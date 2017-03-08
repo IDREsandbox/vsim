@@ -44,9 +44,6 @@
     <CustomBuild Include="..\..\mainWindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\newvsim.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\newvsim.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
@@ -54,6 +51,9 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\viewerWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\OSGViewerWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -73,15 +73,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_mainWindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\newvsim.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_newvsim.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_newvsim.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_newvsim.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -90,6 +81,15 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_viewerWidget.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_OSGViewerWidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_OSGViewerWidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\OSGViewerWidget.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

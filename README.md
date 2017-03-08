@@ -21,3 +21,15 @@ Setup Visual Studio
 	`mklink /D dependencies T:\Projects\_UCLA\vsim\vsim-dependencies`
 4. Qt Version - vsim project > Qt Project Settings > Version > link to the corresponding version (have to do this for 32 and 64 if you have both)
 
+
+## Style guide
+
+- tabs
+- \\n line endings
+- include guards (no #pragma once)
+- please include the minimal headers needed per file, this helps with readability
+- .cpp, .h, MyClass -> MyClass.cpp
+- int m_member_variable; class MyClass; typedef SomeType;
+- avoid exceptions; do error handling C style - lots of if/else, enum error codes, NULLs, etc (please no longjumps)
+- avoid crazy templates and crazy macros
+- logging? do we even log? 

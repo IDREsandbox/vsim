@@ -27,6 +27,7 @@
 
 #include <QtCore/QObject>
 
+#include "OSGViewerWidget.h"
 #include "viewerWidget.h"
 #include "dragLabel.h"
 #include "ui_mainOverlay.h"
@@ -132,17 +133,19 @@ public:
 
 		//gw = createGraphicsWindow(0, 0, 640, 480);
 
-		//osg::Node* scene = osgDB::readNodeFile("T:\\Projects\\_UCLA\\vsim\\vsim-dependencies\\OpenSceneGraph-Data-3.4.0\\cow.osg");
+		//osg::Node* f = osgDB::readNodeFile("T:\\Projects\\_UCLA\\vsim\\vsim-dependencies\\OpenSceneGraph-Data-3.4.0\\cow.osg");
 
-		widget = new viewerWidget(this);
+		osgWidget = new OSGViewerWidget(this);
+		setCentralWidget(osgWidget);
 
-		background = new QWidget(this);
-		background->setStyleSheet("background-color:blue;");
-		setCentralWidget(background);
+		//widget = new viewerWidget(this);
+		//background = new QWidget(this);
+		//background->setStyleSheet("background-color:blue;");
+		//setCentralWidget(background);
 
-		/*widget = new QWidget(this);
-		widget->setStyleSheet("background-color:yellow;");
-		setCentralWidget(widget);*/
+		//widget = new QWidget(this);
+		//widget->setStyleSheet("background-color:yellow;");
+		//setCentralWidget(widget);
 
 		//widget->layout()->setContentsMargin(0, 0, 0, 0);
 
@@ -312,6 +315,7 @@ protected:
 	//QWidget* centrlWidget;
 	osgQt::GraphicsWindowQt* gw;
 	viewerWidget* widget;
+	OSGViewerWidget* osgWidget;
 	QWidget* layout1;
 	QWidget* layout2;
 
