@@ -47,9 +47,6 @@
     <CustomBuild Include="..\..\newvsim.qrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\newvsim.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\viewerWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -94,9 +91,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_mainOverlay.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_newvsim.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
