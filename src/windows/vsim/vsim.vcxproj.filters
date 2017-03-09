@@ -44,9 +44,6 @@
     <CustomBuild Include="..\..\mainWindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\newvsim.qrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\viewerWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -69,9 +66,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_mainWindow.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_newvsim.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_viewerWidget.cpp">
       <Filter>Generated Files\Debug</Filter>
