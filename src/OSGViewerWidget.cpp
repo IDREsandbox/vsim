@@ -80,7 +80,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	this->setMouseTracking(true);
 }
 
-osgViewer::Viewer * OSGViewerWidget::GetViewer()
+osgViewer::Viewer * OSGViewerWidget::getViewer()
 {
 	return viewer_;
 }
