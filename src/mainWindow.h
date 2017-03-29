@@ -28,7 +28,6 @@
 #include <QtCore/QObject>
 
 #include "OSGViewerWidget.h"
-#include "viewerWidget.h"
 #include "dragLabel.h"
 #include "ui_mainOverlay.h"
 
