@@ -1,6 +1,8 @@
-#VSim
 
-##Installation
+# VSim
+
+## Installation
+
 ### Windows - Visual Studio 2015
 
 Setup Qt
@@ -25,11 +27,27 @@ Setup Visual Studio
 ## Style guide
 
 - tabs
+- function brackets, doesn't really matter
+	```
+	void foo()
+	{
+		bar();
+	}
+- if/else
+	```
+	if (something) {
+		foo();
+	} else if (something_else) {
+		bar();
+	} else {
+		zzz();
+	}
 - \\n line endings
 - include guards (no #pragma once)
-- please include the minimal headers needed per file, this helps with readability
+- sensible #includes, the old code makes a mess of #include
 - .cpp, .h, MyClass -> MyClass.cpp
 - int m_member_variable; class MyClass; typedef SomeType;
-- avoid exceptions; do error handling C style - lots of if/else, enum error codes, NULLs, etc (please no longjumps)
+- avoid exceptions, do simple error handling - lots of if/else, enum error codes, NULLs, etc
 - avoid crazy templates and crazy macros
-- logging? do we even log? 
+- logging? do we even log? we should add a log.
+- smart pointers: the existing code uses a lot of raw pointers, but we should be using smart ones
