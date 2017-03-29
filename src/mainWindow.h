@@ -313,7 +313,6 @@ protected:
 
 	//QWidget* centrlWidget;
 	osgQt::GraphicsWindowQt* gw;
-	viewerWidget* widget;
 	OSGViewerWidget* osgWidget;
 	QWidget* layout1;
 	QWidget* layout2;
