@@ -49,8 +49,12 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	//osgViewer::View* view = new osgViewer::View;
 	viewer_->setCamera(camera);
+	
 	osg::Node* scene = osgDB::readNodeFile("T:\\Projects\\_UCLA\\vsim\\vsim-dependencies\\OpenSceneGraph-Data-3.4.0\\cow.osg");
-	viewer_->setSceneData(scene);
+	osg::Group* group = new osg::Group();
+	group->setNodeMask(0x2);
+	group->addChild(scene);
+	viewer_->setSceneData(group);
 	viewer_->addEventHandler(new osgViewer::StatsHandler);
 
 // I have no idea what this is for. If we need it for additional events copy it from the tutorial
@@ -80,7 +84,13 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	this->setMouseTracking(true);
 }
 
-osgViewer::Viewer * OSGViewerWidget::getViewer()
+osgViewer::Viewer * OSGViewerWidget::setViewer(osgViewer::Viewer* viewer)
+{
+	
+	return nullptr;
+}
+
+osgViewer::Viewer* OSGViewerWidget::getViewer() const
 {
 	return viewer_;
 }

@@ -19,7 +19,8 @@ class OSGViewerWidget : public QOpenGLWidget
 public:
 	OSGViewerWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
 
-	osgViewer::Viewer *getViewer();
+	osgViewer::Viewer* setViewer(osgViewer::Viewer*);
+	osgViewer::Viewer* getViewer() const;
 
 protected:
 	virtual void paintEvent(QPaintEvent* paintEvent);
