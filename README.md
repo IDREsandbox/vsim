@@ -45,8 +45,8 @@ Setup Visual Studio
 - \\n line endings
 - include guards (no #pragma once)
 - sensible #includes, the old code makes a mess of #include
-- .cpp, .h, MyClass -> MyClass.cpp
-- int m_member_variable; class MyClass; typedef SomeType;
+- .cpp, .h, MyClass.cpp
+- int m_member_variable; class MyClass; typedef SomeType; MyClass::memberFunction
 - avoid exceptions, do simple error handling - lots of if/else, enum error codes, NULLs, etc
 - avoid crazy templates and crazy macros
 - logging? do we even log? we should add a log.
