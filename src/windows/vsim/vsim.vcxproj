@@ -42,6 +42,7 @@
     <ClCompile Include="..\..\main.cpp" />
     <ClCompile Include="..\..\MainWindow.cpp" />
     <ClCompile Include="..\..\OSGViewerWidget.cpp" />
+    <ClCompile Include="..\..\Util.cpp" />
     <ClCompile Include="..\..\VSimApp.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_dragLabel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -127,6 +128,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Util.h" />
     <ClInclude Include="..\..\VSimApp.h" />
     <ClInclude Include="GeneratedFiles\ui_MainWindow.h" />
   </ItemGroup>

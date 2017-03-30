@@ -3,6 +3,9 @@
 
 #include <memory>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QErrorMessage>
+#include <QtWidgets/QProgressDialog>
 
 #include "ui_MainWindow.h"
 #include "OSGViewerWidget.h"
@@ -21,10 +24,16 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow(QWidget* parent = nullptr);
 
+	// UI stuff
+	void ErrorDialog(const std::string& msg);
+	void MessageDialog(const std::string& msg);
+	void LoadingDialog(const std::string& msg);
+
+	// linking
+	osgViewer::Viewer* getViewer() const { return m_osg_widget->getViewer(); };
+
+	// qt stuff
 	void paintEvent(QPaintEvent* event);
-
-	OSGViewerWidget* getOSGWidget() const { return m_osg_widget; };
-
 
 public slots:
 	void actionNew();
@@ -40,7 +49,7 @@ private:
 	QWidget* m_drag_area;
 	
 	// main window owns the vsim app
-	// circular reference -> use a pointer
+	// circular reference, use a pointer
 	std::unique_ptr<VSimApp> m_vsimapp;
 };
 
