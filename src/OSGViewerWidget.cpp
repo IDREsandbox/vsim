@@ -52,7 +52,6 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	
 	osg::Node* scene = osgDB::readNodeFile("T:\\Projects\\_UCLA\\vsim\\vsim-dependencies\\OpenSceneGraph-Data-3.4.0\\cow.osg");
 	osg::Group* group = new osg::Group();
-	group->setNodeMask(0x2);
 	group->addChild(scene);
 	viewer_->setSceneData(group);
 	viewer_->addEventHandler(new osgViewer::StatsHandler);

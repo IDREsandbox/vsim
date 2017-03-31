@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 	setMinimumSize(800, 600);
 	ui.statusbar->showMessage("the best status bar", 0);
 	setWindowIcon(QIcon("res/vsim.ico"));
+	setWindowTitle("VSim");
 
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui.root);
@@ -85,6 +86,10 @@ void MainWindow::actionOpen()
 {
 	qDebug("open action");
 	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim", "", "VSim files (*.vsim; *.osg; *.osgb);;All types (*.*)");
+	if (filename == "") {
+		qDebug() << "open cancel";
+		return;
+	}
 	qDebug() << "opening - " << filename;
 	m_vsimapp->openVSim(filename.toStdString());
 }

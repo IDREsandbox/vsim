@@ -8,6 +8,7 @@
 #include <osgGA/StateSetManipulator>
 
 #include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QProgressDialog>
@@ -81,31 +82,38 @@ bool VSimApp::openVSim(const std::string & filename)
 
 bool VSimApp::saveVSim(const std::string& filename)
 {
-	std::ofstream ofs;
-	ofs.open(filename.c_str(), std::ios::binary);
-	if (!ofs.good()) {
+
+	bool success = osgDB::writeNodeFile(*m_model, filename);
+	if (!success) {
 		QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
-		return false;
 	}
 
-	// TODO: binary, compression, etc... (this also leaks)
-	//	osgDB::Options* options = new osgDB::Options(
-	//		//"WriteImageHint=WriteOut "
-	//		//"Compressor=zlib "
-	//		//"Ascii "
-	//		);
+	return success;
+	//std::ofstream ofs;
+	//ofs.open(filename.c_str(), std::ios::binary);
+	//if (!ofs.good()) {
+	//	QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
+	//	return false;
+	//}
 
-	osgDB::ReaderWriter* rw = osgDB::Registry::instance()->getReaderWriterForExtension("osg");
-	if (!rw) {
-		QMessageBox::warning(m_window, "Save Error", "Error creating osgb writer " + QString::fromStdString(filename));
-		return false;
-	}
+	//// TODO: binary, compression, etc... (this also leaks)
+	////	osgDB::Options* options = new osgDB::Options(
+	////		//"WriteImageHint=WriteOut "
+	////		//"Compressor=zlib "
+	////		//"Ascii "
+	////		);
 
-	// TODO: check wresult
-	osgDB::ReaderWriter::WriteResult wresult = rw->writeNode(*m_model, ofs, nullptr);
-	ofs.close();
+	//osgDB::ReaderWriter* rw = osgDB::Registry::instance()->getReaderWriterForExtension("osg");
+	//if (!rw) {
+	//	QMessageBox::warning(m_window, "Save Error", "Error creating osgb writer " + QString::fromStdString(filename));
+	//	return false;
+	//}
 
-	return true;
+	//// TODO: check wresult
+	//osgDB::ReaderWriter::WriteResult wresult = rw->writeNode(*m_model, ofs, nullptr);
+	//ofs.close();
+
+	//return true;
 }
 
 //		m_eresources_manager->addEResourcesToNode(m_model);
