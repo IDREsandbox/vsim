@@ -86,19 +86,20 @@ bool VSimApp::openVSim(const std::string & filename)
 		}
 	}
 	reset();
+	m_model = loadedModel;
 	m_viewer->setSceneData(loadedModel.get());
 	return true;
 }
 
 bool VSimApp::saveVSim(const std::string& filename)
 {
-
 	bool success = osgDB::writeNodeFile(*m_model, filename);
 	if (!success) {
 		QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
 	}
 
 	return success;
+
 	//std::ofstream ofs;
 	//ofs.open(filename.c_str(), std::ios::binary);
 	//if (!ofs.good()) {
@@ -113,14 +114,18 @@ bool VSimApp::saveVSim(const std::string& filename)
 	////		//"Ascii "
 	////		);
 
-	//osgDB::ReaderWriter* rw = osgDB::Registry::instance()->getReaderWriterForExtension("osg");
+	//// this is how you do ascii (from robertosfield on github)
+	//osgDB::Options* options = new osgDB::Options;
+	//options->setPluginStringData("fileType", "Ascii");
+
+	//osgDB::ReaderWriter* rw = osgDB::Registry::instance()->getReaderWriterForExtension("osgt");
 	//if (!rw) {
 	//	QMessageBox::warning(m_window, "Save Error", "Error creating osgb writer " + QString::fromStdString(filename));
 	//	return false;
 	//}
 
 	//// TODO: check wresult
-	//osgDB::ReaderWriter::WriteResult wresult = rw->writeNode(*m_model, ofs, nullptr);
+	//osgDB::ReaderWriter::WriteResult wresult = rw->writeNode(*m_model, ofs, options);
 	//ofs.close();
 
 	//return true;
