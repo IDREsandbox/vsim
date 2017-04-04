@@ -85,7 +85,7 @@ void MainWindow::actionNew()
 void MainWindow::actionOpen()
 {
 	qDebug("open action");
-	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim", "", "VSim files (*.vsim; *.osg; *.osgb);;All types (*.*)");
+	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim", "", "VSim files (*.vsim; *.osg; *.osgt; *.osgb; );;All types (*.*)");
 	if (filename == "") {
 		qDebug() << "open cancel";
 		return;
@@ -102,7 +102,7 @@ void MainWindow::actionSave()
 void MainWindow::actionSaveAs()
 {
 	qDebug("saveas");
-	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", "osg ascii file (*.osg);;osg binary file (*.osgb)");
+	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", "osg ascii file (*.osgt);;osg binary file (*.osgb)");
 	if (filename == "") {
 		qDebug() << "saveas cancel";
 		return;
