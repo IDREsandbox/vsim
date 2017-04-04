@@ -6,6 +6,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QErrorMessage>
 #include <QtWidgets/QProgressDialog>
+#include <QDropEvent>
 
 #include "ui_MainWindow.h"
 #include "OSGViewerWidget.h"
@@ -24,7 +25,7 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow(QWidget* parent = nullptr);
 
-	// UI stuff
+	// UI stuff (these are just tests, TODO: remove, just use the built in qt dialogs)
 	void ErrorDialog(const std::string& msg);
 	void MessageDialog(const std::string& msg);
 	void LoadingDialog(const std::string& msg);
@@ -32,8 +33,11 @@ public:
 	// linking
 	osgViewer::Viewer* getViewer() const { return m_osg_widget->getViewer(); };
 
-	// qt stuff
+	// event stuff
 	void paintEvent(QPaintEvent* event);
+	void dragEnterEvent(QDragEnterEvent *event);
+	void dropEvent(QDropEvent *event);
+
 
 public slots:
 	void actionNew();

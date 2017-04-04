@@ -2,6 +2,10 @@
 #include <QFileDialog>
 #include <QDebug>
 #include <QTimer>
+#include <QDrag>
+#include <QDragEnterEvent>
+#include <QMimeData>
+#include <QDir>
 
 #include "MainWindow.h"
 
@@ -17,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui.statusbar->showMessage("the best status bar", 0);
 	setWindowIcon(QIcon("res/vsim.ico"));
 	setWindowTitle("VSim");
+	setAcceptDrops(true);
+	qDebug() << "root: " << QDir::currentPath();
 
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui.root);
@@ -74,6 +80,27 @@ void MainWindow::LoadingDialog(const std::string & msg)
 void MainWindow::paintEvent(QPaintEvent * event)
 {
 	m_drag_area->setMask(m_drag_area->childrenRegion());
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent* event)
+{
+	if (event->mimeData()->hasText()) {
+		qDebug() << "drag enter " << event->mimeData()->text();
+		event->acceptProposedAction();
+	}
+}
+
+void MainWindow::dropEvent(QDropEvent * event)
+{
+	if (event->mimeData()->hasText()) {
+		QString text = event->mimeData()->text();
+		qDebug() << "drop file: " << text;
+
+		if (text.startsWith("file:///")) {
+			text.remove(0, 8); // remove the prefix
+		}
+		m_vsimapp->openVSim(text.toStdString());
+	}
 }
 
 

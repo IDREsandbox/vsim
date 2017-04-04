@@ -51,7 +51,7 @@ bool VSimApp::importModel(const std::string& filename)
 
 bool VSimApp::openVSim(const std::string & filename)
 {
-	reset();
+	std::cout << "open vsim: " << filename.c_str() << "\n";
 	osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile(filename);
 
 	// if .vsim, use osgb, TODO: our own readerwriter?
@@ -60,24 +60,34 @@ bool VSimApp::openVSim(const std::string & filename)
 		std::ifstream ifs;
 		ifs.open(filename.c_str(), std::ios::binary);
 		if (!ifs.good()) {
-			QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
+			QMessageBox::warning(m_window, "Load Error", "Error opening file " + QString::fromStdString(filename));
 			return false;
 		}
 
 		osgDB::ReaderWriter *rw = osgDB::Registry::instance()->getReaderWriterForExtension("osgb");
 		if (!rw) {
-			QMessageBox::warning(m_window, "Save Error", "Error creating osgb writer " + QString::fromStdString(filename));
+			QMessageBox::warning(m_window, "Load Error", "Error creating osgb reader " + QString::fromStdString(filename));
 			return false;
 		}
 		osgDB::ReaderWriter::ReadResult result = rw->readNode(ifs);
 		if (result.success()) {
 			loadedModel = result.takeNode();
 		}
+		else {
+			QMessageBox::warning(m_window, "Load Error", "Error opening file " + QString::fromStdString(filename));
+			return false;
+		}
 	}
 	else {
 		loadedModel = osgDB::readNodeFile(filename);
+		if (!loadedModel) {
+			QMessageBox::warning(m_window, "Load Error", "Error opening file " + QString::fromStdString(filename));
+			return false;
+		}
 	}
+	reset();
 	m_viewer->setSceneData(loadedModel.get());
+	return true;
 }
 
 bool VSimApp::saveVSim(const std::string& filename)
