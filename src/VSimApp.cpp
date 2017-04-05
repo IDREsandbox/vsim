@@ -56,7 +56,7 @@ bool VSimApp::openVSim(const std::string & filename)
 
 	// if .vsim, use osgb, TODO: our own readerwriter?
 	std::string ext = Util::getExtension(filename);
-	if (ext == ".vsim") {
+	if (ext == "vsim") {
 		std::ifstream ifs;
 		ifs.open(filename.c_str(), std::ios::binary);
 		if (!ifs.good()) {
@@ -74,7 +74,7 @@ bool VSimApp::openVSim(const std::string & filename)
 			loadedModel = result.takeNode();
 		}
 		else {
-			QMessageBox::warning(m_window, "Load Error", "Error opening file " + QString::fromStdString(filename));
+			QMessageBox::warning(m_window, "Load Error", "Error converting file to osg nodes " + QString::fromStdString(filename));
 			return false;
 		}
 	}
@@ -88,6 +88,7 @@ bool VSimApp::openVSim(const std::string & filename)
 	reset();
 	m_model = loadedModel;
 	m_viewer->setSceneData(loadedModel.get());
+	extractNarrativesFromNode(m_model);
 	return true;
 }
 
@@ -118,6 +119,8 @@ bool VSimApp::saveVSim(const std::string& filename)
 	//osgDB::Options* options = new osgDB::Options;
 	//options->setPluginStringData("fileType", "Ascii");
 
+	// for image data WriteImageHint=IncludeData or WriteOut
+
 	//osgDB::ReaderWriter* rw = osgDB::Registry::instance()->getReaderWriterForExtension("osgt");
 	//if (!rw) {
 	//	QMessageBox::warning(m_window, "Save Error", "Error creating osgb writer " + QString::fromStdString(filename));
@@ -129,6 +132,26 @@ bool VSimApp::saveVSim(const std::string& filename)
 	//ofs.close();
 
 	//return true;
+}
+
+void VSimApp::extractNarrativesFromNode(osg::Node * node)
+{
+	//m_narrative_list_editor->removeAllNarratives();//Remove all the current narratives;
+	m_narrative_list.clear();
+
+	unsigned int NumChildren = node->asGroup()->getNumChildren();
+	for (unsigned int i = 0; i < NumChildren; i++)
+	{
+		osg::Node* c = node->asGroup()->getChild(i);
+		Narrative* nar = dynamic_cast<Narrative*>(c);
+		if (nar)
+		{
+			NarrativeReference* ref = new NarrativeReference();
+			ref->setNarrative(nar); // why does this reference exist?
+			m_narrative_list.addNarrative(ref);
+			printf("found narrative %s\n", nar->getName().c_str());
+		}
+	}
 }
 
 //		m_eresources_manager->addEResourcesToNode(m_model);
