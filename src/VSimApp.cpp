@@ -94,11 +94,11 @@ bool VSimApp::openVSim(const std::string & filename)
 
 bool VSimApp::saveVSim(const std::string& filename)
 {
-	bool success = osgDB::writeNodeFile(*m_model, filename);
+	bool success = osgDB::writeNodeFile(*m_model, filename, new osgDB::Options("WriteImageHint=IncludeData"));
 	if (!success) {
 		QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
 	}
-
+	//new osgDB::Options("WriteImageHint=IncludeData Compressor=zlib")
 	return success;
 
 	//std::ofstream ofs;
