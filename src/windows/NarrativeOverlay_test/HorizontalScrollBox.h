@@ -4,6 +4,8 @@
 #include <QtWidgets/QScrollArea>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
+
+//#include "NarrativeLayout.h"
 // goals:
 // 1. add, insert, delete, select, clear
 // 2. context menu for ^
@@ -11,12 +13,6 @@
 
 // configuration
 // size, item width/height
-
-class FixedRatioLayout : public QHBoxLayout {
-public:
-	//bool hasHeightForWidth() { return true; }
-	//int heightForWidth(int w) { return 3*w/4; }
-};
 
 class HorizontalScrollBox : public QScrollArea {
 	Q_OBJECT
@@ -34,7 +30,7 @@ public:
 private:
 	QWidget* m_scroll_area_widget;
 	QHBoxLayout* m_scroll_area_layout;
-
+	//CardLayout* m_card_layout;
 };
 
 #endif // HORIZONTALSCROLLBOX_TEST_H

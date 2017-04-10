@@ -13,7 +13,7 @@ public:
 	~NarrativeOverlay_test();
 
 private:
-	Ui::NarrativeOverlay_testClass ui;
+	Ui::MainWindow ui;
 };
 
 #endif // NARRATIVEOVERLAY_TEST_H
