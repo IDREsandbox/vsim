@@ -1,65 +1,58 @@
 #include "HorizontalScrollBox.h"
+#include "NarrativeLayout.h"
 
 HorizontalScrollBox::HorizontalScrollBox(QWidget* parent) : QScrollArea(parent)
 {
-	//narratives->setObjectName(QStringLiteral("narratives"));
-	//narratives->setWidgetResizable(true);
-	//this->setWidgetResizable(true);
+	this->setObjectName(QStringLiteral("scrollArea"));
+	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+	this->setWidgetResizable(true);
 
-	////QHBoxLayout* m_fill_layout = new QHBoxLayout(m_scroll_area_widget);
-	////m_fill_layout->setObjectName("fillLayout");
-	////m_fill_layout->setContentsMargins(0, 0, 0, 0);
+	auto saw = new QWidget(this);
+	saw->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
+	saw->setGeometry(QRect(0, 0, 653, 316));
+	saw->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+	saw->setStyleSheet(QStringLiteral("background-color: rgb(200, 100, 200);"));
+	this->setWidget(saw);
 
-	m_scroll_area_widget = new QWidget();
-	m_scroll_area_widget->setObjectName("scrollAreaWidget");
-	////m_scroll_area_widget->setGeometry(QRect(0, 0, 972, 113));
-	////m_scroll_area_widget->set
-	////m_scroll_area_widget->setFixedWidth(1000);
-	m_scroll_area_widget->setStyleSheet("background-color: rgb(200, 0, 0);");
-	//m_scroll_area_widget->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred));
+	auto sawlayout = new CardLayout(saw, 10);
+	sawlayout->setContentsMargins(10, 10, 10, 10);
 
-	//this->setWidget(m_scroll_area_widget);
-	//this->setStyleSheet("background-color: rgb(0,100,0)");
+	for (int i = 0; i < 100; i++) {
+		//auto wx = new QWidget(saw);
+		auto wx = new QLabel(QString::number(i), saw);
+		wx->setStyleSheet(QString("background-color: rgb(") + QString::number((i * 40) % 255) + "," + QString::number(((i % 7) * 50) % 255) + "," + QString::number(100) + ");");
+		//wx->setStyleSheet(QString("background-color: rgb(") + QString::number(100) + "," + QString::number(0) + "," + QString::number(0) + ");");
+		wx->setGeometry(0, 0, 100, 100);
+		//wx->setFixedWidth(100);
+		//wx->setFixedHeight(300);
+		//wx->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred));
+		sawlayout->addWidget(wx);
+	}
+}
 
-	//m_scroll_area_layout = new QHBoxLayout(m_scroll_area_widget);
-	//m_scroll_area_layout->setObjectName("scrollAreaLayout");
-	//m_scroll_area_layout->setContentsMargins(0, 0, 0, 0);
+void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
+{
+	int scrollpos = horizontalScrollBar()->value();
+	auto bar = horizontalScrollBar();
+	//horizontalScrollBar()->
 
-	//m_card_layout = new CardLayout(m_scroll_area_widget);
+	//if (bar->m)
+	//float ratio = bar->value() / (float)bar->maximum();
+	//qDebug() << bar->minimum() << bar->maximum() << bar->value() << ratio;
+	//float ratio = bar->value() / bar->maximum();
 
+	//event->accept();
 
-	//QWidget* contentsWidget = new QWidget(this);
-	//contentsWidget->resize(1000, 100);
-	//contentsWidget->setFixedWidth(1000);
-	//contentsWidget->setStyleSheet("background-color: rgb(0, 200, 200);");
-	//contentsWidget->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred));
+	QScrollArea::resizeEvent(event);
+	//this->setGeometry(event->);
 
-	//QLabel *imageLabel = new QLabel;
-	//QImage image("bigcow.png");
-	//imageLabel->setPixmap(QPixmap::fromImage(image));
-	////imageLabel->setText("FOOOOOOOOOOOOOOOOOO");
+	//horizontalScrollBar()->setSliderPosition(scrollpos);
+	//qDebug() << "end" << scrollpos;
+	
+	float rescale = event->size().height()/(float)event->oldSize().height();
+	
+	qDebug() << "after" << bar->minimum() << bar->maximum() << bar->value();
 
-	//this->setBackgroundRole(QPalette::Dark);
-	//this->setWidget(imageLabel);
-
-	//{
-	//	auto widget1 = new QWidget(m_scroll_area_widget);
-	//	//widget_6->setObjectName(QStringLiteral("widget_6"));
-	//	//QSizePolicy sizePolicy2(QSizePolicy::Fixed, QSizePolicy::Fixed);
-	//	widget1->setStyleSheet(QStringLiteral("background-color: rgb(0, 0, 150);"));
-	//	widget1->resize(100, 100);
-	//	m_scroll_area_layout->addWidget(widget1);
-	//}
-	//{
-	//	auto widget1 = new QWidget(m_scroll_area_widget);
-	//	widget1->setStyleSheet(QStringLiteral("background-color: rgb(0, 0, 150);"));
-	//	widget1->resize(100, 100);
-	//	m_scroll_area_layout->addWidget(widget1);
-	//}
-	//{
-	//	auto widget1 = new QWidget(m_scroll_area_widget);
-	//	widget1->setStyleSheet(QStringLiteral("background-color: rgb(0, 0, 150);"));
-	//	widget1->resize(100, 100);
-	//	m_scroll_area_layout->addWidget(widget1);
-	//}
+	bar->setValue(bar->value()*rescale);
 }

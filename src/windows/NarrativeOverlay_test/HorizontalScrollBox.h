@@ -7,7 +7,7 @@
 
 //#include "NarrativeLayout.h"
 // goals:
-// 1. add, insert, delete, select, clear
+// 1. add, insert, delete, select, clear (signals)
 // 2. context menu for ^
 // 3. multiselect, multidelete, drag n drop, other fancy stuff
 
@@ -22,6 +22,8 @@ public:
 	void add();
 	void insert();
 
+protected:
+	void resizeEvent(QResizeEvent* event);
 
 //public signals:
 //	void selected();

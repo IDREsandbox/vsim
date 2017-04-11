@@ -8,7 +8,7 @@ class CardLayout : public QLayout
 {
 	Q_OBJECT
 public:
-	CardLayout(QWidget *parent, int dist) : QLayout(parent) {};
+	CardLayout(QWidget *parent, int spacing) : QLayout(parent), m_spacing(spacing) {};
 	//CardLayout(QLayout *parent, int dist) : QLayout(parent) {};
 	CardLayout(int dist) : QLayout() {};
 	~CardLayout();
@@ -23,5 +23,8 @@ public:
 
 private:
 	QList<QLayoutItem*> list;
+
+	int m_spacing = 0;
+	float m_ratio = 3.0 / 3.0;
 };
 #endif
