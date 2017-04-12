@@ -13,6 +13,7 @@ public:
 	CardLayout(int dist) : QLayout() {};
 	~CardLayout();
 
+	// virtual Qt Stuff
 	void addItem(QLayoutItem *item);
 	QSize sizeHint() const;
 	QSize minimumSize() const;
@@ -21,10 +22,22 @@ public:
 	QLayoutItem *takeAt(int);
 	void setGeometry(const QRect &rect);
 
+	// 
+	void setHeight(int height) { m_height = height; };
+	int spacing() const { return m_spacing; };
+	void setSpacing(int spacing) { m_spacing = spacing; };
+	int getMinWidth() const;
+
+	int boxHeight() const;
+	int boxWidth() const;
+
 private:
 	QList<QLayoutItem*> list;
 
+	int m_height = 100;
 	int m_spacing = 0;
-	float m_ratio = 3.0 / 3.0;
+
+	float m_ratio = 4.0 / 3.0;
+
 };
 #endif

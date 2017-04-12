@@ -5,7 +5,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 
-//#include "NarrativeLayout.h"
+#include "NarrativeLayout.h"
 // goals:
 // 1. add, insert, delete, select, clear (signals)
 // 2. context menu for ^
@@ -31,8 +31,8 @@ protected:
 
 private:
 	QWidget* m_scroll_area_widget;
-	QHBoxLayout* m_scroll_area_layout;
-	//CardLayout* m_card_layout;
+	//QHBoxLayout* m_scroll_area_layout;
+	CardLayout* m_layout;
 };
 
 #endif // HORIZONTALSCROLLBOX_TEST_H

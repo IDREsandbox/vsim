@@ -29,37 +29,8 @@ QSize CardLayout::sizeHint() const
 
 QSize CardLayout::minimumSize() const
 {
-	QSize s(0, 0);
-	int n = list.count();
-	int i = 0;
-	while (i < n) {
-		QLayoutItem *o = list.at(i);
-		s = s.expandedTo(o->minimumSize());
-		++i;
-	}
-	//return s + n*QSize(spacing(), spacing());
-	//m_previous_height * 100;
-	//qDebug() << m_previous_height; 
-
-	// FIXME: if you get a stack overflow... it's because the adding/removing of the scrollbar causes this to resize, then change width, then change the need for a scrollbar
-	// solution? always show a scrollbar?
-	// what does powerpoint do? fixed
-	
-	//Debug() << "parent parent" << this->parentWidget()->parentWidget()->parentWidget()->size();
-
-	// use the height of the scrollbox
-	int baseHeight = this->parentWidget()->parentWidget()->parentWidget()->size().height();
-	int smallHeight = this->parentWidget()->parentWidget()->size().height();
-
-	// if there is no scrollbar,
-	// always assume there is a scrollbar
-	//if 
-	auto margins = contentsMargins();
-
-	int totalspace = m_spacing*(qMax(0, list.size() - 1));
-	qDebug() << totalspace;
-
-	return QSize(margins.left() + margins.right() + totalspace + list.size() * smallHeight * m_ratio, 50);
+	// deal with this in the scrollbox
+	return QSize(100, 50);
 }
 
 int CardLayout::count() const
@@ -91,23 +62,58 @@ void CardLayout::setGeometry(const QRect &r)
 	if (list.size() == 0)
 		return;
 	
-	int w = r.width() - (list.count() - 1) * spacing();
+	//int w = r.width() - (list.count() - 1) * spacing();
 	//int h = r.height() - (list.count() - 1) * spacing();
-	int h = r.height();
-	//qDebug() << r << w << h;
+	//int h = r.height() - margins.top() - margins.bottom();
 
 	int xpos = 0;
 	xpos += margins.left();
 
+	//m_height = r.height()
+	int bheight = boxHeight();
+	int bwidth = boxWidth();
+
 	for (int i = 0; i < list.size(); i++) {
 		QLayoutItem *o = list.at(i);
 
-		QRect geom(xpos, 0, h*m_ratio, h);
+		QRect geom(xpos, margins.top(), bwidth, bheight);
 		o->setGeometry(geom);
 
-		xpos += h*m_ratio;
+		xpos += bwidth;
 		xpos += m_spacing;
-		//xpos += spacing();
-		
 	}
 }
+
+int CardLayout::getMinWidth() const
+{
+	auto margins = contentsMargins();
+
+	int boxh = boxHeight();
+	int totalspace = m_spacing*(qMax(0, list.size() - 1));
+	int minwidth = margins.left() + margins.right() + totalspace + list.size() * boxWidth();
+
+	return minwidth;
+}
+
+int CardLayout::boxHeight() const
+{
+	auto margins = contentsMargins();
+	return m_height - margins.top() - margins.bottom();
+}
+
+int CardLayout::boxWidth() const
+{
+	return floor(boxHeight()*m_ratio);
+}
+
+//int CardLayout::positionOf(int index) const
+//{
+//	int smallHeight = this->parentWidget()->parentWidget()->size().height();
+//	auto margins = contentsMargins();
+//	int boxh = smallHeight - margins.top() - margins.bottom();
+//
+//	int totalspace = m_spacing*(qMax(0, list.size() - 1));
+//	qDebug() << totalspace;
+//
+//	return ;
+//}
