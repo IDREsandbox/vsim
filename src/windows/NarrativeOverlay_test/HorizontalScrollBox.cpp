@@ -2,6 +2,7 @@
 #include <QResizeEvent>
 #include "HorizontalScrollBox.h"
 
+#include <QCoreApplication>
 
 HorizontalScrollBox::HorizontalScrollBox(QWidget* parent) : QScrollArea(parent)
 {
@@ -12,10 +13,24 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent) : QScrollArea(parent)
 
 	m_scroll_area_widget = new QWidget(this);
 	m_scroll_area_widget->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-	m_scroll_area_widget->setGeometry(QRect(0, 0, 653, 316));
-	m_scroll_area_widget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+	//m_scroll_area_widget->setGeometry(QRect(0, 0, 653, 316));
+	//m_scroll_area_widget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 	m_scroll_area_widget->setStyleSheet(QStringLiteral("background-color: rgb(200, 100, 200);"));
 	this->setWidget(m_scroll_area_widget);
+
+
+	m_slide_menu = new QMenu(tr("Context menu"), this);
+	//QAction actionDelete("Cut", m_slide_menu);
+	//QAction actionDelete("Copy", m_slide_menu);
+	//QAction actionDelete("Paste", m_slide_menu);
+	QAction* actionNew = new QAction("New Slide", m_slide_menu);
+	QAction* actionDelete = new QAction("Delete Slide", m_slide_menu);
+	//QAction actionDelete("Duplicate Slide", m_slide_menu);
+	connect(actionNew, &QAction::triggered, this, [this] { this->addItem("a brand new item!"); });
+	connect(actionDelete, &QAction::triggered, this, [this] { qDebug() << "DELETE!!!"; });
+	m_slide_menu->addAction(actionNew);
+	m_slide_menu->addAction(actionDelete);
+
 
 	//m_layout = new CardLayout(m_scroll_area_widget, 10);
 	//m_layout->setHeight(m_scroll_area_widget->height());
@@ -25,12 +40,14 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent) : QScrollArea(parent)
 	addItem("BAR The foool?");
 	insertItem(1, "Insert me at 1 (aka 2)");
 
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < 10; i++) {
 		addItem("some itemmm");
 	}
 
 	insertItem(0, "the first of course");
 	addItem("the LAST ITEM!");
+
+	this->addItem("test");
 }
 
 void HorizontalScrollBox::addItem(QString text)
@@ -41,12 +58,41 @@ void HorizontalScrollBox::addItem(QString text)
 
 void HorizontalScrollBox::insertItem(int index, QString text)
 {
+	qDebug() << "insert item";
 	auto newWidget = new ScrollBoxItem(m_scroll_area_widget);
 	newWidget->setText(QString::number(index + 1) + QString(" - ") + text);
 
 	newWidget->setStyleSheet(QString("background-color: rgb(") + QString::number((index * 40) % 255) + "," + QString::number(((index % 7) * 50) % 255) + "," + QString::number(100) + ");");
 
 	m_items.insert(index, newWidget);
+
+	newWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	// conntect to opening the menu
+	connect(newWidget, &QWidget::customContextMenuRequested, this, [this, newWidget](const QPoint& pos) { this->m_slide_menu->exec(newWidget->mapToGlobal(pos)); });
+
+	newWidget->show();
+
+	setWidgetWidth();
+	//resizeEvent();
+	//positionChildren();
+	//QCoreApplication::postEvent(this, new QResizeEvent(size(), size()));
+}
+
+void HorizontalScrollBox::slideContextMenu(QContextMenuEvent* event)
+{
+	qDebug() << "context menu";
+
+	QMenu* contextMenu = new QMenu(tr("Context menu"), this);
+	QAction actionCut("Cut", this);
+	QAction actionCopy("Copy", this);
+	QAction actionPaste("Paste", this);
+	QAction actionNew("New Slide", this);
+	QAction actionDelete("Delete Slide", this);
+	QAction actionDuplicate("Duplicate Slide", this);
+	connect(&actionDelete, &QAction::triggered, this, [this] { qDebug() << "DELETE!!!"; });
+	contextMenu->addAction(&actionDelete);
+
+	contextMenu->exec(event->globalPos());
 }
 
 void HorizontalScrollBox::positionChildren()
@@ -96,7 +142,31 @@ void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
 	// tell layout the new height
 	//m_layout->setHeight(event->size().height());
 	m_height = event->size().height();
+	setWidgetWidth();
 
+	// minimum width
+	int newBoxWidth = floor(m_height*m_ratio);
+	int newBoxHeight = m_height;
+
+	// deal with other stuff
+	QScrollArea::resizeEvent(event);
+
+	int newSegmentSize = newBoxWidth + m_spacing;
+
+	// reposition the scrollbar so that it's over the original slide
+	int newValue;
+	if (nomargin <= 0) {
+		newValue = oldValue;
+	}
+	else {
+		newValue = leftmargin + segmentNumber * newSegmentSize + segmentOffset;//((framePortion > 1.0) ? newBoxWidth + 
+	}
+	
+	bar->setValue(newValue);
+}
+
+void HorizontalScrollBox::setWidgetWidth()
+{
 	// minimum width
 	int newBoxWidth = floor(m_height*m_ratio);
 	int newBoxHeight = m_height;
@@ -108,19 +178,4 @@ void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
 	m_scroll_area_widget->setMinimumWidth(minwidth);
 
 	positionChildren();
-
-	// deal with other stuff, like the scrollbar and whatever
-	QScrollArea::resizeEvent(event);
-
-	int newSegmentSize = newBoxWidth + m_spacing;
-
-	int newValue;
-	if (nomargin <= 0) {
-		newValue = oldValue;
-	}
-	else {
-		newValue = leftmargin + segmentNumber * newSegmentSize + segmentOffset;//((framePortion > 1.0) ? newBoxWidth + 
-	}
-	
-	bar->setValue(newValue);
 }
