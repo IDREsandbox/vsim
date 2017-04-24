@@ -18,12 +18,11 @@
 class ScrollBoxItem : public QLabel {
 public:
 	ScrollBoxItem(QWidget* parent) : QLabel(parent) {
-	
 	};
 protected:
 	int i = 0;
 	void mouseMoveEvent(QMouseEvent* event){
-		qDebug() << "mouse move" << this->text();
+		qDebug() << "mouse move" << this->text() << event->modifiers();
 		i++;
 	}
 	void mousePressEvent(QMouseEvent* event) {
@@ -43,19 +42,30 @@ public:
 	// TODO: replace text with QImage or something
 	void addItem(QString text);
 	void insertItem(int position, QString text);
+	int size();
 
-	void slideContextMenu(QContextMenuEvent*);
+	void deleteItem(int position);
+
+	// get selected
+	// delete
+	// delete list
+
+	//void slideContextMenu(QContextMenuEvent*);
+	
+	// internal slots
+	// pos: global click position, slide: item index
+	void onItemMenu(QPoint globalPos, );
+	void onSpaceMenu(int position);
 
 signals:
-	void selected(int);
-	//	void selected();
+	void selected(int item);
 	//	void deleted();
-
+	// void deleted(int);
+	// void deleted(list);
 
 protected:
 	void positionChildren();
 	void resizeEvent(QResizeEvent* event);
-
 
 private:
 	void setWidgetWidth();
@@ -66,9 +76,10 @@ private:
 	//int boxWidth() const;
 	int m_height = 100;
 	int m_spacing = 10;
-	int m_ratio = 1.0;
+	float m_ratio = 1.0; // width to height ratio for items
+	float m_space_ratio = .1; // width to height ratio for spaces
 
-	QMenu* m_slide_menu;
+	QMenu* m_slide_menu; // context menu
 };
 
 #endif // HORIZONTALSCROLLBOX_TEST_H

@@ -18,7 +18,11 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent) : QScrollArea(parent)
 	m_scroll_area_widget->setStyleSheet(QStringLiteral("background-color: rgb(200, 100, 200);"));
 	this->setWidget(m_scroll_area_widget);
 
-
+	//m_layout = new CardLayout(m_scroll_area_widget, 10);
+	//m_layout->setHeight(m_scroll_area_widget->height());
+	//m_layout->setContentsMargins(0, 0, 0, 0);
+	
+	// initialize menus
 	m_slide_menu = new QMenu(tr("Context menu"), this);
 	//QAction actionDelete("Cut", m_slide_menu);
 	//QAction actionDelete("Copy", m_slide_menu);
@@ -26,16 +30,10 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent) : QScrollArea(parent)
 	QAction* actionNew = new QAction("New Slide", m_slide_menu);
 	QAction* actionDelete = new QAction("Delete Slide", m_slide_menu);
 	//QAction actionDelete("Duplicate Slide", m_slide_menu);
-	connect(actionNew, &QAction::triggered, this, [this] { this->addItem("a brand new item!"); });
-	connect(actionDelete, &QAction::triggered, this, [this] { qDebug() << "DELETE!!!"; });
-	m_slide_menu->addAction(actionNew);
-	m_slide_menu->addAction(actionDelete);
+	connect(actionNew, &QAction::triggered, this,
 
 
-	//m_layout = new CardLayout(m_scroll_area_widget, 10);
-	//m_layout->setHeight(m_scroll_area_widget->height());
-	//m_layout->setContentsMargins(0, 0, 0, 0);
-	
+
 	addItem("FOO THE BAR");
 	addItem("BAR The foool?");
 	insertItem(1, "Insert me at 1 (aka 2)");
@@ -66,16 +64,28 @@ void HorizontalScrollBox::insertItem(int index, QString text)
 
 	m_items.insert(index, newWidget);
 
+	
+	// handle right-clicks
 	newWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-	// conntect to opening the menu
-	connect(newWidget, &QWidget::customContextMenuRequested, this, [this, newWidget](const QPoint& pos) { this->m_slide_menu->exec(newWidget->mapToGlobal(pos)); });
+	connect(newWidget, &QWidget::customContextMenuRequested, this, 
+		[this, newWidget](const QPoint& pos) { 
+			this->onItemMenu(newWidget->mapToGlobal(pos), newWidget); 
+		}
+	);
+	
+	//[this, newWidget](const QPoint& pos) { this->m_slide_menu->exec(newWidget->mapToGlobal(pos)); }
 
 	newWidget->show();
-
 	setWidgetWidth();
 	//resizeEvent();
 	//positionChildren();
 	//QCoreApplication::postEvent(this, new QResizeEvent(size(), size()));
+}
+
+void HorizontalScrollBox::deleteItem(int position)
+{
+	QWidget* item = m_items.takeAt(position);
+	delete item;
 }
 
 void HorizontalScrollBox::slideContextMenu(QContextMenuEvent* event)
@@ -93,6 +103,33 @@ void HorizontalScrollBox::slideContextMenu(QContextMenuEvent* event)
 	contextMenu->addAction(&actionDelete);
 
 	contextMenu->exec(event->globalPos());
+}
+
+void HorizontalScrollBox::onItemMenu(QPoint pos, int slide)
+{
+	QMenu* slideMenu = new QMenu(tr("Context menu"), this);
+	//QAction actionDelete("Cut", m_slide_menu);
+	//QAction actionDelete("Copy", m_slide_menu);
+	//QAction actionDelete("Paste", m_slide_menu);
+	QAction* actionNew = new QAction("New Slide", slideMenu);
+	QAction* actionDelete = new QAction("Delete Slide", slideMenu);
+	//QAction actionDelete("Duplicate Slide", m_slide_menu);
+	connect(actionNew, &QAction::triggered, this, 
+		[this, slide] { 
+			//this->addItem("a brand new item!"); 
+			this->insertItem(slide + 1, "a brand new item!");
+		}
+	);
+	connect(actionDelete, &QAction::triggered, this, 
+		[this, slide] { 
+			this->deleteItem(slide);
+			qDebug() << "DELETE!!!" << slide; 
+		}
+	);
+	slideMenu->addAction(actionNew);
+	slideMenu->addAction(actionDelete);
+
+	slideMenu->exec(pos);
 }
 
 void HorizontalScrollBox::positionChildren()
