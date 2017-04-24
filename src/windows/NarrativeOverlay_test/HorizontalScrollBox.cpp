@@ -43,23 +43,11 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 		qDebug() << "background context menu";
 		m_slide_menu->exec(m_scroll_area_widget->mapToGlobal(pos)); }
 	);
-
-	addItem("FOO THE BAR");
-	addItem("BAR The foool?");
-	insertItem(1, "Insert me at 1 (aka 2)");
-
-	for (int i = 0; i < 2; i++) {
-		addItem("some itemmm");
-	}
-
-	insertItem(0, "the first of course");
-	addItem("the LAST ITEM!");
-
-	this->addItem("test");
 }
 
 void HorizontalScrollBox::addBlankItem()
 {
+	// TODO: add after selection
 	addItem("A BRAND NEW ITEM!");
 }
 
@@ -136,33 +124,6 @@ void HorizontalScrollBox::onItemMenu(QPoint localPos, ScrollBoxItem* widget)
 	m_slide_menu->exec(widget->mapToGlobal(localPos));
 }
 
-void HorizontalScrollBox::positionChildren()
-{
-	//auto margins = contentsMargins();
-	//QMargins margins = QMargins(5, 5, 5, 5);
-
-	if (m_items.size() == 0)
-		return;
-
-	int xpos = 0;
-	//xpos += margins.left();
-
-	//m_height = r.height()
-	int bheight = m_height;
-	int bwidth = m_height*m_ratio;
-
-	for (int i = 0; i < m_items.size(); i++) {
-		QWidget *o = m_items.at(i);
-
-		//QRect geom(xpos, margins.top(), bwidth, bheight);
-		QRect geom(xpos, 0, bwidth, bheight);
-		o->setGeometry(geom);
-
-		xpos += bwidth;
-		xpos += m_spacing;
-	}
-}
-
 void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
 {
 	// snapshot of current position and all that
@@ -230,4 +191,31 @@ void HorizontalScrollBox::setWidgetWidth()
 int HorizontalScrollBox::getIndexOf(QWidget* widget)
 {
 	return m_items.indexOf(widget);
+}
+
+void HorizontalScrollBox::positionChildren()
+{
+	//auto margins = contentsMargins();
+	//QMargins margins = QMargins(5, 5, 5, 5);
+
+	if (m_items.size() == 0)
+		return;
+
+	int xpos = 0;
+	//xpos += margins.left();
+
+	//m_height = r.height()
+	int bheight = m_height;
+	int bwidth = m_height*m_ratio;
+
+	for (int i = 0; i < m_items.size(); i++) {
+		QWidget *o = m_items.at(i);
+
+		//QRect geom(xpos, margins.top(), bwidth, bheight);
+		QRect geom(xpos, 0, bwidth, bheight);
+		o->setGeometry(geom);
+
+		xpos += bwidth;
+		xpos += m_spacing;
+	}
 }

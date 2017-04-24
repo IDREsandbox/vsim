@@ -10,7 +10,7 @@
 // goals:
 // 1. add, insert, delete, select, clear (signals)
 // 2. context menu for ^
-// 3. multiselect, multidelete, drag n drop, other fancy stuff
+// 3. copy paste, multiselect, multidelete, drag n drop, other fancy stuff
 
 // configuration
 // size, item width/height
