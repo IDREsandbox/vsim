@@ -82,7 +82,7 @@ void HorizontalScrollBox::insertItem(int index, QString text)
 void HorizontalScrollBox::deleteSelection()
 {
 	int index = getIndexOf(m_selection);
-	// TODO: error checking
+	if (index == -1) return;
 	deleteItem(index);
 }
 
