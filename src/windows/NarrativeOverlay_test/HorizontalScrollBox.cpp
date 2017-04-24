@@ -4,7 +4,9 @@
 
 #include <QCoreApplication>
 
-HorizontalScrollBox::HorizontalScrollBox(QWidget* parent) : QScrollArea(parent)
+HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
+	:	QScrollArea(parent),
+		m_selection(NULL)
 {
 	this->setObjectName(QStringLiteral("scrollArea"));
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -23,22 +25,30 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent) : QScrollArea(parent)
 	//m_layout->setContentsMargins(0, 0, 0, 0);
 	
 	// initialize menus
-	m_slide_menu = new QMenu(tr("Context menu"), this);
+	m_slide_menu = new QMenu(tr("Slide context menu"), this);
 	//QAction actionDelete("Cut", m_slide_menu);
 	//QAction actionDelete("Copy", m_slide_menu);
 	//QAction actionDelete("Paste", m_slide_menu);
 	QAction* actionNew = new QAction("New Slide", m_slide_menu);
 	QAction* actionDelete = new QAction("Delete Slide", m_slide_menu);
-	//QAction actionDelete("Duplicate Slide", m_slide_menu);
-	connect(actionNew, &QAction::triggered, this,
+	connect(actionNew, &QAction::triggered, this, &HorizontalScrollBox::addBlankItem);
+	connect(actionDelete, &QAction::triggered, this, &HorizontalScrollBox::deleteSelection);
+	m_slide_menu->addAction(actionNew);
+	m_slide_menu->addAction(actionDelete);
 
-
+	// handle right-clicks for background, TODO: use a different menu
+	m_scroll_area_widget->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_scroll_area_widget, &QWidget::customContextMenuRequested, this,
+		[this](const QPoint& pos) {
+		qDebug() << "background context menu";
+		m_slide_menu->exec(m_scroll_area_widget->mapToGlobal(pos)); }
+	);
 
 	addItem("FOO THE BAR");
 	addItem("BAR The foool?");
 	insertItem(1, "Insert me at 1 (aka 2)");
 
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 2; i++) {
 		addItem("some itemmm");
 	}
 
@@ -46,6 +56,11 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent) : QScrollArea(parent)
 	addItem("the LAST ITEM!");
 
 	this->addItem("test");
+}
+
+void HorizontalScrollBox::addBlankItem()
+{
+	addItem("A BRAND NEW ITEM!");
 }
 
 void HorizontalScrollBox::addItem(QString text)
@@ -59,77 +74,66 @@ void HorizontalScrollBox::insertItem(int index, QString text)
 	qDebug() << "insert item";
 	auto newWidget = new ScrollBoxItem(m_scroll_area_widget);
 	newWidget->setText(QString::number(index + 1) + QString(" - ") + text);
-
 	newWidget->setStyleSheet(QString("background-color: rgb(") + QString::number((index * 40) % 255) + "," + QString::number(((index % 7) * 50) % 255) + "," + QString::number(100) + ");");
 
 	m_items.insert(index, newWidget);
 
-	
-	// handle right-clicks
+	// handle right-clicks on items
 	newWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(newWidget, &QWidget::customContextMenuRequested, this, 
 		[this, newWidget](const QPoint& pos) { 
-			this->onItemMenu(newWidget->mapToGlobal(pos), newWidget); 
+			this->onItemMenu(pos, newWidget); 
 		}
 	);
-	
-	//[this, newWidget](const QPoint& pos) { this->m_slide_menu->exec(newWidget->mapToGlobal(pos)); }
 
+	select(newWidget);
 	newWidget->show();
 	setWidgetWidth();
-	//resizeEvent();
-	//positionChildren();
-	//QCoreApplication::postEvent(this, new QResizeEvent(size(), size()));
+}
+
+void HorizontalScrollBox::deleteSelection()
+{
+	int index = getIndexOf(m_selection);
+	// TODO: error checking
+	deleteItem(index);
+}
+
+void HorizontalScrollBox::select(QWidget* widget)
+{
+	if (m_selection != NULL) {
+		//widget->unhighlight
+		m_selection->setStyleSheet("background-color: rgb(100, 100, 100);");
+	}
+	// TODO: guarantee existence
+	m_selection = widget;
+	//widget->highlight
+	widget->setStyleSheet("background-color: rgb(0, 100, 255);");
+}
+
+void HorizontalScrollBox::deselect()
+{
+	if (m_selection != NULL) {
+		// widget->unhighlight
+		m_selection->setStyleSheet("background-color: rgb(100, 100, 100);");
+	}
+	m_selection = NULL;
 }
 
 void HorizontalScrollBox::deleteItem(int position)
 {
+	deselect();
 	QWidget* item = m_items.takeAt(position);
 	delete item;
+	if (m_items.length() > 0) {
+		select(m_items.last()); // TODO: replace with something else
+	}
+	setWidgetWidth();
 }
 
-void HorizontalScrollBox::slideContextMenu(QContextMenuEvent* event)
+void HorizontalScrollBox::onItemMenu(QPoint localPos, ScrollBoxItem* widget)
 {
-	qDebug() << "context menu";
-
-	QMenu* contextMenu = new QMenu(tr("Context menu"), this);
-	QAction actionCut("Cut", this);
-	QAction actionCopy("Copy", this);
-	QAction actionPaste("Paste", this);
-	QAction actionNew("New Slide", this);
-	QAction actionDelete("Delete Slide", this);
-	QAction actionDuplicate("Duplicate Slide", this);
-	connect(&actionDelete, &QAction::triggered, this, [this] { qDebug() << "DELETE!!!"; });
-	contextMenu->addAction(&actionDelete);
-
-	contextMenu->exec(event->globalPos());
-}
-
-void HorizontalScrollBox::onItemMenu(QPoint pos, int slide)
-{
-	QMenu* slideMenu = new QMenu(tr("Context menu"), this);
-	//QAction actionDelete("Cut", m_slide_menu);
-	//QAction actionDelete("Copy", m_slide_menu);
-	//QAction actionDelete("Paste", m_slide_menu);
-	QAction* actionNew = new QAction("New Slide", slideMenu);
-	QAction* actionDelete = new QAction("Delete Slide", slideMenu);
-	//QAction actionDelete("Duplicate Slide", m_slide_menu);
-	connect(actionNew, &QAction::triggered, this, 
-		[this, slide] { 
-			//this->addItem("a brand new item!"); 
-			this->insertItem(slide + 1, "a brand new item!");
-		}
-	);
-	connect(actionDelete, &QAction::triggered, this, 
-		[this, slide] { 
-			this->deleteItem(slide);
-			qDebug() << "DELETE!!!" << slide; 
-		}
-	);
-	slideMenu->addAction(actionNew);
-	slideMenu->addAction(actionDelete);
-
-	slideMenu->exec(pos);
+	select(widget);
+	m_slide_menu->exec(widget->mapToGlobal(localPos));
 }
 
 void HorizontalScrollBox::positionChildren()
@@ -202,6 +206,12 @@ void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
 	bar->setValue(newValue);
 }
 
+void HorizontalScrollBox::wheelEvent(QWheelEvent* event)
+{
+	qDebug() << event->angleDelta();
+	horizontalScrollBar()->setValue(horizontalScrollBar()->value() - event->delta());
+}
+
 void HorizontalScrollBox::setWidgetWidth()
 {
 	// minimum width
@@ -215,4 +225,9 @@ void HorizontalScrollBox::setWidgetWidth()
 	m_scroll_area_widget->setMinimumWidth(minwidth);
 
 	positionChildren();
+}
+
+int HorizontalScrollBox::getIndexOf(QWidget* widget)
+{
+	return m_items.indexOf(widget);
 }

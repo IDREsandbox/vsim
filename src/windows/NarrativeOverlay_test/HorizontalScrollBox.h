@@ -39,45 +39,54 @@ class HorizontalScrollBox : public QScrollArea {
 public:
 	HorizontalScrollBox(QWidget* parent);
 
+	// Items
 	// TODO: replace text with QImage or something
+	void addBlankItem();
 	void addItem(QString text);
 	void insertItem(int position, QString text);
-	int size();
 
 	void deleteItem(int position);
+	void deleteSelection();
 
-	// get selected
-	// delete
-	// delete list
+	// selection
+	void select(QWidget*);
+	void deselect();
 
 	//void slideContextMenu(QContextMenuEvent*);
 	
 	// internal slots
 	// pos: global click position, slide: item index
-	void onItemMenu(QPoint globalPos, );
-	void onSpaceMenu(int position);
+	void onItemMenu(QPoint globalPos, ScrollBoxItem* widget);
+	//void onSpaceMenu(int position);
 
 signals:
-	void selected(int item);
-	//	void deleted();
-	// void deleted(int);
-	// void deleted(list);
+	//void selected(int item);
+	//void deleted();
+	//void deleted(int);
+	//void deleted(list);
 
 protected:
-	void positionChildren();
-	void resizeEvent(QResizeEvent* event);
+	// qt overrides
+	virtual void resizeEvent(QResizeEvent* event);
+	virtual void wheelEvent(QWheelEvent* event);
 
 private:
+	// use this to 
 	void setWidgetWidth();
+	int getIndexOf(QWidget*);
+	void positionChildren();
+	
 	QWidget* m_scroll_area_widget;
 	QList<QWidget*> m_items;
+
+	QWidget* m_selection; // TODO: range selection
 
 	//int boxHeight() const;
 	//int boxWidth() const;
 	int m_height = 100;
 	int m_spacing = 10;
 	float m_ratio = 1.0; // width to height ratio for items
-	float m_space_ratio = .1; // width to height ratio for spaces
+	float m_space_ratio = .1; // TODO: width to height ratio for spaces
 
 	QMenu* m_slide_menu; // context menu
 };
