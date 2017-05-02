@@ -16,6 +16,8 @@ public:
 		ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 		ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 		dragEdge = 0;
+		currSize.setWidth(250);
+		currSize.setHeight(250);
 	}
 
 	dragLabel(std::string str, QWidget* parent) : QLabel(QString::fromStdString(str), parent) {
@@ -24,6 +26,8 @@ public:
 		ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 		ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 		dragEdge = 0;
+		currSize.setWidth(250);
+		currSize.setHeight(250);
 	}
 
 	~dragLabel()
@@ -31,21 +35,24 @@ public:
 
 	void dragLabel::mousePressEvent(QMouseEvent *event)
 	{
+		currSize = this->size();
 		offset = event->pos();
+		resizeOffset = event->pos();
 
-		topLeft = QRect(0, 0, width() / 6, height() / 6); //dragEdge 1
-		topRight = QRect(width() - (width() / 6), 0, width() / 6, height() / 6); //dragEdge 2
-		bottomLeft = QRect(0, height() - (height() / 6), width() / 6, height() / 6); //dragEdge 3
-		bottomRight = QRect(width() - (width() / 6), height() - (height() / 6), width() / 6, height() / 6); //dragEdge 4
+		//we only need bottom right, oops
+		//topLeft = QRect(0, 0, width() / 6, height() / 6); //dragEdge 1, top left
+		//topRight = QRect(width() - (width() / 6), 0, width() / 6, height() / 6); //dragEdge 2, top right
+		//bottomLeft = QRect(0, height() - (height() / 6), width() / 6, height() / 6); //dragEdge 3, bottom left
+		bottomRight = QRect(width() - (width() / 6), height() - (height() / 6), width() / 6, height() / 6); //dragEdge 4, bottom right
 
-		if (topLeft.contains(event->pos()))
+		/* if (topLeft.contains(event->pos()))
 			dragEdge = 1;
 		else if (topRight.contains(event->pos()))
 			dragEdge = 2;
 		else if (bottomLeft.contains(event->pos()))
-			dragEdge = 3;
-		else if (bottomRight.contains(event->pos()))
-			dragEdge = 4;
+			dragEdge = 3; */
+		if (bottomRight.contains(event->pos()))
+			dragEdge = 1;
 		else
 			dragEdge = 0;
 	}
@@ -58,29 +65,35 @@ public:
 			{
 				this->move(mapToParent(event->pos() - offset));
 				ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
-				//std::cout << ratioHeight << "    ";
 				ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
-				//std::cout << ratioWidth << "      ";
+				//std::cout << ratioHeight << "    ";
+				//std::cout << ratioWidth << "    ";
 			}
-
-			else if (dragEdge == 1)
+			//only need bottom right for now, so other options are commented out
+			/* else if (dragEdge == 1)
 			{
-				this->resize(this->width() + (event->pos().x() - offset.x()), this->height() + (event->pos().y() - offset.y()));
+				this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
+				resizeOffset = event->pos();
 			}
 
 			else if (dragEdge == 2)
 			{
-				this->resize(this->width() + (event->pos().x() - offset.x()), this->height() + (event->pos().y() - offset.y()));
+				this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
+				resizeOffset = event->pos();
 			}
 
 			else if (dragEdge == 3)
 			{
-				this->resize(this->width() + (event->pos().x() - offset.x()), this->height() + (event->pos().y() - offset.y()));
-			}
+				this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
+				resizeOffset = event->pos();
+			} */
 
-			else if (dragEdge == 4)
+			else if (dragEdge == 1)
 			{
-				this->resize(this->width() + (event->pos().x() - offset.x()), this->height() + (event->pos().y() - offset.y()));
+				this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
+				currSize.setWidth(this->width() + (event->pos().x() - resizeOffset.x()));
+				currSize.setHeight(this->height() + (event->pos().y() - resizeOffset.y()));
+				resizeOffset = event->pos();
 			}
 
 		}
@@ -93,7 +106,9 @@ public:
 	float dragLabel::ratioW(){
 		return ratioWidth;
 	}
-	//void dragLabel::resizeEvent(QResizeEvent *event)
+	void dragLabel::resizeEvent(QResizeEvent *event) {
+		this->resize(currSize.width(), currSize.height());
+	}
 	//{
 	//	/*int proportionHeight = 1 - ((parSize.height() - pos().y()) / parSize.height());
 	//	int proportionWidth = 1 - ((parSize.width() - pos().x()) / parSize.width());
@@ -124,6 +139,8 @@ public:
 protected:
 	QWidget* par;
 	QPoint offset;
+	QSize currSize;
+	QPoint resizeOffset;
 	float ratioHeight;
 	float ratioWidth;
 	int dragEdge;
