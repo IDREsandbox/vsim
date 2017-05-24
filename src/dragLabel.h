@@ -13,6 +13,7 @@ public:
 	dragLabel(QWidget* parent) : QLabel(parent) {
 		setStyleSheet("background-color:green; color:blue;");
 		par = parent;
+		parSize = par->size();
 		ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 		ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 		dragEdge = 0;
@@ -23,6 +24,7 @@ public:
 	dragLabel(std::string str, QWidget* parent) : QLabel(QString::fromStdString(str), parent) {
 		setStyleSheet("background-color:green; color:blue;");
 		par = parent;
+		parSize = par->size();
 		ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 		ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 		dragEdge = 0;
@@ -93,6 +95,10 @@ public:
 				this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
 				currSize.setWidth(this->width() + (event->pos().x() - resizeOffset.x()));
 				currSize.setHeight(this->height() + (event->pos().y() - resizeOffset.y()));
+
+				ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
+				ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+
 				resizeOffset = event->pos();
 			}
 
@@ -106,8 +112,16 @@ public:
 	float dragLabel::ratioW(){
 		return ratioWidth;
 	}
+
 	void dragLabel::resizeEvent(QResizeEvent *event) {
 		this->resize(currSize.width(), currSize.height());
+
+		parSize = par->size();
+
+		int newX = parSize.width() * ratioWidth;
+		int newY = parSize.height() * ratioHeight;
+
+		this->move(newX, newY);
 	}
 	//{
 	//	/*int proportionHeight = 1 - ((parSize.height() - pos().y()) / parSize.height());
@@ -140,6 +154,7 @@ protected:
 	QWidget* par;
 	QPoint offset;
 	QSize currSize;
+	QSize parSize;
 	QPoint resizeOffset;
 	float ratioHeight;
 	float ratioWidth;
