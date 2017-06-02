@@ -49,6 +49,14 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui.actionMessage, &QAction::triggered, this, [this] { this->MessageDialog("A beautiful message"); });
 	connect(ui.actionProgress, &QAction::triggered, this, [this] { this->LoadingDialog("zzz"); });
 
+	// connect narrative pushbuttons
+	connect(ui.forward, &QPushButton::clicked, this, &MainWindow::narListForward);
+	connect(ui.minus, &QPushButton::clicked, this, &MainWindow::narListDelete);
+	connect(ui.plus, &QPushButton::clicked, this, &MainWindow::narListAdd);
+	connect(ui.pause, &QPushButton::clicked, this, &MainWindow::narListPause);
+	connect(ui.open, &QPushButton::clicked, this, &MainWindow::narListOpen);
+	connect(ui.info, &QPushButton::clicked, this, &MainWindow::narListInfo);
+
 	// create vsim
 	m_vsimapp = std::unique_ptr<VSimApp>(new VSimApp(this));
 }
@@ -148,4 +156,34 @@ void MainWindow::actionImportModel()
 	}
 	qDebug() << "importing - " << filename;
 	m_vsimapp->importModel(filename.toStdString());
+}
+
+void MainWindow::narListForward()
+{
+	qDebug("Forward");
+}
+
+void MainWindow::narListAdd()
+{
+	qDebug("Add");
+}
+
+void MainWindow::narListDelete()
+{
+	qDebug("Delete");
+}
+
+void MainWindow::narListPause()
+{
+	qDebug("Pause");
+}
+
+void MainWindow::narListOpen()
+{
+	qDebug("Open");
+}
+
+void MainWindow::narListInfo()
+{
+	qDebug("Info");
 }

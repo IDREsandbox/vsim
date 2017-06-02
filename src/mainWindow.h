@@ -46,6 +46,14 @@ public slots:
 	void actionSaveAs();
 	void actionImportModel();
 
+	// TODO
+	void narListForward();
+	void narListAdd();
+	void narListDelete();
+	void narListPause();
+	void narListOpen();
+	void narListInfo();
+
 private:
 	Ui::MainWindow ui;
 	OSGViewerWidget* m_osg_widget;
