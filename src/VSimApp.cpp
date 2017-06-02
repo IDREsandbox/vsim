@@ -137,7 +137,7 @@ bool VSimApp::saveVSim(const std::string& filename)
 void VSimApp::extractNarrativesFromNode(osg::Node * node)
 {
 	//m_narrative_list_editor->removeAllNarratives();//Remove all the current narratives;
-	m_narrative_list.clear();
+	m_narrative_list->clear();
 
 	unsigned int NumChildren = node->asGroup()->getNumChildren();
 	for (unsigned int i = 0; i < NumChildren; i++)
@@ -148,7 +148,7 @@ void VSimApp::extractNarrativesFromNode(osg::Node * node)
 		{
 			NarrativeReference* ref = new NarrativeReference();
 			ref->setNarrative(nar); // why does this reference exist?
-			m_narrative_list.addNarrative(ref);
+			m_narrative_list->addNarrative(ref);
 			printf("found narrative %s\n", nar->getName().c_str());
 		}
 	}
