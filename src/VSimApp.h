@@ -43,8 +43,9 @@ protected:
 
 	// narrative stuff, TODO: move to a narrative manager/player class?
 	void extractNarrativesFromNode(osg::Node* node);
-	//osg::ref_ptr<NarrativeList> m_narrative_list;
-	NarrativeList* m_narrative_list;
+	
+	osg::ref_ptr<NarrativeList> m_narrative_list;
+	//NarrativeList* m_narrative_list;
 };
 
 extern VSimApp* g_vsimapp;

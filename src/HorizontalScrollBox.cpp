@@ -17,18 +17,54 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_scroll_area_widget->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
 	//m_scroll_area_widget->setGeometry(QRect(0, 0, 653, 316));
 	//m_scroll_area_widget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-	m_scroll_area_widget->setStyleSheet(QStringLiteral("background-color: rgb(200, 100, 200);"));
+	//m_scroll_area_widget->setStyleSheet(QStringLiteral("background-color: rgb(200, 100, 200);"));
+
+	// Sam - is this right?
+	const char *style =
+		"QScrollBar:horizontal {		  "
+		"    border: 2px solid grey;	  "
+		"    background: #32CC99;		  "
+		"    height: 15px;				  "
+		"    margin: 0px 20px 0 20px;	  "
+		"}								  "
+		"QScrollBar::handle:horizontal {  "
+		"    background: white;			  "
+		"    min-width: 20px;			  "
+		"}								  "
+		"QScrollBar::add-line:horizontal {"
+		"    border: 2px solid grey;	  "
+		"    background: #32CC99;		  "
+		"    width: 20px;				  "
+		"    subcontrol-position: right;  "
+		"    subcontrol-origin: margin;	  "
+		"}								  "
+		"								  "
+		"QScrollBar::sub-line:horizontal {"
+		"    border: 2px solid grey;	  "
+		"    background: #32CC99;		  "
+		"    width: 20px;				  "
+		"    subcontrol-position: left;	  "
+		"    subcontrol-origin: margin;	  "
+		"}								  "
+		"QScrollBar::add-page:horizontal, "
+		"QScrollBar::sub-page:horizontal {"
+		"	background: none;"
+		"}"
+		;
+
+	this->horizontalScrollBar()->setStyleSheet(style);
+
+	for (int i = 0; i < 10; i++) {
+		this->addItem("foo");
+	}
+
 	this->setWidget(m_scroll_area_widget);
 
-	//m_layout = new CardLayout(m_scroll_area_widget, 10);
-	//m_layout->setHeight(m_scroll_area_widget->height());
-	//m_layout->setContentsMargins(0, 0, 0, 0);
-	
 	// initialize menus
 	m_slide_menu = new QMenu(tr("Slide context menu"), this);
-	//QAction actionDelete("Cut", m_slide_menu);
-	//QAction actionDelete("Copy", m_slide_menu);
-	//QAction actionDelete("Paste", m_slide_menu);
+	//QAction actionCut("Cut", m_slide_menu);
+	//QAction actionCopy("Copy", m_slide_menu);
+	//QAction actionPaste("Paste", m_slide_menu);
 	QAction* actionNew = new QAction("New Slide", m_slide_menu);
 	QAction* actionDelete = new QAction("Delete Slide", m_slide_menu);
 	connect(actionNew, &QAction::triggered, this, &HorizontalScrollBox::addBlankItem);
