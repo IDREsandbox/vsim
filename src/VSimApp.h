@@ -14,16 +14,19 @@
 #include "MainWindow.h"
 #include "narrative/NarrativeList.h"
 
+class NarrativeList;
 class MainWindow;
 
-class VSimApp
+class VSimApp : public QObject
 {
+	Q_OBJECT
 public:
     VSimApp(MainWindow*);
     //~VSimApp();
 
     osgViewer::Viewer* getViewer() { return m_viewer;}
-    NarrativeList* getNarList() { return m_narrative_list;}
+	int foo;
+    NarrativeList* getNarList() { return &m_narrative_list;}
 
 	// file stuff
 	void reset();
@@ -44,8 +47,8 @@ protected:
 	// narrative stuff, TODO: move to a narrative manager/player class?
 	void extractNarrativesFromNode(osg::Node* node);
 	
-	osg::ref_ptr<NarrativeList> m_narrative_list;
-	//NarrativeList* m_narrative_list;
+	//osg::ref_ptr<NarrativeList> m_narrative_list;
+	NarrativeList m_narrative_list;
 };
 
 extern VSimApp* g_vsimapp;

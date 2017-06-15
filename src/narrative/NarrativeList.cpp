@@ -1,16 +1,10 @@
-/*
- * NarrativeList.cpp
- *
- *  Created on: Mar 26, 2011
- *      Author: eduardo
- */
-
 #include "narrative/NarrativeList.h"
 #include "narrative/Narrative.h"
 
-NarrativeList::NarrativeList(): m_selection(-1)
-{
 
+NarrativeList::NarrativeList(MainWindow *window) : m_window(window), m_selection(-1)
+{
+	m_list_gui = window->ui.narratives;
 }
 
 NarrativeList::~NarrativeList()

@@ -6,6 +6,9 @@
 #include <QDebug>
 #include <QtWidgets/QMenu>
 #include <QContextMenuEvent>
+#include <set>
+
+#include "ScrollBoxItem.h"
 
 // goals:
 // 1. add, insert, delete, select, clear (signals)
@@ -15,30 +18,14 @@
 // configuration
 // size, item width/height
 
-class ScrollBoxItem : public QLabel {
-public:
-	ScrollBoxItem(QWidget* parent) : QLabel(parent) {
-	};
-protected:
-	int i = 0;
-	void mouseMoveEvent(QMouseEvent* event){
-		qDebug() << "mouse move" << this->text() << event->modifiers();
-		i++;
-	}
-	void mousePressEvent(QMouseEvent* event) {
-		qDebug() << "mouse event" << this->text();
-	}
-	void mouseDoubleClickEvent(QMouseEvent* event) {
-		qDebug() << "mouse double click" << this->text();
-	}
-};
-
-
 class HorizontalScrollBox : public QScrollArea {
+
 	Q_OBJECT
+
 public:
 	HorizontalScrollBox(QWidget* parent);
 
+// public interface, controller should wire signals back to these
 	// Items
 	// TODO: replace text with QImage or something
 	void addBlankItem();
@@ -48,20 +35,36 @@ public:
 	void deleteItem(int position);
 	void deleteSelection();
 
+	void clearSelection();
+
+	std::set<int> getSelection();
+	int getLastSelected();
+	ScrollBoxItem *getItem(int position);
+
 	// selection
-	void select(QWidget*);
-	void deselect();
+	//void select(ScrollBoxItem*);
+	void addToSelection(int);
+	void removeFromSelection(int);
+	void select(int);
+
+	bool isSelected(int);
 
 	//void slideContextMenu(QContextMenuEvent*);
 	
 	// internal slots
 	// pos: global click position, slide: item index
-	void onItemMenu(QPoint globalPos, ScrollBoxItem* widget);
+	void openMenu(QPoint globalPos);
 	//void onSpaceMenu(int position);
 
+// public signaling, actions, etc
+	QMenu* m_slide_menu; // context menu
+	QAction* m_action_new;
+	QAction* m_action_delete;
 signals:
-	//void selected(int item);
-	//void deleted();
+	void sDoubleClick();
+	void sNew(int newIndex);
+	void sDeleted();
+
 	//void deleted(int);
 	//void deleted(list);
 
@@ -70,16 +73,27 @@ protected:
 	virtual void resizeEvent(QResizeEvent* event);
 	virtual void wheelEvent(QWheelEvent* event);
 
+	void mousePressEvent(QMouseEvent* event);
+
+	void itemMousePressEvent(QMouseEvent* event, int index);
+
 private:
 	// use this to 
+	void refresh(); // redraw items (after deletion or something)
 	void setWidgetWidth();
-	int getIndexOf(QWidget*);
+	int getIndexOf(ScrollBoxItem*);
 	void positionChildren();
+	//void renumber(); // renumber all items
 	
 	QWidget* m_scroll_area_widget;
-	QList<QWidget*> m_items;
+	QList<ScrollBoxItem*> m_items;
 
-	QWidget* m_selection; // TODO: range selection
+	//ScrollBoxItem* m_selection; // TODO: range selection
+	//int m_selection;
+
+	int m_focus;
+	int m_last_selected;
+	std::set<int> m_selection;
 
 	//int boxHeight() const;
 	//int boxWidth() const;
@@ -88,7 +102,7 @@ private:
 	float m_ratio = 1.0; // width to height ratio for items
 	float m_space_ratio = .1; // TODO: width to height ratio for spaces
 
-	QMenu* m_slide_menu; // context menu
+	
 };
 
 #endif // HORIZONTALSCROLLBOX_H
