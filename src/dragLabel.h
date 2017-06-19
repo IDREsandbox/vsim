@@ -14,22 +14,28 @@ public:
 		setStyleSheet("background-color:green; color:blue;");
 		par = parent;
 		parSize = par->size();
+		//oldParSize = par->size();
 		ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 		ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 		dragEdge = 0;
 		currSize.setWidth(250);
 		currSize.setHeight(250);
+		//center.setX(this->rect().topLeft().x() + currSize.width() / 2);
+		//center.setY(this->rect().topLeft().y() - currSize.height() / 2);
 	}
 
 	dragLabel(std::string str, QWidget* parent) : QLabel(QString::fromStdString(str), parent) {
 		setStyleSheet("background-color:green; color:blue;");
 		par = parent;
 		parSize = par->size();
+		//oldParSize = par->size();
 		ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 		ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 		dragEdge = 0;
 		currSize.setWidth(250);
 		currSize.setHeight(250);
+		//center.setX(this->rect().topLeft().x() + currSize.width() / 2);
+		//center.setY(this->rect().topLeft().y() - currSize.height() / 2);
 	}
 
 	~dragLabel()
@@ -66,10 +72,14 @@ public:
 			if (dragEdge == 0)
 			{
 				this->move(mapToParent(event->pos() - offset));
+
 				ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 				ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 				//std::cout << ratioHeight << "    ";
 				//std::cout << ratioWidth << "    ";
+
+				//center.setX(this->rect().topLeft().x() + currSize.width() / 2);
+				//center.setY(this->rect().topLeft().y() - currSize.height() / 2);
 			}
 			//only need bottom right for now, so other options are commented out
 			/* else if (dragEdge == 1)
@@ -100,6 +110,9 @@ public:
 				ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 
 				resizeOffset = event->pos();
+
+				//center.setX(this->rect().topLeft().x() + currSize.width() / 2);
+				//center.setY(this->rect().topLeft().y() - currSize.height() / 2);
 			}
 
 		}
@@ -122,6 +135,13 @@ public:
 		int newY = parSize.height() * ratioHeight;
 
 		this->move(newX, newY);
+
+		//float percentX = oldParSize.width() - parSize.width()/oldParSize.width();
+		//float percentY = oldParSize.height() - parSize.height()/oldParSize.height();
+
+		//this->resize(this->width() - (this->width()*percentX), this->height() - (this->height()*percentY));
+
+		//oldParSize = par->size();
 	}
 	//{
 	//	/*int proportionHeight = 1 - ((parSize.height() - pos().y()) / parSize.height());
@@ -151,10 +171,12 @@ public:
 	//}
 
 protected:
+	QPoint center;
 	QWidget* par;
 	QPoint offset;
 	QSize currSize;
 	QSize parSize;
+	QSize oldParSize;
 	QPoint resizeOffset;
 	float ratioHeight;
 	float ratioWidth;
