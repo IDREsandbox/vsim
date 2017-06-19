@@ -10,11 +10,15 @@
 
 #include <assert.h>
 #include "narrative/NarrativeReference.h"
+#include "HorizontalScrollBox.h"
+#include "MainWindow.h"
 
-class NarrativeList: public osg::Referenced
+class MainWindow;
+class NarrativeList // why osg? : public osg::Referenced
 {
 public:
-    NarrativeList();
+	NarrativeList();
+    NarrativeList(MainWindow*);
     virtual ~NarrativeList();
 
     NarrativeReference* getSelectedNarrativeReference() { return (m_selection >= 0 ? m_narrativeReferences[m_selection] : NULL); }
@@ -31,8 +35,11 @@ public:
 
 protected:
     int m_selection;
-    typedef std::vector<osg::ref_ptr<NarrativeReference> > NarrativeReferenceVector;
+    typedef std::vector<osg::ref_ptr<NarrativeReference>> NarrativeReferenceVector;
     NarrativeReferenceVector m_narrativeReferences;
+
+	MainWindow *m_window;
+	HorizontalScrollBox *m_list_gui;
 };
 
 #endif /* NARRATIVELIST_H_ */

@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vsim", "vsim\vsim.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NarrativeOverlay_test", "NarrativeOverlay_test\NarrativeOverlay_test.vcxproj", "{8F6D50AA-2D2D-4A0B-8E4C-51C3A1D732C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,14 +21,6 @@ Global
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.Build.0 = Release|x64
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.ActiveCfg = Release|Win32
 		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.Build.0 = Release|Win32
-		{8F6D50AA-2D2D-4A0B-8E4C-51C3A1D732C5}.Debug|x64.ActiveCfg = Debug|x64
-		{8F6D50AA-2D2D-4A0B-8E4C-51C3A1D732C5}.Debug|x64.Build.0 = Debug|x64
-		{8F6D50AA-2D2D-4A0B-8E4C-51C3A1D732C5}.Debug|x86.ActiveCfg = Debug|Win32
-		{8F6D50AA-2D2D-4A0B-8E4C-51C3A1D732C5}.Debug|x86.Build.0 = Debug|Win32
-		{8F6D50AA-2D2D-4A0B-8E4C-51C3A1D732C5}.Release|x64.ActiveCfg = Release|x64
-		{8F6D50AA-2D2D-4A0B-8E4C-51C3A1D732C5}.Release|x64.Build.0 = Release|x64
-		{8F6D50AA-2D2D-4A0B-8E4C-51C3A1D732C5}.Release|x86.ActiveCfg = Release|Win32
-		{8F6D50AA-2D2D-4A0B-8E4C-51C3A1D732C5}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

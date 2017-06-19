@@ -49,8 +49,16 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui.actionMessage, &QAction::triggered, this, [this] { this->MessageDialog("A beautiful message"); });
 	connect(ui.actionProgress, &QAction::triggered, this, [this] { this->LoadingDialog("zzz"); });
 
+	// connect narrative pushbuttons
+	connect(ui.forward, &QPushButton::clicked, this, &MainWindow::narListForward);
+	connect(ui.minus, &QPushButton::clicked, this, &MainWindow::narListDelete);
+	connect(ui.plus, &QPushButton::clicked, this, &MainWindow::narListAdd);
+	connect(ui.pause, &QPushButton::clicked, this, &MainWindow::narListPause);
+	connect(ui.open, &QPushButton::clicked, this, &MainWindow::narListOpen);
+	connect(ui.info, &QPushButton::clicked, this, &MainWindow::narListInfo);
+
 	// create vsim
-	m_vsimapp = std::unique_ptr<VSimApp>(new VSimApp(this));
+	//m_vsimapp = std::unique_ptr<VSimApp>(new VSimApp(this));
 }
 
 void MainWindow::ErrorDialog(const std::string & msg)
@@ -99,7 +107,8 @@ void MainWindow::dropEvent(QDropEvent * event)
 		if (text.startsWith("file:///")) {
 			text.remove(0, 8); // remove the prefix
 		}
-		m_vsimapp->openVSim(text.toStdString());
+		//m_vsimapp->openVSim(text.toStdString());
+		emit sOpenFile(text.toStdString());
 	}
 }
 
@@ -107,7 +116,8 @@ void MainWindow::dropEvent(QDropEvent * event)
 void MainWindow::actionNew()
 {
 	qDebug("new");
-	m_vsimapp->reset();
+	//m_vsimapp->reset();
+	emit sNew();
 }
 void MainWindow::actionOpen()
 {
@@ -118,7 +128,9 @@ void MainWindow::actionOpen()
 		return;
 	}
 	qDebug() << "opening - " << filename;
-	m_vsimapp->openVSim(filename.toStdString());
+	
+	//m_vsimapp->openVSim(filename.toStdString());
+	emit sOpenFile(filename.toStdString());
 }
 
 void MainWindow::actionSave()
@@ -135,7 +147,9 @@ void MainWindow::actionSaveAs()
 		return;
 	}
 	qDebug() << "saving as - " << filename;
-	m_vsimapp->saveVSim(filename.toStdString());
+	// 
+	//m_vsimapp->saveVSim(filename.toStdString());
+	emit sSaveFile(filename.toStdString());
 }
 
 void MainWindow::actionImportModel()
@@ -147,5 +161,36 @@ void MainWindow::actionImportModel()
 		return;
 	}
 	qDebug() << "importing - " << filename;
-	m_vsimapp->importModel(filename.toStdString());
+	//m_vsimapp->importModel(filename.toStdString());
+	emit sImportModel(filename.toStdString());
+}
+
+void MainWindow::narListForward()
+{
+	qDebug("Forward");
+}
+
+void MainWindow::narListAdd()
+{
+	qDebug("Add");
+}
+
+void MainWindow::narListDelete()
+{
+	qDebug("Delete");
+}
+
+void MainWindow::narListPause()
+{
+	qDebug("Pause");
+}
+
+void MainWindow::narListOpen()
+{
+	qDebug("Open");
+}
+
+void MainWindow::narListInfo()
+{
+	qDebug("Info");
 }

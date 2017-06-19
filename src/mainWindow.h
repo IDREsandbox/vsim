@@ -12,7 +12,7 @@
 #include "OSGViewerWidget.h"
 #include "dragLabel.h"
 
-#include "VSimApp.h"
+//#include "VSimApp.h"
 
 extern osgViewer::Viewer* g_viewer;
 
@@ -38,7 +38,6 @@ public:
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dropEvent(QDropEvent *event);
 
-
 public slots:
 	void actionNew();
 	void actionOpen();
@@ -46,15 +45,31 @@ public slots:
 	void actionSaveAs();
 	void actionImportModel();
 
-private:
+	// TODO
+	void narListForward();
+	void narListAdd();
+	void narListDelete();
+	void narListPause();
+	void narListOpen();
+	void narListInfo();
+
+signals:
+	void sOpenFile(const std::string&);
+	void sSaveFile(const std::string&);
+	void sNew();
+	void sImportModel(const std::string&);
+
+public:
 	Ui::MainWindow ui;
+
+private:
 	OSGViewerWidget* m_osg_widget;
 
 	QWidget* m_drag_area;
 	
 	// main window owns the vsim app
-	// circular reference, use a pointer
-	std::unique_ptr<VSimApp> m_vsimapp;
+	// circular reference, use a pointer, EDIT: all clear!
+	// std::unique_ptr<VSimApp> m_vsimapp;
 };
 
 

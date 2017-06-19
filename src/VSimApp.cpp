@@ -1,5 +1,3 @@
-#include "VSimApp.h"
-
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers> // stats handler
 #include <osgGA/KeySwitchMatrixManipulator>
@@ -12,19 +10,27 @@
 
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QProgressDialog>
-
+#include <QtWidgets/QAction>
 #include "VSimApp.h"
 #include "Util.h"
+
+#include <QObject>
 
 #define OPTIMIZE 0
 
 VSimApp* g_vsimapp;
 
 VSimApp::VSimApp(MainWindow* window)
-	: m_window(window)
+	: m_window(window),
+	m_narrative_list(window)
 {
 	m_viewer = window->getViewer();
 	m_model = m_viewer->getSceneData();
+
+	QObject::connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
+	QObject::connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
+	QObject::connect(window, &MainWindow::sImportModel, this, &VSimApp::importModel);
+	QObject::connect(window, &MainWindow::sNew, this, &VSimApp::reset);
 }
 
 void VSimApp::reset()
