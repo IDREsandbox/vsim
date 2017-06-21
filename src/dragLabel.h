@@ -21,6 +21,8 @@ public:
 		dragEdge = 0;
 		currSize.setWidth(250);
 		currSize.setHeight(250);
+
+		this->setWordWrap(true);
 	}
 
 	dragLabel(std::string str, QWidget* parent) : QLabel(QString::fromStdString(str), parent) {
@@ -33,6 +35,8 @@ public:
 		dragEdge = 0;
 		currSize.setWidth(250);
 		currSize.setHeight(250);
+
+		this->setWordWrap(true);
 	}
 
 	~dragLabel()
@@ -83,7 +87,7 @@ public:
 		oldParSize = par->size();
 	}
 
-	void dragLabel::mainResize() {
+	void dragLabel::mainResize() { //must call this inside of mainWindow's resizeEvent handler
 		parSize = par->size();
 
 		float percentX = float((oldParSize.width() - parSize.width())) / oldParSize.width();
@@ -97,6 +101,31 @@ public:
 		this->move(newX, newY);
 
 		oldParSize = par->size();
+	}
+
+	void dragLabel::resizeEvent(QResizeEvent* event) {
+		//font scaling
+		QFont font = this->font();
+		QRect cRect = this->contentsRect();
+
+		if (this->text().isEmpty())
+			return;
+
+		int fontSize = 14;
+
+		while (true)
+		{
+			QFont f(font);
+			f.setPixelSize(fontSize);
+			QRect r = QFontMetrics(f).boundingRect(this->text());
+			if (r.height() <= cRect.height() && r.width() <= cRect.width())
+				fontSize++;
+			else
+				break;
+		}
+
+		font.setPixelSize(fontSize);
+		this->setFont(font);
 	}
 
 protected:

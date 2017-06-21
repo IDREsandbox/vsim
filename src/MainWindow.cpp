@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_drag_area = new QWidget(ui.root);
 	ui.rootLayout->addWidget(m_drag_area, 0, 0);
 
-	test = new dragLabel("drag widget", m_drag_area);
+	test = new dragLabel("I listened to the thing back when with theresa but i've forgotten it all now, except for that it is goddamn excellent.", m_drag_area);
 	test->setObjectName(QString::fromUtf8("label"));
 	test->setGeometry(250, 250, 250, 250);
 
