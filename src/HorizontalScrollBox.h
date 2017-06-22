@@ -51,12 +51,7 @@ public:
 
 	bool isSelected(int);
 
-	//void slideContextMenu(QContextMenuEvent*);
-	
-	// internal slots
-	// pos: global click position, slide: item index
 	void openMenu(QPoint globalPos);
-	//void onSpaceMenu(int position);
 
 // public signaling, actions, etc
 	QMenu* m_slide_menu; // context menu
@@ -77,22 +72,15 @@ protected:
 	virtual void wheelEvent(QWheelEvent* event);
 
 	void mousePressEvent(QMouseEvent* event);
-
 	void itemMousePressEvent(QMouseEvent* event, int index);
 
 private:
-	// use this to 
 	void refresh(); // redraw items (after deletion or something)
 	void setWidgetWidth();
-	int getIndexOf(ScrollBoxItem*);
 	void positionChildren();
-	//void renumber(); // renumber all items
 	
 	QWidget* m_scroll_area_widget;
 	QList<ScrollBoxItem*> m_items;
-
-	//ScrollBoxItem* m_selection; // TODO: range selection
-	//int m_selection;
 
 	int m_focus;
 	int m_last_selected;

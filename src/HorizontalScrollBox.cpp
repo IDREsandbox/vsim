@@ -18,11 +18,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 
 	m_scroll_area_widget = new QWidget(this);
 	m_scroll_area_widget->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-	//m_scroll_area_widget->setGeometry(QRect(0, 0, 653, 316));
-	//m_scroll_area_widget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
-	//m_scroll_area_widget->setStyleSheet(QStringLiteral("background-color: rgb(200, 100, 200);"));
 
-	// is this right?
 	const char *style =
 		"QScrollBar:horizontal {		  "
 		"    border: 2px solid grey;	  "
@@ -65,7 +61,6 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	//QAction actionCopy("Copy", m_slide_menu);
 	//QAction actionPaste("Paste", m_slide_menu);
 	m_action_new = new QAction("New Slide", m_slide_menu);
-	qDebug() << "action new\n";
 	m_action_delete = new QAction("Delete Slide", m_slide_menu);
 
 
@@ -76,7 +71,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_scroll_area_widget->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_scroll_area_widget, &QWidget::customContextMenuRequested, this,
 		[this](const QPoint& pos) {
-		qDebug() << "background context menu";
+		qDebug() << "narrative list gui - background context menu";
 		m_slide_menu->exec(m_scroll_area_widget->mapToGlobal(pos)); }
 	);
 }
@@ -90,7 +85,7 @@ void HorizontalScrollBox::addItem(ScrollBoxItem *item)
 
 void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 {
-	qDebug() << "insert item at" << index;
+	qDebug() << "narrative list gui - insert item at" << index;
 	item->setParent(m_scroll_area_widget);
 	m_items.insert(index, item);
 	// steal all mouse events on items
@@ -302,11 +297,6 @@ void HorizontalScrollBox::setWidgetWidth()
 	m_scroll_area_widget->setMinimumWidth(minwidth);
 
 	positionChildren();
-}
-
-int HorizontalScrollBox::getIndexOf(ScrollBoxItem* widget)
-{
-	return m_items.indexOf(widget);
 }
 
 void HorizontalScrollBox::positionChildren()
