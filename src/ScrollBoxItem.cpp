@@ -2,19 +2,14 @@
 
 
 ScrollBoxItem::ScrollBoxItem(QWidget* parent)
-	: QLabel(parent)
+	: QFrame(parent)
 {
-}
-
-int ScrollBoxItem::foo()
-{
-	return 0;
 }
 
 void ScrollBoxItem::SetIndex(int index)
 {
 	m_index = index;
-	setText(QString::number(index));
+	//setText(QString::number(index));
 }
 
 int ScrollBoxItem::GetIndex(int index)
@@ -34,12 +29,15 @@ void ScrollBoxItem::ColorSelect(bool color)
 		setStyleSheet("background-color: rgb(0, 100, 255);");
 	}
 	else {
-		setStyleSheet("background-color: rgb(100,100,100);");
+		setStyleSheet("background-color: rgb(70,70,70);");
 	}
 }
 
 void ScrollBoxItem::mousePressEvent(QMouseEvent * event)
 {
-	qDebug() << "mouse event" << this->text();
+	qDebug() << "mouse event ScrollBoxItem" << m_index; // << this->text();
 	emit sMousePressEvent(event, m_index);
 }
+
+
+

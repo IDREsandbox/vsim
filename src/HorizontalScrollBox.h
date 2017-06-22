@@ -9,6 +9,7 @@
 #include <set>
 
 #include "ScrollBoxItem.h"
+#include "narrative/NarrativeScrollItem.h"
 
 // goals:
 // 1. add, insert, delete, select, clear (signals)
@@ -29,15 +30,18 @@ public:
 	// Items
 	// TODO: replace text with QImage or something
 	void addBlankItem();
-	void addItem(QString text);
-	void insertItem(int position, QString text);
+
+	// this scroll box takes ownership, so just construct with nullptr
+	void addItem(ScrollBoxItem*);
+	void insertItem(int position, ScrollBoxItem*);
+	void clear();
 
 	void deleteItem(int position);
 	void deleteSelection();
 
 	void clearSelection();
 
-	std::set<int> getSelection();
+	const std::set<int>& getSelection();
 	int getLastSelected();
 	ScrollBoxItem *getItem(int position);
 
@@ -63,7 +67,8 @@ public:
 signals:
 	void sDoubleClick();
 	void sNew(int newIndex);
-	void sDeleted();
+	void sDeleted(std::set<int>);
+	//void sDeleted(int index);
 
 	//void deleted(int);
 	//void deleted(list);
@@ -97,10 +102,10 @@ private:
 
 	//int boxHeight() const;
 	//int boxWidth() const;
-	int m_height = 100;
-	int m_spacing = 10;
-	float m_ratio = 1.0; // width to height ratio for items
-	float m_space_ratio = .1; // TODO: width to height ratio for spaces
+	int m_height;
+	int m_spacing;
+	float m_ratio; // width to height ratio for items
+	float m_space_ratio; // TODO: width to height ratio for spaces
 
 	
 };

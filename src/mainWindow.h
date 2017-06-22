@@ -11,6 +11,7 @@
 #include "ui_MainWindow.h"
 #include "OSGViewerWidget.h"
 #include "dragLabel.h"
+#include "narrative/NarrativeInfoDialog.h"
 
 //#include "VSimApp.h"
 
@@ -59,8 +60,10 @@ signals:
 	void sNew();
 	void sImportModel(const std::string&);
 
+	// ui, signal emitters
 public:
 	Ui::MainWindow ui;
+	NarrativeInfoDialog *m_narrative_info_dialog;
 
 private:
 	OSGViewerWidget* m_osg_widget;

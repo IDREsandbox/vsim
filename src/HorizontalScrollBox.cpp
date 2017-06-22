@@ -4,7 +4,12 @@
 #include "HorizontalScrollBox.h"
 
 HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
-	:	QScrollArea(parent)
+	:	QScrollArea(parent),
+
+	m_height(60),
+	m_spacing(10),
+	m_ratio(1.5), // width to height ratio for items
+	m_space_ratio(.1) // TODO: width to height ratio for spaces
 {
 	this->setObjectName(QStringLiteral("scrollArea"));
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -17,21 +22,21 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	//m_scroll_area_widget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 	//m_scroll_area_widget->setStyleSheet(QStringLiteral("background-color: rgb(200, 100, 200);"));
 
-	// Sam - is this right?
+	// is this right?
 	const char *style =
 		"QScrollBar:horizontal {		  "
 		"    border: 2px solid grey;	  "
-		"    background: #32CC99;		  "
+		"    background: #112244;		  "
 		"    height: 15px;				  "
 		"    margin: 0px 20px 0 20px;	  "
 		"}								  "
 		"QScrollBar::handle:horizontal {  "
-		"    background: white;			  "
+		"    background: #666666;			  "
 		"    min-width: 20px;			  "
 		"}								  "
 		"QScrollBar::add-line:horizontal {"
 		"    border: 2px solid grey;	  "
-		"    background: #32CC99;		  "
+		"    background: #112244;		  "
 		"    width: 20px;				  "
 		"    subcontrol-position: right;  "
 		"    subcontrol-origin: margin;	  "
@@ -39,7 +44,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 		"								  "
 		"QScrollBar::sub-line:horizontal {"
 		"    border: 2px solid grey;	  "
-		"    background: #32CC99;		  "
+		"    background: #112244;		  "
 		"    width: 20px;				  "
 		"    subcontrol-position: left;	  "
 		"    subcontrol-origin: margin;	  "
@@ -52,8 +57,8 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 
 	this->horizontalScrollBar()->setStyleSheet(style);
 
-	for (int i = 0; i < 10; i++) {
-		this->addItem("foo");
+	for (int i = 0; i < 1; i++) {
+		this->addBlankItem();
 	}
 
 	this->setWidget(m_scroll_area_widget);
@@ -63,13 +68,15 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	//QAction actionCut("Cut", m_slide_menu);
 	//QAction actionCopy("Copy", m_slide_menu);
 	//QAction actionPaste("Paste", m_slide_menu);
-	QAction* actionNew = new QAction("New Slide", m_slide_menu);
-	QAction* actionDelete = new QAction("Delete Slide", m_slide_menu);
+	m_action_new = new QAction("New Slide", m_slide_menu);
+	qDebug() << "action new\n";
+	m_action_delete = new QAction("Delete Slide", m_slide_menu);
 	// temporary direct connection
-	connect(actionNew, &QAction::triggered, this, &HorizontalScrollBox::addBlankItem);
-	connect(actionDelete, &QAction::triggered, this, &HorizontalScrollBox::deleteSelection);
-	m_slide_menu->addAction(actionNew);
-	m_slide_menu->addAction(actionDelete);
+	//connect(m_action_new, &QAction::triggered, this, &HorizontalScrollBox::addBlankItem);
+	//connect(m_action_delete, &QAction::triggered, this, &HorizontalScrollBox::deleteSelection);
+
+	m_slide_menu->addAction(m_action_new);
+	m_slide_menu->addAction(m_action_delete);
 
 	// handle right-clicks for background, TODO: use a different menu
 	m_scroll_area_widget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -83,31 +90,46 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 void HorizontalScrollBox::addBlankItem()
 {
 	// TODO: add after selection
-	addItem("A BRAND NEW ITEM!");
+	//addItem("A BRAND NEW ITEM!");
+	//ScrollBoxItem *new_item = new ScrollBoxItem(m_scroll_area_widget);
+	NarrativeScrollItem *new_item = new NarrativeScrollItem(m_scroll_area_widget);
+	new_item->setInfo({ "hello world", "a compelling story someoemeo meoemoemoem eomeoe moemeo meo meom", "le author"});
+
+	//new_item->setText(QString::number(m_items.size() + 1) + QString(" - ") + "ehehe");
+	//new_item->setStyleSheet(QString("background-color: rgb(") + QString::number((m_items.size() * 40) % 255) + "," + QString::number(((m_items.size() % 7) * 50) % 255) + "," + QString::number(100) + ");");
+
+	addItem(new_item);
 }
 
-void HorizontalScrollBox::addItem(QString text)
+void HorizontalScrollBox::addItem(ScrollBoxItem *item)
 {
-	insertItem(m_items.size(), text);
+	insertItem(m_items.size(), item);
 	horizontalScrollBar()->setValue(horizontalScrollBar()->maximum());
+	
 }
 
-void HorizontalScrollBox::insertItem(int index, QString text)
+void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 {
-	qDebug() << "insert item";
-	auto newWidget = new ScrollBoxItem(m_scroll_area_widget);
-	newWidget->setText(QString::number(index + 1) + QString(" - ") + text);
-	newWidget->setStyleSheet(QString("background-color: rgb(") + QString::number((index * 40) % 255) + "," + QString::number(((index % 7) * 50) % 255) + "," + QString::number(100) + ");");
-
-	m_items.insert(index, newWidget);
-
+	qDebug() << "insert item at" << index;
+	item->setParent(m_scroll_area_widget);
+	m_items.insert(index, item);
 	// steal all mouse events on items
-	connect(newWidget, &ScrollBoxItem::sMousePressEvent, this, &HorizontalScrollBox::itemMousePressEvent);
-
+	connect(item, &ScrollBoxItem::sMousePressEvent, this, &HorizontalScrollBox::itemMousePressEvent);
 	select(index);
+	item->show();
+	refresh();
+}
 
-	//select(newWidget);
-	newWidget->show();
+void HorizontalScrollBox::clear()
+{
+	for (auto ptr : m_items) {
+		delete ptr;
+	}
+	m_items.clear();
+	m_selection.clear();
+	m_focus = -1;
+	m_last_selected = -1;
+
 	refresh();
 }
 
@@ -138,7 +160,7 @@ void HorizontalScrollBox::clearSelection()
 	m_selection.clear();
 }
 
-std::set<int> HorizontalScrollBox::getSelection()
+const std::set<int>& HorizontalScrollBox::getSelection()
 {
 	return m_selection;
 }
@@ -254,7 +276,7 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 	if (event->button() == Qt::LeftButton) {
 		qDebug() << "lmb";
 		m_last_selected = index;
-		if (event->modifiers() & Qt::ShiftModifier) {
+		if (event->modifiers() & Qt::ControlModifier) {
 			if (isSelected(index)) {
 				removeFromSelection(index);
 			}

@@ -5,7 +5,7 @@
 #include <QMouseEvent>
 #include <QDebug>
 
-class ScrollBoxItem : public QLabel {
+class ScrollBoxItem : public QFrame {
 	Q_OBJECT
 public:
 	ScrollBoxItem(QWidget* parent);
@@ -14,7 +14,8 @@ public:
 
 	// interface for gui
 	// index is used for pretty numbering
-	int foo();
+
+	// TODO: fix naming style
 	void SetIndex(int index);
 	int GetIndex(int index);
 	void ColorFocus(bool color);
@@ -27,7 +28,5 @@ protected:
 private:
 	int m_index = -1;
 };
-
-
 
 #endif

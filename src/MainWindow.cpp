@@ -8,6 +8,7 @@
 #include <QDir>
 
 #include "MainWindow.h"
+#include "narrative/NarrativeInfoDialog.h"
 
 extern osgViewer::Viewer* g_viewer = nullptr;
 
@@ -23,6 +24,9 @@ MainWindow::MainWindow(QWidget *parent)
 	setWindowTitle("VSim");
 	setAcceptDrops(true);
 	qDebug() << "root: " << QDir::currentPath();
+
+	// narrative info dialog
+	m_narrative_info_dialog = new NarrativeInfoDialog(this);
 
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui.root);
@@ -57,8 +61,17 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui.open, &QPushButton::clicked, this, &MainWindow::narListOpen);
 	connect(ui.info, &QPushButton::clicked, this, &MainWindow::narListInfo);
 
-	// create vsim
-	//m_vsimapp = std::unique_ptr<VSimApp>(new VSimApp(this));
+	// connect narrative info
+	connect(m_narrative_info_dialog, &QDialog::accepted, this, [this] { qDebug() << "narrative accept";
+		auto data = this->m_narrative_info_dialog->getInfo();
+		qDebug() << "Title:" << data.m_title.c_str();
+		qDebug() << "Description:" << data.m_description.c_str();
+		qDebug() << "Author:" << data.m_contact.c_str();
+		});
+	connect(m_narrative_info_dialog, &QDialog::rejected, this, [this] { qDebug() << "narrative reject"; });
+	connect(m_narrative_info_dialog, &QDialog::finished, this, [this](int i) { qDebug() << "narrative finished" << i; });
+
+
 }
 
 void MainWindow::ErrorDialog(const std::string & msg)
@@ -135,7 +148,7 @@ void MainWindow::actionOpen()
 
 void MainWindow::actionSave()
 {
-	qDebug("save");
+	qDebug("save (not implemented yet)");
 }
 
 void MainWindow::actionSaveAs()
@@ -192,5 +205,6 @@ void MainWindow::narListOpen()
 
 void MainWindow::narListInfo()
 {
-	qDebug("Info");
+	m_narrative_info_dialog->exec();
+	qDebug("narrative info");
 }

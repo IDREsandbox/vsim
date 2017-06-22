@@ -14,6 +14,13 @@
 #include <osg/node>
 #include "narrative/NarrativeNode.h"
 
+// low budget version, TODO: replace with narrative?
+struct NarrativeInfo {
+	std::string m_title;
+	std::string m_description;
+	std::string m_contact;
+};
+
 typedef std::vector<osg::ref_ptr<NarrativeNode> > NarrativeNodeVector;
 typedef std::vector<osg::ref_ptr<NarrativeTransition> > NarrativeTransitionVector;
 
@@ -46,6 +53,7 @@ public:
 	void setAuthor(const std::string& author){m_author = author;}
 	const std::string& getDescription() const {return m_description;}
 	void setDescription(const std::string& description){m_description = description;}
+
 	bool getLock() const{return m_locked;}
 	void setLock(bool lock){ m_locked = lock;}	
 	NarrativeSelectionInfo getSelection() const { return m_selection; }
