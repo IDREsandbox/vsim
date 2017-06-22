@@ -49,6 +49,7 @@
     <ClCompile Include="..\..\narrative\NarrativeReference.cpp" />
     <ClCompile Include="..\..\narrative\NarrativeScrollItem.cpp" />
     <ClCompile Include="..\..\narrative\SerializerNarrative.cpp" />
+    <ClCompile Include="..\..\narrative\SerializerNarrativeList.cpp" />
     <ClCompile Include="..\..\narrative\SerializerNarrativeNode.cpp" />
     <ClCompile Include="..\..\narrative\SerializerNarrativeReference.cpp" />
     <ClCompile Include="..\..\narrative\SerializerNarrativeTransition.cpp" />

@@ -11,9 +11,9 @@ class NarrativeScrollItem : public ScrollBoxItem {
 	Q_OBJECT
 public:
 	NarrativeScrollItem(QWidget* parent);
-	//NarrativeScrollItem(QWidget* parent, const NarrativeInfo &);
+	NarrativeScrollItem(const Narrative&);
 
-	void setInfo(const NarrativeInfo &);
+	void setInfo(const Narrative&);
 
 private:
 	QLabel *m_title_label;

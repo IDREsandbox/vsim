@@ -21,26 +21,8 @@ NarrativeList::NarrativeList(QObject* parent, MainWindow* window)
 
 NarrativeList::~NarrativeList()
 {
-
 }
 
-void NarrativeList::addNarrative(Narrative* narrative)
-{
-	m_narratives.push_back(narrative);
-
-	// add item to gui
-	NarrativeScrollItem *new_item = new NarrativeScrollItem(nullptr);
-	new_item->setInfo({
-		narrative->getName(),
-		narrative->getDescription(),
-		narrative->getAuthor()
-	});
-	m_list_gui->addItem(new_item);
-}
-void NarrativeList::addBlankNarrative()
-{
-	m_list_gui->addBlankItem();
-}
 void NarrativeList::newNarrative()
 {
 	// open up the dialog
@@ -51,7 +33,7 @@ void NarrativeList::newNarrative()
 	}
 	NarrativeInfo info = dlg->getInfo();
 
-	// add item to osg
+	// add item to osg and to here
 	if (m_model == nullptr) {
 		qDebug() << "failed to create new narrative - model is not initialized";
 		return;
@@ -60,76 +42,91 @@ void NarrativeList::newNarrative()
 	narrative->setName(info.m_title);
 	narrative->setAuthor(info.m_contact);
 	narrative->setDescription(info.m_description);
-	m_narratives.push_back(narrative);
-	m_model->asGroup()->addChild(narrative);
+	m_narrative_group->addChild(narrative);
 
-	addNarrative(narrative);
-
-	//// add item to gui
-	//NarrativeScrollItem *new_item = new NarrativeScrollItem(nullptr);
-	//new_item->setInfo(dlg->getInfo());
-	//m_list_gui->addItem(new_item);	
+	// add to gui
+	m_list_gui->addItem(new NarrativeScrollItem(*narrative));
 }
 
 void NarrativeList::deleteSelection()
 {
 	std::set<int> selection = m_list_gui->getSelection();
+	std::vector<Narrative*> deletionList;
+
+	// get pointers to nodes to delete
+	for (auto i : selection) {
+		Narrative *nar = dynamic_cast<Narrative*>(m_narrative_group->getChild(i));
+		if (nar == NULL) {
+			qWarning() << "detected a non-narrative in the osg narrative group";
+		}
+		deletionList.push_back(nar);
+	}
+	// delete them
+	for (auto delete_me : deletionList) {
+		m_narrative_group->removeChild(delete_me);
+	}
 
 	m_list_gui->deleteSelection();
 }
 
-//void NarrativeList::deleteSelection(const std::set<int>& selection)
-//{
-//	NarrativeReferenceVector newList;
-//	// TODO
-//}
-//
-//void NarrativeList::removeNarrative(int index)
-//{
-//    assert(index >= 0 && index < (int)m_narrativeReferences.size());
-//    NarrativeReferenceVector::iterator it = m_narrativeReferences.begin();
-//    it += index;
-//    it = m_narrativeReferences.erase(it);
-//    int new_selected = index;
-//    if (it == m_narrativeReferences.end())
-//        new_selected = m_narrativeReferences.size() - 1;
-//    setSelection(new_selected);
-//}
-
-unsigned int NarrativeList::getNumNarratives()
+void NarrativeList::load(osg::Group * model)
 {
-	return m_narratives.size();
-}
-
-Narrative * NarrativeList::getNarrativeReference(unsigned int i)
-{
-	assert(i < m_narratives.size());
-	return m_narratives[i];
-}
-
-void NarrativeList::clear()
-{
-	m_narratives.clear(); 
 	m_list_gui->clear();
 	m_focus = -1;
-	m_model = nullptr;
-}
-
-void NarrativeList::loadFromNode(osg::Node * model)
-{
-	clear();
+	m_narrative_group = nullptr;
 	m_model = model;
 
-	unsigned int NumChildren = model->asGroup()->getNumChildren();
+	// new: load narratives in a NarrativeList group
+	// search for a narrative list node, if not found then create one
+	unsigned int NumChildren = model->getNumChildren();
 	for (unsigned int i = 0; i < NumChildren; i++)
 	{
-		osg::Node* c = model->asGroup()->getChild(i);
+		osg::Group* group = model->getChild(i)->asGroup();
+		if (group)
+		{
+			std::string name = group->getName();
+			if (name == "NarrativeList") {
+				m_narrative_group = group->asGroup();
+				qDebug() << "found NarrativeList in file";
+				break;
+			}
+		}
+	}
+	// if no NarrativeList was found then create one
+	if (m_narrative_group == nullptr) {
+		m_narrative_group = new osg::Group;
+		m_narrative_group->setName("NarrativeList");
+		model->addChild(m_narrative_group);
+		qDebug() << "didnt find NarrativeList in file - creating a new one";
+	}
+
+	// load narratives into the gui
+	for (unsigned int i = 0; i < m_narrative_group->getNumChildren(); i++)
+	{
+		osg::Node* c = m_narrative_group->getChild(i);
 		Narrative* nar = dynamic_cast<Narrative*>(c);
 		if (nar)
 		{
-			addNarrative(nar);
-			qDebug() << "found narrative" << nar->getName().c_str();
+			// add item to gui
+			m_list_gui->addItem(new NarrativeScrollItem(*nar));
+		}
+		qDebug() << "loading narrative" << QString::fromStdString(nar->getName());
+	}
+
+	// old code: load narratives stored directly, for backward compatibility
+	for (unsigned int i = 0; i < m_model->getNumChildren(); i++)
+	{
+		osg::Node* c = m_model->getChild(i);
+		Narrative* nar = dynamic_cast<Narrative*>(c);
+		if (nar)
+		{
+			qDebug() << "found old narrative" << nar->getName().c_str();
+			// remove from old
+			m_model->removeChild(nar);
+			// add item to osg data structure
+			m_narrative_group->addChild(nar);
+			// add item to gui
+			m_list_gui->addItem(new NarrativeScrollItem(*nar));
 		}
 	}
 }
-

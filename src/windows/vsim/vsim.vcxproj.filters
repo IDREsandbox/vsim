@@ -178,6 +178,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_NarrativeScrollItem.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\narrative\SerializerNarrativeList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_MainWindow.h">

@@ -26,11 +26,16 @@ NarrativeScrollItem::NarrativeScrollItem(QWidget * parent)
 
 }
 
-void NarrativeScrollItem::setInfo(const NarrativeInfo &data)
+NarrativeScrollItem::NarrativeScrollItem(const Narrative &nar)
+	: NarrativeScrollItem(nullptr)
 {
-	m_title_label->setText(QString::fromStdString(data.m_title));
-	m_desc_label->setText(QString::fromStdString(data.m_description));
-	// TODO: elided text?
+	setInfo(nar);
+}
+
+void NarrativeScrollItem::setInfo(const Narrative &nar)
+{
+	m_title_label->setText(QString::fromStdString(nar.getName()));
+	m_desc_label->setText(QString::fromStdString(nar.getDescription()));
 }
 
 

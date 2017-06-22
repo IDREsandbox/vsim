@@ -24,10 +24,22 @@ VSimApp::VSimApp(MainWindow* window)
 	: m_window(window)
 {
 	m_viewer = window->getViewer();
-	m_model = m_viewer->getSceneData();
 
-	m_narrative_list = new NarrativeList(this, window);
-	m_narrative_list->loadFromNode(m_model);
+	osg::Node *scene_data = m_viewer->getSceneData();
+	if (!scene_data) {
+		reset();
+	}
+	else {
+		m_model = m_viewer->getSceneData()->asGroup();
+		if (!m_model) {
+			reset();
+		}
+		else {
+			qDebug() << "loading from initial viewer data";
+			m_narrative_list = new NarrativeList(this, window);
+			m_narrative_list->load(m_model);
+		}
+	}
 
 	QObject::connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
 	QObject::connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
@@ -35,12 +47,25 @@ VSimApp::VSimApp(MainWindow* window)
 	QObject::connect(window, &MainWindow::sNew, this, &VSimApp::reset);
 }
 
+bool VSimApp::init(osg::Node *model)
+{
+	if (model == nullptr) {
+		qWarning() << "attempting to init vsim with a null model";
+		return false;
+	}
+	osg::Group *group = model->asGroup();
+	if (group == nullptr) {
+		qWarning() << "attempting to init vsim but model is not a group";
+		return false;
+	}
+
+	m_model = group;
+	m_viewer->setSceneData(m_model);
+	m_narrative_list->load(m_model);
+}
 void VSimApp::reset()
 {
-	qDebug() << "vsim reset";
-	m_model = new osg::Group();
-	m_viewer->setSceneData(m_model.get());
-	m_narrative_list->loadFromNode(m_model);
+	init(new osg::Group);
 }
 
 bool VSimApp::importModel(const std::string& filename)
@@ -50,12 +75,12 @@ bool VSimApp::importModel(const std::string& filename)
 	// otherwise
 	loadedModel = osgDB::readNodeFile(filename);
 	if (!loadedModel.get()) {
-		printf("error loading file %s\n", filename.c_str());
+		qWarning() << "error loading file %s\n" << filename.c_str();
 		QMessageBox::warning(m_window, "Import Error", "Error loading file " + QString::fromStdString(filename));
 		return false;
 	}
 
-	m_model->asGroup()->addChild(loadedModel);
+	m_model->addChild(loadedModel);
 	return true;
 }
 
@@ -95,11 +120,11 @@ bool VSimApp::openVSim(const std::string & filename)
 			return false;
 		}
 	}
-	reset();
-	m_model = loadedModel;
-	m_viewer->setSceneData(loadedModel.get());
 
-	m_narrative_list->loadFromNode(m_model);
+	if (!init(loadedModel)) {
+		QMessageBox::warning(m_window, "Load Error", "Model init failed " + QString::fromStdString(filename));
+		return false;
+	}
 	return true;
 }
 

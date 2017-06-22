@@ -14,13 +14,6 @@
 #include <osg/node>
 #include "narrative/NarrativeNode.h"
 
-// low budget version, TODO: replace with narrative?
-struct NarrativeInfo {
-	std::string m_title;
-	std::string m_description;
-	std::string m_contact;
-};
-
 typedef std::vector<osg::ref_ptr<NarrativeNode> > NarrativeNodeVector;
 typedef std::vector<osg::ref_ptr<NarrativeTransition> > NarrativeTransitionVector;
 

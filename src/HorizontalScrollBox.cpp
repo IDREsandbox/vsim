@@ -57,10 +57,6 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 
 	this->horizontalScrollBar()->setStyleSheet(style);
 
-	for (int i = 0; i < 1; i++) {
-		this->addBlankItem();
-	}
-
 	this->setWidget(m_scroll_area_widget);
 
 	// initialize menus
@@ -71,9 +67,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_action_new = new QAction("New Slide", m_slide_menu);
 	qDebug() << "action new\n";
 	m_action_delete = new QAction("Delete Slide", m_slide_menu);
-	// temporary direct connection
-	//connect(m_action_new, &QAction::triggered, this, &HorizontalScrollBox::addBlankItem);
-	//connect(m_action_delete, &QAction::triggered, this, &HorizontalScrollBox::deleteSelection);
+
 
 	m_slide_menu->addAction(m_action_new);
 	m_slide_menu->addAction(m_action_delete);
@@ -85,20 +79,6 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 		qDebug() << "background context menu";
 		m_slide_menu->exec(m_scroll_area_widget->mapToGlobal(pos)); }
 	);
-}
-
-void HorizontalScrollBox::addBlankItem()
-{
-	// TODO: add after selection
-	//addItem("A BRAND NEW ITEM!");
-	//ScrollBoxItem *new_item = new ScrollBoxItem(m_scroll_area_widget);
-	NarrativeScrollItem *new_item = new NarrativeScrollItem(m_scroll_area_widget);
-	new_item->setInfo({ "hello world", "a compelling story someoemeo meoemoemoem eomeoe moemeo meo meom", "le author"});
-
-	//new_item->setText(QString::number(m_items.size() + 1) + QString(" - ") + "ehehe");
-	//new_item->setStyleSheet(QString("background-color: rgb(") + QString::number((m_items.size() * 40) % 255) + "," + QString::number(((m_items.size() % 7) * 50) % 255) + "," + QString::number(100) + ");");
-
-	addItem(new_item);
 }
 
 void HorizontalScrollBox::addItem(ScrollBoxItem *item)

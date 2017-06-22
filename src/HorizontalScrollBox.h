@@ -28,8 +28,6 @@ public:
 
 // public interface, controller should wire signals back to these
 	// Items
-	// TODO: replace text with QImage or something
-	void addBlankItem();
 
 	// this scroll box takes ownership, so just construct with nullptr
 	void addItem(ScrollBoxItem*);

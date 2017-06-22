@@ -5,8 +5,13 @@
 #include "ui_NarrativeInfoDialog.h"
 #include <QDialogButtonBox>
 #include <QAbstractButton>
-#include "Narrative.h"
 
+// low budget version, TODO: replace with narrative?
+struct NarrativeInfo {
+	std::string m_title;
+	std::string m_description;
+	std::string m_contact;
+};
 
 class NarrativeInfoDialog : public QDialog {
 	Q_OBJECT
