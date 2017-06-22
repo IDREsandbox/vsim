@@ -2,34 +2,49 @@
 #define DRAGLABEL_H
 
 #include <QtWidgets/QWidget>
-#include <QtWidgets/qlabel.h>
+#include <QtWidgets>
 #include <QtGui/QMouseEvent>
+#include <iostream>
+#include <QtCore/QBasicTimer>
+
 
 class dragLabel : public QLabel
 {
 	Q_OBJECT
 
 public:
-	dragLabel(QWidget* parent) : QLabel(parent) {
-		setStyleSheet("background-color:green; color:blue;");
+	dragLabel(QWidget* parent, std::string style) : QLabel(parent) 
+	{
+		setStyleSheet(QString::fromStdString(style));
+		
 		par = parent;
 		parSize = par->size();
+		oldParSize = par->size();
+		
 		ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 		ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+		
 		dragEdge = 0;
-		currSize.setWidth(250);
-		currSize.setHeight(250);
+		
+		this->setMargin(15);
+		this->setWordWrap(true);
 	}
 
-	dragLabel(std::string str, QWidget* parent) : QLabel(QString::fromStdString(str), parent) {
-		setStyleSheet("background-color:green; color:blue;");
+	dragLabel(std::string str, std::string style, QWidget* parent) : QLabel(QString::fromStdString(str), parent) 
+	{
+		setStyleSheet(QString::fromStdString(style));
+
 		par = parent;
 		parSize = par->size();
+		oldParSize = par->size();
+
 		ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 		ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+		
 		dragEdge = 0;
-		currSize.setWidth(250);
-		currSize.setHeight(250);
+		
+		this->setMargin(15);
+		this->setWordWrap(true);
 	}
 
 	~dragLabel()
@@ -37,132 +52,123 @@ public:
 
 	void dragLabel::mousePressEvent(QMouseEvent *event)
 	{
-		currSize = this->size();
 		offset = event->pos();
 		resizeOffset = event->pos();
 
-		//we only need bottom right, oops
-		//topLeft = QRect(0, 0, width() / 6, height() / 6); //dragEdge 1, top left
-		//topRight = QRect(width() - (width() / 6), 0, width() / 6, height() / 6); //dragEdge 2, top right
-		//bottomLeft = QRect(0, height() - (height() / 6), width() / 6, height() / 6); //dragEdge 3, bottom left
-		bottomRight = QRect(width() - (width() / 6), height() - (height() / 6), width() / 6, height() / 6); //dragEdge 4, bottom right
+		bottomRight = QRect(width() - (width() / 6), height() - (height() / 6), width() / 6, height() / 6); 
 
-		/* if (topLeft.contains(event->pos()))
-			dragEdge = 1;
-		else if (topRight.contains(event->pos()))
-			dragEdge = 2;
-		else if (bottomLeft.contains(event->pos()))
-			dragEdge = 3; */
 		if (bottomRight.contains(event->pos()))
 			dragEdge = 1;
 		else
 			dragEdge = 0;
 	}
 
+	void dragLabel::mouseReleaseEvent(QMouseEvent *event) 
+	{
+		if (timer.isActive()) {
+			timer.stop();
+			bool ok;
+			QString text = QInputDialog::getText(this, tr("Label Text"),
+				tr("Input Text:"), QLineEdit::Normal, this->text(), &ok);
+			if (ok && !text.isEmpty())
+				this->setText(text);
+		}
+		else {
+			timer.start(300, this);
+		}
+	}
+
+	void dragLabel::timerEvent(QTimerEvent *event) {
+		timer.stop();
+	}
+
 	void dragLabel::mouseMoveEvent(QMouseEvent *event)
 	{
 		if (event->buttons() & Qt::LeftButton)
 		{
-			if (dragEdge == 0)
+			if (!dragEdge)
 			{
 				this->move(mapToParent(event->pos() - offset));
+
 				ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 				ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
-				//std::cout << ratioHeight << "    ";
-				//std::cout << ratioWidth << "    ";
-			}
-			//only need bottom right for now, so other options are commented out
-			/* else if (dragEdge == 1)
-			{
-				this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
-				resizeOffset = event->pos();
 			}
 
-			else if (dragEdge == 2)
+			else if (dragEdge)
 			{
 				this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
-				resizeOffset = event->pos();
-			}
-
-			else if (dragEdge == 3)
-			{
-				this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
-				resizeOffset = event->pos();
-			} */
-
-			else if (dragEdge == 1)
-			{
-				this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
-				currSize.setWidth(this->width() + (event->pos().x() - resizeOffset.x()));
-				currSize.setHeight(this->height() + (event->pos().y() - resizeOffset.y()));
 
 				ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 				ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 
 				resizeOffset = event->pos();
 			}
-
 		}
 	}
 
-	float dragLabel::ratioH(){
-		return ratioHeight;
+	void dragLabel::updateParSize() 
+	{ //call in mainWindow's resizeEvent handler for first two resizes
+		parSize = par->size();
+		oldParSize = par->size();
 	}
 
-	float dragLabel::ratioW(){
-		return ratioWidth;
-	}
-
-	void dragLabel::resizeEvent(QResizeEvent *event) {
-		this->resize(currSize.width(), currSize.height());
-
+	void dragLabel::mainResize() 
+	{ //must call this inside of mainWindow's resizeEvent handler
 		parSize = par->size();
 
-		int newX = parSize.width() * ratioWidth;
-		int newY = parSize.height() * ratioHeight;
+		float percentX = float((oldParSize.width() - parSize.width())) / oldParSize.width();
+		float percentY = float((oldParSize.height() - parSize.height())) / oldParSize.height();
+
+		this->resize(std::round(float(this->width() - (this->width()*percentX))), std::round(float(this->height() - (this->height()*percentY))));
+
+		int newX = std::round(float(parSize.width() * ratioWidth));
+		int newY = std::round(float(parSize.height() * ratioHeight));
 
 		this->move(newX, newY);
+
+		oldParSize = par->size();
 	}
-	//{
-	//	/*int proportionHeight = 1 - ((parSize.height() - pos().y()) / parSize.height());
-	//	int proportionWidth = 1 - ((parSize.width() - pos().x()) / parSize.width());
-	//	
-	//	parSize = par->size();
 
-	//	int newX = parSize.width() * proportionWidth;
-	//	int newY = parSize.height() * proportionHeight;
+	void dragLabel::resizeEvent(QResizeEvent* event) 
+	{ //font scaling
+		QFont font = this->font();
+		QRect cRect = this->contentsRect();
 
-	//	this->move(mapToParent(QPoint(newX, newY)));*/
+		if (this->text().isEmpty())
+			return;
 
-	//	this->move(250, 250);
-	//}
+		int fontSize = 14;
 
-	//void dragLabel::moveEvent(QMoveEvent *event)
-	//{
-	//int proportionHeight = 1 - ((parSize.height() - event->oldSize().height()) / parSize.height());
-	//int proportionWidth = 1 - ((parSize.width() - event->oldSize().width()) / parSize.width());
+		while (true)
+		{
+			QFont f(font);
+			f.setPixelSize(fontSize);
+			QRect r = QFontMetrics(f).boundingRect(this->text());
+			if (r.height() <= cRect.height() && r.width() <= cRect.width())
+				fontSize++;
+			else
+				break;
+		}
 
-	//parSize = par->size();
-
-	//int newX = parSize.width() * proportionWidth;
-	//int newY = parSize.height() * proportionHeight;
-
-	//	this->move(mapToParent(newX, newY));		
-	//}
+		font.setPixelSize(fontSize);
+		this->setFont(font);
+	}
 
 protected:
 	QWidget* par;
-	QPoint offset;
-	QSize currSize;
 	QSize parSize;
+	QSize oldParSize;
+	
+	QPoint offset;
 	QPoint resizeOffset;
+	
 	float ratioHeight;
 	float ratioWidth;
-	int dragEdge;
-	QRect topLeft; 
-	QRect bottomLeft;
-	QRect topRight;
+	
+	bool dragEdge;
 	QRect bottomRight;
+
+	QBasicTimer timer;
 };
 
 #endif // DRAGLABEL_H

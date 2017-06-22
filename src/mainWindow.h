@@ -26,6 +26,8 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow(QWidget* parent = nullptr);
 
+	void resizeEvent(QResizeEvent * event);
+
 	// UI stuff (these are just tests, TODO: remove, just use the built in qt dialogs)
 	void ErrorDialog(const std::string& msg);
 	void MessageDialog(const std::string& msg);
@@ -67,8 +69,10 @@ public:
 
 private:
 	OSGViewerWidget* m_osg_widget;
-
+	dragLabel* test;
 	QWidget* m_drag_area;
+	//QPoint offset;
+	int offset;
 	
 	// main window owns the vsim app
 	// circular reference, use a pointer, EDIT: all clear!

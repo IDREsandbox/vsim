@@ -1,4 +1,5 @@
 #include <osgViewer/Viewer>
+#include <iostream>
 #include <QFileDialog>
 #include <QDebug>
 #include <QTimer>
@@ -17,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	// initialize the Qt Designer stuff
 	ui.setupUi(this);
+
+	offset = 0;
 
 	setMinimumSize(800, 600);
 	ui.statusbar->showMessage("the best status bar", 0);
@@ -38,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_drag_area = new QWidget(ui.root);
 	ui.rootLayout->addWidget(m_drag_area, 0, 0);
 
-	dragLabel* test = new dragLabel("drag widget", m_drag_area);
+	test = new dragLabel("I listened to the thing back when with theresa but i've forgotten it all now, except for that it is goddamn excellent.", "background-color:#ffffff;color:#000000;", m_drag_area);
 	test->setObjectName(QString::fromUtf8("label"));
 	test->setGeometry(250, 250, 250, 250);
 
@@ -72,6 +75,16 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_narrative_info_dialog, &QDialog::finished, this, [this](int i) { qDebug() << "narrative finished" << i; });
 
 
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event) {
+	if (offset < 2) {
+		test->updateParSize();
+		offset++;
+	}
+
+	if (offset >= 2)
+		test->mainResize();
 }
 
 void MainWindow::ErrorDialog(const std::string & msg)
