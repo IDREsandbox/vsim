@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	setMinimumSize(800, 600);
 	ui.statusbar->showMessage("the best status bar", 0);
-	setWindowIcon(QIcon("res/vsim.ico"));
+	setWindowIcon(QIcon("assets/vsim.ico"));
 	setWindowTitle("VSim");
 	setAcceptDrops(true);
 	qDebug() << "root: " << QDir::currentPath();

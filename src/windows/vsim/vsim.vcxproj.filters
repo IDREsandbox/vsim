@@ -198,5 +198,16 @@
     <ClInclude Include="GeneratedFiles\ui_NarrativeScrollItem.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="vsim.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
+    <Image Include="..\..\assets\vsim.png" />
+    <Image Include="..\..\assets\vsim.ico" />
   </ItemGroup>
 </Project>
