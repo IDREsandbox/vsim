@@ -7,7 +7,6 @@
 #include "HorizontalScrollBox.h"
 #include "MainWindow.h"
 
-class MainWindow;
 class NarrativeList : public QObject // why osg? : public osg::Referenced
 {
 	Q_OBJECT
