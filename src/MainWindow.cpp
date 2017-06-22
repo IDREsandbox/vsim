@@ -10,6 +10,7 @@
 
 #include "MainWindow.h"
 #include "narrative/NarrativeInfoDialog.h"
+#include "dragLabelInput.h"
 
 extern osgViewer::Viewer* g_viewer = nullptr;
 
@@ -41,7 +42,9 @@ MainWindow::MainWindow(QWidget *parent)
 	m_drag_area = new QWidget(ui.root);
 	ui.rootLayout->addWidget(m_drag_area, 0, 0);
 
-	test = new dragLabel("I listened to the thing back when with theresa but i've forgotten it all now, except for that it is goddamn excellent.", "background-color:#ffffff;color:#000000;", m_drag_area);
+	dragLabelEdit = new dragLabelInput(this);
+
+	test = new dragLabel("I listened to the thing back when with theresa but i've forgotten it all now, except for that it is goddamn excellent.", "background-color:#ffffff;color:#000000;", m_drag_area, this);
 	test->setObjectName(QString::fromUtf8("label"));
 	test->setGeometry(250, 250, 250, 250);
 
@@ -74,7 +77,12 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_narrative_info_dialog, &QDialog::rejected, this, [this] { qDebug() << "narrative reject"; });
 	connect(m_narrative_info_dialog, &QDialog::finished, this, [this](int i) { qDebug() << "narrative finished" << i; });
 
-
+	connect(dragLabelEdit, &QDialog::accepted, this, [this] { qDebug() << "dragLabel accept";
+	auto data = this->dragLabelEdit->getInfo();
+	qDebug() << "Description:" << data;
+	});
+	connect(dragLabelEdit, &QDialog::rejected, this, [this] { qDebug() << "dragLabel reject"; });
+	connect(dragLabelEdit, &QDialog::finished, this, [this](int i) { qDebug() << "dragLabel finished" << i; });
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) {

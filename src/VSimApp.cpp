@@ -62,6 +62,7 @@ bool VSimApp::init(osg::Node *model)
 	m_model = group;
 	m_viewer->setSceneData(m_model);
 	m_narrative_list->load(m_model);
+	return true;
 }
 void VSimApp::reset()
 {

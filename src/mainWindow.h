@@ -12,12 +12,14 @@
 #include "OSGViewerWidget.h"
 #include "dragLabel.h"
 #include "narrative/NarrativeInfoDialog.h"
+#include "dragLabelInput.h"
 
 //#include "VSimApp.h"
 
 extern osgViewer::Viewer* g_viewer;
 
 class VSimApp;
+class dragLabel;
 
 class MainWindow : public QMainWindow
 {
@@ -65,6 +67,7 @@ signals:
 	// ui, signal emitters
 public:
 	Ui::MainWindow ui;
+	dragLabelInput* dragLabelEdit;
 	NarrativeInfoDialog *m_narrative_info_dialog;
 
 private:
