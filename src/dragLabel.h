@@ -2,40 +2,48 @@
 #define DRAGLABEL_H
 
 #include <QtWidgets/QWidget>
-#include <QtWidgets/qlabel.h>
+#include <QtWidgets>
 #include <QtGui/QMouseEvent>
 #include <iostream>
+#include <QtCore/QBasicTimer>
+
 
 class dragLabel : public QLabel
 {
 	Q_OBJECT
 
 public:
-	dragLabel(QWidget* parent) : QLabel(parent) {
-		setStyleSheet("background-color:green; color:blue;");
+	dragLabel(QWidget* parent, std::string style) : QLabel(parent) 
+	{
+		setStyleSheet(QString::fromStdString(style));
+		
 		par = parent;
 		parSize = par->size();
 		oldParSize = par->size();
+		
 		ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 		ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+		
 		dragEdge = 0;
-		currSize.setWidth(250);
-		currSize.setHeight(250);
-
+		
+		this->setMargin(15);
 		this->setWordWrap(true);
 	}
 
-	dragLabel(std::string str, QWidget* parent) : QLabel(QString::fromStdString(str), parent) {
-		setStyleSheet("background-color:green; color:blue;");
+	dragLabel(std::string str, std::string style, QWidget* parent) : QLabel(QString::fromStdString(str), parent) 
+	{
+		setStyleSheet(QString::fromStdString(style));
+
 		par = parent;
 		parSize = par->size();
 		oldParSize = par->size();
+
 		ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 		ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+		
 		dragEdge = 0;
-		currSize.setWidth(250);
-		currSize.setHeight(250);
-
+		
+		this->setMargin(15);
 		this->setWordWrap(true);
 	}
 
@@ -44,7 +52,6 @@ public:
 
 	void dragLabel::mousePressEvent(QMouseEvent *event)
 	{
-		currSize = this->size();
 		offset = event->pos();
 		resizeOffset = event->pos();
 
@@ -56,11 +63,30 @@ public:
 			dragEdge = 0;
 	}
 
+	void dragLabel::mouseReleaseEvent(QMouseEvent *event) 
+	{
+		if (timer.isActive()) {
+			timer.stop();
+			bool ok;
+			QString text = QInputDialog::getText(this, tr("Label Text"),
+				tr("Input Text:"), QLineEdit::Normal, this->text(), &ok);
+			if (ok && !text.isEmpty())
+				this->setText(text);
+		}
+		else {
+			timer.start(300, this);
+		}
+	}
+
+	void dragLabel::timerEvent(QTimerEvent *event) {
+		timer.stop();
+	}
+
 	void dragLabel::mouseMoveEvent(QMouseEvent *event)
 	{
 		if (event->buttons() & Qt::LeftButton)
 		{
-			if (dragEdge == 0)
+			if (!dragEdge)
 			{
 				this->move(mapToParent(event->pos() - offset));
 
@@ -68,11 +94,9 @@ public:
 				ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 			}
 
-			else if (dragEdge == 1)
+			else if (dragEdge)
 			{
 				this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
-				currSize.setWidth(this->width() + (event->pos().x() - resizeOffset.x()));
-				currSize.setHeight(this->height() + (event->pos().y() - resizeOffset.y()));
 
 				ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 				ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
@@ -82,12 +106,14 @@ public:
 		}
 	}
 
-	void dragLabel::updateParSize() {
+	void dragLabel::updateParSize() 
+	{ //call in mainWindow's resizeEvent handler for first two resizes
 		parSize = par->size();
 		oldParSize = par->size();
 	}
 
-	void dragLabel::mainResize() { //must call this inside of mainWindow's resizeEvent handler
+	void dragLabel::mainResize() 
+	{ //must call this inside of mainWindow's resizeEvent handler
 		parSize = par->size();
 
 		float percentX = float((oldParSize.width() - parSize.width())) / oldParSize.width();
@@ -103,8 +129,8 @@ public:
 		oldParSize = par->size();
 	}
 
-	void dragLabel::resizeEvent(QResizeEvent* event) {
-		//font scaling
+	void dragLabel::resizeEvent(QResizeEvent* event) 
+	{ //font scaling
 		QFont font = this->font();
 		QRect cRect = this->contentsRect();
 
@@ -130,15 +156,19 @@ public:
 
 protected:
 	QWidget* par;
-	QPoint offset;
-	QSize currSize;
 	QSize parSize;
 	QSize oldParSize;
+	
+	QPoint offset;
 	QPoint resizeOffset;
+	
 	float ratioHeight;
 	float ratioWidth;
-	int dragEdge;
+	
+	bool dragEdge;
 	QRect bottomRight;
+
+	QBasicTimer timer;
 };
 
 #endif // DRAGLABEL_H
