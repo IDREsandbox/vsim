@@ -118,12 +118,9 @@ void NarrativeList::load(osg::Group * model)
 
 	// new: load narratives in a NarrativeList group
 	// search for a narrative list node, if not found then create one
-	unsigned int NumChildren = model->getNumChildren();
-	for (unsigned int i = 0; i < NumChildren; i++)
-	{
+	for (unsigned int i = 0; i < model->getNumChildren(); i++) {
 		osg::Group* group = model->getChild(i)->asGroup();
-		if (group)
-		{
+		if (group) {
 			std::string name = group->getName();
 			if (name == "NarrativeList") {
 				m_narrative_group = group->asGroup();
@@ -132,6 +129,7 @@ void NarrativeList::load(osg::Group * model)
 			}
 		}
 	}
+
 	// if no NarrativeList was found then create one
 	if (m_narrative_group == nullptr) {
 		m_narrative_group = new osg::Group;
@@ -141,12 +139,10 @@ void NarrativeList::load(osg::Group * model)
 	}
 
 	// load narratives into the gui
-	for (unsigned int i = 0; i < m_narrative_group->getNumChildren(); i++)
-	{
+	for (unsigned int i = 0; i < m_narrative_group->getNumChildren(); i++) {
 		osg::Node* c = m_narrative_group->getChild(i);
 		Narrative* nar = dynamic_cast<Narrative*>(c);
-		if (nar)
-		{
+		if (nar) {
 			// add item to gui
 			addToGui(nar);
 		}
@@ -154,12 +150,10 @@ void NarrativeList::load(osg::Group * model)
 	}
 
 	// old code: load narratives stored directly, for backward compatibility
-	for (unsigned int i = 0; i < m_model->getNumChildren(); i++)
-	{
+	for (unsigned int i = 0; i < m_model->getNumChildren(); i++) {
 		osg::Node* c = m_model->getChild(i);
 		Narrative* nar = dynamic_cast<Narrative*>(c);
-		if (nar)
-		{
+		if (nar) {
 			qDebug() << "found old narrative" << nar->getName().c_str();
 			// remove from old
 			m_model->removeChild(nar);
