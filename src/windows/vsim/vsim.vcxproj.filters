@@ -50,9 +50,6 @@
     <CustomBuild Include="..\..\VSimApp.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\ScrollBoxItem.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\HorizontalScrollBox.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -78,6 +75,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="singleLabelList.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\ScrollBoxItem.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -145,15 +145,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_VSimApp.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_ScrollBoxItem.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_ScrollBoxItem.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\ScrollBoxItem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\HorizontalScrollBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -201,6 +192,15 @@
     </ClCompile>
     <ClCompile Include="singleLabelList.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ScrollBoxItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ScrollBoxItem.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ScrollBoxItem.cpp">
+      <Filter>Generated Files\Release</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

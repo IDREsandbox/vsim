@@ -2,9 +2,10 @@
 #ifndef NARRATIVEINFODIALOG_HPP
 #define NARRATIVEINFODIALOG_HPP
 #include <QDialog>
-#include "ui_NarrativeInfoDialog.h"
 #include <QDialogButtonBox>
-#include <QAbstractButton>
+
+#include "ui_NarrativeInfoDialog.h"
+#include "narrative/Narrative.h"
 
 // low budget version, TODO: replace with narrative?
 struct NarrativeInfo {
@@ -21,18 +22,17 @@ public:
 	NarrativeInfoDialog(QWidget *parent, const NarrativeInfo&);
 	~NarrativeInfoDialog();
 
+	void setInfo(const Narrative&);
 	const NarrativeInfo& getInfo();
+	void clear();
 
-//signals:
-	// QDialog - accepted, finished, rejected
-	//void sOK(const NarrativeInfo&);
-	//void sCancel();
 protected:
 	void accept();
 
 private:
+	void setGui();
 	Ui::dialog ui;
-	NarrativeInfo m_result;
+	NarrativeInfo m_info;
 };
 
 #endif // NARRATIVEINFODIALOG_HPP

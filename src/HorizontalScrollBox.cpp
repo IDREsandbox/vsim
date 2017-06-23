@@ -60,12 +60,13 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	//QAction actionCut("Cut", m_slide_menu);
 	//QAction actionCopy("Copy", m_slide_menu);
 	//QAction actionPaste("Paste", m_slide_menu);
-	m_action_new = new QAction("New Slide", m_slide_menu);
-	m_action_delete = new QAction("Delete Slide", m_slide_menu);
-
+	m_action_new = new QAction("New Narrative", m_slide_menu);
+	m_action_delete = new QAction("Delete Narrative", m_slide_menu);
+	m_action_edit = new QAction("Edit Narrative", m_slide_menu);
 
 	m_slide_menu->addAction(m_action_new);
 	m_slide_menu->addAction(m_action_delete);
+	m_slide_menu->addAction(m_action_edit);
 
 	// handle right-clicks for background, TODO: use a different menu
 	m_scroll_area_widget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -130,7 +131,7 @@ void HorizontalScrollBox::deleteSelection()
 void HorizontalScrollBox::clearSelection()
 {
 	for (auto i : m_items) {
-		i->ColorSelect(false);
+		i->colorSelect(false);
 	}
 	m_selection.clear();
 }
@@ -145,7 +146,7 @@ int HorizontalScrollBox::getLastSelected()
 	return m_last_selected;
 }
 
-ScrollBoxItem * HorizontalScrollBox::getItem(int position)
+ScrollBoxItem *HorizontalScrollBox::getItem(int position)
 {
 	if (position < m_items.size()) {
 		return m_items.at(position);
@@ -156,19 +157,19 @@ ScrollBoxItem * HorizontalScrollBox::getItem(int position)
 void HorizontalScrollBox::addToSelection(int index)
 {
 	m_selection.insert(index);
-	m_items[index]->ColorSelect(true);
+	m_items[index]->colorSelect(true);
 }
 void HorizontalScrollBox::removeFromSelection(int index) 
 {
 	m_selection.erase(index);
-	m_items[index]->ColorSelect(false);
+	m_items[index]->colorSelect(false);
 }
 
 void HorizontalScrollBox::select(int index)
 {
 	clearSelection();
 	m_selection.insert(index);
-	m_items[index]->ColorSelect(true);
+	m_items[index]->colorSelect(true);
 }
 
 bool HorizontalScrollBox::isSelected(int index)
@@ -247,10 +248,15 @@ void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 
 void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 {
-	qDebug() << "item mouse presse event " << index;
+	qDebug() << "item mouse press event " << index;
 	if (event->button() == Qt::LeftButton) {
 		qDebug() << "lmb";
 		m_last_selected = index;
+		if (event->type() == QEvent::MouseButtonDblClick) {
+			qDebug() << "double click!!!";
+			emit sDoubleClick();
+		}
+
 		if (event->modifiers() & Qt::ControlModifier) {
 			if (isSelected(index)) {
 				removeFromSelection(index);
@@ -279,7 +285,7 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 void HorizontalScrollBox::refresh()
 {
 	for (int i = 0; i < m_items.size(); i++) {
-		m_items[i]->SetIndex(i);
+		m_items[i]->setIndex(i);
 	}
 	setWidgetWidth();
 }

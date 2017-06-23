@@ -226,6 +226,5 @@ void MainWindow::narListOpen()
 
 void MainWindow::narListInfo()
 {
-	m_narrative_info_dialog->exec();
 	qDebug("narrative info");
 }

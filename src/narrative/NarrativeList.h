@@ -16,13 +16,12 @@ public:
 
 	// opens up the dialog, makes a new narrative
 	void newNarrative();
-	
+
+	// opens up the dialog, change name and stuff
+	void editNarrativeInfo();
+
 	// deletes the gui selection
 	void deleteSelection();
-
-	//void deleteSelection(const std::set<int>& selection);
-	//void insertNarrative();
-	//void removeNarrative(int index);
 
 	// initializes gui from osg data, also converts old narratives to new
 	void load(osg::Group* model);

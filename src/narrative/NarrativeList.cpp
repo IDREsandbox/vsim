@@ -17,6 +17,11 @@ NarrativeList::NarrativeList(QObject* parent, MainWindow* window)
 	// delete
 	connect(m_list_gui->m_action_delete, &QAction::triggered, this, &NarrativeList::deleteSelection);
 	connect(m_window->ui.minus, &QPushButton::clicked, this, &NarrativeList::deleteSelection);
+
+	// edit
+	connect(m_list_gui->m_action_edit, &QAction::triggered, this, &NarrativeList::editNarrativeInfo);
+	connect(m_list_gui, &HorizontalScrollBox::sDoubleClick, this, &NarrativeList::editNarrativeInfo);
+	connect(m_window->ui.info, &QPushButton::clicked, this, &NarrativeList::editNarrativeInfo);
 }
 
 NarrativeList::~NarrativeList()
@@ -26,7 +31,8 @@ NarrativeList::~NarrativeList()
 void NarrativeList::newNarrative()
 {
 	// open up the dialog
-	auto dlg = m_window->m_narrative_info_dialog;
+	NarrativeInfoDialog *dlg = m_window->m_narrative_info_dialog;
+	dlg->clear();
 	int result = dlg->exec();
 	if (result == QDialog::Rejected) {
 		return;
@@ -46,6 +52,35 @@ void NarrativeList::newNarrative()
 
 	// add to gui
 	m_list_gui->addItem(new NarrativeScrollItem(*narrative));
+}
+
+void NarrativeList::editNarrativeInfo()
+{
+	int active_item = m_list_gui->getLastSelected();
+	qDebug() << "narrative list - begin edit on" << active_item;
+	if (active_item < 0) {
+		qWarning() << "narrative list - can't edit with no selection";
+		return;
+	}
+
+	NarrativeScrollItem *item = dynamic_cast<NarrativeScrollItem*>(m_list_gui->getItem(active_item));
+	Narrative *narrative = dynamic_cast<Narrative*>(m_narrative_group->getChild(active_item));
+
+	NarrativeInfoDialog *dlg = m_window->m_narrative_info_dialog;
+	dlg->setInfo(*narrative);
+	int result = dlg->exec();
+	if (result == QDialog::Rejected) {
+		qDebug() << "narrative list - cancelled edit on" << active_item;
+		return;
+	}
+	
+	// get the new info
+	NarrativeInfo info = dlg->getInfo();
+	narrative->setName(info.m_title);
+	narrative->setDescription(info.m_description);
+	narrative->setAuthor(info.m_contact);
+
+	item->setInfo(*narrative);
 }
 
 void NarrativeList::deleteSelection()

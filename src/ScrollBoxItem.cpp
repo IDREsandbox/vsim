@@ -1,29 +1,28 @@
 #include "ScrollBoxItem.h"
 
-
 ScrollBoxItem::ScrollBoxItem(QWidget* parent)
 	: QFrame(parent)
 {
 }
 
-void ScrollBoxItem::SetIndex(int index)
+void ScrollBoxItem::setIndex(int index)
 {
 	m_index = index;
 	//setText(QString::number(index));
 }
 
-int ScrollBoxItem::GetIndex(int index)
+int ScrollBoxItem::getIndex(int index)
 {
 	return m_index;
 }
 
-void ScrollBoxItem::ColorFocus(bool color)
+void ScrollBoxItem::colorFocus(bool color)
 {
 	//setStyleSheet("background-color: rgb(0, 100, 255);");
 	// do something else? like draw a rectangle
 }
 
-void ScrollBoxItem::ColorSelect(bool color)
+void ScrollBoxItem::colorSelect(bool color)
 {
 	if (color) {
 		setStyleSheet("background-color: rgb(0, 100, 255);");
@@ -33,11 +32,8 @@ void ScrollBoxItem::ColorSelect(bool color)
 	}
 }
 
-void ScrollBoxItem::mousePressEvent(QMouseEvent * event)
+void ScrollBoxItem::mousePressEvent(QMouseEvent *event)
 {
-	qDebug() << "mouse event ScrollBoxItem" << m_index; // << this->text();
+	qDebug() << "mouse event ScrollBoxItem" << event->type() << m_index; // << this->text();
 	emit sMousePressEvent(event, m_index);
 }
-
-
-
