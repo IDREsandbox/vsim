@@ -53,12 +53,6 @@ public:
 
 	void openMenu(QPoint globalPos);
 
-// public signaling, actions, etc
-	QMenu* m_slide_menu; // context menu
-	QAction* m_action_new;
-	QAction* m_action_delete;
-	QAction* m_action_edit;
-
 signals:
 	void sDoubleClick();
 	//void sNew(int newIndex);

@@ -55,26 +55,13 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 
 	this->setWidget(m_scroll_area_widget);
 
-	// initialize menus
-	m_slide_menu = new QMenu(tr("Slide context menu"), this);
-	//QAction actionCut("Cut", m_slide_menu);
-	//QAction actionCopy("Copy", m_slide_menu);
-	//QAction actionPaste("Paste", m_slide_menu);
-	m_action_new = new QAction("New Narrative", m_slide_menu);
-	m_action_delete = new QAction("Delete Narrative", m_slide_menu);
-	m_action_edit = new QAction("Edit Narrative", m_slide_menu);
-
-	m_slide_menu->addAction(m_action_new);
-	m_slide_menu->addAction(m_action_delete);
-	m_slide_menu->addAction(m_action_edit);
-
-	// handle right-clicks for background, TODO: use a different menu
-	m_scroll_area_widget->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_scroll_area_widget, &QWidget::customContextMenuRequested, this,
-		[this](const QPoint& pos) {
-		qDebug() << "narrative list gui - background context menu";
-		m_slide_menu->exec(m_scroll_area_widget->mapToGlobal(pos)); }
-	);
+	//// handle right-clicks for background, TODO: use a different menu
+	//m_scroll_area_widget->setContextMenuPolicy(Qt::CustomContextMenu);
+	//connect(m_scroll_area_widget, &QWidget::customContextMenuRequested, this,
+	//	[this](const QPoint& pos) {
+	//	qDebug() << "narrative list gui - background context menu";
+	//	m_slide_menu->exec(m_scroll_area_widget->mapToGlobal(pos)); }
+	//);
 }
 
 void HorizontalScrollBox::addItem(ScrollBoxItem *item)
@@ -188,7 +175,8 @@ void HorizontalScrollBox::deleteItem(int position)
 
 void HorizontalScrollBox::openMenu(QPoint globalPos)
 {
-	m_slide_menu->exec(globalPos);
+	qDebug() << "who did this";
+	//m_slide_menu->exec(globalPos);
 }
 
 void HorizontalScrollBox::resizeEvent(QResizeEvent* event)

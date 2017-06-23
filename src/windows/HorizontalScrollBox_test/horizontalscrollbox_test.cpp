@@ -1,16 +1,39 @@
 #include "HorizontalScrollBox.h"
 #include "narrative/NarrativeScrollItem.h"
+#include "narrative/NarrativeScrollBox.h"
 #include <QtWidgets/QApplication> 
+#include <QtWidgets/QVBoxLayout>
 
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-	HorizontalScrollBox w(nullptr);
 
-	w.setGeometry(100, 100, 800, 250);
+	// who cares if we leak
+	QWidget window(nullptr);
+
+	window.setGeometry(100, 100, 800, 750);
+	QVBoxLayout *verticalLayout = new QVBoxLayout(&window);
+	window.setLayout(verticalLayout);
+
+
+	HorizontalScrollBox *normal_box = new HorizontalScrollBox(&window);
+	NarrativeScrollBox *narrative_box = new NarrativeScrollBox(&window);
+	HorizontalScrollBox *slide_box = new HorizontalScrollBox(&window);
+
+	// todo
+	//NarrativeScrollBox *narrative_box = new NarrativeScrollBox(&window);
+	//SlideScrollBox *slide_box = new SlideScrollBox(&window);
+
+	verticalLayout->addWidget(normal_box);
+	verticalLayout->addWidget(narrative_box);
+	verticalLayout->addWidget(slide_box);
+
+	
 	for (int i = 0; i < 10; i++) {
-		w.addItem(new NarrativeScrollItem("hello", "world"));
+		normal_box->addItem(new NarrativeScrollItem("hello", "world"));
 	}
-	w.show();
+
+
+	window.show();
 	return a.exec();
 }
