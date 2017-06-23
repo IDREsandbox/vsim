@@ -19,12 +19,10 @@ class ScrollBoxItem : public QFrame {
 public:
 	ScrollBoxItem(QWidget* parent);
 	
-	// interface for controller
+	// interface for controller is in derived classes
 	
 	// interface for gui
 	// index is used for pretty numbering
-	
-	// TODO: fix naming style
 	void setIndex(int index);
 	int getIndex(int index);
 	void colorFocus(bool color);

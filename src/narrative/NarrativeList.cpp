@@ -51,7 +51,7 @@ void NarrativeList::newNarrative()
 	m_narrative_group->addChild(narrative);
 
 	// add to gui
-	m_list_gui->addItem(new NarrativeScrollItem(*narrative));
+	m_list_gui->addItem(new NarrativeScrollItem(narrative->getName(), narrative->getDescription()));
 }
 
 void NarrativeList::editNarrativeInfo()
@@ -80,7 +80,7 @@ void NarrativeList::editNarrativeInfo()
 	narrative->setDescription(info.m_description);
 	narrative->setAuthor(info.m_contact);
 
-	item->setInfo(*narrative);
+	item->setInfo(info.m_title, info.m_description);
 }
 
 void NarrativeList::deleteSelection()
@@ -143,7 +143,7 @@ void NarrativeList::load(osg::Group * model)
 		if (nar)
 		{
 			// add item to gui
-			m_list_gui->addItem(new NarrativeScrollItem(*nar));
+			addToGui(nar);
 		}
 		qDebug() << "loading narrative" << QString::fromStdString(nar->getName());
 	}
@@ -161,7 +161,12 @@ void NarrativeList::load(osg::Group * model)
 			// add item to osg data structure
 			m_narrative_group->addChild(nar);
 			// add item to gui
-			m_list_gui->addItem(new NarrativeScrollItem(*nar));
+			addToGui(nar);
 		}
 	}
+}
+
+void NarrativeList::addToGui(Narrative *nar)
+{
+	m_list_gui->addItem(new NarrativeScrollItem(nar->getName(), nar->getDescription()));
 }

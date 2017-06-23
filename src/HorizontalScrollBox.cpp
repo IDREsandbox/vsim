@@ -248,12 +248,11 @@ void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 
 void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 {
-	qDebug() << "item mouse press event " << index;
 	if (event->button() == Qt::LeftButton) {
-		qDebug() << "lmb";
+		qDebug() << "item press - lmb";
 		m_last_selected = index;
 		if (event->type() == QEvent::MouseButtonDblClick) {
-			qDebug() << "double click!!!";
+			qDebug() << "item press - double click";
 			emit sDoubleClick();
 		}
 
@@ -264,7 +263,7 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 			else {
 				addToSelection(index);
 			}
-			qDebug() << "shift";
+			qDebug() << "item press - shift";
 		}
 		else {
 			select(index);
@@ -272,7 +271,7 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 		refresh();
 	}
 	else if (event->button() == Qt::RightButton) {
-		qDebug() << "rmb";
+		qDebug() << "item press - rmb";
 		m_last_selected = index;
 		if (!isSelected(index)) {
 			select(index);

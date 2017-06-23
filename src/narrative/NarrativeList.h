@@ -11,7 +11,7 @@ class NarrativeList : public QObject
 {
 	Q_OBJECT
 public:
-    NarrativeList(QObject* parent, MainWindow* window);
+    NarrativeList(QObject *parent, MainWindow *window);
     virtual ~NarrativeList();
 
 	// opens up the dialog, makes a new narrative
@@ -24,9 +24,11 @@ public:
 	void deleteSelection();
 
 	// initializes gui from osg data, also converts old narratives to new
-	void load(osg::Group* model);
+	void load(osg::Group *model);
 
-protected:
+private:
+	void addToGui(Narrative *);
+
 	int m_focus;
 
 	// std::vector<Narrative*> m_narratives;

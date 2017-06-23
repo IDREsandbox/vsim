@@ -26,17 +26,26 @@ NarrativeScrollItem::NarrativeScrollItem(QWidget * parent)
 
 }
 
-NarrativeScrollItem::NarrativeScrollItem(const Narrative &nar)
+//NarrativeScrollItem::NarrativeScrollItem(const Narrative &nar)
+//	: NarrativeScrollItem(nullptr)
+//{
+//	setInfo(nar);
+//}
+
+//void NarrativeScrollItem::setInfo(const Narrative &nar)
+//{
+//	m_title_label->setText(QString::fromStdString(nar.getName()));
+//	m_desc_label->setText(QString::fromStdString(nar.getDescription()));
+//}
+
+NarrativeScrollItem::NarrativeScrollItem(const std::string & title, const std::string & description)
 	: NarrativeScrollItem(nullptr)
 {
-	setInfo(nar);
+	setInfo(title, description);
 }
 
-void NarrativeScrollItem::setInfo(const Narrative &nar)
+void NarrativeScrollItem::setInfo(const std::string & title, const std::string & description)
 {
-	m_title_label->setText(QString::fromStdString(nar.getName()));
-	m_desc_label->setText(QString::fromStdString(nar.getDescription()));
+	m_title_label->setText(title.c_str());
+	m_desc_label->setText(description.c_str());
 }
-
-
-
