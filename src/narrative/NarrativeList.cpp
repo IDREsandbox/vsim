@@ -8,20 +8,25 @@
 NarrativeList::NarrativeList(QObject* parent, MainWindow* window)
 	: QObject(parent), m_window(window), m_focus(-1), m_model(nullptr)
 {
-	m_list_gui = window->ui.narratives;
+	m_list_gui = window->ui.topBar->ui.narratives;
 
 	// new
 	connect(m_list_gui->m_action_new, &QAction::triggered, this, &NarrativeList::newNarrative);
-	connect(m_window->ui.plus, &QPushButton::clicked, this, &NarrativeList::newNarrative);
+	connect(m_window->ui.topBar->ui.plus, &QPushButton::clicked, this, &NarrativeList::newNarrative);
 
 	// delete
 	connect(m_list_gui->m_action_delete, &QAction::triggered, this, &NarrativeList::deleteSelection);
-	connect(m_window->ui.minus, &QPushButton::clicked, this, &NarrativeList::deleteSelection);
+	connect(m_window->ui.topBar->ui.minus, &QPushButton::clicked, this, &NarrativeList::deleteSelection);
 
 	// edit
 	connect(m_list_gui->m_action_edit, &QAction::triggered, this, &NarrativeList::editNarrativeInfo);
-	connect(m_list_gui, &HorizontalScrollBox::sDoubleClick, this, &NarrativeList::editNarrativeInfo);
-	connect(m_window->ui.info, &QPushButton::clicked, this, &NarrativeList::editNarrativeInfo);
+	connect(m_window->ui.topBar->ui.info, &QPushButton::clicked, this, &NarrativeList::editNarrativeInfo);
+
+	// double click
+	connect(m_list_gui, &HorizontalScrollBox::sDoubleClick, this, 
+		[this]() {
+			this->m_window->ui.topBar->showSlides();
+			});
 }
 
 NarrativeList::~NarrativeList()

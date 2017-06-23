@@ -51,12 +51,12 @@ public slots:
 	void actionImportModel();
 
 	// TODO
-	void narListForward();
-	void narListAdd();
-	void narListDelete();
-	void narListPause();
-	void narListOpen();
-	void narListInfo();
+	// void narListForward();
+	// void narListAdd();
+	// void narListDelete();
+	// void narListPause();
+	// void narListOpen();
+	// void narListInfo();
 
 signals:
 	void sOpenFile(const std::string&);

@@ -60,12 +60,23 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui.actionProgress, &QAction::triggered, this, [this] { this->LoadingDialog("zzz"); });
 
 	// connect narrative pushbuttons
-	connect(ui.forward, &QPushButton::clicked, this, &MainWindow::narListForward);
-	connect(ui.minus, &QPushButton::clicked, this, &MainWindow::narListDelete);
-	connect(ui.plus, &QPushButton::clicked, this, &MainWindow::narListAdd);
-	connect(ui.pause, &QPushButton::clicked, this, &MainWindow::narListPause);
-	connect(ui.open, &QPushButton::clicked, this, &MainWindow::narListOpen);
-	connect(ui.info, &QPushButton::clicked, this, &MainWindow::narListInfo);
+	// connect(ui.topBar->ui.play, &QPushButton::clicked, this, &MainWindow::narListForward);
+	// connect(ui.minus, &QPushButton::clicked, this, &MainWindow::narListDelete);
+	// connect(ui.plus, &QPushButton::clicked, this, &MainWindow::narListAdd);
+	// connect(ui.pause, &QPushButton::clicked, this, &MainWindow::narListPause);
+	// connect(ui.open, &QPushButton::clicked, this, &MainWindow::narListOpen);
+	// connect(ui.info, &QPushButton::clicked, this, &MainWindow::narListInfo);
+
+	connect(ui.topBar->ui.open, &QPushButton::clicked, this, 
+		[this]() {
+			qDebug() << "open";
+			this->ui.topBar->showSlides();
+		});
+	connect(ui.topBar->ui.left_2, &QPushButton::clicked, this,
+		[this]() {
+			qDebug() << "goback";
+			this->ui.topBar->showNarratives();
+		});
 
 	// connect narrative info
 	connect(m_narrative_info_dialog, &QDialog::accepted, this, [this] { qDebug() << "narrative accept";
@@ -199,32 +210,32 @@ void MainWindow::actionImportModel()
 	emit sImportModel(filename.toStdString());
 }
 
-void MainWindow::narListForward()
-{
-	qDebug("Forward");
-}
-
-void MainWindow::narListAdd()
-{
-	qDebug("Add");
-}
-
-void MainWindow::narListDelete()
-{
-	qDebug("Delete");
-}
-
-void MainWindow::narListPause()
-{
-	qDebug("Pause");
-}
-
-void MainWindow::narListOpen()
-{
-	qDebug("Open");
-}
-
-void MainWindow::narListInfo()
-{
-	qDebug("narrative info");
-}
+//void MainWindow::narListForward()
+//{
+//	qDebug("Forward");
+//}
+//
+//void MainWindow::narListAdd()
+//{
+//	qDebug("Add");
+//}
+//
+//void MainWindow::narListDelete()
+//{
+//	qDebug("Delete");
+//}
+//
+//void MainWindow::narListPause()
+//{
+//	qDebug("Pause");
+//}
+//
+//void MainWindow::narListOpen()
+//{
+//	qDebug("Open");
+//}
+//
+//void MainWindow::narListInfo()
+//{
+//	qDebug("narrative info");
+//}
