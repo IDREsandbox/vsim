@@ -10,7 +10,7 @@
 class NarrativeScrollItem : public ScrollBoxItem {
 	Q_OBJECT
 public:
-	NarrativeScrollItem(QWidget* parent);
+	NarrativeScrollItem();
 	NarrativeScrollItem(const std::string& title, const std::string& description);
 	//NarrativeScrollItem(const Narrative&);
 	//void setInfo(const Narrative&);

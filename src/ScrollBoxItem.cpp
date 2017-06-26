@@ -1,7 +1,7 @@
 #include "ScrollBoxItem.h"
 
-ScrollBoxItem::ScrollBoxItem(QWidget* parent)
-	: QFrame(parent)
+ScrollBoxItem::ScrollBoxItem()
+	: QFrame(nullptr)
 {
 }
 
@@ -30,6 +30,11 @@ void ScrollBoxItem::colorSelect(bool color)
 	else {
 		setStyleSheet("background-color: rgb(70,70,70);");
 	}
+}
+
+int ScrollBoxItem::widthFromHeight(int height)
+{
+	return (16.0f / 9.0f) * height;
 }
 
 void ScrollBoxItem::mousePressEvent(QMouseEvent *event)

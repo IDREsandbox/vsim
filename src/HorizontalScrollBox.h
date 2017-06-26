@@ -20,9 +20,7 @@
 // size, item width/height
 
 class HorizontalScrollBox : public QScrollArea {
-
 	Q_OBJECT
-
 public:
 	HorizontalScrollBox(QWidget* parent);
 
@@ -53,6 +51,8 @@ public:
 
 	void openMenu(QPoint globalPos);
 
+	void setSpacing(int);
+
 signals:
 	void sDoubleClick();
 	//void sNew(int newIndex);
@@ -72,8 +72,9 @@ protected:
 
 private:
 	void refresh(); // redraw items (after deletion or something)
-	void setWidgetWidth();
-	void positionChildren();
+	//void setWidgetWidth();
+	//void positionChildren();
+	//void refreshGeometry();
 	
 	QWidget* m_scroll_area_widget;
 	QList<ScrollBoxItem*> m_items;
@@ -85,9 +86,9 @@ private:
 	//int boxHeight() const;
 	//int boxWidth() const;
 	int m_height;
-	int m_spacing;
-	float m_ratio; // width to height ratio for items
-	float m_space_ratio; // TODO: width to height ratio for spaces
+	int m_spacing = 10;
+	//float m_ratio; // width to height ratio for items
+	//float m_space_ratio; // TODO: width to height ratio for spaces
 
 	
 };

@@ -4,12 +4,7 @@
 #include "HorizontalScrollBox.h"
 
 HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
-	:	QScrollArea(parent),
-
-	m_height(60),
-	m_spacing(10),
-	m_ratio(1.5), // width to height ratio for items
-	m_space_ratio(.1) // TODO: width to height ratio for spaces
+	:	QScrollArea(parent)
 {
 	this->setObjectName(QStringLiteral("scrollArea"));
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -54,6 +49,9 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	this->horizontalScrollBar()->setStyleSheet(style);
 
 	this->setWidget(m_scroll_area_widget);
+
+	m_height = m_scroll_area_widget->height();
+	qDebug() << "INITAL HEIGHT?" << m_height;
 
 	//// handle right-clicks for background, TODO: use a different menu
 	//m_scroll_area_widget->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -170,7 +168,7 @@ void HorizontalScrollBox::deleteItem(int position)
 	clearSelection();
 	ScrollBoxItem* item = m_items.takeAt(position);
 	delete item;
-	setWidgetWidth();
+	refresh();
 }
 
 void HorizontalScrollBox::openMenu(QPoint globalPos)
@@ -179,47 +177,23 @@ void HorizontalScrollBox::openMenu(QPoint globalPos)
 	//m_slide_menu->exec(globalPos);
 }
 
+void HorizontalScrollBox::setSpacing(int space)
+{
+	m_spacing = space;
+	refresh();
+}
+
 void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
 {
 	// snapshot of current position and all that
-	int oldValue = horizontalScrollBar()->value();
-	auto bar = horizontalScrollBar();
+	//int oldValue = horizontalScrollBar()->value();
+	//QScrollBar *bar = horizontalScrollBar();
 
-	// we want to keep the same frame on the left side when we resize
-	int leftmargin = 0;//m_layout->contentsMargins().left();
-	int boxWidth = floor(m_height*m_ratio); //int boxWidth = m_layout->boxWidth();
-
-	int nomargin = oldValue - leftmargin;
-	int segmentSize = boxWidth + m_spacing;
-	int segmentNumber = nomargin / (segmentSize); // [    frame    ][space] <- one segment
-	int segmentOffset = nomargin % segmentSize;
-	//float framePortion = std::min(1.0f, segmentOffset / (float)boxWidth); // 0-1 if in the frame, 1 if in the spacer
-	//int spacerOffset = std::max(0, segmentOffset - boxWidth); // 0 if in the frame, 0-space is in the spacer
-	
-	// tell layout the new height
-	//m_layout->setHeight(event->size().height());
 	m_height = event->size().height();
-	setWidgetWidth();
-
-	// minimum width
-	int newBoxWidth = floor(m_height*m_ratio);
-	int newBoxHeight = m_height;
+	refresh();
 
 	// deal with other stuff
 	QScrollArea::resizeEvent(event);
-
-	int newSegmentSize = newBoxWidth + m_spacing;
-
-	// reposition the scrollbar so that it's over the original slide
-	int newValue;
-	if (nomargin <= 0) {
-		newValue = oldValue;
-	}
-	else {
-		newValue = leftmargin + segmentNumber * newSegmentSize + segmentOffset;//((framePortion > 1.0) ? newBoxWidth + 
-	}
-	
-	bar->setValue(newValue);
 }
 
 void HorizontalScrollBox::wheelEvent(QWheelEvent* event)
@@ -274,41 +248,19 @@ void HorizontalScrollBox::refresh()
 	for (int i = 0; i < m_items.size(); i++) {
 		m_items[i]->setIndex(i);
 	}
-	setWidgetWidth();
-}
 
-void HorizontalScrollBox::setWidgetWidth()
-{
-	// minimum width
-	int newBoxWidth = floor(m_height*m_ratio);
-	int newBoxHeight = m_height;
-
-	int totalspace = m_spacing*(qMax(0, m_items.size() - 1));
-
-	//int minwidth = margins.left() + margins.right() + totalspace + list.size() * boxWidth();
-	int minwidth = totalspace + m_items.size() * newBoxWidth;
-	m_scroll_area_widget->setMinimumWidth(minwidth);
-
-	positionChildren();
-}
-
-void HorizontalScrollBox::positionChildren()
-{
-	//auto margins = contentsMargins();
-	//QMargins margins = QMargins(5, 5, 5, 5);
-
-	if (m_items.size() == 0)
+	if (m_items.size() == 0) {
+		m_scroll_area_widget->setMinimumWidth(0);
 		return;
+	}
 
-	int xpos = 0;
-	//xpos += margins.left();
+	int xpos = m_spacing;
 
-	//m_height = r.height()
 	int bheight = m_height;
-	int bwidth = m_height*m_ratio;
 
 	for (int i = 0; i < m_items.size(); i++) {
 		ScrollBoxItem *o = m_items.at(i);
+		int bwidth = o->widthFromHeight(bheight);
 
 		//QRect geom(xpos, margins.top(), bwidth, bheight);
 		QRect geom(xpos, 0, bwidth, bheight);
@@ -317,5 +269,7 @@ void HorizontalScrollBox::positionChildren()
 		xpos += bwidth;
 		xpos += m_spacing;
 	}
+
+	m_scroll_area_widget->setMinimumWidth(xpos);
 }
 

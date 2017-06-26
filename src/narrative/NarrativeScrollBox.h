@@ -1,5 +1,5 @@
-﻿#ifndef NARRATIVESCROLLBOX_HPP
-#define NARRATIVESCROLLBOX_HPP
+﻿#ifndef NARRATIVESCROLLBOX_H
+#define NARRATIVESCROLLBOX_H
 
 #include "HorizontalScrollBox.h"
 
@@ -23,4 +23,4 @@ private:
 	
 };
 
-#endif // NARRATIVESCROLLBOX_HPP
+#endif // NARRATIVESCROLLBOX_H

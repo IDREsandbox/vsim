@@ -6,18 +6,10 @@
 #include <QMouseEvent>
 #include <QDebug>
 
-class Foo : QFrame {
-	Q_OBJECT
-public:
-
-	void foo();
-};
-
-
 class ScrollBoxItem : public QFrame {
 	Q_OBJECT
 public:
-	ScrollBoxItem(QWidget* parent);
+	ScrollBoxItem();
 	
 	// interface for controller is in derived classes
 	
@@ -27,6 +19,9 @@ public:
 	int getIndex(int index);
 	void colorFocus(bool color);
 	void colorSelect(bool color);
+
+	virtual int widthFromHeight(int height);
+
 signals:
 	void sMousePressEvent(QMouseEvent *event, int index);
 	

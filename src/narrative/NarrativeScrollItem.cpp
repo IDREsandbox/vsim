@@ -2,8 +2,7 @@
 #include "NarrativeScrollItem.h"
 
 
-NarrativeScrollItem::NarrativeScrollItem(QWidget * parent)
-	: ScrollBoxItem(parent)
+NarrativeScrollItem::NarrativeScrollItem()
 {
 
 	//setStyleSheet(QLatin1String("background-color: rgb(225, 255, 48);\n"
@@ -39,7 +38,7 @@ NarrativeScrollItem::NarrativeScrollItem(QWidget * parent)
 //}
 
 NarrativeScrollItem::NarrativeScrollItem(const std::string & title, const std::string & description)
-	: NarrativeScrollItem(nullptr)
+	: NarrativeScrollItem()
 {
 	setInfo(title, description);
 }
