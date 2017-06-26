@@ -22,19 +22,29 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 		this->deleteSelection();
 	});
 
+	setSpacing(0);
 }
 
 void SlideScrollBox::contextMenuEvent(QContextMenuEvent * event)
 {
 	qDebug() << "custom context menu shenanigans";
-	m_slide_menu->exec(event->globalPos());
+	//m_slide_menu->exec(event->globalPos());
 }
 
 void SlideScrollBox::addItem()
 {
 	SlideScrollItem *new_item = new SlideScrollItem();
-	SlideTransitionScrollItem *new_transition = new SlideTransitionScrollItem();
+
+	
+	connect(new_item->getSlideWidget(), &SlideScrollWidget::sMousePressEvent, this,
+		[this](QMouseEvent* e) {
+		qDebug() << "slide mouse press event";
+	});
+
+	connect(new_item->getTransitionWidget(), &SlideTransitionScrollWidget::sMousePressEvent, this,
+		[this](QMouseEvent* e) {
+		qDebug() << "transition mouse press event";
+	});
 
 	HorizontalScrollBox::addItem(new_item);
-	HorizontalScrollBox::addItem(new_transition);
 }

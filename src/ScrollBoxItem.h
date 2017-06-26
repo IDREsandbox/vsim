@@ -15,8 +15,8 @@ public:
 	
 	// interface for gui
 	// index is used for pretty numbering
-	void setIndex(int index);
-	int getIndex(int index);
+	virtual void setIndex(int index);
+	virtual int getIndex();
 	void colorFocus(bool color);
 	void colorSelect(bool color);
 
@@ -26,7 +26,7 @@ signals:
 	void sMousePressEvent(QMouseEvent *event, int index);
 	
 protected:
-	void mousePressEvent(QMouseEvent *event);
+	virtual void mousePressEvent(QMouseEvent *event);
 		
 private:
 	int m_index = -1;

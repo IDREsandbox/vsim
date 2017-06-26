@@ -12,9 +12,17 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	this->setWidgetResizable(true);
 
 	m_scroll_area_widget = new QWidget(this);
-	m_scroll_area_widget->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
+	m_scroll_area_widget->setStyleSheet(
+		"color: rgb(255, 255, 255);"
+	);
+	this->setWidget(m_scroll_area_widget);
+	
+		
+	m_height = m_scroll_area_widget->height();
+	qDebug() << "INITAL HEIGHT?" << m_height;
 
-	const char *style =
+
+	const char *scrollbar_style =
 		"QScrollBar:horizontal {		  "
 		"    border: 2px solid grey;	  "
 		"    background: #112244;		  "
@@ -46,12 +54,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 		"}"
 		;
 
-	this->horizontalScrollBar()->setStyleSheet(style);
-
-	this->setWidget(m_scroll_area_widget);
-
-	m_height = m_scroll_area_widget->height();
-	qDebug() << "INITAL HEIGHT?" << m_height;
+	this->horizontalScrollBar()->setStyleSheet(scrollbar_style);
 
 	//// handle right-clicks for background, TODO: use a different menu
 	//m_scroll_area_widget->setContextMenuPolicy(Qt::CustomContextMenu);

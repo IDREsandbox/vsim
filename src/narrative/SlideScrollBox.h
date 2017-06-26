@@ -2,9 +2,7 @@
 #define SLIDESCROLLBOX_H
 
 #include "HorizontalScrollBox.h"
-#include "SlideScrollBox.h"
 #include "SlideScrollItem.h"
-#include "SlideTransitionScrollItem.h"
 
 class SlideScrollBox : public HorizontalScrollBox {
 	Q_OBJECT
@@ -15,7 +13,6 @@ public:
 	virtual void contextMenuEvent(QContextMenuEvent *event);
 
 	void addItem();
-	void setPicture();
 
 private:
 	QMenu *m_slide_menu; // context menu
