@@ -9,7 +9,7 @@
 #include <set>
 
 #include "ScrollBoxItem.h"
-#include "narrative/NarrativeScrollItem.h"
+//#include "narrative/NarrativeScrollItem.h"
 
 // goals:
 // 1. add, insert, delete, select, clear (signals)

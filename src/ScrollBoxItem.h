@@ -17,8 +17,8 @@ public:
 	// index is used for pretty numbering
 	virtual void setIndex(int index);
 	virtual int getIndex();
-	void colorFocus(bool color);
-	void colorSelect(bool color);
+	virtual void colorFocus(bool color);
+	virtual void colorSelect(bool color);
 
 	virtual int widthFromHeight(int height);
 

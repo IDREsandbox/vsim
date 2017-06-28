@@ -18,7 +18,8 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	this->setWidget(m_scroll_area_widget);
 	
 		
-	m_height = m_scroll_area_widget->height();
+	//m_height = m_scroll_area_widget->height();
+	m_height = this->height();
 	qDebug() << "INITAL HEIGHT?" << m_height;
 
 
@@ -74,8 +75,13 @@ void HorizontalScrollBox::addItem(ScrollBoxItem *item)
 
 void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 {
+	
 	qDebug() << "narrative list gui - insert item at" << index;
 	item->setParent(m_scroll_area_widget);
+	// approximate geometry, will be fixed later on in refresh()
+	item->setGeometry(0, 0, m_height, 2.5*m_height);
+	qDebug() << "height from wdith test" << m_height;
+	item->widthFromHeight(m_height);
 	m_items.insert(index, item);
 	// steal all mouse events on items
 	connect(item, &ScrollBoxItem::sMousePressEvent, this, &HorizontalScrollBox::itemMousePressEvent);
@@ -191,12 +197,18 @@ void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
 	// snapshot of current position and all that
 	//int oldValue = horizontalScrollBar()->value();
 	//QScrollBar *bar = horizontalScrollBar();
-
+	qDebug() << "resize event" << event->size().height();
+	qDebug() << "resize event before" << m_scroll_area_widget->height();
 	m_height = event->size().height();
 	refresh();
 
 	// deal with other stuff
 	QScrollArea::resizeEvent(event);
+
+	qDebug() << "resize event after" << m_scroll_area_widget->height();
+	for (auto item : m_items) {
+		item->widthFromHeight(m_scroll_area_widget->height());
+	}
 }
 
 void HorizontalScrollBox::wheelEvent(QWheelEvent* event)

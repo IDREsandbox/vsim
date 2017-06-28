@@ -33,6 +33,6 @@ void NarrativeScrollBox::contextMenuEvent(QContextMenuEvent * event)
 
 void NarrativeScrollBox::addItem(const std::string & title, const std::string & description)
 {
-	NarrativeScrollItem *new_item = new NarrativeScrollItem(title, description);
-	HorizontalScrollBox::addItem(new_item);
+	//NarrativeScrollItem *new_item = new NarrativeScrollItem(title, description);
+	//HorizontalScrollBox::addItem(new_item);
 }

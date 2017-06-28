@@ -1,34 +1,24 @@
-#ifndef SLIDESCROLLITEM_H
+﻿#ifndef SLIDESCROLLITEM_H
 #define SLIDESCROLLITEM_H
-
-#include <QLabel>
-#include <QVBoxLayout>
-#include <string>
 #include "ScrollBoxItem.h"
-#include "Narrative.h"
-
-#include "SlideTransitionScrollWidget.h"
-#include "SlideScrollWidget.h"
+#include "ui_SlideScrollItem.h"
 
 class SlideScrollItem : public ScrollBoxItem {
 	Q_OBJECT
+
 public:
 	SlideScrollItem();
 
 	virtual void setIndex(int index);
 	virtual int widthFromHeight(int height);
-	
-	SlideScrollWidget *getSlideWidget();
-	SlideTransitionScrollWidget *getTransitionWidget();
+	virtual void colorFocus(bool color);
+	virtual void colorSelect(bool color);
 
-protected:
-	virtual void mousePressEvent(QMouseEvent *event);
+	virtual void resizeEvent(QResizeEvent* event);
+	
 
 private:
-	QHBoxLayout *m_layout;
-	
-	SlideScrollWidget *m_slide_widget;
-	SlideTransitionScrollWidget *m_trans_widget;
+	Ui::SlideScrollItem ui;
 };
 
-#endif
+#endif // SLIDESCROLLITEM_HPP
