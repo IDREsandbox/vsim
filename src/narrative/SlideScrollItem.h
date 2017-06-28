@@ -14,8 +14,8 @@ public:
 	virtual void colorFocus(bool color);
 	virtual void colorSelect(bool color);
 
-	virtual void resizeEvent(QResizeEvent* event);
-	
+signals:
+	void sTransitionDoubleClick();
 
 private:
 	Ui::SlideScrollItem ui;

@@ -49,12 +49,13 @@ public:
 
 	bool isSelected(int);
 
-	void openMenu(QPoint globalPos);
-
 	void setSpacing(int);
 
+	virtual void openMenu(QPoint globalPos);
+	virtual void openItemMenu(QPoint globalPos);
+
 signals:
-	void sDoubleClick();
+	//void sDoubleClick();
 	//void sNew(int newIndex);
 	//void sDeleted(std::set<int>);
 	//void sDeleted(int index);

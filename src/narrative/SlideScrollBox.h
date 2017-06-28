@@ -12,8 +12,6 @@ class SlideScrollBox : public HorizontalScrollBox {
 public:
 	SlideScrollBox(QWidget * parent = nullptr);
 
-	virtual void contextMenuEvent(QContextMenuEvent *event);
-
 	// controller interface
 	void addItem();
 
@@ -23,26 +21,35 @@ public:
 	void setDuration(float t); // < 0 is forever
 	void setTranstionDuration(float t); // <= 0 is instantaneous
 
+	// virtual overrides
+	virtual void openMenu(QPoint globalPos);
+	virtual void openItemMenu(QPoint globalPos);
+
 signals:
 	void sSetTransitionDuration();
 	void sSetDuration();
 	void sDeleteSlides();
 	void sNewSlide();
 
+protected:
+	void keyPressEvent(QKeyEvent *event);
+
 private:
+	// mouse event handling
+	void handleSlideMouseEvent(QMouseEvent *event);
+	void handleTransitionMouseEvent(QMouseEvent *event);
 
 	// slide menu
+	QMenu *m_bar_menu;
 	QMenu *m_slide_menu; // context menu
 	QAction *m_action_new;
 	QAction *m_action_delete;
 	QAction *m_action_edit;
 	QAction *m_action_set_camera;
 	QAction *m_action_set_duration;
-
-	// transition menu
-	QMenu *m_transition_menu;
-	QAction *m_action_set_transition_duration;
+	QAction *m_action_set_transition;
 
 };
+
 
 #endif // SLIDESCROLLBOX_H

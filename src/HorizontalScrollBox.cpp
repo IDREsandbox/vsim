@@ -182,8 +182,10 @@ void HorizontalScrollBox::deleteItem(int position)
 
 void HorizontalScrollBox::openMenu(QPoint globalPos)
 {
-	qDebug() << "who did this";
-	//m_slide_menu->exec(globalPos);
+}
+
+void HorizontalScrollBox::openItemMenu(QPoint globalPos)
+{
 }
 
 void HorizontalScrollBox::setSpacing(int space)
@@ -221,6 +223,10 @@ void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 {
 	qDebug() << "scroll area mouse event\n";
 	clearSelection();
+	if (event->button() == Qt::RightButton) {
+		qDebug() << "open area mouse press";
+		openMenu(event->globalPos());
+	}
 }
 
 void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
@@ -230,7 +236,7 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 		m_last_selected = index;
 		if (event->type() == QEvent::MouseButtonDblClick) {
 			qDebug() << "item press - double click";
-			emit sDoubleClick();
+			//emit sDoubleClick();
 		}
 
 		if (event->modifiers() & Qt::ControlModifier) {
@@ -253,10 +259,11 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 		if (!isSelected(index)) {
 			select(index);
 		}
-		openMenu(event->globalPos());
+		openItemMenu(event->globalPos());
 		refresh();
 	}
 }
+
 
 void HorizontalScrollBox::refresh()
 {
