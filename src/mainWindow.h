@@ -77,9 +77,6 @@ private:
 	//QPoint offset;
 	int offset;
 	
-	// main window owns the vsim app
-	// circular reference, use a pointer, EDIT: all clear!
-	// std::unique_ptr<VSimApp> m_vsimapp;
 };
 
 

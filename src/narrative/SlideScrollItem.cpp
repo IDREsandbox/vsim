@@ -3,7 +3,18 @@
 SlideScrollItem::SlideScrollItem() : ScrollBoxItem() {
 	ui.setupUi(this);
 
+	ui.transition_label->installEventFilter(this);
 	//ui.transition_widget->setFixedWidth(26);
+}
+
+void SlideScrollItem::setTransition(float duration)
+{
+	ui.transition_label->setText(QString::number(duration));
+}
+
+void SlideScrollItem::setDuration(float duration)
+{
+	ui.duration_label->setText(QString::number(duration));
 }
 
 void SlideScrollItem::setIndex(int index)
@@ -46,10 +57,23 @@ void SlideScrollItem::colorFocus(bool color)
 void SlideScrollItem::colorSelect(bool color)
 {
 	if (color) {
-		this->setStyleSheet("background-color: rgba(255,255,255,10);");
+		this->setStyleSheet("background-color: rgba(0,0,255,50);");
 	}
 	else {
-		this->setStyleSheet("background-color: rgba(0,0,255,0);");
+		this->setStyleSheet("background-color: rgba(0,0,0,0);");
 	}
 }
+
+bool SlideScrollItem::eventFilter(QObject * obj, QEvent * event)
+{	
+	if (obj == ui.transition_label) {
+		if (event->type() == QEvent::MouseButtonDblClick) {
+			qDebug() << "slide item - double click";
+			emit sTransitionDoubleClick();
+			return false;
+		}
+	}
+	return false;
+}
+
 

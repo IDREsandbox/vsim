@@ -24,9 +24,11 @@ public:
 
 signals:
 	void sMousePressEvent(QMouseEvent *event, int index);
+	void sMouseReleaseEvent(QMouseEvent *event, int index);
 	
 protected:
 	virtual void mousePressEvent(QMouseEvent *event);
+	virtual void mouseReleaseEvent(QMouseEvent *event);
 		
 private:
 	int m_index = -1;

@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 
 	window.setGeometry(100, 100, 800, 750);
 
-	window.setStyleSheet("background-color: rgba(40,40,40,200);");
+	//window.setStyleSheet("background-color: rgba(40,40,40,200);");
 	QVBoxLayout *verticalLayout = new QVBoxLayout(&window);
 	window.setLayout(verticalLayout);
 
@@ -31,6 +31,8 @@ int main(int argc, char *argv[])
 	verticalLayout->addWidget(narrative_box);
 	verticalLayout->addWidget(slide_box);
 
+	//slide_box->setStyleSheet("background-color: rgba(0,0,0,200);");
+	//narrative_box->setStyleSheet("QMenu { color: rgb(40,40,40); }");
 	
 	//for (int i = 0; i < 4; i++) {
 	//	normal_box->addItem(new NarrativeScrollItem("hello", "world"));

@@ -4,7 +4,7 @@
 #include "HorizontalScrollBox.h"
 
 HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
-	:	QScrollArea(parent)
+	: QScrollArea(parent)
 {
 	this->setObjectName(QStringLiteral("scrollArea"));
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -14,6 +14,9 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_scroll_area_widget = new QWidget(this);
 	m_scroll_area_widget->setStyleSheet(
 		"color: rgb(255, 255, 255);"
+		//"QMenu {"
+		//"	background-color: rgb(255,255,255);"
+		//"}"
 	);
 	this->setWidget(m_scroll_area_widget);
 	
@@ -199,15 +202,15 @@ void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
 	// snapshot of current position and all that
 	//int oldValue = horizontalScrollBar()->value();
 	//QScrollBar *bar = horizontalScrollBar();
-	qDebug() << "resize event" << event->size().height();
-	qDebug() << "resize event before" << m_scroll_area_widget->height();
+	//qDebug() << "resize event" << event->size().height();
+	//qDebug() << "resize event before" << m_scroll_area_widget->height();
 	m_height = event->size().height();
 	refresh();
 
 	// deal with other stuff
 	QScrollArea::resizeEvent(event);
 
-	qDebug() << "resize event after" << m_scroll_area_widget->height();
+	//qDebug() << "resize event after" << m_scroll_area_widget->height();
 	for (auto item : m_items) {
 		item->widthFromHeight(m_scroll_area_widget->height());
 	}
@@ -237,6 +240,9 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 		if (event->type() == QEvent::MouseButtonDblClick) {
 			qDebug() << "item press - double click";
 			//emit sDoubleClick();
+			addToSelection(index);
+			refresh();
+			return;
 		}
 
 		if (event->modifiers() & Qt::ControlModifier) {

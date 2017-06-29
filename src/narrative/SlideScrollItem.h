@@ -9,10 +9,18 @@ class SlideScrollItem : public ScrollBoxItem {
 public:
 	SlideScrollItem();
 
+	// 
+	void setTransition(float);
+	void setDuration(float);
+
+	// overrides 
 	virtual void setIndex(int index);
 	virtual int widthFromHeight(int height);
 	virtual void colorFocus(bool color);
 	virtual void colorSelect(bool color);
+
+	// for filtering double clicks
+	bool eventFilter(QObject * obj, QEvent * ev);
 
 signals:
 	void sTransitionDoubleClick();
