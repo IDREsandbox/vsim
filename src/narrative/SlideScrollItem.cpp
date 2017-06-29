@@ -4,17 +4,35 @@ SlideScrollItem::SlideScrollItem() : ScrollBoxItem() {
 	ui.setupUi(this);
 
 	ui.transition_label->installEventFilter(this);
-	//ui.transition_widget->setFixedWidth(26);
+	ui.duration_label->installEventFilter(this);
+
+	setTransition(2.0f);
+	setDuration(0.0f);
 }
 
+float SlideScrollItem::getTransition()
+{
+	return m_transition_duration;
+}
+float SlideScrollItem::getDuration()
+{
+	return m_duration;
+}
 void SlideScrollItem::setTransition(float duration)
 {
-	ui.transition_label->setText(QString::number(duration));
+	m_transition_duration = duration;
+	ui.transition_label->setText(QString::number(duration) + "s");
 }
 
 void SlideScrollItem::setDuration(float duration)
 {
-	ui.duration_label->setText(QString::number(duration));
+	m_duration = duration;
+	if (m_duration <= 0) {
+		ui.duration_label->setText("-");
+	}
+	else {
+		ui.duration_label->setText(QString::number(duration) + "s");
+	}
 }
 
 void SlideScrollItem::setIndex(int index)
@@ -68,8 +86,15 @@ bool SlideScrollItem::eventFilter(QObject * obj, QEvent * event)
 {	
 	if (obj == ui.transition_label) {
 		if (event->type() == QEvent::MouseButtonDblClick) {
-			qDebug() << "slide item - double click";
+			qDebug() << "slide item transition - double click";
 			emit sTransitionDoubleClick();
+			return false;
+		}
+	}
+	if (obj == ui.duration_label) {
+		if (event->type() == QEvent::MouseButtonDblClick) {
+			qDebug() << "slide item duration - double click";
+			emit sDurationDoubleClick();
 			return false;
 		}
 	}

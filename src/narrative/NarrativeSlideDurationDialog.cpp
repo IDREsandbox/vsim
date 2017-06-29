@@ -18,7 +18,7 @@ void NarrativeSlideDurationDialog::setDuration(bool checked, float duration)
 float NarrativeSlideDurationDialog::getDuration()
 {
 	if (ui.onclick_checkbox->isChecked()) {
-		return -1.0f;
+		return 0.0f;
 	}
 	else {
 		return ui.duration_spinbox->value();

@@ -9,9 +9,10 @@ class SlideScrollItem : public ScrollBoxItem {
 public:
 	SlideScrollItem();
 
-	// 
+	float getTransition();
+	float getDuration();
 	void setTransition(float);
-	void setDuration(float);
+	void setDuration(float); // 0 for stay, >0 for timed
 
 	// overrides 
 	virtual void setIndex(int index);
@@ -24,9 +25,13 @@ public:
 
 signals:
 	void sTransitionDoubleClick();
+	void sDurationDoubleClick();
 
 private:
 	Ui::SlideScrollItem ui;
+
+	float m_duration;
+	float m_transition_duration;
 };
 
 #endif // SLIDESCROLLITEM_HPP

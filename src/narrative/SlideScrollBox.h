@@ -18,23 +18,27 @@ public:
 	// controller interface
 	void addItem();
 
-	std::set<int> getSlideSelection();
+	//std::set<int> getSlideSelection();
 	//std::set<int> getTransitionSelection(); // will always be the same as slide selection
 
 	void setDuration(float t); // < 0 is forever
 	void setTranstionDuration(float t); // 0 is instantaneous
 
-	// gui display
-	float transitionDialog(float duration); // < 0 on reject, >= 0 on accept with duration
-	float durationDialog(bool stay, float duration); // < 0 on reject, = 0 for hold, > 0 for timed slide duration
+
+	// gui display some dialogs
+	// opens based on selection, emits signals
+	void transitionDialog();
+	void durationDialog();
+	float execTransitionDialog(float duration); // < 0 on reject, >= 0 on accept with duration
+	float execDurationDialog(float duration); // < 0 on reject, = 0 for hold, > 0 for timed slide duration
 
 	// virtual overrides
 	virtual void openMenu(QPoint globalPos);
 	virtual void openItemMenu(QPoint globalPos);
 	
 signals:
-	void sSetTransitionDuration();
-	void sSetDuration();
+	void sSetTransitionDuration(float);
+	void sSetDuration(float);
 	void sDeleteSlides();
 	void sNewSlide();
 
@@ -47,7 +51,6 @@ private:
 	QMenu *m_slide_menu; // context menu
 	QAction *m_action_new;
 	QAction *m_action_delete;
-	QAction *m_action_edit;
 	QAction *m_action_set_camera;
 	QAction *m_action_set_duration;
 	QAction *m_action_set_transition;
