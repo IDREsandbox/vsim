@@ -4,6 +4,8 @@
 #include <set>
 #include <osg/Node>
 #include "narrative/Narrative.h"
+#include "narrative/NarrativeScrollBox.h"
+#include "narrative/SlideScrollBox.h"
 #include "HorizontalScrollBox.h"
 #include "MainWindow.h"
 
@@ -36,7 +38,8 @@ private:
 	osg::Group *m_model;
 
 	MainWindow *m_window;
-	HorizontalScrollBox *m_list_gui;
+	NarrativeScrollBox *m_narrative_box;
+	SlideScrollBox *m_slide_box;
 };
 
 #endif /* NARRATIVELIST_H_ */

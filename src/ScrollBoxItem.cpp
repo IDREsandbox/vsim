@@ -8,7 +8,6 @@ ScrollBoxItem::ScrollBoxItem()
 void ScrollBoxItem::setIndex(int index)
 {
 	m_index = index;
-	//setText(QString::number(index));
 }
 
 int ScrollBoxItem::getIndex()

@@ -8,25 +8,30 @@
 NarrativeList::NarrativeList(QObject* parent, MainWindow* window)
 	: QObject(parent), m_window(window), m_focus(-1), m_model(nullptr)
 {
-	m_list_gui = window->ui.topBar->ui.narratives;
+	m_narrative_box = window->ui.topBar->ui.narratives;
 
 	// new
-	connect(m_list_gui->m_action_new, &QAction::triggered, this, &NarrativeList::newNarrative);
+	connect(m_narrative_box, &NarrativeScrollBox::sNew, this, &NarrativeList::newNarrative);
 	connect(m_window->ui.topBar->ui.plus, &QPushButton::clicked, this, &NarrativeList::newNarrative);
 
 	// delete
-	connect(m_list_gui->m_action_delete, &QAction::triggered, this, &NarrativeList::deleteSelection);
+	connect(m_narrative_box, &NarrativeScrollBox::sDelete, this, &NarrativeList::deleteSelection);
 	connect(m_window->ui.topBar->ui.minus, &QPushButton::clicked, this, &NarrativeList::deleteSelection);
 
-	// edit
-	connect(m_list_gui->m_action_edit, &QAction::triggered, this, &NarrativeList::editNarrativeInfo);
+	// info
+	connect(m_narrative_box, &NarrativeScrollBox::sInfo, this, &NarrativeList::editNarrativeInfo);
 	connect(m_window->ui.topBar->ui.info, &QPushButton::clicked, this, &NarrativeList::editNarrativeInfo);
 
+	// open
 	// double click
-	connect(m_list_gui, &HorizontalScrollBox::sDoubleClick, this, 
+	connect(m_narrative_box, &NarrativeScrollBox::sOpen, this, 
 		[this]() {
 			this->m_window->ui.topBar->showSlides();
 			});
+	//connect(m_list_gui, &HorizontalScrollBox::sDoubleClick, this, 
+	//	[this]() {
+	//		this->m_window->ui.topBar->showSlides();
+	//		});
 }
 
 NarrativeList::~NarrativeList()
@@ -56,19 +61,19 @@ void NarrativeList::newNarrative()
 	m_narrative_group->addChild(narrative);
 
 	// add to gui
-	m_list_gui->addItem(new NarrativeScrollItem(narrative->getName(), narrative->getDescription()));
+	addToGui(narrative);
 }
 
 void NarrativeList::editNarrativeInfo()
 {
-	int active_item = m_list_gui->getLastSelected();
+	int active_item = m_narrative_box->getLastSelected();
 	qDebug() << "narrative list - begin edit on" << active_item;
 	if (active_item < 0) {
 		qWarning() << "narrative list - can't edit with no selection";
 		return;
 	}
 
-	NarrativeScrollItem *item = dynamic_cast<NarrativeScrollItem*>(m_list_gui->getItem(active_item));
+	NarrativeScrollItem *item = dynamic_cast<NarrativeScrollItem*>(m_narrative_box->getItem(active_item));
 	Narrative *narrative = dynamic_cast<Narrative*>(m_narrative_group->getChild(active_item));
 
 	NarrativeInfoDialog *dlg = m_window->m_narrative_info_dialog;
@@ -90,7 +95,7 @@ void NarrativeList::editNarrativeInfo()
 
 void NarrativeList::deleteSelection()
 {
-	std::set<int> selection = m_list_gui->getSelection();
+	std::set<int> selection = m_narrative_box->getSelection();
 	std::vector<Narrative*> deletionList;
 
 	// get pointers to nodes to delete
@@ -106,12 +111,12 @@ void NarrativeList::deleteSelection()
 		m_narrative_group->removeChild(delete_me);
 	}
 
-	m_list_gui->deleteSelection();
+	m_narrative_box->deleteSelection();
 }
 
 void NarrativeList::load(osg::Group * model)
 {
-	m_list_gui->clear();
+	m_narrative_box->clear();
 	m_focus = -1;
 	m_narrative_group = nullptr;
 	m_model = model;
@@ -167,5 +172,5 @@ void NarrativeList::load(osg::Group * model)
 
 void NarrativeList::addToGui(Narrative *nar)
 {
-	m_list_gui->addItem(new NarrativeScrollItem(nar->getName(), nar->getDescription()));
+	m_narrative_box->addItem(nar->getName(), nar->getDescription());
 }

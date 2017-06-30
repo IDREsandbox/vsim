@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>882</width>
+    <width>875</width>
     <height>169</height>
    </rect>
   </property>
@@ -75,7 +75,7 @@ border-color: rgb(238, 238, 238);</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="3" rowspan="4">
-           <widget class="HorizontalScrollBox" name="narratives" native="true"/>
+           <widget class="NarrativeScrollBox" name="narratives" native="true"/>
           </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="plus">
@@ -254,7 +254,7 @@ border-color: rgb(238, 238, 238);</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="0" column="3" rowspan="4">
-           <widget class="HorizontalScrollBox" name="slides" native="true"/>
+           <widget class="SlideScrollBox" name="slides" native="true"/>
           </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="plus_2">
@@ -432,9 +432,15 @@ border-color: rgb(238, 238, 238);</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>HorizontalScrollBox</class>
+   <class>NarrativeScrollBox</class>
    <extends>QWidget</extends>
-   <header>HorizontalScrollBox.h</header>
+   <header>narrative/NarrativeScrollBox.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SlideScrollBox</class>
+   <extends>QWidget</extends>
+   <header>narrative/SlideScrollBox.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

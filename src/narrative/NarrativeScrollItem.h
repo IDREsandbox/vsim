@@ -12,6 +12,12 @@ public:
 
 	void setInfo(const std::string &title, const std::string &description);
 
+protected:
+	void mousePressEvent(QMouseEvent *event);
+
+signals:
+	void sDoubleClick();
+
 private:
 	Ui::NarrativeScrollItem ui;
 };

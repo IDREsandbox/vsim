@@ -19,6 +19,7 @@ NarrativeScrollBox::NarrativeScrollBox(QWidget * parent) : HorizontalScrollBox(p
 	connect(m_action_delete, &QAction::triggered, this, &NarrativeScrollBox::sDelete);
 	connect(m_action_info, &QAction::triggered, this, &NarrativeScrollBox::sInfo);
 	connect(m_action_open, &QAction::triggered, this, &NarrativeScrollBox::sOpen);
+	
 
 	//connect(m_action_new, &QAction::triggered, this, [this]() {
 	//	addItem("weow", "cool");
@@ -37,6 +38,7 @@ void NarrativeScrollBox::addItem(const std::string & title, const std::string & 
 {
 	NarrativeScrollItem *item = new NarrativeScrollItem();
 	item->setInfo(title, description);
+	connect(item, &NarrativeScrollItem::sDoubleClick, this, &NarrativeScrollBox::sOpen);
 	HorizontalScrollBox::addItem(item);
 }
 
