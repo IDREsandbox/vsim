@@ -83,10 +83,9 @@ void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 	item->setParent(m_scroll_area_widget);
 	// approximate geometry, will be fixed later on in refresh()
 	item->setGeometry(0, 0, m_height, 2.5*m_height);
-	qDebug() << "height from wdith test" << m_height;
 	item->widthFromHeight(m_height);
 	m_items.insert(index, item);
-	// steal all mouse events on items
+	// steal all mouse events on items, alternatively we could use a filter
 	connect(item, &ScrollBoxItem::sMousePressEvent, this, &HorizontalScrollBox::itemMousePressEvent);
 	select(index);
 	item->show();

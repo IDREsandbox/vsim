@@ -18,17 +18,17 @@ int ScrollBoxItem::getIndex()
 
 void ScrollBoxItem::colorFocus(bool color)
 {
-	//setStyleSheet("background-color: rgb(0, 100, 255);");
+	setStyleSheet("background-color: rgb(0, 100, 255);");
 	// do something else? like draw a rectangle
 }
 
 void ScrollBoxItem::colorSelect(bool color)
 {
 	if (color) {
-		//setStyleSheet("background-color: rgb(0, 100, 255);");
+		setStyleSheet("background-color: rgb(0, 100, 255);");
 	}
 	else {
-		//setStyleSheet("background-color: rgb(70,70,70);");
+		setStyleSheet("background-color: rgb(70,70,70);");
 	}
 }
 

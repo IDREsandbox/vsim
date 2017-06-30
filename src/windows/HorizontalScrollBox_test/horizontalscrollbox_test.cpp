@@ -14,18 +14,20 @@ int main(int argc, char *argv[])
 
 	window.setGeometry(100, 100, 800, 750);
 
-	//window.setStyleSheet("background-color: rgba(40,40,40,200);");
+	window.setStyleSheet(".QWidget { background-color: rgba(40,40,40,255); }");
 	QVBoxLayout *verticalLayout = new QVBoxLayout(&window);
 	window.setLayout(verticalLayout);
 
 	HorizontalScrollBox *normal_box = new HorizontalScrollBox(&window);
-	//HorizontalScrollBox *narrative_box = new HorizontalScrollBox(&window);
+	
 	NarrativeScrollBox *narrative_box = new NarrativeScrollBox(&window);
-	SlideScrollBox *slide_box = new SlideScrollBox(&window);
+	// wire the box to itself
+	QObject::connect(narrative_box, &NarrativeScrollBox::sNew, [narrative_box]() { narrative_box->addItem("new", "slide"); });
+	QObject::connect(narrative_box, &NarrativeScrollBox::sDelete, [narrative_box]() { narrative_box->deleteSelection(); });
 
-	// todo
-	//NarrativeScrollBox *narrative_box = new NarrativeScrollBox(&window);
-	//SlideScrollBox *slide_box = new SlideScrollBox(&window);
+	SlideScrollBox *slide_box = new SlideScrollBox(&window);
+	QObject::connect(slide_box, &SlideScrollBox::sSetDuration, [slide_box](float d) { slide_box->setDuration(d); });
+	QObject::connect(slide_box, &SlideScrollBox::sSetTransitionDuration, [slide_box](float d) { slide_box->setTranstionDuration(d); });
 
 	verticalLayout->addWidget(normal_box);
 	verticalLayout->addWidget(narrative_box);
@@ -34,17 +36,13 @@ int main(int argc, char *argv[])
 	//slide_box->setStyleSheet("background-color: rgba(0,0,0,200);");
 	//narrative_box->setStyleSheet("QMenu { color: rgb(40,40,40); }");
 	
-	//for (int i = 0; i < 4; i++) {
-	//	normal_box->addItem(new NarrativeScrollItem("hello", "world"));
-	//}
-	//for (int i = 0; i < 10; i++) {
-	//	narrative_box->addItem("hello", "world2");
-	//}
-	//for (int i = 0; i < 4; i++) {
-	//	narrative_box->addItem("hello", "world");
-	//}
 	for (int i = 0; i < 4; i++) {
-		//slide_box->addItem(new NarrativeScrollItem("hello", "world"));
+		normal_box->addItem(new ScrollBoxItem());
+	}
+	for (int i = 0; i < 4; i++) {
+		narrative_box->addItem("hello", "world");
+	}
+	for (int i = 0; i < 4; i++) {
 		slide_box->addItem();
 	}
 

@@ -17,6 +17,7 @@ public:
 
 	// controller interface
 	void addItem();
+	SlideScrollItem *getItem(int index);
 
 	//std::set<int> getSlideSelection();
 	//std::set<int> getTransitionSelection(); // will always be the same as slide selection
@@ -29,7 +30,7 @@ public:
 	// opens based on selection, emits signals
 	void transitionDialog();
 	void durationDialog();
-	float execTransitionDialog(float duration); // < 0 on reject, >= 0 on accept with duration
+	float execTransitionDialog(float duration); // ?? on reject, >= 0 on accept with duration
 	float execDurationDialog(float duration); // < 0 on reject, = 0 for hold, > 0 for timed slide duration
 
 	// virtual overrides
@@ -40,7 +41,7 @@ signals:
 	void sSetTransitionDuration(float);
 	void sSetDuration(float);
 	void sDeleteSlides();
-	void sNewSlide();
+	void sNewSlide(int);
 
 protected:
 	void keyPressEvent(QKeyEvent *event);
@@ -55,7 +56,6 @@ private:
 	QAction *m_action_set_duration;
 	QAction *m_action_set_transition;
 	
-
 };
 
 

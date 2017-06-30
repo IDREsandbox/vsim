@@ -54,15 +54,6 @@ public:
 	virtual void openMenu(QPoint globalPos);
 	virtual void openItemMenu(QPoint globalPos);
 
-signals:
-	//void sDoubleClick();
-	//void sNew(int newIndex);
-	//void sDeleted(std::set<int>);
-	//void sDeleted(int index);
-
-	//void deleted(int);
-	//void deleted(list);
-
 protected:
 	// qt overrides
 	virtual void resizeEvent(QResizeEvent* event);

@@ -14,7 +14,7 @@ public:
 	// interface for controller is in derived classes
 	
 	// interface for gui
-	// index is used for pretty numbering
+	// index is used for pretty numbering and selection signaling
 	virtual void setIndex(int index);
 	virtual int getIndex();
 	virtual void colorFocus(bool color);

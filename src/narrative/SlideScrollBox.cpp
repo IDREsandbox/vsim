@@ -24,12 +24,8 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	m_slide_menu->addAction(m_action_set_camera);
 	m_slide_menu->addAction(m_action_set_transition);
 
-	connect(m_action_new, &QAction::triggered, this, [this]() {
-		this->addItem();
-	});
-	connect(m_action_delete, &QAction::triggered, this, [this]() {
-		this->deleteSelection();
-	});
+	connect(m_action_new, &QAction::triggered, this, &SlideScrollBox::addItem);
+	connect(m_action_delete, &QAction::triggered, this, &SlideScrollBox::deleteSelection);
 	connect(m_action_set_duration, &QAction::triggered, this, &SlideScrollBox::durationDialog);
 	connect(m_action_set_transition, &QAction::triggered, this, &SlideScrollBox::transitionDialog);
 
@@ -43,10 +39,14 @@ void SlideScrollBox::addItem()
 	connect(new_item, &SlideScrollItem::sDurationDoubleClick, this, &SlideScrollBox::durationDialog);
 	HorizontalScrollBox::addItem(new_item);
 }
+SlideScrollItem *SlideScrollBox::getItem(int index)
+{
+	return dynamic_cast<SlideScrollItem*>(HorizontalScrollBox::getItem(index));
+}
 void SlideScrollBox::setTranstionDuration(float t)
 {
 	for (int index : getSelection()) {
-		qDebug() << "transition stuff" << index << t;
+		qDebug() << "gui set transition" << index << t;
 		SlideScrollItem *item = dynamic_cast<SlideScrollItem*>(getItem(index));
 		item->setTransition(t);
 	}
@@ -54,7 +54,7 @@ void SlideScrollBox::setTranstionDuration(float t)
 void SlideScrollBox::setDuration(float t)
 {
 	for (int index : getSelection()) {
-		qDebug() << "set stuff" << index << t;
+		qDebug() << "gui set duration " << index << t;
 		SlideScrollItem *item = dynamic_cast<SlideScrollItem*>(getItem(index));
 		item->setDuration(t);
 	}
@@ -66,7 +66,7 @@ void SlideScrollBox::transitionDialog()
 	SlideScrollItem *item = dynamic_cast<SlideScrollItem*>(getItem(last));
 	float duration = execTransitionDialog(item->getTransition());
 	emit sSetTransitionDuration(duration);
-	setTranstionDuration(duration);
+	//setTranstionDuration(duration); // uncomment to wire to self, otherwise the owner has to do this
 }
 void SlideScrollBox::durationDialog()
 {
@@ -74,8 +74,9 @@ void SlideScrollBox::durationDialog()
 	if (last == -1) return;
 	SlideScrollItem *item = dynamic_cast<SlideScrollItem*>(getItem(last));
 	float duration = execDurationDialog(item->getDuration());
+	if (duration < 0) return;
 	emit sSetDuration(duration);
-	setDuration(duration);
+	//setDuration(duration);
 }
 float SlideScrollBox::execTransitionDialog(float duration)
 {

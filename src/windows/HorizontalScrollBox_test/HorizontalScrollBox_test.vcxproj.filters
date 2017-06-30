@@ -74,15 +74,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_SlideScrollBox.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\narrative\Foo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_Foo.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_Foo.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\narrative\SlideScrollItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -101,6 +92,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_NarrativeSlideDurationDialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\narrative\NarrativeScrollItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_NarrativeScrollItem.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_NarrativeScrollItem.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\HorizontalScrollBox.h">
@@ -108,9 +108,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\ScrollBoxItem.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\narrative\NarrativeScrollItem.ui">
-      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\narrative\NarrativeScrollBox.h">
       <Filter>Header Files</Filter>
@@ -120,9 +117,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\experiment\bgfill.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\narrative\Foo.hpp">
-      <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\narrative\SlideScrollItem.h">
       <Filter>Header Files</Filter>
@@ -136,6 +130,12 @@
     <CustomBuild Include="..\..\narrative\NarrativeSlideDurationDialog.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\narrative\NarrativeScrollItem.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\narrative\NarrativeScrollItem.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_bgfill.h">
@@ -145,6 +145,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_NarrativeSlideDurationDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_NarrativeScrollItem.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
