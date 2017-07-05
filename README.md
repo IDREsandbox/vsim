@@ -11,7 +11,7 @@ Setup Qt
 2. Install Qt 5.8, 32 and/or 64 bit versions
 3. In Visual Studio - 
 	- Install QTPackage plugin (Tools > Extensions and Updates, OR https://marketplace.visualstudio.com/items?itemName=havendv.QtPackage)
-	- QT5 > QtOptions - add the Qt versions
+	- QT5 > QtOptions - add the Qt versions. Name the x64 version 5.8.
 
 
 Setup Visual Studio
@@ -22,7 +22,7 @@ Setup Visual Studio
 3. Working Directory, this is for the little icon and fonts - `$(ROOT)/src`
 4. Dependencies - setup a symlink to the dependencies. The project assumes that dependencies are located in the root git directory, so you have to give it a link to the actual dependencies. If you're at the sandbox, dependencies are in vsim/vsim-dependencies.
 	`mklink /D dependencies T:\Projects\_UCLA\vsim\vsim-dependencies`
-5. Qt Version - right click vsim project in the Solution Explorer > Qt Project Settings > Version > link to the corresponding version (have to do this for 32 and 64 if you have both). Name the x64 version 5.8.
+5. Qt Version - right click vsim project in the Solution Explorer > Qt Project Settings > Version > link to the corresponding version (have to do this for 32 and 64 if you have both). 
 
 
 ## Style guide
