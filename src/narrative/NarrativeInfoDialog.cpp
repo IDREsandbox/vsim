@@ -1,7 +1,9 @@
 ﻿#include <QDebug>
 #include "NarrativeInfoDialog.h"
 
-NarrativeInfoDialog::NarrativeInfoDialog(QWidget * parent) : QDialog(parent) {
+NarrativeInfoDialog::NarrativeInfoDialog(QWidget * parent) 
+	: QDialog(parent) 
+{
 	ui.setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 	// if you don't want the icon in the top left, also removes the X button

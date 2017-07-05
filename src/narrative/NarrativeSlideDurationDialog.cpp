@@ -1,11 +1,12 @@
 ﻿#include "NarrativeSlideDurationDialog.h"
 #include <QCheckBox>
 
-NarrativeSlideDurationDialog::NarrativeSlideDurationDialog(QWidget * parent) : QDialog(parent) {
+NarrativeSlideDurationDialog::NarrativeSlideDurationDialog(QWidget * parent) 
+	: QDialog(parent) 
+{
 	ui.setupUi(this);
 
 	connect(ui.onclick_checkbox, &QCheckBox::stateChanged, this, &NarrativeSlideDurationDialog::enableDisableDuration);
-
 }
 
 void NarrativeSlideDurationDialog::setDuration(bool checked, float duration)

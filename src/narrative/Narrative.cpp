@@ -9,13 +9,13 @@
 #include "narrative/Narrative.h"
 #include "narrative/NarrativeNode.h"
 
-Narrative::Narrative():
-		osg::Node(),
-		m_name("Unknown"),
-		m_description("Unknown"),
-		m_author("Unknown"),
-		m_selection(-1, false),
-		m_locked(false)
+Narrative::Narrative()
+	: osg::Node(),
+	m_name("Unknown"),
+	m_description("Unknown"),
+	m_author("Unknown"),
+	m_selection(-1, false),
+	m_locked(false)
 {
 }
 

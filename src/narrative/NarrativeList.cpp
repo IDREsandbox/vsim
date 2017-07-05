@@ -6,7 +6,10 @@
 #include <QAction>
 
 NarrativeList::NarrativeList(QObject* parent, MainWindow* window)
-	: QObject(parent), m_window(window), m_focus(-1), m_model(nullptr)
+	: QObject(parent), 
+	m_window(window), 
+	m_focus(-1), 
+	m_model(nullptr)
 {
 	m_narrative_box = window->ui.topBar->ui.narratives;
 

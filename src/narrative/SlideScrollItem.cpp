@@ -1,6 +1,8 @@
 ﻿#include "SlideScrollItem.h"
 
-SlideScrollItem::SlideScrollItem() : ScrollBoxItem() {
+SlideScrollItem::SlideScrollItem() 
+	: ScrollBoxItem() 
+{
 	ui.setupUi(this);
 
 	ui.transition_label->installEventFilter(this);

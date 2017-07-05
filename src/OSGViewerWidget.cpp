@@ -27,8 +27,7 @@
 #include <QWheelEvent>
 
 OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
-	: QOpenGLWidget(parent,	
-		f)
+	: QOpenGLWidget(parent,	f)
 	, graphicsWindow_(new osgViewer::GraphicsWindowEmbedded(this->x(),
 		this->y(),
 		this->width(),
@@ -50,6 +49,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	//osgViewer::View* view = new osgViewer::View;
 	viewer_->setCamera(camera);
 	
+	// TODO: replace this with blank
 	osg::Node* scene = osgDB::readNodeFile("T:\\Projects\\_UCLA\\vsim\\vsim-dependencies\\OpenSceneGraph-Data-3.4.0\\cow.osg");
 	osg::Group* group = new osg::Group();
 	group->addChild(scene);

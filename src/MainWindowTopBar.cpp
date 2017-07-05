@@ -1,6 +1,8 @@
 ﻿#include "MainWindowTopBar.h"
 
-MainWindowTopBar::MainWindowTopBar(QWidget * parent) : QFrame(parent) {
+MainWindowTopBar::MainWindowTopBar(QWidget * parent) 
+	: QFrame(parent) 
+{
 	ui.setupUi(this);
 }
 
