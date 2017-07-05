@@ -22,7 +22,7 @@ Setup Visual Studio
 3. Working Directory, this is for the little icon and fonts - `$(ROOT)/src`
 4. Dependencies - setup a symlink to the dependencies. The project assumes that dependencies are located in the root git directory, so you have to give it a link to the actual dependencies. If you're at the sandbox, dependencies are in vsim/vsim-dependencies.
 	`mklink /D dependencies T:\Projects\_UCLA\vsim\vsim-dependencies`
-5. Qt Version - right click vsim project in the Solution Explorer > Qt Project Settings > Version > link to the corresponding version (have to do this for 32 and 64 if you have both)
+5. Qt Version - right click vsim project in the Solution Explorer > Qt Project Settings > Version > link to the corresponding version (have to do this for 32 and 64 if you have both). Name the x64 version 5.8.
 
 
 ## Style guide
@@ -38,9 +38,11 @@ Setup Visual Studio
 	```
 	if (something) {
 		foo();
-	} else if (something_else) {
+	} 
+	else if (something_else) {
 		bar();
-	} else {
+	} 
+	else {
 		zzz();
 	}
 - \\n line endings
@@ -50,5 +52,5 @@ Setup Visual Studio
 - int m_member_variable; class MyClass; typedef SomeType; MyClass::memberFunction
 - avoid exceptions, do simple error handling - lots of if/else, enum error codes, NULLs, etc
 - avoid crazy templates and crazy macros
-- logging? do we even log? we should add a log.
-- smart pointers: the existing code uses a lot of raw pointers, but we should be using smart ones
+- logging? do we even log? we should add a log. For now use qDebug(), qInfo(), etc
+- smart pointers: QObjects just use raw pointers, osg stuff use refs or raw pointers
