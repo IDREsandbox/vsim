@@ -3,9 +3,33 @@
 #include <QAbstractItemModel>
 #include <QUndoStack>
 #include <QDebug>
-struct Thing {
+
+struct Other;
+
+
+struct Node {
+	Node *parent = nullptr;
+	Node(Node *p) : parent(p) {}
+	Node() : parent(nullptr) {}
+	virtual ~Node() = 0 {}
+};
+
+struct Thing : public Node {
 	int nverts;
 	std::string filename;
+	std::vector<Other*> children;
+
+	Thing(int n, std::string f)
+		: Node(), nverts(n), filename(f) {}
+};
+
+struct Other : public Node {
+	int hairstyle;
+	std::string pajamas;
+	std::string three;
+
+	Other(Node *p, int h, std::string pa, std::string t)
+		: Node(p), hairstyle(h), pajamas(pa), three(t) {}
 };
 
 // creating a model
