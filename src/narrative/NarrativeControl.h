@@ -16,19 +16,9 @@ public:
     NarrativeControl(QObject *parent, MainWindow *window);
     virtual ~NarrativeControl();
 
-	// opens up the dialog, makes a new narrative
-	void newNarrative();
-
-	// opens up the dialog, change name and stuff
-	void editNarrativeInfo();
-
-	// deletes the gui selection
-	void deleteSelection();
-
 	// initializes gui from osg data, also converts old narratives to new
 	void load(osg::Group *model);
 	void loadSlides(Narrative *narrative);
-
 
 	//void showSlides(int index);
 	void openNarrative();
@@ -37,15 +27,17 @@ public:
 	Narrative *getNarrative(int index);
 	NarrativeNode *getNarrativeNode(int narrative, int slide);
 
-	// all commands
-	//Narratives
+	// All Commands -
+	// Narratives
 	//	New Narrative
 	//	Delete Narrative
 	//	Set Narrative Info
 	//	(Move Narrative)
 	//	Duplicate Narrative
 	//	Import Narrative
-
+	void newNarrative();
+	void editNarrativeInfo();
+	void deleteNarratives();
 
 	//Slides
 	//	New Slide

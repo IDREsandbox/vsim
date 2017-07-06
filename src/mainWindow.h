@@ -67,13 +67,13 @@ signals:
 	// ui, signal emitters
 public:
 	Ui::MainWindow ui;
-	dragLabelInput* dragLabelEdit;
+	dragLabelInput *dragLabelEdit;
 	NarrativeInfoDialog *m_narrative_info_dialog;
 
-private:
-	OSGViewerWidget* m_osg_widget;
-	dragLabel* test;
-	QWidget* m_drag_area;
+public:
+	OSGViewerWidget *m_osg_widget;
+	dragLabel *test;
+	QWidget *m_drag_area;
 	//QPoint offset;
 	int offset;
 	

@@ -20,8 +20,8 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_narrative_box, &NarrativeScrollBox::sNew, this, &NarrativeControl::newNarrative);
 	connect(m_window->ui.topBar->ui.plus, &QPushButton::clicked, this, &NarrativeControl::newNarrative);
 	// delete
-	connect(m_narrative_box, &NarrativeScrollBox::sDelete, this, &NarrativeControl::deleteSelection);
-	connect(m_window->ui.topBar->ui.minus, &QPushButton::clicked, this, &NarrativeControl::deleteSelection);
+	connect(m_narrative_box, &NarrativeScrollBox::sDelete, this, &NarrativeControl::deleteNarratives);
+	connect(m_window->ui.topBar->ui.minus, &QPushButton::clicked, this, &NarrativeControl::deleteNarratives);
 	// info
 	connect(m_narrative_box, &NarrativeScrollBox::sInfo, this, &NarrativeControl::editNarrativeInfo);
 	connect(m_window->ui.topBar->ui.info, &QPushButton::clicked, this, &NarrativeControl::editNarrativeInfo);
@@ -105,7 +105,7 @@ void NarrativeControl::editNarrativeInfo()
 	item->setInfo(info.m_title, info.m_description);
 }
 
-void NarrativeControl::deleteSelection()
+void NarrativeControl::deleteNarratives()
 {
 	std::set<int> selection = m_narrative_box->getSelection();
 	std::vector<Narrative*> deletionList;
@@ -241,9 +241,11 @@ void NarrativeControl::newSlide()
 	node->setPauseAtNode(15.0f);
 	
 	// TODO: put this code somewhere else
-	QImage img(288, 162, QImage::Format_RGB444);
+	QRect dims = m_window->m_osg_widget->geometry();
+	QImage img(dims.width(), dims.height(), QImage::Format_RGB444);
 	QPainter painter(&img);
-	m_window->render(&painter);
+	m_window->m_osg_widget->render(&painter);
+
 	//QLabel *testlabel = new QLabel;
 	//testlabel->setPixmap(QPixmap::fromImage(img));
 	//testlabel->show();
