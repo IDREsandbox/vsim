@@ -19,3 +19,8 @@ void MainWindowTopBar::showSlides()
 {
 	ui.stackedWidget->setCurrentIndex(1);
 }
+
+void MainWindowTopBar::setSlidesHeader(std::string header)
+{
+	ui.label_2->setText(QString::fromStdString(header));
+}

@@ -12,6 +12,12 @@ SlideScrollItem::SlideScrollItem()
 	setDuration(0.0f);
 }
 
+void SlideScrollItem::setImage(const QImage & img)
+{
+	//ui.image_label->set
+	ui.image_label->setPixmap(QPixmap::fromImage(img));
+}
+
 float SlideScrollItem::getTransition()
 {
 	return m_transition_duration;

@@ -19,5 +19,8 @@ REGISTER_OBJECT_WRAPPER( NarrativeNode,
     ADD_MATRIXD_SERIALIZER(ViewMatrix, osg::Matrixd());
     ADD_FLOAT_SERIALIZER(PauseAtNode, 4.0f);
 	ADD_BOOL_SERIALIZER(StayOnNode, false);
-	ADD_IMAGE_SERIALIZER(Image, osg::Image, NULL);
+	// old
+	//ADD_IMAGE_SERIALIZER(Image, osg::Image, NULL);
+	// new
+	ADD_FLOAT_SERIALIZER(TransitionDuration, 2.0f);
 }

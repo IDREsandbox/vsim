@@ -10,7 +10,7 @@
 #include "narrative/NarrativeNode.h"
 
 Narrative::Narrative()
-	: osg::Node(),
+	: osg::Group(),
 	m_name("Unknown"),
 	m_description("Unknown"),
 	m_author("Unknown"),

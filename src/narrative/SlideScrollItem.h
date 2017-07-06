@@ -9,6 +9,9 @@ class SlideScrollItem : public ScrollBoxItem {
 public:
 	SlideScrollItem();
 
+	void setImage(const QImage &img);
+
+	// Scroll Box Iterface
 	float getTransition();
 	float getDuration();
 	void setTransition(float);

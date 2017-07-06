@@ -25,12 +25,12 @@ struct NarrativeSelectionInfo
     NarrativeSelectionInfo(int in_node, bool in_trans): node(in_node), isTransitionSelected(in_trans) {}
 };
 
-class Narrative: public osg::Node
+class Narrative: public osg::Group
 {
 public:
     Narrative();
     Narrative(const Narrative& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY):
-    		osg::Node(n, copyop),
+    		osg::Group(n, copyop),
     		m_selection(n.m_selection),
     		m_nodes(n.m_nodes),
     		m_transitions(n.m_transitions),
@@ -46,6 +46,10 @@ public:
 	void setAuthor(const std::string& author){m_author = author;}
 	const std::string& getDescription() const {return m_description;}
 	void setDescription(const std::string& description){m_description = description;}
+	
+	//const std::vector<std::string>& getStrings() const { return m_strings; }
+	//void setStrings(const std::vector<std::string>& strings) { m_strings = strings; }
+
 
 	bool getLock() const{return m_locked;}
 	void setLock(bool lock){ m_locked = lock;}	
@@ -67,6 +71,8 @@ protected:
     NarrativeNodeVector m_nodes;
     NarrativeTransitionVector m_transitions;
 	bool m_locked;
+
+	//std::vector<std::string> m_strings;
 };
 
 #endif /* NARRATIVE_H_ */

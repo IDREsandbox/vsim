@@ -21,6 +21,19 @@ NarrativeNode::~NarrativeNode()
 {
 }
 
+float NarrativeNode::getTransitionDuration() const
+{
+	return m_transition_duration;
+}
+void NarrativeNode::setTransitionDuration(float tduration)
+{
+	if (tduration < 0) {
+		qWarning() << "NarrativeNode cannot have a negative transition duration";
+		return;
+	}
+	m_transition_duration = tduration;
+}
+
 //VSCanvas* NarrativeNode::getOverlayCanvas()
 //{
 //    int numChildren = getNumChildren();

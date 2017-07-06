@@ -12,9 +12,9 @@
 #include <osgViewer/Viewer>
 
 #include "MainWindow.h"
-#include "narrative/NarrativeList.h"
+#include "narrative/NarrativeControl.h"
 
-class NarrativeList;
+class NarrativeControl;
 class MainWindow;
 
 class VSimApp : public QObject
@@ -25,7 +25,7 @@ public:
     //~VSimApp();
 
     osgViewer::Viewer* getViewer() { return m_viewer;}
-    NarrativeList* getNarList() { return m_narrative_list;}
+    NarrativeControl* getNarList() { return m_narrative_list;}
 
 	// file stuff
 	bool init(osg::Node *model); // loads node, does error checking
@@ -44,7 +44,7 @@ protected:
     osg::ref_ptr<osg::Group> m_model;
 	bool m_model_loaded;
 
-	NarrativeList *m_narrative_list;
+	NarrativeControl *m_narrative_list;
 };
 
 extern VSimApp* g_vsimapp;

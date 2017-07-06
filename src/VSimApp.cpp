@@ -36,7 +36,7 @@ VSimApp::VSimApp(MainWindow* window)
 		}
 		else {
 			qDebug() << "loading from initial viewer data";
-			m_narrative_list = new NarrativeList(this, window);
+			m_narrative_list = new NarrativeControl(this, window);
 			m_narrative_list->load(m_model);
 		}
 	}

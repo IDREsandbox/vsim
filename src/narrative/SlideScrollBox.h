@@ -16,7 +16,7 @@ public:
 	SlideScrollBox(QWidget * parent = nullptr);
 
 	// controller interface
-	void addItem();
+	SlideScrollItem *addItem();
 	SlideScrollItem *getItem(int index);
 
 	//std::set<int> getSlideSelection();
@@ -39,7 +39,7 @@ public:
 	
 signals:
 	void sSetTransitionDuration(float);
-	void sSetDuration(float);
+	void sSetDuration(float); // 0 if pause at node
 	void sDeleteSlides();
 	void sNewSlide(int);
 

@@ -24,20 +24,21 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	m_slide_menu->addAction(m_action_set_camera);
 	m_slide_menu->addAction(m_action_set_transition);
 
-	connect(m_action_new, &QAction::triggered, this, &SlideScrollBox::addItem);
-	connect(m_action_delete, &QAction::triggered, this, &SlideScrollBox::deleteSelection);
+	connect(m_action_new, &QAction::triggered, this, &SlideScrollBox::sNewSlide);
+	connect(m_action_delete, &QAction::triggered, this, &SlideScrollBox::sDeleteSlides);
 	connect(m_action_set_duration, &QAction::triggered, this, &SlideScrollBox::durationDialog);
 	connect(m_action_set_transition, &QAction::triggered, this, &SlideScrollBox::transitionDialog);
 
 	setSpacing(10);
 }
 
-void SlideScrollBox::addItem()
+SlideScrollItem *SlideScrollBox::addItem()
 {
 	SlideScrollItem *new_item = new SlideScrollItem();
 	connect(new_item, &SlideScrollItem::sTransitionDoubleClick, this, &SlideScrollBox::transitionDialog);
 	connect(new_item, &SlideScrollItem::sDurationDoubleClick, this, &SlideScrollBox::durationDialog);
 	HorizontalScrollBox::addItem(new_item);
+	return new_item;
 }
 SlideScrollItem *SlideScrollBox::getItem(int index)
 {
@@ -80,7 +81,9 @@ void SlideScrollBox::durationDialog()
 }
 float SlideScrollBox::execTransitionDialog(float duration)
 {
-	return QInputDialog::getDouble(nullptr, "Transition Time", "Transition Time (seconds)", duration, 0.0, 3600.0, 1, nullptr, Qt::WindowSystemMenuHint);
+	double d = QInputDialog::getDouble(nullptr, "Transition Time", "Transition Time (seconds)", duration, 0.0, 3600.0, 1, nullptr, Qt::WindowSystemMenuHint);
+	qDebug() << "value of d" << d;
+	return d;
 }
 float SlideScrollBox::execDurationDialog(float init_duration)
 {
