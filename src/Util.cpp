@@ -48,3 +48,32 @@ std::string Util::getExtension(const std::string& filename)
         return ext;
     }
 }
+
+QRect Util::rectFit(QRect container, float whratio)
+{
+	float container_ratio = container.width() / container.height();
+	
+	int width, height;
+	int top, left;
+
+	// container is wider, so match the vertical
+	if (container_ratio >= whratio) {
+		height = container.height();
+		width = whratio*height;
+	
+		int leftover = container.width() - width;
+		top = 0;
+		left = leftover / 2;
+	}
+	// container is taller, so match the horizontal
+	else {
+		width = container.width();
+		height = (1 / whratio)*width;
+
+		int leftover = container.height() - height;
+		left = 0;
+		top = leftover / 2;
+	}
+
+	return QRect(left, top, width, height);
+}
