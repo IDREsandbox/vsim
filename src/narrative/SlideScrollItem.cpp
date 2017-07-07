@@ -38,7 +38,7 @@ void SlideScrollItem::setDuration(float duration)
 		ui.duration_label->setText("-");
 	}
 	else {
-		ui.duration_label->setText(QString::number(duration, 'f', 3) + "s");
+		ui.duration_label->setText(QString::number(duration, 'f', 1) + "s");
 	}
 }
 

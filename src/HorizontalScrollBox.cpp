@@ -20,11 +20,8 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	);
 	this->setWidget(m_scroll_area_widget);
 	
-		
 	//m_height = m_scroll_area_widget->height();
 	m_height = this->height();
-	qDebug() << "INITAL HEIGHT?" << m_height;
-
 
 	const char *scrollbar_style =
 		"QScrollBar:horizontal {		  "
