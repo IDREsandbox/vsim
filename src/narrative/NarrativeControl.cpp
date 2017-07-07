@@ -194,7 +194,7 @@ void NarrativeControl::loadSlides(Narrative * narrative)
 		if (!node) {
 			qWarning() << "Load error: non-narrative detected in narrative children";
 		}
-		qDebug() << "loading slide";
+		qDebug() << "loading slide" << node->getPauseAtNode() << node->getStayOnNode() << node->getTransitionDuration();
 
 		addNodeToGui(node);
 	}
