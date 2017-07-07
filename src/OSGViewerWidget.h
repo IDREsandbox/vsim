@@ -11,6 +11,7 @@
 #include <osg/ref_ptr>
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
+#include <osg/Camera>
 
 class OSGViewerWidget : public QOpenGLWidget
 {
@@ -21,6 +22,9 @@ public:
 
 	osgViewer::Viewer* setViewer(osgViewer::Viewer*);
 	osgViewer::Viewer* getViewer() const;
+
+	// TODO?
+	// QImage takePictureAt(osg::Camera*);
 
 protected:
 	virtual void paintEvent(QPaintEvent* paintEvent);

@@ -19,13 +19,6 @@ public:
 	SlideScrollItem *addItem();
 	SlideScrollItem *getItem(int index);
 
-	//std::set<int> getSlideSelection();
-	//std::set<int> getTransitionSelection(); // will always be the same as slide selection
-
-	void setDuration(float t); // < 0 is forever
-	void setTranstionDuration(float t); // 0 is instantaneous
-
-
 	// gui display some dialogs
 	// opens based on selection, emits signals
 	void transitionDialog();
@@ -42,6 +35,7 @@ signals:
 	void sSetDuration(float); // 0 if pause at node
 	void sDeleteSlides();
 	void sNewSlide(int);
+	void sSetCamera();
 
 protected:
 	void keyPressEvent(QKeyEvent *event);

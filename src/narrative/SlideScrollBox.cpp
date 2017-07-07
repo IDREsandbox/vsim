@@ -28,6 +28,7 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	connect(m_action_delete, &QAction::triggered, this, &SlideScrollBox::sDeleteSlides);
 	connect(m_action_set_duration, &QAction::triggered, this, &SlideScrollBox::durationDialog);
 	connect(m_action_set_transition, &QAction::triggered, this, &SlideScrollBox::transitionDialog);
+	connect(m_action_set_camera, &QAction::triggered, this, &SlideScrollBox::sSetCamera);
 
 	setSpacing(10);
 }
@@ -43,22 +44,6 @@ SlideScrollItem *SlideScrollBox::addItem()
 SlideScrollItem *SlideScrollBox::getItem(int index)
 {
 	return dynamic_cast<SlideScrollItem*>(HorizontalScrollBox::getItem(index));
-}
-void SlideScrollBox::setTranstionDuration(float t)
-{
-	for (int index : getSelection()) {
-		qDebug() << "gui set transition" << index << t;
-		SlideScrollItem *item = dynamic_cast<SlideScrollItem*>(getItem(index));
-		item->setTransition(t);
-	}
-}
-void SlideScrollBox::setDuration(float t)
-{
-	for (int index : getSelection()) {
-		qDebug() << "gui set duration " << index << t;
-		SlideScrollItem *item = dynamic_cast<SlideScrollItem*>(getItem(index));
-		item->setDuration(t);
-	}
 }
 void SlideScrollBox::transitionDialog()
 {

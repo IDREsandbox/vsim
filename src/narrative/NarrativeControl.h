@@ -44,15 +44,17 @@ public:
 	//	Delete Slides
 	//	Set Slide Duration
 	//	Set Slide Transition
+	//  Set Slide Camera
 	//	Move Slides
 	//	Duplicate Slides
-	// act on currently selected items
+	// these act on currently selected items
+	// TODO: versions using sets, ex. deleteSlides(std::set<int>)
 	void newSlide();
 	void deleteSlides();
 	void setSlideDuration(float);
 	void setSlideTransition(float);
-	// TODO: versions using sets, ex. deleteSlides(std::set<int>)
-
+	void setSlideCamera();
+	
 	//Canvas
 	//	New Box
 	//	Delete Box
@@ -62,6 +64,7 @@ public:
 private:
 	void addToGui(Narrative *);
 	void addNodeToGui(NarrativeNode *);
+	QImage generateThumbnail();
 
 	int m_current_narrative;
 	int m_current_slide;

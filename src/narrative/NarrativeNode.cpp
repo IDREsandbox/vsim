@@ -10,11 +10,27 @@
 // ---------------------------------------------------
 // NarrativeNode
 
-NarrativeNode::NarrativeNode(int flags): osg::Group(), m_view_matrix(), m_pauseAtNode(4.0f), m_stayOnNode(false)
+NarrativeNode::NarrativeNode(int flags)
+	: osg::Group(),
+	m_view_matrix(),
+	m_pauseAtNode(15.0f),
+	m_transition_duration(4.0f),
+	m_stayOnNode(false),
+	m_image(NULL)
 {
     //setNodeMask(0x00000000);
 //    if (flags == NarrativeNode::WITH_OVERLAY_CANVAS)
 //        setOverlayCanvas(new VSCanvas(osgNewWidget::WIDGET_NONE));
+}
+
+NarrativeNode::NarrativeNode(const NarrativeNode & n, const osg::CopyOp & copyop)
+	: osg::Group(n, copyop),
+	m_view_matrix(n.m_view_matrix),
+	m_pauseAtNode(n.m_pauseAtNode),
+	m_stayOnNode(n.m_stayOnNode),
+	m_transition_duration(n.m_transition_duration),
+	m_image(n.m_image)
+{
 }
 
 NarrativeNode::~NarrativeNode()

@@ -42,9 +42,10 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_slide_box, &SlideScrollBox::sSetDuration, this, &NarrativeControl::setSlideDuration);
 	// transition
 	connect(m_slide_box, &SlideScrollBox::sSetTransitionDuration, this, &NarrativeControl::setSlideTransition);
+	// camera
+	connect(m_slide_box, &SlideScrollBox::sSetCamera, this, &NarrativeControl::setSlideCamera);
 	// back
 	connect(m_window->ui.topBar->ui.left_2, &QPushButton::clicked, this, &NarrativeControl::closeNarrative);
-
 }
 
 NarrativeControl::~NarrativeControl()
@@ -241,33 +242,11 @@ void NarrativeControl::newSlide()
 	node->setStayOnNode(false);
 	node->setPauseAtNode(15.0f);
 	
-	// TODO: put this code somewhere else
+	node->setImage(Util::imageQtToOsg(generateThumbnail()));
 	
-	// widget dimensions
-	QRect dims = m_window->m_osg_widget->geometry();
-	// screenshot dimensions
-	QRect ssdims = Util::rectFit(dims, 16.0 / 9.0);
-
-	QImage img(ssdims.width(), ssdims.height(), QImage::Format_RGB444);
-	QPainter painter(&img);
-	m_window->m_osg_widget->render(&painter, QPoint(0,0), QRegion(ssdims));
-
-	// optional, fewer big screenshots
-	QImage smallimg;
-	smallimg = img.scaled(288, 162, Qt::IgnoreAspectRatio);
-
-	// uncomment to see the rectangle
-	//QLabel *testlabel = new QLabel;
-	//testlabel->setPixmap(QPixmap::fromImage(smallimg));
-	//testlabel->show();
-	//QLabel *testlabel2 = new QLabel;
-	//testlabel2->setPixmap(QPixmap::fromImage(img));
-	//testlabel2->show();
-
-	node->setImage(smallimg);
-	
+	// add to osg
 	nar->addChild(node);
-
+	// add to gui
 	addNodeToGui(node);
 }
 
@@ -289,9 +268,10 @@ void NarrativeControl::setSlideDuration(float duration)
 		else {
 			node->setPauseAtNode(duration);
 		}
+
+		SlideScrollItem *item = m_slide_box->getItem(slide);
+		item->setDuration(duration);
 	}
-	// gui
-	m_slide_box->setDuration(duration);
 }
 
 void NarrativeControl::setSlideTransition(float transition)
@@ -301,9 +281,24 @@ void NarrativeControl::setSlideTransition(float transition)
 	for (auto slide : selection) {
 		NarrativeNode *node = getNarrativeNode(m_current_narrative, slide);
 		node->setTransitionDuration(transition);
+
+		SlideScrollItem *item = m_slide_box->getItem(slide);
+		item->setTransition(transition);
 	}
-	// gui
-	m_slide_box->setTranstionDuration(transition);
+}
+
+void NarrativeControl::setSlideCamera()
+{
+	std::set<int> selection = m_slide_box->getSelection();
+	QImage new_thumbnail = generateThumbnail();
+	// widget dimensions
+	for (auto slide : selection) {
+		NarrativeNode *node = getNarrativeNode(m_current_narrative, slide);
+		node->setImage(Util::imageQtToOsg(new_thumbnail));
+	
+		SlideScrollItem *item = m_slide_box->getItem(slide);
+		item->setImage(new_thumbnail);
+	}
 }
 
 void NarrativeControl::addToGui(Narrative *nar)
@@ -321,5 +316,22 @@ void NarrativeControl::addNodeToGui(NarrativeNode *node)
 	else {
 		newitem->setDuration(node->getPauseAtNode());
 	}
-	newitem->setImage(node->getImage());
+	newitem->setImage(Util::imageOsgToQt(node->getImage()));
+}
+
+QImage NarrativeControl::generateThumbnail()
+{
+	// widget dimensions
+	QRect dims = m_window->m_osg_widget->geometry();
+	// screenshot dimensions
+	QRect ssdims = Util::rectFit(dims, 16.0 / 9.0);
+
+	QImage img(ssdims.width(), ssdims.height(), QImage::Format_RGB444);
+	QPainter painter(&img);
+	m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims));
+
+	// optional, fewer big screenshots
+	QImage smallimg;
+	smallimg = img.scaled(288, 162, Qt::IgnoreAspectRatio);
+	return smallimg;
 }
