@@ -1,5 +1,6 @@
 #include "narrative/NarrativeControl.h"
 #include "narrative/Narrative.h"
+#include "Util.h"
 
 #include <QObject>
 #include <QDebug>
@@ -241,16 +242,26 @@ void NarrativeControl::newSlide()
 	node->setPauseAtNode(15.0f);
 	
 	// TODO: put this code somewhere else
+	
+	// widget dimensions
 	QRect dims = m_window->m_osg_widget->geometry();
-	QImage img(dims.width(), dims.height(), QImage::Format_RGB444);
-	QPainter painter(&img);
-	m_window->m_osg_widget->render(&painter);
+	// screenshot dimensions
+	QRect ssdims = Util::rectFit(dims, 16.0 / 9.0);
 
+	QImage img(ssdims.width(), ssdims.height(), QImage::Format_RGB444);
+	QPainter painter(&img);
+	m_window->m_osg_widget->render(&painter, QPoint(0,0), QRegion(ssdims));
+
+	// optional, fewer big screenshot
+	QImage smallimg;
+	smallimg = img.scaled(288, 162);
+
+	// uncomment to see the rectangle
 	//QLabel *testlabel = new QLabel;
 	//testlabel->setPixmap(QPixmap::fromImage(img));
 	//testlabel->show();
 
-	node->setImage(img);
+	node->setImage(smallimg);
 	
 	nar->addChild(node);
 
