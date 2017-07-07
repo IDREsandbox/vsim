@@ -51,7 +51,7 @@ std::string Util::getExtension(const std::string& filename)
 
 QRect Util::rectFit(QRect container, float whratio)
 {
-	float container_ratio = container.width() / container.height();
+	float container_ratio = container.width() / (float) container.height();
 	
 	int width, height;
 	int top, left;

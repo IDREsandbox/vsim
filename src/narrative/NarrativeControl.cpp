@@ -252,14 +252,17 @@ void NarrativeControl::newSlide()
 	QPainter painter(&img);
 	m_window->m_osg_widget->render(&painter, QPoint(0,0), QRegion(ssdims));
 
-	// optional, fewer big screenshot
+	// optional, fewer big screenshots
 	QImage smallimg;
-	smallimg = img.scaled(288, 162);
+	smallimg = img.scaled(288, 162, Qt::IgnoreAspectRatio);
 
 	// uncomment to see the rectangle
 	//QLabel *testlabel = new QLabel;
-	//testlabel->setPixmap(QPixmap::fromImage(img));
+	//testlabel->setPixmap(QPixmap::fromImage(smallimg));
 	//testlabel->show();
+	//QLabel *testlabel2 = new QLabel;
+	//testlabel2->setPixmap(QPixmap::fromImage(img));
+	//testlabel2->show();
 
 	node->setImage(smallimg);
 	
