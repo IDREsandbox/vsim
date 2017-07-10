@@ -1,0 +1,51 @@
+CMake Cheat Sheet
+
+Making the visual studio project (starting in the root)
+
+mkdir build
+cd build
+cmake ..
+
+Other generators
+cmake -G "Visual Studio 15 2017 Win64" ..
+
+Special install directory, for testing installation folder. 
+The default on windows is Program Files so for testing don't mess with that
+cmake -D CMAKE_INSTALL_PREFIX=install ..
+
+Building (starting in the build directory)
+cmake --build .
+
+Building release
+cmake --build . --config Release
+
+Installing (equivalent of 'make install' on Linux)
+cmake --build . --target INSTALL
+
+Packaging, default generator is WIX
+cmake --build . --config Release
+cpack .
+
+
+
+-------------
+
+
+With Visual Studio 2017, this thing is so strange
+
+
+-------------
+
+With Qt
+
+
+cmake -D CMAKE_PREFIX_PATH=C:/Qt/5.8/msvc2015 ..
+
+
+-------------
+
+Altogether
+
+cmake -G "Visual Studio 15 2017 Win64" \
+  -D CMAKE_PREFIX_PATH=C:/Qt/5.9.1/msvc2017_64 \
+  -D CMAKE_INSTALL_PREFIX=install ..
