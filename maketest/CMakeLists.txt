@@ -24,11 +24,20 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # search path
 include_directories("${PROJECT_BINARY_DIR}")
 
+
+
+find_package(OpenSceneGraph 3.0.0 REQUIRED osgDB osgUtil)
+include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+
+message(OPENSCENEGRAPH_FOUND)
+message(OPENSCENEGRAPH_VERSION)
+message(OPENSCENEGRAPH_INCLUDE_DIRS )
+message(OPENSCENEGRAPH_LIBRARIES )
+message(${OPENSCENEGRAPH_INCLUDE_DIRS})
+message(${OPENSCENEGRAPH_LIBRARIES})
+
 find_package(Qt5Widgets)
 #get_target_property(QtWidgets Qt5::Core LOCATION)
-
-find_package(OpenSceneGraph 2.0.0 REQUIRED osgDB osgUtil)
-include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 # source
 file(GLOB hello_src "*.h" "*.cpp")
@@ -63,6 +72,10 @@ foreach(dll
   install(FILES ${dll_location} DESTINATION "bin")
   message("imported target: ${dll}, path: ${dll_location}")
 endforeach(dll)
+
+IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    message("debug mode")
+ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
 # # build a CPack driven installer package
 # include (InstallRequiredSystemLibraries)

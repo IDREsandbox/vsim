@@ -47,14 +47,11 @@ cmake -D CMAKE_PREFIX_PATH=C:/Qt/5.8/msvc2015 ..
 Altogether
 
 cmake -G "Visual Studio 15 2017 Win64" \
-  -D CMAKE_PREFIX_PATH=C:/Qt/5.9.1/msvc2017_64; \
+  -D CMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;\
+                        T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/lib"\
   -D CMAKE_INSTALL_PREFIX=install ..
 
 cmake --build . --target INSTALL --config Release
-
-
-
-
 
 
 HOW TO BUILD DEPENDENCIES
