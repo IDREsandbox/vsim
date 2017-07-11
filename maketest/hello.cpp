@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QWidget>
 #include "hello.h"
+#include "foo.h"
 
 int main (int argc, char *argv[])
 {
@@ -12,6 +13,7 @@ int main (int argc, char *argv[])
   QWidget *w = new QWidget();
   w->show();
   printf("hello to the world, %s - Version %d.%d\n", argv[0], Hello_VERSION_MAJOR, Hello_VERSION_MINOR);
+  printf("testing foo %d\n", Foo::Wow(44));
   a.exec();
 
 

@@ -20,17 +20,25 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+# dependencies
 # search path
 include_directories("${PROJECT_BINARY_DIR}")
 
-
 find_package(Qt5Widgets)
-get_target_property(QtWidgets Qt5::Core LOCATION)
+#get_target_property(QtWidgets Qt5::Core LOCATION)
+
+find_package(OpenSceneGraph 2.0.0 REQUIRED osgDB osgUtil)
+include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+
+# source
+file(GLOB hello_src "*.h" "*.cpp")
 
 # final add executable
-add_executable(hello hello.cpp)
+add_executable(hello ${hello_src})
 
+# linking
 target_link_libraries(hello Qt5::Widgets)
+target_link_libraries(foo ${OPENSCENEGRAPH_LIBRARIES})
 
 #install
 install(TARGETS hello DESTINATION "bin")
