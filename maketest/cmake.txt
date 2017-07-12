@@ -47,8 +47,7 @@ cmake -D CMAKE_PREFIX_PATH=C:/Qt/5.8/msvc2015 ..
 Altogether
 
 cmake -G "Visual Studio 15 2017 Win64" \
-  -D CMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;\
-                        T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/lib"\
+  -D CMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install"\
   -D CMAKE_INSTALL_PREFIX=install ..
 
 cmake --build . --target INSTALL --config Release
@@ -76,6 +75,7 @@ cmake \
   .
 #  -D CURL_SOURCE_DIR= \
 
+
 cmake --build . --config Debug
 cmake --build . --config Release
 cmake --build . --target INSTALL --config Debug
@@ -92,6 +92,8 @@ cmake -G "Visual Studio 15 2017 Win64" \
   ../../../dependencies-src/OpenSceneGraph-3.4.0/
 
 cmake -D ACTUAL_3RDPARTY_DIR="$DEPS/3rdParty-build/msvc2017_64/3rdParty/-x64" .
+cmake -D CMAKE_INSTALL_PREFIX=install .
+# i ran into an issues w/ administrator priviledges and the T drive... so install relative
 
 cmake --build . --config Debug
 cmake --build . --config Release
