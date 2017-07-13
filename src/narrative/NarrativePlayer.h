@@ -24,6 +24,9 @@ public:
 	void play();
 	void pause();
 
+public: //slots
+	void selectionChange(int narrative, int slide);
+
 private:
 	MainWindow *m_window;
 	NarrativeControl *m_narratives;

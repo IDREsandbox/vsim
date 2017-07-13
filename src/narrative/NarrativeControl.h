@@ -28,6 +28,8 @@ public:
 	void openNarrative();
 	void closeNarrative();
 
+	// this should be const or it is dangerous to have public
+	// it means that ppl can change narrative data w/o it being updated by the gui
 	Narrative *getNarrative(int index);
 	NarrativeNode *getNarrativeNode(int narrative, int slide);
 
