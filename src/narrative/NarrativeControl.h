@@ -9,6 +9,10 @@
 #include "HorizontalScrollBox.h"
 #include "MainWindow.h"
 
+// Interface to the underlying osg data for narratives
+// Exactly one should exist per VSimApp
+// TODO: convert to QAbstractItemModel, remove focus state, remove thumbnail code
+// TODO: undo/redo
 class NarrativeControl : public QObject
 {
 	Q_OBJECT

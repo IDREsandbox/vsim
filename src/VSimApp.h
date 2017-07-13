@@ -13,6 +13,7 @@
 
 #include "MainWindow.h"
 #include "narrative/NarrativeControl.h"
+#include "narrative/NarrativePlayer.h"
 
 class NarrativeControl;
 class MainWindow;
@@ -44,6 +45,7 @@ protected:
     osg::ref_ptr<osg::Group> m_model;
 	bool m_model_loaded;
 
+	NarrativePlayer *m_narrative_player;
 	NarrativeControl *m_narrative_list;
 };
 

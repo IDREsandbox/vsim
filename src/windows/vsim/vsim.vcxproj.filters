@@ -271,6 +271,9 @@
     <ClCompile Include="..\..\narrative\NarrativeControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\narrative\NarrativePlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">
@@ -305,6 +308,9 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_NarrativeSlideDurationDialog.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\narrative\NarrativePlayer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
