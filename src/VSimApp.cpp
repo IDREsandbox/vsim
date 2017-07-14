@@ -25,6 +25,7 @@ VSimApp::VSimApp(MainWindow* window)
 {
 	m_viewer = window->getViewer();
 	m_narrative_list = new NarrativeControl(this, m_window);
+	m_narrative_player = new NarrativePlayer(this, m_window, m_narrative_list);
 
 	QObject::connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
 	QObject::connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);

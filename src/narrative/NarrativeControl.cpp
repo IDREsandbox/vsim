@@ -222,15 +222,26 @@ void NarrativeControl::closeNarrative()
 	this->m_window->ui.topBar->showNarratives();
 }
 
+void NarrativeControl::openSlide()
+{
+	int index = m_slide_box->getLastSelected();
+}
+
 Narrative *NarrativeControl::getNarrative(int index)
 {
+	if (index >= m_narrative_group->getNumChildren() || index < 0) {
+		return nullptr;
+	}
 	osg::Node *c = m_narrative_group->getChild(index);
 	return dynamic_cast<Narrative*>(c);
 }
 
 NarrativeNode * NarrativeControl::getNarrativeNode(int narrative, int slide)
 {
-	return dynamic_cast<NarrativeNode*>(getNarrative(narrative)->getChild(slide));
+	Narrative *nar = getNarrative(narrative);
+	if (!nar) return nullptr;
+	if (slide >= nar->getNumChildren() || slide < 0) return nullptr;
+	return dynamic_cast<NarrativeNode*>(nar->getChild(slide));
 }
 
 void NarrativeControl::newSlide()
@@ -243,6 +254,8 @@ void NarrativeControl::newSlide()
 	node->setPauseAtNode(15.0f);
 	
 	node->setImage(Util::imageQtToOsg(generateThumbnail()));
+	
+	node->setViewMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
 	
 	// add to osg
 	nar->addChild(node);
@@ -295,7 +308,8 @@ void NarrativeControl::setSlideCamera()
 	for (auto slide : selection) {
 		NarrativeNode *node = getNarrativeNode(m_current_narrative, slide);
 		node->setImage(Util::imageQtToOsg(new_thumbnail));
-	
+		node->setViewMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
+
 		SlideScrollItem *item = m_slide_box->getItem(slide);
 		item->setImage(new_thumbnail);
 	}

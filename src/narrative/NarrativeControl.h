@@ -27,6 +27,7 @@ public:
 	//void showSlides(int index);
 	void openNarrative();
 	void closeNarrative();
+	void openSlide();
 
 	// this should be const or it is dangerous to have public
 	// it means that ppl can change narrative data w/o it being updated by the gui
@@ -79,7 +80,7 @@ private:
 	osg::Group *m_narrative_group; // the osg side data structure, instead of using a vector
 	osg::Group *m_model;
 
-	MainWindow *m_window;
+	MainWindow *m_window; // TODO: remove this after redesign, this should be completely gui independent
 	NarrativeScrollBox *m_narrative_box;
 	SlideScrollBox *m_slide_box;
 };
