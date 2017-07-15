@@ -19,11 +19,15 @@
   <property name="maximumSize">
    <size>
     <width>93</width>
-    <height>300</height>
+    <height>340</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgba(86, 86, 86, 80);
+color: rgb(255, 255, 255);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">

@@ -3,7 +3,7 @@
 
 #include "ui_editButtons.h"
 
-class editButtons : public QWidget
+class editButtons : public QFrame
 {
 	Q_OBJECT
 

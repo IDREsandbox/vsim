@@ -1,6 +1,6 @@
 #include <editButtons.h>
 
-editButtons::editButtons(QWidget* parent) : QWidget(parent)
+editButtons::editButtons(QWidget* parent) : QFrame(parent)
 {
-
+	ui.setupUi(this);
 }
