@@ -15,6 +15,7 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 {
 	m_narrative_box = window->ui.topBar->ui.narratives;
 	m_slide_box = window->ui.topBar->ui.slides;
+	m_canvas = window->m_drag_area;
 
 	// NARRATIVE CONTROL
 	// new
@@ -38,6 +39,9 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	// delete
 	connect(m_slide_box, &SlideScrollBox::sDeleteSlides, this, &NarrativeControl::deleteSlides);
 	connect(m_window->ui.topBar->ui.minus_2, &QPushButton::clicked, this, &NarrativeControl::deleteSlides);
+	// edit
+	connect(m_slide_box, &SlideScrollBox::sEditSlide, this, &NarrativeControl::editSlide);
+	connect(m_window->ui.topBar->ui.open_2, &QPushButton::clicked, this, &NarrativeControl::editSlide);
 	// duration
 	connect(m_slide_box, &SlideScrollBox::sSetDuration, this, &NarrativeControl::setSlideDuration);
 	// transition
@@ -253,6 +257,10 @@ void NarrativeControl::newSlide()
 void NarrativeControl::deleteSlides()
 {
 	m_slide_box->deleteSelection();
+}
+
+void NarrativeControl::editSlide() {
+	m_canvas->editCanvas();
 }
 
 void NarrativeControl::setSlideDuration(float duration)

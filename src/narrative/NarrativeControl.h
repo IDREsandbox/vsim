@@ -51,6 +51,7 @@ public:
 	// TODO: versions using sets, ex. deleteSlides(std::set<int>)
 	void newSlide();
 	void deleteSlides();
+	void editSlide();
 	void setSlideDuration(float);
 	void setSlideTransition(float);
 	void setSlideCamera();
@@ -76,6 +77,7 @@ private:
 	MainWindow *m_window;
 	NarrativeScrollBox *m_narrative_box;
 	SlideScrollBox *m_slide_box;
+	labelCanvas *m_canvas;
 };
 
 #endif /* NARRATIVELIST_H_ */

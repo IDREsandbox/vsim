@@ -30,6 +30,8 @@ public:
     osg::Matrixd& getViewMatrix() { return m_view_matrix; }
     const osg::Matrixd& getViewMatrix() const { return m_view_matrix; }
     void setViewMatrix(const osg::Matrixd& matrix) { m_view_matrix = matrix; }
+
+	//this can own the widget data. 3 vecs: x, y, text
     //VSCanvas* getOverlayCanvas();
     //void setOverlayCanvas(VSCanvas* canvas);
     float getPauseAtNode() const { return m_pauseAtNode; }
