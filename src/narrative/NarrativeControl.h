@@ -9,6 +9,10 @@
 #include "HorizontalScrollBox.h"
 #include "MainWindow.h"
 
+// Interface to the underlying osg data for narratives
+// Exactly one should exist per VSimApp
+// TODO: convert to QAbstractItemModel, remove focus state, remove thumbnail code
+// TODO: undo/redo
 class NarrativeControl : public QObject
 {
 	Q_OBJECT
@@ -24,6 +28,8 @@ public:
 	void openNarrative();
 	void closeNarrative();
 
+	// this should be const or it is dangerous to have public
+	// it means that ppl can change narrative data w/o it being updated by the gui
 	Narrative *getNarrative(int index);
 	NarrativeNode *getNarrativeNode(int narrative, int slide);
 

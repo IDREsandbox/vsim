@@ -24,27 +24,14 @@ VSimApp::VSimApp(MainWindow* window)
 	: m_window(window)
 {
 	m_viewer = window->getViewer();
-
-	osg::Node *scene_data = m_viewer->getSceneData();
-	if (!scene_data) {
-		reset();
-	}
-	else {
-		m_model = m_viewer->getSceneData()->asGroup();
-		if (!m_model) {
-			reset();
-		}
-		else {
-			qDebug() << "loading from initial viewer data";
-			m_narrative_list = new NarrativeControl(this, window);
-			m_narrative_list->load(m_model);
-		}
-	}
+	m_narrative_list = new NarrativeControl(this, m_window);
 
 	QObject::connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
 	QObject::connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
 	QObject::connect(window, &MainWindow::sImportModel, this, &VSimApp::importModel);
 	QObject::connect(window, &MainWindow::sNew, this, &VSimApp::reset);
+
+	reset();
 }
 
 bool VSimApp::init(osg::Node *model)
@@ -62,6 +49,7 @@ bool VSimApp::init(osg::Node *model)
 	m_model = group;
 	m_viewer->setSceneData(m_model);
 	m_narrative_list->load(m_model);
+
 	return true;
 }
 void VSimApp::reset()
