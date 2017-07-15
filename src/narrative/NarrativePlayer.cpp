@@ -12,6 +12,7 @@ NarrativePlayer::NarrativePlayer(QObject *parent, MainWindow *window, NarrativeC
 	m_transitioning(false),
 	m_slide_time_sec(0)
 {
+	//m_manipulator = new osgGA::FirstPersonManipulator();
 
 	m_narrative_box = m_window->ui.topBar->ui.narratives;
 	m_slide_box = m_window->ui.topBar->ui.slides;
@@ -62,6 +63,7 @@ void NarrativePlayer::update(double dt_sec)
 		return;
 	}
 	if (m_current_narrative == -1 || m_current_slide == -1) {
+		qDebug() << "update error narrative";
 		pause();
 		return;
 	}
@@ -110,7 +112,7 @@ void NarrativePlayer::update(double dt_sec)
 			next();
 			return;
 		}
-
+		//qDebug() << "transitioning:" << t;
 		osg::Matrixd new_matrix = Util::viewMatrixLerp(t, source_node->getViewMatrix(), dest_node->getViewMatrix());
 		setViewMatrix(new_matrix);
 	}
@@ -118,13 +120,19 @@ void NarrativePlayer::update(double dt_sec)
 
 void NarrativePlayer::play()
 {
+	qDebug() << "play";
 	if (m_current_narrative == -1 || m_current_slide == -1) {
+		return;
+	}
+	const NarrativeNode *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
+	if (next_node == nullptr) { // check if at the end
+		pause();
 		return;
 	}
 
 	m_playing = true;
 	m_transitioning = false;
-	next();
+	m_slide_time_sec = 0;
 }
 
 void NarrativePlayer::next()
@@ -139,7 +147,7 @@ void NarrativePlayer::next()
 			return;
 		}
 		// if the next slide has a transition, then transitioning, otherwise skip
-		if (next_node->getTransitionDuration() >= .00001) {
+		if (next_node->getTransitionDuration() <= .00001) {
 			m_transitioning = false;
 		}
 		else {
@@ -158,6 +166,14 @@ void NarrativePlayer::next()
 
 		const NarrativeNode *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
 		setViewMatrix(current_node->getViewMatrix());
+
+		// if there is no next node, we're done
+		const NarrativeNode *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
+		if (next_node == nullptr) {
+			qInfo() << "Narrative Player - last slide reached";
+			pause();
+			return;
+		}
 	}
 
 	// after the switch and slide update, check if there is a StayOnNode

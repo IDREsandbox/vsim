@@ -68,6 +68,8 @@ public:
 	//	Move Box
 	//	Edit Box Content
 
+	void OSGDebug();
+
 private:
 	void addToGui(Narrative *);
 	void addNodeToGui(NarrativeNode *);

@@ -6,6 +6,7 @@
 #include "MainWindow.h"
 #include <QObject>
 #include <osg/Matrix>
+#include <osgGA/FirstPersonManipulator>
 
 class NarrativePlayer : public QObject
 {
@@ -40,6 +41,8 @@ private:
 
 	double m_previous_time;
 	QTimer *m_timer; // frame timer, used for updates
+
+	//osg::ref_ptr<osgGA::StandardManipulator> m_manipulator;
 
 	// convenience pointers
 	NarrativeScrollBox *m_narrative_box;
