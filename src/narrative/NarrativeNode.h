@@ -13,13 +13,13 @@
 #include <QDebug>
 #include <QImage>
 
-class VSCanvas;
-namespace osgNewWidget { class Canvas; }
+//class VSCanvas;
+//namespace osgNewWidget { class Canvas; }
 
 class NarrativeNode: public osg::Group
 {
 public:
-    enum NarrativeNodeFlags { NONE, WITH_OVERLAY_CANVAS };
+    //enum NarrativeNodeFlags { NONE, WITH_OVERLAY_CANVAS };
 
     NarrativeNode(int flags = 0);
 	NarrativeNode(const NarrativeNode& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
@@ -55,7 +55,7 @@ protected:
 };
 
 
-// old code, add for compatibility serialization later?
+// DEPRECATED old code, add for compatibility serialization later?
 class NarrativeTransition: public osg::Node
 {
 public:

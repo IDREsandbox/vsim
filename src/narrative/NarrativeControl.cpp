@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <QAction>
 #include <QList>
+#include <osg/Matrix>
+#include <osg/io_utils>
 
 NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	: QObject(parent), 
@@ -50,6 +52,20 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_slide_box, &SlideScrollBox::sSetCamera, this, &NarrativeControl::setSlideCamera);
 	// back
 	connect(m_window->ui.topBar->ui.left_2, &QPushButton::clicked, this, &NarrativeControl::closeNarrative);
+
+	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, &NarrativeControl::OSGDebug);
+	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this, 
+	[this](){
+		osg::Matrixd matrix = m_window->getViewer()->getCameraManipulator()->getMatrix();
+		osg::Vec3 trans, scale;
+		osg::Quat rot, so;
+		matrix.decompose(trans, rot, scale, so);
+
+		double y, p, r;
+		Util::quatToYPR(rot, &y, &p, &r);
+		qDebug() << "ypr" << y*180/M_PI << p*180/M_PI << r*180/M_PI;
+	});
+	
 }
 
 NarrativeControl::~NarrativeControl()
@@ -226,15 +242,26 @@ void NarrativeControl::closeNarrative()
 	this->m_window->ui.topBar->showNarratives();
 }
 
+void NarrativeControl::openSlide()
+{
+	int index = m_slide_box->getLastSelected();
+}
+
 Narrative *NarrativeControl::getNarrative(int index)
 {
+	if (index >= m_narrative_group->getNumChildren() || index < 0) {
+		return nullptr;
+	}
 	osg::Node *c = m_narrative_group->getChild(index);
 	return dynamic_cast<Narrative*>(c);
 }
 
 NarrativeNode * NarrativeControl::getNarrativeNode(int narrative, int slide)
 {
-	return dynamic_cast<NarrativeNode*>(getNarrative(narrative)->getChild(slide));
+	Narrative *nar = getNarrative(narrative);
+	if (!nar) return nullptr;
+	if (slide >= nar->getNumChildren() || slide < 0) return nullptr;
+	return dynamic_cast<NarrativeNode*>(nar->getChild(slide));
 }
 
 void NarrativeControl::newSlide()
@@ -248,6 +275,8 @@ void NarrativeControl::newSlide()
 	
 	node->setImage(Util::imageQtToOsg(generateThumbnail()));
 	
+	node->setViewMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
+	
 	// add to osg
 	nar->addChild(node);
 	// add to gui
@@ -256,6 +285,19 @@ void NarrativeControl::newSlide()
 
 void NarrativeControl::deleteSlides()
 {
+	std::set<int> selection = m_slide_box->getSelection();
+	std::vector<NarrativeNode*> nodes;
+	
+	// data
+	for (int slide : selection) {
+		nodes.push_back(getNarrativeNode(m_current_narrative, slide));
+	}
+	for (NarrativeNode *node : nodes) {
+		Narrative *nar = getNarrative(m_current_narrative);
+		nar->removeChild(node);
+	}
+
+	// gui
 	m_slide_box->deleteSelection();
 }
 
@@ -265,10 +307,9 @@ void NarrativeControl::editSlide() {
 
 void NarrativeControl::setSlideDuration(float duration)
 {
-	// data
 	std::set<int> selection = m_slide_box->getSelection();
 	for (auto slide : selection) {
-		
+		// data
 		NarrativeNode *node = getNarrativeNode(m_current_narrative, slide);
 		if (duration == 0) {
 			node->setStayOnNode(true);
@@ -277,6 +318,7 @@ void NarrativeControl::setSlideDuration(float duration)
 			node->setPauseAtNode(duration);
 		}
 
+		// gui
 		SlideScrollItem *item = m_slide_box->getItem(slide);
 		item->setDuration(duration);
 	}
@@ -284,12 +326,13 @@ void NarrativeControl::setSlideDuration(float duration)
 
 void NarrativeControl::setSlideTransition(float transition)
 {
-	// data
 	std::set<int> selection = m_slide_box->getSelection();
 	for (auto slide : selection) {
 		NarrativeNode *node = getNarrativeNode(m_current_narrative, slide);
+		// data
 		node->setTransitionDuration(transition);
 
+		// gui
 		SlideScrollItem *item = m_slide_box->getItem(slide);
 		item->setTransition(transition);
 	}
@@ -303,9 +346,25 @@ void NarrativeControl::setSlideCamera()
 	for (auto slide : selection) {
 		NarrativeNode *node = getNarrativeNode(m_current_narrative, slide);
 		node->setImage(Util::imageQtToOsg(new_thumbnail));
-	
+		node->setViewMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
+
 		SlideScrollItem *item = m_slide_box->getItem(slide);
 		item->setImage(new_thumbnail);
+	}
+}
+
+void NarrativeControl::OSGDebug()
+{
+	uint narrative_count = m_narrative_group->getNumChildren();
+	for (uint i = 0; i < narrative_count; i++) {
+		Narrative *nar = getNarrative(i);
+		qInfo() << "Narrative" << i << QString::fromStdString(nar->getName());
+		
+		uint slide_count = nar->getNumChildren();
+		for (uint j = 0; j < slide_count; j++) {
+			NarrativeNode *slide = getNarrativeNode(i, j);
+			qInfo() << "\tSlide" << j << slide->getTransitionDuration();
+		}
 	}
 }
 
