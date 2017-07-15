@@ -13,13 +13,14 @@
 #include "dragLabel.h"
 #include "narrative/NarrativeInfoDialog.h"
 #include "dragLabelInput.h"
+#include "labelCanvas.h"
 
 //#include "VSimApp.h"
 
 extern osgViewer::Viewer* g_viewer;
 
 class VSimApp;
-class dragLabel;
+class labelCanvas;
 
 class MainWindow : public QMainWindow
 {
@@ -27,8 +28,6 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow(QWidget* parent = nullptr);
-
-	void resizeEvent(QResizeEvent * event);
 
 	// UI stuff (these are just tests, TODO: remove, just use the built in qt dialogs)
 	void ErrorDialog(const std::string& msg);
@@ -67,16 +66,11 @@ signals:
 	// ui, signal emitters
 public:
 	Ui::MainWindow ui;
-	dragLabelInput *dragLabelEdit;
 	NarrativeInfoDialog *m_narrative_info_dialog;
 
 public:
 	OSGViewerWidget *m_osg_widget;
-	dragLabel *test;
-	QWidget *m_drag_area;
-	//QPoint offset;
-	int offset;
-	
+	labelCanvas *m_drag_area;
 };
 
 

@@ -12,6 +12,7 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	//m_slide_menu->setStyleSheet("background-color: rgb(255,255,255);");
 	m_action_new = new QAction("New Slide", m_slide_menu);
 	m_action_delete = new QAction("Delete Slide", m_slide_menu);
+	m_action_edit = new QAction("Edit Slide", m_slide_menu);
 	m_action_set_duration = new QAction("Set Duration", m_slide_menu);
 	m_action_set_camera = new QAction("Set Camera", m_slide_menu);
 	m_action_set_transition = new QAction("Set Transition", m_slide_menu);
@@ -20,12 +21,14 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 
 	m_slide_menu->addAction(m_action_new);
 	m_slide_menu->addAction(m_action_delete);
+	m_slide_menu->addAction(m_action_edit);
 	m_slide_menu->addAction(m_action_set_duration);
 	m_slide_menu->addAction(m_action_set_camera);
 	m_slide_menu->addAction(m_action_set_transition);
 
 	connect(m_action_new, &QAction::triggered, this, &SlideScrollBox::sNewSlide);
 	connect(m_action_delete, &QAction::triggered, this, &SlideScrollBox::sDeleteSlides);
+	connect(m_action_edit, &QAction::triggered, this, &SlideScrollBox::sEditSlide);
 	connect(m_action_set_duration, &QAction::triggered, this, &SlideScrollBox::durationDialog);
 	connect(m_action_set_transition, &QAction::triggered, this, &SlideScrollBox::transitionDialog);
 	connect(m_action_set_camera, &QAction::triggered, this, &SlideScrollBox::sSetCamera);

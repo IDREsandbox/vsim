@@ -8,16 +8,20 @@
 #include <QtCore/QBasicTimer>
 #include "MainWindow.h"
 
-class MainWindow;
-
 class dragLabel : public QLabel
 {
 	Q_OBJECT
 
 public:
-	dragLabel(QWidget* parent, std::string style, MainWindow* window);
-	dragLabel(std::string str, std::string style, QWidget* parent, MainWindow* window);
+	//constructor for creating new widget
+	dragLabel(QWidget* parent, std::string style);
+
+	//constructor for generation from data
+	dragLabel(std::string str, std::string style, int x, int y, int w, int h, QWidget* parent);
 	~dragLabel();
+
+	void setIndex(int index);
+	int getIndex();
 
 	void mousePressEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
@@ -25,8 +29,13 @@ public:
 	void mouseMoveEvent(QMouseEvent *event);
 
 	void updateParSize();
-	void mainResize();
-	void resizeEvent(QResizeEvent* event);
+	void canvasResize();
+	void resizeEvent(QResizeEvent *event);
+
+signals:
+	void sTextSet(QString, int);
+	void sSizeSet(QSize, int);
+	void sPosSet(QPoint, int);
 
 protected:
 	QWidget* par;
@@ -44,7 +53,7 @@ protected:
 
 	QBasicTimer timer;
 
-	MainWindow* m_window;
+	int m_index = -1;
 };
 
 #endif // DRAGLABEL_H
