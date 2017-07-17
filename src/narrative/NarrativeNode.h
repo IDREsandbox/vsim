@@ -27,6 +27,8 @@ public:
 
     META_Node(, NarrativeNode)
 
+	// This is actually the camera matrix, gotten from manipulator->getMatrix()
+	// the name is kept for compatibility
     osg::Matrixd& getViewMatrix() { return m_view_matrix; }
     const osg::Matrixd& getViewMatrix() const { return m_view_matrix; }
     void setViewMatrix(const osg::Matrixd& matrix) { m_view_matrix = matrix; }

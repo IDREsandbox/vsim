@@ -1,0 +1,73 @@
+
+New Format
+
+root osg::Group
+	Children {
+		"Narratives" osg::Group
+			Children {
+				Narrative1 ::Narrative (osg::Group)
+					Name
+					Author
+					Description
+					Children {
+						NarrativeNode1 ::NarrativeNode (osg::Group)
+							StayOnNode
+							PauseAtNode
+							TransitionDuration
+							CameraMatrix
+							Children {
+								Label1 ::Label
+									x
+									y
+									width
+									height
+									content?
+									background?
+									image?
+							}
+					}
+			}
+
+		"Models" osg::Group
+			Children {
+
+
+			}
+
+
+	}
+
+
+
+
+
+Old Format
+
+root osg::Node (whatever model was loaded is the root)
+	
+	Children {
+		"VsimBrandingOverlay" ::VSCanvas
+		ModelInformation ::ModelInformation
+		Model2
+		Model3
+		Narrative1 ::Narrative
+		Narrative2 ::Narrative
+			NarrativeNodes, user serializer {
+				Node 1
+					same as ours
+				Transition 1
+					same as ours
+				Node 2
+				Transition 2
+			}
+			Selection, user serializer
+			Name
+			Author
+			Description
+	}
+
+
+
+
+
+
