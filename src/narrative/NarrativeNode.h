@@ -57,13 +57,12 @@ protected:
 };
 
 
-// DEPRECATED old code, add for compatibility serialization later?
+// DEPRECATED - This class is used for reading in old vsim formats.
 class NarrativeTransition: public osg::Node
 {
 public:
     NarrativeTransition();
-    NarrativeTransition(const NarrativeTransition& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
-    : osg::Node(n, copyop) {}
+	NarrativeTransition(const NarrativeTransition& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
     virtual ~NarrativeTransition();
 
     META_Node(, NarrativeTransition)

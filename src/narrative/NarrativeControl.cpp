@@ -52,19 +52,6 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_slide_box, &SlideScrollBox::sSetCamera, this, &NarrativeControl::setSlideCamera);
 	// back
 	connect(m_window->ui.topBar->ui.left_2, &QPushButton::clicked, this, &NarrativeControl::closeNarrative);
-
-	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, &NarrativeControl::OSGDebug);
-	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this, 
-	[this](){
-		osg::Matrixd matrix = m_window->getViewer()->getCameraManipulator()->getMatrix();
-		osg::Vec3 trans, scale;
-		osg::Quat rot, so;
-		matrix.decompose(trans, rot, scale, so);
-
-		double y, p, r;
-		Util::quatToYPR(rot, &y, &p, &r);
-		qDebug() << "ypr" << y*180/M_PI << p*180/M_PI << r*180/M_PI;
-	});
 	
 }
 
@@ -84,8 +71,8 @@ void NarrativeControl::newNarrative()
 	NarrativeInfo info = dlg->getInfo();
 
 	// add item to osg and to here
-	if (m_model == nullptr) {
-		qDebug() << "failed to create new narrative - model is not initialized";
+	if (m_narrative_group == nullptr) {
+		qWarning() << "Error: failed to create new narrative - model is not initialized";
 		return;
 	}
 	Narrative *narrative = new Narrative();
@@ -148,37 +135,14 @@ void NarrativeControl::deleteNarratives()
 	m_narrative_box->deleteSelection();
 }
 
-void NarrativeControl::load(osg::Group * model)
+void NarrativeControl::load(osg::Group *narratives)
 {
 	m_narrative_box->clear();
 	m_slide_box->clear(); 
 	m_current_narrative = -1;
 	m_current_slide = -1;
-	m_narrative_group = nullptr;
-	m_model = model;
+	m_narrative_group = narratives;
 	closeNarrative();
-
-	// new: load narratives in a NarrativeList group
-	// search for a narrative list node, if not found then create one
-	for (unsigned int i = 0; i < model->getNumChildren(); i++) {
-		osg::Group* group = model->getChild(i)->asGroup();
-		if (group) {
-			std::string name = group->getName();
-			if (name == "NarrativeList") {
-				m_narrative_group = group->asGroup();
-				qDebug() << "found NarrativeList in file";
-				break;
-			}
-		}
-	}
-
-	// if no NarrativeList was found then create one
-	if (m_narrative_group == nullptr) {
-		m_narrative_group = new osg::Group;
-		m_narrative_group->setName("NarrativeList");
-		model->addChild(m_narrative_group);
-		qDebug() << "didnt find NarrativeList in file - creating a new one";
-	}
 
 	// load narratives into the gui
 	for (unsigned int i = 0; i < m_narrative_group->getNumChildren(); i++) {
@@ -188,26 +152,11 @@ void NarrativeControl::load(osg::Group * model)
 			// add item to gui
 			addToGui(nar);
 		}
-		qDebug() << "loading narrative" << QString::fromStdString(nar->getName());
-	}
-
-	// old code: load narratives stored directly, for backward compatibility
-	for (unsigned int i = 0; i < m_model->getNumChildren(); i++) {
-		osg::Node* c = m_model->getChild(i);
-		Narrative* nar = dynamic_cast<Narrative*>(c);
-		if (nar) {
-			qDebug() << "found old narrative" << nar->getName().c_str();
-			// remove from old
-			m_model->removeChild(nar);
-			// add item to osg data structure
-			m_narrative_group->addChild(nar);
-			// add item to gui
-			addToGui(nar);
-		}
+		qDebug() << "loading narrative to gui -" << QString::fromStdString(nar->getName());
 	}
 }
 
-void NarrativeControl::loadSlides(Narrative * narrative)
+void NarrativeControl::loadSlides(Narrative *narrative)
 {
 	m_slide_box->clear();
 	for (unsigned int i = 0; i < narrative->getNumChildren(); i++) {
@@ -350,21 +299,6 @@ void NarrativeControl::setSlideCamera()
 
 		SlideScrollItem *item = m_slide_box->getItem(slide);
 		item->setImage(new_thumbnail);
-	}
-}
-
-void NarrativeControl::OSGDebug()
-{
-	uint narrative_count = m_narrative_group->getNumChildren();
-	for (uint i = 0; i < narrative_count; i++) {
-		Narrative *nar = getNarrative(i);
-		qInfo() << "Narrative" << i << QString::fromStdString(nar->getName());
-		
-		uint slide_count = nar->getNumChildren();
-		for (uint j = 0; j < slide_count; j++) {
-			NarrativeNode *slide = getNarrativeNode(i, j);
-			qInfo() << "\tSlide" << j << slide->getTransitionDuration();
-		}
 	}
 }
 

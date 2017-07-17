@@ -6,7 +6,7 @@ labelCanvas::labelCanvas(QWidget* parent)
 {
 	editDlg = new editButtons(this);
 	editDlg->move(10, 180);
-	editDlg->hide();
+	//editDlg->hide();
 
 	connect(editDlg, SIGNAL(sNewLabel(std::string)), this, SLOT(newLabel(std::string)));
 	connect(editDlg, SIGNAL(sDeleteLabel(int)), this, SLOT(deleteLabel(int)));

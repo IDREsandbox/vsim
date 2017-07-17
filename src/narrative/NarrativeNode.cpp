@@ -81,8 +81,16 @@ void NarrativeNode::setTransitionDuration(float tduration)
 // ---------------------------------------------------
 // NarrativeTransition
 
-NarrativeTransition::NarrativeTransition(): osg::Node(), m_duration(4.0f)
+NarrativeTransition::NarrativeTransition()
+	: osg::Node(), 
+	m_duration(4.0f)
 {
+}
+
+NarrativeTransition::NarrativeTransition(const NarrativeTransition & n, const osg::CopyOp & copyop)
+	: osg::Node(n, copyop),
+	m_duration(n.m_duration)
+{  
 }
 
 NarrativeTransition::~NarrativeTransition()

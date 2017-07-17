@@ -6,8 +6,6 @@
  */
 
 #include <osgDB/ObjectWrapper>
-#include <osgDB/InputStream>
-#include <osgDB/OutputStream>
 
 #include "narrative/NarrativeNode.h"
 

@@ -19,6 +19,15 @@ Narrative::Narrative()
 {
 }
 
+Narrative::Narrative(const Narrative & n, const osg::CopyOp & copyop)
+	: osg::Group(n, copyop),
+	m_selection(n.m_selection),
+	m_nodes(n.m_nodes),
+	m_transitions(n.m_transitions),
+	m_locked(false) 
+{
+}
+
 Narrative::~Narrative()
 {
 }

@@ -20,8 +20,8 @@ public:
     NarrativeControl(QObject *parent, MainWindow *window);
     virtual ~NarrativeControl();
 
-	// initializes gui from osg data, also converts old narratives to new
-	void load(osg::Group *model);
+	// initializes gui from osg data, pass in a group of Narratives
+	void load(osg::Group *narratives);
 	void loadSlides(Narrative *narrative);
 
 	//void showSlides(int index);
@@ -68,8 +68,6 @@ public:
 	//	Delete Box
 	//	Move Box
 	//	Edit Box Content
-
-	void OSGDebug();
 
 private:
 	void addToGui(Narrative *);

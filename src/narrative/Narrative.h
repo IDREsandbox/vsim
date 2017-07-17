@@ -29,12 +29,7 @@ class Narrative: public osg::Group
 {
 public:
     Narrative();
-    Narrative(const Narrative& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY):
-    		osg::Group(n, copyop),
-    		m_selection(n.m_selection),
-    		m_nodes(n.m_nodes),
-    		m_transitions(n.m_transitions),
-    		m_locked(false) {}
+	Narrative(const Narrative& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
     virtual ~Narrative();
 
     META_Node(, Narrative)
@@ -62,6 +57,7 @@ public:
     NarrativeTransition* getTransition(unsigned int i) const { assert(i < m_transitions.size() - 1); return m_transitions[i].get(); }
     void clear() { m_nodes.clear(); m_transitions.clear(); setName(""); setSelection(-1, false); }
 	
+	bool convertToNewVSim();
 
 protected:
 	std::string m_name;

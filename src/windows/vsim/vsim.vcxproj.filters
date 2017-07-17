@@ -289,20 +289,20 @@
     <ClCompile Include="editButtons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="labelCanvas.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_editButtons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_labelCanvas.cpp">
-      <Filter>Generated Files\Release</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_editButtons.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_editButtons.cpp">
-      <Filter>Generated Files\Release</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_labelCanvas.cpp">
-      <Filter>Generated Files\Release</Filter>
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="labelCanvas.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -340,7 +340,7 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_editButtons.h">
-      <Filter>Generated Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
