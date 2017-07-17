@@ -68,9 +68,6 @@
     <CustomBuild Include="dragLabelInput.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="singleLabelList.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\ScrollBoxItem.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -106,6 +103,15 @@
     </CustomBuild>
     <CustomBuild Include="..\..\narrative\NarrativePlayer.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="editButtons.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="labelCanvas.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="editButtons.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -208,9 +214,6 @@
     <ClCompile Include="dragLabel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="singleLabelList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\ScrollBoxItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -283,6 +286,24 @@
     <ClCompile Include="GeneratedFiles\Release\moc_NarrativePlayer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="editButtons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="labelCanvas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_labelCanvas.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_editButtons.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_editButtons.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_labelCanvas.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">
@@ -316,6 +337,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_NarrativeSlideDurationDialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_editButtons.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

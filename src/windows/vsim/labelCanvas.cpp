@@ -5,7 +5,8 @@ labelCanvas::labelCanvas(QWidget* parent)
 	: QWidget(parent)
 {
 	editDlg = new editButtons(this);
-	editDlg->move(250, 250);
+	editDlg->move(10, 180);
+	editDlg->hide();
 
 	connect(editDlg, SIGNAL(sNewLabel(std::string)), this, SLOT(newLabel(std::string)));
 	connect(editDlg, SIGNAL(sDeleteLabel(int)), this, SLOT(deleteLabel(int)));
@@ -18,6 +19,7 @@ labelCanvas::~labelCanvas()
 
 void labelCanvas::editCanvas() {
 	editDlg->show();
+	qDebug() << "loading narrative";
 }
 
 void labelCanvas::exitEdit() {
