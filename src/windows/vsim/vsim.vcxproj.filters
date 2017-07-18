@@ -33,6 +33,9 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Deprecated">
+      <UniqueIdentifier>{28d94e53-8d81-42fa-bcbc-0ce0dbabf026}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\dragLabel.h">
@@ -140,27 +143,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\narrative\Narrative.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\narrative\NarrativeNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\narrative\NarrativeReference.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\narrative\SerializerNarrative.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\narrative\SerializerNarrativeNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\narrative\SerializerNarrativeReference.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\narrative\SerializerNarrativeTransition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_MainWindow.cpp">
@@ -289,30 +271,84 @@
     <ClCompile Include="editButtons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="labelCanvas.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_editButtons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_labelCanvas.cpp">
-      <Filter>Generated Files\Release</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_editButtons.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_editButtons.cpp">
-      <Filter>Generated Files\Release</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_labelCanvas.cpp">
-      <Filter>Generated Files\Release</Filter>
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="labelCanvas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SerializerModelInformation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\narrative\Narrative2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\narrative\SerializerNarrative2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\narrative\NarrativeSlide.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\osgNewWidget\Canvas.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\osgNewWidget\Label.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerCanvas.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerLabel.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerVSCanvas.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerVSLabel.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerVSWidget.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerWidget.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\osgNewWidget\VSWidget.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\osgNewWidget\Widget.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\narrative\Narrative.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\narrative\NarrativeNode.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\narrative\SerializerNarrative.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeNode.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeTransition.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\narrative\SerializerNarrativeSlide.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\narrative\NarrativeNode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\narrative\Narrative.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_NarrativeInfoDialog.h">
@@ -320,9 +356,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_NarrativeScrollItem.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_dragLabelInput.h">
       <Filter>Generated Files</Filter>
@@ -338,6 +371,33 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_NarrativeSlideDurationDialog.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ModelInformation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\narrative\Narrative2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\narrative\NarrativeSlide.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\deprecated\osgNewWidget\Canvas.h">
+      <Filter>Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\deprecated\osgNewWidget\Label.h">
+      <Filter>Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\deprecated\osgNewWidget\VSWidget.h">
+      <Filter>Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\deprecated\osgNewWidget\Widget.h">
+      <Filter>Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\deprecated\narrative\Narrative.h">
+      <Filter>Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\deprecated\narrative\NarrativeNode.h">
+      <Filter>Deprecated</Filter>
     </ClInclude>
     <ClInclude Include="ui_editButtons.h">
       <Filter>Generated Files</Filter>

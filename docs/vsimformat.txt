@@ -1,5 +1,5 @@
 
-New Format
+New .vsim Format
 
 root osg::Group
 	Children {
@@ -35,15 +35,15 @@ root osg::Group
 			}
 
 
+		"ModelInformation" ::ModelInformation
+
+
+		(metastuff)
 	}
 
+Old .vsim Format
 
-
-
-
-Old Format
-
-root osg::Node (whatever model was loaded is the root)
+"vsim" osg::Node (whatever model was loaded is the root)
 	
 	Children {
 		"VsimBrandingOverlay" ::VSCanvas
@@ -53,8 +53,22 @@ root osg::Node (whatever model was loaded is the root)
 		Narrative1 ::Narrative
 		Narrative2 ::Narrative
 			NarrativeNodes, user serializer {
-				Node 1
-					same as ours
+				Node1 ::NarrativeNode (osg::Group)
+					mostly same as ours
+					Children {
+						"overlaycanvas" ::VSCanvas (osgNewWidget::Canvas osgNewWidget::Widget osg::Geode)
+							all of the widget stuff, x/y/w/h whatever
+							Group osg::Group
+								Children {
+									widget1
+									widget2
+										Position osg::Vec2f
+										Size osg::Vec2f
+										BgGeometry
+										BorderGeometry
+										bunch of other random stuff
+								}
+					}
 				Transition 1
 					same as ours
 				Node 2
@@ -67,7 +81,66 @@ root osg::Node (whatever model was loaded is the root)
 	}
 
 
+The narrative formats are pretty much the same, 
+New .nar Format (vsim/osgb/osgt)
+Old .nar Format (osgb)	
+
+
+
+Model loading logic
+
+Open should always be vsim/osgb/osgt
+
+vsim?
+ old format
+ new format
+
+osgb/osgt?
+ this might be a vsim file, not sure...
+
+load it as is, into an osg::Node
+ look for the following and create if they don't exist:
+  "Narratives"
+  "Models"
+  "ModelInformation"
+  mark the root as "vsim"
+ look for the following in root, and move to the correct groups OR convert if necessary:
+  ::Narrative
+  ::ModelInformation with no name, give it a name
+
+
+Import
+
+vsim/osgb/osgt
+ this is really complicated... it should be the same as load, but append Narratives and Models
+ we might need to add a "vsim" tag somewhere to distinguish (like the root name)
+ 1. convert to new format
+ 2. merge with 
+
+
+osg/obj/fbx/dae/skt/flt/etc?
+ this is a raw model, do importing instead
+
+
+Export
+
+vsim/osgb/osgt
+ export as is
 
 
 
 
+
+
+
+The flow of things
+
+reset 
+  calls init(new Group)
+init
+  cleans up old stuff
+  calls convertToNewVSim
+convertToNewVSim
+  
+
+nar

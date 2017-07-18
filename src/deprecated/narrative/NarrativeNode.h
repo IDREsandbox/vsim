@@ -8,56 +8,48 @@
 #ifndef NARRATIVENODE_H_
 #define NARRATIVENODE_H_
 
-#include <osg/group>
-#include <osg/image>
-#include <QDebug>
-#include <QImage>
+#include <osg/Group>
+#include <osg/Image>
 
-//class VSCanvas;
-//namespace osgNewWidget { class Canvas; }
+class VSCanvas;
+namespace osgNewWidget { class Canvas; }
 
 class NarrativeNode: public osg::Group
 {
 public:
-    //enum NarrativeNodeFlags { NONE, WITH_OVERLAY_CANVAS };
+    enum NarrativeNodeFlags { NONE, WITH_OVERLAY_CANVAS };
 
     NarrativeNode(int flags = 0);
-	NarrativeNode(const NarrativeNode& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+    NarrativeNode(const NarrativeNode& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
+		: osg::Group(n, copyop),
+		m_view_matrix(n.m_view_matrix),
+		m_pauseAtNode(n.m_pauseAtNode),
+		m_stayOnNode(n.m_stayOnNode) {}
     virtual ~NarrativeNode();
 
     META_Node(, NarrativeNode)
 
-	// This is actually the camera matrix, gotten from manipulator->getMatrix()
-	// the name is kept for compatibility
     osg::Matrixd& getViewMatrix() { return m_view_matrix; }
     const osg::Matrixd& getViewMatrix() const { return m_view_matrix; }
     void setViewMatrix(const osg::Matrixd& matrix) { m_view_matrix = matrix; }
-
-	//this can own the widget data. 3 vecs: x, y, text
-    //VSCanvas* getOverlayCanvas();
-    //void setOverlayCanvas(VSCanvas* canvas);
+    VSCanvas* getOverlayCanvas();
+    void setOverlayCanvas(VSCanvas* canvas);
     float getPauseAtNode() const { return m_pauseAtNode; }
     void setPauseAtNode(float pause) { m_pauseAtNode = pause; }
 	bool getStayOnNode() const { return m_stayOnNode; }
 	void setStayOnNode(bool value) { m_stayOnNode = value; }
-	osg::Image *getImage() { return m_image; }
-	const osg::Image *getImage() const { return m_image; }
-	void setImage(osg::Image *image) { m_image = image; }
-
-	float getTransitionDuration() const;
-	void setTransitionDuration(float tduration);
+	// Both const and non-const versions are required for serializer.
+	osg::Image* getImage() { return m_image; }
+	const osg::Image* getImage() const { return m_image; }
+	void setImage(osg::Image* image) { m_image = image; }
 
 protected:
     osg::Matrixd m_view_matrix;
     float m_pauseAtNode;
 	bool m_stayOnNode;
-
-	float m_transition_duration;
 	osg::ref_ptr<osg::Image> m_image;
 };
 
-
-// DEPRECATED old code, add for compatibility serialization later?
 class NarrativeTransition: public osg::Node
 {
 public:
