@@ -42,9 +42,10 @@ public:
 	const std::string& getDescription() const {return m_description;}
 	void setDescription(const std::string& description){m_description = description;}
 	
-	//const std::vector<std::string>& getStrings() const { return m_strings; }
-	//void setStrings(const std::vector<std::string>& strings) { m_strings = strings; }
-
+	const std::vector<std::string>& getStrings() const { return m_strings; }
+	void setStrings(const std::vector<std::string>& strings) { m_strings = strings; }
+	float getFoo() const { return m_foo; }
+	void setFoo(float foo) { m_foo = foo; }
 
 	bool getLock() const{return m_locked;}
 	void setLock(bool lock){ m_locked = lock;}	
@@ -67,8 +68,9 @@ protected:
     NarrativeNodeVector m_nodes;
     NarrativeTransitionVector m_transitions;
 	bool m_locked;
+	float m_foo;
 
-	//std::vector<std::string> m_strings;
+	std::vector<std::string> m_strings;
 };
 
 #endif /* NARRATIVE_H_ */

@@ -48,17 +48,7 @@ VSimApp::VSimApp(MainWindow* window)
 
 bool VSimApp::init()
 {
-	osg::Group *root = new osg::Group;
-
-	convertToNewVSim(root);
-
-	m_narrative_group = findOrCreateChildGroup(root, "Narratives");
-	m_model_group = findOrCreateChildGroup(root, "Models");
-
-	m_root = root;
-	m_viewer->setSceneData(root); // ideally this would be m_model, but it's easy to mess up
-	m_narrative_list->load(m_narrative_group);
-
+	initWithVSim(new osg::Group);
 	return true;
 }
 bool VSimApp::initWithModel(osg::Node *model)
@@ -76,12 +66,12 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	if (!convertToNewVSim(root)) {
 		return false;
 	}
-	// clear the current scene and
-	// merge the new root with our new empty one
-	init();
-	mergeAnotherVSim(root);
 
-	// reload
+	m_narrative_group = findOrCreateChildGroup(root, "Narratives");
+	m_model_group = findOrCreateChildGroup(root, "Models");
+
+	m_root = root;
+	m_viewer->setSceneData(root); // ideall this would be only models, but its easy to mess things up
 	m_narrative_list->load(m_narrative_group);
 	
 	return true;
@@ -112,6 +102,8 @@ bool VSimApp::openVSim(const std::string & filename)
 	std::cout << "open vsim: " << filename.c_str() << "\n";
 	osg::ref_ptr<osg::Node> loadedModel;
 	//osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile(filename);
+	//osgDB::Options* options = new osgDB::Options;
+	//options->setPluginStringData("fileType", "Ascii");
 
 	// if .vsim, use osgb, TODO: our own readerwriter?
 	std::string ext = Util::getExtension(filename);
@@ -320,6 +312,8 @@ bool VSimApp::mergeAnotherVSim(osg::Group *other)
 	for (uint i = 0; i < other_model_group->getNumChildren(); i++) {
 		m_model_group->addChild(other_model_group->getChild(i));
 	}
+
+	// what are we supposed to do with all of the other junk?
 	return true;
 }
 

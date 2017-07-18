@@ -17,6 +17,8 @@ Narrative::Narrative()
 	m_selection(-1, false),
 	m_locked(false)
 {
+	m_strings = { "heylllo", "toth   eworld" };
+	m_foo = 100.0f;
 }
 
 Narrative::Narrative(const Narrative & n, const osg::CopyOp & copyop)
