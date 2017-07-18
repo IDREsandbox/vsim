@@ -69,7 +69,7 @@ void NarrativePlayer::update(double dt_sec)
 	}
 
 	if (!m_transitioning) { // not transitioning, waiting on slide
-		const NarrativeNode *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
 		if (current_node == nullptr) {
 			qWarning() << "Error: narrative player current slide is null";
 			pause();
@@ -77,7 +77,7 @@ void NarrativePlayer::update(double dt_sec)
 		}
 
 		m_slide_time_sec += dt_sec;
-		double wait_time = current_node->getPauseAtNode();
+		double wait_time = current_node->getDuration();
 		if (m_slide_time_sec >= wait_time) {
 			next();
 		}
@@ -97,8 +97,8 @@ void NarrativePlayer::update(double dt_sec)
 		}
 
 		// get source slide
-		const NarrativeNode *source_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide - 1);
-		const NarrativeNode *dest_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		const NarrativeSlide *source_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide - 1);
+		const NarrativeSlide *dest_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
 		double transition_duration = dest_node->getTransitionDuration();
 
 		// advance time
@@ -113,8 +113,8 @@ void NarrativePlayer::update(double dt_sec)
 			return;
 		}
 		//qDebug() << "transitioning:" << t;
-		osg::Matrixd new_matrix = Util::viewMatrixLerp(t, source_node->getViewMatrix(), dest_node->getViewMatrix());
-		setViewMatrix(new_matrix);
+		osg::Matrixd new_matrix = Util::viewMatrixLerp(t, source_node->getCameraMatrix(), dest_node->getCameraMatrix());
+		setCameraMatrix(new_matrix);
 	}
 }
 
@@ -124,7 +124,7 @@ void NarrativePlayer::play()
 	if (m_current_narrative == -1 || m_current_slide == -1) {
 		return;
 	}
-	const NarrativeNode *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
+	const NarrativeSlide *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
 	if (next_node == nullptr) { // check if at the end
 		pause();
 		return;
@@ -140,7 +140,7 @@ void NarrativePlayer::next()
 	qInfo() << "Narrative Player - next";
 	// if not playing, we still want to do the transition on next()
 	if (!m_transitioning) {
-		const NarrativeNode *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
+		const NarrativeSlide *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
 		printf("next node %p\n", next_node);
 		if (next_node == nullptr) { // check if at the end
 			pause();
@@ -164,11 +164,11 @@ void NarrativePlayer::next()
 		m_transitioning = false;
 		m_slide_time_sec = 0;
 
-		const NarrativeNode *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
-		setViewMatrix(current_node->getViewMatrix());
+		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		setCameraMatrix(current_node->getCameraMatrix());
 
 		// if there is no next node, we're done
-		const NarrativeNode *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
+		const NarrativeSlide *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
 		if (next_node == nullptr) {
 			qInfo() << "Narrative Player - last slide reached";
 			pause();
@@ -178,7 +178,7 @@ void NarrativePlayer::next()
 
 	// after the switch and slide update, check if there is a StayOnNode
 	if (m_transitioning == false && isPlaying()) {
-		const NarrativeNode *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
 		if (current_node->getStayOnNode()) {
 			pause();
 		}
@@ -197,15 +197,15 @@ void NarrativePlayer::pause()
 	// if we're in a transition, then roll back to the previous slide
 	if (m_playing == true) {
 		if (m_transitioning == true) {
-			const NarrativeNode *prev_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide - 1);
+			const NarrativeSlide *prev_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide - 1);
 			if (prev_node == nullptr) {
 				qWarning() << "Error: narrative player is transitioning in the first node?";
 			}
-			setViewMatrix(prev_node->getViewMatrix());
+			setCameraMatrix(prev_node->getCameraMatrix());
 		} 
 		else {
 			// view should already be here?
-			//const NarrativeNode *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide - 1);
+			//const Slide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide - 1);
 			//setViewMatrix(current_node->getViewMatrix());
 		}
 	}
@@ -217,12 +217,12 @@ bool NarrativePlayer::isPlaying()
 	return m_playing;
 }
 
-void NarrativePlayer::setViewMatrix(osg::Matrixd view_matrix)
+void NarrativePlayer::setCameraMatrix(osg::Matrixd camera_matrix)
 {
 	//m_window->getViewer()->getC
 	//m_window->getViewer()->getCamera()->setViewMatrix(view_matrix);
 	//m_window->getViewer()->getCamera()->getViewMatrixAsLookAt(osg::Vec3(0, 0, 0), osg::Vec3(0, 0, 0), osg::Vec3(0, 0, 1));
-	m_window->getViewer()->getCameraManipulator()->setByMatrix(view_matrix);
+	m_window->getViewer()->getCameraManipulator()->setByMatrix(camera_matrix);
 }
 
 void NarrativePlayer::selectionChange()
@@ -243,12 +243,12 @@ void NarrativePlayer::selectionChange()
 		m_current_slide = *slide_sel.rbegin();
 
 		qDebug() << "Narrative Player - slide selection" << m_current_narrative << m_current_slide;
-		const NarrativeNode *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
 		if (current_node == nullptr) {
 			qWarning() << "Error: can't set narrative player view to selection, indices: ", m_current_narrative, m_current_slide;
 		}
 		else {
-			setViewMatrix(current_node->getViewMatrix());
+			setCameraMatrix(current_node->getCameraMatrix());
 		}
 	}
 	pause();

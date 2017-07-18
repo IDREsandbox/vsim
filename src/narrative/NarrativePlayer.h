@@ -2,7 +2,7 @@
 #define NARRATIVEPLAYER_H
 
 #include "narrative/NarrativeControl.h"
-#include "narrative/NarrativeNode.h"
+#include "narrative/NarrativeSlide.h"
 #include "MainWindow.h"
 #include <QObject>
 #include <osg/Matrix>
@@ -20,7 +20,7 @@ public:
 
 	bool isPlaying();
 
-	void setViewMatrix(osg::Matrixd view_matrix);
+	void setCameraMatrix(osg::Matrixd camera_matrix);
 
 public: //slots
 	void selectionChange();

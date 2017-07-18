@@ -5,7 +5,7 @@
 #include <QDialogButtonBox>
 
 #include "ui_NarrativeInfoDialog.h"
-#include "narrative/Narrative.h"
+#include "narrative/Narrative2.h"
 
 // low budget version, TODO: replace with narrative?
 struct NarrativeInfo {
@@ -22,7 +22,7 @@ public:
 	NarrativeInfoDialog(QWidget *parent, const NarrativeInfo&);
 	~NarrativeInfoDialog();
 
-	void setInfo(const Narrative&);
+	void setInfo(const Narrative2&);
 	const NarrativeInfo& getInfo();
 	void clear();
 

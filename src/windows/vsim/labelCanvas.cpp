@@ -10,7 +10,7 @@ labelCanvas::labelCanvas(QWidget* parent)
 
 	editDlg = new editButtons(this);
 	editDlg->move(10, 180);
-	editDlg->hide();
+	//editDlg->hide();
 
 	QSignalMapper* signalMapper = new QSignalMapper(this);
 

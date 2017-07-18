@@ -100,8 +100,11 @@ QImage Util::imageOsgToQt(const osg::Image *oimg)
 	// - wrong format
 	// - non-contiguous rows
 	// - WARNING: the QImage references the osg byte array instead of copying, this could be a problem
+	if (oimg == nullptr) {
+		qWarning() << "Error: trying to convert a null image";
+		return QImage();
+	}
 	return QImage(oimg->data(), oimg->s(), oimg->t(), QImage::Format_RGBA8888);
-
 }
 
 // credits to stackoverflow
