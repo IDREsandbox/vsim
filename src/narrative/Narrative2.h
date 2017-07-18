@@ -1,10 +1,3 @@
-/*
- * Narrative.h
- *
- *  Created on: Feb 4, 2011
- *      Author: eduardo
- */
-
 #ifndef NARRATIVE2_H
 #define NARRATIVE2_H
 
@@ -16,10 +9,10 @@
 class Narrative2: public osg::Group
 {
 public:
-    Narrative2();
+	Narrative2();
 	Narrative2(const Narrative2& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	Narrative2(const Narrative *old); // converts old narrative to a new one
-    virtual ~Narrative2();
+	virtual ~Narrative2();
 
 	META_Node(, Narrative2)
 

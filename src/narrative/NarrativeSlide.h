@@ -9,24 +9,17 @@
 
 class NarrativeSlide: public osg::Group
 {
-public:
-    //enum NarrativeNodeFlags { NONE, WITH_OVERLAY_CANVAS };
-
-    NarrativeSlide();
+public:	
+	NarrativeSlide();
 	NarrativeSlide(const NarrativeSlide& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	NarrativeSlide(const NarrativeNode *old, const NarrativeTransition *old_transition);
-    virtual ~NarrativeSlide();
-
+	virtual ~NarrativeSlide();
+	
 	META_Node(, NarrativeSlide);
-
-	// This is actually the camera matrix, gotten from manipulator->getMatrix()
-	// the name is kept for compatibility
-    const osg::Matrixd& getCameraMatrix() const;
+	
+	const osg::Matrixd& getCameraMatrix() const;
 	void setCameraMatrix(const osg::Matrixd& matrix);
-
-	//this can own the widget data. 3 vecs: x, y, text
-    //VSCanvas* getOverlayCanvas();
-    //void setOverlayCanvas(VSCanvas* canvas);
+	
 	float getDuration() const;
 	void setDuration(float duration);
 	bool getStayOnNode() const;
@@ -38,8 +31,8 @@ public:
 	void setTransitionDuration(float tduration);
 
 protected:
-    osg::Matrixd m_camera_matrix;
-    float m_duration;
+	osg::Matrixd m_camera_matrix;
+	float m_duration;
 	bool m_stay_on_node;
 	float m_transition_duration;
 	osg::ref_ptr<osg::Image> m_thumbnail;

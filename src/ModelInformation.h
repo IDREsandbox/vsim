@@ -57,14 +57,14 @@ public:
 		return Model_Name;
 	}
 
-    void setModelName(const std::string& modelname) {
+	void setModelName(const std::string& modelname) {
 		Model_Name = modelname;
 	}
 	
 	const std::string& getProjectDate() const {
 		return Project_Date; 
 	}
-    void setProjectDate(const std::string& pd) {
+	void setProjectDate(const std::string& pd) {
 		Project_Date = pd; 
 		
 	}
@@ -72,35 +72,35 @@ public:
 	const std::string& getReleaseDateVersion() const { 
 		return Release_Date_Version;
 	}
-    void setReleaseDateVersion(const std::string& rd) { 
+	void setReleaseDateVersion(const std::string& rd) { 
 		Release_Date_Version = rd; 
 	}
 
 	const std::string& getPrimaryAuthors() const { 
 		return Primary_Authors; 
 	}
-    void setPrimaryAuthors(const std::string& pa) { 
+	void setPrimaryAuthors(const std::string& pa) { 
 		Primary_Authors = pa;
 	}
 
 	const std::string& getContributors() const { 
 		return Contributors; 
 	}
-    void setContributors(const std::string& contribu) { 
+	void setContributors(const std::string& contribu) { 
 		Contributors = contribu; 
 	}
 
 	const std::string& getPlaceofPublication() const { 
 		return Place_of_Publication; 
 	}
-    void setPlaceofPublication(const std::string& place) { 
+	void setPlaceofPublication(const std::string& place) { 
 		Place_of_Publication = place; 
 	}
 
 	const std::string& getAccessInformationURL() const { 
 		return Access_Information_URL; 
 	}
-    void setAccessInformationURL(const std::string& accessinformation) { 
+	void setAccessInformationURL(const std::string& accessinformation) { 
 		Access_Information_URL = accessinformation; 
 	}
 
@@ -152,7 +152,7 @@ public:
 	const std::string& getExpireDate() const { 
 		return Expire_Date;
 	}
-    void setExpireDate(const std::string& ed) { 
+	void setExpireDate(const std::string& ed) { 
 		Expire_Date = ed; 
 	}
 

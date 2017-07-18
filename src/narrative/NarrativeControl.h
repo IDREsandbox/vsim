@@ -17,8 +17,8 @@ class NarrativeControl : public QObject
 {
 	Q_OBJECT
 public:
-    NarrativeControl(QObject *parent, MainWindow *window);
-    virtual ~NarrativeControl();
+	NarrativeControl(QObject *parent, MainWindow *window);
+	virtual ~NarrativeControl();
 
 	// initializes gui from osg data, pass in a group of Narratives
 	void load(osg::Group *narratives);

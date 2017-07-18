@@ -1,9 +1,3 @@
-/*
- * Narrative.cpp
- *
- *  Created on: Feb 4, 2011
- *      Author: eduardo
- */
 #include <osg/node>
 #include <assert.h>
 #include "narrative/Narrative2.h"

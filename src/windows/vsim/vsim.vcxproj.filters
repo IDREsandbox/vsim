@@ -357,9 +357,6 @@
     <ClInclude Include="GeneratedFiles\ui_NarrativeScrollItem.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_dragLabelInput.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -374,9 +371,6 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_NarrativeSlideDurationDialog.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_editButtons.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\ModelInformation.h">
       <Filter>Header Files</Filter>
@@ -404,6 +398,9 @@
     </ClInclude>
     <ClInclude Include="..\..\deprecated\narrative\NarrativeNode.h">
       <Filter>Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_editButtons.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
