@@ -5,18 +5,20 @@
  *      Author: eduardo
  */
 
-#ifndef NARRATIVE_H_
-#define NARRATIVE_H_
+#ifndef NARRATIVE2_H
+#define NARRATIVE2_H
 
 #include <string>
 #include <osg/node>
 #include "narrative/NarrativeSlide.h"
+#include "deprecated/narrative/Narrative.h"
 
 class Narrative2: public osg::Group
 {
 public:
     Narrative2();
 	Narrative2(const Narrative2& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+	Narrative2(const Narrative *old); // converts old narrative to a new one
     virtual ~Narrative2();
 
 	META_Node(, Narrative2)
@@ -38,4 +40,4 @@ private:
 	bool m_locked;
 };
 
-#endif /* NARRATIVE_H_ */
+#endif /* NARRATIVE2_H */

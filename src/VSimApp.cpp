@@ -13,6 +13,7 @@
 #include <QtWidgets/QAction>
 #include "VSimApp.h"
 #include "Util.h"
+#include "deprecated/narrative/Narrative.h"
 
 #include <QObject>
 
@@ -269,22 +270,36 @@ bool VSimApp::convertToNewVSim(osg::Group *root)
 	// findOrCreateChildGroup(root, "EmbeddedResources");
 
 	// Scan the root for different things, convert them, put them into the Narratives group
-	for (uint i = 0; i < root->getNumChildren(); i++) {
+	uint numChildren = root->getNumChildren();
+	for (uint i = 0; i < numChildren; i++) {
 		osg::Node *node = root->getChild(i);
+
 		if (!node) {
-			qInfo() << "child" << i << "is null ptr?";
+			qDebug() << "child" << i << "is null ptr?";
 		}
 		std::string class_name = node->className();
+
+		Narrative *qq = dynamic_cast<Narrative*>(node);
+		if (qq) {
+			qDebug() << "dynamic cast to narrative";
+		}
 		
 		qDebug() << "scanning - found classname" << QString::fromStdString(class_name);
 		// if we find a narrative in the root, then move it to the Narratives group
 		if (class_name == "Narrative") {
-			qDebug() << "Found a narrative";
-			Narrative2 *nar = dynamic_cast<Narrative2*>(node);
-			if (!nar) return false; // this probably makes no sense
+			
+			Narrative *old_nar = dynamic_cast<Narrative*>(node);
+			if (!old_nar) {
+				qWarning() << "Failed to load old narrative";
+				return false; // this probably makes no sense
+			}
+			qDebug() << "Found an old narrative" << QString::fromStdString(old_nar->getName()) << "- converting";
+			Narrative2 *new_nar = new Narrative2(old_nar);
 
-			narrative_group->addChild(nar);
-			root->removeChild(nar);
+			narrative_group->addChild(new_nar);
+			root->removeChild(old_nar);
+			i--; // avoid incrementing since we just shifted everything by 1
+			numChildren--;
 		}
 		// otherwise just leave things where they are
 		else {

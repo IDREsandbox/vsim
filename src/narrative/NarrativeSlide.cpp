@@ -1,6 +1,6 @@
 #include "narrative/NarrativeSlide.h"
 
-NarrativeSlide::NarrativeSlide(int flags)
+NarrativeSlide::NarrativeSlide()
 	: osg::Group(),
 	m_camera_matrix(),
 	m_duration(15.0f),
@@ -17,6 +17,17 @@ NarrativeSlide::NarrativeSlide(const NarrativeSlide & n, const osg::CopyOp & cop
 	m_stay_on_node(n.m_stay_on_node),
 	m_transition_duration(n.m_transition_duration),
 	m_thumbnail(n.m_thumbnail)
+{
+}
+
+NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransition * old_transition)
+	: osg::Group(),
+	m_camera_matrix(old->getViewMatrix()),
+	m_duration(old->getPauseAtNode()),
+	m_stay_on_node(old->getStayOnNode()),
+	m_transition_duration(old_transition->getDuration()),
+	m_thumbnail(nullptr)
+	//m_thumbnail(new osg::Image(*old->getImage(), osg::CopyOp::DEEP_COPY_ALL))
 {
 }
 

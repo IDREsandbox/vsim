@@ -1,18 +1,20 @@
-#ifndef NARRATIVENODE_H_
-#define NARRATIVENODE_H_
+#ifndef NARRATIVESLIDE_H
+#define NARRATIVESLIDE_H
 
 #include <osg/group>
 #include <osg/image>
 #include <QDebug>
 #include <QImage>
+#include "deprecated/narrative/NarrativeNode.h"
 
 class NarrativeSlide: public osg::Group
 {
 public:
     //enum NarrativeNodeFlags { NONE, WITH_OVERLAY_CANVAS };
 
-    NarrativeSlide(int flags = 0);
+    NarrativeSlide();
 	NarrativeSlide(const NarrativeSlide& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+	NarrativeSlide(const NarrativeNode *old, const NarrativeTransition *old_transition);
     virtual ~NarrativeSlide();
 
 	META_Node(, NarrativeSlide);
@@ -43,4 +45,4 @@ protected:
 	osg::ref_ptr<osg::Image> m_thumbnail;
 };
 
-#endif /* NARRATIVENODE_H_ */
+#endif /* NARRATIVESLIDE_H */

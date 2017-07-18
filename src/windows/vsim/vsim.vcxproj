@@ -39,6 +39,21 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\deprecated\narrative\Narrative.cpp" />
+    <ClCompile Include="..\..\deprecated\narrative\NarrativeNode.cpp" />
+    <ClCompile Include="..\..\deprecated\narrative\SerializerNarrative.cpp" />
+    <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeNode.cpp" />
+    <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeTransition.cpp" />
+    <ClCompile Include="..\..\deprecated\osgNewWidget\Canvas.cpp" />
+    <ClCompile Include="..\..\deprecated\osgNewWidget\Label.cpp" />
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerCanvas.cpp" />
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerLabel.cpp" />
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerVSCanvas.cpp" />
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerVSLabel.cpp" />
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerVSWidget.cpp" />
+    <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerWidget.cpp" />
+    <ClCompile Include="..\..\deprecated\osgNewWidget\VSWidget.cpp" />
+    <ClCompile Include="..\..\deprecated\osgNewWidget\Widget.cpp" />
     <ClCompile Include="..\..\HorizontalScrollBox.cpp" />
     <ClCompile Include="..\..\main.cpp" />
     <ClCompile Include="..\..\MainWindow.cpp" />
@@ -52,7 +67,7 @@
     <ClCompile Include="..\..\narrative\NarrativeScrollItem.cpp" />
     <ClCompile Include="..\..\narrative\NarrativeSlideDurationDialog.cpp" />
     <ClCompile Include="..\..\narrative\SerializerNarrative2.cpp" />
-    <ClCompile Include="..\..\narrative\SerializerNarrativeNode.cpp" />
+    <ClCompile Include="..\..\narrative\SerializerNarrativeSlide.cpp" />
     <ClCompile Include="..\..\narrative\SlideScrollBox.cpp" />
     <ClCompile Include="..\..\narrative\SlideScrollItem.cpp" />
     <ClCompile Include="..\..\OSGViewerWidget.cpp" />
@@ -266,11 +281,13 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I.\..\..\narrative" "-I.\..\.." "-I.\.." "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(DEPS)\OpenSceneGraph-3.4.0-build\msvc2015_$(PlatformArchitecture)\include"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\deprecated\narrative\Narrative.h" />
+    <ClInclude Include="..\..\deprecated\narrative\NarrativeNode.h" />
+    <ClInclude Include="..\..\deprecated\osgNewWidget\Canvas.h" />
+    <ClInclude Include="..\..\deprecated\osgNewWidget\Label.h" />
+    <ClInclude Include="..\..\deprecated\osgNewWidget\VSWidget.h" />
+    <ClInclude Include="..\..\deprecated\osgNewWidget\Widget.h" />
     <ClInclude Include="..\..\ModelInformation.h" />
-    <ClInclude Include="..\..\osgNewWidget\Canvas.h" />
-    <ClInclude Include="..\..\osgNewWidget\Label.h" />
-    <ClInclude Include="..\..\osgNewWidget\VSWidget.h" />
-    <ClInclude Include="..\..\osgNewWidget\Widget.h" />
     <ClInclude Include="ui_editButtons.h" />
     <CustomBuild Include="dragLabelInput.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
