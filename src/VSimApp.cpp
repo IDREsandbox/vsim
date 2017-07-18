@@ -30,6 +30,7 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
 	connect(window, &MainWindow::sImportModel, this, &VSimApp::importModel);
 	connect(window, &MainWindow::sNew, this, &VSimApp::reset);
+	connect(window, &MainWindow::sSaveCurrent, this, &VSimApp::saveCurrentVSim);
 
 	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, &VSimApp::OSGDebug);
 	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this,
@@ -74,6 +75,8 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	m_root = root;
 	m_viewer->setSceneData(root); // ideall this would be only models, but its easy to mess things up
 	m_narrative_list->load(m_narrative_group);
+
+	//m_viewer->getCamera()->setProjectionMatrixAsPerspective(75.0f, )
 	
 	return true;
 }
@@ -151,47 +154,49 @@ bool VSimApp::openVSim(const std::string & filename)
 
 bool VSimApp::saveVSim(const std::string& filename)
 {
-	bool success = osgDB::writeNodeFile(*m_root, filename, new osgDB::Options("WriteImageHint=IncludeData"));
-	if (!success) {
-		QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
-		return false;
+
+	// if vsim, then use osgb
+	std::string ext = Util::getExtension(filename);
+	if (ext == "vsim") {
+		qDebug() << "saving vsim";
+		std::ofstream ofs;
+		ofs.open(filename.c_str(), std::ios::binary);
+		if (!ofs.good()) {
+			QMessageBox::warning(m_window, "Save Error", "Error opening file for writing " + QString::fromStdString(filename));
+			return false;
+		}
+		osgDB::ReaderWriter *rw = osgDB::Registry::instance()->getReaderWriterForExtension("osgb");
+		if (!rw) {
+			QMessageBox::warning(m_window, "Save Error", "Error creating osgb writer " + QString::fromStdString(filename));
+			return false;
+		}
+		//// this is how you do ascii (from robertosfield on github)
+		//osgDB::Options* options = new osgDB::Options;
+		//options->setPluginStringData("fileType", "Ascii");
+		osgDB::ReaderWriter::WriteResult result = rw->writeNode(*m_root, ofs, new osgDB::Options("WriteImageHint=IncludeData"));
+
+		if (result.success()) {
+		}
+		else {
+			QMessageBox::warning(m_window, "Save Error", "Error writing osg nodes " + QString::fromStdString(filename));
+			return false;
+		}
 	}
-	setFileName(filename);
-	return success;
+	// otherwise use osgb/osgt, let osg decide
+	else {
+		bool success = osgDB::writeNodeFile(*m_root, filename, new osgDB::Options("WriteImageHint=IncludeData"));
+		if (!success) {
+			QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
+			return false;
+		}
+	}
+	return true;
+}
 
-	//new osgDB::Options("WriteImageHint=IncludeData Compressor=zlib")
-
-	//std::ofstream ofs;
-	//ofs.open(filename.c_str(), std::ios::binary);
-	//if (!ofs.good()) {
-	//	QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
-	//	return false;
-	//}
-
-	//// TODO: binary, compression, etc... (this also leaks)
-	////	osgDB::Options* options = new osgDB::Options(
-	////		//"WriteImageHint=WriteOut "
-	////		//"Compressor=zlib "
-	////		//"Ascii "
-	////		);
-
-	//// this is how you do ascii (from robertosfield on github)
-	//osgDB::Options* options = new osgDB::Options;
-	//options->setPluginStringData("fileType", "Ascii");
-
-	// for image data WriteImageHint=IncludeData or WriteOut
-
-	//osgDB::ReaderWriter* rw = osgDB::Registry::instance()->getReaderWriterForExtension("osgt");
-	//if (!rw) {
-	//	QMessageBox::warning(m_window, "Save Error", "Error creating osgb writer " + QString::fromStdString(filename));
-	//	return false;
-	//}
-
-	//// TODO: check wresult
-	//osgDB::ReaderWriter::WriteResult wresult = rw->writeNode(*m_model, ofs, options);
-	//ofs.close();
-
-	//return true;
+bool VSimApp::saveCurrentVSim()
+{
+	saveVSim(getFileName());
+	return false;
 }
 
 std::string VSimApp::getFileName()
@@ -259,7 +264,6 @@ bool VSimApp::convertToNewVSim(osg::Group *root)
 
 	// find Narratives
 	osg::Group *narrative_group = findOrCreateChildGroup(root, "Narratives");
-
 	// find Models
 	osg::Group *model_group = findOrCreateChildGroup(root, "Models");
 
@@ -284,7 +288,7 @@ bool VSimApp::convertToNewVSim(osg::Group *root)
 			qDebug() << "dynamic cast to narrative";
 		}
 		
-		qDebug() << "scanning - found classname" << QString::fromStdString(class_name);
+		qDebug() << "found in root -" << QString::fromStdString(class_name);
 		// if we find a narrative in the root, then move it to the Narratives group
 		if (class_name == "Narrative") {
 			
@@ -331,6 +335,3 @@ bool VSimApp::mergeAnotherVSim(osg::Group *other)
 	// what are we supposed to do with all of the other junk?
 	return true;
 }
-
-//		m_eresources_manager->addEResourcesToNode(m_model);
-//		m_ccreator_manager->SaveModelInformation(m_model);//add if no modelinformation node

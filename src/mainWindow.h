@@ -60,6 +60,7 @@ public slots:
 signals:
 	void sOpenFile(const std::string&);
 	void sSaveFile(const std::string&);
+	void sSaveCurrent();
 	void sNew();
 	void sImportModel(const std::string&);
 

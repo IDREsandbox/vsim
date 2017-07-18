@@ -37,6 +37,7 @@ public:
 	bool importModel(const std::string& filename); // TODO: more complicated logic with vsim
 	bool openVSim(const std::string& filename);
 	bool saveVSim(const std::string& filename);
+	bool saveCurrentVSim();
 
 	osg::Group* getRoot() const { return m_root.get(); }
 
@@ -52,7 +53,6 @@ private:
 	// merges an existing vsim root with this one
 	// expects new format
 	bool mergeAnotherVSim(osg::Group *); 
-	
 
 	MainWindow* m_window;
 	osgViewer::Viewer* m_viewer;

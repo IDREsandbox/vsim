@@ -156,13 +156,13 @@ void MainWindow::actionOpen()
 
 void MainWindow::actionSave()
 {
-	qDebug("save (not implemented yet)");
+	emit sSaveCurrent();
 }
 
 void MainWindow::actionSaveAs()
 {
 	qDebug("saveas");
-	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", "osg ascii file (*.osgt);;osg binary file (*.osgb)");
+	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", "VSim file (*.vsim);;osg ascii file (*.osgt);;osg binary file (*.osgb)");
 	if (filename == "") {
 		qDebug() << "saveas cancel";
 		return;
