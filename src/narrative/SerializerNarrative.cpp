@@ -19,7 +19,7 @@ static bool checkNarrativeNodes( const Narrative& node )
 }
 static bool readNarrativeNodes( osgDB::InputStream& is, Narrative& node )
 {
-	unsigned int size = 0;
+	uint size = 0;
 	is >> size >> is.BEGIN_BRACKET;
 	// The first node has no transition
 	if (size >= 1) {
@@ -29,13 +29,13 @@ static bool readNarrativeNodes( osgDB::InputStream& is, Narrative& node )
 		}
 		node.addChild(childNode);
 	}
-	for (unsigned int i = 1; i < size; i++) {
+	for (uint i = 1; i < size; i++) {
 		// read in a transition
         NarrativeTransition* childTrans = dynamic_cast<NarrativeTransition*>(is.readObject());
 		// read in a node
 		NarrativeNode* childNode = dynamic_cast<NarrativeNode*>(is.readObject());
 		if (childNode == nullptr || childTrans == nullptr) {
-			qWarning() << "Error: reading old narrative format and read null transition/node pair";
+			qWarning() << "Error: reading old narrative format and read null transition/node pair" << i << "/" << size;
 		}
 		if (childNode && childTrans) {
 			childNode->setTransitionDuration(childTrans->getDuration());
@@ -87,7 +87,7 @@ REGISTER_OBJECT_WRAPPER( Narrative,
                          ::Narrative,
                          "osg::Object osg::Node osg::Group ::Narrative" )
 {
-    ADD_USER_SERIALIZER(NarrativeNodes); // DEPRECATED, kept for backwards compatibility
+    //ADD_USER_SERIALIZER(NarrativeNodes); // DEPRECATED, kept for backwards compatibility
     //ADD_USER_SERIALIZER(Selection); // DEPRECATED, is unused
 	ADD_STRING_SERIALIZER(Name, "");
 	ADD_STRING_SERIALIZER(Author, "");
