@@ -3,7 +3,7 @@
 
 #include <set>
 #include <osg/Node>
-#include "narrative/Narrative.h"
+#include "narrative/Narrative2.h"
 #include "narrative/NarrativeScrollBox.h"
 #include "narrative/SlideScrollBox.h"
 #include "HorizontalScrollBox.h"
@@ -22,7 +22,7 @@ public:
 
 	// initializes gui from osg data, pass in a group of Narratives
 	void load(osg::Group *narratives);
-	void loadSlides(Narrative *narrative);
+	void loadSlides(Narrative2 *narrative);
 
 	//void showSlides(int index);
 	void openNarrative();
@@ -31,8 +31,8 @@ public:
 
 	// this should be const or it is dangerous to have public
 	// it means that ppl can change narrative data w/o it being updated by the gui
-	Narrative *getNarrative(int index);
-	NarrativeNode *getNarrativeNode(int narrative, int slide);
+	Narrative2 *getNarrative(int index);
+	NarrativeSlide *getNarrativeNode(int narrative, int slide);
 
 	// All Commands -
 	// Narratives
@@ -70,8 +70,8 @@ public:
 	//	Edit Box Content
 
 private:
-	void addToGui(Narrative *);
-	void addNodeToGui(NarrativeNode *);
+	void addToGui(Narrative2 *);
+	void addNodeToGui(NarrativeSlide *);
 	QImage generateThumbnail();
 
 	int m_current_narrative;

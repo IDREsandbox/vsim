@@ -1,5 +1,5 @@
 #include "narrative/NarrativeControl.h"
-#include "narrative/Narrative.h"
+#include "narrative/Narrative2.h"
 #include "Util.h"
 
 #include <QObject>
@@ -75,8 +75,8 @@ void NarrativeControl::newNarrative()
 		qWarning() << "Error: failed to create new narrative - model is not initialized";
 		return;
 	}
-	Narrative *narrative = new Narrative();
-	narrative->setName(info.m_title);
+	Narrative2 *narrative = new Narrative2();
+	narrative->setTitle(info.m_title);
 	narrative->setAuthor(info.m_contact);
 	narrative->setDescription(info.m_description);
 	m_narrative_group->addChild(narrative);
@@ -95,7 +95,7 @@ void NarrativeControl::editNarrativeInfo()
 	}
 
 	NarrativeScrollItem *item = dynamic_cast<NarrativeScrollItem*>(m_narrative_box->getItem(active_item));
-	Narrative *narrative = dynamic_cast<Narrative*>(m_narrative_group->getChild(active_item));
+	Narrative2 *narrative = dynamic_cast<Narrative2*>(m_narrative_group->getChild(active_item));
 
 	NarrativeInfoDialog *dlg = m_window->m_narrative_info_dialog;
 	dlg->setInfo(*narrative);
@@ -107,7 +107,7 @@ void NarrativeControl::editNarrativeInfo()
 	
 	// get the new info
 	NarrativeInfo info = dlg->getInfo();
-	narrative->setName(info.m_title);
+	narrative->setTitle(info.m_title);
 	narrative->setDescription(info.m_description);
 	narrative->setAuthor(info.m_contact);
 
@@ -117,11 +117,11 @@ void NarrativeControl::editNarrativeInfo()
 void NarrativeControl::deleteNarratives()
 {
 	std::set<int> selection = m_narrative_box->getSelection();
-	std::vector<Narrative*> deletionList;
+	std::vector<Narrative2*> deletionList;
 
 	// get pointers to nodes to delete
 	for (auto i : selection) {
-		Narrative *nar = dynamic_cast<Narrative*>(m_narrative_group->getChild(i));
+		Narrative2 *nar = dynamic_cast<Narrative2*>(m_narrative_group->getChild(i));
 		if (nar == NULL) {
 			qWarning() << "detected a non-narrative in the osg narrative group";
 		}
@@ -147,24 +147,24 @@ void NarrativeControl::load(osg::Group *narratives)
 	// load narratives into the gui
 	for (unsigned int i = 0; i < m_narrative_group->getNumChildren(); i++) {
 		osg::Node* c = m_narrative_group->getChild(i);
-		Narrative* nar = dynamic_cast<Narrative*>(c);
+		Narrative2* nar = dynamic_cast<Narrative2*>(c);
 		if (nar) {
 			// add item to gui
 			addToGui(nar);
 		}
-		qDebug() << "loading narrative to gui -" << QString::fromStdString(nar->getName());
+		qDebug() << "loading narrative to gui -" << QString::fromStdString(nar->getTitle());
 	}
 }
 
-void NarrativeControl::loadSlides(Narrative *narrative)
+void NarrativeControl::loadSlides(Narrative2 *narrative)
 {
 	m_slide_box->clear();
 	for (unsigned int i = 0; i < narrative->getNumChildren(); i++) {
-		NarrativeNode *node = dynamic_cast<NarrativeNode*>(narrative->getChild(i));
+		NarrativeSlide *node = dynamic_cast<NarrativeSlide*>(narrative->getChild(i));
 		if (!node) {
 			qWarning() << "Load error: non-narrative detected in narrative children";
 		}
-		qDebug() << "loading slide" << node->getPauseAtNode() << node->getStayOnNode() << node->getTransitionDuration();
+		qDebug() << "loading slide" << node->getDuration() << node->getStayOnNode() << node->getTransitionDuration();
 
 		addNodeToGui(node);
 	}
@@ -179,8 +179,8 @@ void NarrativeControl::openNarrative()
 	this->m_window->ui.topBar->showSlides();
 	m_current_narrative = index;
 
-	Narrative *nar = getNarrative(index);
-	this->m_window->ui.topBar->setSlidesHeader(nar->getName());
+	Narrative2 *nar = getNarrative(index);
+	this->m_window->ui.topBar->setSlidesHeader(nar->getTitle());
 
 	loadSlides(getNarrative(index));
 }
@@ -196,35 +196,35 @@ void NarrativeControl::openSlide()
 	int index = m_slide_box->getLastSelected();
 }
 
-Narrative *NarrativeControl::getNarrative(int index)
+Narrative2 *NarrativeControl::getNarrative(int index)
 {
 	if (index >= m_narrative_group->getNumChildren() || index < 0) {
 		return nullptr;
 	}
 	osg::Node *c = m_narrative_group->getChild(index);
-	return dynamic_cast<Narrative*>(c);
+	return dynamic_cast<Narrative2*>(c);
 }
 
-NarrativeNode * NarrativeControl::getNarrativeNode(int narrative, int slide)
+NarrativeSlide * NarrativeControl::getNarrativeNode(int narrative, int slide)
 {
-	Narrative *nar = getNarrative(narrative);
+	Narrative2 *nar = getNarrative(narrative);
 	if (!nar) return nullptr;
 	if (slide >= nar->getNumChildren() || slide < 0) return nullptr;
-	return dynamic_cast<NarrativeNode*>(nar->getChild(slide));
+	return dynamic_cast<NarrativeSlide*>(nar->getChild(slide));
 }
 
 void NarrativeControl::newSlide()
 {
-	Narrative *nar = getNarrative(m_current_narrative);
+	Narrative2 *nar = getNarrative(m_current_narrative);
 
-	NarrativeNode *node = new NarrativeNode();
+	NarrativeSlide *node = new NarrativeSlide();
 	node->setTransitionDuration(2.0f);
 	node->setStayOnNode(false);
-	node->setPauseAtNode(15.0f);
+	node->setDuration(15.0f);
 	
-	node->setImage(Util::imageQtToOsg(generateThumbnail()));
+	node->setThumbnail(Util::imageQtToOsg(generateThumbnail()));
 	
-	node->setViewMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
+	node->setCameraMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
 	
 	// add to osg
 	nar->addChild(node);
@@ -235,14 +235,14 @@ void NarrativeControl::newSlide()
 void NarrativeControl::deleteSlides()
 {
 	std::set<int> selection = m_slide_box->getSelection();
-	std::vector<NarrativeNode*> nodes;
+	std::vector<NarrativeSlide*> nodes;
 	
 	// data
 	for (int slide : selection) {
 		nodes.push_back(getNarrativeNode(m_current_narrative, slide));
 	}
-	for (NarrativeNode *node : nodes) {
-		Narrative *nar = getNarrative(m_current_narrative);
+	for (NarrativeSlide *node : nodes) {
+		Narrative2 *nar = getNarrative(m_current_narrative);
 		nar->removeChild(node);
 	}
 
@@ -259,12 +259,12 @@ void NarrativeControl::setSlideDuration(float duration)
 	std::set<int> selection = m_slide_box->getSelection();
 	for (auto slide : selection) {
 		// data
-		NarrativeNode *node = getNarrativeNode(m_current_narrative, slide);
+		NarrativeSlide *node = getNarrativeNode(m_current_narrative, slide);
 		if (duration == 0) {
 			node->setStayOnNode(true);
 		}
 		else {
-			node->setPauseAtNode(duration);
+			node->setDuration(duration);
 		}
 
 		// gui
@@ -277,7 +277,7 @@ void NarrativeControl::setSlideTransition(float transition)
 {
 	std::set<int> selection = m_slide_box->getSelection();
 	for (auto slide : selection) {
-		NarrativeNode *node = getNarrativeNode(m_current_narrative, slide);
+		NarrativeSlide *node = getNarrativeNode(m_current_narrative, slide);
 		// data
 		node->setTransitionDuration(transition);
 
@@ -293,21 +293,21 @@ void NarrativeControl::setSlideCamera()
 	QImage new_thumbnail = generateThumbnail();
 	// widget dimensions
 	for (auto slide : selection) {
-		NarrativeNode *node = getNarrativeNode(m_current_narrative, slide);
-		node->setImage(Util::imageQtToOsg(new_thumbnail));
-		node->setViewMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
+		NarrativeSlide *node = getNarrativeNode(m_current_narrative, slide);
+		node->setThumbnail(Util::imageQtToOsg(new_thumbnail));
+		node->setCameraMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
 
 		SlideScrollItem *item = m_slide_box->getItem(slide);
 		item->setImage(new_thumbnail);
 	}
 }
 
-void NarrativeControl::addToGui(Narrative *nar)
+void NarrativeControl::addToGui(Narrative2 *nar)
 {
-	m_narrative_box->addItem(nar->getName(), nar->getDescription());
+	m_narrative_box->addItem(nar->getTitle(), nar->getDescription());
 }
 
-void NarrativeControl::addNodeToGui(NarrativeNode *node)
+void NarrativeControl::addNodeToGui(NarrativeSlide *node)
 {
 	SlideScrollItem *newitem = m_slide_box->addItem();
 	newitem->setTransition(node->getTransitionDuration());
@@ -315,9 +315,9 @@ void NarrativeControl::addNodeToGui(NarrativeNode *node)
 		newitem->setDuration(0.0f);
 	}
 	else {
-		newitem->setDuration(node->getPauseAtNode());
+		newitem->setDuration(node->getDuration());
 	}
-	newitem->setImage(Util::imageOsgToQt(node->getImage()));
+	newitem->setImage(Util::imageOsgToQt(node->getThumbnail()));
 }
 
 QImage NarrativeControl::generateThumbnail()

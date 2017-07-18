@@ -1,23 +1,15 @@
-/*
- * SerializerNarrativeNode.cpp
- *
- *  Created on: Mar 26, 2011
- *      Author: eduardo
- */
-
 #include <osgDB/ObjectWrapper>
 
-#include "narrative/NarrativeNode.h"
+#include "narrative/NarrativeSlide.h"
 
-REGISTER_OBJECT_WRAPPER( NarrativeNode,
-                         new ::NarrativeNode,
-                         ::NarrativeNode,
-                         "osg::Object osg::Node osg::Group ::NarrativeNode" )
+REGISTER_OBJECT_WRAPPER( NarrativeSlide,
+                         new ::NarrativeSlide,
+                         ::NarrativeSlide,
+                         "osg::Object osg::Node osg::Group ::NarrativeSlide" )
 {
-    ADD_MATRIXD_SERIALIZER(ViewMatrix, osg::Matrixd());
-    ADD_FLOAT_SERIALIZER(PauseAtNode, 15.0f);
+    ADD_MATRIXD_SERIALIZER(CameraMatrix, osg::Matrixd());
+    ADD_FLOAT_SERIALIZER(Duration, 15.0f);
 	ADD_BOOL_SERIALIZER(StayOnNode, false);
-	ADD_IMAGE_SERIALIZER(Image, osg::Image, NULL);
-	//ADD_FLOAT_SERIALIZER(TransitionDuration, 4.0f);
-	
+	ADD_FLOAT_SERIALIZER(TransitionDuration, 4.0f);
+	ADD_IMAGE_SERIALIZER(Thumbnail, osg::Image, NULL);
 }

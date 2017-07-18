@@ -214,11 +214,11 @@ void VSimApp::OSGDebug()
 
 	qInfo() << "Narratives:";
 	for (uint i = 0; i < m_narrative_group->getNumChildren(); i++) {
-		Narrative *nar = dynamic_cast<Narrative*>(m_narrative_group->getChild(i));
+		Narrative2 *nar = dynamic_cast<Narrative2*>(m_narrative_group->getChild(i));
 		if (!nar) continue;
-		qInfo() << "Narrative" << i << QString::fromStdString(nar->getName());
+		qInfo() << "Narrative" << i << QString::fromStdString(nar->getTitle());
 		for (uint j = 0; j < nar->getNumChildren(); j++) {
-			NarrativeNode *slide = dynamic_cast<NarrativeNode*>(nar->getChild(i));
+			NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(nar->getChild(i));
 			qInfo() << "\tSlide" << j << slide->getTransitionDuration();
 		}
 	}
@@ -280,7 +280,7 @@ bool VSimApp::convertToNewVSim(osg::Group *root)
 		// if we find a narrative in the root, then move it to the Narratives group
 		if (class_name == "Narrative") {
 			qDebug() << "Found a narrative";
-			Narrative *nar = dynamic_cast<Narrative*>(node);
+			Narrative2 *nar = dynamic_cast<Narrative2*>(node);
 			if (!nar) return false; // this probably makes no sense
 
 			narrative_group->addChild(nar);
