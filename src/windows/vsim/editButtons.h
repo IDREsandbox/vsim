@@ -11,11 +11,11 @@ public:
 	editButtons(QWidget* parent = nullptr);
 
 signals:
-	void sNewLabel(std::string);
-	void sDeleteLabel(int);
-	void sEditExit();
+	//void sNewLabel(std::string);
+	//void sDeleteLabel(int);
+	//void sEditExit();
 
-private:
+public:
 	Ui::editButtons ui;
 };
 

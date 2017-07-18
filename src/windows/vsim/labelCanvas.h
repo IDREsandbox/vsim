@@ -22,7 +22,7 @@ public:
 	void editCanvas();
 
 public slots:
-	void newLabel(std::string style);
+	void newLabel(QString style);
 	void deleteLabel(int idx);
 	void exitEdit();
 
@@ -33,6 +33,7 @@ signals:
 
 protected:
 	QList<dragLabel*> m_items;
+	QWidget* invisible;
 	editButtons* editDlg;
 	int offset = 0;
 	int idx = 0;
