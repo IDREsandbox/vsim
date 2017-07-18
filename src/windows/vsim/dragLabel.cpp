@@ -78,7 +78,7 @@ void dragLabel::mouseReleaseEvent(QMouseEvent *event)
 {
 	if (timer.isActive()) {
 		timer.stop();
-		qDebug() << this->text();
+
 		dragLabelInput *setTextDg = new dragLabelInput(nullptr);
 		setTextDg->setWindowFlags(Qt::WindowSystemMenuHint);
 		
@@ -92,7 +92,6 @@ void dragLabel::mouseReleaseEvent(QMouseEvent *event)
 		QString text = setTextDg->getInfo();
 		text.replace("font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400;", "font-size:" + QString::number(size) + "px;");
 		this->setText(text);
-		qDebug() << text;
 		emit sTextSet(text, m_index);
 
 		delete setTextDg;
@@ -175,10 +174,8 @@ void dragLabel::resizeEvent(QResizeEvent* event)
 		QFont tempFont(font);
 		tempFont.setPixelSize(size);
 		QRect tempRect = QFontMetrics(tempFont).boundingRect(plainText);
-		if (tempRect.height() <= rect.height() && tempRect.width() <= rect.width()) {
+		if (tempRect.height() <= rect.height() && tempRect.width() <= rect.width()) 
 			size++;
-			qDebug() << QString::number(size);
-		}
 		else
 			break;
 	}
@@ -186,8 +183,6 @@ void dragLabel::resizeEvent(QResizeEvent* event)
 	QString text = this->text();
 	text.replace("font-size:" + QString::number(oldSize) + "px;", "font-size:" + QString::number(size) + "px;");
 	this->setText(text);
-	
-	qDebug() << this->text();
 
 	font.setPixelSize(size);
 	this->setFont(font);
