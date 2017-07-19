@@ -461,6 +461,8 @@ border-color: rgb(238, 238, 238);
     <addaction name="actionError"/>
     <addaction name="actionMessage"/>
     <addaction name="actionProgress"/>
+    <addaction name="actionOSG_Debug"/>
+    <addaction name="actionCamera_Debug"/>
    </widget>
    <addaction name="menuhello_to_the_world"/>
    <addaction name="menuTest"/>
@@ -524,6 +526,22 @@ border-color: rgb(238, 238, 238);
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionOSG_Debug">
+   <property name="text">
+    <string>OSG Debug</string>
+   </property>
+   <property name="shortcut">
+    <string>F10</string>
+   </property>
+  </action>
+  <action name="actionCamera_Debug">
+   <property name="text">
+    <string>Camera Debug</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
    </property>
   </action>
  </widget>

@@ -3,29 +3,36 @@
 
 #include <set>
 #include <osg/Node>
-#include "narrative/Narrative.h"
+#include "narrative/Narrative2.h"
 #include "narrative/NarrativeScrollBox.h"
 #include "narrative/SlideScrollBox.h"
 #include "HorizontalScrollBox.h"
 #include "MainWindow.h"
 
+// Interface to the underlying osg data for narratives
+// Exactly one should exist per VSimApp
+// TODO: convert to QAbstractItemModel, remove focus state, remove thumbnail code
+// TODO: undo/redo
 class NarrativeControl : public QObject
 {
 	Q_OBJECT
 public:
-    NarrativeControl(QObject *parent, MainWindow *window);
-    virtual ~NarrativeControl();
+	NarrativeControl(QObject *parent, MainWindow *window);
+	virtual ~NarrativeControl();
 
-	// initializes gui from osg data, also converts old narratives to new
-	void load(osg::Group *model);
-	void loadSlides(Narrative *narrative);
+	// initializes gui from osg data, pass in a group of Narratives
+	void load(osg::Group *narratives);
+	void loadSlides(Narrative2 *narrative);
 
 	//void showSlides(int index);
 	void openNarrative();
 	void closeNarrative();
+	void openSlide();
 
-	Narrative *getNarrative(int index);
-	NarrativeNode *getNarrativeNode(int narrative, int slide);
+	// this should be const or it is dangerous to have public
+	// it means that ppl can change narrative data w/o it being updated by the gui
+	Narrative2 *getNarrative(int index);
+	NarrativeSlide *getNarrativeNode(int narrative, int slide);
 
 	// All Commands -
 	// Narratives
@@ -51,6 +58,7 @@ public:
 	// TODO: versions using sets, ex. deleteSlides(std::set<int>)
 	void newSlide();
 	void deleteSlides();
+	void editSlide();
 	void setSlideDuration(float);
 	void setSlideTransition(float);
 	void setSlideCamera();
@@ -62,8 +70,8 @@ public:
 	//	Edit Box Content
 
 private:
-	void addToGui(Narrative *);
-	void addNodeToGui(NarrativeNode *);
+	void addToGui(Narrative2 *);
+	void addNodeToGui(NarrativeSlide *);
 	QImage generateThumbnail();
 
 	int m_current_narrative;
@@ -73,9 +81,10 @@ private:
 	osg::Group *m_narrative_group; // the osg side data structure, instead of using a vector
 	osg::Group *m_model;
 
-	MainWindow *m_window;
+	MainWindow *m_window; // TODO: remove this after redesign, this should be completely gui independent
 	NarrativeScrollBox *m_narrative_box;
 	SlideScrollBox *m_slide_box;
+	labelCanvas *m_canvas;
 };
 
 #endif /* NARRATIVELIST_H_ */

@@ -20,8 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
 	// initialize the Qt Designer stuff
 	ui.setupUi(this);
 
-	offset = 0;
-
 	setMinimumSize(800, 600);
 	ui.statusbar->showMessage("the best status bar", 0);
 	setWindowIcon(QIcon("assets/vsim.ico"));
@@ -39,14 +37,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui.rootLayout->addWidget(m_osg_widget, 0, 0);
 
 	// drag widget
-	m_drag_area = new QWidget(ui.root);
+	m_drag_area = new labelCanvas(ui.root);
 	ui.rootLayout->addWidget(m_drag_area, 0, 0);
-
-	dragLabelEdit = new dragLabelInput(this);
-
-	test = new dragLabel("I listened to the thing back when with theresa but i've forgotten it all now, except for that it is goddamn excellent.", "background-color:#ffffff;color:#000000;", m_drag_area, this);
-	test->setObjectName(QString::fromUtf8("label"));
-	test->setGeometry(250, 250, 250, 250);
 
 	connect(ui.actionNew, &QAction::triggered, this, &MainWindow::actionNew);
 	connect(ui.actionOpen, &QAction::triggered, this, &MainWindow::actionOpen);
@@ -88,22 +80,6 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_narrative_info_dialog, &QDialog::rejected, this, [this] { qDebug() << "narrative reject"; });
 	connect(m_narrative_info_dialog, &QDialog::finished, this, [this](int i) { qDebug() << "narrative finished" << i; });
 
-	connect(dragLabelEdit, &QDialog::accepted, this, [this] { qDebug() << "dragLabel accept";
-	auto data = this->dragLabelEdit->getInfo();
-	qDebug() << "Description:" << data;
-	});
-	connect(dragLabelEdit, &QDialog::rejected, this, [this] { qDebug() << "dragLabel reject"; });
-	connect(dragLabelEdit, &QDialog::finished, this, [this](int i) { qDebug() << "dragLabel finished" << i; });
-}
-
-void MainWindow::resizeEvent(QResizeEvent *event) {
-	if (offset < 2) {
-		test->updateParSize();
-		offset++;
-	}
-
-	if (offset >= 2)
-		test->mainResize();
 }
 
 void MainWindow::ErrorDialog(const std::string & msg)
@@ -180,13 +156,13 @@ void MainWindow::actionOpen()
 
 void MainWindow::actionSave()
 {
-	qDebug("save (not implemented yet)");
+	emit sSaveCurrent();
 }
 
 void MainWindow::actionSaveAs()
 {
 	qDebug("saveas");
-	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", "osg ascii file (*.osgt);;osg binary file (*.osgb)");
+	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", "VSim file (*.vsim);;osg ascii file (*.osgt);;osg binary file (*.osgb)");
 	if (filename == "") {
 		qDebug() << "saveas cancel";
 		return;

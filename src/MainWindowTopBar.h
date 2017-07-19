@@ -16,6 +16,9 @@ public:
 
 	void setSlidesHeader(std::string);
 
+	// TODO
+	//void enableEdting(bool);
+
 public:
 	Ui::MainWindowTopBar ui;
 };

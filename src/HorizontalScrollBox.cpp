@@ -127,6 +127,7 @@ void HorizontalScrollBox::clearSelection()
 		i->colorSelect(false);
 	}
 	m_selection.clear();
+	emit sSelectionChange();
 }
 
 const std::set<int>& HorizontalScrollBox::getSelection()
@@ -151,11 +152,13 @@ void HorizontalScrollBox::addToSelection(int index)
 {
 	m_selection.insert(index);
 	m_items[index]->colorSelect(true);
+	emit sSelectionChange();
 }
 void HorizontalScrollBox::removeFromSelection(int index) 
 {
 	m_selection.erase(index);
 	m_items[index]->colorSelect(false);
+	emit sSelectionChange();
 }
 
 void HorizontalScrollBox::select(int index)
@@ -163,6 +166,7 @@ void HorizontalScrollBox::select(int index)
 	clearSelection();
 	m_selection.insert(index);
 	m_items[index]->colorSelect(true);
+	emit sSelectionChange();
 }
 
 bool HorizontalScrollBox::isSelected(int index)
@@ -191,6 +195,13 @@ void HorizontalScrollBox::setSpacing(int space)
 {
 	m_spacing = space;
 	refresh();
+}
+
+void HorizontalScrollBox::forceSelect(int index)
+{
+	blockSignals(true);
+	select(index);
+	blockSignals(false);
 }
 
 void HorizontalScrollBox::resizeEvent(QResizeEvent* event)

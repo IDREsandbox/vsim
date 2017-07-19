@@ -20,7 +20,7 @@ NarrativeInfoDialog::NarrativeInfoDialog(QWidget * parent, const NarrativeInfo &
 NarrativeInfoDialog::~NarrativeInfoDialog() {
 }
 
-void NarrativeInfoDialog::setInfo(const Narrative &nar)
+void NarrativeInfoDialog::setInfo(const Narrative2 &nar)
 {
 	m_info = {
 		nar.getName(),

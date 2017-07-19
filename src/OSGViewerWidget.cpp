@@ -42,17 +42,14 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	osg::Camera* camera = new osg::Camera;
 	camera->setViewport(0, 0, this->width(), this->height());
 	camera->setClearColor(osg::Vec4(51/255.f, 51/255.f, 102/255.f, 1.f));
-	camera->setProjectionMatrixAsPerspective(30.f, aspectRatio, 1.f, 1000.f);
+	camera->setProjectionMatrixAsPerspective(75.f, aspectRatio, 1.f, 7500.f);
 	camera->setGraphicsContext(graphicsWindow_);
 	camera->getOrCreateStateSet()->setGlobalDefaults(); // depth buffers and things
 
 	//osgViewer::View* view = new osgViewer::View;
 	viewer_->setCamera(camera);
 	
-	// TODO: replace this with blank
-	osg::Node* scene = osgDB::readNodeFile("T:\\Projects\\_UCLA\\vsim\\vsim-dependencies\\OpenSceneGraph-Data-3.4.0\\cow.osg");
 	osg::Group* group = new osg::Group();
-	group->addChild(scene);
 	viewer_->setSceneData(group);
 	viewer_->addEventHandler(new osgViewer::StatsHandler);
 
@@ -65,6 +62,9 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	manipulator->setAllowThrow(false);
 
 	viewer_->setCameraManipulator(manipulator);
+
+	// lighting
+	viewer_->setLightingMode(osg::View::SKY_LIGHT);
 
 	// for composite viewer
 	// viewer_->addView(view);
