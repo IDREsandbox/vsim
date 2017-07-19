@@ -3,6 +3,37 @@
 
 ## Installation
 
+### Windows - CMake, Visual Studio 2017, Qt 5.9.1
+
+Setup Qt
+
+ 1. Download Qt Open Source https://www.qt.io/download-open-source/
+ 2. Install Qt 5.9.1 64 bit VS2017
+
+Building
+
+ 1. In the vsim root
+ 	```
+	mkdir build
+	cd build
+	cmake -G "Visual Studio 15 2017 Win64" \
+	  -D CMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install" \
+	  -D OPENSCENEGRAPH_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin" \
+	  -D THIRDPARTY_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin" \
+	  -D CMAKE_INSTALL_PREFIX=install ..
+	  ```
+ 2. To build (use Debug for debug)
+	`cmake --build . --config Release`
+ 3. To install
+	`cmake --build . --target INSTALL --config Release`
+ 4. To package (into installer)
+	`cpack .`
+ 5. For more cmake instructions see cmake.txt
+
+CMake inside Visual Studio 2017
+
+TODO
+
 ### Windows - Visual Studio 2015
 
 Setup Qt
