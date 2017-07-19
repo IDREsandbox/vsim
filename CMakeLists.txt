@@ -25,7 +25,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # dependencies
 # search path
 
-find_package(OpenSceneGraph 3.4.0 REQUIRED osgDB osgUtil osgGA osgViewer)
+find_package(OpenSceneGraph 3.4.0 REQUIRED osgDB osgUtil osgGA osgViewer osgText)
 find_package(Qt5Widgets)
 
 include_directories("${PROJECT_BINARY_DIR}")
@@ -43,6 +43,8 @@ file(GLOB_RECURSE VSim_src
   src/*.h
   src/*.cpp
   )
+list(FILTER VSim_src EXCLUDE REGEX ".*src/windows.*") 
+message("sources - " ${VSim_src})
 
 # file(GLOB VSim_src 
 #   "src/*.h" 

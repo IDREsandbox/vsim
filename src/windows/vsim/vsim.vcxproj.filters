@@ -38,9 +38,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\dragLabel.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\OSGViewerWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -67,9 +64,6 @@
     </CustomBuild>
     <CustomBuild Include="..\..\dragLabelInput.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dragLabelInput.h">
-      <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\ScrollBoxItem.h">
       <Filter>Header Files</Filter>
@@ -107,23 +101,23 @@
     <CustomBuild Include="..\..\narrative\NarrativePlayer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="editButtons.h">
+    <CustomBuild Include="..\..\dragLabel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="labelCanvas.h">
+    <CustomBuild Include="..\..\dragLabelInput.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="editButtons.ui">
+    <CustomBuild Include="..\..\editButtons.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\labelCanvas.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\editButtons.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GeneratedFiles\Debug\moc_dragLabel.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_dragLabel.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -183,18 +177,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_NarrativeScrollItem.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="dragLabelInput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_dragLabelInput.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_dragLabelInput.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="dragLabel.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\ScrollBoxItem.cpp">
       <Filter>Source Files</Filter>
@@ -268,9 +250,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_NarrativePlayer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="editButtons.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_editButtons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -281,9 +260,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_labelCanvas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="labelCanvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\SerializerModelInformation.cpp">
@@ -346,6 +322,42 @@
     <ClCompile Include="..\..\narrative\SerializerNarrativeSlide.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\dragLabel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_dragLabel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_dragLabel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dragLabelInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_dragLabelInput.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_dragLabelInput.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\editButtons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_editButtons.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_editButtons.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\labelCanvas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_labelCanvas.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_labelCanvas.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">
@@ -399,7 +411,7 @@
     <ClInclude Include="..\..\deprecated\narrative\NarrativeNode.h">
       <Filter>Deprecated</Filter>
     </ClInclude>
-    <ClInclude Include="ui_editButtons.h">
+    <ClInclude Include="GeneratedFiles\ui_editButtons.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

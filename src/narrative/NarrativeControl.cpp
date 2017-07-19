@@ -198,7 +198,7 @@ void NarrativeControl::openSlide()
 
 Narrative2 *NarrativeControl::getNarrative(int index)
 {
-	if (index >= m_narrative_group->getNumChildren() || index < 0) {
+	if (index < 0 || (uint)index >= m_narrative_group->getNumChildren()) {
 		return nullptr;
 	}
 	osg::Node *c = m_narrative_group->getChild(index);
@@ -209,7 +209,7 @@ NarrativeSlide * NarrativeControl::getNarrativeNode(int narrative, int slide)
 {
 	Narrative2 *nar = getNarrative(narrative);
 	if (!nar) return nullptr;
-	if (slide >= nar->getNumChildren() || slide < 0) return nullptr;
+	if (slide < 0 || (uint)slide >= nar->getNumChildren()) return nullptr;
 	return dynamic_cast<NarrativeSlide*>(nar->getChild(slide));
 }
 
