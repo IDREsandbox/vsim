@@ -50,6 +50,7 @@ VSimApp::VSimApp(MainWindow* window)
 
 bool VSimApp::init()
 {
+	m_filename = "";
 	initWithVSim(new osg::Group);
 	return true;
 }
@@ -195,8 +196,12 @@ bool VSimApp::saveVSim(const std::string& filename)
 
 bool VSimApp::saveCurrentVSim()
 {
-	saveVSim(getFileName());
-	return false;
+	if (m_filename == "") {
+		m_window->actionSaveAs();
+		return true;
+	}
+	saveVSim(m_filename);
+	return true;
 }
 
 std::string VSimApp::getFileName()
