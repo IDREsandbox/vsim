@@ -216,3 +216,20 @@ osg::Matrixd Util::viewMatrixLerp(double t, osg::Matrixd m0, osg::Matrixd m1)
 
 	return osg::Matrix::rotate(rot) * osg::Matrix::translate(pos);
 }
+
+double Util::exponentialSmooth(double start, double end, double factor, double clip)
+{
+	double difference = end - start;
+	if (abs(difference) <= clip) {
+		return end;
+	}
+	return start + difference * factor;
+}
+
+double Util::exponentialSmooth2(double * current, double end, double factor, double clip)
+{
+	double new_value = Util::exponentialSmooth(*current, end, factor, clip);
+	double delta = new_value - *current;
+	*current = new_value;
+	return delta;
+}

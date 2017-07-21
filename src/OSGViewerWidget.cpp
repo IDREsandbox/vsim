@@ -133,13 +133,11 @@ void OSGViewerWidget::setNavigationMode(NavigationMode mode)
 	}
 
 	if (mode == NAVIGATION_FIRST_PERSON) {
-		setCursor(Qt::BlankCursor);
-		centerCursor();
+		takeCursor();
 	}
 	else {
-		setCursor(Qt::ArrowCursor);
+		releaseCursor();
 	}
-
 
 	viewer_->setCameraManipulator(new_manipulator, false);
 	setCameraMatrix(old_matrix);
@@ -160,14 +158,15 @@ void OSGViewerWidget::setCameraFrozen(bool freeze)
 	m_camera_frozen = freeze;
 	if (freeze) {
 		qInfo() << "Camera freeze";
-		setCursor(Qt::ArrowCursor);
 		osg::Matrixd old_matrix = getCameraMatrix();
 		viewer_->setCameraManipulator(m_simple_manipulator);
 		setCameraMatrix(old_matrix);
+		releaseCursor();
 	}
 	else {
 		qInfo() << "Camera unfreeze";
 		setNavigationMode(m_navigation_mode);
+		setFocus();
 	}
 }
 
@@ -203,7 +202,6 @@ void OSGViewerWidget::paintEvent(QPaintEvent* /* paintEvent */)
 void OSGViewerWidget::paintGL()
 {
 	viewer_->frame();
-	qDebug() << "----------------frame";
 }
 
 void OSGViewerWidget::resizeGL(int width, int height)
@@ -255,17 +253,13 @@ void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 bool second = false;
 void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 {
-
-
 	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON || getActualNavigationMode() == NAVIGATION_FLIGHT) {
 		// center the mouse
 		int dx = width() / 2 - event->x();
 		int dy = height() / 2 - event->y();
 		if (dx == 0 && dy == 0) {
-			//qDebug() << "---------Fuzzz";
 			return;
 		}
-		//qDebug() << "-----------qt mouse event" << dx << dy << height() << event->y();
 	}
 	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
 		centerCursor();
@@ -433,6 +427,17 @@ void OSGViewerWidget::centerCursor()
 	QCursor new_cursor = cursor();
 	new_cursor.setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 	setCursor(new_cursor);
+}
+
+void OSGViewerWidget::takeCursor()
+{
+	grabMouse(Qt::BlankCursor);
+	centerCursor();	
+}
+
+void OSGViewerWidget::releaseCursor()
+{
+	releaseMouse();
 }
 
 osgGA::EventQueue* OSGViewerWidget::getEventQueue() const
