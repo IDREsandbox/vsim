@@ -25,7 +25,17 @@ protected:
 
 	osg::Matrixd m_inverse_matrix;
 
+	// How this smoothing works:
+	// There is a target (x,y) which is modified by the dx and dy of mouse movement
+	// There is a lagging (x,y) which follows behind the target a little bit using rotateByPixels(dx,dy).
+	// Actual motion uses the lagging motion and maps it to ypr
+	// Approach is exponential (1/2)^n
+	// +x is to the right
+	// +y is down
+	void rotateByPixels(int dx, int dy);
+
 private:
+	double m_prev_time_sec;
 
 	bool m_key_w;
 	bool m_key_a;
@@ -34,6 +44,13 @@ private:
 	bool m_key_shift;
 	bool m_key_ctrl;
 
+	double m_x_current;
+	double m_y_current;
+	double m_x_target;
+	double m_y_target;
+
+	double m_sensitivity;
+	double m_smoothing;
 };
 
 #endif /* FIRSTPERSONMANIPULATOR_H */

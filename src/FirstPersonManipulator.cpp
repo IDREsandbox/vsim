@@ -10,7 +10,14 @@ FirstPersonManipulator::FirstPersonManipulator()
 	m_key_d(false)
 {
 	setMaxVelocity(10);
+	m_x_current = 0;
+	m_y_current = 0;
+	m_x_target = 0;
+	m_y_target = 0;
 	//init();
+
+	m_sensitivity = .005;
+	m_smoothing = .2;
 
 }
 
@@ -21,6 +28,7 @@ bool FirstPersonManipulator::handle(const osgGA::GUIEventAdapter & ea, osgGA::GU
 	osgGA::GUIEventAdapter::EventType type = ea.getEventType();
 
 	if (type == osgGA::GUIEventAdapter::FRAME) {
+		//m_prev_time_sec = viewer
 		//qDebug() << "frame" << frame;
 
 		//qDebug() << "FRAME " << frame
@@ -38,7 +46,7 @@ bool FirstPersonManipulator::handle(const osgGA::GUIEventAdapter & ea, osgGA::GU
 			moveForward(-.2);
 		}
 		if (m_key_d) {
-			//qDebug() << "strafe";
+			qDebug() << "strafe" << frame;
 			moveRight(.2);
 		}
 		if (m_key_a) {
@@ -51,6 +59,30 @@ bool FirstPersonManipulator::handle(const osgGA::GUIEventAdapter & ea, osgGA::GU
 			moveUp(-.2);
 		}
 
+		// go halfway to the target
+		double difference_x = m_x_target - m_x_current;
+		double difference_y = m_y_target - m_y_current;
+		
+		float dx = difference_x * m_smoothing;
+		float dy = difference_y * m_smoothing;
+
+		if (abs(difference_x) <= 1) {
+			m_x_current = m_x_target;
+		}
+		else {
+			m_x_current += dx;
+		}
+
+		if (abs(difference_y) <= 1) {
+			m_y_current = m_y_target;
+		}
+		else {
+			m_y_current += dy;
+		}
+
+		if (abs(difference_x) >= .01 || abs(difference_y) >= .001) {
+			rotateByPixels(dx, dy);
+		}
 
 	}
 	else if (type == osgGA::GUIEventAdapter::PUSH) {
@@ -68,8 +100,6 @@ bool FirstPersonManipulator::handle(const osgGA::GUIEventAdapter & ea, osgGA::GU
 	}
 	else if (type == osgGA::GUIEventAdapter::MOVE) {
 
-
-
 		float dx = ea.getX() - ea.getXmax() / 2;
 
 		// sooo, qt uses ints and +y is down, osg uses float and +y is up
@@ -78,50 +108,9 @@ bool FirstPersonManipulator::handle(const osgGA::GUIEventAdapter & ea, osgGA::GU
 		int yfromtop = (int)ea.getYmax() - (int)ea.getY();
 		float dy = yfromtop - ((int)ea.getYmax()) / 2;
 
-		//qDebug() << "mouse struggle";
-		//qDebug()
-		//	<< "x" << ea.getX()
-		//	<< "y" << ea.getY()
-		//	<< "yt" << yfromtop
-		//	<< "xmax" << ea.getXmax()
-		//	<< "ymax" << ea.getYmax()
-		//	<< "xmin" << ea.getXmin()
-		//	<< "xnorm" << ea.getXnormalized()
-		//	<< "ynorm" << ea.getYnormalized()
-		//	<< "scrolling" << ea.getScrollingDeltaX();
-		//qDebug() << "osg" << dx << dy;
+		m_x_target += dx;
+		m_y_target += dy;
 
-		// if dx or dy is too small make 0
-		//dx = (abs(dx) <= .5) ? 0 : dx;
-		//dy = (abs(dy) <= .5) ? 0 : dy;
-
-		//qDebug() << "round" << dx << dy;
-
-		osg::Matrixd m = getMatrix();
-		double y, p, r;
-		Util::quatToYPR(m.getRotate(), &y, &p, &r);
-		//qDebug() << "ypr1" << y*180/M_PI << p*180/M_PI << r*180/M_PI;
-
-		// dx+ yaw decreases
-		// dx- yaw increases
-		// dy+ pitch increases
-		// dy- pitch decreases
-		// conversion: pixels -> radians
-		y -= dx * .005;
-		p += dy * .005;
-		//qDebug() << dx << dy;
-		//qDebug() << "ypr2" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI;
-
-		p = Util::clamp(p, -M_PI_2+.01, M_PI_2-.01);
-		// this doesn't work?
-		//rotateYawPitch(osg::Quat(), y*180/M_PI, p*180/M_PI, osg::Vec3d(0, 0, 1));
-
-		osg::Quat rot = Util::YPRToQuat(y, p, 0);
-		osg::Vec3d pos = m.getTrans();
-
-		//std::cout << "yaw " << yaw*180/M_PI << " pitch " << pitch * 180 / M_PI << " roll " << roll * 180 / M_PI << " xyz " << pos << "\n";
-
-		setByMatrix(osg::Matrix::rotate(rot) * osg::Matrix::translate(pos));
 		return true;
 
 	}
@@ -200,4 +189,32 @@ bool FirstPersonManipulator::startAnimationByMousePointerIntersection(const osgG
 {
 	qDebug() << "animation start";
 	return false;
+}
+
+void FirstPersonManipulator::rotateByPixels(int dx, int dy)
+{
+	osg::Matrixd m = getMatrix();
+	double yaw, pitch, roll;
+	Util::quatToYPR(m.getRotate(), &yaw, &pitch, &roll);
+	//qDebug() << "ypr1" << y*180/M_PI << p*180/M_PI << r*180/M_PI;
+
+	// dx+ yaw decreases
+	// dx- yaw increases
+	// dy+ pitch increases
+	// dy- pitch decreases
+	// conversion: pixels -> radians
+	yaw -= dx * m_sensitivity;
+	pitch += dy * m_sensitivity;
+
+	pitch = Util::clamp(pitch, -M_PI_2 + .01, M_PI_2 - .01);
+
+	// why doesnt this work...? how is this even supposed to work?
+	//rotateYawPitch(osg::Quat(), y*180/M_PI, p*180/M_PI, osg::Vec3d(0, 0, 1));
+
+	// just do it by hand
+	osg::Quat rot = Util::YPRToQuat(yaw, pitch, 0);
+	osg::Vec3d pos = m.getTrans();
+	setByMatrix(osg::Matrix::rotate(rot) * osg::Matrix::translate(pos));
+
+	//qDebug() << "mouse event" << frame;
 }
