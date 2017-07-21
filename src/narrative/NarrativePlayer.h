@@ -6,9 +6,6 @@
 #include "MainWindow.h"
 #include <QObject>
 #include <osg/Matrix>
-#include <osgGA/FirstPersonManipulator>
-#include <osgGA/TerrainManipulator>
-#include "SimpleCameraManipulator.h"
 
 // NarrativePlayer owns the camera
 class NarrativePlayer : public QObject
@@ -25,19 +22,11 @@ public:
 
 	bool isPlaying();
 
-	enum NavigationMode {
-		NAVIGATION_FIRST_PERSON,
-		NAVIGATION_FLIGHT,
-		NAVIGATION_OBJECT
-	};
-
 	void setCameraMatrix(osg::Matrixd camera_matrix);
-	void setNavigationMode(NavigationMode mode);
-	void freezeCamera(bool freeze);
 
 	// goto and pause at a slide
 	// set the slide selection
-	bool setSlide(int narrative, int slide); // TODO
+	// bool setSlide(int narrative, int slide); // TODO
 
 public: //slots
 	void selectionChange();
@@ -59,16 +48,9 @@ private:
 	double m_previous_time;
 	QTimer *m_timer; // frame timer, used for updates
 
-	// camera manipulators
-	NavigationMode m_navigation_mode;
-	osg::ref_ptr<SimpleCameraManipulator> m_simple_manipulator; // this one has no controls	
-	osg::ref_ptr<osgGA::FirstPersonManipulator> m_first_person_manipulator;
-	osg::ref_ptr<osgGA::FirstPersonManipulator> m_flight_manipulator;
-	osg::ref_ptr<osgGA::TerrainManipulator> m_terrain_manipulator;
-
-	bool m_frozen;
-
-	void figureOutFrozenCamera(); // locks the camera if playing or frozen
+	//void figureOutFrozenCamera(); // locks the camera if playing or frozen
+	// remembers the previous navigation mode to switch back to after finishing playing
+	OSGViewerWidget::NavigationMode m_old_navigation_mode;
 
 };
 

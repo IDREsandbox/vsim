@@ -51,17 +51,23 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	
 	osg::Group* group = new osg::Group();
 	viewer_->setSceneData(group);
-	viewer_->addEventHandler(new osgViewer::StatsHandler);
+	
+	osgViewer::StatsHandler *stats_handler = new osgViewer::StatsHandler;
+	stats_handler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_T);
+	viewer_->addEventHandler(stats_handler);
+	
+	// Camera Manipulator and Navigation
+	//osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
+	//manipulator->setAllowThrow(false);
+	//viewer_->setCameraManipulator(manipulator);
+	m_camera_frozen = false;
+	m_simple_manipulator = new SimpleCameraManipulator();
+	m_first_person_manipulator = new FirstPersonManipulator;
+	m_flight_manipulator = new FirstPersonManipulator;
+	m_object_manipulator = new ObjectManipulator;
+	viewer_->setCameraManipulator(m_object_manipulator);
+	//setNavigationMode(NAVIGATION_OBJECT);
 
-// I have no idea what this is for. If we need it for additional events copy it from the tutorial
-//#ifdef WITH_PICK_HANDLER
-//	view->addEventHandler(new PickHandler);
-//#endif
-
-	osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
-	manipulator->setAllowThrow(false);
-
-	viewer_->setCameraManipulator(manipulator);
 
 	// lighting
 	viewer_->setLightingMode(osg::View::SKY_LIGHT);
@@ -83,15 +89,91 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	this->setMouseTracking(true);
 }
 
-osgViewer::Viewer * OSGViewerWidget::setViewer(osgViewer::Viewer* viewer)
-{
-	
-	return nullptr;
-}
-
 osgViewer::Viewer* OSGViewerWidget::getViewer() const
 {
 	return viewer_;
+}
+
+osg::Matrixd OSGViewerWidget::getCameraMatrix()
+{
+	return viewer_->getCameraManipulator()->getMatrix();
+}
+
+void OSGViewerWidget::setCameraMatrix(osg::Matrixd m)
+{
+	return viewer_->getCameraManipulator()->setByMatrix(m);
+}
+
+void OSGViewerWidget::setNavigationMode(NavigationMode mode)
+{
+	
+	osg::Matrixd old_matrix = getCameraMatrix();
+
+	osgGA::CameraManipulator *new_manipulator;
+	switch (mode) {
+	case NAVIGATION_FIRST_PERSON:
+		qInfo() << "Navigation mode set to First Person";
+		new_manipulator = m_first_person_manipulator;
+		break;
+	case NAVIGATION_FLIGHT:
+		qInfo() << "Navigation mode set to Flight";
+		new_manipulator = m_flight_manipulator;
+		break;
+	case NAVIGATION_OBJECT:
+	default:
+		qInfo() << "Navigation mode set to Object";
+		new_manipulator = m_object_manipulator;
+		break;
+	}
+
+	m_navigation_mode = mode;
+
+	if (m_camera_frozen) {
+		return;
+	}
+
+	if (mode == NAVIGATION_FIRST_PERSON) {
+		setCursor(Qt::BlankCursor);
+		centerCursor();
+	}
+	else {
+		setCursor(Qt::ArrowCursor);
+	}
+
+
+	viewer_->setCameraManipulator(new_manipulator, false);
+	setCameraMatrix(old_matrix);
+}
+
+OSGViewerWidget::NavigationMode OSGViewerWidget::getNavigationMode() const
+{
+	return m_navigation_mode;
+}
+
+OSGViewerWidget::NavigationMode OSGViewerWidget::getActualNavigationMode() const
+{
+	return m_camera_frozen ? NAVIGATION_SIMPLE : m_navigation_mode;
+}
+
+void OSGViewerWidget::setCameraFrozen(bool freeze)
+{
+	m_camera_frozen = freeze;
+	if (freeze) {
+		qInfo() << "Camera freeze";
+		setCursor(Qt::ArrowCursor);
+		osg::Matrixd old_matrix = getCameraMatrix();
+		viewer_->setCameraManipulator(m_simple_manipulator);
+		setCameraMatrix(old_matrix);
+	}
+	else {
+		qInfo() << "Camera unfreeze";
+		setNavigationMode(m_navigation_mode);
+	}
+}
+
+bool OSGViewerWidget::getCameraFrozen() const
+{
+	return m_camera_frozen;
 }
 
 void OSGViewerWidget::paintEvent(QPaintEvent* /* paintEvent */)
@@ -121,6 +203,7 @@ void OSGViewerWidget::paintEvent(QPaintEvent* /* paintEvent */)
 void OSGViewerWidget::paintGL()
 {
 	viewer_->frame();
+	qDebug() << "----------------frame";
 }
 
 void OSGViewerWidget::resizeGL(int width, int height)
@@ -147,15 +230,15 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 	}
 	else if (event->key() == Qt::Key_D)
 	{
-		osgDB::writeNodeFile(*viewer_->getSceneData(),
-			"/tmp/sceneGraph.osg");
+		//osgDB::writeNodeFile(*viewer_->getSceneData(),
+		//	"/tmp/sceneGraph.osg");
 
-		return;
+		//return;
 	}
 	else if (event->key() == Qt::Key_H)
 	{
-		this->onHome();
-		return;
+		//this->onHome();
+		//return;
 	}
 
 	this->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData));
@@ -169,24 +252,28 @@ void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 	this->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KeySymbol(*keyData));
 }
 
+bool second = false;
 void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	// Note that we have to check the buttons mask in order to see whether the
-	// left button has been pressed. A call to `button()` will only result in
-	// `Qt::NoButton` for mouse move events.
-	if (selectionActive_ && event->buttons() & Qt::LeftButton)
-	{
-		selectionEnd_ = event->pos();
 
-		// Ensures that new paint events are created while the user moves the
-		// mouse.
-		this->update();
+
+	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON || getActualNavigationMode() == NAVIGATION_FLIGHT) {
+		// center the mouse
+		int dx = width() / 2 - event->x();
+		int dy = height() / 2 - event->y();
+		if (dx == 0 && dy == 0) {
+			//qDebug() << "---------Fuzzz";
+			return;
+		}
+		//qDebug() << "-----------qt mouse event" << dx << dy << height() << event->y();
 	}
-	else
-	{
-		this->getEventQueue()->mouseMotion(static_cast<float>(event->x()),
-			static_cast<float>(event->y()));
+	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
+		centerCursor();
 	}
+
+	event->accept();
+	this->getEventQueue()->mouseMotion(static_cast<float>(event->x()),
+		static_cast<float>(event->y()));
 }
 
 void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
@@ -339,6 +426,13 @@ void OSGViewerWidget::onResize(int width, int height)
 	if (cameras.size() > 0) {
 		cameras[0]->setViewport(0, 0, width, height);
 	}
+}
+
+void OSGViewerWidget::centerCursor()
+{
+	QCursor new_cursor = cursor();
+	new_cursor.setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
+	setCursor(new_cursor);
 }
 
 osgGA::EventQueue* OSGViewerWidget::getEventQueue() const

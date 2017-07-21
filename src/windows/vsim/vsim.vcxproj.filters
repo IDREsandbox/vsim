@@ -361,6 +361,12 @@
     <ClCompile Include="..\..\SimpleCameraManipulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\FirstPersonManipulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ObjectManipulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">
@@ -418,6 +424,12 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\SimpleCameraManipulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FirstPersonManipulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ObjectManipulator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

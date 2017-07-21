@@ -107,6 +107,13 @@ QImage Util::imageOsgToQt(const osg::Image *oimg)
 	return QImage(oimg->data(), oimg->s(), oimg->t(), QImage::Format_RGBA8888);
 }
 
+double Util::clamp(double value, double min, double max)
+{
+	if (value > max) return max;
+	if (value < min) return min;
+	return value;
+}
+
 // credits to stackoverflow
 double Util::angleWrap(double x)
 {
@@ -152,7 +159,7 @@ void Util::quatToYPR(const osg::Quat &quat, double *yaw, double *pitch, double *
 	double phi = acos(fwd.z() / r);
 
 	*yaw = angleWrap(theta);
-	*pitch = angleWrap(phi - M_PI_2);
+	*pitch = phi - M_PI_2;
 
 	// calculating roll
 	// roll is the angle difference between flatright and right

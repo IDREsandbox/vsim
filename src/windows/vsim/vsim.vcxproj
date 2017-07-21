@@ -37,6 +37,7 @@
     <ClCompile Include="..\..\dragLabel.cpp" />
     <ClCompile Include="..\..\dragLabelInput.cpp" />
     <ClCompile Include="..\..\editButtons.cpp" />
+    <ClCompile Include="..\..\FirstPersonManipulator.cpp" />
     <ClCompile Include="..\..\HorizontalScrollBox.cpp" />
     <ClCompile Include="..\..\labelCanvas.cpp" />
     <ClCompile Include="..\..\main.cpp" />
@@ -54,6 +55,7 @@
     <ClCompile Include="..\..\narrative\SerializerNarrativeSlide.cpp" />
     <ClCompile Include="..\..\narrative\SlideScrollBox.cpp" />
     <ClCompile Include="..\..\narrative\SlideScrollItem.cpp" />
+    <ClCompile Include="..\..\ObjectManipulator.cpp" />
     <ClCompile Include="..\..\OSGViewerWidget.cpp" />
     <ClCompile Include="..\..\ScrollBoxItem.cpp" />
     <ClCompile Include="..\..\SerializerModelInformation.cpp" />
@@ -322,6 +324,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I.\..\..\narrative" "-I.\..\.." "-I.\.." "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(DEPS)\OpenSceneGraph-3.4.0-build\msvc2015_$(PlatformArchitecture)\include"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\FirstPersonManipulator.h" />
     <ClInclude Include="..\..\ModelInformation.h" />
     <CustomBuild Include="..\..\ScrollBoxItem.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing ScrollBoxItem.h...</Message>
@@ -449,6 +452,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I.\..\..\narrative" "-I.\..\.." "-I.\.." "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(DEPS)\OpenSceneGraph-3.4.0-build\msvc2015_$(PlatformArchitecture)\include"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\ObjectManipulator.h" />
     <ClInclude Include="..\..\SimpleCameraManipulator.h" />
     <ClInclude Include="GeneratedFiles\ui_dragLabelInput.h" />
     <ClInclude Include="GeneratedFiles\ui_editButtons.h" />

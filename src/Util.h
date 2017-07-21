@@ -21,6 +21,8 @@ namespace Util
 	// osg::Image to QImage
 	QImage imageOsgToQt(const osg::Image *oimg);
 
+	double clamp(double value, double min, double max);
+
 	// forces an angle between 0 and 180
 	double angleWrap(double x);
 
@@ -30,10 +32,11 @@ namespace Util
 	double closestAngle(double x, double y);
 
 	// Converts the quaternion quat to yaw, pitch, and roll
-	// assumes z up, x right, y fwd
+	// assumes z up, x fwd, y left
 	// yaw is rotation ccw about world z, so facing left (w/ respect to x fwd) is +90
 	// pitch is rotation ccw about y, so tilted down is -45 pitch
-	// angles are wrapped [0,360]
+	// yaw and roll are [0,2PI]
+	// pitch is [-PI/2, PI/2]
 	void quatToYPR(const osg::Quat& quat, double *yaw, double *pitch, double *roll);
 
 	// Converts yaw, pitch, and roll to a quaternion

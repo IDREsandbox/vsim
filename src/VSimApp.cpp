@@ -42,7 +42,7 @@ VSimApp::VSimApp(MainWindow* window)
 
 		double y, p, r;
 		Util::quatToYPR(rot, &y, &p, &r);
-		qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI;
+		qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI << "pos" << trans.x() << trans.y() << trans.z();
 	});
 
 	reset();
