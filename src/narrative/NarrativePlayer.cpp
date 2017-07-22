@@ -134,7 +134,7 @@ void NarrativePlayer::play()
 	m_slide_time_sec = 0;
 	
 	m_old_navigation_mode = m_window->m_osg_widget->getNavigationMode();
-	m_window->m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_SIMPLE);
+	//m_window->m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_SIMPLE);
 }
 
 void NarrativePlayer::next()
@@ -209,7 +209,7 @@ void NarrativePlayer::pause()
 	m_transitioning = false;
 	setCameraMatrix(new_slide->getCameraMatrix());
 
-	m_window->m_osg_widget->setNavigationMode(m_old_navigation_mode);
+	//m_window->m_osg_widget->setNavigationMode(m_old_navigation_mode);
 }
 bool NarrativePlayer::isPlaying()
 {

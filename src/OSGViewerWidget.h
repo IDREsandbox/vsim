@@ -12,9 +12,11 @@
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
 #include <osg/Camera>
+#include <QElapsedTimer>
 #include "SimpleCameraManipulator.h"
 #include "FirstPersonManipulator.h"
 #include "ObjectManipulator.h"
+#include "KeyTracker.h"
 
 class OSGViewerWidget : public QOpenGLWidget
 {
@@ -90,6 +92,11 @@ private:
 	osg::ref_ptr<ObjectManipulator> m_object_manipulator;
 
 	bool m_camera_frozen;
+
+	// key press tracker
+	KeyTracker m_key_tracker;
+
+	QElapsedTimer m_frame_timer;
 
 	void processSelection();
 };

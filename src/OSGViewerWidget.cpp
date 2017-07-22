@@ -68,7 +68,6 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	viewer_->setCameraManipulator(m_object_manipulator);
 	//setNavigationMode(NAVIGATION_OBJECT);
 
-
 	// lighting
 	viewer_->setLightingMode(osg::View::SKY_LIGHT);
 
@@ -83,10 +82,15 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMinimumSize(100, 100);
 
+	// Key tracking
+	this->installEventFilter(&m_key_tracker);
+
 	// Ensures that the widget receives mouse move events even though no
 	// mouse button has been pressed. We require this in order to let the
 	// graphics window switch viewports properly.
 	this->setMouseTracking(true);
+
+	m_frame_timer.start();
 }
 
 osgViewer::Viewer* OSGViewerWidget::getViewer() const
@@ -111,9 +115,14 @@ void OSGViewerWidget::setNavigationMode(NavigationMode mode)
 
 	osgGA::CameraManipulator *new_manipulator;
 	switch (mode) {
+	case NAVIGATION_SIMPLE:
+		qInfo() << "Navigation mode set to Simple";
+		new_manipulator = m_simple_manipulator;
+		break;
 	case NAVIGATION_FIRST_PERSON:
 		qInfo() << "Navigation mode set to First Person";
 		new_manipulator = m_first_person_manipulator;
+		m_first_person_manipulator->stop();
 		break;
 	case NAVIGATION_FLIGHT:
 		qInfo() << "Navigation mode set to Flight";
@@ -123,6 +132,7 @@ void OSGViewerWidget::setNavigationMode(NavigationMode mode)
 	default:
 		qInfo() << "Navigation mode set to Object";
 		new_manipulator = m_object_manipulator;
+		m_object_manipulator->finishAnimation(); // same as stop
 		break;
 	}
 
@@ -162,6 +172,11 @@ void OSGViewerWidget::setCameraFrozen(bool freeze)
 		viewer_->setCameraManipulator(m_simple_manipulator);
 		setCameraMatrix(old_matrix);
 		releaseCursor();
+
+		m_first_person_manipulator->stop();
+
+		m_object_manipulator->finishAnimation();
+
 	}
 	else {
 		qInfo() << "Camera unfreeze";
@@ -177,6 +192,15 @@ bool OSGViewerWidget::getCameraFrozen() const
 
 void OSGViewerWidget::paintEvent(QPaintEvent* /* paintEvent */)
 {
+	// a frame
+	qint64 dt = m_frame_timer.nsecsElapsed();
+	m_frame_timer.restart();
+	double dt_sec = (double)dt / 1.0e9;
+
+	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
+		m_first_person_manipulator->update(dt_sec, &m_key_tracker);
+	}
+
 	this->makeCurrent();
 
 	QPainter painter(this);
@@ -216,6 +240,7 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 {
 	QString keyString = event->text();
 	const char* keyData = keyString.toLocal8Bit().data();
+	qDebug() << "qt key press" << keyData;
 
 	if (event->key() == Qt::Key_S)
 	{
@@ -238,7 +263,15 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 		//this->onHome();
 		//return;
 	}
-
+	else if (event->key() == Qt::Key_Shift) {
+		qDebug() << "qt shift key";
+	}
+	else if (event->key() == Qt::Key_Alt) {
+		qDebug() << "at lkey";
+	}
+	else if (event->key() == Qt::CTRL) {
+		qDebug() << "ctrl";
+	}
 	this->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData));
 }
 
@@ -253,15 +286,13 @@ void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 bool second = false;
 void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON || getActualNavigationMode() == NAVIGATION_FLIGHT) {
-		// center the mouse
-		int dx = width() / 2 - event->x();
-		int dy = height() / 2 - event->y();
+	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
+		int dx = event->x() - width() / 2;
+		int dy = event->y() - height() / 2;
 		if (dx == 0 && dy == 0) {
 			return;
 		}
-	}
-	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
+		m_first_person_manipulator->mouseMove(dx, dy);
 		centerCursor();
 	}
 
@@ -367,6 +398,11 @@ void OSGViewerWidget::wheelEvent(QWheelEvent* event)
 
 	event->accept();
 	int delta = event->delta();
+
+	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
+		qDebug() << "mouse wheel delta" << delta;
+		m_first_person_manipulator->accelerate((delta > 0) ? 1 : -1);
+	}
 
 	osgGA::GUIEventAdapter::ScrollingMotion motion = delta > 0 ? osgGA::GUIEventAdapter::SCROLL_UP
 		: osgGA::GUIEventAdapter::SCROLL_DOWN;

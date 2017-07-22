@@ -53,12 +53,12 @@ namespace Util
 	osg::Matrixd viewMatrixLerp(double t, osg::Matrixd m0, osg::Matrixd m1);
 
 	// Exponential interpolation? Returns the new value of start
-	// - factor is the amount stepped toward the end
+	// - factor is the portion remaining after the step
 	// - if (end-start) is smaller than clip, then we jump to the end
-	// ex. exponentialSmooth(start=1, end=2, factor=.25, clip=0) is 1.25
-	// ex. exponentialSmooth(start=1, end=1.1, factor=.5, clip=.2) is 1.1
-	double exponentialSmooth(double start, double end, double factor, double clip = 0.0);
+	// ex. exponentialSmooth(start=1, end=2, factor=.25, dt=1, clip=0) is 1.25
+	// ex. exponentialSmooth(start=1, end=1.1, factor=.5, dt=1, clip=.2) is 1.1
+	double exponentialSmooth(double start, double end, double factor, double dt = 1.0, double clip = 0.0);
 
 	// Same as above, but updates current, and returns the change in current
-	double exponentialSmooth2(double *current, double end, double factor, double clip = 0.0);
+	double exponentialSmooth2(double *current, double end, double factor, double dt = 1.0, double clip = 0.0);
 }
