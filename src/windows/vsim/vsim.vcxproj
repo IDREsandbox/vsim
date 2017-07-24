@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\BaseFirstPersonManipulator.cpp" />
     <ClCompile Include="..\..\deprecated\narrative\Narrative.cpp" />
     <ClCompile Include="..\..\deprecated\narrative\NarrativeNode.cpp" />
     <ClCompile Include="..\..\deprecated\narrative\SerializerNarrative.cpp" />
@@ -247,6 +248,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\BaseFirstPersonManipulator.h" />
     <ClInclude Include="..\..\deprecated\narrative\Narrative.h" />
     <ClInclude Include="..\..\deprecated\narrative\NarrativeNode.h" />
     <ClInclude Include="..\..\deprecated\osgNewWidget\Canvas.h" />

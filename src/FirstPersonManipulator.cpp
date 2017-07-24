@@ -7,8 +7,7 @@ FirstPersonManipulator::FirstPersonManipulator()
 {
 	stop();
 
-	m_sensitivity = .25;
-	m_smoothing = .005;
+	m_smoothing = .003;
 
 	m_movement_smoothing = .01;
 	m_base_speed = 10.0;
@@ -19,7 +18,6 @@ static int frame = 0;
 
 void FirstPersonManipulator::stop()
 {
-	//qDebug() << "stop";
 	m_pos_current = osg::Vec3d();
 	m_pos_target = osg::Vec3d();
 	m_x_current = 0;
@@ -94,35 +92,9 @@ void FirstPersonManipulator::accelerate(int ticks)
 	m_speed_click += ticks;
 }
 
-
 bool FirstPersonManipulator::handle(const osgGA::GUIEventAdapter & ea, osgGA::GUIActionAdapter & us)
 {
-	return true;
-}
-
-void FirstPersonManipulator::rotateByPixels(double dx, double dy)
-{
-	osg::Matrixd m = getMatrix();
-	double yaw, pitch, roll;
-	Util::quatToYPR(m.getRotate(), &yaw, &pitch, &roll);
-	//qDebug() << "ypr1" << y*180/M_PI << p*180/M_PI << r*180/M_PI;
-
-	// dx+ yaw decreases
-	// dx- yaw increases
-	// dy+ pitch increases
-	// dy- pitch decreases
-	// sensitivity is degrees/pixel, to convert to radians/pixel use M_PI/180
-	yaw -= dx * m_sensitivity * M_PI / 180;
-	pitch += dy * m_sensitivity * M_PI / 180;
-
-	pitch = Util::clamp(pitch, -M_PI_2 + .01, M_PI_2 - .01);
-
-	// why doesnt this work...? how is this even supposed to work?
-	//rotateYawPitch(osg::Quat(), y*180/M_PI, p*180/M_PI, osg::Vec3d(0, 0, 1));
-	// nvm let's just do it by hand
-	osg::Quat rot = Util::YPRToQuat(yaw, pitch, 0);
-	osg::Vec3d pos = m.getTrans();
-	setByMatrix(osg::Matrix::rotate(rot) * osg::Matrix::translate(pos));
+	return false;
 }
 
 double FirstPersonManipulator::getMaxSpeed()
