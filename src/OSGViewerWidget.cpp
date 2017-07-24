@@ -63,7 +63,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_camera_frozen = false;
 	m_simple_manipulator = new SimpleCameraManipulator();
 	m_first_person_manipulator = new FirstPersonManipulator;
-	m_flight_manipulator = new FirstPersonManipulator;
+	m_flight_manipulator = new FlightManipulator;
 	m_object_manipulator = new ObjectManipulator;
 	viewer_->setCameraManipulator(m_object_manipulator);
 	//setNavigationMode(NAVIGATION_OBJECT);
@@ -127,6 +127,7 @@ void OSGViewerWidget::setNavigationMode(NavigationMode mode)
 	case NAVIGATION_FLIGHT:
 		qInfo() << "Navigation mode set to Flight";
 		new_manipulator = m_flight_manipulator;
+		m_flight_manipulator->stop();
 		break;
 	case NAVIGATION_OBJECT:
 	default:
@@ -173,10 +174,10 @@ void OSGViewerWidget::setCameraFrozen(bool freeze)
 		setCameraMatrix(old_matrix);
 		releaseCursor();
 
+		// stop all manipulator momentum
 		m_first_person_manipulator->stop();
-
+		m_flight_manipulator->stop();
 		m_object_manipulator->finishAnimation();
-
 	}
 	else {
 		qInfo() << "Camera unfreeze";
@@ -197,8 +198,19 @@ void OSGViewerWidget::paintEvent(QPaintEvent* /* paintEvent */)
 	m_frame_timer.restart();
 	double dt_sec = (double)dt / 1.0e9;
 
-	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
+	NavigationMode mode = getActualNavigationMode();
+	if (mode == NAVIGATION_FIRST_PERSON) {
 		m_first_person_manipulator->update(dt_sec, &m_key_tracker);
+	}
+	else if (mode == NAVIGATION_FLIGHT) {
+		QPoint mouse = mapFromGlobal(cursor().pos());
+		int dx = mouse.x() - width() / 2;
+		int dy = mouse.y() - height() / 2;
+		double nx = 2 * dx / (double)height();
+		double ny = 2 * dy / (double)height();
+		m_flight_manipulator->setMousePosition(nx, ny);
+
+		m_flight_manipulator->update(dt_sec, &m_key_tracker);
 	}
 
 	this->makeCurrent();
@@ -238,10 +250,6 @@ void OSGViewerWidget::resizeGL(int width, int height)
 
 void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 {
-	QString keyString = event->text();
-	const char* keyData = keyString.toLocal8Bit().data();
-	qDebug() << "qt key press" << keyData;
-
 	if (event->key() == Qt::Key_S)
 	{
 #ifdef WITH_SELECTION_PROCESSING
@@ -272,21 +280,29 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 	else if (event->key() == Qt::CTRL) {
 		qDebug() << "ctrl";
 	}
-	this->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData));
+
+	// This guy's code is a little wonky, notice that toLocal8Bit() returns a temporary array, but data
+	// is a pointer to memory. This led to a bug where calling qDebug() after this line would override
+	// keyData (since it's just an arbitrary place in memory)
+	// const char* keyData = keyString.toLocal8Bit().data();
+	// Safer code
+	QString keyString = event->text();
+	QByteArray keyData = keyString.toLocal8Bit();
+	this->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData.data()));
 }
 
 void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 {
 	QString keyString = event->text();
-	const char* keyData = keyString.toLocal8Bit().data();
-
-	this->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KeySymbol(*keyData));
+	QByteArray keyData = keyString.toLocal8Bit();
+	this->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KeySymbol(*keyData.data()));
 }
 
 bool second = false;
 void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
+	NavigationMode mode = getActualNavigationMode();
+	if (mode == NAVIGATION_FIRST_PERSON) {
 		int dx = event->x() - width() / 2;
 		int dy = event->y() - height() / 2;
 		if (dx == 0 && dy == 0) {
@@ -295,6 +311,12 @@ void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 		m_first_person_manipulator->mouseMove(dx, dy);
 		centerCursor();
 	}
+	// We'd have to install a global event filter for all mouse move events to go
+	//  through, it's easier just to poll on update.
+	//else if (mode == NAVIGATION_FLIGHT) {
+	//	...
+	//	m_flight_manipulator->setMousePosition(nx, ny);
+	//}
 
 	event->accept();
 	this->getEventQueue()->mouseMotion(static_cast<float>(event->x()),
@@ -309,39 +331,45 @@ void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
 		selectionStart_ = event->pos();
 		selectionEnd_ = selectionStart_; // Deletes the old selection
 		selectionFinished_ = false;           // As long as this is set, the rectangle will be drawn
+		return;
+	}
+
+	if (event->type() == QMouseEvent::MouseButtonPress) {
+		if (event->button() == Qt::MiddleButton) {
+			m_flight_manipulator->stop();
+		}
 	}
 
 	// Normal processing
-	else
+
+	// 1 = left mouse button
+	// 2 = middle mouse button
+	// 3 = right mouse button
+
+	unsigned int button = 0;
+
+	switch (event->button())
 	{
-		// 1 = left mouse button
-		// 2 = middle mouse button
-		// 3 = right mouse button
+	case Qt::LeftButton:
+		button = 1;
+		break;
 
-		unsigned int button = 0;
+	case Qt::MiddleButton:
+		button = 2;
+		break;
 
-		switch (event->button())
-		{
-		case Qt::LeftButton:
-			button = 1;
-			break;
+	case Qt::RightButton:
+		button = 3;
+		break;
 
-		case Qt::MiddleButton:
-			button = 2;
-			break;
-
-		case Qt::RightButton:
-			button = 3;
-			break;
-
-		default:
-			break;
-		}
-
-		this->getEventQueue()->mouseButtonPress(static_cast<float>(event->x()),
-			static_cast<float>(event->y()),
-			button);
+	default:
+		break;
 	}
+
+	this->getEventQueue()->mouseButtonPress(static_cast<float>(event->x()),
+		static_cast<float>(event->y()),
+		button);
+
 }
 
 void OSGViewerWidget::mouseReleaseEvent(QMouseEvent* event)

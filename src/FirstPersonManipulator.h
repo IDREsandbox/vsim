@@ -11,7 +11,9 @@ class FirstPersonManipulator : public BaseFirstPersonManipulator
    public:
 	FirstPersonManipulator();
 
+	// stop all motion
 	void stop();
+
 	void update(double dt, KeyTracker *keys);
 
 	// Qt's setCursor() creates an event and takes an entire frame, so nonzero
@@ -30,10 +32,9 @@ class FirstPersonManipulator : public BaseFirstPersonManipulator
 	// max speed is controlled exponentially by "ticks"
 	// +4 ticks is double, -4 is half
 	void accelerate(int ticks);
-	double getMaxSpeed();
 
-	// override all osg events
-	virtual bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us);
+	// meters per second
+	double getMaxSpeed();
 
 private:
 	// x fwd (w/s), y left (a/d), z up (shift/ctrl)

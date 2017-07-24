@@ -14,8 +14,6 @@ FirstPersonManipulator::FirstPersonManipulator()
 	m_speed_click = 0;
 }
 
-static int frame = 0;
-
 void FirstPersonManipulator::stop()
 {
 	m_pos_current = osg::Vec3d();
@@ -90,11 +88,6 @@ void FirstPersonManipulator::mouseMove(int dx, int dy)
 void FirstPersonManipulator::accelerate(int ticks)
 {
 	m_speed_click += ticks;
-}
-
-bool FirstPersonManipulator::handle(const osgGA::GUIEventAdapter & ea, osgGA::GUIActionAdapter & us)
-{
-	return false;
 }
 
 double FirstPersonManipulator::getMaxSpeed()

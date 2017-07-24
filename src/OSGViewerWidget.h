@@ -15,6 +15,7 @@
 #include <QElapsedTimer>
 #include "SimpleCameraManipulator.h"
 #include "FirstPersonManipulator.h"
+#include "FlightManipulator.h"
 #include "ObjectManipulator.h"
 #include "KeyTracker.h"
 
@@ -56,6 +57,7 @@ protected:
 	virtual void keyPressEvent(QKeyEvent* event);
 	virtual void keyReleaseEvent(QKeyEvent* event);
 
+	// Forward mouse move events 
 	virtual void mouseMoveEvent(QMouseEvent* event);
 	virtual void mousePressEvent(QMouseEvent* event);
 	virtual void mouseReleaseEvent(QMouseEvent* event);
@@ -88,7 +90,7 @@ private:
 	NavigationMode m_navigation_mode;
 	osg::ref_ptr<SimpleCameraManipulator> m_simple_manipulator; // this one has no controls	
 	osg::ref_ptr<FirstPersonManipulator> m_first_person_manipulator;
-	osg::ref_ptr<FirstPersonManipulator> m_flight_manipulator;
+	osg::ref_ptr<FlightManipulator> m_flight_manipulator;
 	osg::ref_ptr<ObjectManipulator> m_object_manipulator;
 
 	bool m_camera_frozen;

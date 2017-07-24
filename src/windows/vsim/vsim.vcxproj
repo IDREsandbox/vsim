@@ -39,6 +39,7 @@
     <ClCompile Include="..\..\dragLabelInput.cpp" />
     <ClCompile Include="..\..\editButtons.cpp" />
     <ClCompile Include="..\..\FirstPersonManipulator.cpp" />
+    <ClCompile Include="..\..\FlightManipulator.cpp" />
     <ClCompile Include="..\..\HorizontalScrollBox.cpp" />
     <ClCompile Include="..\..\KeyTracker.cpp" />
     <ClCompile Include="..\..\labelCanvas.cpp" />
@@ -328,6 +329,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I.\..\..\narrative" "-I.\..\.." "-I.\.." "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(DEPS)\OpenSceneGraph-3.4.0-build\msvc2015_$(PlatformArchitecture)\include"</Command>
     </CustomBuild>
     <ClInclude Include="..\..\FirstPersonManipulator.h" />
+    <ClInclude Include="..\..\FlightManipulator.h" />
     <ClInclude Include="..\..\KeyTracker.h" />
     <ClInclude Include="..\..\ModelInformation.h" />
     <CustomBuild Include="..\..\ScrollBoxItem.h">

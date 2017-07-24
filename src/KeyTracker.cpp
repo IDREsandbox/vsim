@@ -18,11 +18,9 @@ bool KeyTracker::eventFilter(QObject * obj, QEvent * e)
 	case QEvent::MouseButtonPress:
 		me = (QMouseEvent*)e;
 		m_mouse_buttons = me->buttons();
-		qDebug() << "mouse buttons" << m_mouse_buttons;
 	case QEvent::MouseButtonRelease:
 		me = (QMouseEvent*)e;
 		m_mouse_buttons = me->buttons();
-		qDebug() << "mouse buttons" << m_mouse_buttons;
 		break;
 	default:
 		break;
