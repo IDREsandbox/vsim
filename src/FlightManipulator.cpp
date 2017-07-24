@@ -1,8 +1,8 @@
 #include "FlightManipulator.h"
 
 FlightManipulator::FlightManipulator() {
-	setSensitivity(35.0);
-	m_acceleration = 2.0;
+	setSensitivity(45.0);
+	m_acceleration = 4.0;
 }
 
 void FlightManipulator::stop()
