@@ -11,7 +11,8 @@ void ObjectManipulator::setByMatrix(const osg::Matrixd &matrix)
 
 	// set default
 	_center = eye + lookVector;
-	_distance = lookVector.length();
+	// TODO: set _distance to be on the z=0 plane maybe? the .length() is usually going to be 1
+	_distance = lookVector.length(); 
 	_rotation = matrix.getRotate();
 	
 	// then run the osg version

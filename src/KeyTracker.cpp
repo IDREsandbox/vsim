@@ -2,14 +2,32 @@
 
 bool KeyTracker::eventFilter(QObject * obj, QEvent * e)
 {
-	if (e->type() == QEvent::KeyPress) {
-		QKeyEvent *ke = (QKeyEvent*)e;
+	QEvent::Type type = e->type();
+	QKeyEvent *ke;
+	QMouseEvent *me;
+
+	switch (e->type()) {
+	case QEvent::KeyPress:
+		ke = (QKeyEvent*)e;
 		m_keymap.insert(ke->key());
-	}
-	else if (e->type() == QEvent::KeyRelease) {
-		QKeyEvent *ke = (QKeyEvent*)e;
+		break;
+	case QEvent::KeyRelease:
+		ke = (QKeyEvent*)e;
 		m_keymap.erase(ke->key());
+		break;
+	case QEvent::MouseButtonPress:
+		me = (QMouseEvent*)e;
+		m_mouse_buttons = me->buttons();
+		qDebug() << "mouse buttons" << m_mouse_buttons;
+	case QEvent::MouseButtonRelease:
+		me = (QMouseEvent*)e;
+		m_mouse_buttons = me->buttons();
+		qDebug() << "mouse buttons" << m_mouse_buttons;
+		break;
+	default:
+		break;
 	}
+
 	return false; // always forward the event
 }
 
@@ -23,4 +41,15 @@ void KeyTracker::debug() {
 	for (auto i : m_keymap) {
 		qDebug() << "key" << QKeySequence(i);
 	}
+	qDebug() << "mouse" << m_mouse_buttons;
+}
+
+Qt::MouseButtons KeyTracker::mouseButtons()
+{
+	return m_mouse_buttons;
+}
+
+bool KeyTracker::buttonPressed(Qt::MouseButton button)
+{
+	return m_mouse_buttons | button;
 }
