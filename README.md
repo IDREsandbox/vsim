@@ -60,6 +60,22 @@ CMake inside Visual Studio 2017
     ````
  5. Right click CMakeLists.txt > build VSim.exe
  
+### OSX
+
+ 1. `brew install qt5 openscenegraph`
+ 2. `git clone https://github.com/IDREsandbox/vsim.git`
+ 3. in the vsim repo
+	```
+	mkdir build
+	cd build
+	cmake \
+	  -D CMAKE_PREFIX_PATH="/usr/local/Cellar/qt/5.9.1" \
+	  -D CMAKE_INSTALL_PREFIX=install ..
+	```
+ 
+ 
+
+
 ### Windows - Visual Studio 2015
 
 Setup Qt
