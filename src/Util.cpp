@@ -107,6 +107,13 @@ QImage Util::imageOsgToQt(const osg::Image *oimg)
 	return QImage(oimg->data(), oimg->s(), oimg->t(), QImage::Format_RGBA8888);
 }
 
+double Util::clamp(double value, double min, double max)
+{
+	if (value > max) return max;
+	if (value < min) return min;
+	return value;
+}
+
 // credits to stackoverflow
 double Util::angleWrap(double x)
 {
@@ -152,7 +159,7 @@ void Util::quatToYPR(const osg::Quat &quat, double *yaw, double *pitch, double *
 	double phi = acos(fwd.z() / r);
 
 	*yaw = angleWrap(theta);
-	*pitch = angleWrap(phi - M_PI_2);
+	*pitch = phi - M_PI_2;
 
 	// calculating roll
 	// roll is the angle difference between flatright and right
@@ -208,4 +215,22 @@ osg::Matrixd Util::viewMatrixLerp(double t, osg::Matrixd m0, osg::Matrixd m1)
 	//std::cout << "yaw " << yaw*180/M_PI << " pitch " << pitch * 180 / M_PI << " roll " << roll * 180 / M_PI << " xyz " << pos << "\n";
 
 	return osg::Matrix::rotate(rot) * osg::Matrix::translate(pos);
+}
+
+double Util::exponentialSmooth(double start, double end, double factor, double dt, double clip)
+{
+	// amount remaining = .5^2
+	double difference = end - start;
+	if (abs(difference) <= clip) {
+		return end;
+	}
+	return end - difference * pow(factor,dt);
+}
+
+double Util::exponentialSmooth2(double * current, double end, double factor, double dt, double clip)
+{
+	double new_value = Util::exponentialSmooth(*current, end, factor, dt, clip);
+	double delta = new_value - *current;
+	*current = new_value;
+	return delta;
 }

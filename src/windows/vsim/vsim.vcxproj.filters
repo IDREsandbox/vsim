@@ -116,15 +116,6 @@
     <CustomBuild Include="..\..\editButtons.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\mrichtextedit.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\mtextedit.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\mrichtextedit.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\main.cpp">
@@ -355,40 +346,34 @@
     <ClCompile Include="GeneratedFiles\Release\moc_labelCanvas.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_mrichtextedit.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_mrichtextedit.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_mtextedit.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_mtextedit.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mrichtextedit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mtextedit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_editButtons.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_labelCanvas.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_editButtons.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_labelCanvas.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="NarrativeSlideLabels.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_editButtons.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SimpleCameraManipulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SerializerNarrativeSlideLabels.cpp">
+    <ClCompile Include="..\..\FirstPersonManipulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\ObjectManipulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\KeyTracker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BaseFirstPersonManipulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\FlightManipulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -447,10 +432,22 @@
     <ClInclude Include="GeneratedFiles\ui_editButtons.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_mrichtextedit.h">
-      <Filter>Generated Files</Filter>
+    <ClInclude Include="..\..\SimpleCameraManipulator.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NarrativeSlideLabels.h">
+    <ClInclude Include="..\..\FirstPersonManipulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ObjectManipulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\KeyTracker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BaseFirstPersonManipulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\FlightManipulator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

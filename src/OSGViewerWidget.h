@@ -12,6 +12,12 @@
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
 #include <osg/Camera>
+#include <QElapsedTimer>
+#include "SimpleCameraManipulator.h"
+#include "FirstPersonManipulator.h"
+#include "FlightManipulator.h"
+#include "ObjectManipulator.h"
+#include "KeyTracker.h"
 
 class OSGViewerWidget : public QOpenGLWidget
 {
@@ -20,10 +26,27 @@ class OSGViewerWidget : public QOpenGLWidget
 public:
 	OSGViewerWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
 
-	osgViewer::Viewer* setViewer(osgViewer::Viewer*);
+	// osgViewer::Viewer* setViewer(osgViewer::Viewer*); // can't change the viewer
 	osgViewer::Viewer* getViewer() const;
 
-	// TODO?
+	osg::Matrixd getCameraMatrix();
+	void setCameraMatrix(osg::Matrixd);
+
+	enum NavigationMode {
+		NAVIGATION_SIMPLE, // does nothing, (used for playing/pausing)
+		NAVIGATION_FIRST_PERSON,
+		NAVIGATION_FLIGHT,
+		NAVIGATION_OBJECT
+	};
+
+	void setNavigationMode(NavigationMode);
+	NavigationMode getNavigationMode() const;
+	NavigationMode getActualNavigationMode() const; // if frozen returns NAVIGATION_SIMPLE
+
+	void setCameraFrozen(bool freeze);
+	bool getCameraFrozen() const;
+
+	// TODO? Just use QWidget::Render
 	// QImage takePictureAt(osg::Camera*);
 
 protected:
@@ -44,18 +67,30 @@ protected:
 private:
 	virtual void onHome();
 	virtual void onResize(int width, int height);
+	
+	// used for first person mode
+	void takeCursor();
+	void releaseCursor();
+	void centerCursor();
 
 	osgGA::EventQueue* getEventQueue() const;
 
 	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> graphicsWindow_;
 	osg::ref_ptr<osgViewer::Viewer> viewer_;
 
-	QPoint selectionStart_;
-	QPoint selectionEnd_;
+	// camera and viewer stuff
+	// camera manipulators
+	NavigationMode m_navigation_mode;
+	osg::ref_ptr<SimpleCameraManipulator> m_simple_manipulator; // this one has no controls	
+	osg::ref_ptr<FirstPersonManipulator> m_first_person_manipulator;
+	osg::ref_ptr<FlightManipulator> m_flight_manipulator;
+	osg::ref_ptr<ObjectManipulator> m_object_manipulator;
 
-	bool selectionActive_;
-	bool selectionFinished_;
+	bool m_camera_frozen;
 
-	void processSelection();
+	// key press tracker
+	KeyTracker m_key_tracker;
+
+	QElapsedTimer m_frame_timer;
 };
 #endif

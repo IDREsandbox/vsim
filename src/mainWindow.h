@@ -35,6 +35,7 @@ public:
 	void LoadingDialog(const std::string& msg);
 
 	// linking
+	//OSGViewerWidget *getViewerWidget() const { return m_osg_widget;	}
 	osgViewer::Viewer* getViewer() const { return m_osg_widget->getViewer(); };
 
 	// event stuff
