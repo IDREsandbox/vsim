@@ -6,7 +6,7 @@
 #include "narrative/Narrative2.h"
 #include "narrative/NarrativeScrollBox.h"
 #include "narrative/SlideScrollBox.h"
-#include "NarrativeSlideLabels.h"
+#include "narrative/NarrativeSlideLabels.h"
 #include "HorizontalScrollBox.h"
 #include "MainWindow.h"
 #include "dragLabel.h"
