@@ -87,6 +87,8 @@ private:
 	osg::ref_ptr<ObjectManipulator> m_object_manipulator;
 
 	bool m_camera_frozen;
+	bool m_gravity_on;
+	bool m_collisions_on;
 
 	// key press tracker
 	KeyTracker m_key_tracker;

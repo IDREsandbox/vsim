@@ -10,6 +10,7 @@ FlightManipulator::FlightManipulator() {
 
 void FlightManipulator::stop()
 {
+	BaseFirstPersonManipulator::stop();
 	m_speed = 0;
 	//m_mouse_x = 0;
 	//m_mouse_y = 0;

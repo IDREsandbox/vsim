@@ -246,6 +246,18 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 			takeCursor();
 		}
 	}
+	if (event->key() == Qt::Key_G) {
+		if (m_gravity_on) {
+			m_gravity_on = false;
+			m_flight_manipulator->enableGravity(false);
+			m_first_person_manipulator->enableGravity(false);
+		}
+		else {
+			m_gravity_on = true;
+			m_flight_manipulator->enableGravity(true);
+			m_first_person_manipulator->enableGravity(true);
+		}
+	}
 
 	// This guy's code is a little wonky, notice that toLocal8Bit() returns a temporary array, but data
 	// is a pointer to memory. This led to a bug where calling qDebug() after this line would override

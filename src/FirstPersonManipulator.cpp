@@ -16,6 +16,7 @@ FirstPersonManipulator::FirstPersonManipulator()
 
 void FirstPersonManipulator::stop()
 {
+	BaseFirstPersonManipulator::stop();
 	m_pos_current = osg::Vec3d();
 	m_pos_target = osg::Vec3d();
 	m_x_current = 0;
@@ -87,7 +88,6 @@ void FirstPersonManipulator::mouseMove(int dx, int dy)
 
 void FirstPersonManipulator::accelerate(int ticks)
 {
-
 	m_speed_click += ticks;
 	m_speed_click = std::max(m_speed_click, -28); // lower limit
 	m_speed_click = std::min(m_speed_click, 28); // upper limit
@@ -97,6 +97,5 @@ void FirstPersonManipulator::accelerate(int ticks)
 double FirstPersonManipulator::getMaxSpeed()
 {
 	double max_speed = m_base_speed * pow(pow(2, .25), m_speed_click);
-	//qDebug() << "ms" << max_speed;
 	return max_speed;
 }

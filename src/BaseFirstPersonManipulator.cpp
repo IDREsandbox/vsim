@@ -3,12 +3,26 @@
 
 
 BaseFirstPersonManipulator::BaseFirstPersonManipulator()
-	: m_sensitivity(.25)
+	: m_sensitivity(.25),
+	m_gravity_acceleration(-4.0),
+	m_gravity_on(false)
 {
+	stop();
+}
+
+void BaseFirstPersonManipulator::stop()
+{
+	m_gravity_velocity = 0;
 }
 
 void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker * keys)
 {
+	if (m_gravity_on) {
+		// update velocity
+		m_gravity_velocity -= m_gravity_acceleration;
+		moveUp(-m_gravity_velocity * dt_sec);
+	}
+	
 	osg::Matrixd mat = getMatrix();
 	osg::Vec3d right = osg::Vec3d(mat(0, 0), mat(0, 1), mat(0, 2));
 	osg::Vec3d up = osg::Vec3d(mat(1, 0), mat(1, 1), mat(1, 2));
@@ -68,4 +82,10 @@ double BaseFirstPersonManipulator::getSensitivity() const
 void BaseFirstPersonManipulator::setSensitivity(double sensitivity)
 {
 	m_sensitivity = sensitivity;
+}
+
+void BaseFirstPersonManipulator::enableGravity(bool enable)
+{
+	m_gravity_velocity = 0;
+	m_gravity_on = enable;
 }
