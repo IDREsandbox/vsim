@@ -59,14 +59,14 @@ void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys) {
 	tz = m_pos_target.z();
 	//qDebug() << "pxpypz" << px << py << pz;
 	//qDebug() << "txtytz" << tx << ty << tz;
-	double cx = Util::exponentialSmooth2(&px, tx, m_movement_smoothing, dt_sec, .01);
-	double cy = Util::exponentialSmooth2(&py, ty, m_movement_smoothing, dt_sec, .01);
-	double cz = Util::exponentialSmooth2(&pz, tz, m_movement_smoothing, dt_sec, .01);
+	double cx = Util::exponentialSmooth2(&px, tx, m_movement_smoothing, dt_sec, .001);
+	double cy = Util::exponentialSmooth2(&py, ty, m_movement_smoothing, dt_sec, .001);
+	double cz = Util::exponentialSmooth2(&pz, tz, m_movement_smoothing, dt_sec, .001);
 	//qDebug() << "deltas" << cx << cy << cz;
 
-	if (abs(cx) >= .001) moveForward(cx);
-	if (abs(cy) >= .001) moveRight(-cy);
-	if (abs(cz) >= .001) moveUp(cz);
+	if (abs(cx) >= .0005) moveForward(cx);
+	if (abs(cy) >= .0005) moveRight(-cy);
+	if (abs(cz) >= .0005) moveUp(cz);
 	// update the vector
 	m_pos_current = osg::Vec3d(px, py, pz);
 

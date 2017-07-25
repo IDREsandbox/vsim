@@ -57,7 +57,6 @@ protected:
 	virtual void keyPressEvent(QKeyEvent* event);
 	virtual void keyReleaseEvent(QKeyEvent* event);
 
-	// Forward mouse move events 
 	virtual void mouseMoveEvent(QMouseEvent* event);
 	virtual void mousePressEvent(QMouseEvent* event);
 	virtual void mouseReleaseEvent(QMouseEvent* event);
@@ -79,12 +78,6 @@ private:
 	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> graphicsWindow_;
 	osg::ref_ptr<osgViewer::Viewer> viewer_;
 
-	QPoint selectionStart_;
-	QPoint selectionEnd_;
-
-	bool selectionActive_;
-	bool selectionFinished_;
-
 	// camera and viewer stuff
 	// camera manipulators
 	NavigationMode m_navigation_mode;
@@ -99,7 +92,5 @@ private:
 	KeyTracker m_key_tracker;
 
 	QElapsedTimer m_frame_timer;
-
-	void processSelection();
 };
 #endif
