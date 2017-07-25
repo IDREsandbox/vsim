@@ -71,11 +71,19 @@ if(NOT IS_DIRECTORY ${OPENSCENEGRAPH_BINARY_DIR})
   message(${OPENSCENEGRAPH_BINARY_DIR})
   message(FATAL_ERROR "Must define OPENSCENEGRAPH_BINARY_DIR")
 endif()
+
 set(THIRDPARTY_BINARY_DIR "" CACHE FILEPATH "where are the osg dependency binaries (zlib and stuff)")
 if(NOT IS_DIRECTORY ${THIRDPARTY_BINARY_DIR})
   message(${THIRDPARTY_BINARY_DIR})
   message(FATAL_ERROR "Must define THIRDPARTY_BINARY_DIR")
 endif()
+
+set(QT_PLATFORMS_DIR "" CACHE FILEPATH "where is qwindows.dll?")
+if(NOT IS_DIRECTORY ${QT_PLATFORMS_DIR})
+  message(${QT_PLATFORMS_DIR})
+  message(FATAL_ERROR "Must define QT_PLATFORMS_DIR")
+endif()
+install(FILE ${QT_PLATFORMS_DIR}/qwindows.dll DESTINATION platforms)
 
 set(THIRDPARTYDLLS 
   libpng

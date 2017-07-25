@@ -21,6 +21,7 @@ Building
 	  -D CMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install" \
 	  -D OPENSCENEGRAPH_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin" \
 	  -D THIRDPARTY_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin" \
+	  -D QT_PLATFORMS_DIR="C:/Qt/5.9.1/msvc2017_64/plugins/platforms" \
 	  -D CMAKE_INSTALL_PREFIX=install ..
 	  ```
  2. To build (use Debug for debug)
@@ -50,6 +51,10 @@ CMake inside Visual Studio 2017
           {
             "name": "THIRDPARTY_BINARY_DIR",
             "value": "T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin"
+          },
+          {
+            "name": "QT_PLATFORMS_DIR",
+            "value": "C:/Qt/5.9.1/msvc2017_64/plugins/platforms"
           }
         ]
     ````
@@ -64,28 +69,6 @@ Setup Qt
 3. In Visual Studio - 
 	- Install QTPackage plugin (Tools > Extensions and Updates, OR https://marketplace.visualstudio.com/items?itemName=havendv.QtPackage)
 	- QT5 > QtOptions - add the Qt versions. Name the x64 version 5.8.
-
-Setup CMake, Qt 5.9.1, Visual Studio 2017
-
-1. In the vsim root
-	mkdir build
-	cd build
-	cmake -G "Visual Studio 15 2017 Win64" \
-	  -D CMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install" \
-	  -D OPENSCENEGRAPH_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin" \
-	  -D THIRDPARTY_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin" \
-	  -D CMAKE_INSTALL_PREFIX=install ..
-2. To build (use Debug for debug)
-	cmake --build . --config Release
-3. To install
-	cmake --build . --target INSTALL --config Release
-4. To package (into installer)
-	cpack .
-5. For more cmake instructions see cmake.txt
-
-CMake inside Visual Studio 2017
-
-
 
 Setup Visual Studio 2015
 
