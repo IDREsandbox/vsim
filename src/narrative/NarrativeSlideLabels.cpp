@@ -1,4 +1,4 @@
-#include "NarrativeSlideLabels.h"
+#include "narrative/NarrativeSlideLabels.h"
 
 NarrativeSlideLabels::NarrativeSlideLabels()
 	: osg::Node(),

@@ -1,6 +1,6 @@
 #include <osgDB/ObjectWrapper>
 
-#include "NarrativeSlideLabels.h"
+#include "narrative/NarrativeSlideLabels.h"
 
 REGISTER_OBJECT_WRAPPER(
 	NarrativeSlideLabels,
