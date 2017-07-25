@@ -26,7 +26,7 @@ void FlightManipulator::update(double dt_sec, KeyTracker *keys) {
 	rotateByPixels(mouse_x * dt_sec, mouse_y * dt_sec);
 
 	// update position
-	if (abs(m_speed) >= .001) {
+	if (std::abs(m_speed) >= .001) {
 		moveForward(m_speed * dt_sec);
 	}
 }

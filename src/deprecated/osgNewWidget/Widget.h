@@ -59,7 +59,7 @@ public:
     bool setImage(const std::string& filePath);
     void setHighlight(bool highlight);
 	void setColors(osg::Vec4 color);
-	void Widget::setAlpha(const float a);
+	void setAlpha(const float a);
 
     osgNewWidget::IWidgetEventHandler* getHandler() { return m_handler; }
     void setHandler(osgNewWidget::IWidgetEventHandler* handler);

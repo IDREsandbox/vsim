@@ -258,7 +258,7 @@ void NarrativePlayer::selectionChange()
 		qDebug() << "Narrative Player - slide selection" << m_current_narrative << m_current_slide;
 		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
 		if (current_node == nullptr) {
-			qWarning() << "Error: can't set narrative player view to selection, indices: ", m_current_narrative, m_current_slide;
+			qWarning() << "Error: can't set narrative player view to selection, indices: " << m_current_narrative << m_current_slide;
 		}
 		else {
 			setCameraMatrix(current_node->getCameraMatrix());
