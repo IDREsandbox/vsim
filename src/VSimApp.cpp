@@ -42,7 +42,7 @@ VSimApp::VSimApp(MainWindow* window)
 
 		double y, p, r;
 		Util::quatToYPR(rot, &y, &p, &r);
-		qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI;
+		qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI << "pos" << trans.x() << trans.y() << trans.z();
 	});
 
 	reset();
@@ -50,6 +50,7 @@ VSimApp::VSimApp(MainWindow* window)
 
 bool VSimApp::init()
 {
+	m_filename = "";
 	initWithVSim(new osg::Group);
 	return true;
 }
@@ -195,8 +196,12 @@ bool VSimApp::saveVSim(const std::string& filename)
 
 bool VSimApp::saveCurrentVSim()
 {
-	saveVSim(getFileName());
-	return false;
+	if (m_filename == "") {
+		m_window->actionSaveAs();
+		return true;
+	}
+	saveVSim(m_filename);
+	return true;
 }
 
 std::string VSimApp::getFileName()

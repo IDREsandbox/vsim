@@ -6,8 +6,8 @@
 #include "MainWindow.h"
 #include <QObject>
 #include <osg/Matrix>
-#include <osgGA/FirstPersonManipulator>
 
+// NarrativePlayer owns the camera
 class NarrativePlayer : public QObject
 {
 	Q_OBJECT
@@ -17,20 +17,26 @@ public:
 	void update(double dt_sec);
 	void play();
 	void pause();
+	// advances the slide or transition, immediately pauses on failure or PauseOnNode
+	void next();
 
 	bool isPlaying();
 
 	void setCameraMatrix(osg::Matrixd camera_matrix);
 
+	// goto and pause at a slide
+	// set the slide selection
+	// bool setSlide(int narrative, int slide); // TODO
+
 public: //slots
 	void selectionChange();
 
 private:
-	// advances the slide or transition, immediately pauses on failure or PauseOnNode
-	void next();
-	
+	// pointers
 	MainWindow *m_window;
 	NarrativeControl *m_narratives;
+	NarrativeScrollBox *m_narrative_box;
+	SlideScrollBox *m_slide_box;
 
 	// important stuff
 	int m_current_narrative;
@@ -42,11 +48,10 @@ private:
 	double m_previous_time;
 	QTimer *m_timer; // frame timer, used for updates
 
-	//osg::ref_ptr<osgGA::StandardManipulator> m_manipulator;
+	//void figureOutFrozenCamera(); // locks the camera if playing or frozen
+	// remembers the previous navigation mode to switch back to after finishing playing
+	OSGViewerWidget::NavigationMode m_old_navigation_mode;
 
-	// convenience pointers
-	NarrativeScrollBox *m_narrative_box;
-	SlideScrollBox *m_slide_box;
 };
 
 #endif /* NARRATIVEPLAYER_H */

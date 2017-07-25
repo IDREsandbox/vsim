@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_drag_area = new labelCanvas(ui.root);
 	ui.rootLayout->addWidget(m_drag_area, 0, 0);
 
+	// vsimapp file stuff
 	connect(ui.actionNew, &QAction::triggered, this, &MainWindow::actionNew);
 	connect(ui.actionOpen, &QAction::triggered, this, &MainWindow::actionOpen);
 	connect(ui.actionSave, &QAction::triggered, this, &MainWindow::actionSave);
@@ -51,14 +52,17 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui.actionMessage, &QAction::triggered, this, [this] { this->MessageDialog("A beautiful message"); });
 	connect(ui.actionProgress, &QAction::triggered, this, [this] { this->LoadingDialog("zzz"); });
 
-	// connect narrative pushbuttons
-	// connect(ui.topBar->ui.play, &QPushButton::clicked, this, &MainWindow::narListForward);
-	// connect(ui.minus, &QPushButton::clicked, this, &MainWindow::narListDelete);
-	// connect(ui.plus, &QPushButton::clicked, this, &MainWindow::narListAdd);
-	// connect(ui.pause, &QPushButton::clicked, this, &MainWindow::narListPause);
-	// connect(ui.open, &QPushButton::clicked, this, &MainWindow::narListOpen);
-	// connect(ui.info, &QPushButton::clicked, this, &MainWindow::narListInfo);
+	// camera manipulator
+	connect(ui.actionFirst_Person_Navigation, &QAction::triggered, m_osg_widget,
+		[this]() {qDebug() << "fp trigger"; m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FIRST_PERSON); });
+	connect(ui.actionFlight_Navigation, &QAction::triggered, m_osg_widget,
+		[this]() {qDebug() << "flight trigger";  m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FLIGHT); });
+	connect(ui.actionObject_Navigation, &QAction::triggered, m_osg_widget,
+		[this]() {qDebug() << "object trigger";  m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_OBJECT); });
+	connect(ui.actionFreeze_Camera, &QAction::toggled, m_osg_widget,
+		[this](bool freeze) {"freeze trigger";  m_osg_widget->setCameraFrozen(freeze); });
 
+	// show slides or narratives
 	connect(ui.topBar->ui.open, &QPushButton::clicked, this, 
 		[this]() {
 			qDebug() << "open";

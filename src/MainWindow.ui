@@ -464,7 +464,19 @@ border-color: rgb(238, 238, 238);
     <addaction name="actionOSG_Debug"/>
     <addaction name="actionCamera_Debug"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>Navigation</string>
+    </property>
+    <addaction name="actionFirst_Person_Navigation"/>
+    <addaction name="actionFlight_Navigation"/>
+    <addaction name="actionObject_Navigation"/>
+    <addaction name="separator"/>
+    <addaction name="actionFreeze_Camera"/>
+    <addaction name="actionReset_Camera"/>
+   </widget>
    <addaction name="menuhello_to_the_world"/>
+   <addaction name="menuView"/>
    <addaction name="menuTest"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -542,6 +554,59 @@ border-color: rgb(238, 238, 238);
    </property>
    <property name="shortcut">
     <string>F11</string>
+   </property>
+  </action>
+  <action name="actionFirst_Person_Navigation">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>First Person Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>1</string>
+   </property>
+  </action>
+  <action name="actionFirst_Person_Mouse">
+   <property name="text">
+    <string>First Person Mouse</string>
+   </property>
+  </action>
+  <action name="actionObject_Navigation">
+   <property name="text">
+    <string>Object Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>3</string>
+   </property>
+  </action>
+  <action name="actionLock">
+   <property name="text">
+    <string>Lock</string>
+   </property>
+  </action>
+  <action name="actionFreeze_Camera">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>FreezeCamera</string>
+   </property>
+   <property name="shortcut">
+    <string>Space</string>
+   </property>
+  </action>
+  <action name="actionReset_Camera">
+   <property name="text">
+    <string>Reset Camera</string>
+   </property>
+  </action>
+  <action name="actionFlight_Navigation">
+   <property name="text">
+    <string>Flight Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>2</string>
    </property>
   </action>
  </widget>

@@ -6,9 +6,9 @@
 
 Narrative2::Narrative2()
 	: osg::Group(),
-	m_title("Unknown"),
-	m_description("Unknown"),
-	m_author("Unknown"),
+	m_title("Untitled"),
+	m_description(""),
+	m_author(""),
 	m_locked(false)
 {
 }

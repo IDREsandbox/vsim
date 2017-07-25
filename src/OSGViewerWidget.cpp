@@ -33,8 +33,6 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 		this->width(),
 		this->height()))
 	, viewer_(new osgViewer::Viewer)
-	, selectionActive_(false)
-	, selectionFinished_(true)
 {
 
 	float aspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
@@ -51,17 +49,22 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	
 	osg::Group* group = new osg::Group();
 	viewer_->setSceneData(group);
-	viewer_->addEventHandler(new osgViewer::StatsHandler);
-
-// I have no idea what this is for. If we need it for additional events copy it from the tutorial
-//#ifdef WITH_PICK_HANDLER
-//	view->addEventHandler(new PickHandler);
-//#endif
-
-	osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
-	manipulator->setAllowThrow(false);
-
-	viewer_->setCameraManipulator(manipulator);
+	
+	osgViewer::StatsHandler *stats_handler = new osgViewer::StatsHandler;
+	stats_handler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_T);
+	viewer_->addEventHandler(stats_handler);
+	
+	// Camera Manipulator and Navigation
+	//osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
+	//manipulator->setAllowThrow(false);
+	//viewer_->setCameraManipulator(manipulator);
+	m_camera_frozen = false;
+	m_simple_manipulator = new SimpleCameraManipulator();
+	m_first_person_manipulator = new FirstPersonManipulator;
+	m_flight_manipulator = new FlightManipulator;
+	m_object_manipulator = new ObjectManipulator;
+	viewer_->setCameraManipulator(m_object_manipulator);
+	//setNavigationMode(NAVIGATION_OBJECT);
 
 	// lighting
 	viewer_->setLightingMode(osg::View::SKY_LIGHT);
@@ -77,16 +80,15 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	this->setFocusPolicy(Qt::StrongFocus);
 	this->setMinimumSize(100, 100);
 
+	// Key tracking
+	this->installEventFilter(&m_key_tracker);
+
 	// Ensures that the widget receives mouse move events even though no
 	// mouse button has been pressed. We require this in order to let the
 	// graphics window switch viewports properly.
 	this->setMouseTracking(true);
-}
 
-osgViewer::Viewer * OSGViewerWidget::setViewer(osgViewer::Viewer* viewer)
-{
-	
-	return nullptr;
+	m_frame_timer.start();
 }
 
 osgViewer::Viewer* OSGViewerWidget::getViewer() const
@@ -94,24 +96,127 @@ osgViewer::Viewer* OSGViewerWidget::getViewer() const
 	return viewer_;
 }
 
+osg::Matrixd OSGViewerWidget::getCameraMatrix()
+{
+	return viewer_->getCameraManipulator()->getMatrix();
+}
+
+void OSGViewerWidget::setCameraMatrix(osg::Matrixd m)
+{
+	return viewer_->getCameraManipulator()->setByMatrix(m);
+}
+
+void OSGViewerWidget::setNavigationMode(NavigationMode mode)
+{
+	
+	osg::Matrixd old_matrix = getCameraMatrix();
+
+	osgGA::CameraManipulator *new_manipulator;
+	switch (mode) {
+	case NAVIGATION_SIMPLE:
+		qInfo() << "Navigation mode set to Simple";
+		new_manipulator = m_simple_manipulator;
+		break;
+	case NAVIGATION_FIRST_PERSON:
+		qInfo() << "Navigation mode set to First Person";
+		new_manipulator = m_first_person_manipulator;
+		m_first_person_manipulator->stop();
+		break;
+	case NAVIGATION_FLIGHT:
+		qInfo() << "Navigation mode set to Flight";
+		new_manipulator = m_flight_manipulator;
+		m_flight_manipulator->stop();
+		break;
+	case NAVIGATION_OBJECT:
+	default:
+		qInfo() << "Navigation mode set to Object";
+		new_manipulator = m_object_manipulator;
+		m_object_manipulator->finishAnimation(); // same as stop
+		break;
+	}
+
+	m_navigation_mode = mode;
+
+	if (m_camera_frozen) {
+		return;
+	}
+
+	if (mode == NAVIGATION_FIRST_PERSON) {
+		takeCursor();
+	}
+	else {
+		releaseCursor();
+	}
+
+	viewer_->setCameraManipulator(new_manipulator, false);
+	setCameraMatrix(old_matrix);
+}
+
+OSGViewerWidget::NavigationMode OSGViewerWidget::getNavigationMode() const
+{
+	return m_navigation_mode;
+}
+
+OSGViewerWidget::NavigationMode OSGViewerWidget::getActualNavigationMode() const
+{
+	return m_camera_frozen ? NAVIGATION_SIMPLE : m_navigation_mode;
+}
+
+void OSGViewerWidget::setCameraFrozen(bool freeze)
+{
+	m_camera_frozen = freeze;
+	if (freeze) {
+		qInfo() << "Camera freeze";
+		osg::Matrixd old_matrix = getCameraMatrix();
+		viewer_->setCameraManipulator(m_simple_manipulator);
+		setCameraMatrix(old_matrix);
+		releaseCursor();
+
+		// stop all manipulator momentum
+		m_first_person_manipulator->stop();
+		m_flight_manipulator->stop();
+		m_object_manipulator->finishAnimation();
+	}
+	else {
+		qInfo() << "Camera unfreeze";
+		setNavigationMode(m_navigation_mode);
+		setFocus();
+	}
+}
+
+bool OSGViewerWidget::getCameraFrozen() const
+{
+	return m_camera_frozen;
+}
+
 void OSGViewerWidget::paintEvent(QPaintEvent* /* paintEvent */)
 {
+	// a frame
+	qint64 dt = m_frame_timer.nsecsElapsed();
+	m_frame_timer.restart();
+	double dt_sec = (double)dt / 1.0e9;
+
+	NavigationMode mode = getActualNavigationMode();
+	if (mode == NAVIGATION_FIRST_PERSON) {
+		m_first_person_manipulator->update(dt_sec, &m_key_tracker);
+	}
+	else if (mode == NAVIGATION_FLIGHT) {
+		QPoint mouse = mapFromGlobal(cursor().pos());
+		int dx = mouse.x() - width() / 2;
+		int dy = mouse.y() - height() / 2;
+		double nx = 2 * dx / (double)height();
+		double ny = 2 * dy / (double)height();
+		m_flight_manipulator->setMousePosition(nx, ny);
+
+		m_flight_manipulator->update(dt_sec, &m_key_tracker);
+	}
+
 	this->makeCurrent();
 
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 
 	this->paintGL();
-
-// same as before?
-//#ifdef WITH_SELECTION_PROCESSING
-//	if (selectionActive_ && !selectionFinished_)
-//	{
-//		painter.setPen(Qt::black);
-//		painter.setBrush(Qt::transparent);
-//		painter.drawRect(makeRectangle(selectionStart_, selectionEnd_));
-//	}
-//#endif
 
 	painter.end();
 
@@ -133,159 +238,138 @@ void OSGViewerWidget::resizeGL(int width, int height)
 
 void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 {
+	if (event->key() == Qt::Key_Shift) {
+		qDebug() << "qt shift key";
+	}
+	else if (event->key() == Qt::Key_Alt) {
+		qDebug() << "at lkey";
+	}
+	else if (event->key() == Qt::CTRL) {
+		qDebug() << "ctrl";
+	}
+
+	// This guy's code is a little wonky, notice that toLocal8Bit() returns a temporary array, but data
+	// is a pointer to memory. This led to a bug where calling qDebug() after this line would override
+	// keyData (since it's just an arbitrary place in memory)
+	// const char* keyData = keyString.toLocal8Bit().data();
+	// Safer code
 	QString keyString = event->text();
-	const char* keyData = keyString.toLocal8Bit().data();
-
-	if (event->key() == Qt::Key_S)
-	{
-#ifdef WITH_SELECTION_PROCESSING
-		selectionActive_ = !selectionActive_;
-#endif
-
-		// Further processing is required for the statistics handler here, so we do
-		// not return right away.
-	}
-	else if (event->key() == Qt::Key_D)
-	{
-		osgDB::writeNodeFile(*viewer_->getSceneData(),
-			"/tmp/sceneGraph.osg");
-
-		return;
-	}
-	else if (event->key() == Qt::Key_H)
-	{
-		this->onHome();
-		return;
-	}
-
-	this->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData));
+	QByteArray keyData = keyString.toLocal8Bit();
+	this->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData.data()));
 }
 
 void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 {
 	QString keyString = event->text();
-	const char* keyData = keyString.toLocal8Bit().data();
-
-	this->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KeySymbol(*keyData));
+	QByteArray keyData = keyString.toLocal8Bit();
+	this->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KeySymbol(*keyData.data()));
 }
 
+bool second = false;
 void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	// Note that we have to check the buttons mask in order to see whether the
-	// left button has been pressed. A call to `button()` will only result in
-	// `Qt::NoButton` for mouse move events.
-	if (selectionActive_ && event->buttons() & Qt::LeftButton)
-	{
-		selectionEnd_ = event->pos();
+	NavigationMode mode = getActualNavigationMode();
+	if (mode == NAVIGATION_FIRST_PERSON) {
+		int dx = event->x() - width() / 2;
+		int dy = event->y() - height() / 2;
+		if (dx == 0 && dy == 0) {
+			return;
+		}
+		m_first_person_manipulator->mouseMove(dx, dy);
+		centerCursor();
+	}
+	// We'd have to install a global event filter for all mouse move events to go
+	//  through, it's easier just to poll on update.
+	//else if (mode == NAVIGATION_FLIGHT) {
+	//	...
+	//	m_flight_manipulator->setMousePosition(nx, ny);
+	//}
 
-		// Ensures that new paint events are created while the user moves the
-		// mouse.
-		this->update();
-	}
-	else
-	{
-		this->getEventQueue()->mouseMotion(static_cast<float>(event->x()),
-			static_cast<float>(event->y()));
-	}
+	event->accept();
+	this->getEventQueue()->mouseMotion(static_cast<float>(event->x()),
+		static_cast<float>(event->y()));
 }
 
 void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
 {
-	// Selection processing
-	if (selectionActive_ && event->button() == Qt::LeftButton)
-	{
-		selectionStart_ = event->pos();
-		selectionEnd_ = selectionStart_; // Deletes the old selection
-		selectionFinished_ = false;           // As long as this is set, the rectangle will be drawn
+	if (event->type() == QMouseEvent::MouseButtonPress) {
+		if (event->button() == Qt::MiddleButton) {
+			m_flight_manipulator->stop();
+		}
 	}
 
 	// Normal processing
-	else
+
+	// 1 = left mouse button
+	// 2 = middle mouse button
+	// 3 = right mouse button
+
+	unsigned int button = 0;
+
+	switch (event->button())
 	{
-		// 1 = left mouse button
-		// 2 = middle mouse button
-		// 3 = right mouse button
+	case Qt::LeftButton:
+		button = 1;
+		break;
 
-		unsigned int button = 0;
+	case Qt::MiddleButton:
+		button = 2;
+		break;
 
-		switch (event->button())
-		{
-		case Qt::LeftButton:
-			button = 1;
-			break;
+	case Qt::RightButton:
+		button = 3;
+		break;
 
-		case Qt::MiddleButton:
-			button = 2;
-			break;
-
-		case Qt::RightButton:
-			button = 3;
-			break;
-
-		default:
-			break;
-		}
-
-		this->getEventQueue()->mouseButtonPress(static_cast<float>(event->x()),
-			static_cast<float>(event->y()),
-			button);
+	default:
+		break;
 	}
+
+	this->getEventQueue()->mouseButtonPress(static_cast<float>(event->x()),
+		static_cast<float>(event->y()),
+		button);
+
 }
 
 void OSGViewerWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-	// Selection processing: Store end position and obtain selected objects
-	// through polytope intersection.
-	if (selectionActive_ && event->button() == Qt::LeftButton)
-	{
-		selectionEnd_ = event->pos();
-		selectionFinished_ = true; // Will force the painter to stop drawing the
-								   // selection rectangle
+	// 1 = left mouse button
+	// 2 = middle mouse button
+	// 3 = right mouse button
 
-		this->processSelection();
+	unsigned int button = 0;
+
+	switch (event->button())
+	{
+	case Qt::LeftButton:
+		button = 1;
+		break;
+
+	case Qt::MiddleButton:
+		button = 2;
+		break;
+
+	case Qt::RightButton:
+		button = 3;
+		break;
+
+	default:
+		break;
 	}
 
-	// Normal processing
-	else
-	{
-		// 1 = left mouse button
-		// 2 = middle mouse button
-		// 3 = right mouse button
-
-		unsigned int button = 0;
-
-		switch (event->button())
-		{
-		case Qt::LeftButton:
-			button = 1;
-			break;
-
-		case Qt::MiddleButton:
-			button = 2;
-			break;
-
-		case Qt::RightButton:
-			button = 3;
-			break;
-
-		default:
-			break;
-		}
-
-		this->getEventQueue()->mouseButtonRelease(static_cast<float>(event->x()),
-			static_cast<float>(event->y()),
-			button);
-	}
+	this->getEventQueue()->mouseButtonRelease(static_cast<float>(event->x()),
+		static_cast<float>(event->y()),
+		button);
 }
 
-void OSGViewerWidget::wheelEvent(QWheelEvent* event)
-{
-	// Ignore wheel events as long as the selection is active.
-	if (selectionActive_)
-		return;
+void OSGViewerWidget::wheelEvent(QWheelEvent* event) {
 
 	event->accept();
 	int delta = event->delta();
+
+	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
+		//qDebug() << "mouse wheel delta" << delta;
+		m_first_person_manipulator->accelerate((delta > 0) ? 1 : -1);
+	}
 
 	osgGA::GUIEventAdapter::ScrollingMotion motion = delta > 0 ? osgGA::GUIEventAdapter::SCROLL_UP
 		: osgGA::GUIEventAdapter::SCROLL_DOWN;
@@ -341,6 +425,24 @@ void OSGViewerWidget::onResize(int width, int height)
 	}
 }
 
+void OSGViewerWidget::centerCursor()
+{
+	QCursor new_cursor = cursor();
+	new_cursor.setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
+	setCursor(new_cursor);
+}
+
+void OSGViewerWidget::takeCursor()
+{
+	grabMouse(Qt::BlankCursor);
+	centerCursor();	
+}
+
+void OSGViewerWidget::releaseCursor()
+{
+	releaseMouse();
+}
+
 osgGA::EventQueue* OSGViewerWidget::getEventQueue() const
 {
 	osgGA::EventQueue* eventQueue = graphicsWindow_->getEventQueue();
@@ -349,53 +451,4 @@ osgGA::EventQueue* OSGViewerWidget::getEventQueue() const
 		return eventQueue;
 	else
 		throw std::runtime_error("Unable to obtain valid event queue");
-}
-
-void OSGViewerWidget::processSelection()
-{
-#ifdef WITH_SELECTION_PROCESSING
-	QRect selectionRectangle = makeRectangle(selectionStart_, selectionEnd_);
-	int widgetHeight = this->height();
-
-	double xMin = selectionRectangle.left();
-	double xMax = selectionRectangle.right();
-	double yMin = widgetHeight - selectionRectangle.bottom();
-	double yMax = widgetHeight - selectionRectangle.top();
-
-	osgUtil::PolytopeIntersector* polytopeIntersector
-		= new osgUtil::PolytopeIntersector(osgUtil::PolytopeIntersector::WINDOW,
-			xMin, yMin,
-			xMax, yMax);
-
-	// This limits the amount of intersections that are reported by the
-	// polytope intersector. Using this setting, a single drawable will
-	// appear at most once while calculating intersections. This is the
-	// preferred and expected behaviour.
-	polytopeIntersector->setIntersectionLimit(osgUtil::Intersector::LIMIT_ONE_PER_DRAWABLE);
-
-	osgUtil::IntersectionVisitor iv(polytopeIntersector);
-
-	for (unsigned int viewIndex = 0; viewIndex < viewer_->getNumViews(); viewIndex++)
-	{
-		osgViewer::View* view = viewer_->getView(viewIndex);
-
-		if (!view)
-			throw std::runtime_error("Unable to obtain valid view for selection processing");
-
-		osg::Camera* camera = view->getCamera();
-
-		if (!camera)
-			throw std::runtime_error("Unable to obtain valid camera for selection processing");
-
-		camera->accept(iv);
-
-		if (!polytopeIntersector->containsIntersections())
-			continue;
-
-		auto intersections = polytopeIntersector->getIntersections();
-
-		for (auto&& intersection : intersections)
-			qDebug() << "Selected a drawable:" << QString::fromStdString(intersection.drawable->getName());
-	}
-#endif
 }
