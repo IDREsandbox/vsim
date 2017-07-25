@@ -213,7 +213,7 @@ void NarrativeControl::openSlide() //should handle loading widgets onto canvas
 	m_canvas->clearCanvas();
 	NarrativeSlideLabels* data;
 
-	for (int i = 0; i < curSl->getNumChildren(); i++) {
+	for (uint i = 0; i < curSl->getNumChildren(); i++) {
 		data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
 		m_canvas->newLabel(data->getStyle(), data->getText(), data->getX(), data->getY(), data->getW(), 
 			data->getH(), data->getParH(), data->getParW(), data->getRatH(), data->getRatW());

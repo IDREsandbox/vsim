@@ -189,33 +189,3 @@ void MainWindow::actionImportModel()
 	//m_vsimapp->importModel(filename.toStdString());
 	emit sImportModel(filename.toStdString());
 }
-
-//void MainWindow::narListForward()
-//{
-//	qDebug("Forward");
-//}
-//
-//void MainWindow::narListAdd()
-//{
-//	qDebug("Add");
-//}
-//
-//void MainWindow::narListDelete()
-//{
-//	qDebug("Delete");
-//}
-//
-//void MainWindow::narListPause()
-//{
-//	qDebug("Pause");
-//}
-//
-//void MainWindow::narListOpen()
-//{
-//	qDebug("Open");
-//}
-//
-//void MainWindow::narListInfo()
-//{
-//	qDebug("narrative info");
-//}

@@ -83,7 +83,7 @@ if(NOT IS_DIRECTORY ${QT_PLATFORMS_DIR})
   message(${QT_PLATFORMS_DIR})
   message(FATAL_ERROR "Must define QT_PLATFORMS_DIR")
 endif()
-install(FILE ${QT_PLATFORMS_DIR}/qwindows.dll DESTINATION platforms)
+install(FILES ${QT_PLATFORMS_DIR}/qwindows.dll DESTINATION platforms)
 
 set(THIRDPARTYDLLS 
   libpng
