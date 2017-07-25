@@ -52,7 +52,19 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_slide_box, &SlideScrollBox::sSetCamera, this, &NarrativeControl::setSlideCamera);
 	// back
 	connect(m_window->ui.topBar->ui.left_2, &QPushButton::clicked, this, &NarrativeControl::closeNarrative);
+	//change
+	connect(m_slide_box, SIGNAL(sSelectionChange()), this, SLOT(openSlide()));
 	
+	//CANVAS CONTROL
+	// new
+	connect(m_canvas, SIGNAL(sNewLabel(std::string, int)), this, SLOT(newLabel(std::string, int)));
+	// move
+	connect(m_canvas, SIGNAL(sSuperSizeSet(QSize, int)), this, SLOT(resizeLabel(QSize, int)));
+	// resize
+	connect(m_canvas, SIGNAL(sSuperPosSet(QPoint, int)), this, SLOT(moveLabel(QPoint, int)));
+	// text change
+	connect(m_canvas, SIGNAL(sSuperTextSet(QString, int)), this, SLOT(textEditLabel(QString, int)));
+
 }
 
 NarrativeControl::~NarrativeControl()
@@ -189,11 +201,113 @@ void NarrativeControl::closeNarrative()
 {
 	m_current_narrative = -1;
 	this->m_window->ui.topBar->showNarratives();
+	m_canvas->clearCanvas();
 }
 
-void NarrativeControl::openSlide()
+void NarrativeControl::openSlide() //should handle loading widgets onto canvas
 {
-	int index = m_slide_box->getLastSelected();
+	m_current_slide = m_slide_box->getLastSelected();
+	if (m_current_slide < 0) return;
+
+	NarrativeSlide* curSl = getNarrativeNode(m_current_narrative, m_current_slide);
+	m_canvas->clearCanvas();
+	NarrativeSlideLabels* data;
+
+	for (int i = 0; i < curSl->getNumChildren(); i++) {
+		data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
+		m_canvas->newLabel(data->getStyle(), data->getText(), data->getX(), data->getY(), data->getW(), 
+			data->getH(), data->getParH(), data->getParW(), data->getRatH(), data->getRatW());
+	}
+
+	//curSl->setThumbnail(Util::imageQtToOsg(generateThumbnail()));
+}
+
+void NarrativeControl::newLabel(std::string str, int idx) {
+	NarrativeSlideLabels* lab = new NarrativeSlideLabels();
+	dragLabel* temp = m_canvas->m_items.at(idx);
+	lab->setX(temp->geometry().x());
+	lab->setY(temp->geometry().y());
+	lab->setW(temp->geometry().width());
+	lab->setH(temp->geometry().height());
+	lab->setText(temp->text().toStdString());
+	lab->setStyle(str);
+	lab->setParH(temp->oldParSize.height());
+	lab->setParW(temp->oldParSize.width());
+	lab->setRatH(temp->ratioHeight);
+	lab->setRatW(temp->ratioWidth);
+
+	m_current_slide = m_slide_box->getLastSelected();
+	if (m_current_slide < 0) return;
+
+	NarrativeSlide* curSl = getNarrativeNode(m_current_narrative, m_current_slide);
+	curSl->addChild(lab);
+
+	m_canvas->exitEdit();
+	QImage new_thumbnail = generateThumbnail();
+	m_canvas->editCanvas();
+	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
+
+	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
+	item->setImage(new_thumbnail);
+}
+
+void NarrativeControl::moveLabel(QPoint pos, int idx) {
+	NarrativeSlide* curSl = getNarrativeNode(m_current_narrative, m_current_slide);
+	NarrativeSlideLabels* lab = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
+	lab->setX(pos.x());
+	lab->setY(pos.y());
+
+	dragLabel* temp = m_canvas->m_items.at(idx);
+	lab->setParH(temp->oldParSize.height());
+	lab->setParW(temp->oldParSize.width());
+	lab->setRatH(temp->ratioHeight);
+	lab->setRatW(temp->ratioWidth);
+
+	int flag = 0;
+	if (m_canvas->editDlg->isVisible()) {
+		m_canvas->exitEdit();
+		flag = 1;
+	}
+
+	QImage new_thumbnail = generateThumbnail();
+	if (flag == 1)
+		m_canvas->editCanvas();
+	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
+
+	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
+	item->setImage(new_thumbnail);
+}
+
+void NarrativeControl::resizeLabel(QSize size, int idx) {
+	NarrativeSlide* curSl = getNarrativeNode(m_current_narrative, m_current_slide);
+	NarrativeSlideLabels* lab = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
+	lab->setW(size.width());
+	lab->setH(size.height());
+
+	dragLabel* temp = m_canvas->m_items.at(idx);
+	lab->setParH(temp->oldParSize.height());
+	lab->setParW(temp->oldParSize.width());
+	lab->setRatH(temp->ratioHeight);
+	lab->setRatW(temp->ratioWidth);
+
+	int flag = 0;
+	if (m_canvas->editDlg->isVisible()) {
+		m_canvas->exitEdit();
+		flag = 1;
+	}
+	QImage new_thumbnail = generateThumbnail();
+	if (flag == 1)
+		m_canvas->editCanvas();
+	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
+
+	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
+	item->setImage(new_thumbnail);
+}
+
+void NarrativeControl::textEditLabel(QString str, int idx) {
+	NarrativeSlide* curSl = getNarrativeNode(m_current_narrative, m_current_slide);
+	NarrativeSlideLabels* lab = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
+	lab->setText(str.toStdString());
 }
 
 Narrative2 *NarrativeControl::getNarrative(int index)
@@ -215,6 +329,7 @@ NarrativeSlide * NarrativeControl::getNarrativeNode(int narrative, int slide)
 
 void NarrativeControl::newSlide()
 {
+	//m_canvas->clearCanvas();
 	Narrative2 *nar = getNarrative(m_current_narrative);
 
 	NarrativeSlide *node = new NarrativeSlide();
@@ -222,7 +337,16 @@ void NarrativeControl::newSlide()
 	node->setStayOnNode(false);
 	node->setDuration(15.0f);
 	
+	int flag = 0;
+	if (m_canvas->editDlg->isVisible()) {
+		m_canvas->exitEdit();
+		flag = 1;
+	}
+
 	node->setThumbnail(Util::imageQtToOsg(generateThumbnail()));
+
+	if (flag = 1)
+		m_canvas->editCanvas();
 	
 	node->setCameraMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
 	
@@ -230,6 +354,8 @@ void NarrativeControl::newSlide()
 	nar->addChild(node);
 	// add to gui
 	addNodeToGui(node);
+
+	//openSlide();
 }
 
 void NarrativeControl::deleteSlides()
@@ -329,7 +455,10 @@ QImage NarrativeControl::generateThumbnail()
 
 	QImage img(ssdims.width(), ssdims.height(), QImage::Format_RGB444);
 	QPainter painter(&img);
+	painter.setCompositionMode(QPainter::CompositionMode_Source);
 	m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims));
+	painter.setCompositionMode(QPainter::CompositionMode_Multiply);
+	m_canvas->render(&painter, QPoint(0, 0), QRegion(ssdims));
 
 	// optional, fewer big screenshots
 	QImage smallimg;

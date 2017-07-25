@@ -28,8 +28,6 @@ private:
 	QAction* m_action_delete;
 	QAction* m_action_info;
 	QAction* m_action_open;
-
-	
 };
 
 #endif // NARRATIVESCROLLBOX_H

@@ -11,7 +11,10 @@ dragLabelInput::dragLabelInput(QWidget* parent) : QDialog(parent) {
 dragLabelInput::dragLabelInput(QWidget* parent, const QString &text)
 	: dragLabelInput(parent)
 {
-	ui.textEdit->setText(text);
+	//ui.setupUi(this);
+	//this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+	this->setFixedWidth(1000);
+	ui.widget->setText(text);
 	m_result = text;
 }
 
@@ -25,7 +28,7 @@ const QString & dragLabelInput::getInfo()
 
 void dragLabelInput::accept()
 {
-	m_result = ui.textEdit->toHtml();
+	m_result = ui.widget->toHtml();
 	QDialog::accept();
 }
 

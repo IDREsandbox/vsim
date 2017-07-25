@@ -17,7 +17,7 @@ public:
 	dragLabel(QWidget* parent, std::string style);
 
 	//constructor for generation from data
-	dragLabel(std::string str, std::string style, int x, int y, int w, int h, QWidget* parent);
+	dragLabel(std::string str, std::string style, QWidget* parent);
 	~dragLabel();
 
 	void setIndex(int index);
@@ -37,7 +37,7 @@ signals:
 	void sSizeSet(QSize, int);
 	void sPosSet(QPoint, int);
 
-protected:
+public:
 	QWidget* par;
 	QSize parSize;
 	QSize oldParSize;

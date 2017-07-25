@@ -5,6 +5,7 @@
 #include <QtCore/QBasicTimer>
 #include "MainWindow.h"
 #include "dragLabel.h"
+#include "mrichtextedit.h"
 
 //constructor for novel generation
 dragLabel::dragLabel(QWidget* parent, std::string style) 
@@ -28,7 +29,7 @@ dragLabel::dragLabel(QWidget* parent, std::string style)
 }
 
 //constructor for generation from data
-dragLabel::dragLabel(std::string str, std::string style, int x, int y, int w, int h, QWidget* parent) 
+dragLabel::dragLabel(std::string str, std::string style, QWidget* parent) 
 	: QLabel(QString::fromStdString(str), parent)
 {
 	setStyleSheet(QString::fromStdString(style));
@@ -37,7 +38,7 @@ dragLabel::dragLabel(std::string str, std::string style, int x, int y, int w, in
 	parSize = par->size();
 	oldParSize = par->size();
 
-	this->setGeometry(x, y, w, h);
+	//this->setGeometry(x, y, w, h);
 
 	ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
 	ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
@@ -79,7 +80,7 @@ void dragLabel::mouseReleaseEvent(QMouseEvent *event)
 	if (timer.isActive()) {
 		timer.stop();
 
-		dragLabelInput *setTextDg = new dragLabelInput(nullptr);
+		dragLabelInput *setTextDg = new dragLabelInput(nullptr, this->text());
 		setTextDg->setWindowFlags(Qt::WindowSystemMenuHint);
 		
 		int size = this->font().pixelSize();
@@ -179,6 +180,10 @@ void dragLabel::resizeEvent(QResizeEvent* event)
 		else
 			break;
 	}
+
+	size = size - 10;
+	if (size < 14)
+		size = 14;
 
 	QString text = this->text();
 	text.replace("font-size:" + QString::number(oldSize) + "px;", "font-size:" + QString::number(size) + "px;");
