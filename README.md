@@ -72,6 +72,8 @@ CMake inside Visual Studio 2017
 	  -D CMAKE_PREFIX_PATH="/usr/local/Cellar/qt/5.9.1" \
 	  -D CMAKE_INSTALL_PREFIX=install ..
 	```
+ 4. Building and installing `cmake --build . --config RELEASE --target install`
+ 5. Packaging `cpack .`
  
  
 
