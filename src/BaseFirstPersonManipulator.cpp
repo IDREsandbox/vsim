@@ -9,6 +9,15 @@ BaseFirstPersonManipulator::BaseFirstPersonManipulator()
 
 void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker * keys)
 {
+	osg::Matrixd mat = getMatrix();
+	osg::Vec3d right = osg::Vec3d(mat(0, 0), mat(0, 1), mat(0, 2));
+	osg::Vec3d up = osg::Vec3d(mat(1, 0), mat(1, 1), mat(1, 2));
+	osg::Vec3d back = osg::Vec3d(mat(2, 0), mat(2, 1), mat(2, 2));
+	osg::Vec3d pos = mat.getTrans();
+	mat.setTrans(pos + right*m_position_delta[0] + up*m_position_delta[1] + back*m_position_delta[2]);
+	setByMatrix(mat);
+
+	m_position_delta = osg::Vec3d();
 }
 
 void BaseFirstPersonManipulator::rotateByPixels(double dx, double dy)
@@ -38,32 +47,17 @@ void BaseFirstPersonManipulator::rotateByPixels(double dx, double dy)
 
 void BaseFirstPersonManipulator::moveForward(double dist)
 {
-	osg::Matrixd mat = getMatrix();
-	// remember osg does post multiplication (different from math class)
-	//   so basis vectors are stored in rows
-	// camera matrix is x right, y up, z toward face
-	osg::Vec3d fwd = osg::Vec3d(-mat(2, 0), -mat(2, 1), -mat(2, 2));
-	osg::Vec3d pos = mat.getTrans();
-	mat.setTrans(pos + fwd * dist);
-	setByMatrix(mat);
+	m_position_delta[2] += -dist;
 }
 
 void BaseFirstPersonManipulator::moveRight(double dist)
 {
-	osg::Matrixd mat = getMatrix();
-	osg::Vec3d fwd = osg::Vec3d(mat(0, 0), mat(0, 1), mat(0, 2));
-	osg::Vec3d pos = mat.getTrans();
-	mat.setTrans(pos + fwd * dist);
-	setByMatrix(mat);
+	m_position_delta[0] += dist;
 }
 
 void BaseFirstPersonManipulator::moveUp(double dist)
 {
-	osg::Matrixd mat = getMatrix();
-	osg::Vec3d fwd = osg::Vec3d(mat(1, 0), mat(1, 1), mat(1, 2));
-	osg::Vec3d pos = mat.getTrans();
-	mat.setTrans(pos + fwd * dist);
-	setByMatrix(mat);
+	m_position_delta[1] += dist;
 }
 
 double BaseFirstPersonManipulator::getSensitivity() const

@@ -40,7 +40,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	osg::Camera* camera = new osg::Camera;
 	camera->setViewport(0, 0, this->width(), this->height());
 	camera->setClearColor(osg::Vec4(51/255.f, 51/255.f, 102/255.f, 1.f));
-	camera->setProjectionMatrixAsPerspective(75.f, aspectRatio, 1.f, 7500.f);
+	camera->setProjectionMatrixAsPerspective(55.f, aspectRatio, 1.f, 7500.f);
 	camera->setGraphicsContext(graphicsWindow_);
 	camera->getOrCreateStateSet()->setGlobalDefaults(); // depth buffers and things
 
@@ -52,6 +52,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	
 	osgViewer::StatsHandler *stats_handler = new osgViewer::StatsHandler;
 	stats_handler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_T);
+	stats_handler->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_Y);
 	viewer_->addEventHandler(stats_handler);
 	
 	// Camera Manipulator and Navigation
@@ -238,14 +239,12 @@ void OSGViewerWidget::resizeGL(int width, int height)
 
 void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 {
-	if (event->key() == Qt::Key_Shift) {
-		qDebug() << "qt shift key";
-	}
-	else if (event->key() == Qt::Key_Alt) {
-		qDebug() << "at lkey";
-	}
-	else if (event->key() == Qt::CTRL) {
-		qDebug() << "ctrl";
+	NavigationMode mode = getActualNavigationMode();
+	if (mode == NAVIGATION_FLIGHT) {
+		if (event->key() == Qt::Key_Alt) {
+			m_flight_manipulator->stop();
+			takeCursor();
+		}
 	}
 
 	// This guy's code is a little wonky, notice that toLocal8Bit() returns a temporary array, but data
@@ -260,23 +259,40 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 
 void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 {
+	NavigationMode mode = getActualNavigationMode();
+	if (mode == NAVIGATION_FLIGHT) {
+		if (event->key() == Qt::Key_Alt) {
+			m_flight_manipulator->stop();
+			releaseCursor();
+		}
+	}
+
 	QString keyString = event->text();
 	QByteArray keyData = keyString.toLocal8Bit();
 	this->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KeySymbol(*keyData.data()));
 }
 
-bool second = false;
+int i = 0;
 void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 {
+	i++;
 	NavigationMode mode = getActualNavigationMode();
+	int dx = event->x() - width() / 2;
+	int dy = event->y() - height() / 2;
 	if (mode == NAVIGATION_FIRST_PERSON) {
-		int dx = event->x() - width() / 2;
-		int dy = event->y() - height() / 2;
-		if (dx == 0 && dy == 0) {
-			return;
+		// if the mouse is centered then don't do anything
+		if (dx != 0 || dy != 0) {
+			m_first_person_manipulator->mouseMove(dx, dy);
+			centerCursor();
 		}
-		m_first_person_manipulator->mouseMove(dx, dy);
-		centerCursor();
+	}
+	if (mode == NAVIGATION_FLIGHT) {
+		if (m_key_tracker.mouseButton(Qt::MiddleButton) || m_key_tracker.keyPressed(Qt::Key_Alt)) {
+			if (dx != 0 || dy != 0) {
+				m_flight_manipulator->strafe(dx, dy);
+				centerCursor();
+			}
+		}
 	}
 	// We'd have to install a global event filter for all mouse move events to go
 	//  through, it's easier just to poll on update.
@@ -292,9 +308,11 @@ void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 
 void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
 {
-	if (event->type() == QMouseEvent::MouseButtonPress) {
+	NavigationMode mode = getActualNavigationMode();
+	if (mode == NAVIGATION_FLIGHT) {
 		if (event->button() == Qt::MiddleButton) {
 			m_flight_manipulator->stop();
+			takeCursor();
 		}
 	}
 
@@ -332,6 +350,13 @@ void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
 
 void OSGViewerWidget::mouseReleaseEvent(QMouseEvent* event)
 {
+	NavigationMode mode = getActualNavigationMode();
+	if (mode == NAVIGATION_FLIGHT) {
+		if (event->button() == Qt::MiddleButton) {
+			m_flight_manipulator->stop();
+			releaseCursor();
+		}
+	}
 	// 1 = left mouse button
 	// 2 = middle mouse button
 	// 3 = right mouse button

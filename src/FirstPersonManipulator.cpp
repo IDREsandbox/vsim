@@ -43,7 +43,6 @@ void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys) {
 	}
 	if (keys->keyPressed(Qt::Key_Shift)) {
 		m_pos_target[2] += dd;
-		//qDebug() << "SHIFT";
 	}
 	if (keys->keyPressed(Qt::Key_Control)) {
 		m_pos_target[2] += -dd;
@@ -77,6 +76,7 @@ void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys) {
 	if (abs(dx) != 0 || abs(dy) != 0) {
 		rotateByPixels(dx, dy);
 	}
+	BaseFirstPersonManipulator::update(dt_sec, keys);
 }
 
 void FirstPersonManipulator::mouseMove(int dx, int dy)
@@ -87,7 +87,11 @@ void FirstPersonManipulator::mouseMove(int dx, int dy)
 
 void FirstPersonManipulator::accelerate(int ticks)
 {
+
 	m_speed_click += ticks;
+	m_speed_click = std::max(m_speed_click, -28); // lower limit
+	m_speed_click = std::min(m_speed_click, 28); // upper limit
+	qInfo() << "First person speed set to" << m_speed_click << ":" << getMaxSpeed() << "m/s";
 }
 
 double FirstPersonManipulator::getMaxSpeed()

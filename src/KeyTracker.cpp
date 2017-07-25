@@ -47,7 +47,7 @@ Qt::MouseButtons KeyTracker::mouseButtons()
 	return m_mouse_buttons;
 }
 
-bool KeyTracker::buttonPressed(Qt::MouseButton button)
+bool KeyTracker::mouseButton(Qt::MouseButton button)
 {
-	return m_mouse_buttons | button;
+	return m_mouse_buttons & button;
 }
