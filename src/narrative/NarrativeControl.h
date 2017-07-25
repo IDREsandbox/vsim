@@ -6,8 +6,10 @@
 #include "narrative/Narrative2.h"
 #include "narrative/NarrativeScrollBox.h"
 #include "narrative/SlideScrollBox.h"
+#include "NarrativeSlideLabels.h"
 #include "HorizontalScrollBox.h"
 #include "MainWindow.h"
+#include "dragLabel.h"
 
 // Interface to the underlying osg data for narratives
 // Exactly one should exist per VSimApp
@@ -27,7 +29,6 @@ public:
 	//void showSlides(int index);
 	void openNarrative();
 	void closeNarrative();
-	void openSlide();
 
 	// this should be const or it is dangerous to have public
 	// it means that ppl can change narrative data w/o it being updated by the gui
@@ -64,10 +65,21 @@ public:
 	void setSlideCamera();
 	
 	//Canvas
-	//	New Box
+	//void newLabel(int idx);
 	//	Delete Box
 	//	Move Box
 	//	Edit Box Content
+
+public slots:
+	//Canvas
+	void newLabel(std::string, int idx);
+	void moveLabel(QPoint pos, int idx);
+	void resizeLabel(QSize size, int idx);
+	void textEditLabel(QString str, int idx);
+	//	Delete Box
+	//	Move Box
+	//	Edit Box Content
+	void openSlide();
 
 private:
 	void addToGui(Narrative2 *);
