@@ -276,3 +276,4 @@ void NarrativePlayer::selectionChange()
 	}
 	pause();
 }
+
