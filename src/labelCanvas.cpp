@@ -2,7 +2,7 @@
 #include "labelCanvas.h"
 
 labelCanvas::labelCanvas(QWidget* parent)
-	: QWidget(parent)
+	: QFrame(parent)
 {
 	invisible = new QWidget(this);
 	invisible->setGeometry(0, 0, 1, 1);

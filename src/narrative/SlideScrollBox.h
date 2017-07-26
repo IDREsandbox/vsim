@@ -51,7 +51,6 @@ private:
 	QAction *m_action_set_camera;
 	QAction *m_action_set_duration;
 	QAction *m_action_set_transition;
-	
 };
 
 

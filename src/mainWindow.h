@@ -42,6 +42,7 @@ public:
 	void paintEvent(QPaintEvent* event);
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dropEvent(QDropEvent *event);
+	void resizeEvent(QResizeEvent* event);
 
 public slots:
 	void actionNew();

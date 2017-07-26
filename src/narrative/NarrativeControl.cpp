@@ -449,16 +449,22 @@ void NarrativeControl::addNodeToGui(NarrativeSlide *node)
 QImage NarrativeControl::generateThumbnail()
 {
 	// widget dimensions
-	QRect dims = m_window->m_osg_widget->geometry();
+	QRect dims = m_window->centralWidget()->geometry(); 
+
 	// screenshot dimensions
 	QRect ssdims = Util::rectFit(dims, 16.0 / 9.0);
+	ssdims.setY(ssdims.y() + 50);
+
 
 	QImage img(ssdims.width(), ssdims.height(), QImage::Format_RGB444);
 	QPainter painter(&img);
 	painter.setCompositionMode(QPainter::CompositionMode_Source);
-	m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims));
-	painter.setCompositionMode(QPainter::CompositionMode_Multiply);
-	m_canvas->render(&painter, QPoint(0, 0), QRegion(ssdims));
+	
+	m_window->ui.topBar->hide();
+	m_window->ui.bottomBar->hide();
+	m_window->render(&painter, QPoint(0, 0), QRegion(ssdims));
+	m_window->ui.topBar->show();
+	m_window->ui.bottomBar->show();
 
 	// optional, fewer big screenshots
 	QImage smallimg;

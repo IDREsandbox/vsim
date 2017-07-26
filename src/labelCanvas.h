@@ -10,7 +10,7 @@
 
 class dragLabel;
 
-class labelCanvas : public QWidget
+class labelCanvas : public QFrame
 {
 	Q_OBJECT
 

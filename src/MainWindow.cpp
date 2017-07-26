@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// drag widget
 	m_drag_area = new labelCanvas(ui.root);
+	//m_drag_area->setGeometry(0, 0, this->width(), this->height());
 	ui.rootLayout->addWidget(m_drag_area, 0, 0);
 
 	// vsimapp file stuff
@@ -137,6 +138,10 @@ void MainWindow::dropEvent(QDropEvent * event)
 	}
 }
 
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+	//m_drag_area->setGeometry(0, 0, event->size().width(), event->size().height());
+}
 
 void MainWindow::actionNew()
 {
