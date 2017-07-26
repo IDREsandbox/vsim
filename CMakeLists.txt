@@ -67,7 +67,6 @@ install(TARGETS VSim DESTINATION .)
 install(DIRECTORY assets DESTINATION .)
 
 if (WIN32)
-
   # DLL copying
   set(OPENSCENEGRAPH_BINARY_DIR "" CACHE FILEPATH "where are the osg binaries")
   if(NOT IS_DIRECTORY ${OPENSCENEGRAPH_BINARY_DIR})
@@ -81,12 +80,19 @@ if (WIN32)
     message(FATAL_ERROR "Must define THIRDPARTY_BINARY_DIR")
   endif()
 
-  set(QT_PLATFORMS_DIR "" CACHE FILEPATH "where is qwindows.dll?")
-  if(NOT IS_DIRECTORY ${QT_PLATFORMS_DIR})
-    message(${QT_PLATFORMS_DIR})
-    message(FATAL_ERROR "Must define QT_PLATFORMS_DIR")
+  set(QT_DIR "" CACHE FILEPATH "where is the Qt root dir")
+  if(NOT IS_DIRECTORY ${QT_DIR})
+    message(${QT_DIR})
+    message(FATAL_ERROR "Must define QT_DIR")
   endif()
-  install(FILES ${QT_PLATFORMS_DIR}/qwindows.dll DESTINATION platforms)
+  install(FILES ${QT_DIR}/plugins/platforms/qwindows.dll DESTINATION platforms)
+
+  # visual studio path https://stackoverflow.com/questions/28533012/how-to-set-runtime-path-for-cmake-custom-command-on-windows
+  set(CMAKE_MSVCIDE_RUN_PATH "${OPENSCENEGRAPH_BINARY_DIR};${OPENSCENEGRAPH_BINARY_DIR}/osgPlugins-3.4.0/;${THIRDPARTY_BINARY_DIR};${QT_DIR}/bin/")
+  message("msvc path" ${CMAKE_MSVCIDE_RUN_PATH})
+  set(FUZZ "foo;;;efee;f;ef;thisoneescaped\;fwef" "quesq" "efeun" "lol")
+  message("fuzz" "${FUZZ}")
+
 
   set(THIRDPARTYDLLS 
     libpng
@@ -200,39 +206,39 @@ if (WIN32)
   # copy THIRDPARTY dlls on postbuild
   foreach(DLL ${THIRDPARTYDLLS})
     set(PREFIX ${THIRDPARTY_BINARY_DIR}/${DLL})
-    add_custom_command(
-      TARGET VSim 
-      PRE_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different
-          ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-          $<TARGET_FILE_DIR:VSim>
-    )
+  #  add_custom_command(
+  #    TARGET VSim 
+  #    PRE_BUILD
+  #    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  #        ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
+  #        $<TARGET_FILE_DIR:VSim>
+  #  )
     install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
   endforeach(DLL)
 
   # copy OSG dlls on postbuild
   foreach(DLL ${OSGDLLS})
     set(PREFIX ${OPENSCENEGRAPH_BINARY_DIR}/${DLL})
-    add_custom_command(
-      TARGET VSim 
-      PRE_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different
-          ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-          $<TARGET_FILE_DIR:VSim>
-    )
+  #  add_custom_command(
+  #    TARGET VSim 
+  #    PRE_BUILD
+  #    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  #        ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
+  #        $<TARGET_FILE_DIR:VSim>
+  #  )
     install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
   endforeach(DLL)
 
   # copy OSG plugin dlls
   foreach(DLL ${OSGPLUGINDLLS})
     set(PREFIX ${OPENSCENEGRAPH_BINARY_DIR}/${OPENSCENEGRAPH_PLUGIN_PREFIX}/${DLL})
-    add_custom_command(
-      TARGET VSim 
-      POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different
-          ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-          $<TARGET_FILE_DIR:VSim>/${OPENSCENEGRAPH_PLUGIN_PREFIX}/
-    )
+  #  add_custom_command(
+  #    TARGET VSim 
+  #    POST_BUILD
+  #    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  #        ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
+  #        $<TARGET_FILE_DIR:VSim>/${OPENSCENEGRAPH_PLUGIN_PREFIX}/
+  #  )
     install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION "${OPENSCENEGRAPH_PLUGIN_PREFIX}/")
   endforeach(DLL)
 
@@ -243,13 +249,13 @@ if (WIN32)
       Qt5::Widgets
       )
     # copy to the Release directory
-    add_custom_command(
-      TARGET VSim 
-      POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:${dll}>
-        $<TARGET_FILE_DIR:VSim>
-    )
+  #  add_custom_command(
+  #    TARGET VSim 
+  #    POST_BUILD
+  #    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  #      $<TARGET_FILE:${dll}>
+  #      $<TARGET_FILE_DIR:VSim>
+  #  )
     # copy to the install directory
     get_target_property(dll_location ${dll} LOCATION)
     install(FILES $<TARGET_FILE:${dll}> DESTINATION ".")
