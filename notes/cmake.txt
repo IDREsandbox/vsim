@@ -146,3 +146,11 @@ wait a long time
 
 
 -------------
+
+
+Testing
+
+cmake --build . --config RELEASE --target RUN_TESTS
+ctest . -c Release
+ctest --verbose
+cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target RUN_TESTS

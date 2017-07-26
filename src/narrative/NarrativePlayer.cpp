@@ -250,7 +250,6 @@ void NarrativePlayer::setCameraMatrix(osg::Matrixd camera_matrix)
 void NarrativePlayer::selectionChange()
 {
 	std::set<int> nar_sel = m_narrative_box->getSelection();
-	int slide;
 	if (nar_sel.empty()) {
 		m_current_narrative = -1;
 	}

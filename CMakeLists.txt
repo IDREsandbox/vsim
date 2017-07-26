@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8.11)
 project (VSim)
 
 # version number
@@ -6,6 +6,10 @@ set (VSim_VERSION_MAJOR 2)
 set (VSim_VERSION_MINOR 0)
 
 message("source directory " ${PROJECT_SOURCE_DIR})
+
+enable_testing()
+set(CTEST_OUTPUT_ON_FAILURE ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # reprocessing stuff
 # configure_file (
@@ -26,14 +30,17 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # search path
 
 find_package(OpenSceneGraph 3.4.0 REQUIRED osgDB osgUtil osgGA osgViewer osgText)
-find_package(Qt5Widgets)
-#find_package(Qt5Core)
-#find_package(Qt5Gui)
+find_package(Qt5 REQUIRED Core Gui Widgets Test)
 
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
+# for some reason find_package isn't working
 #get_target_property(QtWidgets Qt5::Core LOCATION)
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
+include_directories(${Qt5Test_INCLUDE_DIRS})
+add_definitions(${Qt5Widgets_DEFINITIONS})
+add_definitions(${Qt5Test_DEFINITIONS})
 
 #include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/src)
@@ -45,7 +52,12 @@ file(GLOB_RECURSE VSim_src
   src/*.h
   src/*.cpp
   )
-list(FILTER VSim_src EXCLUDE REGEX ".*src/windows.*") 
+list(FILTER VSim_src EXCLUDE REGEX ".*src/windows.*")
+list(FILTER VSim_src EXCLUDE REGEX ".*src/main.cpp")
+file(GLOB_RECURSE VSim_headers
+  src/*.h
+  )
+
 message("sources - " ${VSim_src})
 
 # file(GLOB VSim_src 
@@ -55,12 +67,28 @@ message("sources - " ${VSim_src})
 #   "src/narratives/*.cpp"
 #   )
 
+add_library(VSim_objects ${VSim_src})
+add_executable(VSim src/main.cpp ${VSim_headers})
+
 # final add executable
-add_executable(VSim ${VSim_src})
 
 # linking
+target_link_libraries(VSim ${VSim_objects})
 target_link_libraries(VSim Qt5::Widgets)
 target_link_libraries(VSim ${OPENSCENEGRAPH_LIBRARIES})
+
+
+# tests
+set(tests
+  Util_test
+  )
+foreach(test ${tests})
+  add_executable(${test} tests/${test}.cpp)
+  add_test(NAME ${test} COMMAND ${test})
+  target_link_libraries(${test} ${VSim_objects})
+  target_link_libraries(${test} Qt5::Widgets Qt5::Test)
+  target_link_libraries(${test} ${OPENSCENEGRAPH_LIBRARIES})
+endforeach(test)
 
 #install
 install(TARGETS VSim DESTINATION .)
@@ -90,9 +118,6 @@ if (WIN32)
   # visual studio path https://stackoverflow.com/questions/28533012/how-to-set-runtime-path-for-cmake-custom-command-on-windows
   set(CMAKE_MSVCIDE_RUN_PATH "${OPENSCENEGRAPH_BINARY_DIR};${OPENSCENEGRAPH_BINARY_DIR}/osgPlugins-3.4.0/;${THIRDPARTY_BINARY_DIR};${QT_DIR}/bin/")
   message("msvc path" ${CMAKE_MSVCIDE_RUN_PATH})
-  set(FUZZ "foo;;;efee;f;ef;thisoneescaped\;fwef" "quesq" "efeun" "lol")
-  message("fuzz" "${FUZZ}")
-
 
   set(THIRDPARTYDLLS 
     libpng
