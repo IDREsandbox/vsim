@@ -1,4 +1,3 @@
-#include <osg/node>
 #include <assert.h>
 #include "narrative/Narrative2.h"
 #include "narrative/NarrativeSlide.h"

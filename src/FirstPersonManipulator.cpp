@@ -64,9 +64,9 @@ void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys) {
 	double cz = Util::exponentialSmooth2(&pz, tz, m_movement_smoothing, dt_sec, .001);
 	//qDebug() << "deltas" << cx << cy << cz;
 
-	if (abs(cx) >= .0005) moveForward(cx);
-	if (abs(cy) >= .0005) moveRight(-cy);
-	if (abs(cz) >= .0005) moveUp(cz);
+	if (std::abs(cx) >= .0005) moveForward(cx);
+	if (std::abs(cy) >= .0005) moveRight(-cy);
+	if (std::abs(cz) >= .0005) moveUp(cz);
 	// update the vector
 	m_pos_current = osg::Vec3d(px, py, pz);
 
@@ -74,7 +74,7 @@ void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys) {
 	double dx = Util::exponentialSmooth2(&m_x_current, m_x_target, m_smoothing, dt_sec, .01);
 	double dy = Util::exponentialSmooth2(&m_y_current, m_y_target, m_smoothing, dt_sec, .01);
 
-	if (abs(dx) != 0 || abs(dy) != 0) {
+	if (std::abs(dx) != 0 || std::abs(dy) != 0) {
 		rotateByPixels(dx, dy);
 	}
 }

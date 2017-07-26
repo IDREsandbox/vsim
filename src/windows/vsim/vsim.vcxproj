@@ -60,7 +60,6 @@
     <ClCompile Include="..\..\narrative\SerializerNarrative2.cpp" />
     <ClCompile Include="..\..\narrative\SerializerNarrativeSlide.cpp" />
     <ClCompile Include="..\..\narrative\SerializerNarrativeSlideLabels.cpp" />
-    <ClCompile Include="..\..\narrative\SerializerSlidesNode.cpp" />
     <ClCompile Include="..\..\narrative\SlideScrollBox.cpp" />
     <ClCompile Include="..\..\narrative\SlideScrollItem.cpp" />
     <ClCompile Include="..\..\ObjectManipulator.cpp" />

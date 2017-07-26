@@ -17,7 +17,7 @@
 
 //#include "VSimApp.h"
 
-extern osgViewer::Viewer* g_viewer;
+//extern osgViewer::Viewer* g_viewer;
 
 class VSimApp;
 class labelCanvas;

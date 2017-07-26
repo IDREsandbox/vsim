@@ -1,8 +1,8 @@
 #ifndef NARRATIVESLIDELABELS_H
 #define NARRATIVESLIDELABELS_H
 
-#include <osg/group>
-#include <osg/image>
+#include <osg/Group>
+#include <osg/Image>
 #include <QDebug>
 
 class NarrativeSlideLabels : public osg::Node

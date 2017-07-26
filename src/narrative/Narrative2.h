@@ -2,7 +2,7 @@
 #define NARRATIVE2_H
 
 #include <string>
-#include <osg/node>
+#include <osg/Node>
 #include "narrative/NarrativeSlide.h"
 #include "deprecated/narrative/Narrative.h"
 

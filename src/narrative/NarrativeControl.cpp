@@ -345,7 +345,7 @@ void NarrativeControl::newSlide()
 
 	node->setThumbnail(Util::imageQtToOsg(generateThumbnail()));
 
-	if (flag = 1)
+	if (flag == 1)
 		m_canvas->editCanvas();
 	
 	node->setCameraMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
@@ -391,6 +391,7 @@ void NarrativeControl::setSlideDuration(float duration)
 		}
 		else {
 			node->setDuration(duration);
+			node->setStayOnNode(false);
 		}
 
 		// gui

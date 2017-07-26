@@ -1,8 +1,8 @@
 #ifndef NARRATIVESLIDE_H
 #define NARRATIVESLIDE_H
 
-#include <osg/group>
-#include <osg/image>
+#include <osg/Group>
+#include <osg/Image>
 #include <QDebug>
 #include <QImage>
 #include "deprecated/narrative/NarrativeNode.h"

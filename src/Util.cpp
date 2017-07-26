@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <QDebug>
-#include "util.h"
+#include "Util.h"
 
 #include <osg/Matrix>
 #include <osg/io_utils>
@@ -126,7 +126,7 @@ double Util::angleWrap(double x)
 double Util::closestAngle(double x, double y)
 {
 	// already the closest?
-	if (abs(x - y) <= M_PI) {
+	if (std::abs(x - y) <= M_PI) {
 		return y;
 	}
 	else {
@@ -221,7 +221,7 @@ double Util::exponentialSmooth(double start, double end, double factor, double d
 {
 	// amount remaining = .5^2
 	double difference = end - start;
-	if (abs(difference) <= clip) {
+	if (std::abs(difference) <= clip) {
 		return end;
 	}
 	return end - difference * pow(factor,dt);

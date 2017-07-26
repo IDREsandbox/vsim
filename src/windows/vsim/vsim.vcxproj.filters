@@ -391,9 +391,6 @@
     <ClCompile Include="..\..\narrative\SerializerNarrativeSlideLabels.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\narrative\SerializerSlidesNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\mrichtextedit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

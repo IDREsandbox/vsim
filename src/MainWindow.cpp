@@ -12,8 +12,6 @@
 #include "narrative/NarrativeInfoDialog.h"
 #include "dragLabelInput.h"
 
-extern osgViewer::Viewer* g_viewer = nullptr;
-
 MainWindow::MainWindow(QWidget *parent) 
 	: QMainWindow(parent)
 {
@@ -32,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui.root);
-	g_viewer = m_osg_widget->getViewer();
+	//g_viewer = m_osg_widget->getViewer();
 	m_osg_widget->lower();
 	ui.rootLayout->addWidget(m_osg_widget, 0, 0);
 
@@ -61,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui.actionObject_Navigation, &QAction::triggered, m_osg_widget,
 		[this]() {qDebug() << "object trigger";  m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_OBJECT); });
 	connect(ui.actionFreeze_Camera, &QAction::toggled, m_osg_widget,
-		[this](bool freeze) {"freeze trigger";  m_osg_widget->setCameraFrozen(freeze); });
+		[this](bool freeze) {qDebug() << "freeze trigger";  m_osg_widget->setCameraFrozen(freeze); });
 
 	// show slides or narratives
 	connect(ui.topBar->ui.open, &QPushButton::clicked, this, 

@@ -5,7 +5,7 @@
 
 class ObjectManipulator : public osgGA::TerrainManipulator {
 public:
-	ObjectManipulator::ObjectManipulator();
+	ObjectManipulator();
 
 	// We have to override the default setByMatrix because its behavior isn't 
 	// great when there is no ground. Basically we have to fill in those 
