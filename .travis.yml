@@ -1,0 +1,7 @@
+language: cpp
+os: osx
+before_install: 
+ - brew update
+ - brew install qt5 openscenegraph
+script:
+ - bash test.sh
