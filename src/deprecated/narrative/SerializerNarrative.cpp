@@ -22,11 +22,13 @@ static bool readNarrativeNodes( osgDB::InputStream& is, Narrative& node )
 	is >> size >> is.BEGIN_BRACKET;
     for (unsigned int i = 0; i < size; i++)
     {
-        NarrativeNode* childNode = dynamic_cast<NarrativeNode*>(is.readObject().get());
+		osg::Object *read_object = is.readObject(); // needed for mac
+        NarrativeNode* childNode = dynamic_cast<NarrativeNode*>(read_object);
         NarrativeTransition* childTrans;
         if (i < size - 1)
         {
-            childTrans = dynamic_cast<NarrativeTransition*>(is.readObject().get());
+			read_object = is.readObject();
+            childTrans = dynamic_cast<NarrativeTransition*>(read_object);
         }
         else
         {
