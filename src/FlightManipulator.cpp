@@ -16,7 +16,7 @@ void FlightManipulator::stop()
 	//m_mouse_y = 0;
 }
 
-void FlightManipulator::update(double dt_sec, KeyTracker *keys) {
+void FlightManipulator::update(double dt_sec, KeyTracker *keys, osg::Node *world) {
 	// update speed
 	Qt::MouseButtons mouse_buttons = keys->mouseButtons();
 	if (mouse_buttons & Qt::LeftButton) {
@@ -43,7 +43,7 @@ void FlightManipulator::update(double dt_sec, KeyTracker *keys) {
 	if (abs(m_speed) >= .001) {
 		moveForward(m_speed * dt_sec);
 	}
-	BaseFirstPersonManipulator::update(dt_sec, keys);
+	BaseFirstPersonManipulator::update(dt_sec, keys, world);
 }
 
 void FlightManipulator::setMousePosition(double posx, double posy)

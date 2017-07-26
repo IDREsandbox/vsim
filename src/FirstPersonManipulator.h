@@ -14,7 +14,7 @@ class FirstPersonManipulator : public BaseFirstPersonManipulator
 	// stop all motion
 	void stop();
 
-	void update(double dt, KeyTracker *keys);
+	void update(double dt, KeyTracker *keys, osg::Node *world);
 
 	// Qt's setCursor() creates an event and takes an entire frame, so nonzero
 	// nonzero mouse events are at half the FPS as they should be. Sooo making

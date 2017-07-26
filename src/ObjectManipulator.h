@@ -12,6 +12,7 @@ public:
 	// protected values in osg. _center, _distance, _rotation
 	void setByMatrix(const osg::Matrixd& matrix);
 	void stop();
+
 };
 
 

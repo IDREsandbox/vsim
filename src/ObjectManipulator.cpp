@@ -1,4 +1,6 @@
 #include "ObjectManipulator.h"
+#include <QString>
+#include <QDebug>
 
 ObjectManipulator::ObjectManipulator()
 {

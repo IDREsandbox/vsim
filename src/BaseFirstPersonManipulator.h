@@ -12,7 +12,7 @@ public:
 
 	// performs physics checks and movement, make sure to call this from 
 	//  from derived classes
-	virtual void update(double dt_sec, KeyTracker *keys);
+	virtual void update(double dt_sec, KeyTracker *keys, osg::Node *world);
 
 	void rotateByPixels(double dx, double dy);
 
@@ -24,6 +24,7 @@ public:
 	void setSensitivity(double);
 
 	void enableGravity(bool enable);
+	void enableCollisions(bool enable);
 private:
 	double m_sensitivity;
 
@@ -35,8 +36,8 @@ private:
 	bool m_gravity_on;
 	double m_gravity_velocity;
 
-	//bool m_collision_on;
-	//double m_collision_radius;
+	bool m_collision_on;
+	double m_collision_radius;
 };
 
 #endif

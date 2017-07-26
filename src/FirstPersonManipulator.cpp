@@ -25,7 +25,7 @@ void FirstPersonManipulator::stop()
 	m_y_target = 0;
 }
 
-void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys) {
+void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::Node *world) {
 	if (keys == nullptr) return;
 	
 	double dd = getMaxSpeed() * dt_sec; // should be multiplied by the time (13ms or so)
@@ -77,7 +77,7 @@ void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys) {
 	if (abs(dx) != 0 || abs(dy) != 0) {
 		rotateByPixels(dx, dy);
 	}
-	BaseFirstPersonManipulator::update(dt_sec, keys);
+	BaseFirstPersonManipulator::update(dt_sec, keys, world);
 }
 
 void FirstPersonManipulator::mouseMove(int dx, int dy)

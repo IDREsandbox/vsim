@@ -65,6 +65,9 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_flight_manipulator = new FlightManipulator;
 	m_object_manipulator = new ObjectManipulator;
 	viewer_->setCameraManipulator(m_object_manipulator);
+
+	m_collisions_on = false;
+	m_gravity_on = false;
 	//setNavigationMode(NAVIGATION_OBJECT);
 
 	// lighting
@@ -199,7 +202,7 @@ void OSGViewerWidget::paintEvent(QPaintEvent* /* paintEvent */)
 
 	NavigationMode mode = getActualNavigationMode();
 	if (mode == NAVIGATION_FIRST_PERSON) {
-		m_first_person_manipulator->update(dt_sec, &m_key_tracker);
+		m_first_person_manipulator->update(dt_sec, &m_key_tracker, viewer_->getSceneData());
 	}
 	else if (mode == NAVIGATION_FLIGHT) {
 		QPoint mouse = mapFromGlobal(cursor().pos());
@@ -209,7 +212,7 @@ void OSGViewerWidget::paintEvent(QPaintEvent* /* paintEvent */)
 		double ny = 2 * dy / (double)height();
 		m_flight_manipulator->setMousePosition(nx, ny);
 
-		m_flight_manipulator->update(dt_sec, &m_key_tracker);
+		m_flight_manipulator->update(dt_sec, &m_key_tracker, viewer_->getSceneData());
 	}
 
 	this->makeCurrent();
@@ -247,16 +250,18 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 		}
 	}
 	if (event->key() == Qt::Key_G) {
-		if (m_gravity_on) {
-			m_gravity_on = false;
-			m_flight_manipulator->enableGravity(false);
-			m_first_person_manipulator->enableGravity(false);
-		}
-		else {
-			m_gravity_on = true;
-			m_flight_manipulator->enableGravity(true);
-			m_first_person_manipulator->enableGravity(true);
-		}
+		qInfo() << "Gravity on";
+		// Toggle gravity
+		m_gravity_on = !m_gravity_on;
+		m_flight_manipulator->enableGravity(m_gravity_on);
+		m_first_person_manipulator->enableGravity(m_gravity_on);
+	}
+	if (event->key() == Qt::Key_C) {
+		// Toggle collisions
+		m_collisions_on = !m_collisions_on;
+		qInfo() << "Collision" << m_collisions_on;
+		m_flight_manipulator->enableCollisions(m_collisions_on);
+		m_first_person_manipulator->enableCollisions(m_collisions_on);
 	}
 
 	// This guy's code is a little wonky, notice that toLocal8Bit() returns a temporary array, but data

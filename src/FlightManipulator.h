@@ -10,7 +10,7 @@ public:
 	// stop all motion
 	void stop();
 
-	virtual void update(double dt_sec, KeyTracker *keys) override;
+	virtual void update(double dt_sec, KeyTracker *keys, osg::Node *world) override;
 
 	// Normalized mouse position (pixelx/(height/2) and pixely/(height/2)). The reason
 	//  is that tiny screens will rotate less than larger screens, which is no
