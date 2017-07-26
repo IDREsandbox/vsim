@@ -128,10 +128,20 @@ void NarrativePlayer::play()
 		//pause();
 		return;
 	}
+	const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+	if (current_node == nullptr) {
+		qInfo() << "Narrative player - error narrative is null";
+		return;
+	}
 
 	m_playing = true;
 	m_transitioning = false;
 	m_slide_time_sec = 0;
+
+	// if we're at a pause node, then we should skip to the next transition
+	if (current_node->getStayOnNode()) {
+		next();
+	}
 	
 	m_old_navigation_mode = m_window->m_osg_widget->getNavigationMode();
 	//m_window->m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_SIMPLE);

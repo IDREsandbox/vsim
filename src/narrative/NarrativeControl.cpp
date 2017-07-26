@@ -391,6 +391,7 @@ void NarrativeControl::setSlideDuration(float duration)
 		}
 		else {
 			node->setDuration(duration);
+			node->setStayOnNode(false);
 		}
 
 		// gui
