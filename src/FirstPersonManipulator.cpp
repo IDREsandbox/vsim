@@ -16,6 +16,7 @@ FirstPersonManipulator::FirstPersonManipulator()
 
 void FirstPersonManipulator::stop()
 {
+	BaseFirstPersonManipulator::stop();
 	m_pos_current = osg::Vec3d();
 	m_pos_target = osg::Vec3d();
 	m_x_current = 0;
@@ -24,7 +25,7 @@ void FirstPersonManipulator::stop()
 	m_y_target = 0;
 }
 
-void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys) {
+void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::Node *world) {
 	if (keys == nullptr) return;
 	
 	double dd = getMaxSpeed() * dt_sec; // should be multiplied by the time (13ms or so)
@@ -43,7 +44,6 @@ void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys) {
 	}
 	if (keys->keyPressed(Qt::Key_Shift)) {
 		m_pos_target[2] += dd;
-		//qDebug() << "SHIFT";
 	}
 	if (keys->keyPressed(Qt::Key_Control)) {
 		m_pos_target[2] += -dd;
@@ -77,6 +77,7 @@ void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys) {
 	if (std::abs(dx) != 0 || std::abs(dy) != 0) {
 		rotateByPixels(dx, dy);
 	}
+	BaseFirstPersonManipulator::update(dt_sec, keys, world);
 }
 
 void FirstPersonManipulator::mouseMove(int dx, int dy)
@@ -88,11 +89,13 @@ void FirstPersonManipulator::mouseMove(int dx, int dy)
 void FirstPersonManipulator::accelerate(int ticks)
 {
 	m_speed_click += ticks;
+	m_speed_click = std::max(m_speed_click, -28); // lower limit
+	m_speed_click = std::min(m_speed_click, 28); // upper limit
+	qInfo() << "First person speed set to" << m_speed_click << ":" << getMaxSpeed() << "m/s";
 }
 
 double FirstPersonManipulator::getMaxSpeed()
 {
 	double max_speed = m_base_speed * pow(pow(2, .25), m_speed_click);
-	//qDebug() << "ms" << max_speed;
 	return max_speed;
 }
