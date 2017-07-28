@@ -8,8 +8,7 @@ set (VSim_VERSION_MINOR 0)
 message("source directory " ${PROJECT_SOURCE_DIR})
 
 enable_testing()
-set(CTEST_OUTPUT_ON_FAILURE ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# set(CTEST_OUTPUT_ON_FAILURE ON) # doesn't do anything
 
 # reprocessing stuff
 # configure_file (
@@ -21,6 +20,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 cmake_policy(SET CMP0020 NEW)
 
 # qt flags
+set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "autogennnn") # for shared gen files?
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
@@ -35,14 +36,19 @@ find_package(Qt5 REQUIRED Core Gui Widgets Test)
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
-# for some reason find_package isn't working
-#get_target_property(QtWidgets Qt5::Core LOCATION)
+# get_target_property(QtWidgets Qt5::Core LOCATION)
+# get_property(GENFOLDER GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER)
+# message("autogen folder" ${AUTOGEN_TARGETS_FOLDER} "prop?" ${GENFOLDER})
+# message("automoc folder" ${AUTOMOC_TARGETS_FOLDER})
+# message("cmake binary" ${CMAKE_BINARY_DIR})
+
+# for some reason find_package doesn't work for libraries
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
+include_directories(C:/Users/dstephan/Desktop/vsim/build/VSim_objects_autogen/include)
 add_definitions(${Qt5Widgets_DEFINITIONS})
 add_definitions(${Qt5Test_DEFINITIONS})
 
-#include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 # source
@@ -68,14 +74,14 @@ message("sources - " ${VSim_src})
 #   )
 
 add_library(VSim_objects ${VSim_src})
-add_executable(VSim src/main.cpp ${VSim_headers})
+add_executable(VSim src/main.cpp)
 
 # final add executable
 
 # linking
-target_link_libraries(VSim ${VSim_objects})
-target_link_libraries(VSim Qt5::Widgets)
-target_link_libraries(VSim ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(VSim_objects Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(VSim VSim_objects)
+
 
 
 # tests
