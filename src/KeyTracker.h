@@ -19,7 +19,7 @@ public:
 
 	// check if a mouse key is pressed
 	Qt::MouseButtons mouseButtons();
-	bool buttonPressed(Qt::MouseButton);
+	bool mouseButton(Qt::MouseButton);
 
 	void debug();
 
