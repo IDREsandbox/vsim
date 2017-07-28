@@ -109,6 +109,7 @@ void MainWindow::LoadingDialog(const std::string & msg)
 	connect(pd, &QProgressDialog::canceled, this, [] {printf("CLOSEDD!!!\n"); });
 }
 
+
 void MainWindow::paintEvent(QPaintEvent * event)
 {
 	m_drag_area->setMask(m_drag_area->childrenRegion());
@@ -134,11 +135,6 @@ void MainWindow::dropEvent(QDropEvent * event)
 		//m_vsimapp->openVSim(text.toStdString());
 		emit sOpenFile(text.toStdString());
 	}
-}
-
-void MainWindow::resizeEvent(QResizeEvent* event)
-{
-	//m_drag_area->setGeometry(0, 0, event->size().width(), event->size().height());
 }
 
 void MainWindow::actionNew()

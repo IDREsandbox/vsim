@@ -2,14 +2,10 @@
 
 NarrativeSlideLabels::NarrativeSlideLabels()
 	: osg::Node(),
-	m_x(250),
-	m_y(250),
-	m_w(250),
-	m_h(150),
-	m_parH(600),
-	m_parW(800),
-	//m_ratH(.5),
-	//m_ratW(.5),
+	m_rX(0.5),
+	m_rY(0.5),
+	m_rW(0.25),
+	m_rH(0.2),
 	m_text("New Label"),
 	m_style("background: rgba(0, 0, 0, 70); color: rgb(255, 255, 255);")
 {
@@ -17,14 +13,10 @@ NarrativeSlideLabels::NarrativeSlideLabels()
 
 NarrativeSlideLabels::NarrativeSlideLabels(const NarrativeSlideLabels & n, const osg::CopyOp & copyop)
 	: osg::Node(n, copyop),
-	m_x(250),
-	m_y(250),
-	m_w(n.m_w),
-	m_h(n.m_h),
-	m_parH(n.m_parH),
-	m_parW(n.m_parW),
-	m_ratH(n.m_ratH),
-	m_ratW(n.m_ratW),
+	m_rX(n.m_rX),
+	m_rY(n.m_rY),
+	m_rW(n.m_rW),
+	m_rH(n.m_rH),
 	m_text(n.m_text),
 	m_style(n.m_style)
 {
@@ -36,84 +28,44 @@ NarrativeSlideLabels::~NarrativeSlideLabels()
 {
 }
 
-int NarrativeSlideLabels::getX() const
+float NarrativeSlideLabels::getrX() const
 {
-	return m_x;
+	return m_rX;
 }
 
-void NarrativeSlideLabels::setX(int x)
+void NarrativeSlideLabels::setrX(float x)
 {
-	m_x = x;
+	m_rX = x;
 }
 
-int NarrativeSlideLabels::getY() const
+float NarrativeSlideLabels::getrY() const
 {
-	return m_y;
+	return m_rY;
 }
 
-void NarrativeSlideLabels::setY(int y)
+void NarrativeSlideLabels::setrY(float y)
 {
-	m_y = y;
+	m_rY = y;
 }
 
-int NarrativeSlideLabels::getW() const
+float NarrativeSlideLabels::getrW() const
 {
-	return m_w;
+	return m_rW;
 }
 
-void NarrativeSlideLabels::setW(int w)
+void NarrativeSlideLabels::setrW(float w)
 {
-	m_w = w;
+	m_rW = w;
 }
 
-int NarrativeSlideLabels::getH() const
+float NarrativeSlideLabels::getrH() const
 {
-	return m_h;
+	return m_rH;
 }
 
-void NarrativeSlideLabels::setH(int h)
+void NarrativeSlideLabels::setrH(float h)
 {
-	m_h = h;
-}
-
-int NarrativeSlideLabels::getParW() const
-{
-	return m_parW;
-}
-
-void NarrativeSlideLabels::setParW(int pw)
-{
-	m_parW = pw;
-}
-
-int NarrativeSlideLabels::getParH() const
-{
-	return m_parH;
-}
-
-void NarrativeSlideLabels::setParH(int ph)
-{
-	m_parH = ph;
-}
-
-float NarrativeSlideLabels::getRatW() const
-{
-	return m_ratW;
-}
-
-void NarrativeSlideLabels::setRatW(float rw)
-{
-	m_ratW = rw;
-}
-
-float NarrativeSlideLabels::getRatH() const
-{
-	return m_ratH;
-}
-
-void NarrativeSlideLabels::setRatH(float rh)
-{
-	m_ratH = rh;
+	m_rH = h;
 }
 
 const std::string& NarrativeSlideLabels::getText() const
