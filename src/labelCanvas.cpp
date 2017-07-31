@@ -23,10 +23,10 @@ labelCanvas::labelCanvas(QWidget* parent)
 	connect(editDlg->ui.head2, SIGNAL(clicked()), signalMapper, SLOT(map()));
 	connect(editDlg->ui.body, SIGNAL(clicked()), signalMapper, SLOT(map()));
 
-	signalMapper->setMapping(editDlg->ui.label, QString("color:rgb(255, 255, 255); background: rgba(0, 0, 0, 70); font-size: 14pt; "));
-	signalMapper->setMapping(editDlg->ui.head1, QString("color:rgb(0, 255, 255); background-color:rgba(0, 0, 0, 70); font-size: 14pt; font-family: \"New Century Schoolbook\";"));
-	signalMapper->setMapping(editDlg->ui.head2, QString("color:rgb(255, 0, 255); background-color:rgba(0, 0, 0, 70); font-size: 14pt; font-family: \"Times New Roman\";"));
-	signalMapper->setMapping(editDlg->ui.body, QString("color:rgb(255, 255, 0); background-color:rgba(0, 0, 0, 70); font-size: 14pt;"));
+	signalMapper->setMapping(editDlg->ui.label, QString("color:rgb(0, 0, 0); background: rgba(255, 255, 255, 70); font-size: 12pt; font-family: \"Arial\"; font-weight: bold; text-align:center;"));
+	signalMapper->setMapping(editDlg->ui.head1, QString("color:rgb(240, 240, 240); background-color:rgba(0, 0, 0, 70); font-size: 36pt; font-family: \"Arial\"; font-weight: bold; text-align:center;"));
+	signalMapper->setMapping(editDlg->ui.head2, QString("color:rgb(224, 147, 31); background-color:rgba(0, 0, 0, 70); font-size: 20pt; font-family: \"Arial\"; font-weight: bold; text-align:center;"));
+	signalMapper->setMapping(editDlg->ui.body, QString("color:rgb(240, 240, 240); background-color:rgba(0, 0, 0, 70); font-size: 12pt; font-family: \"Arial\"; font-weight: regular; text-align:left;"));
 	connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(newLabel(QString)));
 }
 
