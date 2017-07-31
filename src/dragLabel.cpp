@@ -26,7 +26,7 @@ dragLabel::dragLabel(labelCanvas* parent, std::string style)
 	ratioX = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 
 	dragEdge = 0;
-	scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
+	scaleFactor = float(float(par->size().height()) / float(720));
 
 	this->setWordWrapMode(QTextOption::WordWrap);
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -48,7 +48,7 @@ dragLabel::dragLabel(std::string str, std::string style, labelCanvas* parent, fl
 	int newY = std::round(float(par->size().height() * ratioY));
 
 	this->setGeometry(newX, newY, newW, newH);
-	scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
+	scaleFactor = float(float(par->size().height()) / float(720));
 
 	dragEdge = 0;
 
@@ -101,13 +101,11 @@ void dragLabel::mouseReleaseEvent(QMouseEvent *event)
 		}
 
 		QString text = setTextDg->getInfo();
-		//text.replace("font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400;", "font-size:" + QString::number(size) + "px;");
+
 		this->setText(text);
 		emit sTextSet(text, m_index);
 
 		delete setTextDg;
-
-		//recalcFontRatios();
 	}
 
 	else {
@@ -147,19 +145,15 @@ void dragLabel::mouseMoveEvent(QMouseEvent *event)
 	}
 }
 
-//void dragLabel::recalcFontRatios() {
-//	QFont font = this->font();
-//	QRect rect = this->contentsRect();
-//	QString plainText = this->toHtml();
-//
-//	int oldSize = font.pixelSize();
-//	QFont tempFont(font);
-//	tempFont.setPixelSize(oldSize);
-//	QRect tempRect = QFontMetrics(tempFont).boundingRect(plainText);
-//
-//	ratioFHeight = 1 - float(float(rect.height() - tempRect.height()) / rect.height());
-//	ratioFWidth = 1 - float(float(rect.width() - tempRect.width()) / rect.width());
-//}
+void dragLabel::resizeEvent(QResizeEvent* event)
+{
+	ValignMiddle(this);
+}
+
+void dragLabel::showEvent(QShowEvent* event)
+{
+	ValignMiddle(this);
+}
 
 void dragLabel::canvasResize()
 { //must call this inside of canvas' resizeEvent handler
@@ -173,39 +167,7 @@ void dragLabel::canvasResize()
 
 	this->move(newX, newY);
 	
-	scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
-
-	//QRect rect = this->contentsRect();
-	//QFont font = this->font();
-	//rect.setWidth(rect.width()*ratioFWidth);
-	//rect.setHeight(rect.height()*ratioFHeight);
-	//int oldSize = font.pixelSize();
-
-	//if (this->toHtml().isEmpty())
-	//	return;
-
-	//int size = 14;
-	//QString plainText = this->toHtml();
-
-	//while (true)
-	//{
-	//	QFont tempFont(font);
-	//	tempFont.setPixelSize(size);
-	//	QRect tempRect = QFontMetrics(tempFont).boundingRect(plainText);
-	//	if (tempRect.height() <= rect.height() && tempRect.width() <= rect.width())
-	//		size++;
-	//	else
-	//		break;
-	//}
-
-	//QString text = this->toHtml();
-	//text.replace("font-size:" + QString::number(oldSize) + "px;", "font-size:" + QString::number(size) + "px;");
-	//this->setText(text);
-
-	//font.setPixelSize(size);
-	//this->setFont(font);
-
-	//recalcFontRatios();
+	scaleFactor = float(float(par->size().height()) / float(720));
 }
 
 void dragLabel::paintEvent(QPaintEvent * event)
@@ -213,6 +175,8 @@ void dragLabel::paintEvent(QPaintEvent * event)
 	QPainter painter(viewport());
 	painter.scale(scaleFactor, scaleFactor);
 	
+	ValignMiddle(this);
+
 	QTextDocument* temp = this->document();
 
 	QTextOption textOption(temp->defaultTextOption());
@@ -223,4 +187,26 @@ void dragLabel::paintEvent(QPaintEvent * event)
 	temp->setDefaultTextOption(textOption);
 
 	temp->drawContents(&painter, this->contentsRect());
+}
+
+void dragLabel::ValignMiddle(QTextEdit* pTextEdit)
+{
+	float nDocHeight = (float)pTextEdit->document()->size().height();
+	if (nDocHeight == 0)						
+		return;
+	float nCtrlHeight = (float)pTextEdit->height();				
+													
+	QTextFrame * pFrame = pTextEdit->document()->rootFrame();
+	QTextFrameFormat frameFmt = pFrame->frameFormat();
+
+	float nTopMargin = (float)frameFmt.topMargin();			
+	float nBBDocH = (float)(nDocHeight - nTopMargin);				
+													
+	if (nCtrlHeight <= nBBDocH)
+		nTopMargin = 2 / (scaleFactor);
+	else
+		nTopMargin = (((nCtrlHeight - nBBDocH) / 2 - 2) / (scaleFactor)) - (std::pow(scaleFactor, 4));
+	frameFmt.setTopMargin(nTopMargin);
+
+	pFrame->setFrameFormat(frameFmt);			
 }

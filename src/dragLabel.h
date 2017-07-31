@@ -31,6 +31,9 @@ public:
 	//void recalcFontRatios();
 
 	void paintEvent(QPaintEvent *event);
+	void showEvent(QShowEvent* event);
+	void resizeEvent(QResizeEvent* event);
+	void ValignMiddle(QTextEdit* pTextEdit);
 
 	void canvasResize();
 

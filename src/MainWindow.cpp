@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 	// initialize the Qt Designer stuff
 	ui.setupUi(this);
 
-	setMinimumSize(800, 600);
+	setMinimumSize(1280, 720);
 	ui.statusbar->showMessage("the best status bar", 0);
 	setWindowIcon(QIcon("assets/vsim.ico"));
 	setWindowTitle("VSim");
