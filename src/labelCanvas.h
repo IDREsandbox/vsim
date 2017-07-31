@@ -10,7 +10,7 @@
 
 class dragLabel;
 
-class labelCanvas : public QFrame
+class labelCanvas : public QWidget
 {
 	Q_OBJECT
 
@@ -25,8 +25,8 @@ public:
 
 public slots:
 	void newLabel(QString style);
-	void newLabel(std::string style, std::string text, int x, int y, int w, int h, int ph, int pw, float rh, float rw);
-	void deleteLabel(int idx);
+	void newLabel(std::string style, std::string text, float rX, float rY, float rW, float rH);
+	void deleteLabel();
 	void exitEdit();
 
 signals:
@@ -39,8 +39,8 @@ public:
 	QVector<dragLabel*> m_items;
 	QWidget* invisible;
 	editButtons* editDlg;
-	int offset = 0;
 	int idx = 0;
+	int lastSelected = 0;
 };
 
 #endif // LABELCANVAS_H

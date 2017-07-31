@@ -8,45 +8,55 @@
 #include "mrichtextedit.h"
 
 //constructor for novel generation
-dragLabel::dragLabel(QWidget* parent, std::string style) 
-	: QLabel(QString::fromStdString("New Label"), parent)
+dragLabel::dragLabel(labelCanvas* parent, std::string style) 
+	: QTextEdit(QString::fromStdString("New Label"), parent)
 {
 	setStyleSheet(QString::fromStdString(style));
 
 	par = parent;
-	parSize = par->size();
-	oldParSize = par->size();
 
-	this->setGeometry(par->size().width() / 2, par->size().height() / 2, 250, 110);
+	this->setGeometry((par->size().width() / 2) - 125, (par->size().height() / 2) - 55, 250, 110);
 
-	ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
-	ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+	//size ratios
+	ratioHeight = 1.0 - float(float(par->size().height() - this->size().height()) / par->size().height());
+	ratioWidth = 1.0 - float(float(par->size().width() - this->size().width()) / par->size().width());
+
+	//position ratios
+	ratioY = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
+	ratioX = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 
 	dragEdge = 0;
+	scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
 
-	this->setMargin(10);
-	this->setWordWrap(true);
+	this->setWordWrapMode(QTextOption::WordWrap);
+	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 
 //constructor for generation from data
-dragLabel::dragLabel(std::string str, std::string style, QWidget* parent) 
-	: QLabel(QString::fromStdString(str), parent)
+dragLabel::dragLabel(std::string str, std::string style, labelCanvas* parent, float rH, float rW, float rY, float rX) 
+	: QTextEdit(QString::fromStdString(str), parent), ratioHeight(rH), ratioWidth(rW), ratioY(rY), ratioX(rX)
 {
 	setStyleSheet(QString::fromStdString(style));
 
 	par = parent;
-	parSize = par->size();
-	oldParSize = par->size();
 
-	//this->setGeometry(x, y, w, h);
+	int newW = std::round(float(par->size().width() * ratioWidth));
+	int newH = std::round(float(par->size().height() * ratioHeight));
 
-	ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
-	ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+	int newX = std::round(float(par->size().width() * ratioX));
+	int newY = std::round(float(par->size().height() * ratioY));
+
+	this->setGeometry(newX, newY, newW, newH);
+	scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
 
 	dragEdge = 0;
 
-	this->setMargin(10);
-	this->setWordWrap(true);
+	this->setWordWrapMode(QTextOption::WordWrap);
+	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+	this->setFrameStyle(QFrame::NoFrame);
 }
 
 dragLabel::~dragLabel()
@@ -80,7 +90,7 @@ void dragLabel::mouseReleaseEvent(QMouseEvent *event)
 	if (timer.isActive()) {
 		timer.stop();
 
-		dragLabelInput *setTextDg = new dragLabelInput(nullptr, this->text());
+		dragLabelInput *setTextDg = new dragLabelInput(nullptr, this->toHtml());
 		setTextDg->setWindowFlags(Qt::WindowSystemMenuHint);
 		
 		int size = this->font().pixelSize();
@@ -91,15 +101,18 @@ void dragLabel::mouseReleaseEvent(QMouseEvent *event)
 		}
 
 		QString text = setTextDg->getInfo();
-		text.replace("font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400;", "font-size:" + QString::number(size) + "px;");
+		//text.replace("font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400;", "font-size:" + QString::number(size) + "px;");
 		this->setText(text);
 		emit sTextSet(text, m_index);
 
 		delete setTextDg;
+
+		//recalcFontRatios();
 	}
 
 	else {
 		timer.start(300, this);
+		par->lastSelected = m_index;
 	}
 }
 
@@ -114,81 +127,100 @@ void dragLabel::mouseMoveEvent(QMouseEvent *event)
 		if (!dragEdge)
 		{
 			this->move(mapToParent(event->pos() - offset));
-			emit sPosSet(this->pos(), m_index);
 
-			ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
-			ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+			ratioY = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
+			ratioX = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+
+			emit sPosSet(this->pos(), m_index);
 		}
 
 		else if (dragEdge)
 		{
 			this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
-			emit sSizeSet(this->size(), m_index);
 
-			ratioHeight = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
-			ratioWidth = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+			ratioHeight = 1 - float(float(par->size().height() - this->size().height()) / par->size().height());
+			ratioWidth = 1 - float(float(par->size().width() - this->size().width()) / par->size().width());
 
 			resizeOffset = event->pos();
+			emit sSizeSet(this->size(), m_index);
 		}
 	}
 }
 
-void dragLabel::updateParSize()
-{ //call in canvas' resizeEvent handler for first two resizes
-	parSize = par->size();
-	oldParSize = par->size();
-}
+//void dragLabel::recalcFontRatios() {
+//	QFont font = this->font();
+//	QRect rect = this->contentsRect();
+//	QString plainText = this->toHtml();
+//
+//	int oldSize = font.pixelSize();
+//	QFont tempFont(font);
+//	tempFont.setPixelSize(oldSize);
+//	QRect tempRect = QFontMetrics(tempFont).boundingRect(plainText);
+//
+//	ratioFHeight = 1 - float(float(rect.height() - tempRect.height()) / rect.height());
+//	ratioFWidth = 1 - float(float(rect.width() - tempRect.width()) / rect.width());
+//}
 
 void dragLabel::canvasResize()
 { //must call this inside of canvas' resizeEvent handler
-	parSize = par->size();
+	int newW = std::round(float(par->size().width() * ratioWidth));
+	int newH = std::round(float(par->size().height() * ratioHeight));
 
-	float percentX = float((oldParSize.width() - parSize.width())) / oldParSize.width();
-	float percentY = float((oldParSize.height() - parSize.height())) / oldParSize.height();
+	this->resize(newW, newH);
 
-	this->resize(std::round(float(this->width() - (this->width()*percentX))), std::round(float(this->height() - (this->height()*percentY))));
-	emit sSizeSet(this->size(), m_index);
-
-	int newX = std::round(float(parSize.width() * ratioWidth));
-	int newY = std::round(float(parSize.height() * ratioHeight));
+	int newX = std::round(float(par->size().width() * ratioX));
+	int newY = std::round(float(par->size().height() * ratioY));
 
 	this->move(newX, newY);
-	emit sPosSet(this->pos(), m_index);
+	
+	scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
 
-	oldParSize = par->size();
+	//QRect rect = this->contentsRect();
+	//QFont font = this->font();
+	//rect.setWidth(rect.width()*ratioFWidth);
+	//rect.setHeight(rect.height()*ratioFHeight);
+	//int oldSize = font.pixelSize();
+
+	//if (this->toHtml().isEmpty())
+	//	return;
+
+	//int size = 14;
+	//QString plainText = this->toHtml();
+
+	//while (true)
+	//{
+	//	QFont tempFont(font);
+	//	tempFont.setPixelSize(size);
+	//	QRect tempRect = QFontMetrics(tempFont).boundingRect(plainText);
+	//	if (tempRect.height() <= rect.height() && tempRect.width() <= rect.width())
+	//		size++;
+	//	else
+	//		break;
+	//}
+
+	//QString text = this->toHtml();
+	//text.replace("font-size:" + QString::number(oldSize) + "px;", "font-size:" + QString::number(size) + "px;");
+	//this->setText(text);
+
+	//font.setPixelSize(size);
+	//this->setFont(font);
+
+	//recalcFontRatios();
 }
 
-void dragLabel::resizeEvent(QResizeEvent* event)
-{ //font scaling irrespective of style
-	QFont font = this->font();
-	QRect rect = this->contentsRect();
-	QString plainText = QTextDocumentFragment::fromHtml(this->text()).toPlainText();
-	int oldSize = font.pixelSize();
+void dragLabel::paintEvent(QPaintEvent * event)
+{
+	QPainter painter(viewport());
+	painter.scale(scaleFactor, scaleFactor);
+	
+	QTextDocument* temp = this->document();
 
-	if (this->text().isEmpty())
-		return;
+	QTextOption textOption(temp->defaultTextOption());
+	temp->setTextWidth(this->size().width() / scaleFactor);
+	temp->setDefaultStyleSheet("p {" + this->styleSheet().split(';').at(0) + ";}");
+	temp->setHtml("<p>" + temp->toHtml() + "</p>");
+	textOption.setWrapMode(QTextOption::WordWrap);
+	temp->setDefaultTextOption(textOption);
 
-	int size = 14;
-
-	while (true)
-	{
-		QFont tempFont(font);
-		tempFont.setPixelSize(size);
-		QRect tempRect = QFontMetrics(tempFont).boundingRect(plainText);
-		if (tempRect.height() <= rect.height() && tempRect.width() <= rect.width()) 
-			size++;
-		else
-			break;
-	}
-
-	size = size - 10;
-	if (size < 14)
-		size = 14;
-
-	QString text = this->text();
-	text.replace("font-size:" + QString::number(oldSize) + "px;", "font-size:" + QString::number(size) + "px;");
-	this->setText(text);
-
-	font.setPixelSize(size);
-	this->setFont(font);
+	temp->drawContents(&painter, this->contentsRect());
 }
