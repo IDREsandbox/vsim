@@ -58,6 +58,7 @@ bool VSimApp::initWithModel(osg::Node *model)
 {
 	init();
 	m_model_group->addChild(model);
+	m_window->m_osg_widget->reset();
 	return true;
 }
 bool VSimApp::initWithVSim(osg::Node *new_node)
@@ -77,7 +78,7 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	m_viewer->setSceneData(root); // ideall this would be only models, but its easy to mess things up
 	m_narrative_list->load(m_narrative_group);
 
-	m_viewer->home();
+	m_window->m_osg_widget->reset();
 	//m_viewer->getCamera()->setProjectionMatrixAsPerspective(75.0f, )
 	
 	return true;
@@ -100,6 +101,7 @@ bool VSimApp::importModel(const std::string& filename)
 	}
 
 	m_model_group->addChild(loadedModel);
+	m_window->m_osg_widget->reset();
 	return true;
 }
 

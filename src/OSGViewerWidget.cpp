@@ -209,6 +209,19 @@ bool OSGViewerWidget::getCameraFrozen() const
 	return m_camera_frozen;
 }
 
+
+
+void OSGViewerWidget::reset()
+{
+	// compute home position and all that
+	osgGA::CameraManipulator *cm = viewer_->getCameraManipulator();
+	cm->setAutoComputeHomePosition(true);
+	cm->setNode(viewer_->getSceneData());
+	cm->computeHomePosition();
+	viewer_->home();
+	qDebug() << "home position";
+}
+
 void OSGViewerWidget::paintEvent(QPaintEvent *e)
 {
 	// a frame

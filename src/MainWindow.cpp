@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 		[this]() {qDebug() << "object trigger";  m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_OBJECT); });
 	connect(ui.actionFreeze_Camera, &QAction::toggled, m_osg_widget,
 		[this](bool freeze) {qDebug() << "freeze trigger";  m_osg_widget->setCameraFrozen(freeze); });
+	connect(ui.actionReset_Camera, &QAction::triggered, m_osg_widget, &OSGViewerWidget::reset);
 
 	// show slides or narratives
 	connect(ui.topBar->ui.open, &QPushButton::clicked, this, 
