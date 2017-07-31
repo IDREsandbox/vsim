@@ -42,7 +42,6 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	traits->y = y();
 	traits->width = width();
 	traits->height = height();
-	// traits->samples = 2; // <--- let qt set the multisampling
 	graphicsWindow_ = new osgViewer::GraphicsWindowEmbedded(traits);
 	
 	float aspectRatio = this->width() / (float)this->height();
@@ -51,20 +50,12 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	osg::Group* group = new osg::Group();
 	viewer_->setSceneData(group);
 
-	// Create the Camera
+	// Use default camera
 	osg::Camera* camera = viewer_->getCamera();
-	qDebug() << "default camera" << camera;
-	qDebug() << "ameara statesset" << camera->getStateSet();
-
-	//auto attr = camera->getStateSet()->getAttribute(osg::StateAttribute::MULTISAMPLE);
-	//if (attr == nullptr) qDebug() << "null multisample";
 	camera->setViewport(0, 0, this->width(), this->height());
 	camera->setClearColor(osg::Vec4(51/255.f, 51/255.f, 102/255.f, 1.f));
 	camera->setProjectionMatrixAsPerspective(55.f, aspectRatio, 1.f, 7500.f);
 	camera->setGraphicsContext(graphicsWindow_); // set the context
-	//camera->getOrCreateStateSet()->setGlobalDefaults(); // depth buffers and things
-	//camera->getOrCreateStateSet()->sample
-	//viewer_->setCamera(camera);
 
 	// Stats Handler
 	osgViewer::StatsHandler *stats_handler = new osgViewer::StatsHandler;
@@ -78,7 +69,6 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	ssm->setKeyEventToggleLighting('L');
 	ssm->setKeyEventToggleTexturing('X');
 	ssm->setKeyEventCyclePolygonMode('M');
-	ssm->setLightingEnabled(true);
 	ssm->setLightingEnabled(false);
 	viewer_->addEventHandler(ssm);
 
@@ -87,24 +77,19 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	
 	// Anti aliasing (QOpenGLWidget)
 	QSurfaceFormat fmt = this->format();
-	fmt.setSamples(8);
-	qDebug() << "what" << fmt.samples();
+	fmt.setSamples(4);
 	this->setFormat(fmt);
-	//glEnable(GL_MULTISAMPLE);
-
-	qDebug() << "samples" << this->format().samples();
-	qDebug() << "osgside" << viewer_->getCamera()->getGraphicsContext()->getTraits()->samples;
 
 	// Camera Manipulator and Navigation
 	//osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
 	//manipulator->setAllowThrow(false);
-	//viewer_->setCameraManipulator(manipulator);
 	m_camera_frozen = false;
 	m_simple_manipulator = new SimpleCameraManipulator();
 	m_first_person_manipulator = new FirstPersonManipulator;
 	m_flight_manipulator = new FlightManipulator;
 	m_object_manipulator = new ObjectManipulator;
 	viewer_->setCameraManipulator(m_object_manipulator);
+	m_navigation_mode = NAVIGATION_OBJECT;
 
 	m_collisions_on = false;
 	m_gravity_on = false;
@@ -124,7 +109,6 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	// frame timer
 	m_frame_timer.start();
-	qDebug() << "sampleszzz" << this->format().samples();
 }
 
 osgViewer::Viewer* OSGViewerWidget::getViewer() const
@@ -248,45 +232,13 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 	}
 
 
-	// let qt do setup stuff
-
-	qDebug() << "samples" << this->format().samples();
-
+	// let qt do setup stuff and call paintGL
 	QOpenGLWidget::paintEvent(e);
-
-	// whats w/ all this stuff
-	//this->makeCurrent();
-
-	//QPainter painter(this);
-	//painter.setRenderHint(QPainter::Antialiasing);
-
-	//this->paintGL();
-
-	//painter.end();
-
-	//this->doneCurrent();
 }
 
 void OSGViewerWidget::paintGL()
 {
-	//glEnable(GL_MULTISAMPLE);
-	GLint maxSamples = 0;
-	GLint multisample = -1;
-	GLint samplebuffers;
-	GLint samples;
-	glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
-	glGetIntegerv(GL_MULTISAMPLE, &multisample);
-	glGetIntegerv(GL_SAMPLE_BUFFERS, &samplebuffers);
-	glGetIntegerv(GL_SAMPLES, &samples);
-	qDebug() << "before max samples" << maxSamples << "sampling?" << multisample << "count" << samples << "buffers" << samplebuffers;
-
 	viewer_->frame();
-
-	glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
-	glGetIntegerv(GL_MULTISAMPLE, &multisample);
-	glGetIntegerv(GL_SAMPLE_BUFFERS, &samplebuffers);
-	glGetIntegerv(GL_SAMPLES, &samples);
-	qDebug() << "after max samples" << maxSamples << "sampling?" << multisample << "count" << samples << "buffers" << samplebuffers;
 }
 
 void OSGViewerWidget::resizeGL(int width, int height)
