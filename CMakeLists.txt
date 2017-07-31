@@ -20,8 +20,8 @@ enable_testing()
 cmake_policy(SET CMP0020 NEW)
 
 # qt flags
-set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "autogennnn") # for shared gen files?
-
+# this thing doesn't work...
+# set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "autogennnn") # for shared gen files?
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
@@ -45,7 +45,7 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 # for some reason find_package doesn't work for libraries
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
-include_directories(C:/Users/dstephan/Desktop/vsim/build/VSim_objects_autogen/include)
+include_directories(${PROJECT_BINARY_DIR}/VSim_objects_autogen/include)
 add_definitions(${Qt5Widgets_DEFINITIONS})
 add_definitions(${Qt5Test_DEFINITIONS})
 
@@ -63,6 +63,9 @@ list(FILTER VSim_src EXCLUDE REGEX ".*src/main.cpp")
 file(GLOB_RECURSE VSim_headers
   src/*.h
   )
+file(GLOB_RECURSE VSim_serializers
+  src/*Serializer*.cpp
+  )
 
 message("sources - " ${VSim_src})
 
@@ -74,7 +77,7 @@ message("sources - " ${VSim_src})
 #   )
 
 add_library(VSim_objects ${VSim_src})
-add_executable(VSim src/main.cpp)
+add_executable(VSim src/main.cpp ${VSim_serializers})
 
 # final add executable
 
@@ -119,7 +122,6 @@ if (WIN32)
     message(${QT_DIR})
     message(FATAL_ERROR "Must define QT_DIR")
   endif()
-  install(FILES ${QT_DIR}/plugins/platforms/qwindows.dll DESTINATION platforms)
 
   # visual studio path https://stackoverflow.com/questions/28533012/how-to-set-runtime-path-for-cmake-custom-command-on-windows
   set(CMAKE_MSVCIDE_RUN_PATH "${OPENSCENEGRAPH_BINARY_DIR};${OPENSCENEGRAPH_BINARY_DIR}/osgPlugins-3.4.0/;${THIRDPARTY_BINARY_DIR};${QT_DIR}/bin/")
@@ -292,6 +294,21 @@ if (WIN32)
     install(FILES $<TARGET_FILE:${dll}> DESTINATION ".")
     message("imported target: ${dll}, path: ${dll_location}")
   endforeach(dll)
+
+  # Qt plugins
+  foreach(dll
+      ${Qt5Gui_PLUGINS}
+      )
+    get_target_property(loc ${dll} LOCATION)
+     # get the relative path, something like plugins/imageformats/png.dll
+    file(RELATIVE_PATH rel ${QT_DIR} ${loc})
+    # then extract the directory - plugins/imageformats
+    get_filename_component(directory ${rel} DIRECTORY)
+    # finally add it to the install
+    install(FILES $<TARGET_FILE:${dll}> DESTINATION ${directory})
+    message("imported target: ${dll}, path: ${dll_location}")
+  endforeach(dll)
+
 endif(WIN32)
 
 IF(CMAKE_BUILD_TYPE MATCHES DEBUG)

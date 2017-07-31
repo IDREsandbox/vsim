@@ -11,7 +11,7 @@ Downloads
  - CMake, add to path
  - Visual Studio 2017
 
-Building
+Building (For more cmake notes see cmake.txt)
 
  1. In the vsim root
  	```
@@ -30,7 +30,7 @@ Building
 	`cmake --build . --target INSTALL --config Release`
  4. To package (into installer)
 	`cpack .`
- 5. For more cmake instructions see cmake.txt
+ 6. Running tests `cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --config RELEASE --target RUN_TESTS`
 
 CMake inside Visual Studio 2017
 
@@ -74,13 +74,11 @@ CMake inside Visual Studio 2017
 	mkdir build
 	cd build
 	cmake \
-	  -D CMAKE_PREFIX_PATH="/usr/local/Cellar/qt/5.9.1" \
-	  -D CMAKE_INSTALL_PREFIX=install ..
+	  -DCMAKE_PREFIX_PATH="/usr/local/Cellar/qt/5.9.1" \
+	  -DCMAKE_INSTALL_PREFIX=install ..
 	```
  4. Building and installing `cmake --build . --config RELEASE --target install`
  5. Packaging `cpack .`
- 
- 
 
 ### Windows - Visual Studio 2015
 
