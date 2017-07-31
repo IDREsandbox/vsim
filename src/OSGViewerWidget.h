@@ -46,6 +46,8 @@ public:
 	void setCameraFrozen(bool freeze);
 	bool getCameraFrozen() const;
 
+	void reset();
+
 	// TODO? Just use QWidget::Render
 	// QImage takePictureAt(osg::Camera*);
 

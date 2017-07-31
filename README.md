@@ -11,18 +11,18 @@ Downloads
  - CMake, add to path
  - Visual Studio 2017
 
-Building
+Building (For more cmake notes see cmake.txt)
 
  1. In the vsim root
  	```
 	mkdir build
 	cd build
 	cmake -G "Visual Studio 15 2017 Win64" \
-	  -D CMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install" \
-	  -D OPENSCENEGRAPH_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin" \
-	  -D THIRDPARTY_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin" \
-	  -D QT_PLATFORMS_DIR="C:/Qt/5.9.1/msvc2017_64/plugins/platforms" \
-	  -D CMAKE_INSTALL_PREFIX=install ..
+	  -DCMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install" \
+	  -DOPENSCENEGRAPH_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin" \
+	  -DTHIRDPARTY_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin" \
+	  -DQT_DIR="C:/Qt/5.9.1/msvc2017_64/" \
+	  -DCMAKE_INSTALL_PREFIX=install ..
 	  ```
  2. To build (use Debug for debug)
 	`cmake --build . --config Release`
@@ -30,7 +30,7 @@ Building
 	`cmake --build . --target INSTALL --config Release`
  4. To package (into installer)
 	`cpack .`
- 5. For more cmake instructions see cmake.txt
+ 6. Running tests `cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --config RELEASE --target RUN_TESTS`
 
 CMake inside Visual Studio 2017
 
@@ -53,13 +53,18 @@ CMake inside Visual Studio 2017
             "value": "T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin"
           },
           {
-            "name": "QT_PLATFORMS_DIR",
+            "name": "QT_DIR",
             "value": "C:/Qt/5.9.1/msvc2017_64/plugins/platforms"
           }
         ]
     ````
  5. Right click CMakeLists.txt > build VSim.exe
- 
+ 6. Right click CMakeLists.txt > Debug and Launch Settings. Paste this
+     ````
+	     "currentDir": "${workspaceRoot}",
+         "env": "PATH=C:/Qt/5.9.1/msvc2017_64/bin/;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin/osgPlugins-3.4.0/;T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin"
+	 ````
+
 ### OSX
 
  1. `brew install qt5 openscenegraph`
@@ -69,14 +74,11 @@ CMake inside Visual Studio 2017
 	mkdir build
 	cd build
 	cmake \
-	  -D CMAKE_PREFIX_PATH="/usr/local/Cellar/qt/5.9.1" \
-	  -D CMAKE_INSTALL_PREFIX=install ..
+	  -DCMAKE_PREFIX_PATH="/usr/local/Cellar/qt/5.9.1" \
+	  -DCMAKE_INSTALL_PREFIX=install ..
 	```
  4. Building and installing `cmake --build . --config RELEASE --target install`
  5. Packaging `cpack .`
- 
- 
-
 
 ### Windows - Visual Studio 2015
 

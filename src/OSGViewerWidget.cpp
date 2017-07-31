@@ -15,6 +15,7 @@
 
 #include <osgViewer/View>
 #include <osgViewer/ViewerEventHandlers>
+#include <osgGA/StateSetManipulator>
 
 #include <cassert>
 
@@ -25,59 +26,75 @@
 #include <QKeyEvent>
 #include <QPainter>
 #include <QWheelEvent>
+#include <QSurfaceFormat>
 
 OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	: QOpenGLWidget(parent,	f)
-	, graphicsWindow_(new osgViewer::GraphicsWindowEmbedded(this->x(),
-		this->y(),
-		this->width(),
-		this->height()))
-	, viewer_(new osgViewer::Viewer)
 {
+	// Create viewer, graphics context, and link them together
+	viewer_ = new osgViewer::Viewer;
+	//osg::ref_ptr<osg::DisplaySettings> display_settings = new osg::DisplaySettings;
+	//display_settings->setNumMultiSamples(8);
+	//viewer_->setDisplaySettings(display_settings);
 
-	float aspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
+	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits(osg::DisplaySettings::instance());
+	traits->x = x();
+	traits->y = y();
+	traits->width = width();
+	traits->height = height();
+	graphicsWindow_ = new osgViewer::GraphicsWindowEmbedded(traits);
+	
+	float aspectRatio = this->width() / (float)this->height();
+	
+	// Create an empty scene
+	osg::Group* group = new osg::Group();
+	viewer_->setSceneData(group);
 
-	osg::Camera* camera = new osg::Camera;
+	// Use default camera
+	osg::Camera* camera = viewer_->getCamera();
 	camera->setViewport(0, 0, this->width(), this->height());
 	camera->setClearColor(osg::Vec4(51/255.f, 51/255.f, 102/255.f, 1.f));
 	camera->setProjectionMatrixAsPerspective(55.f, aspectRatio, 1.f, 7500.f);
-	camera->setGraphicsContext(graphicsWindow_);
-	camera->getOrCreateStateSet()->setGlobalDefaults(); // depth buffers and things
+	camera->setGraphicsContext(graphicsWindow_); // set the context
 
-	//osgViewer::View* view = new osgViewer::View;
-	viewer_->setCamera(camera);
-	
-	osg::Group* group = new osg::Group();
-	viewer_->setSceneData(group);
-	
+	// Stats Handler
 	osgViewer::StatsHandler *stats_handler = new osgViewer::StatsHandler;
 	stats_handler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_T);
 	stats_handler->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_Y);
 	viewer_->addEventHandler(stats_handler);
 	
+	// Camera State Handler
+	osgGA::StateSetManipulator* ssm = new osgGA::StateSetManipulator(viewer_->getCamera()->getOrCreateStateSet());
+	ssm->setKeyEventToggleBackfaceCulling('B');
+	ssm->setKeyEventToggleLighting('L');
+	ssm->setKeyEventToggleTexturing('X');
+	ssm->setKeyEventCyclePolygonMode('M');
+	ssm->setLightingEnabled(false);
+	viewer_->addEventHandler(ssm);
+
+	// Lighting
+	viewer_->setLightingMode(osg::View::SKY_LIGHT);
+	
+	// Anti aliasing (QOpenGLWidget)
+	QSurfaceFormat fmt = this->format();
+	fmt.setSamples(4);
+	this->setFormat(fmt);
+
 	// Camera Manipulator and Navigation
 	//osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
 	//manipulator->setAllowThrow(false);
-	//viewer_->setCameraManipulator(manipulator);
 	m_camera_frozen = false;
 	m_simple_manipulator = new SimpleCameraManipulator();
 	m_first_person_manipulator = new FirstPersonManipulator;
 	m_flight_manipulator = new FlightManipulator;
 	m_object_manipulator = new ObjectManipulator;
 	viewer_->setCameraManipulator(m_object_manipulator);
+	m_navigation_mode = NAVIGATION_OBJECT;
 
 	m_collisions_on = false;
 	m_gravity_on = false;
 	//setNavigationMode(NAVIGATION_OBJECT);
-
-	// lighting
-	viewer_->setLightingMode(osg::View::SKY_LIGHT);
-
-	// for composite viewer
-	// viewer_->addView(view);
-	// viewer_->setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
-	// viewer_->realize();
-
+	
 	// This ensures that the widget will receive keyboard events. This focus
 	// policy is not set by default. The default, Qt::NoFocus, will result in
 	// keyboard events that are ignored.
@@ -87,11 +104,10 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	// Key tracking
 	this->installEventFilter(&m_key_tracker);
 
-	// Ensures that the widget receives mouse move events even though no
-	// mouse button has been pressed. We require this in order to let the
-	// graphics window switch viewports properly.
+	// Mouse tracking
 	this->setMouseTracking(true);
 
+	// frame timer
 	m_frame_timer.start();
 }
 
@@ -193,7 +209,20 @@ bool OSGViewerWidget::getCameraFrozen() const
 	return m_camera_frozen;
 }
 
-void OSGViewerWidget::paintEvent(QPaintEvent* /* paintEvent */)
+
+
+void OSGViewerWidget::reset()
+{
+	// compute home position and all that
+	osgGA::CameraManipulator *cm = viewer_->getCameraManipulator();
+	cm->setAutoComputeHomePosition(true);
+	cm->setNode(viewer_->getSceneData());
+	cm->computeHomePosition();
+	viewer_->home();
+	qDebug() << "home position";
+}
+
+void OSGViewerWidget::paintEvent(QPaintEvent *e)
 {
 	// a frame
 	qint64 dt = m_frame_timer.nsecsElapsed();
@@ -215,16 +244,9 @@ void OSGViewerWidget::paintEvent(QPaintEvent* /* paintEvent */)
 		m_flight_manipulator->update(dt_sec, &m_key_tracker, viewer_->getSceneData());
 	}
 
-	this->makeCurrent();
 
-	QPainter painter(this);
-	painter.setRenderHint(QPainter::Antialiasing);
-
-	this->paintGL();
-
-	painter.end();
-
-	this->doneCurrent();
+	// let qt do setup stuff and call paintGL
+	QOpenGLWidget::paintEvent(e);
 }
 
 void OSGViewerWidget::paintGL()
