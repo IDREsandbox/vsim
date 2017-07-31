@@ -16,15 +16,8 @@ public:
 	SlideScrollBox(QWidget * parent = nullptr);
 
 	// controller interface
-	void addItem();
+	SlideScrollItem *addItem();
 	SlideScrollItem *getItem(int index);
-
-	//std::set<int> getSlideSelection();
-	//std::set<int> getTransitionSelection(); // will always be the same as slide selection
-
-	void setDuration(float t); // < 0 is forever
-	void setTranstionDuration(float t); // 0 is instantaneous
-
 
 	// gui display some dialogs
 	// opens based on selection, emits signals
@@ -39,9 +32,11 @@ public:
 	
 signals:
 	void sSetTransitionDuration(float);
-	void sSetDuration(float);
+	void sSetDuration(float); // 0 if pause at node
 	void sDeleteSlides();
 	void sNewSlide(int);
+	void sEditSlide();
+	void sSetCamera();
 
 protected:
 	void keyPressEvent(QKeyEvent *event);
@@ -52,10 +47,10 @@ private:
 	QMenu *m_slide_menu; // context menu
 	QAction *m_action_new;
 	QAction *m_action_delete;
+	QAction *m_action_edit;
 	QAction *m_action_set_camera;
 	QAction *m_action_set_duration;
 	QAction *m_action_set_transition;
-	
 };
 
 

@@ -14,6 +14,11 @@ public:
 	void showNarratives();
 	void showSlides();
 
+	void setSlidesHeader(std::string);
+
+	// TODO
+	//void enableEdting(bool);
+
 public:
 	Ui::MainWindowTopBar ui;
 };

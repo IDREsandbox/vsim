@@ -51,8 +51,13 @@ public:
 
 	void setSpacing(int);
 
+	void forceSelect(int); // hack, for the narrative player, does not emit signals
+
 	virtual void openMenu(QPoint globalPos);
 	virtual void openItemMenu(QPoint globalPos);
+
+signals:
+	void sSelectionChange();
 
 protected:
 	// qt overrides

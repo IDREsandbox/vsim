@@ -7,44 +7,64 @@
 #include <iostream>
 #include <QtCore/QBasicTimer>
 #include "MainWindow.h"
+#include "labelCanvas.h"
 
-class MainWindow;
-
-class dragLabel : public QLabel
+class dragLabel : public QTextEdit
 {
 	Q_OBJECT
 
 public:
-	dragLabel(QWidget* parent, std::string style, MainWindow* window);
-	dragLabel(std::string str, std::string style, QWidget* parent, MainWindow* window);
+	//constructor for creating new widget
+	dragLabel(labelCanvas* parent, std::string style);
+
+	//constructor for generation from data
+	dragLabel(std::string str, std::string style, labelCanvas* parent, float rH, float rW, float rY, float rX);
 	~dragLabel();
+
+	void setIndex(int index);
+	int getIndex();
 
 	void mousePressEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
 	void timerEvent(QTimerEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
+	//void recalcFontRatios();
 
-	void updateParSize();
-	void mainResize();
+	void paintEvent(QPaintEvent *event);
+	void showEvent(QShowEvent* event);
 	void resizeEvent(QResizeEvent* event);
+	void ValignMiddle(QTextEdit* pTextEdit);
 
-protected:
-	QWidget* par;
-	QSize parSize;
-	QSize oldParSize;
+	void canvasResize();
+
+signals:
+	void sTextSet(QString, int);
+	void sSizeSet(QSize, int);
+	void sPosSet(QPoint, int);
+
+public:
+	labelCanvas* par;
 	
 	QPoint offset;
 	QPoint resizeOffset;
+
+	float scaleFactor = 1;
 	
+	//float ratioFHeight;
+	//float ratioFWidth;
+
 	float ratioHeight;
 	float ratioWidth;
+
+	float ratioX;
+	float ratioY;
 	
 	bool dragEdge;
 	QRect bottomRight;
 
 	QBasicTimer timer;
 
-	MainWindow* m_window;
+	int m_index = -1;
 };
 
 #endif // DRAGLABEL_H

@@ -12,6 +12,11 @@ SlideScrollItem::SlideScrollItem()
 	setDuration(0.0f);
 }
 
+void SlideScrollItem::setImage(const QImage & img)
+{
+	ui.image_label->setPixmap(QPixmap::fromImage(img));
+}
+
 float SlideScrollItem::getTransition()
 {
 	return m_transition_duration;
@@ -23,7 +28,7 @@ float SlideScrollItem::getDuration()
 void SlideScrollItem::setTransition(float duration)
 {
 	m_transition_duration = duration;
-	ui.transition_label->setText(QString::number(duration) + "s");
+	ui.transition_label->setText(QString::number(duration, 'f', 1) + "s");
 }
 
 void SlideScrollItem::setDuration(float duration)
@@ -33,7 +38,7 @@ void SlideScrollItem::setDuration(float duration)
 		ui.duration_label->setText("-");
 	}
 	else {
-		ui.duration_label->setText(QString::number(duration) + "s");
+		ui.duration_label->setText(QString::number(duration, 'f', 1) + "s");
 	}
 }
 

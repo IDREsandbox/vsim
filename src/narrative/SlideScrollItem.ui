@@ -107,9 +107,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QWidget" name="image_widget" native="true">
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(60,60,80);</string>
+       <widget class="QLabel" name="image_label">
+        <property name="text">
+         <string>image_label</string>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -130,9 +133,6 @@
        </widget>
       </item>
      </layout>
-     <zorder>number_label</zorder>
-     <zorder>duration_label</zorder>
-     <zorder>image_widget</zorder>
     </widget>
    </item>
   </layout>

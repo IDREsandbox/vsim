@@ -12,39 +12,60 @@
 #include <osgViewer/Viewer>
 
 #include "MainWindow.h"
-#include "narrative/NarrativeList.h"
+#include "narrative/NarrativeControl.h"
+#include "narrative/NarrativePlayer.h"
 
-class NarrativeList;
+class NarrativeControl;
 class MainWindow;
 
 class VSimApp : public QObject
 {
 	Q_OBJECT
 public:
-    VSimApp(MainWindow*);
-    //~VSimApp();
+	VSimApp(MainWindow*);
+	//~VSimApp();
 
-    osgViewer::Viewer* getViewer() { return m_viewer;}
-    NarrativeList* getNarList() { return m_narrative_list;}
+	osgViewer::Viewer* getViewer() { return m_viewer;}
+	NarrativeControl* getNarList() { return m_narrative_list;}
 
-	// file stuff
-	bool init(osg::Node *model); // loads node, does error checking
+	// this is called on every new, reset, etc
+	bool initWithVSim(osg::Node *root); 
+	bool initWithModel(osg::Node *model); 
+	bool init();
+	
 	void reset();
-	bool importModel(const std::string& filename);
+	bool importModel(const std::string& filename); // TODO: more complicated logic with vsim
 	bool openVSim(const std::string& filename);
 	bool saveVSim(const std::string& filename);
+	bool saveCurrentVSim();
 
-    osg::Node* getModel() const { return m_model.get(); }
+	osg::Group* getRoot() const { return m_root.get(); }
 
-protected:
+	std::string getFileName();
+	void setFileName(const std::string &);
+
+	void OSGDebug();
+
+private:
+	static osg::Group *findOrCreateChildGroup(osg::Group *root, const std::string &name);
+	// creates Narratives, Models, etc groups
+	static bool convertToNewVSim(osg::Group *root);
+	// merges an existing vsim root with this one
+	// expects new format
+	bool mergeAnotherVSim(osg::Group *); 
+
 	MainWindow* m_window;
 	osgViewer::Viewer* m_viewer;
 
-    std::string m_model_filename;
-    osg::ref_ptr<osg::Group> m_model;
+	std::string m_filename;
+	osg::ref_ptr<osg::Group> m_root;
 	bool m_model_loaded;
 
-	NarrativeList *m_narrative_list;
+	osg::Group *m_narrative_group;
+	osg::Group *m_model_group;
+
+	NarrativePlayer *m_narrative_player;
+	NarrativeControl *m_narrative_list;
 };
 
 extern VSimApp* g_vsimapp;

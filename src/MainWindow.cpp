@@ -12,17 +12,13 @@
 #include "narrative/NarrativeInfoDialog.h"
 #include "dragLabelInput.h"
 
-extern osgViewer::Viewer* g_viewer = nullptr;
-
 MainWindow::MainWindow(QWidget *parent) 
 	: QMainWindow(parent)
 {
 	// initialize the Qt Designer stuff
 	ui.setupUi(this);
 
-	offset = 0;
-
-	setMinimumSize(800, 600);
+	setMinimumSize(1280, 720);
 	ui.statusbar->showMessage("the best status bar", 0);
 	setWindowIcon(QIcon("assets/vsim.ico"));
 	setWindowTitle("VSim");
@@ -34,20 +30,15 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui.root);
-	g_viewer = m_osg_widget->getViewer();
-	m_osg_widget->lower();
+	m_osg_widget->lower(); // move this to the back
 	ui.rootLayout->addWidget(m_osg_widget, 0, 0);
 
 	// drag widget
-	m_drag_area = new QWidget(ui.root);
+	m_drag_area = new labelCanvas(ui.root);
+	//m_drag_area->setGeometry(0, 0, this->width(), this->height());
 	ui.rootLayout->addWidget(m_drag_area, 0, 0);
 
-	dragLabelEdit = new dragLabelInput(this);
-
-	test = new dragLabel("I listened to the thing back when with theresa but i've forgotten it all now, except for that it is goddamn excellent.", "background-color:#ffffff;color:#000000;", m_drag_area, this);
-	test->setObjectName(QString::fromUtf8("label"));
-	test->setGeometry(250, 250, 250, 250);
-
+	// vsimapp file stuff
 	connect(ui.actionNew, &QAction::triggered, this, &MainWindow::actionNew);
 	connect(ui.actionOpen, &QAction::triggered, this, &MainWindow::actionOpen);
 	connect(ui.actionSave, &QAction::triggered, this, &MainWindow::actionSave);
@@ -59,14 +50,18 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui.actionMessage, &QAction::triggered, this, [this] { this->MessageDialog("A beautiful message"); });
 	connect(ui.actionProgress, &QAction::triggered, this, [this] { this->LoadingDialog("zzz"); });
 
-	// connect narrative pushbuttons
-	// connect(ui.topBar->ui.play, &QPushButton::clicked, this, &MainWindow::narListForward);
-	// connect(ui.minus, &QPushButton::clicked, this, &MainWindow::narListDelete);
-	// connect(ui.plus, &QPushButton::clicked, this, &MainWindow::narListAdd);
-	// connect(ui.pause, &QPushButton::clicked, this, &MainWindow::narListPause);
-	// connect(ui.open, &QPushButton::clicked, this, &MainWindow::narListOpen);
-	// connect(ui.info, &QPushButton::clicked, this, &MainWindow::narListInfo);
+	// camera manipulator
+	connect(ui.actionFirst_Person_Navigation, &QAction::triggered, m_osg_widget,
+		[this]() {qDebug() << "fp trigger"; m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FIRST_PERSON); });
+	connect(ui.actionFlight_Navigation, &QAction::triggered, m_osg_widget,
+		[this]() {qDebug() << "flight trigger";  m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FLIGHT); });
+	connect(ui.actionObject_Navigation, &QAction::triggered, m_osg_widget,
+		[this]() {qDebug() << "object trigger";  m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_OBJECT); });
+	connect(ui.actionFreeze_Camera, &QAction::toggled, m_osg_widget,
+		[this](bool freeze) {qDebug() << "freeze trigger";  m_osg_widget->setCameraFrozen(freeze); });
+	connect(ui.actionReset_Camera, &QAction::triggered, m_osg_widget, &OSGViewerWidget::reset);
 
+	// show slides or narratives
 	connect(ui.topBar->ui.open, &QPushButton::clicked, this, 
 		[this]() {
 			qDebug() << "open";
@@ -88,22 +83,6 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_narrative_info_dialog, &QDialog::rejected, this, [this] { qDebug() << "narrative reject"; });
 	connect(m_narrative_info_dialog, &QDialog::finished, this, [this](int i) { qDebug() << "narrative finished" << i; });
 
-	connect(dragLabelEdit, &QDialog::accepted, this, [this] { qDebug() << "dragLabel accept";
-	auto data = this->dragLabelEdit->getInfo();
-	qDebug() << "Description:" << data;
-	});
-	connect(dragLabelEdit, &QDialog::rejected, this, [this] { qDebug() << "dragLabel reject"; });
-	connect(dragLabelEdit, &QDialog::finished, this, [this](int i) { qDebug() << "dragLabel finished" << i; });
-}
-
-void MainWindow::resizeEvent(QResizeEvent *event) {
-	if (offset < 2) {
-		test->updateParSize();
-		offset++;
-	}
-
-	if (offset >= 2)
-		test->mainResize();
 }
 
 void MainWindow::ErrorDialog(const std::string & msg)
@@ -129,6 +108,7 @@ void MainWindow::LoadingDialog(const std::string & msg)
 	pd->show();
 	connect(pd, &QProgressDialog::canceled, this, [] {printf("CLOSEDD!!!\n"); });
 }
+
 
 void MainWindow::paintEvent(QPaintEvent * event)
 {
@@ -157,7 +137,6 @@ void MainWindow::dropEvent(QDropEvent * event)
 	}
 }
 
-
 void MainWindow::actionNew()
 {
 	qDebug("new");
@@ -180,13 +159,13 @@ void MainWindow::actionOpen()
 
 void MainWindow::actionSave()
 {
-	qDebug("save (not implemented yet)");
+	emit sSaveCurrent();
 }
 
 void MainWindow::actionSaveAs()
 {
 	qDebug("saveas");
-	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", "osg ascii file (*.osgt);;osg binary file (*.osgb)");
+	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", "VSim file (*.vsim);;osg ascii file (*.osgt);;osg binary file (*.osgb)");
 	if (filename == "") {
 		qDebug() << "saveas cancel";
 		return;
@@ -209,33 +188,3 @@ void MainWindow::actionImportModel()
 	//m_vsimapp->importModel(filename.toStdString());
 	emit sImportModel(filename.toStdString());
 }
-
-//void MainWindow::narListForward()
-//{
-//	qDebug("Forward");
-//}
-//
-//void MainWindow::narListAdd()
-//{
-//	qDebug("Add");
-//}
-//
-//void MainWindow::narListDelete()
-//{
-//	qDebug("Delete");
-//}
-//
-//void MainWindow::narListPause()
-//{
-//	qDebug("Pause");
-//}
-//
-//void MainWindow::narListOpen()
-//{
-//	qDebug("Open");
-//}
-//
-//void MainWindow::narListInfo()
-//{
-//	qDebug("narrative info");
-//}

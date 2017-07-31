@@ -1,0 +1,162 @@
+CMake Cheat Sheet
+
+Making the visual studio project (starting in the root)
+
+mkdir build
+cd build
+cmake ..
+
+Other generators
+cmake -G "Visual Studio 15 2017 Win64" ..
+
+Special install directory, for testing installation folder. 
+The default on windows is Program Files so for testing don't mess with that
+cmake -D CMAKE_INSTALL_PREFIX=install ..
+
+Building (starting in the build directory)
+cmake --build .
+
+Building release
+cmake --build . --config Release
+
+Installing (equivalent of 'make install' on Linux)
+cmake --build . --target INSTALL --config Release
+
+Packaging, default generator is WIX
+cmake --build . --config Release
+cpack .
+
+
+--------------
+
+
+With Qt
+
+
+cmake -D CMAKE_PREFIX_PATH=C:/Qt/5.8/msvc2015 ..
+
+
+-------------
+
+Altogether
+
+cmake -G "Visual Studio 15 2017 Win64" \
+  -D CMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install" \
+  -D OPENSCENEGRAPH_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin" \
+  -D THIRDPARTY_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin" \
+  -D CMAKE_INSTALL_PREFIX=install ..
+
+cmake --build . --target INSTALL --config Release
+
+cmake -D OPENSCENEGRAPH_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin" .
+cmake -D THIRDPARTY_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin" .
+
+
+HOW TO BUILD DEPENDENCIES
+use the gui as a guide to fill holes?
+cd into the build directories, something like $DEPS/third-party-build/mscv2017_64
+
+SRC="T:/Projects/_UCLA/vsim/dependencies-src/"
+DEPS="T:/Projects/_UCLA/vsim/vsim-dependencies/"
+
+# building third party
+cmake -G "Visual Studio 15 2017 Win64" \
+  $SRC/osg-3rdparty-cmake/
+
+cmake \
+  -D FREETYPE_SOURCE_DIR=$SRC/freetype-2.7.1 \
+  -D GIFLIB_SOURCE_DIR=$SRC/giflib-5.1.4 \
+  -D GLUT_SOURCE_DIR=$SRC/glut-3.7 \
+  -D LIBJPEG_SOURCE_DIR=$SRC/jpeg-9b \
+  -D LIBPNG_SOURCE_DIR=$SRC/lpng1628 \
+  -D LIBTIFF_SOURCE_DIR=$SRC/tiff-4.0.4 \
+  -D MINIZIP_SOURCE_DIR=$SRC/minizip-master \
+  -D ZLIB_SOURCE_DIR=$SRC/zlib-1.2.11 \
+  .
+#  -D CURL_SOURCE_DIR= \
+
+
+cmake --build . --config Debug
+cmake --build . --config Release
+cmake --build . --target INSTALL --config Debug
+cmake --build . --target INSTALL --config Release
+
+# building collada3 (TODO in the far future)
+
+# building openscenegraph 
+
+SRC="T:/Projects/_UCLA/vsim/dependencies-src/"
+DEPS="T:/Projects/_UCLA/vsim/vsim-dependencies/"
+
+cmake -G "Visual Studio 15 2017 Win64" \
+  ../../../dependencies-src/OpenSceneGraph-3.4.0/
+
+cmake -D ACTUAL_3RDPARTY_DIR="$DEPS/3rdParty-build/msvc2017_64/3rdParty/-x64" .
+cmake -D CMAKE_INSTALL_PREFIX=install .
+# i ran into an issues w/ administrator priviledges and the T drive... so install relative
+
+cmake --build . --config Debug
+cmake --build . --config Release
+cmake --build . --target INSTALL --config Debug
+cmake --build . --target INSTALL --config Release
+
+
+
+-------------
+
+
+With Visual Studio 2017, this thing is so strange
+
+Install Qt 5.9.1, 
+
+Open Visual Studio 2017, open the vsim folder
+click on CMakeLists.txt, save (this will cause Visual Studio to try to run cmake)
+
+right click CMakeLists.txt > Change CMake Settings
+CMakeLists.txt should pop up
+
+
+
+
+
+  -DCMAKE_PREFIX_PATH=C:/Qt/5.9.1/msvc2017_64;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install
+  -DOPENSCENEGRAPH_BINARY_DIR=T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin
+  -DTHIRDPARTY_BINARY_DIR=T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin
+
+paste this at the end of "x64-Debug" and "x64-Release"
+        "variables": [
+          {
+            "name": "CMAKE_PREFIX_PATH",
+            "value": "C:/Qt/5.9.1/msvc2017_64;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install"
+          },
+          {
+            "name": "OPENSCENEGRAPH_BINARY_DIR",
+            "value": "T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin"
+          },
+          {
+            "name": "THIRDPARTY_BINARY_DIR",
+            "value": "T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin"
+          }
+        ]
+
+Make sure the VS Configuration is on x64-Debug/Release. 
+
+right click CMakeLists.txt > build VSim.exe
+wait a long time
+
+
+-------------
+
+
+Testing
+
+cmake --build . --config RELEASE --target RUN_TESTS
+ctest . -c Release
+ctest --verbose
+cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target RUN_TESTS
+
+cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --target RUN_TESTS
+
+cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --config RELEASE --target RUN_TESTS
+
+ctest -C RELEASE -O Output.log --output-on-failure -R Util
