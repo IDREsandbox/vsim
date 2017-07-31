@@ -50,7 +50,7 @@ VSimApp::VSimApp(MainWindow* window)
 
 bool VSimApp::init()
 {
-	m_filename = "";
+	setFileName("");
 	initWithVSim(new osg::Group);
 	return true;
 }
@@ -58,6 +58,7 @@ bool VSimApp::initWithModel(osg::Node *model)
 {
 	init();
 	m_model_group->addChild(model);
+	m_window->m_osg_widget->reset();
 	return true;
 }
 bool VSimApp::initWithVSim(osg::Node *new_node)
@@ -77,6 +78,7 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	m_viewer->setSceneData(root); // ideall this would be only models, but its easy to mess things up
 	m_narrative_list->load(m_narrative_group);
 
+	m_window->m_osg_widget->reset();
 	//m_viewer->getCamera()->setProjectionMatrixAsPerspective(75.0f, )
 	
 	return true;
@@ -99,6 +101,7 @@ bool VSimApp::importModel(const std::string& filename)
 	}
 
 	m_model_group->addChild(loadedModel);
+	m_window->m_osg_widget->reset();
 	return true;
 }
 
@@ -109,6 +112,8 @@ bool VSimApp::openVSim(const std::string & filename)
 	//osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile(filename);
 	//osgDB::Options* options = new osgDB::Options;
 	//options->setPluginStringData("fileType", "Ascii");
+
+	bool init_success = false;
 
 	// if .vsim, use osgb, TODO: our own readerwriter?
 	std::string ext = Util::getExtension(filename);
@@ -134,17 +139,23 @@ bool VSimApp::openVSim(const std::string & filename)
 			QMessageBox::warning(m_window, "Load Error", "Error converting file to osg nodes " + QString::fromStdString(filename));
 			return false;
 		}
+		init_success = initWithVSim(loadedModel);
 	}
-	else { // osgb or osgt
+	else if (ext == "osgb" || ext == "osgt") { // osgb or osgt
 		qDebug() << "loading osgt/osgb";
 		loadedModel = osgDB::readNodeFile(filename);
 		if (!loadedModel) {
 			QMessageBox::warning(m_window, "Load Error", "Error opening file " + QString::fromStdString(filename));
 			return false;
 		}
+		init_success = initWithVSim(loadedModel);
+	}
+	else {
+		qDebug() << "loading a non osg model";
+		loadedModel = osgDB::readNodeFile(filename);
+		init_success = initWithModel(loadedModel);
 	}
 
-	bool init_success = initWithVSim(loadedModel);
 	if (!init_success) {
 		QMessageBox::warning(m_window, "Load Error", "Model init failed " + QString::fromStdString(filename));
 		return false;
@@ -155,7 +166,6 @@ bool VSimApp::openVSim(const std::string & filename)
 
 bool VSimApp::saveVSim(const std::string& filename)
 {
-
 	// if vsim, then use osgb
 	std::string ext = Util::getExtension(filename);
 	if (ext == "vsim") {
@@ -191,12 +201,18 @@ bool VSimApp::saveVSim(const std::string& filename)
 			return false;
 		}
 	}
+	setFileName(filename);
 	return true;
 }
 
 bool VSimApp::saveCurrentVSim()
 {
 	if (m_filename == "") {
+		m_window->actionSaveAs();
+		return true;
+	}
+	std::string ext = Util::getExtension(m_filename);
+	if (ext != ".vsim") {
 		m_window->actionSaveAs();
 		return true;
 	}

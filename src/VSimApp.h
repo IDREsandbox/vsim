@@ -28,11 +28,11 @@ public:
 	osgViewer::Viewer* getViewer() { return m_viewer;}
 	NarrativeControl* getNarList() { return m_narrative_list;}
 
-	// file stuff
+	// this is called on every new, reset, etc
+	bool initWithVSim(osg::Node *root); 
+	bool initWithModel(osg::Node *model); 
 	bool init();
-	bool initWithModel(osg::Node *model);
-	bool initWithVSim(osg::Node *root);
-
+	
 	void reset();
 	bool importModel(const std::string& filename); // TODO: more complicated logic with vsim
 	bool openVSim(const std::string& filename);

@@ -17,23 +17,14 @@ public:
 
 	META_Node(, NarrativeSlideLabels);
 
-	int getX() const;
-	void setX(int x);
-	int getY() const;
-	void setY(int y);
-	int getW() const;
-	void setW(int w);
-	int getH() const;
-	void setH(int h);
-
-	int getParW() const;
-	void setParW(int pw);
-	int getParH() const;
-	void setParH(int ph);
-	float getRatW() const;
-	void setRatW(float rw);
-	float getRatH() const;
-	void setRatH(float rh);
+	float getrX() const;
+	void setrX(float x);
+	float getrY() const;
+	void setrY(float y);
+	float getrW() const;
+	void setrW(float w);
+	float getrH() const;
+	void setrH(float h);
 
 	const std::string& getText() const;
 	void setText(const std::string& text);
@@ -41,15 +32,10 @@ public:
 	void setStyle(const std::string& style);
 
 public:
-	int m_x;
-	int m_y;
-	int m_w;
-	int m_h;
-
-	int m_parH;
-	int m_parW;
-	float m_ratW;
-	float m_ratH;
+	float m_rX;
+	float m_rY;
+	float m_rW;
+	float m_rH;
 
 	std::string m_text;
 	std::string m_style;

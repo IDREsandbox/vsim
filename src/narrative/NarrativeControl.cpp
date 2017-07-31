@@ -195,6 +195,7 @@ void NarrativeControl::openNarrative()
 	this->m_window->ui.topBar->setSlidesHeader(nar->getTitle());
 
 	loadSlides(getNarrative(index));
+	m_canvas->exitEdit();
 }
 
 void NarrativeControl::closeNarrative()
@@ -215,8 +216,8 @@ void NarrativeControl::openSlide() //should handle loading widgets onto canvas
 
 	for (uint i = 0; i < curSl->getNumChildren(); i++) {
 		data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
-		m_canvas->newLabel(data->getStyle(), data->getText(), data->getX(), data->getY(), data->getW(), 
-			data->getH(), data->getParH(), data->getParW(), data->getRatH(), data->getRatW());
+		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(), 
+			data->getrH());
 	}
 
 	//curSl->setThumbnail(Util::imageQtToOsg(generateThumbnail()));
@@ -225,16 +226,12 @@ void NarrativeControl::openSlide() //should handle loading widgets onto canvas
 void NarrativeControl::newLabel(std::string str, int idx) {
 	NarrativeSlideLabels* lab = new NarrativeSlideLabels();
 	dragLabel* temp = m_canvas->m_items.at(idx);
-	lab->setX(temp->geometry().x());
-	lab->setY(temp->geometry().y());
-	lab->setW(temp->geometry().width());
-	lab->setH(temp->geometry().height());
-	lab->setText(temp->text().toStdString());
+	lab->setrX(temp->ratioX);
+	lab->setrY(temp->ratioY);
+	lab->setrW(temp->ratioWidth);
+	lab->setrH(temp->ratioHeight);
+	lab->setText(temp->toHtml().toStdString());//ext().toStdString());
 	lab->setStyle(str);
-	lab->setParH(temp->oldParSize.height());
-	lab->setParW(temp->oldParSize.width());
-	lab->setRatH(temp->ratioHeight);
-	lab->setRatW(temp->ratioWidth);
 
 	m_current_slide = m_slide_box->getLastSelected();
 	if (m_current_slide < 0) return;
@@ -254,14 +251,9 @@ void NarrativeControl::newLabel(std::string str, int idx) {
 void NarrativeControl::moveLabel(QPoint pos, int idx) {
 	NarrativeSlide* curSl = getNarrativeNode(m_current_narrative, m_current_slide);
 	NarrativeSlideLabels* lab = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
-	lab->setX(pos.x());
-	lab->setY(pos.y());
-
 	dragLabel* temp = m_canvas->m_items.at(idx);
-	lab->setParH(temp->oldParSize.height());
-	lab->setParW(temp->oldParSize.width());
-	lab->setRatH(temp->ratioHeight);
-	lab->setRatW(temp->ratioWidth);
+	lab->setrX(temp->ratioX);
+	lab->setrY(temp->ratioY);
 
 	int flag = 0;
 	if (m_canvas->editDlg->isVisible()) {
@@ -281,14 +273,9 @@ void NarrativeControl::moveLabel(QPoint pos, int idx) {
 void NarrativeControl::resizeLabel(QSize size, int idx) {
 	NarrativeSlide* curSl = getNarrativeNode(m_current_narrative, m_current_slide);
 	NarrativeSlideLabels* lab = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
-	lab->setW(size.width());
-	lab->setH(size.height());
-
 	dragLabel* temp = m_canvas->m_items.at(idx);
-	lab->setParH(temp->oldParSize.height());
-	lab->setParW(temp->oldParSize.width());
-	lab->setRatH(temp->ratioHeight);
-	lab->setRatW(temp->ratioWidth);
+	lab->setrH(temp->ratioHeight);
+	lab->setrW(temp->ratioWidth);
 
 	int flag = 0;
 	if (m_canvas->editDlg->isVisible()) {
@@ -450,16 +437,22 @@ void NarrativeControl::addNodeToGui(NarrativeSlide *node)
 QImage NarrativeControl::generateThumbnail()
 {
 	// widget dimensions
-	QRect dims = m_window->m_osg_widget->geometry();
+	QRect dims = m_window->centralWidget()->geometry(); 
+
 	// screenshot dimensions
 	QRect ssdims = Util::rectFit(dims, 16.0 / 9.0);
+	ssdims.setY(ssdims.y() + 50);
+
 
 	QImage img(ssdims.width(), ssdims.height(), QImage::Format_RGB444);
 	QPainter painter(&img);
 	painter.setCompositionMode(QPainter::CompositionMode_Source);
-	m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims));
-	painter.setCompositionMode(QPainter::CompositionMode_Multiply);
-	m_canvas->render(&painter, QPoint(0, 0), QRegion(ssdims));
+	
+	m_window->ui.topBar->hide();
+	m_window->ui.bottomBar->hide();
+	m_window->render(&painter, QPoint(0, 0), QRegion(ssdims));
+	m_window->ui.topBar->show();
+	m_window->ui.bottomBar->show();
 
 	// optional, fewer big screenshots
 	QImage smallimg;

@@ -600,6 +600,9 @@ border-color: rgb(238, 238, 238);
    <property name="text">
     <string>Reset Camera</string>
    </property>
+   <property name="shortcut">
+    <string>H</string>
+   </property>
   </action>
   <action name="actionFlight_Navigation">
    <property name="text">

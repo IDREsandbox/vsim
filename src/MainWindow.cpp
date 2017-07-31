@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 	// initialize the Qt Designer stuff
 	ui.setupUi(this);
 
-	setMinimumSize(800, 600);
+	setMinimumSize(1280, 720);
 	ui.statusbar->showMessage("the best status bar", 0);
 	setWindowIcon(QIcon("assets/vsim.ico"));
 	setWindowTitle("VSim");
@@ -30,12 +30,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui.root);
-	//g_viewer = m_osg_widget->getViewer();
-	m_osg_widget->lower();
+	m_osg_widget->lower(); // move this to the back
 	ui.rootLayout->addWidget(m_osg_widget, 0, 0);
 
 	// drag widget
 	m_drag_area = new labelCanvas(ui.root);
+	//m_drag_area->setGeometry(0, 0, this->width(), this->height());
 	ui.rootLayout->addWidget(m_drag_area, 0, 0);
 
 	// vsimapp file stuff
@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 		[this]() {qDebug() << "object trigger";  m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_OBJECT); });
 	connect(ui.actionFreeze_Camera, &QAction::toggled, m_osg_widget,
 		[this](bool freeze) {qDebug() << "freeze trigger";  m_osg_widget->setCameraFrozen(freeze); });
+	connect(ui.actionReset_Camera, &QAction::triggered, m_osg_widget, &OSGViewerWidget::reset);
 
 	// show slides or narratives
 	connect(ui.topBar->ui.open, &QPushButton::clicked, this, 
@@ -108,6 +109,7 @@ void MainWindow::LoadingDialog(const std::string & msg)
 	connect(pd, &QProgressDialog::canceled, this, [] {printf("CLOSEDD!!!\n"); });
 }
 
+
 void MainWindow::paintEvent(QPaintEvent * event)
 {
 	m_drag_area->setMask(m_drag_area->childrenRegion());
@@ -134,7 +136,6 @@ void MainWindow::dropEvent(QDropEvent * event)
 		emit sOpenFile(text.toStdString());
 	}
 }
-
 
 void MainWindow::actionNew()
 {
