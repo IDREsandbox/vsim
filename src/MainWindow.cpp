@@ -28,11 +28,22 @@ MainWindow::MainWindow(QWidget *parent)
 	// narrative info dialog
 	m_narrative_info_dialog = new NarrativeInfoDialog(this);
 
+	// set global window settings before making viewer... so we don't have to deal with GraphicsContext stuff
+	//osg::DisplaySettings::instance()->setNumMultiSamples(8);
+	//qDebug() << "window aa" << osg::DisplaySettings::instance()->getNumMultiSamples();
+
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui.root);
-	//g_viewer = m_osg_widget->getViewer();
-	m_osg_widget->lower();
+	m_osg_widget->lower(); // move this to the back
 	ui.rootLayout->addWidget(m_osg_widget, 0, 0);
+
+	//QSurfaceFormat fmt = m_osg_widget->format();
+	//fmt.setSamples(4);
+	//qDebug() << "in the mainwindow" << fmt.samples();
+	//m_osg_widget->setFormat(fmt);
+	//glEnable(GL_MULTISAMPLE);
+	//QSurfaceFormat::setDefaultFormat(fmt);
+
 
 	// drag widget
 	m_drag_area = new labelCanvas(ui.root);
