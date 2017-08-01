@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_osg_widget->setLayout(dummylayout);
 	dummylayout->addWidget(ui.mainSplitter);
 	dummylayout->setContentsMargins(QMargins()); // zero margins
+	ui.mainSplitter->setMouseTracking(true);
 
 	// drag widget
 	m_drag_area = new labelCanvas(ui.root);
