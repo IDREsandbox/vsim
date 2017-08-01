@@ -96,6 +96,8 @@ void labelCanvas::deleteLabel() {
 	m_items.removeAt(lastSelected);
 	delete f;
 
+	emit sDeleteLabel(lastSelected);
+
 	for (int i = 0; i < m_items.count(); ++i)
 	{
 		dragLabel* f = m_items.at(lastSelected);

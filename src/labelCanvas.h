@@ -34,6 +34,7 @@ signals:
 	void sSuperSizeSet(QSize, int);
 	void sSuperPosSet(QPoint, int);
 	void sNewLabel(std::string, int);
+	void sDeleteLabel(int);
 
 public:
 	QVector<dragLabel*> m_items;

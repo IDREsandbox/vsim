@@ -76,6 +76,7 @@ public slots:
 	void moveLabel(QPoint pos, int idx);
 	void resizeLabel(QSize size, int idx);
 	void textEditLabel(QString str, int idx);
+	void deleteLabel(int idx);
 	//	Delete Box
 	//	Move Box
 	//	Edit Box Content

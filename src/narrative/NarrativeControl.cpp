@@ -64,6 +64,8 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_canvas, SIGNAL(sSuperPosSet(QPoint, int)), this, SLOT(moveLabel(QPoint, int)));
 	// text change
 	connect(m_canvas, SIGNAL(sSuperTextSet(QString, int)), this, SLOT(textEditLabel(QString, int)));
+	// delete
+	connect(m_canvas, SIGNAL(sDeleteLabel(int)), this, SLOT(deleteLabel(int)));
 
 }
 
@@ -147,6 +149,30 @@ void NarrativeControl::deleteNarratives()
 	m_narrative_box->deleteSelection();
 }
 
+void NarrativeControl::deleteLabel(int idx)
+{
+	m_current_slide = m_slide_box->getLastSelected();
+	if (m_current_slide < 0) return;
+
+	NarrativeSlide* curSl = getNarrativeNode(m_current_narrative, m_current_slide);
+	NarrativeSlideLabels* data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
+
+	curSl->removeChild(data);
+
+	int flag = 0;
+	if (m_canvas->editDlg->isVisible()) {
+		m_canvas->exitEdit();
+		flag = 1;
+	}
+	QImage new_thumbnail = generateThumbnail();
+	if (flag == 1)
+		m_canvas->editCanvas();
+	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
+
+	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
+	item->setImage(new_thumbnail);
+}
+
 void NarrativeControl::load(osg::Group *narratives)
 {
 	m_narrative_box->clear();
@@ -205,7 +231,7 @@ void NarrativeControl::closeNarrative()
 	m_canvas->clearCanvas();
 }
 
-void NarrativeControl::openSlide() //should handle loading widgets onto canvas
+void NarrativeControl::openSlide() 
 {
 	m_current_slide = m_slide_box->getLastSelected();
 	if (m_current_slide < 0) return;
@@ -220,7 +246,6 @@ void NarrativeControl::openSlide() //should handle loading widgets onto canvas
 			data->getrH());
 	}
 
-	//curSl->setThumbnail(Util::imageQtToOsg(generateThumbnail()));
 }
 
 void NarrativeControl::newLabel(std::string str, int idx) {
@@ -230,7 +255,7 @@ void NarrativeControl::newLabel(std::string str, int idx) {
 	lab->setrY(temp->ratioY);
 	lab->setrW(temp->ratioWidth);
 	lab->setrH(temp->ratioHeight);
-	lab->setText(temp->toHtml().toStdString());//ext().toStdString());
+	lab->setText(temp->toHtml().toStdString());
 	lab->setStyle(str);
 
 	m_current_slide = m_slide_box->getLastSelected();
@@ -316,7 +341,6 @@ NarrativeSlide * NarrativeControl::getNarrativeNode(int narrative, int slide)
 
 void NarrativeControl::newSlide()
 {
-	//m_canvas->clearCanvas();
 	Narrative2 *nar = getNarrative(m_current_narrative);
 
 	NarrativeSlide *node = new NarrativeSlide();
@@ -341,8 +365,6 @@ void NarrativeControl::newSlide()
 	nar->addChild(node);
 	// add to gui
 	addNodeToGui(node);
-
-	//openSlide();
 }
 
 void NarrativeControl::deleteSlides()
