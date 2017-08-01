@@ -257,7 +257,7 @@ void VSimApp::debugCamera()
 
 	double y, p, r;
 	Util::quatToYPR(rot, &y, &p, &r);
-	std::cout << "matrix" << matrix << "translation" << trans << "scale" << scale << "rotation" << rot;
+	std::cout << "matrix" << matrix << "\ntranslation" << trans << "\nscale" << scale << "\nrotation" << rot;
 	qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI;
 }
 
