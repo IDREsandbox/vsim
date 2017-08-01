@@ -33,9 +33,14 @@ MainWindow::MainWindow(QWidget *parent)
 	m_osg_widget->lower(); // move this to the back
 	ui.rootLayout->addWidget(m_osg_widget, 0, 0);
 
+	ui.mainSplitter->setParent(m_osg_widget);
+	QGridLayout *dummylayout = new QGridLayout(m_osg_widget);
+	m_osg_widget->setLayout(dummylayout);
+	dummylayout->addWidget(ui.mainSplitter);
+	dummylayout->setContentsMargins(QMargins()); // zero margins
+
 	// drag widget
 	m_drag_area = new labelCanvas(ui.root);
-	//m_drag_area->setGeometry(0, 0, this->width(), this->height());
 	ui.rootLayout->addWidget(m_drag_area, 0, 0);
 
 	// vsimapp file stuff
