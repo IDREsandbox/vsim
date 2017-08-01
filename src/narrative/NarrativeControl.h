@@ -85,7 +85,7 @@ public slots:
 private:
 	void addToGui(Narrative2 *);
 	void addNodeToGui(NarrativeSlide *);
-	QImage generateThumbnail();
+	QImage generateThumbnail(int option);
 
 	int m_current_narrative;
 	int m_current_slide;

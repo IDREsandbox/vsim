@@ -277,6 +277,9 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 	}
 }
 
+void HorizontalScrollBox::setLastSelected(int idx) {
+	m_last_selected = idx;
+}
 
 void HorizontalScrollBox::refresh()
 {

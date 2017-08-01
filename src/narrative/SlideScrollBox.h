@@ -17,6 +17,7 @@ public:
 
 	// controller interface
 	SlideScrollItem *addItem();
+	SlideScrollItem *addItem(int idx);
 	SlideScrollItem *getItem(int index);
 
 	// gui display some dialogs

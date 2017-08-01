@@ -164,7 +164,7 @@ void NarrativeControl::deleteLabel(int idx)
 		m_canvas->exitEdit();
 		flag = 1;
 	}
-	QImage new_thumbnail = generateThumbnail();
+	QImage new_thumbnail = generateThumbnail(1);
 	if (flag == 1)
 		m_canvas->editCanvas();
 	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
@@ -265,7 +265,7 @@ void NarrativeControl::newLabel(std::string str, int idx) {
 	curSl->addChild(lab);
 
 	m_canvas->exitEdit();
-	QImage new_thumbnail = generateThumbnail();
+	QImage new_thumbnail = generateThumbnail(1);
 	m_canvas->editCanvas();
 	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
@@ -286,7 +286,7 @@ void NarrativeControl::moveLabel(QPoint pos, int idx) {
 		flag = 1;
 	}
 
-	QImage new_thumbnail = generateThumbnail();
+	QImage new_thumbnail = generateThumbnail(1);
 	if (flag == 1)
 		m_canvas->editCanvas();
 	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
@@ -307,7 +307,7 @@ void NarrativeControl::resizeLabel(QSize size, int idx) {
 		m_canvas->exitEdit();
 		flag = 1;
 	}
-	QImage new_thumbnail = generateThumbnail();
+	QImage new_thumbnail = generateThumbnail(1);
 	if (flag == 1)
 		m_canvas->editCanvas();
 	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
@@ -347,28 +347,33 @@ void NarrativeControl::newSlide()
 	node->setTransitionDuration(2.0f);
 	node->setStayOnNode(false);
 	node->setDuration(15.0f);
-	
-	int flag = 0;
-	if (m_canvas->editDlg->isVisible()) {
-		m_canvas->exitEdit();
-		flag = 1;
-	}
 
-	node->setThumbnail(Util::imageQtToOsg(generateThumbnail()));
-
-	if (flag == 1)
-		m_canvas->editCanvas();
+	node->setThumbnail(Util::imageQtToOsg(generateThumbnail(2)));
 	
 	node->setCameraMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
 	
-	// add to osg
-	nar->addChild(node);
-	// add to gui
-	addNodeToGui(node);
+	if ((m_current_slide == -1) || (m_current_slide == nar->getNumChildren() - 1)) {
+		// add to osg
+		nar->addChild(node);
+		// add to gui
+		addNodeToGui(node);
+	}
+	else {
+		nar->insertChild(m_current_slide + 1, node);
+		SlideScrollItem *newitem = m_slide_box->addItem(m_current_slide + 1);
+		newitem->setTransition(node->getTransitionDuration());
+		if (node->getStayOnNode()) {
+			newitem->setDuration(0.0f);
+		}
+		else {
+			newitem->setDuration(node->getDuration());
+		}
 
-	//add "select this node" here
-	//m_slide_box->select(nar->getNumChildren() - 1);
-	//m_current_slide = nar->getNumChildren();
+		newitem->setImage(Util::imageOsgToQt(node->getThumbnail()));
+	}
+
+	m_slide_box->setLastSelected(m_current_slide + 1);
+	openSlide();
 }
 
 void NarrativeControl::deleteSlides()
@@ -430,7 +435,7 @@ void NarrativeControl::setSlideTransition(float transition)
 void NarrativeControl::setSlideCamera()
 {
 	std::set<int> selection = m_slide_box->getSelection();
-	//QImage new_thumbnail = generateThumbnail();
+
 	// widget dimensions
 	for (auto slide : selection) {
 		NarrativeSlide *node = getNarrativeNode(m_current_narrative, slide);
@@ -449,7 +454,7 @@ void NarrativeControl::setSlideCamera()
 			m_canvas->exitEdit();
 			flag = 1;
 		}
-		QImage new_thumbnail = generateThumbnail();
+		QImage new_thumbnail = generateThumbnail(1);
 		if (flag == 1)
 			m_canvas->editCanvas();
 
@@ -476,10 +481,11 @@ void NarrativeControl::addNodeToGui(NarrativeSlide *node)
 	else {
 		newitem->setDuration(node->getDuration());
 	}
+
 	newitem->setImage(Util::imageOsgToQt(node->getThumbnail()));
 }
 
-QImage NarrativeControl::generateThumbnail()
+QImage NarrativeControl::generateThumbnail(int option)
 {
 	// widget dimensions
 	QRect dims = m_window->centralWidget()->geometry(); 
@@ -492,8 +498,13 @@ QImage NarrativeControl::generateThumbnail()
 	QImage img(ssdims.width(), ssdims.height(), QImage::Format_ARGB32);
 	QPainter painter(&img);
 
-	m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
-	m_window->m_drag_area->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawChildren | QWidget::IgnoreMask);
+	if (option == 1) {
+		m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
+		m_window->m_drag_area->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawChildren | QWidget::IgnoreMask);
+	}
+	else if (option == 2) {
+		m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
+	}
 
 	// optional, fewer big screenshots
 	QImage smallimg;
