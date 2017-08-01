@@ -234,3 +234,15 @@ double Util::exponentialSmooth2(double * current, double end, double factor, dou
 	*current = new_value;
 	return delta;
 }
+
+QString Util::osgMatrixToQString(osg::Matrix m)
+{
+	QString s;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			s.append(QString::number(m(i, j)) + " ");
+		}
+		s.append("| ");
+	}
+	return s;
+}

@@ -61,4 +61,7 @@ namespace Util
 
 	// Same as above, but updates current, and returns the change in current
 	double exponentialSmooth2(double *current, double end, double factor, double dt = 1.0, double clip = 0.0);
+
+	// 
+	QString osgMatrixToQString(osg::Matrix);
 }
