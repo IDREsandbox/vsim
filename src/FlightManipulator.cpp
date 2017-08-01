@@ -1,7 +1,16 @@
 #include "FlightManipulator.h"
 #include "Util.h"
 
-FlightManipulator::FlightManipulator() {
+FlightManipulator::FlightManipulator()
+	: m_mouse_x(0),
+	m_mouse_y(0),
+	m_speed(0),
+	m_scurrent_x(0),
+	m_scurrent_y(0),
+	m_starget_x(0),
+	m_starget_y(0)
+{
+	// parameters
 	setSensitivity(45.0);
 	m_acceleration = 4.0;
 	m_strafe_sensitivity = .01;
