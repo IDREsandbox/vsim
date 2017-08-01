@@ -14,6 +14,7 @@ NarrativePlayer::NarrativePlayer(QObject *parent, MainWindow *window, NarrativeC
 {
 	m_narrative_box = m_window->ui.topBar->ui.narratives;
 	m_slide_box = m_window->ui.topBar->ui.slides;
+	m_canvas = m_window->m_drag_area;
 
 	// play pause
 	connect(m_window->ui.topBar->ui.play_2, &QPushButton::clicked, this, &NarrativePlayer::play);
@@ -68,6 +69,7 @@ void NarrativePlayer::update(double dt_sec)
 
 	if (!m_transitioning) { // not transitioning, waiting on slide
 		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+
 		if (current_node == nullptr) {
 			qWarning() << "Error: narrative player current slide is null";
 			pause();
@@ -118,6 +120,8 @@ void NarrativePlayer::update(double dt_sec)
 
 void NarrativePlayer::play()
 {
+	m_canvas->clearCanvas();
+	
 	qDebug() << "play";
 	if (m_current_narrative == -1 || m_current_slide == -1) {
 		return;
@@ -137,6 +141,16 @@ void NarrativePlayer::play()
 	m_playing = true;
 	m_transitioning = false;
 	m_slide_time_sec = 0;
+
+	m_canvas->exitEdit();
+
+	NarrativeSlideLabels* data;
+	NarrativeSlide *curSl = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+	for (uint i = 0; i < curSl->getNumChildren(); i++) {
+		data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
+		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
+			data->getrH());
+	}
 
 	// if we're at a pause node, then we should skip to the next transition
 	if (current_node->getStayOnNode()) {
@@ -164,6 +178,7 @@ void NarrativePlayer::next()
 		}
 		else {
 			m_transitioning = true;
+			m_canvas->hide();
 		}
 
 		m_current_slide++;
@@ -174,11 +189,24 @@ void NarrativePlayer::next()
 
 	// if transitioning, jump to the finish
 	else {
+		qDebug() << "2";
 		m_transitioning = false;
 		m_slide_time_sec = 0;
-
+		//m_canvas->clearCanvas();
 		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
 		setCameraMatrix(current_node->getCameraMatrix());
+		
+		m_canvas->clearCanvas();
+		m_canvas->show();
+
+		NarrativeSlideLabels* data;
+		NarrativeSlide *curSl = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		for (uint i = 0; i < curSl->getNumChildren(); i++) {
+			data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
+			//qDebug() << i;
+			m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
+				data->getrH());
+		}
 
 		// if there is no next node, we're done
 		const NarrativeSlide *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);

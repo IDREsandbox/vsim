@@ -6,6 +6,7 @@
 #include "MainWindow.h"
 #include <QObject>
 #include <osg/Matrix>
+#include "labelCanvas.h"
 
 // NarrativePlayer owns the camera
 class NarrativePlayer : public QObject
@@ -51,7 +52,7 @@ private:
 	//void figureOutFrozenCamera(); // locks the camera if playing or frozen
 	// remembers the previous navigation mode to switch back to after finishing playing
 	OSGViewerWidget::NavigationMode m_old_navigation_mode;
-
+	labelCanvas* m_canvas;
 };
 
 #endif /* NARRATIVEPLAYER_H */

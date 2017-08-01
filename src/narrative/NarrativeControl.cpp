@@ -365,6 +365,10 @@ void NarrativeControl::newSlide()
 	nar->addChild(node);
 	// add to gui
 	addNodeToGui(node);
+
+	//add "select this node" here
+	//m_slide_box->select(nar->getNumChildren() - 1);
+	//m_current_slide = nar->getNumChildren();
 }
 
 void NarrativeControl::deleteSlides()
@@ -426,10 +430,29 @@ void NarrativeControl::setSlideTransition(float transition)
 void NarrativeControl::setSlideCamera()
 {
 	std::set<int> selection = m_slide_box->getSelection();
-	QImage new_thumbnail = generateThumbnail();
+	//QImage new_thumbnail = generateThumbnail();
 	// widget dimensions
 	for (auto slide : selection) {
 		NarrativeSlide *node = getNarrativeNode(m_current_narrative, slide);
+
+		m_canvas->clearCanvas();
+		NarrativeSlideLabels* data;
+
+		for (uint i = 0; i < node->getNumChildren(); i++) {
+			data = dynamic_cast<NarrativeSlideLabels*>(node->getChild(i));
+			m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
+				data->getrH());
+		}
+
+		int flag = 0;
+		if (m_canvas->editDlg->isVisible()) {
+			m_canvas->exitEdit();
+			flag = 1;
+		}
+		QImage new_thumbnail = generateThumbnail();
+		if (flag == 1)
+			m_canvas->editCanvas();
+
 		node->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 		node->setCameraMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
 
