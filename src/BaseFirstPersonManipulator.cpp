@@ -4,6 +4,7 @@
 
 BaseFirstPersonManipulator::BaseFirstPersonManipulator()
 	: m_sensitivity(.25),
+	m_position_delta(),
 	m_gravity_acceleration(-4.0),
 	m_gravity_on(false),
 	m_collision_on(false),

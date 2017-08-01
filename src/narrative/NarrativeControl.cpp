@@ -444,15 +444,11 @@ QImage NarrativeControl::generateThumbnail()
 	ssdims.setY(ssdims.y() + 50);
 
 
-	QImage img(ssdims.width(), ssdims.height(), QImage::Format_RGB444);
+	QImage img(ssdims.width(), ssdims.height(), QImage::Format_ARGB32);
 	QPainter painter(&img);
-	painter.setCompositionMode(QPainter::CompositionMode_Source);
-	
-	m_window->ui.topBar->hide();
-	m_window->ui.bottomBar->hide();
-	m_window->render(&painter, QPoint(0, 0), QRegion(ssdims));
-	m_window->ui.topBar->show();
-	m_window->ui.bottomBar->show();
+
+	m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
+	m_window->m_drag_area->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawChildren | QWidget::IgnoreMask);
 
 	// optional, fewer big screenshots
 	QImage smallimg;

@@ -15,12 +15,17 @@
 - CMake unit testing set up and notes
 - CMake installs Qt DLLs
 - Added CHANGELOG.md
+- Added vertical splitter
 
 ### Changed
 - Text label dimensions save percentages instead of pixels
 - Text label rendering via QTextDocument rather than QLabel
 - CMake addition of a virtual library
 - Renamed old narratives diagram to old narratives
+- MainWindow osg_viewer_widget is now the parent of splitter
+
+### Fixed
+- Thumbnail picture is correct
 
 ## 2017-07-24
 ### Added

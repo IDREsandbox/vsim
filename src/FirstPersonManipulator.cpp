@@ -7,11 +7,10 @@ FirstPersonManipulator::FirstPersonManipulator()
 {
 	stop();
 
-	m_smoothing = .003;
-
 	m_movement_smoothing = .01;
 	m_base_speed = 10.0;
 	m_speed_click = 0;
+	m_smoothing = .003;
 }
 
 void FirstPersonManipulator::stop()

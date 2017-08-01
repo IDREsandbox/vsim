@@ -26,7 +26,7 @@ dragLabel::dragLabel(labelCanvas* parent, std::string style)
 	ratioX = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
 
 	dragEdge = 0;
-	scaleFactor = float(float(par->size().height()) / float(720));
+	scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
 
 	this->setWordWrapMode(QTextOption::WordWrap);
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -48,7 +48,7 @@ dragLabel::dragLabel(std::string str, std::string style, labelCanvas* parent, fl
 	int newY = std::round(float(par->size().height() * ratioY));
 
 	this->setGeometry(newX, newY, newW, newH);
-	scaleFactor = float(float(par->size().height()) / float(720));
+	scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
 
 	dragEdge = 0;
 
@@ -167,7 +167,7 @@ void dragLabel::canvasResize()
 
 	this->move(newX, newY);
 	
-	scaleFactor = float(float(par->size().height()) / float(720));
+	scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
 }
 
 void dragLabel::paintEvent(QPaintEvent * event)
@@ -181,7 +181,7 @@ void dragLabel::paintEvent(QPaintEvent * event)
 
 	QTextOption textOption(temp->defaultTextOption());
 	temp->setTextWidth(this->size().width() / scaleFactor);
-	temp->setDefaultStyleSheet("p {" + this->styleSheet().split(';').at(0) + ";}");
+	temp->setDefaultStyleSheet("p {" + this->styleSheet().split(';').at(0) + ";" + this->styleSheet().split(';').at(5) + ";}");
 	temp->setHtml("<p>" + temp->toHtml() + "</p>");
 	textOption.setWrapMode(QTextOption::WordWrap);
 	temp->setDefaultTextOption(textOption);
@@ -203,10 +203,10 @@ void dragLabel::ValignMiddle(QTextEdit* pTextEdit)
 	float nBBDocH = (float)(nDocHeight - nTopMargin);				
 													
 	if (nCtrlHeight <= nBBDocH)
-		nTopMargin = 2 / (scaleFactor);
+		nTopMargin = 2;
 	else
-		nTopMargin = (((nCtrlHeight - nBBDocH) / 2 - 2) / (scaleFactor)) - (std::pow(scaleFactor, 4));
-	frameFmt.setTopMargin(nTopMargin);
+		nTopMargin = (nCtrlHeight - nBBDocH) / 2 - (2*std::pow(scaleFactor, 5));
+	frameFmt.setTopMargin(nTopMargin/scaleFactor);
 
 	pFrame->setFrameFormat(frameFmt);			
 }

@@ -5,6 +5,8 @@
 #include <osgGA/FirstPersonManipulator>
 #include <osgGA/StateSetManipulator>
 
+#include <osg/io_utils>
+
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 
@@ -33,17 +35,7 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(window, &MainWindow::sSaveCurrent, this, &VSimApp::saveCurrentVSim);
 
 	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, &VSimApp::OSGDebug);
-	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this,
-		[this]() {
-		osg::Matrixd matrix = m_window->getViewer()->getCameraManipulator()->getMatrix();
-		osg::Vec3 trans, scale;
-		osg::Quat rot, so;
-		matrix.decompose(trans, rot, scale, so);
-
-		double y, p, r;
-		Util::quatToYPR(rot, &y, &p, &r);
-		qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI << "pos" << trans.x() << trans.y() << trans.z();
-	});
+	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this, &VSimApp::debugCamera);
 
 	reset();
 }
@@ -254,6 +246,19 @@ void VSimApp::OSGDebug()
 	for (uint i = 0; i < m_model_group->getNumChildren(); i++) {
 		qInfo() << "Model" << QString::fromStdString(m_model_group->getChild(i)->getName());
 	}
+}
+
+void VSimApp::debugCamera()
+{
+	osg::Matrixd matrix = m_window->getViewer()->getCameraManipulator()->getMatrix();
+	osg::Vec3 trans, scale;
+	osg::Quat rot, so;
+	matrix.decompose(trans, rot, scale, so);
+
+	double y, p, r;
+	Util::quatToYPR(rot, &y, &p, &r);
+	std::cout << "matrix " << matrix << "\ntranslation " << trans << "\nscale " << scale << "\nrotation " << rot << "\n";
+	qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI;
 }
 
 osg::Group *VSimApp::findOrCreateChildGroup(osg::Group *root, const std::string & name)

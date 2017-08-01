@@ -45,6 +45,7 @@ public:
 	void setFileName(const std::string &);
 
 	void OSGDebug();
+	void debugCamera();
 
 private:
 	static osg::Group *findOrCreateChildGroup(osg::Group *root, const std::string &name);
