@@ -213,13 +213,21 @@ bool OSGViewerWidget::getCameraFrozen() const
 
 void OSGViewerWidget::reset()
 {
-	// compute home position and all that
-	osgGA::CameraManipulator *cm = viewer_->getCameraManipulator();
-	cm->setAutoComputeHomePosition(true);
-	cm->setNode(viewer_->getSceneData());
-	cm->computeHomePosition();
-	viewer_->home();
-	qDebug() << "home position";
+	// pretty much copied from osgGA::CameraManipulator::computeHomePosition
+	qDebug() << "Home";
+	osg::BoundingSphere bound = viewer_->getSceneData()->getBound();
+
+	double left, right, bottom, top, zNear, zFar, dist;
+	viewer_->getCamera()->getProjectionMatrixAsFrustum(left, right, bottom, top, zNear, zFar);
+	double vertical2 = fabs(right - left) / zNear / 2.;
+	double horizontal2 = fabs(top - bottom) / zNear / 2.;
+	double dim = horizontal2 < vertical2 ? horizontal2 : vertical2;
+	double viewAngle = atan2(dim, 1.);
+	dist = bound.radius() / sin(viewAngle);
+
+	// for some reason osg::lookAt gives the inverse...
+	osg::Matrixd mat = osg::Matrix::lookAt(bound.center() + osg::Vec3d(0.0, -dist, 0.0f), bound.center(), osg::Vec3(0, 0, 1));
+	setCameraMatrix(osg::Matrix::inverse(mat));
 }
 
 void OSGViewerWidget::paintEvent(QPaintEvent *e)
