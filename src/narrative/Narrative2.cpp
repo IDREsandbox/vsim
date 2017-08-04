@@ -59,3 +59,40 @@ const std::string& Narrative2::getDescription() const {
 void Narrative2::setDescription(const std::string& description) {
 	m_description = description;
 }
+
+Narrative2::NewSlideCommand::NewSlideCommand(Narrative2 *narrative, int slide_index, QUndoCommand * parent)
+	: QUndoCommand(parent),
+	m_narrative(narrative),
+	m_index(slide_index)
+{
+	m_slide = new NarrativeSlide;
+}
+void Narrative2::NewSlideCommand::undo()
+{
+	m_narrative->removeChild(m_index);
+	m_narrative->sDeleteSlide(m_index);
+}
+void Narrative2::NewSlideCommand::redo()
+{
+	m_narrative->insertChild(m_index, m_slide);
+	m_narrative->sNewSlide(m_index);
+}
+
+Narrative2::DeleteSlideCommand::DeleteSlideCommand(Narrative2 *narrative, int slide_index, QUndoCommand * parent)
+	: QUndoCommand(parent),
+	m_narrative(narrative),
+	m_index(slide_index)
+{
+	NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(narrative->getChild(slide_index));
+	m_slide = slide;
+}
+void Narrative2::DeleteSlideCommand::undo()
+{
+	m_narrative->insertChild(m_index, m_slide);
+	m_narrative->sNewSlide(m_index);
+}
+void Narrative2::DeleteSlideCommand::redo()
+{
+	m_narrative->removeChild(m_index);
+	m_narrative->sDeleteSlide(m_index);
+}

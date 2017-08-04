@@ -91,6 +91,8 @@ void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 
 void HorizontalScrollBox::clear()
 {
+	qDebug() << "clearing";
+
 	for (auto ptr : m_items) {
 		delete ptr;
 	}

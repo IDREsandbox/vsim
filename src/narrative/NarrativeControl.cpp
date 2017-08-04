@@ -9,141 +9,6 @@
 #include <osg/Matrix>
 #include <osg/io_utils>
 #include <QUndoStack>
-//
-//// owns the narrative
-//class NewNarrativeCommand : public QUndoCommand {
-//private:
-//	osg::ref_ptr<Narrative2> m_narrative;
-//	osg::Group *m_group;
-//	int m_index;
-//
-//public:
-//	NewNarrativeCommand(osg::Group *group, int index, QUndoCommand *parent = nullptr)
-//		: QUndoCommand(parent),
-//		m_group(group),
-//		m_index(index)
-//	{
-//		m_narrative = new Narrative2;
-//	}
-//	void undo() {
-//		m_group->removeChild(m_narrative);
-//	}
-//	void redo() {
-//		m_group->insertChild(m_index, m_narrative);
-//	}
-//};
-//class DeleteNarrativeCommand : public QUndoCommand {
-//private:
-//	osg::ref_ptr<Narrative2> m_narrative;
-//	osg::Group *m_group;
-//	int m_index;
-//
-//public:
-//	DeleteNarrativeCommand(osg::Group *group, int index, QUndoCommand *parent = nullptr)
-//		: QUndoCommand(parent),
-//		m_group(group),
-//		m_index(index)
-//	{
-//		osg::Node *node = group->getChild(index);
-//		m_narrative = dynamic_cast<Narrative2*>(node);
-//	}
-//	void undo() {
-//		m_group->insertChild(m_index, m_narrative);
-//	}
-//	void redo() {
-//		m_group->removeChild(m_narrative);
-//	}
-//};
-//class SetNarrativeInfoCommand : public QUndoCommand {
-//private:
-//	Narrative2 *m_narrative;
-//	std::string old_title;
-//	std::string old_description;
-//	std::string old_author;
-//	std::string new_title;
-//	std::string new_description;
-//	std::string new_author;
-//
-//public:
-//	SetNarrativeInfoCommand(Narrative2 *narrative,
-//		const std::string &title,
-//		const std::string &description,
-//		const std::string &author,
-//		QUndoCommand *parent = nullptr)
-//		: QUndoCommand(parent),
-//		m_narrative(narrative),
-//		old_title(narrative->getTitle()),
-//		old_description(narrative->getDescription()),
-//		old_author(narrative->getAuthor()),
-//		new_title(title),
-//		new_description(description),
-//		new_author(author)
-//	{
-//	}
-//	void undo() {
-//		m_narrative->setTitle(old_title);
-//		m_narrative->setDescription(old_description);
-//		m_narrative->setAuthor(old_author);
-//	}
-//	void redo() {
-//		m_narrative->setTitle(new_title);
-//		m_narrative->setDescription(new_description);
-//		m_narrative->setAuthor(new_author);
-//	}
-//};
-//
-////class SetNarrativeInfoCommand;
-//class MoveNarrativeCommand : public QUndoCommand {
-//private:
-//	osg::ref_ptr<Narrative2> m_narrative;
-//	osg::Group *m_group;
-//	int m_old_index;
-//	int m_new_index;
-//
-//public:
-//	MoveNarrativeCommand(osg::Group *group, int new_index, int old_index, QUndoCommand *parent = nullptr)
-//		: m_group(group),
-//		m_old_index(old_index),
-//		m_new_index(new_index)
-//	{
-//		osg::Node *node = group->getChild(old_index);
-//		m_narrative = dynamic_cast<Narrative2*>(node);
-//	}
-//	void undo() {
-//		m_group->removeChild(m_narrative);
-//		m_group->insertChild(m_old_index, m_narrative);
-//	}
-//	void redo() {
-//		m_group->removeChild(m_narrative);
-//		m_group->insertChild(m_new_index, m_narrative);
-//	}
-//};
-//
-////class DuplicateNarrativeCommand;
-////class ImportNarrativeCommand;
-//
-//class NewSlideCommand;
-//
-//class NewSlideCommand : public QUndoStack {
-//private:
-//	Narrative2 *m_narrative; // parent
-//	int m_index;
-//
-//public:
-//	NewSlideCommand(Narrative2 *narrative, m_index);
-//
-//};
-//class DeleteSlideCommand;
-//class SetSlideDurationCommand;
-//class SetSlideTransitionCommand;
-//class SetSlideCameraCommand;
-////class MoveSlideCommand;
-//
-//class NewLabelCommand;
-//class DeleteLabelCommand;
-//class MoveLabelCommand;
-//class ResizeLabelCommand;
-//class SetLabelTextCommand;
 
 NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	: QObject(parent), 
@@ -154,6 +19,7 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	m_narrative_box = window->ui.topBar->ui.narratives;
 	m_slide_box = window->ui.topBar->ui.slides;
 	m_canvas = window->m_drag_area;
+	m_undo_stack = window->m_undo_stack;
 
 	// NARRATIVE CONTROL
 	// new
@@ -168,7 +34,6 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	// open
 	connect(m_narrative_box, &NarrativeScrollBox::sOpen, this, &NarrativeControl::openNarrative);
 	connect(m_window->ui.topBar->ui.open, &QPushButton::clicked, this, &NarrativeControl::openNarrative);
-
 
 	// SLIDE CONTROL
 	// new
@@ -201,6 +66,11 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	// text change
 	connect(m_canvas, SIGNAL(sSuperTextSet(QString, int)), this, SLOT(textEditLabel(QString, int)));
 
+
+	// dirty slide thumbnails
+	connect(m_slide_box, &SlideScrollBox::sThumbnailsDirty, this, 
+		[this]() {redrawThumbnails(m_slide_box->getDirtySlides()); }
+		);
 }
 
 NarrativeControl::~NarrativeControl()
@@ -304,19 +174,19 @@ void NarrativeControl::load(osg::Group *narratives)
 	}
 }
 
-void NarrativeControl::loadSlides(Narrative2 *narrative)
-{
-	m_slide_box->clear();
-	for (unsigned int i = 0; i < narrative->getNumChildren(); i++) {
-		NarrativeSlide *node = dynamic_cast<NarrativeSlide*>(narrative->getChild(i));
-		if (!node) {
-			qWarning() << "Load error: non-narrative detected in narrative children";
-		}
-		//qDebug() << "loading slide" << node->getDuration() << node->getStayOnNode() << node->getTransitionDuration();
-
-		addNodeToGui(node);
-	}
-}
+//void NarrativeControl::loadSlides(Narrative2 *narrative)
+//{
+//	m_slide_box->clear();
+//	for (unsigned int i = 0; i < narrative->getNumChildren(); i++) {
+//		NarrativeSlide *node = dynamic_cast<NarrativeSlide*>(narrative->getChild(i));
+//		if (!node) {
+//			qWarning() << "Load error: non-narrative detected in narrative children";
+//		}
+//		//qDebug() << "loading slide" << node->getDuration() << node->getStayOnNode() << node->getTransitionDuration();
+//
+//		addNodeToGui(node);
+//	}
+//}
 
 
 void NarrativeControl::openNarrative()
@@ -324,14 +194,15 @@ void NarrativeControl::openNarrative()
 	int index = m_narrative_box->getLastSelected();
 	if (index < 0) return;
 
+	qDebug() << "open narrative at" << index;
 	this->m_window->ui.topBar->showSlides();
 	m_current_narrative = index;
 
 	Narrative2 *nar = getNarrative(index);
 	this->m_window->ui.topBar->setSlidesHeader(nar->getTitle());
+	m_slide_box->setNarrative(nar);
 
-	loadSlides(getNarrative(index));
-	m_canvas->exitEdit();
+	//m_canvas->exitEdit();
 }
 
 void NarrativeControl::closeNarrative()
@@ -343,18 +214,18 @@ void NarrativeControl::closeNarrative()
 
 void NarrativeControl::openSlide() //should handle loading widgets onto canvas
 {
-	m_current_slide = m_slide_box->getLastSelected();
-	if (m_current_slide < 0) return;
+	//m_current_slide = m_slide_box->getLastSelected();
+	//if (m_current_slide < 0) return;
 
-	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
-	m_canvas->clearCanvas();
-	NarrativeSlideLabels* data;
+	//NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
+	//m_canvas->clearCanvas();
+	//NarrativeSlideLabels* data;
 
-	for (uint i = 0; i < curSl->getNumChildren(); i++) {
-		data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
-		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(), 
-			data->getrH());
-	}
+	//for (uint i = 0; i < curSl->getNumChildren(); i++) {
+	//	data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
+	//	m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(), 
+	//		data->getrH());
+	//}
 
 	//curSl->setThumbnail(Util::imageQtToOsg(generateThumbnail()));
 }
@@ -378,7 +249,7 @@ void NarrativeControl::newLabel(std::string str, int idx) {
 	m_canvas->exitEdit();
 	QImage new_thumbnail = generateThumbnail();
 	m_canvas->editCanvas();
-	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
+	//curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
 	item->setImage(new_thumbnail);
@@ -400,7 +271,7 @@ void NarrativeControl::moveLabel(QPoint pos, int idx) {
 	QImage new_thumbnail = generateThumbnail();
 	if (flag == 1)
 		m_canvas->editCanvas();
-	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
+	//curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
 	item->setImage(new_thumbnail);
@@ -421,7 +292,7 @@ void NarrativeControl::resizeLabel(QSize size, int idx) {
 	QImage new_thumbnail = generateThumbnail();
 	if (flag == 1)
 		m_canvas->editCanvas();
-	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
+	//curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
 	item->setImage(new_thumbnail);
@@ -454,49 +325,56 @@ void NarrativeControl::newSlide()
 {
 	//m_canvas->clearCanvas();
 	Narrative2 *nar = getNarrative(m_current_narrative);
+	auto matrix = m_window->m_osg_widget->getCameraMatrix();
+	auto thumbnail = generateThumbnail();
 
-	NarrativeSlide *node = new NarrativeSlide();
-	node->setTransitionDuration(2.0f);
-	node->setStayOnNode(false);
-	node->setDuration(15.0f);
+	// figure out where to insert
+	int index;
+	if (m_slide_box->getSelection().empty() || m_slide_box->getLastSelected() < 0) {
+		// no selection? insert at the end
+		index = nar->getNumChildren();
+	}
+	else {
+		// insert after the last selected
+		index = m_slide_box->getLastSelected() + 1;
+	}
+
+	// perform command
+	m_undo_stack->push(new Narrative2::NewSlideCommand(nar, index));
 	
+	// initialization
+	NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
+	slide->setCameraMatrix(matrix);
+
+	// initializing the new slide
+
+	// canvas stuff
 	int flag = 0;
 	if (m_canvas->editDlg->isVisible()) {
 		m_canvas->exitEdit();
 		flag = 1;
 	}
 
-	node->setThumbnail(Util::imageQtToOsg(generateThumbnail()));
-
 	if (flag == 1)
 		m_canvas->editCanvas();
 	
-	node->setCameraMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
 	
-	// add to osg
-	nar->addChild(node);
-	// add to gui
-	addNodeToGui(node);
-
-	//openSlide();
 }
 
 void NarrativeControl::deleteSlides()
 {
+	qDebug() << "delete slides";
 	std::set<int> selection = m_slide_box->getSelection();
-	std::vector<NarrativeSlide*> nodes;
+	Narrative2 *nar = getNarrative(m_current_narrative);
 	
-	// data
-	for (int slide : selection) {
-		nodes.push_back(getNarrativeSlide(m_current_narrative, slide));
+	// perform command
+	m_undo_stack->beginMacro("Delete Narratives");
+	// we need to delete in reverse order to get the indices right
+	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
+		qDebug() << "pushing delete" << *i;
+		m_undo_stack->push(new Narrative2::DeleteSlideCommand(nar, *i));
 	}
-	for (NarrativeSlide *node : nodes) {
-		Narrative2 *nar = getNarrative(m_current_narrative);
-		nar->removeChild(node);
-	}
-
-	// gui
-	m_slide_box->deleteSelection();
+	m_undo_stack->endMacro();
 }
 
 void NarrativeControl::editSlide() {
@@ -508,14 +386,15 @@ void NarrativeControl::setSlideDuration()
 	qDebug() << "set slide duration";
 	std::set<int> selection = m_slide_box->getSelection();
 	if (selection.empty()) return;
-	qDebug() << "fff?";
-	// intial values for the dialog by looking up the first selection
-	int slide_index = *selection.begin();
+	
+	// Create the duration dialog, initialize values to the last item selected
+	int slide_index = m_slide_box->getLastSelected();
 	NarrativeSlide *first_slide = getNarrativeSlide(m_current_narrative, slide_index);
 	float duration = NarrativeSlideDurationDialog::create(first_slide->getStayOnNode(), first_slide->getDuration());
-	qDebug() << "should have made the dialog?";
-	QUndoStack *stack = m_window->m_undo_stack;
-	stack->beginMacro("Set Duration");
+	if (duration < 0) return;
+
+	// perform the command
+	m_undo_stack->beginMacro("Set Duration");
 	for (auto index : selection) {
 		NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
 		if (duration == 0) {
@@ -525,7 +404,7 @@ void NarrativeControl::setSlideDuration()
 			m_window->m_undo_stack->push(new NarrativeSlide::SetDurationCommand(slide, duration));
 		}
 	}
-	stack->endMacro();
+	m_undo_stack->endMacro();
 }
 
 void NarrativeControl::setSlideTransition()
@@ -551,15 +430,15 @@ void NarrativeControl::setSlideCamera()
 {
 	std::set<int> selection = m_slide_box->getSelection();
 	QImage new_thumbnail = generateThumbnail();
-	// widget dimensions
-	for (auto slide : selection) {
-		NarrativeSlide *node = getNarrativeSlide(m_current_narrative, slide);
-		node->setThumbnail(Util::imageQtToOsg(new_thumbnail));
-		node->setCameraMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());
+	osg::Matrixd matrix = m_window->m_osg_widget->getCameraMatrix();
 
-		SlideScrollItem *item = m_slide_box->getItem(slide);
-		item->setImage(new_thumbnail);
+	QUndoStack *stack = m_window->m_undo_stack;
+	stack->beginMacro("Set Transition Duration");
+	for (auto index : selection) {
+		NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
+		stack->push(new NarrativeSlide::SetCameraMatrixCommand(slide, matrix));
 	}
+	stack->endMacro();
 }
 
 void NarrativeControl::addToGui(Narrative2 *nar)
@@ -567,10 +446,32 @@ void NarrativeControl::addToGui(Narrative2 *nar)
 	m_narrative_box->addItem(nar->getTitle(), nar->getDescription());
 }
 
-void NarrativeControl::addNodeToGui(NarrativeSlide *node)
+//void NarrativeControl::addNodeToGui(NarrativeSlide *node)
+//{
+//	SlideScrollItem *newitem = m_slide_box->addItem();
+//	newitem->setSlide(node);
+//}
+
+void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*>& slides)
 {
-	SlideScrollItem *newitem = m_slide_box->addItem();
-	newitem->setSlide(node);
+	osg::Matrixd old_matrix = m_window->m_osg_widget->getCameraMatrix();
+	osg::Matrixd current_matrix;
+	current_matrix(0, 0) = INFINITY; // make the matrix nonsense so that it draws at least once
+	QImage thumbnail = generateThumbnail();
+
+	for (auto slide : slides) {
+		qDebug() << "redrawing thumbnail" << slide->getIndex();
+		// if the matrix is the same, then don't bother re-rendering
+		osg::Matrixd potential_matrix = slide->getSlide()->getCameraMatrix();
+		if (potential_matrix != current_matrix) {
+			current_matrix = potential_matrix;
+			m_window->m_osg_widget->setCameraMatrix(current_matrix);
+			thumbnail = generateThumbnail();
+		}
+
+		slide->setImage(thumbnail);
+		slide->setThumbnailDirty(false);
+	}
 }
 
 QImage NarrativeControl::generateThumbnail()

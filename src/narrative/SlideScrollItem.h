@@ -12,12 +12,16 @@ public:
 	SlideScrollItem();
 	SlideScrollItem(NarrativeSlide *);
 	void setSlide(NarrativeSlide *);
+	NarrativeSlide *getSlide();
 
+	// set gui
 	void setImage(const QImage &img);
+	void setTransition(float duration);
+	void setDuration(bool stay, float duration); // 0 for stay, >0 for timed
 
-	// Scroll Box Iterface
-	void setTransition(float);
-	void setDuration(float); // 0 for stay, >0 for timed
+	// thumbnail stuff
+	bool thumbnailDirty();
+	void setThumbnailDirty(bool dirty);
 
 	// overrides 
 	virtual void setIndex(int index);
@@ -31,6 +35,8 @@ public:
 signals:
 	void sTransitionDoubleClick();
 	void sDurationDoubleClick();
+
+	void sThumbnailDirty();
 
 private:
 	Ui::SlideScrollItem ui;

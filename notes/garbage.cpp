@@ -85,3 +85,142 @@
 
 
 		//m_window->getViewer()->getCameraManipulator()->setByMatrix(cameraMatrix);
+
+
+
+// stuff in the narrativecontrol.cpp narrative control undo redo commands
+//
+//// owns the narrative
+//class NewNarrativeCommand : public QUndoCommand {
+//private:
+//	osg::ref_ptr<Narrative2> m_narrative;
+//	osg::Group *m_group;
+//	int m_index;
+//
+//public:
+//	NewNarrativeCommand(osg::Group *group, int index, QUndoCommand *parent = nullptr)
+//		: QUndoCommand(parent),
+//		m_group(group),
+//		m_index(index)
+//	{
+//		m_narrative = new Narrative2;
+//	}
+//	void undo() {
+//		m_group->removeChild(m_narrative);
+//	}
+//	void redo() {
+//		m_group->insertChild(m_index, m_narrative);
+//	}
+//};
+//class DeleteNarrativeCommand : public QUndoCommand {
+//private:
+//	osg::ref_ptr<Narrative2> m_narrative;
+//	osg::Group *m_group;
+//	int m_index;
+//
+//public:
+//	DeleteNarrativeCommand(osg::Group *group, int index, QUndoCommand *parent = nullptr)
+//		: QUndoCommand(parent),
+//		m_group(group),
+//		m_index(index)
+//	{
+//		osg::Node *node = group->getChild(index);
+//		m_narrative = dynamic_cast<Narrative2*>(node);
+//	}
+//	void undo() {
+//		m_group->insertChild(m_index, m_narrative);
+//	}
+//	void redo() {
+//		m_group->removeChild(m_narrative);
+//	}
+//};
+//class SetNarrativeInfoCommand : public QUndoCommand {
+//private:
+//	Narrative2 *m_narrative;
+//	std::string old_title;
+//	std::string old_description;
+//	std::string old_author;
+//	std::string new_title;
+//	std::string new_description;
+//	std::string new_author;
+//
+//public:
+//	SetNarrativeInfoCommand(Narrative2 *narrative,
+//		const std::string &title,
+//		const std::string &description,
+//		const std::string &author,
+//		QUndoCommand *parent = nullptr)
+//		: QUndoCommand(parent),
+//		m_narrative(narrative),
+//		old_title(narrative->getTitle()),
+//		old_description(narrative->getDescription()),
+//		old_author(narrative->getAuthor()),
+//		new_title(title),
+//		new_description(description),
+//		new_author(author)
+//	{
+//	}
+//	void undo() {
+//		m_narrative->setTitle(old_title);
+//		m_narrative->setDescription(old_description);
+//		m_narrative->setAuthor(old_author);
+//	}
+//	void redo() {
+//		m_narrative->setTitle(new_title);
+//		m_narrative->setDescription(new_description);
+//		m_narrative->setAuthor(new_author);
+//	}
+//};
+//
+////class SetNarrativeInfoCommand;
+//class MoveNarrativeCommand : public QUndoCommand {
+//private:
+//	osg::ref_ptr<Narrative2> m_narrative;
+//	osg::Group *m_group;
+//	int m_old_index;
+//	int m_new_index;
+//
+//public:
+//	MoveNarrativeCommand(osg::Group *group, int new_index, int old_index, QUndoCommand *parent = nullptr)
+//		: m_group(group),
+//		m_old_index(old_index),
+//		m_new_index(new_index)
+//	{
+//		osg::Node *node = group->getChild(old_index);
+//		m_narrative = dynamic_cast<Narrative2*>(node);
+//	}
+//	void undo() {
+//		m_group->removeChild(m_narrative);
+//		m_group->insertChild(m_old_index, m_narrative);
+//	}
+//	void redo() {
+//		m_group->removeChild(m_narrative);
+//		m_group->insertChild(m_new_index, m_narrative);
+//	}
+//};
+//
+////class DuplicateNarrativeCommand;
+////class ImportNarrativeCommand;
+//
+//class NewSlideCommand;
+//
+//class NewSlideCommand : public QUndoStack {
+//private:
+//	Narrative2 *m_narrative; // parent
+//	int m_index;
+//
+//public:
+//	NewSlideCommand(Narrative2 *narrative, m_index);
+//
+//};
+//class DeleteSlideCommand;
+//class SetSlideDurationCommand;
+//class SetSlideTransitionCommand;
+//class SetSlideCameraCommand;
+////class MoveSlideCommand;
+//
+//class NewLabelCommand;
+//class DeleteLabelCommand;
+//class MoveLabelCommand;
+//class ResizeLabelCommand;
+//class SetLabelTextCommand;

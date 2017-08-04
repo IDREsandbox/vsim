@@ -35,6 +35,9 @@ public:
 	Narrative2 *getNarrative(int index);
 	NarrativeSlide *getNarrativeSlide(int narrative, int slide);
 
+	void redrawThumbnails(const std::vector<SlideScrollItem*>& slides);
+	QImage generateThumbnail();
+
 	// All Commands -
 	// Narratives
 	//	New Narrative
@@ -81,34 +84,9 @@ public slots:
 	//	Edit Box Content
 	void openSlide();
 
-signals:
-	void sNewNarrative(int index);
-	void sDeleteNarrative(int index);
-	void sSetNarrativeInfo(int index, std::string title, std::string description, std::string author);
-	void sMoveNarrative(int old_index, int new_index);
-
-	void sNewSlide(Narrative2 *narrative, int index);
-	void sDeleteSlide(Narrative2 *narrative, int index);
-	
-	// which one?
-	// also... the player should switch if the undo event involves a different slide/narrative
-	//void sSetSlideDuration(Narrative2 *narrative, int index, float duration);
-	//void sSetSlideDuration(int narrative, int slide, float duration);
-	//void sSetSlideDuration(NarrativeSlide *slide, float duration);
-
-
-	//void sSetLabelText(int narrative, int slide, int label, std::string text);
-	//void sSetLabelText(int narrative, int slide, int label, std::string text);
-	//void sSetLabelText(int narrative, int slide, int label, std::string text);
-	//void sSetLabelText(int narrative, int slide, int label, std::string text);
-	//void sSetLabelText(int narrative, int slide, int label, std::string text);
-
-	//                  (Label*, std::string text)
-
 private:
 	void addToGui(Narrative2 *);
 	void addNodeToGui(NarrativeSlide *);
-	QImage generateThumbnail();
 
 	int m_current_narrative;
 	int m_current_slide;
@@ -121,6 +99,8 @@ private:
 	NarrativeScrollBox *m_narrative_box;
 	SlideScrollBox *m_slide_box;
 	labelCanvas *m_canvas;
+
+	QUndoStack *m_undo_stack;
 };
 
 #endif /* NARRATIVELIST_H_ */

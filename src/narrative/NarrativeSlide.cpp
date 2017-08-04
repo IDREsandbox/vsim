@@ -5,8 +5,7 @@ NarrativeSlide::NarrativeSlide()
 	m_camera_matrix(),
 	m_duration(15.0f),
 	m_stay_on_node(false),
-	m_transition_duration(4.0f),
-	m_thumbnail(NULL)
+	m_transition_duration(4.0f)
 {
 }
 
@@ -15,8 +14,7 @@ NarrativeSlide::NarrativeSlide(const NarrativeSlide & n, const osg::CopyOp & cop
 	m_camera_matrix(n.m_camera_matrix),
 	m_duration(n.m_duration),
 	m_stay_on_node(n.m_stay_on_node),
-	m_transition_duration(n.m_transition_duration),
-	m_thumbnail(n.m_thumbnail)
+	m_transition_duration(n.m_transition_duration)
 {
 }
 
@@ -25,9 +23,7 @@ NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransit
 	m_camera_matrix(old->getViewMatrix()),
 	m_duration(old->getPauseAtNode()),
 	m_stay_on_node(old->getStayOnNode()),
-	m_transition_duration(old_transition->getDuration()),
-	m_thumbnail(nullptr)
-	//m_thumbnail(new osg::Image(*old->getImage(), osg::CopyOp::DEEP_COPY_ALL))
+	m_transition_duration(old_transition->getDuration())
 {
 }
 
@@ -39,7 +35,6 @@ const osg::Matrixd & NarrativeSlide::getCameraMatrix() const
 {
 	return m_camera_matrix;
 }
-
 void NarrativeSlide::setCameraMatrix(const osg::Matrixd & matrix)
 {
 	m_camera_matrix = matrix;
@@ -68,19 +63,8 @@ bool NarrativeSlide::getStayOnNode() const
 
 void NarrativeSlide::setStayOnNode(bool stay)
 {
-//	if (stay != m_stay_on_node) emit()
 	m_stay_on_node = stay;
 	emit sStayOnNodeChanged(stay);
-}
-
-const osg::Image * NarrativeSlide::getThumbnail() const
-{
-	return m_thumbnail;
-}
-
-void NarrativeSlide::setThumbnail(osg::Image * thumbnail)
-{
-	m_thumbnail = thumbnail;
 }
 
 float NarrativeSlide::getTransitionDuration() const
@@ -96,4 +80,38 @@ void NarrativeSlide::setTransitionDuration(float tduration)
 	m_transition_duration = tduration;
 	emit sTransitionDurationChanged(tduration);
 	qDebug() << "emit duration change";
+}
+
+NarrativeSlide::NewLabelCommand::NewLabelCommand(NarrativeSlide * slide, QUndoCommand * parent)
+	: QUndoCommand(parent),
+	m_slide(slide)
+{
+	m_label = new NarrativeSlideLabels;
+}
+void NarrativeSlide::NewLabelCommand::undo()
+{
+	m_slide->removeChild(m_label);
+	m_slide->sDeleteLabel(m_label);
+}
+void NarrativeSlide::NewLabelCommand::redo()
+{
+	m_slide->addChild(m_label);
+	m_slide->sNewLabel(m_label);
+}
+
+NarrativeSlide::DeleteLabelCommand::DeleteLabelCommand(NarrativeSlide * slide, NarrativeSlideLabels *label, QUndoCommand * parent)
+	: QUndoCommand(parent),
+	m_slide(slide),
+	m_label(label)
+{
+}
+void NarrativeSlide::DeleteLabelCommand::undo()
+{
+	m_slide->addChild(m_label);
+	m_slide->sNewLabel(m_label);
+}
+void NarrativeSlide::DeleteLabelCommand::redo()
+{
+	m_slide->removeChild(m_label);
+	m_slide->sDeleteLabel(m_label);
 }

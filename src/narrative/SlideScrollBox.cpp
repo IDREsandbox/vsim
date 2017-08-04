@@ -2,7 +2,8 @@
 #include "SlideScrollBox.h"
 
 SlideScrollBox::SlideScrollBox(QWidget * parent) 
-	: HorizontalScrollBox(parent) 
+	: HorizontalScrollBox(parent),
+	m_narrative(nullptr)
 {
 	
 	// slide menu
@@ -36,62 +37,70 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	setSpacing(10);
 }
 
-SlideScrollItem *SlideScrollBox::addItem()
+void SlideScrollBox::setNarrative(Narrative2 *narrative)
 {
-	SlideScrollItem *new_item = new SlideScrollItem();
-	connect(new_item, &SlideScrollItem::sDurationDoubleClick, this, &SlideScrollBox::sSetDuration);
-	connect(new_item, &SlideScrollItem::sTransitionDoubleClick, this, &SlideScrollBox::sSetTransitionDuration);
-	HorizontalScrollBox::addItem(new_item);
-	return new_item;
+	// already the same narrative?
+	if (m_narrative == narrative) return;
+	// disconnect the current narrative
+	if (m_narrative != nullptr) {
+		disconnect(m_narrative, 0, this, 0);
+	}
+
+	clear();
+	m_narrative = narrative;
+	if (narrative == nullptr) return;
+
+	// listen to the insert and remove signals from m_narratives
+	// so that we can add/remove from the slide box accordingly
+	connect(m_narrative, &Narrative2::sNewSlide, this, 
+		[this](int index) {
+			NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(m_narrative->getChild(index));
+			if (slide == nullptr) {
+				qWarning() << "get child at index" << index << "was null";
+				return;
+			}
+			insertNewSlide(index, slide);
+		});
+	connect(m_narrative, &Narrative2::sDeleteSlide, this, &HorizontalScrollBox::deleteItem);
+
+	uint nc = narrative->getNumChildren();
+	for (uint i = 0; i < nc; i++) {
+		qDebug() << "reloading child" << i;
+		NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(narrative->getChild(i));
+		if (!slide) {
+			qWarning() << "Load error: non-narrative detected in narrative children";
+		}
+		//qDebug() << "loading slide" << node->getDuration() << node->getStayOnNode() << node->getTransitionDuration();
+		insertNewSlide(i, slide);
+	}
 }
+
+//SlideScrollItem *SlideScrollBox::addItem()
+//{
+//	SlideScrollItem *new_item = new SlideScrollItem();
+//	connect(new_item, &SlideScrollItem::sDurationDoubleClick, this, &SlideScrollBox::sSetDuration);
+//	connect(new_item, &SlideScrollItem::sTransitionDoubleClick, this, &SlideScrollBox::sSetTransitionDuration);
+//	HorizontalScrollBox::addItem(new_item);
+//	return new_item;
+//}
+
 SlideScrollItem *SlideScrollBox::getItem(int index)
 {
 	return dynamic_cast<SlideScrollItem*>(HorizontalScrollBox::getItem(index));
 }
-//void SlideScrollBox::transitionDialog()
-//{
-//	int last = getLastSelected();
-//	if (last == -1) return;
-//	SlideScrollItem *item = dynamic_cast<SlideScrollItem*>(getItem(last));
-//	float duration = execTransitionDialog(item->getTransition());
-//	emit sSetTransitionDuration(duration);
-//	//setTranstionDuration(duration); // uncomment to wire to self, otherwise the owner has to do this
-//}
-//void SlideScrollBox::durationDialog()
-//{
-//	int last = getLastSelected();
-//	if (last == -1) return;
-//	SlideScrollItem *item = dynamic_cast<SlideScrollItem*>(getItem(last));
-//	float duration = execDurationDialog(item->getDuration());
-//	if (duration < 0) return;
-//	emit sSetDuration(duration);
-//	//setDuration(duration);
-//}
-//float SlideScrollBox::execTransitionDialog(float duration)
-//{
-//	double d = QInputDialog::getDouble(nullptr, "Transition Time", "Transition Time (seconds)", duration, 0.0, 3600.0, 1, nullptr, Qt::WindowSystemMenuHint);
-//	qDebug() << "value of d" << d;
-//	return d;
-//}
-//float SlideScrollBox::execDurationDialog(bool init_stay, float init_duration)
-//{
-//	NarrativeSlideDurationDialog *dialog = new NarrativeSlideDurationDialog(nullptr);
-//	dialog->setWindowFlags(Qt::WindowSystemMenuHint);
-//	
-//	dialog->setDuration(init_stay, init_duration);
-//	int result = dialog->exec();
-//	float duration;
-//	if (result == QDialog::Rejected) {
-//		duration = -1.0f;
-//	}
-//	else {
-//		duration = dialog->getDuration();
-//	}
-//	qDebug() << "set duration dialog result -" << duration;
-//	delete dialog;
-//	return duration;
-//}
 
+void SlideScrollBox::insertNewSlide(int index, NarrativeSlide *slide)
+{
+	qDebug() << "insert new slide";
+	SlideScrollItem *new_item = new SlideScrollItem(slide);
+	connect(new_item, &SlideScrollItem::sDurationDoubleClick, this, &SlideScrollBox::sSetDuration);
+	connect(new_item, &SlideScrollItem::sTransitionDoubleClick, this, &SlideScrollBox::sSetTransitionDuration);
+	connect(new_item, &SlideScrollItem::sThumbnailDirty, this, &SlideScrollBox::sThumbnailsDirty);
+	HorizontalScrollBox::insertItem(index, new_item);
+
+	// this thing emits signals, so we need it at the end
+	new_item->setThumbnailDirty(true);
+}
 
 void SlideScrollBox::openMenu(QPoint globalPos) {
 	m_bar_menu->exec(globalPos);
@@ -100,6 +109,18 @@ void SlideScrollBox::openMenu(QPoint globalPos) {
 void SlideScrollBox::openItemMenu(QPoint globalPos)
 {
 	m_slide_menu->exec(globalPos);
+}
+
+std::vector<SlideScrollItem*> SlideScrollBox::getDirtySlides()
+{
+	std::vector<SlideScrollItem*> items;
+	for (auto item : m_items) {
+		SlideScrollItem *slide_item = dynamic_cast<SlideScrollItem*>(item);
+		if (slide_item->thumbnailDirty()) {
+			items.push_back(slide_item);
+		}
+	}
+	return items;
 }
 
 void SlideScrollBox::keyPressEvent(QKeyEvent *event) {

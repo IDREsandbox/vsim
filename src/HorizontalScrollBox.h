@@ -33,26 +33,23 @@ public:
 	void clear();
 
 	void deleteItem(int position);
-	void deleteSelection();
-
-	void clearSelection();
-
-	const std::set<int>& getSelection();
-	int getLastSelected();
 	ScrollBoxItem *getItem(int position);
 
 	// selection
+	void deleteSelection();
+	void clearSelection();
+	const std::set<int>& getSelection();
+	int getLastSelected();
+	
 	//void select(ScrollBoxItem*);
 	void addToSelection(int);
 	void removeFromSelection(int);
 	void select(int);
-
 	bool isSelected(int);
-
-	void setSpacing(int);
-
 	void forceSelect(int); // hack, for the narrative player, does not emit signals
 
+	void setSpacing(int);
+	
 	virtual void openMenu(QPoint globalPos);
 	virtual void openItemMenu(QPoint globalPos);
 
@@ -67,7 +64,7 @@ protected:
 	void mousePressEvent(QMouseEvent* event);
 	void itemMousePressEvent(QMouseEvent* event, int index);
 
-private:
+protected:
 	void refresh(); // redraw items (after deletion or something)
 	//void setWidgetWidth();
 	//void positionChildren();

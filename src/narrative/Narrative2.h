@@ -3,11 +3,13 @@
 
 #include <string>
 #include <osg/Node>
+#include <QObject>
 #include "narrative/NarrativeSlide.h"
 #include "deprecated/narrative/Narrative.h"
 
-class Narrative2: public osg::Group
-{
+class Narrative2: public QObject, public osg::Group {
+	Q_OBJECT
+
 public:
 	Narrative2();
 	Narrative2(const Narrative2& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
@@ -25,6 +27,32 @@ public:
 
 	bool getLock() const{return m_locked;}
 	void setLock(bool lock){ m_locked = lock;}
+
+signals:
+	void sNewSlide(int); 
+	void sDeleteSlide(int);
+
+public: // COMMANDS
+	class NewSlideCommand : public QUndoCommand {
+	public:
+		NewSlideCommand(Narrative2 *narrative, int slide_index, QUndoCommand *parent = nullptr);
+		void undo();
+		void redo();
+	private:
+		Narrative2 *m_narrative;
+		osg::ref_ptr<NarrativeSlide> m_slide;
+		int m_index;
+	};
+	class DeleteSlideCommand : public QUndoCommand {
+	public:
+		DeleteSlideCommand(Narrative2 *narrative, int slide_index, QUndoCommand *parent = nullptr);
+		void undo();
+		void redo();
+	private:
+		Narrative2 *m_narrative;
+		osg::ref_ptr<NarrativeSlide> m_slide;
+		int m_index;
+	};
 
 private:
 	std::string m_title;

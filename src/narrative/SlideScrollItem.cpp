@@ -2,7 +2,8 @@
 #include "Util.h"
 
 SlideScrollItem::SlideScrollItem() 
-	: ScrollBoxItem(), m_slide(nullptr)
+	: ScrollBoxItem(), 
+	m_slide(nullptr)
 {
 	ui.setupUi(this);
 
@@ -10,7 +11,9 @@ SlideScrollItem::SlideScrollItem()
 	ui.duration_label->installEventFilter(this);
 
 	setTransition(2.0f);
-	setDuration(0.0f);
+	setDuration(true, 0.0f);
+
+	m_thumbnail_dirty = true;
 }
 
 void SlideScrollItem::setImage(const QImage & img)
@@ -32,14 +35,25 @@ void SlideScrollItem::setTransition(float duration)
 	ui.transition_label->setText(QString::number(duration, 'f', 1) + "s");
 }
 
-void SlideScrollItem::setDuration(float duration)
+void SlideScrollItem::setDuration(bool stay, float duration)
 {
-	if (duration <= 0) {
+	if (stay) {
 		ui.duration_label->setText("-");
 	}
 	else {
 		ui.duration_label->setText(QString::number(duration, 'f', 1) + "s");
 	}
+}
+
+bool SlideScrollItem::thumbnailDirty()
+{
+	return m_thumbnail_dirty;
+}
+
+void SlideScrollItem::setThumbnailDirty(bool dirty)
+{
+	m_thumbnail_dirty = dirty;
+	if (dirty) emit sThumbnailDirty();
 }
 
 void SlideScrollItem::setIndex(int index)
@@ -121,19 +135,26 @@ void SlideScrollItem::setSlide(NarrativeSlide *slide)
 	}
 
 	m_slide = slide;
-	setDuration(slide->getDuration());
+	setDuration(slide->getStayOnNode(), slide->getDuration());
 	setTransition(slide->getTransitionDuration());
-	setImage(Util::imageOsgToQt(slide->getThumbnail()));
+	//setImage(Util::imageOsgToQt(slide->getThumbnail()));
 
 	//connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, &SlideScrollItem::setDuration);
-	connect(slide, &NarrativeSlide::sCameraMatrixChanged, this, [this]() {m_thumbnail_dirty = true; });
-	connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, [this](bool stay) {
-		if (stay) setDuration(0);
-		else setDuration(m_slide->getDuration());
-	});
-	connect(slide, &NarrativeSlide::sDurationChanged, this, &SlideScrollItem::setDuration);
+	
+	connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, [this](bool stay) {setDuration(stay, 0);});
+	connect(slide, &NarrativeSlide::sDurationChanged, this, [this](float duration) {setDuration(m_slide->getStayOnNode(), duration);});
 	connect(slide, &NarrativeSlide::sTransitionDurationChanged, this, &SlideScrollItem::setTransition);
-	//connect(slide, &NarrativeSlide::sTransitionDurationChanged, this, []() {qDebug() << "foo"; });
+
+	// TODO: how should this thumbnail stuff work?
+	connect(slide, &NarrativeSlide::sCameraMatrixChanged, this, [this]() {
+		setThumbnailDirty(true);
+	});
+
+}
+
+NarrativeSlide *SlideScrollItem::getSlide()
+{
+	return m_slide;
 }
 
 

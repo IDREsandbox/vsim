@@ -8,6 +8,7 @@
 #include "HorizontalScrollBox.h"
 #include "SlideScrollItem.h"
 #include "NarrativeSlideDurationDialog.h"
+#include "Narrative2.h"
 
 class SlideScrollBox : public HorizontalScrollBox {
 	Q_OBJECT
@@ -15,9 +16,14 @@ class SlideScrollBox : public HorizontalScrollBox {
 public:
 	SlideScrollBox(QWidget * parent = nullptr);
 
+	// 
+	void setNarrative(Narrative2 *narrative);
+
 	// controller interface
-	SlideScrollItem *addItem();
+	//SlideScrollItem *addItem();
+	//SlideScrollItem *addItem(NarrativeSlide *slide);
 	SlideScrollItem *getItem(int index);
+	void insertNewSlide(int index, NarrativeSlide *slide);
 
 	// gui display some dialogs
 	// opens based on selection, emits signals
@@ -29,6 +35,8 @@ public:
 	// virtual overrides
 	virtual void openMenu(QPoint globalPos);
 	virtual void openItemMenu(QPoint globalPos);
+
+	std::vector<SlideScrollItem*> getDirtySlides(); // slides whose thumbnails need to be drawn
 	
 signals:
 	void sSetTransitionDuration();
@@ -38,10 +46,14 @@ signals:
 	void sEditSlide();
 	void sSetCamera();
 
+	void sThumbnailsDirty();
+
 protected:
 	void keyPressEvent(QKeyEvent *event);
 
 private:
+	Narrative2 *m_narrative;
+
 	// slide menu
 	QMenu *m_bar_menu;
 	QMenu *m_slide_menu; // context menu
