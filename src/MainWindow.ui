@@ -462,7 +462,13 @@ border-color: rgb(238, 238, 238);
     <addaction name="actionFreeze_Camera"/>
     <addaction name="actionReset_Camera"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+   </widget>
    <addaction name="menuhello_to_the_world"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuTest"/>
   </widget>

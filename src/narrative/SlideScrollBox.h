@@ -21,18 +21,18 @@ public:
 
 	// gui display some dialogs
 	// opens based on selection, emits signals
-	void transitionDialog();
-	void durationDialog();
-	float execTransitionDialog(float duration); // ?? on reject, >= 0 on accept with duration
-	float execDurationDialog(float duration); // < 0 on reject, = 0 for hold, > 0 for timed slide duration
+	//void transitionDialog();
+	//void durationDialog();
+	//float execTransitionDialog(float duration); // ?? on reject, >= 0 on accept with duration
+	//float execDurationDialog(bool stay, float duration); // < 0 on reject, = 0 for hold, > 0 for timed slide duration
 
 	// virtual overrides
 	virtual void openMenu(QPoint globalPos);
 	virtual void openItemMenu(QPoint globalPos);
 	
 signals:
-	void sSetTransitionDuration(float);
-	void sSetDuration(float); // 0 if pause at node
+	void sSetTransitionDuration();
+	void sSetDuration(); // 0 if pause at node
 	void sDeleteSlides();
 	void sNewSlide(int);
 	void sEditSlide();

@@ -43,6 +43,7 @@ const osg::Matrixd & NarrativeSlide::getCameraMatrix() const
 void NarrativeSlide::setCameraMatrix(const osg::Matrixd & matrix)
 {
 	m_camera_matrix = matrix;
+	emit sCameraMatrixChanged(matrix);
 }
 
 float NarrativeSlide::getDuration() const
@@ -57,6 +58,7 @@ void NarrativeSlide::setDuration(float duration)
 		return;
 	}
 	m_duration = duration;
+	emit sDurationChanged(duration);
 }
 
 bool NarrativeSlide::getStayOnNode() const
@@ -66,7 +68,9 @@ bool NarrativeSlide::getStayOnNode() const
 
 void NarrativeSlide::setStayOnNode(bool stay)
 {
+//	if (stay != m_stay_on_node) emit()
 	m_stay_on_node = stay;
+	emit sStayOnNodeChanged(stay);
 }
 
 const osg::Image * NarrativeSlide::getThumbnail() const
@@ -90,4 +94,6 @@ void NarrativeSlide::setTransitionDuration(float tduration)
 		return;
 	}
 	m_transition_duration = tduration;
+	emit sTransitionDurationChanged(tduration);
+	qDebug() << "emit duration change";
 }

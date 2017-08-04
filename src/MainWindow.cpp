@@ -18,12 +18,23 @@ MainWindow::MainWindow(QWidget *parent)
 	// initialize the Qt Designer stuff
 	ui.setupUi(this);
 
+	// window stuff
 	setMinimumSize(1280, 720);
 	ui.statusbar->showMessage("the best status bar", 0);
 	setWindowIcon(QIcon("assets/vsim.ico"));
 	setWindowTitle("VSim");
 	setAcceptDrops(true);
 	qDebug() << "root: " << QDir::currentPath();
+
+	// undo stack
+	m_undo_stack = new QUndoStack(this);
+	m_undo_stack->setUndoLimit(50);
+	QAction *undo_action = m_undo_stack->createUndoAction(this, tr("&Undo"));
+	QAction *redo_action = m_undo_stack->createRedoAction(this, tr("&Redo"));
+	undo_action->setShortcuts(QKeySequence::Undo);
+	redo_action->setShortcuts(QKeySequence::Redo);
+	ui.menuEdit->addAction(undo_action);
+	ui.menuEdit->addAction(redo_action);
 
 	// narrative info dialog
 	m_narrative_info_dialog = new NarrativeInfoDialog(this);
@@ -33,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_osg_widget->lower(); // move this to the back
 	ui.rootLayout->addWidget(m_osg_widget, 0, 0);
 
+	// set viewer widget as parent of gui stuff, so signals can get through
 	ui.mainSplitter->setParent(m_osg_widget);
 	QGridLayout *dummylayout = new QGridLayout(m_osg_widget);
 	m_osg_widget->setLayout(dummylayout);

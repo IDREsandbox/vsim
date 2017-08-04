@@ -148,6 +148,10 @@ ScrollBoxItem *HorizontalScrollBox::getItem(int position)
 	return nullptr;
 }
 
+// simple code given an abstract selection thing
+// on selection change (index, bool)
+// m_items[index]->colorSelect(bool);
+
 void HorizontalScrollBox::addToSelection(int index)
 {
 	m_selection.insert(index);

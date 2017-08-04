@@ -1,5 +1,23 @@
 ﻿#include "NarrativeSlideDurationDialog.h"
 #include <QCheckBox>
+#include <QDebug>
+
+float NarrativeSlideDurationDialog::create(bool init_stay, float init_duration) {
+	NarrativeSlideDurationDialog *dialog = new NarrativeSlideDurationDialog(nullptr);
+	dialog->setWindowFlags(Qt::WindowSystemMenuHint);
+	dialog->setDuration(init_stay, init_duration);
+	int result = dialog->exec();
+	float duration;
+	if (result == QDialog::Rejected) {
+		duration = -1.0f;
+	}
+	else {
+		duration = dialog->getDuration();
+	}
+	qDebug() << "Set duration dialog result -" << duration;
+	delete dialog;
+	return duration;
+}
 
 NarrativeSlideDurationDialog::NarrativeSlideDurationDialog(QWidget * parent) 
 	: QDialog(parent) 

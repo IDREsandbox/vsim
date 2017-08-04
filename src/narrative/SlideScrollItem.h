@@ -1,19 +1,21 @@
 ﻿#ifndef SLIDESCROLLITEM_H
 #define SLIDESCROLLITEM_H
 #include "ScrollBoxItem.h"
+#include "narrative/NarrativeSlide.h"
 #include "ui_SlideScrollItem.h"
 
+// Gui 'view' of narrative slide
 class SlideScrollItem : public ScrollBoxItem {
 	Q_OBJECT
 
 public:
 	SlideScrollItem();
+	SlideScrollItem(NarrativeSlide *);
+	void setSlide(NarrativeSlide *);
 
 	void setImage(const QImage &img);
 
 	// Scroll Box Iterface
-	float getTransition();
-	float getDuration();
 	void setTransition(float);
 	void setDuration(float); // 0 for stay, >0 for timed
 
@@ -32,9 +34,9 @@ signals:
 
 private:
 	Ui::SlideScrollItem ui;
+	NarrativeSlide *m_slide; // pointer to the data
 
-	float m_duration;
-	float m_transition_duration;
+	bool m_thumbnail_dirty;
 };
 
 #endif // SLIDESCROLLITEM_HPP

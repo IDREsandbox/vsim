@@ -1,7 +1,8 @@
 ﻿#include "SlideScrollItem.h"
+#include "Util.h"
 
 SlideScrollItem::SlideScrollItem() 
-	: ScrollBoxItem() 
+	: ScrollBoxItem(), m_slide(nullptr)
 {
 	ui.setupUi(this);
 
@@ -17,24 +18,23 @@ void SlideScrollItem::setImage(const QImage & img)
 	ui.image_label->setPixmap(QPixmap::fromImage(img));
 }
 
-float SlideScrollItem::getTransition()
-{
-	return m_transition_duration;
-}
-float SlideScrollItem::getDuration()
-{
-	return m_duration;
-}
+//float SlideScrollItem::getTransition()
+//{
+//	return m_transition_duration;
+//}
+//float SlideScrollItem::getDuration()
+//{
+//	return m_duration;
+//}
 void SlideScrollItem::setTransition(float duration)
 {
-	m_transition_duration = duration;
+	qDebug() << "set transition";
 	ui.transition_label->setText(QString::number(duration, 'f', 1) + "s");
 }
 
 void SlideScrollItem::setDuration(float duration)
 {
-	m_duration = duration;
-	if (m_duration <= 0) {
+	if (duration <= 0) {
 		ui.duration_label->setText("-");
 	}
 	else {
@@ -106,6 +106,34 @@ bool SlideScrollItem::eventFilter(QObject * obj, QEvent * event)
 		}
 	}
 	return false;
+}
+
+SlideScrollItem::SlideScrollItem(NarrativeSlide *slide)
+	: SlideScrollItem()
+{
+	setSlide(slide);
+}
+
+void SlideScrollItem::setSlide(NarrativeSlide *slide)
+{
+	if (m_slide != nullptr) {
+		disconnect(m_slide, 0, this, 0);
+	}
+
+	m_slide = slide;
+	setDuration(slide->getDuration());
+	setTransition(slide->getTransitionDuration());
+	setImage(Util::imageOsgToQt(slide->getThumbnail()));
+
+	//connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, &SlideScrollItem::setDuration);
+	connect(slide, &NarrativeSlide::sCameraMatrixChanged, this, [this]() {m_thumbnail_dirty = true; });
+	connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, [this](bool stay) {
+		if (stay) setDuration(0);
+		else setDuration(m_slide->getDuration());
+	});
+	connect(slide, &NarrativeSlide::sDurationChanged, this, &SlideScrollItem::setDuration);
+	connect(slide, &NarrativeSlide::sTransitionDurationChanged, this, &SlideScrollItem::setTransition);
+	//connect(slide, &NarrativeSlide::sTransitionDurationChanged, this, []() {qDebug() << "foo"; });
 }
 
 

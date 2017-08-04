@@ -7,6 +7,9 @@ class NarrativeSlideDurationDialog : public QDialog {
 	Q_OBJECT
 
 public:
+	// Recommended use
+	static float create(bool stay, float duration);
+
 	NarrativeSlideDurationDialog(QWidget * parent = nullptr);
 
 	// 0 for transition-on-click

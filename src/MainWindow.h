@@ -73,6 +73,7 @@ public:
 public:
 	OSGViewerWidget *m_osg_widget;
 	labelCanvas *m_drag_area;
+	QUndoStack *m_undo_stack;
 };
 
 

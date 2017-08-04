@@ -31,6 +31,13 @@ public:
 	const std::string& getStyle() const;
 	void setStyle(const std::string& style);
 
+signals:
+
+
+public: // COMMANDS
+
+
+
 public:
 	float m_rX;
 	float m_rY;
