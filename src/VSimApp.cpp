@@ -19,6 +19,7 @@
 
 #define OPTIMIZE 0
 
+
 VSimApp::VSimApp(MainWindow* window)
 	: m_window(window)
 {
@@ -35,6 +36,7 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, &VSimApp::OSGDebug);
 	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this,
 		[this]() {
+
 		osg::Matrixd matrix = m_window->getViewer()->getCameraManipulator()->getMatrix();
 		osg::Vec3 trans, scale;
 		osg::Quat rot, so;

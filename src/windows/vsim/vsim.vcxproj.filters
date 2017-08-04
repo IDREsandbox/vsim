@@ -125,6 +125,9 @@
     <CustomBuild Include="..\..\mtextedit.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="labelCanvasView.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\main.cpp">
@@ -408,6 +411,15 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_mtextedit.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_labelCanvasView.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_labelCanvasView.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="labelCanvasView.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

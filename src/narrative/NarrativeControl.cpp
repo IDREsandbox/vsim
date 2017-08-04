@@ -67,6 +67,25 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	// delete
 	connect(m_canvas, SIGNAL(sDeleteLabel(int)), this, SLOT(deleteLabel(int)));
 
+	editDlg = new editButtons(m_window);
+	editDlg->move(10, 200);
+	editDlg->hide();
+
+	QSignalMapper* signalMapper = new QSignalMapper(this);
+
+	connect(editDlg->ui.done, &QPushButton::clicked, this, &NarrativeControl::exitEdit);
+	connect(editDlg->ui.delete_2, &QPushButton::clicked, this, &NarrativeControl::deleteLabelButton);
+	connect(editDlg->ui.label, SIGNAL(clicked()), signalMapper, SLOT(map()));
+	connect(editDlg->ui.head1, SIGNAL(clicked()), signalMapper, SLOT(map()));
+	connect(editDlg->ui.head2, SIGNAL(clicked()), signalMapper, SLOT(map()));
+	connect(editDlg->ui.body, SIGNAL(clicked()), signalMapper, SLOT(map()));
+
+	signalMapper->setMapping(editDlg->ui.label, QString("color:rgb(0, 0, 0); background: rgba(255, 255, 255, 70); font-size: 12pt; font-family: \"Arial\"; font-weight: bold; text-align:center;"));
+	signalMapper->setMapping(editDlg->ui.head1, QString("color:rgb(240, 240, 240); background-color:rgba(0, 0, 0, 70); font-size: 36pt; font-family: \"Arial\"; font-weight: bold; text-align:center;"));
+	signalMapper->setMapping(editDlg->ui.head2, QString("color:rgb(224, 147, 31); background-color:rgba(0, 0, 0, 70); font-size: 20pt; font-family: \"Arial\"; font-weight: bold; text-align:center;"));
+	signalMapper->setMapping(editDlg->ui.body, QString("color:rgb(240, 240, 240); background-color:rgba(0, 0, 0, 70); font-size: 12pt; font-family: \"Arial\"; font-weight: regular; text-align:left;"));
+	connect(signalMapper, SIGNAL(mapped(QString)), this, SLOT(newLabelButton(QString)));
+
 }
 
 NarrativeControl::~NarrativeControl()
@@ -159,14 +178,14 @@ void NarrativeControl::deleteLabel(int idx)
 
 	curSl->removeChild(data);
 
-	int flag = 0;
-	if (m_canvas->editDlg->isVisible()) {
-		m_canvas->exitEdit();
-		flag = 1;
-	}
+	//int flag = 0;
+	//if (m_canvas->editDlg->isVisible()) {
+	//	m_canvas->exitEdit();
+	//	flag = 1;
+	//}
 	QImage new_thumbnail = generateThumbnail(1);
-	if (flag == 1)
-		m_canvas->editCanvas();
+	//if (flag == 1)
+	//	m_canvas->editCanvas();
 	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
@@ -221,7 +240,12 @@ void NarrativeControl::openNarrative()
 	this->m_window->ui.topBar->setSlidesHeader(nar->getTitle());
 
 	loadSlides(getNarrative(index));
-	m_canvas->exitEdit();
+	this->exitEdit();
+
+	if (nar->getNumChildren() > 0) {
+		m_slide_box->setLastSelected(0);
+		openSlide();
+	}
 }
 
 void NarrativeControl::closeNarrative()
@@ -245,7 +269,19 @@ void NarrativeControl::openSlide()
 		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(), 
 			data->getrH());
 	}
+}
 
+void NarrativeControl::deleteLabelButton() {
+	m_canvas->deleteLabel();
+}
+
+void NarrativeControl::exitEdit() {
+	editDlg->hide();
+	m_window->m_view->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+}
+
+void NarrativeControl::newLabelButton(QString style) {
+	m_canvas->newLabel(style);
 }
 
 void NarrativeControl::newLabel(std::string str, int idx) {
@@ -264,9 +300,9 @@ void NarrativeControl::newLabel(std::string str, int idx) {
 	NarrativeSlide* curSl = getNarrativeNode(m_current_narrative, m_current_slide);
 	curSl->addChild(lab);
 
-	m_canvas->exitEdit();
+	//m_canvas->exitEdit();
 	QImage new_thumbnail = generateThumbnail(1);
-	m_canvas->editCanvas();
+	//m_canvas->editCanvas();
 	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
@@ -280,15 +316,15 @@ void NarrativeControl::moveLabel(QPoint pos, int idx) {
 	lab->setrX(temp->ratioX);
 	lab->setrY(temp->ratioY);
 
-	int flag = 0;
-	if (m_canvas->editDlg->isVisible()) {
-		m_canvas->exitEdit();
-		flag = 1;
-	}
+	//int flag = 0;
+	//if (m_canvas->editDlg->isVisible()) {
+	//	m_canvas->exitEdit();
+	//	flag = 1;
+	//}
 
 	QImage new_thumbnail = generateThumbnail(1);
-	if (flag == 1)
-		m_canvas->editCanvas();
+	//if (flag == 1)
+	//	m_canvas->editCanvas();
 	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
@@ -302,14 +338,14 @@ void NarrativeControl::resizeLabel(QSize size, int idx) {
 	lab->setrH(temp->ratioHeight);
 	lab->setrW(temp->ratioWidth);
 
-	int flag = 0;
-	if (m_canvas->editDlg->isVisible()) {
-		m_canvas->exitEdit();
-		flag = 1;
-	}
+	//int flag = 0;
+	//if (m_canvas->editDlg->isVisible()) {
+	//	m_canvas->exitEdit();
+	//	flag = 1;
+	//}
 	QImage new_thumbnail = generateThumbnail(1);
-	if (flag == 1)
-		m_canvas->editCanvas();
+	//if (flag == 1)
+	//	m_canvas->editCanvas();
 	curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
@@ -395,7 +431,8 @@ void NarrativeControl::deleteSlides()
 }
 
 void NarrativeControl::editSlide() {
-	m_canvas->editCanvas();
+	m_window->m_view->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+	editDlg->show();
 }
 
 void NarrativeControl::setSlideDuration(float duration)
@@ -449,14 +486,14 @@ void NarrativeControl::setSlideCamera()
 				data->getrH());
 		}
 
-		int flag = 0;
-		if (m_canvas->editDlg->isVisible()) {
-			m_canvas->exitEdit();
-			flag = 1;
-		}
+		//int flag = 0;
+		//if (m_canvas->editDlg->isVisible()) {
+		//	m_canvas->exitEdit();
+		//	flag = 1;
+		//}
 		QImage new_thumbnail = generateThumbnail(1);
-		if (flag == 1)
-			m_canvas->editCanvas();
+		//if (flag == 1)
+		//	m_canvas->editCanvas();
 
 		node->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 		node->setCameraMatrix(m_window->getViewer()->getCameraManipulator()->getMatrix());

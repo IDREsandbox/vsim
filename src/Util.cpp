@@ -187,11 +187,57 @@ osg::Quat Util::YPRToQuat(double yaw, double pitch, double roll)
 	return (base * osg::Matrix::rotate(osg::Quat(roll, osg::Vec3(1, 0, 0), pitch, osg::Vec3(0, 1, 0), yaw, osg::Vec3(0, 0, 1)))).getRotate();
 }
 
+osg::Vec4d Util::mult_vec(osg::Matrixd M, osg::Vec4d v)
+{
+	osg::Vec4d v_new;
+	v_new[0] = osg::Vec4d(M(0, 1), M(0, 2), M(0, 3), M(0, 4)) * v;
+	v_new[1] = osg::Vec4d(M(1, 1), M(1, 2), M(1, 3), M(1, 4)) * v;
+	v_new[2] = osg::Vec4d(M(2, 1), M(2, 2), M(2, 3), M(2, 4)) * v;
+	v_new[3] = osg::Vec4d(M(3, 1), M(3, 2), M(3, 3), M(3, 4)) * v;
+	return v_new;
+}
+
+//4x4 transpose
+osg::Matrixd Util::transpose(osg::Matrixd m)
+{
+	osg::Matrixd result(m);
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			result(j, i) = m(i, j);
+		}
+	}
+	return result;
+}
+
+Util::endPt Util::hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl) {
+	osg::Matrixd curveMat(b[0], b[1], b[2], b[3], a[0], a[1], a[2], a[3], db[0], db[1], db[2], db[3], da[0], da[1], da[2], da[3]);
+	osg::Matrixd hermiteMat(-2, 3, 0, 0, 2, -3, 0, 1, 1, -1, 0, 0, 1, -2, 1, 0);
+	double tNext = t + epsl;
+	osg::Vec4d pt1 = mult_vec((transpose(curveMat) * hermiteMat), osg::Vec4d(t*t*t, t*t, t, 1));
+	osg::Vec4d pt2 = mult_vec((transpose(curveMat) * hermiteMat), osg::Vec4d(tNext*tNext*tNext*tNext, tNext*tNext, tNext, 1));
+	Util::endPt result;
+	result.pos = osg::Vec3d(pt1[0], pt1[2], pt1[1]);
+	osg::Vec4d diff = pt2 - pt1;
+	result.tan = osg::Vec3d(diff[0], diff[2], diff[1]);
+
+	return result;
+}
+
+
+osg::Matrixd Util::camMatHerm(double t, osg::Matrixd m0, osg::Matrixd m1) {
+	osg::Vec3d pos0 = m0.getTrans();
+	osg::Vec3d pos1 = m1.getTrans();
+	
+	Util::endPt res = Util::hermiteCurve(osg::Vec4d(pos0[0], pos0[1], pos0[2], 1), osg::Vec4d(pos1[0], pos1[1], pos1[2], 1), osg::Vec4d(15, 0, 0, 0), osg::Vec4d(15, 0, 0, 0), t, .5);
+	return osg::Matrixd::lookAt(osg::Vec3d(res.pos), osg::Vec3d(res.pos + res.tan), osg::Vec3d(0, 0, 1)); //osg::Matrixd::inverse(
+}
+
 osg::Matrixd Util::viewMatrixLerp(double t, osg::Matrixd m0, osg::Matrixd m1)
 {
 	// linear interpolation of position
 	osg::Vec3d pos0 = m0.getTrans();
 	osg::Vec3d pos1 = m1.getTrans();
+
 	osg::Vec3d pos = Util::lerp(t, pos0, pos1);
 
 	// linear interpolation of yaw and pitch
