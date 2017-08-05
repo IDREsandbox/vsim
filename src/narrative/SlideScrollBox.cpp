@@ -36,6 +36,15 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	setSpacing(10);
 }
 
+SlideScrollItem *SlideScrollBox::addItem(int idx)
+{
+	SlideScrollItem *new_item = new SlideScrollItem();
+	connect(new_item, &SlideScrollItem::sTransitionDoubleClick, this, &SlideScrollBox::transitionDialog);
+	connect(new_item, &SlideScrollItem::sDurationDoubleClick, this, &SlideScrollBox::durationDialog);
+	HorizontalScrollBox::insertItem(idx, new_item);
+	return new_item;
+}
+
 SlideScrollItem *SlideScrollBox::addItem()
 {
 	SlideScrollItem *new_item = new SlideScrollItem();

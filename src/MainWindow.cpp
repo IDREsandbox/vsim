@@ -41,8 +41,11 @@ MainWindow::MainWindow(QWidget *parent)
 	ui.mainSplitter->setMouseTracking(true);
 
 	// drag widget
-	m_drag_area = new labelCanvas(ui.root);
-	ui.rootLayout->addWidget(m_drag_area, 0, 0);
+	m_drag_area = new labelCanvas();
+	m_drag_area->setGeometry(0, 0, this->size().width(), this->size().height());
+	m_drag_area->setMinimumSize(800, 600);
+	m_view = new labelCanvasView(ui.root, m_drag_area);
+	ui.rootLayout->addWidget(m_view, 0, 0);
 
 	// vsimapp file stuff
 	connect(ui.actionNew, &QAction::triggered, this, &MainWindow::actionNew);
@@ -118,7 +121,8 @@ void MainWindow::LoadingDialog(const std::string & msg)
 
 void MainWindow::paintEvent(QPaintEvent * event)
 {
-	m_drag_area->setMask(m_drag_area->childrenRegion());
+	//m_drag_area->setMask(m_drag_area->childrenRegion());
+	//m_view->setMask(m_drag_area->childrenRegion());
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)

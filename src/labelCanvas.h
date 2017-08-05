@@ -18,29 +18,33 @@ public:
 	labelCanvas(QWidget* parent = nullptr);
 	~labelCanvas();
 
-	void resizeEvent(QResizeEvent* event);
-	void showSlides(int idx);
-	void editCanvas();
+	//void resizeEvent(QResizeEvent* event);
+	//void showSlides(int idx);
+	//void editCanvas();
 	void clearCanvas();
 
 public slots:
 	void newLabel(QString style);
 	void newLabel(std::string style, std::string text, float rX, float rY, float rW, float rH);
 	void deleteLabel();
-	void exitEdit();
+	//void exitEdit();
 
 signals:
 	void sSuperTextSet(QString, int);
 	void sSuperSizeSet(QSize, int);
 	void sSuperPosSet(QPoint, int);
 	void sNewLabel(std::string, int);
+	void sDeleteLabel(int);
 
 public:
 	QVector<dragLabel*> m_items;
+	//QGraphicsScene* m_scene;
 	QWidget* invisible;
-	editButtons* editDlg;
+	//editButtons* editDlg;
 	int idx = 0;
 	int lastSelected = 0;
+
+	//float scaleFactor = 1;
 };
 
 #endif // LABELCANVAS_H

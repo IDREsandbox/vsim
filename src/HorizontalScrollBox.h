@@ -43,6 +43,8 @@ public:
 
 	// selection
 	//void select(ScrollBoxItem*);
+	void setLastSelected(int);
+
 	void addToSelection(int);
 	void removeFromSelection(int);
 	void select(int);

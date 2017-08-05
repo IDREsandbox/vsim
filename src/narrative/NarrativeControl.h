@@ -10,6 +10,7 @@
 #include "HorizontalScrollBox.h"
 #include "MainWindow.h"
 #include "dragLabel.h"
+#include "editButtons.h"
 
 // Interface to the underlying osg data for narratives
 // Exactly one should exist per VSimApp
@@ -71,11 +72,17 @@ public:
 	//	Edit Box Content
 
 public slots:
+	//editDlg buttons
+	void exitEdit();
+	void deleteLabelButton();
+	void newLabelButton(QString style);
+
 	//Canvas
 	void newLabel(std::string, int idx);
 	void moveLabel(QPoint pos, int idx);
 	void resizeLabel(QSize size, int idx);
 	void textEditLabel(QString str, int idx);
+	void deleteLabel(int idx);
 	//	Delete Box
 	//	Move Box
 	//	Edit Box Content
@@ -84,7 +91,7 @@ public slots:
 private:
 	void addToGui(Narrative2 *);
 	void addNodeToGui(NarrativeSlide *);
-	QImage generateThumbnail();
+	QImage generateThumbnail(int option);
 
 	int m_current_narrative;
 	int m_current_slide;
@@ -97,6 +104,8 @@ private:
 	NarrativeScrollBox *m_narrative_box;
 	SlideScrollBox *m_slide_box;
 	labelCanvas *m_canvas;
+
+	editButtons* editDlg;
 };
 
 #endif /* NARRATIVELIST_H_ */
