@@ -110,9 +110,6 @@
     <CustomBuild Include="..\..\editButtons.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\labelCanvas.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\editButtons.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
@@ -125,7 +122,7 @@
     <CustomBuild Include="..\..\mtextedit.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="labelCanvasView.h">
+    <CustomBuild Include="..\..\labelCanvasView.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -352,12 +349,6 @@
     <ClCompile Include="..\..\labelCanvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_labelCanvas.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_labelCanvas.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_editButtons.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
@@ -412,14 +403,14 @@
     <ClCompile Include="GeneratedFiles\Release\moc_mtextedit.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\labelCanvasView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_labelCanvasView.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_labelCanvasView.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="labelCanvasView.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

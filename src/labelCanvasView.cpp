@@ -29,7 +29,6 @@ labelCanvasView::~labelCanvasView()
 
 void labelCanvasView::resizeEvent(QResizeEvent* event)
 {
-	this->scene()->setSceneRect(this->size());
 	scaleFactor = float(float(this->size().height()) / float(720));
 
 	this->resetMatrix();
