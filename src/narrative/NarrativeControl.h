@@ -3,6 +3,7 @@
 
 #include <set>
 #include <osg/Node>
+#include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative2.h"
 #include "narrative/NarrativeScrollBox.h"
 #include "narrative/SlideScrollBox.h"
@@ -23,8 +24,9 @@ public:
 	virtual ~NarrativeControl();
 
 	// initializes gui from osg data, pass in a group of Narratives
-	void load(osg::Group *narratives);
-	void loadSlides(Narrative2 *narrative);
+	//void load(osg::Group *narratives);
+	//void loadSlides(Narrative2 *narrative);
+	void load(NarrativeGroup *narratives);
 
 	//void showSlides(int index);
 	void openNarrative();
@@ -92,7 +94,7 @@ private:
 	int m_current_slide;
 
 	// std::vector<Narrative*> m_narratives;
-	osg::Group *m_narrative_group; // the osg side data structure, instead of using a vector
+	NarrativeGroup *m_narrative_group; // the osg side data structure, instead of using a vector
 	osg::Group *m_model;
 
 	MainWindow *m_window; // TODO: remove this after redesign, this should be completely gui independent

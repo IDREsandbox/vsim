@@ -16,6 +16,7 @@
 #include "VSimApp.h"
 #include "Util.h"
 #include "deprecated/narrative/Narrative.h"
+#include "narrative/NarrativeGroup.h"
 
 #include <QObject>
 
@@ -25,8 +26,8 @@ VSimApp::VSimApp(MainWindow* window)
 	: m_window(window)
 {
 	m_viewer = window->getViewer();
-	m_narrative_list = new NarrativeControl(this, m_window);
-	m_narrative_player = new NarrativePlayer(this, m_window, m_narrative_list);
+	m_narrative_control = new NarrativeControl(this, m_window);
+	m_narrative_player = new NarrativePlayer(this, m_window, m_narrative_control);
 
 	connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
 	connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
@@ -34,7 +35,7 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(window, &MainWindow::sNew, this, &VSimApp::reset);
 	connect(window, &MainWindow::sSaveCurrent, this, &VSimApp::saveCurrentVSim);
 
-	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, &VSimApp::OSGDebug);
+	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, [this]() {m_root->debug(); });
 	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this, &VSimApp::debugCamera);
 
 	reset();
@@ -43,32 +44,30 @@ VSimApp::VSimApp(MainWindow* window)
 bool VSimApp::init()
 {
 	setFileName("");
-	initWithVSim(new osg::Group);
+	initWithVSim(new VSimRoot);
 	return true;
 }
 bool VSimApp::initWithModel(osg::Node *model)
 {
 	init();
-	m_model_group->addChild(model);
+	m_root->models()->addChild(model);
 	m_window->m_osg_widget->reset();
 	return true;
 }
 bool VSimApp::initWithVSim(osg::Node *new_node)
 {
-	qDebug() << "init with VSim";
-	// try and convert to new format
-	osg::Group *root = new_node->asGroup();
-	if (!root) return false;
-	if (!convertToNewVSim(root)) {
-		return false;
+	VSimRoot *root = dynamic_cast<VSimRoot*>(new_node);
+	if (root == nullptr) {
+		// create a new VSimRoot, convert from old format
+		root = new VSimRoot(new_node->asGroup());
 	}
-
-	m_narrative_group = findOrCreateChildGroup(root, "Narratives");
-	m_model_group = findOrCreateChildGroup(root, "Models");
-
+	else {
+		qDebug() << "is in fact a vsimroot";
+	}
 	m_root = root;
-	m_viewer->setSceneData(root); // ideall this would be only models, but its easy to mess things up
-	m_narrative_list->load(m_narrative_group);
+	m_viewer->setSceneData(m_root->models()); // ideally this would be only models, but its easy to mess things up
+
+	m_narrative_control->load(m_root->narratives());
 
 	m_window->m_osg_widget->reset();
 	//m_viewer->getCamera()->setProjectionMatrixAsPerspective(75.0f, )
@@ -91,8 +90,7 @@ bool VSimApp::importModel(const std::string& filename)
 		QMessageBox::warning(m_window, "Import Error", "Error loading file " + QString::fromStdString(filename));
 		return false;
 	}
-
-	m_model_group->addChild(loadedModel);
+	m_root->models()->addChild(loadedModel);
 	m_window->m_osg_widget->reset();
 	return true;
 }
@@ -223,31 +221,6 @@ void VSimApp::setFileName(const std::string &str)
 	m_window->setWindowTitle("VSim - " + QString::fromStdString(str));
 }
 
-void VSimApp::OSGDebug()
-{
-	qInfo() << "root";
-	for (uint i = 0; i < m_model_group->getNumChildren(); i++) {
-		osg::Node *node = m_model_group->getChild(i);
-		qInfo() << "-" << QString::fromStdString(node->getName()) << node->className();
-	}
-
-	qInfo() << "Narratives:";
-	for (uint i = 0; i < m_narrative_group->getNumChildren(); i++) {
-		Narrative2 *nar = dynamic_cast<Narrative2*>(m_narrative_group->getChild(i));
-		if (!nar) continue;
-		qInfo() << "Narrative" << i << QString::fromStdString(nar->getTitle());
-		for (uint j = 0; j < nar->getNumChildren(); j++) {
-			NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(nar->getChild(i));
-			qInfo() << "\tSlide" << j << slide->getTransitionDuration();
-		}
-	}
-
-	qInfo() << "Models:";
-	for (uint i = 0; i < m_model_group->getNumChildren(); i++) {
-		qInfo() << "Model" << QString::fromStdString(m_model_group->getChild(i)->getName());
-	}
-}
-
 void VSimApp::debugCamera()
 {
 	osg::Matrixd matrix = m_window->getViewer()->getCameraManipulator()->getMatrix();
@@ -259,105 +232,4 @@ void VSimApp::debugCamera()
 	Util::quatToYPR(rot, &y, &p, &r);
 	std::cout << "matrix " << matrix << "\ntranslation " << trans << "\nscale " << scale << "\nrotation " << rot << "\n";
 	qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI;
-}
-
-osg::Group *VSimApp::findOrCreateChildGroup(osg::Group *root, const std::string & name)
-{
-	uint num_children = root->getNumChildren();
-	for (uint i = 0; i < num_children; i++) {
-		osg::Group *child = root->getChild(i)->asGroup();
-
-		if (!child) {
-			// not a group, just skip it
-			continue;
-		}
-
-		if (child->getName() == name) {
-			//qInfo() << "Group" << QString::fromStdString(name) << "found";
-			return child;
-		}
-	}
-	//qInfo() << "Node" << QString::fromStdString(name) << "not found. Creating it.";
-	osg::Group *new_group = new osg::Group();
-	new_group->setName(name);
-	root->addChild(new_group);
-
-	return new_group;
-}
-
-bool VSimApp::convertToNewVSim(osg::Group *root)
-{
-
-	// find Narratives
-	osg::Group *narrative_group = findOrCreateChildGroup(root, "Narratives");
-	// find Models
-	osg::Group *model_group = findOrCreateChildGroup(root, "Models");
-
-	qDebug() << "converting to vsim" << narrative_group->getNumChildren();
-	// find ModelInformation
-
-	// find EResources
-	// findOrCreateChildGroup(root, "EmbeddedResources");
-
-	// Scan the root for different things, convert them, put them into the Narratives group
-	uint numChildren = root->getNumChildren();
-	for (uint i = 0; i < numChildren; i++) {
-		osg::Node *node = root->getChild(i);
-
-		if (!node) {
-			qDebug() << "child" << i << "is null ptr?";
-		}
-		std::string class_name = node->className();
-
-		Narrative *qq = dynamic_cast<Narrative*>(node);
-		if (qq) {
-			qDebug() << "dynamic cast to narrative";
-		}
-		
-		qDebug() << "found in root -" << QString::fromStdString(class_name);
-		// if we find a narrative in the root, then move it to the Narratives group
-		if (class_name == "Narrative") {
-			
-			Narrative *old_nar = dynamic_cast<Narrative*>(node);
-			if (!old_nar) {
-				qWarning() << "Failed to load old narrative";
-				return false; // this probably makes no sense
-			}
-			qDebug() << "Found an old narrative" << QString::fromStdString(old_nar->getName()) << "- converting";
-			Narrative2 *new_nar = new Narrative2(old_nar);
-
-			narrative_group->addChild(new_nar);
-			root->removeChild(old_nar);
-			i--; // avoid incrementing since we just shifted everything by 1
-			numChildren--;
-		}
-		// otherwise just leave things where they are
-		else {
-			//root->removeChild(node);
-			//model_group->addChild(node);
-		}
-		
-	}
-
-	return true;
-}
-
-bool VSimApp::mergeAnotherVSim(osg::Group *other)
-{
-	osg::Group *other_narrative_group = findOrCreateChildGroup(other, "Narratives");
-	// basically just copy over the Narratives and Models contents
-	qDebug() << "merging";
-	qDebug() << "current narratives:" << m_narrative_group->getNumChildren();
-	qDebug() << "other narratives:" << other_narrative_group->getNumChildren();
-
-	for (uint i = 0; i < other_narrative_group->getNumChildren(); i++) {
-		m_narrative_group->addChild(other_narrative_group->getChild(i));
-	}
-	osg::Group *other_model_group = findOrCreateChildGroup(other, "Models");
-	for (uint i = 0; i < other_model_group->getNumChildren(); i++) {
-		m_model_group->addChild(other_model_group->getChild(i));
-	}
-
-	// what are we supposed to do with all of the other junk?
-	return true;
 }

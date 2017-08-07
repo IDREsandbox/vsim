@@ -34,6 +34,19 @@ NarrativeScrollBox::~NarrativeScrollBox() {
 	
 }
 
+void NarrativeScrollBox::setNarrativeGroup(NarrativeGroup *group)
+{
+	//disconnect(0, signal, this, slot);
+
+	clear();
+	m_narratives = group;
+	if (group == nullptr) return;
+
+	// connect the new and delete signals
+	// TODO
+	// construct stuff
+}
+
 void NarrativeScrollBox::addItem(const std::string & title, const std::string & description)
 {
 	NarrativeScrollItem *item = new NarrativeScrollItem();

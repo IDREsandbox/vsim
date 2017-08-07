@@ -153,7 +153,7 @@ void NarrativeControl::deleteNarratives()
 	m_narrative_box->deleteSelection();
 }
 
-void NarrativeControl::load(osg::Group *narratives)
+void NarrativeControl::load(NarrativeGroup *narratives)
 {
 	m_narrative_box->clear();
 	m_slide_box->clear(); 

@@ -3,6 +3,7 @@
 
 #include "HorizontalScrollBox.h"
 #include "NarrativeScrollItem.h"
+#include "narrative/NarrativeGroup.h"
 
 class NarrativeScrollBox : public HorizontalScrollBox {
 	Q_OBJECT
@@ -10,6 +11,8 @@ class NarrativeScrollBox : public HorizontalScrollBox {
 public:
 	NarrativeScrollBox(QWidget * parent = nullptr);
 	~NarrativeScrollBox();
+
+	void setNarrativeGroup(NarrativeGroup *group);
 
 	void addItem(const std::string &title, const std::string &description);
 
@@ -23,6 +26,8 @@ signals:
 	void sOpen();
 
 private:
+	NarrativeGroup *m_narratives;
+
 	QMenu* m_slide_menu; // context menu
 	QAction* m_action_new;
 	QAction* m_action_delete;

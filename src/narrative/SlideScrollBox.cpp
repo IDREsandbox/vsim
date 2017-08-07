@@ -39,12 +39,9 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 
 void SlideScrollBox::setNarrative(Narrative2 *narrative)
 {
-	// already the same narrative?
-	if (m_narrative == narrative) return;
-	// disconnect the current narrative
-	if (m_narrative != nullptr) {
-		disconnect(m_narrative, 0, this, 0);
-	}
+	// disconnect incoming signals if already connected to a narrative
+	disconnect(0, &Narrative2::sNewSlide, this, &SlideScrollBox::newItem);
+	disconnect(0, &Narrative2::sDeleteSlide, this, &HorizontalScrollBox::deleteItem);
 
 	clear();
 	m_narrative = narrative;
@@ -52,15 +49,7 @@ void SlideScrollBox::setNarrative(Narrative2 *narrative)
 
 	// listen to the insert and remove signals from m_narratives
 	// so that we can add/remove from the slide box accordingly
-	connect(m_narrative, &Narrative2::sNewSlide, this, 
-		[this](int index) {
-			NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(m_narrative->getChild(index));
-			if (slide == nullptr) {
-				qWarning() << "get child at index" << index << "was null";
-				return;
-			}
-			insertNewSlide(index, slide);
-		});
+	connect(m_narrative, &Narrative2::sNewSlide, this, &SlideScrollBox::newItem);
 	connect(m_narrative, &Narrative2::sDeleteSlide, this, &HorizontalScrollBox::deleteItem);
 
 	uint nc = narrative->getNumChildren();
@@ -87,6 +76,16 @@ void SlideScrollBox::setNarrative(Narrative2 *narrative)
 SlideScrollItem *SlideScrollBox::getItem(int index)
 {
 	return dynamic_cast<SlideScrollItem*>(HorizontalScrollBox::getItem(index));
+}
+
+void SlideScrollBox::newItem(int index)
+{
+	NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(m_narrative->getChild(index));
+	if (slide == nullptr) {
+		qWarning() << "insert new slide" << index << "is not a NarrativeSlide";
+		return;
+	}
+	insertNewSlide(index, slide);
 }
 
 void SlideScrollBox::insertNewSlide(int index, NarrativeSlide *slide)

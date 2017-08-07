@@ -23,6 +23,7 @@ public:
 	//SlideScrollItem *addItem();
 	//SlideScrollItem *addItem(NarrativeSlide *slide);
 	SlideScrollItem *getItem(int index);
+	void newItem(int index);
 	void insertNewSlide(int index, NarrativeSlide *slide);
 
 	// gui display some dialogs
