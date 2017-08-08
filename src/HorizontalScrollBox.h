@@ -80,7 +80,6 @@ protected:
 	QWidget* m_scroll_area_widget;
 	QList<ScrollBoxItem*> m_items;
 
-	int m_focus;
 	int m_last_selected;
 	std::set<int> m_selection;
 

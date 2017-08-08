@@ -2,8 +2,7 @@
 #include "SlideScrollBox.h"
 
 SlideScrollBox::SlideScrollBox(QWidget * parent) 
-	: HorizontalScrollBox(parent),
-	m_narrative(nullptr)
+	: HorizontalScrollBox(parent)
 {
 	
 	// slide menu

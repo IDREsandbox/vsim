@@ -60,13 +60,6 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 
 	this->horizontalScrollBar()->setStyleSheet(scrollbar_style);
 
-	//// handle right-clicks for background, TODO: use a different menu
-	//m_scroll_area_widget->setContextMenuPolicy(Qt::CustomContextMenu);
-	//connect(m_scroll_area_widget, &QWidget::customContextMenuRequested, this,
-	//	[this](const QPoint& pos) {
-	//	qDebug() << "narrative list gui - background context menu";
-	//	m_slide_menu->exec(m_scroll_area_widget->mapToGlobal(pos)); }
-	//);
 }
 
 void HorizontalScrollBox::addItem(ScrollBoxItem *item)
@@ -113,8 +106,10 @@ void HorizontalScrollBox::clear()
 	}
 	m_items.clear();
 	m_selection.clear();
-	m_focus = -1;
 	m_last_selected = -1;
+
+	if (m_group) disconnect(m_group, 0, this, 0);
+	m_group = nullptr;
 
 	refresh();
 }

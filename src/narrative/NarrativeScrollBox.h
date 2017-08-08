@@ -21,8 +21,6 @@ signals:
 	void sOpen();
 
 private:
-	NarrativeGroup *m_narratives;
-
 	QMenu* m_slide_menu; // context menu
 	QAction* m_action_new;
 	QAction* m_action_delete;

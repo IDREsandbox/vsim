@@ -1,8 +1,7 @@
 ﻿#include "NarrativeScrollBox.h"
 
 NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
-	: HorizontalScrollBox(parent),
-	m_narratives(nullptr)
+	: HorizontalScrollBox(parent)
 {
 	
 	// initialize menus

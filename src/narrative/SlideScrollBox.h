@@ -37,8 +37,6 @@ protected:
 	void paintEvent(QPaintEvent *event);
 
 private:
-	Narrative2 *m_narrative;
-
 	// slide menu
 	QMenu *m_bar_menu;
 	QMenu *m_slide_menu; // context menu
