@@ -4,7 +4,7 @@
 #include "deprecated/narrative/NarrativeNode.h"
 
 Narrative2::Narrative2()
-	: osg::Group(),
+	: Group(),
 	m_title("Untitled"),
 	m_description(""),
 	m_author(""),
@@ -13,7 +13,7 @@ Narrative2::Narrative2()
 }
 
 Narrative2::Narrative2(const Narrative2 & n, const osg::CopyOp & copyop)
-	: osg::Group(n, copyop),
+	: Group(n, copyop),
 	m_title(n.m_title),
 	m_description(n.m_description),
 	m_author(n.m_author),
@@ -22,7 +22,7 @@ Narrative2::Narrative2(const Narrative2 & n, const osg::CopyOp & copyop)
 }
 
 Narrative2::Narrative2(const Narrative * old)
-	: osg::Group(),
+	: Group(),
 	m_title(old->getName()),
 	m_description(old->getDescription()),
 	m_author(old->getAuthor()),

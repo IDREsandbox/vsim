@@ -37,7 +37,7 @@ public:
 	Narrative2 *getNarrative(int index);
 	NarrativeSlide *getNarrativeSlide(int narrative, int slide);
 
-	void redrawThumbnails(const std::vector<SlideScrollItem*>& slides);
+	void redrawThumbnails(const std::vector<SlideScrollItem*> slides);
 	QImage generateThumbnail();
 
 	// All Commands -

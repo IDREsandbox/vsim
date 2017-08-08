@@ -145,7 +145,7 @@ void NarrativeControl::load(NarrativeGroup *narratives)
 	m_narrative_group = narratives;
 	closeNarrative();
 
-	m_narrative_box->setNarrativeGroup(narratives);
+	m_narrative_box->setGroup(narratives);
 }
 
 void NarrativeControl::openNarrative()
@@ -159,7 +159,7 @@ void NarrativeControl::openNarrative()
 
 	Narrative2 *nar = getNarrative(index);
 	this->m_window->ui.topBar->setSlidesHeader(nar->getTitle());
-	m_slide_box->setNarrative(nar);
+	m_slide_box->setGroup(nar);
 
 	//m_canvas->exitEdit();
 }
@@ -211,7 +211,7 @@ void NarrativeControl::newLabel(std::string str, int idx) {
 	//curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
-	item->setImage(new_thumbnail);
+	item->setThumbnailDirty(true);
 }
 
 void NarrativeControl::moveLabel(QPoint pos, int idx) {
@@ -233,7 +233,7 @@ void NarrativeControl::moveLabel(QPoint pos, int idx) {
 	//curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
-	item->setImage(new_thumbnail);
+	item->setThumbnailDirty(true);
 }
 
 void NarrativeControl::resizeLabel(QSize size, int idx) {
@@ -254,7 +254,7 @@ void NarrativeControl::resizeLabel(QSize size, int idx) {
 	//curSl->setThumbnail(Util::imageQtToOsg(new_thumbnail));
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
-	item->setImage(new_thumbnail);
+	item->setThumbnailDirty(true);
 }
 
 void NarrativeControl::textEditLabel(QString str, int idx) {
@@ -411,7 +411,7 @@ void NarrativeControl::setSlideCamera()
 //	newitem->setSlide(node);
 //}
 
-void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*>& slides)
+void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> slides)
 {
 	osg::Matrixd old_matrix = m_window->m_osg_widget->getCameraMatrix();
 	osg::Matrixd current_matrix;

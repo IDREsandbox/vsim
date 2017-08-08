@@ -7,10 +7,9 @@
 class ModelGroup : public QObject, public osg::Group {
 	Q_OBJECT
 public:
-	ModelGroup();
-	ModelGroup(const ModelGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+	ModelGroup() {}
+	ModelGroup(const ModelGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
 	META_Node(, ModelGroup)
-
 
 };
 

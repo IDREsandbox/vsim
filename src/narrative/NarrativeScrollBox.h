@@ -12,13 +12,7 @@ public:
 	NarrativeScrollBox(QWidget * parent = nullptr);
 	~NarrativeScrollBox();
 
-	void setNarrativeGroup(NarrativeGroup *group);
-
-	void newItem(int index);
-	void insertNewNarrative(int index, Narrative2* narrative);
-
-	virtual void openMenu(QPoint globalPos);
-	virtual void openItemMenu(QPoint globalPos);
+	ScrollBoxItem *createItem(osg::Node *node) override;
 
 signals:
 	void sNew();

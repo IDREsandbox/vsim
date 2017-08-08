@@ -36,11 +36,11 @@ VSimRoot::VSimRoot(osg::Group * old_group)
 			qDebug() << "Found an old narrative" << QString::fromStdString(old_narrative->getName()) << "- converting";
 			Narrative2 *new_narrative = new Narrative2(old_narrative);
 
-			m_narratives->addChild(old_narrative);
+			m_narratives->addChild(new_narrative);
 		}
-		// don't know the type? just copy to the root
+		// don't know the type? just copy to the model group
 		else {
-			addChild(node);
+			m_models->addChild(node);
 		}
 
 	}

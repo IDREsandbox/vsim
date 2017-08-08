@@ -9,9 +9,10 @@
 
 #include <QUndoStack>
 #include "Command.h"
+#include "Group.h"
 #include "narrative/NarrativeSlideLabels.h"
 
-class NarrativeSlide: public QObject, public osg::Group
+class NarrativeSlide : public Group
 {
 	Q_OBJECT
 
@@ -65,23 +66,16 @@ public: // COMMANDS
 			: ModifyCommand(&getCameraMatrix, &setCameraMatrix, camera, slide, parent) {}
 	};
 
-	class NewLabelCommand : public QUndoCommand {
+
+	class NewLabelCommand : public Group::NewNodeCommand<NarrativeSlideLabels> {
 	public:
-		NewLabelCommand(NarrativeSlide *slide, QUndoCommand *parent = nullptr);
-		void undo();
-		void redo();
-	private:
-		NarrativeSlide *m_slide;
-		osg::ref_ptr<NarrativeSlideLabels> m_label;
+		NewLabelCommand(NarrativeSlide *group, int index, QUndoCommand *parent = nullptr)
+			: Group::NewNodeCommand<NarrativeSlideLabels>(group, index, parent) {}
 	};
-	class DeleteLabelCommand : public QUndoCommand {
+	class DeleteLabelCommand : public Group::DeleteNodeCommand<NarrativeSlideLabels> {
 	public:
-		DeleteLabelCommand(NarrativeSlide *slide, NarrativeSlideLabels *label, QUndoCommand *parent = nullptr);
-		void undo();
-		void redo();
-	private:
-		NarrativeSlide *m_slide;
-		osg::ref_ptr<NarrativeSlideLabels> m_label;
+		DeleteLabelCommand(NarrativeSlide *group, int index, QUndoCommand *parent = nullptr)
+			: Group::DeleteNodeCommand<NarrativeSlideLabels>(group, index, parent) {}
 	};
 
 private:

@@ -6,8 +6,9 @@
 #include <QObject>
 #include "narrative/NarrativeSlide.h"
 #include "deprecated/narrative/Narrative.h"
+#include "Group.h"
 
-class Narrative2: public QObject, public osg::Group {
+class Narrative2 : public Group {
 	Q_OBJECT
 
 public:
@@ -54,17 +55,17 @@ public: // COMMANDS
 			: ModifyCommand(&getDescription, &setDescription, desc, nar, parent) {}
 	};
 
-	class NewSlideCommand : public NewNodeCommand<Narrative2, NarrativeSlide> {
+	class NewSlideCommand : public Group::NewNodeCommand<NarrativeSlide> {
 	public:
-		NewSlideCommand(Narrative2 *narrative, int slide_index, QUndoCommand *parent = nullptr)
-			: NewNodeCommand(&sNewSlide, &sDeleteSlide, narrative, slide_index, parent)	{}
+		NewSlideCommand(Narrative2 *group, int index, QUndoCommand *parent = nullptr)
+			: Group::NewNodeCommand<NarrativeSlide>(group, index, parent) {}
+	};
+	class DeleteSlideCommand : public Group::DeleteNodeCommand<NarrativeSlide> {
+	public:
+		DeleteSlideCommand(Narrative2 *group, int index, QUndoCommand *parent = nullptr)
+			: Group::DeleteNodeCommand<NarrativeSlide>(group, index, parent) {}
 	};
 
-	class DeleteSlideCommand : public DeleteNodeCommand<Narrative2, NarrativeSlide> {
-	public:
-		DeleteSlideCommand(Narrative2 *narrative, int slide_index, QUndoCommand *parent = nullptr)
-			: DeleteNodeCommand(&sNewSlide, &sDeleteSlide, narrative, slide_index, parent) {}
-	};
 
 private:
 	std::string m_title;

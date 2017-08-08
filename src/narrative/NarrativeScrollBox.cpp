@@ -22,51 +22,24 @@ NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
 	connect(m_action_delete, &QAction::triggered, this, &NarrativeScrollBox::sDelete);
 	connect(m_action_info, &QAction::triggered, this, &NarrativeScrollBox::sInfo);
 	connect(m_action_open, &QAction::triggered, this, &NarrativeScrollBox::sOpen);
+
+	setMenu(m_slide_menu);
+	setItemMenu(m_slide_menu);
 }
 
 NarrativeScrollBox::~NarrativeScrollBox() {
 	
 }
 
-void NarrativeScrollBox::setNarrativeGroup(NarrativeGroup *group)
+ScrollBoxItem * NarrativeScrollBox::createItem(osg::Node * node)
 {
-	if (m_narratives != nullptr) disconnect(m_narratives, 0, this, 0);
-
-	clear();
-	m_narratives = group;
-	if (group == nullptr) return;
-
-	connect(m_narratives, &NarrativeGroup::sNewNarrative, this, &NarrativeScrollBox::newItem);
-	connect(m_narratives, &NarrativeGroup::sDeleteNarrative, this, &HorizontalScrollBox::deleteItem);
-
-	for (uint i = 0; i < m_narratives->getNumChildren(); i++) {
-		newItem(i);
+	qDebug() << "create item narrative ?" << node;
+	Narrative2 *narrative = dynamic_cast<Narrative2*>(node);
+	if (narrative == nullptr) {
+		qWarning() << "insert new narrative" << node << "is not a NarrativeSlide";
+		return nullptr;
 	}
-}
-
-void NarrativeScrollBox::newItem(int index) {
-	Narrative2 *nar = dynamic_cast<Narrative2*>(m_narratives->getChild(index));
-	if (nar == nullptr) {
-		qWarning() << "insert new narrative" << index << "is not a NarrativeSlide";
-		return;
-	}
-	insertNewNarrative(index, nar);
-}
-
-void NarrativeScrollBox::insertNewNarrative(int index, Narrative2 * narrative)
-{
-	qDebug() << "insert new narrative";
 	NarrativeScrollItem *item = new NarrativeScrollItem(narrative);
 	connect(item, &NarrativeScrollItem::sDoubleClick, this, &NarrativeScrollBox::sOpen);
-	HorizontalScrollBox::insertItem(index, item);
+	return item;
 }
-
-void NarrativeScrollBox::openMenu(QPoint globalPos)
-{
-	m_slide_menu->exec(globalPos);
-}
-void NarrativeScrollBox::openItemMenu(QPoint globalPos)
-{
-	m_slide_menu->exec(globalPos);
-}
-

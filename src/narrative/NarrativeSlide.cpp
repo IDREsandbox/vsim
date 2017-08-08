@@ -1,7 +1,7 @@
 #include "narrative/NarrativeSlide.h"
 
 NarrativeSlide::NarrativeSlide()
-	: osg::Group(),
+	: Group(),
 	m_camera_matrix(),
 	m_duration(15.0f),
 	m_stay_on_node(false),
@@ -10,7 +10,7 @@ NarrativeSlide::NarrativeSlide()
 }
 
 NarrativeSlide::NarrativeSlide(const NarrativeSlide & n, const osg::CopyOp & copyop)
-	: osg::Group(n, copyop),
+	: Group(n, copyop),
 	m_camera_matrix(n.m_camera_matrix),
 	m_duration(n.m_duration),
 	m_stay_on_node(n.m_stay_on_node),
@@ -19,7 +19,7 @@ NarrativeSlide::NarrativeSlide(const NarrativeSlide & n, const osg::CopyOp & cop
 }
 
 NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransition * old_transition)
-	: osg::Group(),
+	: Group(),
 	m_camera_matrix(old->getViewMatrix()),
 	m_duration(old->getPauseAtNode()),
 	m_stay_on_node(old->getStayOnNode()),
@@ -80,38 +80,4 @@ void NarrativeSlide::setTransitionDuration(float tduration)
 	m_transition_duration = tduration;
 	emit sTransitionDurationChanged(tduration);
 	qDebug() << "emit duration change";
-}
-
-NarrativeSlide::NewLabelCommand::NewLabelCommand(NarrativeSlide * slide, QUndoCommand * parent)
-	: QUndoCommand(parent),
-	m_slide(slide)
-{
-	m_label = new NarrativeSlideLabels;
-}
-void NarrativeSlide::NewLabelCommand::undo()
-{
-	m_slide->removeChild(m_label);
-	m_slide->sDeleteLabel(m_label);
-}
-void NarrativeSlide::NewLabelCommand::redo()
-{
-	m_slide->addChild(m_label);
-	m_slide->sNewLabel(m_label);
-}
-
-NarrativeSlide::DeleteLabelCommand::DeleteLabelCommand(NarrativeSlide * slide, NarrativeSlideLabels *label, QUndoCommand * parent)
-	: QUndoCommand(parent),
-	m_slide(slide),
-	m_label(label)
-{
-}
-void NarrativeSlide::DeleteLabelCommand::undo()
-{
-	m_slide->addChild(m_label);
-	m_slide->sNewLabel(m_label);
-}
-void NarrativeSlide::DeleteLabelCommand::redo()
-{
-	m_slide->removeChild(m_label);
-	m_slide->sDeleteLabel(m_label);
 }

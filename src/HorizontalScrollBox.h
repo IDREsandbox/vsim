@@ -9,6 +9,7 @@
 #include <set>
 
 #include "ScrollBoxItem.h"
+#include "Group.h"
 //#include "narrative/NarrativeScrollItem.h"
 
 // goals:
@@ -29,18 +30,17 @@ public:
 
 	// this scroll box takes ownership, so just construct with nullptr
 	void addItem(ScrollBoxItem*);
-	void insertItem(int position, ScrollBoxItem*);
-	void clear();
-
+	virtual void insertItem(int position, ScrollBoxItem*);
 	void deleteItem(int position);
+
 	ScrollBoxItem *getItem(int position);
+	void clear();
 
 	// selection
 	void deleteSelection();
 	void clearSelection();
 	const std::set<int>& getSelection();
 	int getLastSelected();
-	
 	//void select(ScrollBoxItem*);
 	void addToSelection(int);
 	void removeFromSelection(int);
@@ -49,14 +49,21 @@ public:
 	void forceSelect(int); // hack, for the narrative player, does not emit signals
 
 	void setSpacing(int);
-	
-	virtual void openMenu(QPoint globalPos);
-	virtual void openItemMenu(QPoint globalPos);
+
+	void setMenu(QMenu *menu);
+	void setItemMenu(QMenu *menu);
+
+	// Data tracking
+	void setGroup(Group *group);
 
 signals:
 	void sSelectionChange();
 
 protected:
+	// these are used to link new/delete signals from groups to creation of new items
+	void insertNewItem(int position);
+	virtual ScrollBoxItem *createItem(osg::Node*);
+
 	// qt overrides
 	virtual void resizeEvent(QResizeEvent* event);
 	virtual void wheelEvent(QWheelEvent* event);
@@ -84,7 +91,11 @@ protected:
 	//float m_ratio; // width to height ratio for items
 	//float m_space_ratio; // TODO: width to height ratio for spaces
 
-	
+	QMenu *m_menu;
+	QMenu *m_item_menu;
+
+	Group *m_group;
+
 };
 
 #endif // HORIZONTALSCROLLBOX_H
