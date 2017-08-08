@@ -10,9 +10,6 @@ SlideScrollItem::SlideScrollItem()
 	ui.transition_label->installEventFilter(this);
 	ui.duration_label->installEventFilter(this);
 
-	setTransition(2.0f);
-	setDuration(true, 0.0f);
-
 	m_thumbnail_dirty = true;
 }
 
@@ -31,7 +28,6 @@ void SlideScrollItem::setImage(const QImage & img)
 //}
 void SlideScrollItem::setTransition(float duration)
 {
-	qDebug() << "set transition";
 	ui.transition_label->setText(QString::number(duration, 'f', 1) + "s");
 }
 

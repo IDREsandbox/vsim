@@ -40,8 +40,7 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 void SlideScrollBox::setNarrative(Narrative2 *narrative)
 {
 	// disconnect incoming signals if already connected to a narrative
-	disconnect(0, &Narrative2::sNewSlide, this, &SlideScrollBox::newItem);
-	disconnect(0, &Narrative2::sDeleteSlide, this, &HorizontalScrollBox::deleteItem);
+	if (m_narrative != nullptr) disconnect(m_narrative, 0, this, 0);
 
 	clear();
 	m_narrative = narrative;
@@ -52,15 +51,8 @@ void SlideScrollBox::setNarrative(Narrative2 *narrative)
 	connect(m_narrative, &Narrative2::sNewSlide, this, &SlideScrollBox::newItem);
 	connect(m_narrative, &Narrative2::sDeleteSlide, this, &HorizontalScrollBox::deleteItem);
 
-	uint nc = narrative->getNumChildren();
-	for (uint i = 0; i < nc; i++) {
-		qDebug() << "reloading child" << i;
-		NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(narrative->getChild(i));
-		if (!slide) {
-			qWarning() << "Load error: non-narrative detected in narrative children";
-		}
-		//qDebug() << "loading slide" << node->getDuration() << node->getStayOnNode() << node->getTransitionDuration();
-		insertNewSlide(i, slide);
+	for (uint i = 0; i < narrative->getNumChildren(); i++) {
+		newItem(i);
 	}
 }
 

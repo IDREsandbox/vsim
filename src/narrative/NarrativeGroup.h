@@ -22,13 +22,13 @@ public: // COMMANDS
 	class NewNarrativeCommand : public NewNodeCommand<NarrativeGroup, Narrative2> {
 	public:
 		NewNarrativeCommand(NarrativeGroup *group, int index, QUndoCommand *parent = nullptr)
-			: NewNodeCommand(&NarrativeGroup::sNewNarrative, &NarrativeGroup::sDeleteNarrative, group, index, parent) {}
+			: NewNodeCommand(&sNewNarrative, &sDeleteNarrative, group, index, parent) {}
 	};
 
 	class DeleteNarrativeCommand : public DeleteNodeCommand<NarrativeGroup, Narrative2> {
 	public:
 		DeleteNarrativeCommand(NarrativeGroup *group, int index, QUndoCommand *parent = nullptr)
-			: DeleteNodeCommand(&NarrativeGroup::sNewNarrative, &NarrativeGroup::sDeleteNarrative, group, index, parent) {}
+			: DeleteNodeCommand(&sNewNarrative, &sDeleteNarrative, group, index, parent) {}
 	};
 
 

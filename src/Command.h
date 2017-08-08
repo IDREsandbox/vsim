@@ -79,7 +79,7 @@ private:
 	void(C::*m_new_signal)(int);
 	void(C::*m_delete_signal)(int);
 	C *m_group;
-	osg::ref_ptr<osg::Node> m_node;
+	osg::ref_ptr<T> m_node;
 	int m_index;
 };
 
@@ -95,7 +95,10 @@ public:
 		: m_new_signal(new_signal),
 		m_delete_signal(delete_signal),
 		m_group(group),
-		m_index(index) {}
+		m_index(index) 
+	{
+		m_node = dynamic_cast<T*>(group->getChild(index));
+	}
 	void undo() {
 		m_group->insertChild(m_index, m_node);
 		(m_group->*m_new_signal)(m_index);
@@ -108,7 +111,7 @@ private:
 	void(C::*m_new_signal)(int);
 	void(C::*m_delete_signal)(int);
 	C *m_group;
-	osg::ref_ptr<osg::Node> m_node;
+	osg::ref_ptr<T> m_node;
 	int m_index;
 };
 #endif

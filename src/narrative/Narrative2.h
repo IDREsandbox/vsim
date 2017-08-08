@@ -29,41 +29,41 @@ public:
 	void setLock(bool lock){ m_locked = lock;}
 
 signals:
-	void sNewSlide(int); 
+	void sTitleChanged(const std::string&);
+	void sAuthorChanged(const std::string&);
+	void sDescriptionChanged(const std::string&);
+
+	void sNewSlide(int);
 	void sDeleteSlide(int);
 
 public: // COMMANDS
-	//class NewSlideCommand : public QUndoCommand {
-	//public:
-	//	NewSlideCommand(Narrative2 *narrative, int slide_index, QUndoCommand *parent = nullptr);
-	//	void undo();
-	//	void redo();
-	//private:
-	//	Narrative2 *m_narrative;
-	//	osg::ref_ptr<NarrativeSlide> m_slide;
-	//	int m_index;
-	//};
-	//class DeleteSlideCommand : public QUndoCommand {
-	//public:
-	//	DeleteSlideCommand(Narrative2 *narrative, int slide_index, QUndoCommand *parent = nullptr);
-	//	void undo();
-	//	void redo();
-	//private:
-	//	Narrative2 *m_narrative;
-	//	osg::ref_ptr<NarrativeSlide> m_slide;
-	//	int m_index;
-	//};
+
+	class SetTitleCommand : public ModifyCommand<Narrative2, const std::string&> {
+	public:
+		SetTitleCommand(Narrative2 *nar, const std::string &title, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&getTitle, &setTitle, title, nar, parent) {}
+	};
+	class SetAuthorCommand : public ModifyCommand<Narrative2, const std::string&> {
+	public:
+		SetAuthorCommand(Narrative2 *nar, const std::string &author, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&getAuthor, &setAuthor, author, nar, parent) {}
+	};
+	class SetDescriptionCommand : public ModifyCommand<Narrative2, const std::string&> {
+	public:
+		SetDescriptionCommand(Narrative2 *nar, const std::string &desc, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&getDescription, &setDescription, desc, nar, parent) {}
+	};
 
 	class NewSlideCommand : public NewNodeCommand<Narrative2, NarrativeSlide> {
 	public:
 		NewSlideCommand(Narrative2 *narrative, int slide_index, QUndoCommand *parent = nullptr)
-			: NewNodeCommand(&Narrative2::sNewSlide, &Narrative2::sDeleteSlide, narrative, slide_index, parent)	{}
+			: NewNodeCommand(&sNewSlide, &sDeleteSlide, narrative, slide_index, parent)	{}
 	};
 
 	class DeleteSlideCommand : public DeleteNodeCommand<Narrative2, NarrativeSlide> {
 	public:
 		DeleteSlideCommand(Narrative2 *narrative, int slide_index, QUndoCommand *parent = nullptr)
-			: DeleteNodeCommand(&Narrative2::sNewSlide, &Narrative2::sDeleteSlide, narrative, slide_index, parent) {}
+			: DeleteNodeCommand(&sNewSlide, &sDeleteSlide, narrative, slide_index, parent) {}
 	};
 
 private:

@@ -69,6 +69,7 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 
 	m_narrative_control->load(m_root->narratives());
 
+	m_window->m_undo_stack->clear();
 	m_window->m_osg_widget->reset();
 	//m_viewer->getCamera()->setProjectionMatrixAsPerspective(75.0f, )
 	

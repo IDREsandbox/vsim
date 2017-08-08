@@ -3,14 +3,15 @@
 #include <QWidget>
 #include "ui_NarrativeScrollItem.h"
 #include "ScrollBoxItem.h"
+#include "narrative/Narrative2.h"
 
 class NarrativeScrollItem : public ScrollBoxItem {
 	Q_OBJECT
 
 public:
 	NarrativeScrollItem();
-
-	void setInfo(const std::string &title, const std::string &description);
+	NarrativeScrollItem(Narrative2 *narrative);
+	void setNarrative(Narrative2 *narrative);
 
 protected:
 	void mousePressEvent(QMouseEvent *event);
@@ -20,6 +21,8 @@ signals:
 
 private:
 	Ui::NarrativeScrollItem ui;
+	Narrative2 *m_narrative;
+	QList<QMetaObject::Connection> m_connections;
 };
 
 #endif // NARRATIVESCROLLITEM_H

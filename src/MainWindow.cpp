@@ -36,9 +36,6 @@ MainWindow::MainWindow(QWidget *parent)
 	ui.menuEdit->addAction(undo_action);
 	ui.menuEdit->addAction(redo_action);
 
-	// narrative info dialog
-	m_narrative_info_dialog = new NarrativeInfoDialog(this);
-
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui.root);
 	m_osg_widget->lower(); // move this to the back
@@ -90,16 +87,6 @@ MainWindow::MainWindow(QWidget *parent)
 			qDebug() << "goback";
 			this->ui.topBar->showNarratives();
 		});
-
-	// connect narrative info
-	connect(m_narrative_info_dialog, &QDialog::accepted, this, [this] { qDebug() << "narrative accept";
-		auto data = this->m_narrative_info_dialog->getInfo();
-		qDebug() << "Title:" << data.m_title.c_str();
-		qDebug() << "Description:" << data.m_description.c_str();
-		qDebug() << "Author:" << data.m_contact.c_str();
-		});
-	connect(m_narrative_info_dialog, &QDialog::rejected, this, [this] { qDebug() << "narrative reject"; });
-	connect(m_narrative_info_dialog, &QDialog::finished, this, [this](int i) { qDebug() << "narrative finished" << i; });
 
 }
 

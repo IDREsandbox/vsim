@@ -14,7 +14,8 @@ public:
 
 	void setNarrativeGroup(NarrativeGroup *group);
 
-	void addItem(const std::string &title, const std::string &description);
+	void newItem(int index);
+	void insertNewNarrative(int index, Narrative2* narrative);
 
 	virtual void openMenu(QPoint globalPos);
 	virtual void openItemMenu(QPoint globalPos);

@@ -68,7 +68,6 @@ signals:
 	// ui, signal emitters
 public:
 	Ui::MainWindow ui;
-	NarrativeInfoDialog *m_narrative_info_dialog;
 
 public:
 	OSGViewerWidget *m_osg_widget;
