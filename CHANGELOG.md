@@ -1,5 +1,20 @@
 # Changelog
 
+## 2017-08-8
+### Added
+- Undo/redo for narratives and slides
+- Undo/redo menu buttons and shortcuts
+- Added VSimRoot, does conversion from old .vsim, reduces resposibilities of VSimApp
+- Group, NarrativeGroup, ModelGroup replace osg::Group so that signals can come out of them
+- Added modelview.md, qteventorder.txt to docs
+- Added generic undoable commands for manipulating simple variables, see Command.h
+
+### Changed
+- Moved cmake cheatsheet to docs
+- Made the slide selection brighter
+- Removed execMenu virtual functions in HorizontalScrollBox
+- Edit dialog responsibilites given to NarrativeControl
+
 ## 2017-07-31
 ### Added
 - shift-B - backface culling
