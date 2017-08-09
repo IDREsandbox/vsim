@@ -85,7 +85,7 @@ void VSimRoot::debug()
 		if (!nar) continue;
 		qInfo() << "Narrative" << i << QString::fromStdString(nar->getTitle());
 		for (uint j = 0; j < nar->getNumChildren(); j++) {
-			NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(nar->getChild(i));
+			NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(nar->getChild(j));
 			qInfo() << "\tSlide" << j << slide->getTransitionDuration();
 		}
 	}

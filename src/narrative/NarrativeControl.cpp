@@ -450,6 +450,7 @@ void NarrativeControl::setSlideDuration()
 		}
 		else {
 			m_undo_stack->push(new NarrativeSlide::SetDurationCommand(slide, duration));
+			m_undo_stack->push(new NarrativeSlide::SetStayOnNodeCommand(slide, false));
 		}
 	}
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, selection));
