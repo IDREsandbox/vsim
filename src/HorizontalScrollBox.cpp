@@ -211,6 +211,7 @@ bool HorizontalScrollBox::isSelected(int index)
 
 void HorizontalScrollBox::deleteItem(int position)
 {
+	m_last_selected = -1;
 	clearSelection();
 	ScrollBoxItem* item = m_items.takeAt(position);
 	delete item;
