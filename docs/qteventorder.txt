@@ -1,0 +1,16 @@
+
+Qt Event order
+
+stealer click <- event filter on child
+child mouse press event <- child widget
+snooper click <- event filter on parent
+parent mouse press <- parent
+child mouse double <- double child -> default double -> single
+child mouse press event <- double child 2
+snooper double click <- filter
+mouse double click <- parent (default)
+
+double clicks first look for a double click handler,
+ if it doesn't exist then the default forwards the event to the single click handler
+
+i have no clue what accep does
