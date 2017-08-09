@@ -16,7 +16,8 @@ class SlideScrollBox : public HorizontalScrollBox {
 public:
 	SlideScrollBox(QWidget * parent = nullptr);
 
-	SlideScrollItem *getItem(int);
+	SlideScrollItem *getItem(int index);
+	
 	ScrollBoxItem *createItem(osg::Node *node) override;
 
 	std::vector<SlideScrollItem*> getDirtySlides(); // slides whose thumbnails need to be drawn

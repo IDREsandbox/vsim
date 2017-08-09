@@ -53,7 +53,7 @@ namespace Util
 	osg::Matrixd viewMatrixLerp(double t, osg::Matrixd m0, osg::Matrixd m1);
 
 	// Exponential interpolation? Returns the new value of start
-	// - factor is the portion remaining after the step
+	// - factor is the portion remaining after the stepf
 	// - if (end-start) is smaller than clip, then we jump to the end
 	// ex. exponentialSmooth(start=1, end=2, factor=.25, dt=1, clip=0) is 1.25
 	// ex. exponentialSmooth(start=1, end=1.1, factor=.5, dt=1, clip=.2) is 1.1
@@ -64,4 +64,17 @@ namespace Util
 
 	// 
 	QString osgMatrixToQString(osg::Matrix);
+	osg::Vec4d mult_vec(osg::Matrixd M, osg::Vec4d v);
+
+	//4x4 transpose
+	osg::Matrixd transpose(osg::Matrixd m);
+
+	struct endPt {
+		osg::Vec3d pos;
+		osg::Vec3d tan;
+	};
+	
+	osg::Matrixd camMatHerm(double t, osg::Matrixd m0, osg::Matrixd m1);
+
+	Util::endPt hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl = .0001);
 }

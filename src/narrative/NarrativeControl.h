@@ -1,5 +1,5 @@
-#ifndef NARRATIVELIST_H_
-#define NARRATIVELIST_H_
+#ifndef NARRATIVECONTROL_H
+#define NARRATIVECONTROL_H
 
 #include <set>
 #include <osg/Node>
@@ -11,6 +11,7 @@
 #include "HorizontalScrollBox.h"
 #include "MainWindow.h"
 #include "dragLabel.h"
+#include "editButtons.h"
 
 // Interface to the underlying osg data for narratives
 // Exactly one should exist per VSimApp
@@ -44,7 +45,7 @@ public:
 	NarrativeSlide *getNarrativeSlide(int narrative, int slide);
 
 	void redrawThumbnails(const std::vector<SlideScrollItem*> slides);
-	QImage generateThumbnail();
+	QImage generateThumbnail(int option = 1);
 
 	// Narratives
 	void newNarrative();
@@ -60,11 +61,18 @@ public:
 	void setSlideCamera();
 	
 public slots:
-	// Canvas
+
+	//editDlg buttons
+	void exitEdit();
+	void deleteLabelButton();
+	void newLabelButton(QString style);
+
+	//Canvas
 	void newLabel(std::string, int idx);
 	void moveLabel(QPoint pos, int idx);
 	void resizeLabel(QSize size, int idx);
 	void textEditLabel(QString str, int idx);
+	void deleteLabel(int idx);
 
 private:
 	int nextSelectionAfterDelete(int total, std::set<int> selection);
@@ -80,7 +88,9 @@ private:
 	NarrativeScrollBox *m_narrative_box;
 	SlideScrollBox *m_slide_box;
 	labelCanvas *m_canvas;
-
+	
+	editButtons* editDlg;
+	
 	QUndoStack *m_undo_stack;
 };
 
@@ -126,4 +136,4 @@ private:
 //	std::set<int> m_labels;
 //};
 
-#endif /* NARRATIVELIST_H_ */
+#endif

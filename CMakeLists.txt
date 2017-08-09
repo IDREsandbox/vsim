@@ -309,6 +309,9 @@ if (WIN32)
     message("imported target: ${dll}, path: ${dll_location}")
   endforeach(dll)
 
+  # windows platform
+  install(FILES ${QT_DIR}/plugins/platforms/qwindows.dll DESTINATION platforms)
+
 endif(WIN32)
 
 IF(CMAKE_BUILD_TYPE MATCHES DEBUG)

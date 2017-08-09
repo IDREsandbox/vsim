@@ -31,8 +31,10 @@ public:
 	//void recalcFontRatios();
 
 	void paintEvent(QPaintEvent *event);
-	void showEvent(QShowEvent* event);
-	void resizeEvent(QResizeEvent* event);
+	//void showEvent(QShowEvent* event);
+	//void resizeEvent(QResizeEvent* event);
+
+
 	void ValignMiddle(QTextEdit* pTextEdit);
 
 	void canvasResize();
@@ -48,7 +50,7 @@ public:
 	QPoint offset;
 	QPoint resizeOffset;
 
-	float scaleFactor = 1;
+	//float scaleFactor = 1;
 	
 	//float ratioFHeight;
 	//float ratioFWidth;

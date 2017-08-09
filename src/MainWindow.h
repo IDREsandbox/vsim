@@ -14,6 +14,7 @@
 #include "narrative/NarrativeInfoDialog.h"
 #include "dragLabelInput.h"
 #include "labelCanvas.h"
+#include "labelCanvasView.h"
 
 //#include "VSimApp.h"
 
@@ -21,6 +22,7 @@
 
 class VSimApp;
 class labelCanvas;
+class labelCanvasView;
 
 class MainWindow : public QMainWindow
 {
@@ -73,6 +75,7 @@ public:
 	OSGViewerWidget *m_osg_widget;
 	labelCanvas *m_drag_area;
 	QUndoStack *m_undo_stack;
+	labelCanvasView *m_view;
 };
 
 

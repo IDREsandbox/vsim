@@ -22,6 +22,7 @@
 
 #define OPTIMIZE 0
 
+
 VSimApp::VSimApp(MainWindow* window)
 	: m_window(window)
 {
