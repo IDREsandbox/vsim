@@ -82,6 +82,7 @@ void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 	select(index);
 	item->show();
 	refresh();
+	m_last_selected = index;
 }
 
 void HorizontalScrollBox::insertNewItem(int index)
@@ -140,6 +141,17 @@ void HorizontalScrollBox::clearSelection()
 	}
 	m_selection.clear();
 	emit sSelectionChange();
+}
+
+void HorizontalScrollBox::setSelection(std::set<int> selection)
+{
+	clearSelection();
+	for (auto i : selection) {
+		if (i < 0 || i > m_items.size()) continue;
+		addToSelection(i);
+	}
+
+	// have the viewport focus the selection
 }
 
 const std::set<int>& HorizontalScrollBox::getSelection()

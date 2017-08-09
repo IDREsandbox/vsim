@@ -87,13 +87,17 @@ void NarrativeControl::newNarrative()
 	}
 
 	// for now just add to the end
+	m_undo_stack->beginMacro("New Narrative");
+	int num_children = m_narrative_group->getNumChildren();
+	m_undo_stack->push(new SelectNarrativesCommand(this, { num_children - 1 }, ON_UNDO));
 	m_undo_stack->push(new NarrativeGroup::NewNarrativeCommand(m_narrative_group, m_narrative_group->getNumChildren()));
+	m_undo_stack->push(new SelectNarrativesCommand(this, { num_children }, ON_REDO));
+	m_undo_stack->endMacro();
 
 	Narrative2 *narrative = getNarrative(m_narrative_group->getNumChildren() - 1);
 	narrative->setTitle(dlg.getTitle());
 	narrative->setAuthor(dlg.getAuthor());
 	narrative->setDescription(dlg.getDescription());
-
 }
 
 void NarrativeControl::editNarrativeInfo()
@@ -115,6 +119,7 @@ void NarrativeControl::editNarrativeInfo()
 	}
 
 	m_undo_stack->beginMacro("Set Narrative Info");
+	m_undo_stack->push(new SelectNarrativesCommand(this, { active_item }));
 	m_undo_stack->push(new Narrative2::SetTitleCommand(narrative, dlg.getTitle()));
 	m_undo_stack->push(new Narrative2::SetAuthorCommand(narrative, dlg.getAuthor()));
 	m_undo_stack->push(new Narrative2::SetDescriptionCommand(narrative, dlg.getDescription()));
@@ -125,14 +130,17 @@ void NarrativeControl::deleteNarratives()
 {
 	std::set<int> selection = m_narrative_box->getSelection();
 	if (selection.empty()) return;
+	int next_selection = nextSelectionAfterDelete(m_narrative_group->getNumChildren(), selection);
 
 	// get pointers to nodes to delete
 	m_undo_stack->beginMacro("Delete Narratives");
+	m_undo_stack->push(new SelectNarrativesCommand(this, selection, ON_UNDO));
 	// delete in reverse order
 	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
 		qDebug() << "pushing delete narrative" << *i;
 		m_undo_stack->push(new NarrativeGroup::DeleteNarrativeCommand(m_narrative_group, *i));
 	}
+	m_undo_stack->push(new SelectNarrativesCommand(this, {next_selection}, ON_REDO));
 	m_undo_stack->endMacro();
 }
 
@@ -153,6 +161,11 @@ void NarrativeControl::openNarrative()
 	int index = m_narrative_box->getLastSelected();
 	if (index < 0) return;
 
+	setNarrative(index);
+}
+
+void NarrativeControl::setNarrative(int index)
+{
 	qDebug() << "open narrative at" << index;
 	this->m_window->ui.topBar->showSlides();
 	m_current_narrative = index;
@@ -160,8 +173,6 @@ void NarrativeControl::openNarrative()
 	Narrative2 *nar = getNarrative(index);
 	this->m_window->ui.topBar->setSlidesHeader(nar->getTitle());
 	m_slide_box->setGroup(nar);
-
-	//m_canvas->exitEdit();
 }
 
 void NarrativeControl::closeNarrative()
@@ -187,6 +198,21 @@ void NarrativeControl::openSlide() //should handle loading widgets onto canvas
 	//}
 
 	//curSl->setThumbnail(Util::imageQtToOsg(generateThumbnail()));
+}
+
+void NarrativeControl::selectNarratives(std::set<int> narratives)
+{
+	closeNarrative();
+	m_narrative_box->setSelection(narratives);
+}
+
+void NarrativeControl::selectSlides(int narrative, std::set<int> slides)
+{
+	if (m_current_narrative != narrative) {
+		setNarrative(narrative);
+	}
+	m_narrative_box->setSelection({narrative});
+	m_slide_box->setSelection({slides});
 }
 
 void NarrativeControl::newLabel(std::string str, int idx) {
@@ -263,6 +289,24 @@ void NarrativeControl::textEditLabel(QString str, int idx) {
 	lab->setText(str.toStdString());
 }
 
+int NarrativeControl::nextSelectionAfterDelete(int total, std::set<int> selection)
+{
+	// figure out the selection after deleting
+	int first_index = *selection.begin();
+	int remaining = total - selection.size();
+	int next_selection;
+	if (remaining == 0) { // everyone's gone
+		next_selection = -1;
+	}
+	else if (remaining >= first_index + 1) {
+		next_selection = first_index; // select next non-deleted item
+	}
+	else {
+		next_selection = first_index - 1; // select the previous item
+	}
+	return next_selection;
+}
+
 Narrative2 *NarrativeControl::getNarrative(int index)
 {
 	if (index < 0 || (uint)index >= m_narrative_group->getNumChildren()) {
@@ -297,9 +341,20 @@ void NarrativeControl::newSlide()
 		index = m_slide_box->getLastSelected() + 1;
 	}
 	qDebug() << "before push";
+
+	// figure out what to select if we were to undo
+	int undo_selection;
+	if (nar->getNumChildren() == 0) undo_selection = -1;
+	else if (index == 0) undo_selection = index;
+	else undo_selection = index - 1;
+
 	// perform command
+	m_undo_stack->beginMacro("New Slide");
+	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, { undo_selection }, ON_UNDO));
 	m_undo_stack->push(new Narrative2::NewSlideCommand(nar, index));
-	
+	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, { index }, ON_REDO));
+	m_undo_stack->endMacro();
+
 	qDebug() << "after push";
 
 	// initialization
@@ -327,14 +382,17 @@ void NarrativeControl::deleteSlides()
 	qDebug() << "delete slides";
 	std::set<int> selection = m_slide_box->getSelection();
 	Narrative2 *nar = getNarrative(m_current_narrative);
+
+	int next_selection = nextSelectionAfterDelete(nar->getNumChildren(), selection);
 	
-	// perform command
 	m_undo_stack->beginMacro("Delete Narratives");
+	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, selection, ON_UNDO));
 	// we need to delete in reverse order to get the indices right
 	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
 		qDebug() << "pushing delete" << *i;
 		m_undo_stack->push(new Narrative2::DeleteSlideCommand(nar, *i));
 	}
+	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, {next_selection}, ON_REDO));
 	m_undo_stack->endMacro();
 }
 
@@ -365,6 +423,7 @@ void NarrativeControl::setSlideDuration()
 			m_undo_stack->push(new NarrativeSlide::SetDurationCommand(slide, duration));
 		}
 	}
+	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, selection));
 	m_undo_stack->endMacro();
 }
 
@@ -383,6 +442,7 @@ void NarrativeControl::setSlideTransition()
 		NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
 		m_undo_stack->push(new NarrativeSlide::SetTransitionDurationCommand(slide, duration));
 	}
+	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, selection));
 	m_undo_stack->endMacro();
 }
 
@@ -397,6 +457,7 @@ void NarrativeControl::setSlideCamera()
 		NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
 		m_undo_stack->push(new NarrativeSlide::SetCameraMatrixCommand(slide, matrix));
 	}
+	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, selection));
 	m_undo_stack->endMacro();
 }
 
@@ -453,4 +514,42 @@ QImage NarrativeControl::generateThumbnail()
 	QImage smallimg;
 	smallimg = img.scaled(288, 162, Qt::IgnoreAspectRatio);
 	return smallimg;
+}
+
+
+SelectNarrativesCommand::SelectNarrativesCommand(NarrativeControl *control, std::set<int> narratives, SelectionCommandWhen when, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_control(control),
+	m_narratives(narratives),
+	m_when(when)
+{
+}
+void SelectNarrativesCommand::undo() {
+	if (m_when != ON_REDO) {
+		m_control->selectNarratives(m_narratives);
+	}
+}
+void SelectNarrativesCommand::redo() {
+	if (m_when != ON_UNDO) {
+		m_control->selectNarratives(m_narratives);
+	}
+}
+
+SelectSlidesCommand::SelectSlidesCommand(NarrativeControl *control, int narrative, std::set<int> slides, SelectionCommandWhen when, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_control(control),
+	m_narrative(narrative),
+	m_slides(slides),
+	m_when(when)
+{
+}
+void SelectSlidesCommand::undo() {
+	if (m_when != ON_REDO) {
+		m_control->selectSlides(m_narrative, m_slides);
+	}
+}
+void SelectSlidesCommand::redo() {
+	if (m_when != ON_UNDO) {
+		m_control->selectSlides(m_narrative, m_slides);
+	}
 }

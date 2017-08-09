@@ -39,6 +39,7 @@ public:
 	// selection
 	void deleteSelection();
 	void clearSelection();
+	void setSelection(std::set<int>); // does negative checking
 	const std::set<int>& getSelection();
 	int getLastSelected();
 	//void select(ScrollBoxItem*);

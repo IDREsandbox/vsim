@@ -28,9 +28,15 @@ public:
 	//void loadSlides(Narrative2 *narrative);
 	void load(NarrativeGroup *narratives);
 
-	//void showSlides(int index);
-	void openNarrative();
+	// selection and focus
+	void openNarrative(); // if index <0 then it uses the the narrative box selection
+	void setNarrative(int index);
 	void closeNarrative();
+	void openSlide();
+
+	void selectNarratives(std::set<int> narratives);
+	void selectSlides(int narrative, std::set<int> slides);
+	void selectLabels(int narrative, int slide, std::set<int> labels);
 
 	// this should be const or it is dangerous to have public
 	// it means that ppl can change narrative data w/o it being updated by the gui
@@ -40,28 +46,12 @@ public:
 	void redrawThumbnails(const std::vector<SlideScrollItem*> slides);
 	QImage generateThumbnail();
 
-	// All Commands -
 	// Narratives
-	//	New Narrative
-	//	Delete Narrative
-	//	Set Narrative Info
-	//	(Move Narrative)
-	//	Duplicate Narrative
-	//	Import Narrative
 	void newNarrative();
 	void editNarrativeInfo();
 	void deleteNarratives();
 
-	//Slides
-	//	New Slide
-	//	Delete Slides
-	//	Set Slide Duration
-	//	Set Slide Transition
-	//  Set Slide Camera
-	//	Move Slides
-	//	Duplicate Slides
-	// these act on currently selected items
-	// TODO: versions using sets, ex. deleteSlides(std::set<int>)
+	// Slides
 	void newSlide();
 	void deleteSlides();
 	void editSlide();
@@ -69,24 +59,16 @@ public:
 	void setSlideTransition();
 	void setSlideCamera();
 	
-	//Canvas
-	//void newLabel(int idx);
-	//	Delete Box
-	//	Move Box
-	//	Edit Box Content
-
 public slots:
-	//Canvas
+	// Canvas
 	void newLabel(std::string, int idx);
 	void moveLabel(QPoint pos, int idx);
 	void resizeLabel(QSize size, int idx);
 	void textEditLabel(QString str, int idx);
-	//	Delete Box
-	//	Move Box
-	//	Edit Box Content
-	void openSlide();
 
 private:
+	int nextSelectionAfterDelete(int total, std::set<int> selection);
+
 	int m_current_narrative;
 	int m_current_slide;
 
@@ -101,5 +83,47 @@ private:
 
 	QUndoStack *m_undo_stack;
 };
+
+enum SelectionCommandWhen {
+	ON_UNDO,
+	ON_REDO,
+	ON_BOTH
+};
+
+class SelectNarrativesCommand : public QUndoCommand {
+public:
+	SelectNarrativesCommand(NarrativeControl *control, std::set<int> narratives, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+	void undo();
+	void redo();
+private:
+	NarrativeControl *m_control;
+	SelectionCommandWhen m_when;
+	std::set<int> m_narratives;
+};
+
+class SelectSlidesCommand : public QUndoCommand {
+public:
+	SelectSlidesCommand(NarrativeControl *control, int narrative, std::set<int> slides, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+	void undo();
+	void redo();
+private:
+	NarrativeControl *m_control;
+	SelectionCommandWhen m_when;
+	int m_narrative;
+	std::set<int> m_slides;
+};
+
+//class SelectLabelsCommand : public QUndoCommand {
+//public:
+//	SelectLabelsCommand(NarrativeControl *control, int narrative, int slide, std::set<int> labels, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+//	void undo();
+//	void redo();
+//private:
+//	NarrativeControl *m_control;
+//	SelectionCommandWhen m_when;
+//	int m_narrative;
+//	int m_slides;
+//	std::set<int> m_labels;
+//};
 
 #endif /* NARRATIVELIST_H_ */
