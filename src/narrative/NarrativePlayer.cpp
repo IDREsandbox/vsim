@@ -157,7 +157,7 @@ void NarrativePlayer::play()
 	m_narratives->exitEdit();
 
 	NarrativeSlideLabels* data;
-	NarrativeSlide *curSl = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+	NarrativeSlide *curSl = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 	for (uint i = 0; i < curSl->getNumChildren(); i++) {
 		data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
 		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
@@ -211,7 +211,7 @@ void NarrativePlayer::next()
 		m_canvas->setGraphicsEffect(effect);
 
 		NarrativeSlideLabels* data;
-		NarrativeSlide *curSl = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		NarrativeSlide *curSl = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 		for (uint i = 0; i < curSl->getNumChildren(); i++) {
 			data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
 			//qDebug() << i;

@@ -170,7 +170,7 @@ void NarrativeControl::deleteLabel(int idx)
 	m_current_slide = m_slide_box->getLastSelected();
 	if (m_current_slide < 0) return;
 
-	NarrativeSlide* curSl = getNarrativeNode(m_current_narrative, m_current_slide);
+	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
 	NarrativeSlideLabels* data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
 
 	curSl->removeChild(data);
@@ -209,9 +209,6 @@ void NarrativeControl::setNarrative(int index)
 	this->m_window->ui.topBar->setSlidesHeader(nar->getTitle());
 	m_slide_box->setGroup(nar);
 	this->exitEdit();
-	
-	loadSlides(getNarrative(index));
-	this->exitEdit();
 
 	if (nar->getNumChildren() > 0) {
 		m_slide_box->setLastSelected(0);
@@ -242,6 +239,9 @@ void NarrativeControl::openSlide()
 	}
 }
 
+void NarrativeControl::deleteLabelButton() {
+	m_canvas->deleteLabel();
+}
 
 void NarrativeControl::exitEdit() {
 	editDlg->hide();
@@ -298,15 +298,6 @@ void NarrativeControl::moveLabel(QPoint pos, int idx) {
 	lab->setrX(temp->ratioX);
 	lab->setrY(temp->ratioY);
 
-	int flag = 0;
-	if (m_canvas->editDlg->isVisible()) {
-		m_canvas->exitEdit();
-		flag = 1;
-	}
-
-	if (flag == 1)
-		m_canvas->editCanvas();
-
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
 	item->setThumbnailDirty(true);
 }
@@ -317,14 +308,6 @@ void NarrativeControl::resizeLabel(QSize size, int idx) {
 	dragLabel* temp = m_canvas->m_items.at(idx);
 	lab->setrH(temp->ratioHeight);
 	lab->setrW(temp->ratioWidth);
-
-	int flag = 0;
-	if (m_canvas->editDlg->isVisible()) {
-		m_canvas->exitEdit();
-		flag = 1;
-	}
-	if (flag == 1)
-		m_canvas->editCanvas();
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
 	item->setThumbnailDirty(true);
@@ -407,19 +390,6 @@ void NarrativeControl::newSlide()
 	NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
 	slide->setCameraMatrix(matrix);
 
-	qDebug() << "after set camera matrix";
-	// initializing the new slide
-
-	// canvas stuff
-	int flag = 0;
-	if (m_canvas->editDlg->isVisible()) {
-		m_canvas->exitEdit();
-		flag = 1;
-	}
-
-	if (flag == 1)
-		m_canvas->editCanvas();
-	
 	m_slide_box->setLastSelected(m_current_slide + 1);
 	openSlide();
 }
