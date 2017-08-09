@@ -147,11 +147,17 @@ void HorizontalScrollBox::setSelection(std::set<int> selection)
 {
 	clearSelection();
 	for (auto i : selection) {
-		if (i < 0 || i > m_items.size()) continue;
+		if (i < 0 || i >= m_items.size()) continue;
 		addToSelection(i);
 	}
 
-	// have the viewport focus the selection
+	// have the viewport focus the first selected item
+	if (!selection.empty()) {
+		int first = *selection.begin();
+		if (first < 0) return;
+		if (first >= m_items.size()) return;
+		ensureWidgetVisible(m_items[first]);
+	}
 }
 
 const std::set<int>& HorizontalScrollBox::getSelection()

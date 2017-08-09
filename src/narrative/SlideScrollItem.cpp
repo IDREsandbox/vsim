@@ -88,11 +88,10 @@ int SlideScrollItem::widthFromHeight(int height)
 void SlideScrollItem::colorFocus(bool color)
 {
 }
-
 void SlideScrollItem::colorSelect(bool color)
 {
 	if (color) {
-		this->setStyleSheet("background-color: rgba(0,0,255,50);");
+		this->setStyleSheet("background-color: rgba(0,100,255,200);");
 	}
 	else {
 		this->setStyleSheet("background-color: rgba(0,0,0,0);");

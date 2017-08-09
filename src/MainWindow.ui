@@ -583,7 +583,7 @@ border-color: rgb(238, 238, 238);
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>FreezeCamera</string>
+    <string>Freeze Camera</string>
    </property>
    <property name="shortcut">
     <string>Space</string>
