@@ -33,6 +33,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 {
 	// Create viewer, graphics context, and link them together
 	viewer_ = new osgViewer::Viewer;
+	//viewer_->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 	//osg::ref_ptr<osg::DisplaySettings> display_settings = new osg::DisplaySettings;
 	//display_settings->setNumMultiSamples(8);
 	//viewer_->setDisplaySettings(display_settings);
@@ -56,6 +57,8 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	camera->setClearColor(osg::Vec4(51/255.f, 51/255.f, 102/255.f, 1.f));
 	camera->setProjectionMatrixAsPerspective(55.f, aspectRatio, 1.f, 7500.f);
 	camera->setGraphicsContext(graphicsWindow_); // set the context
+	camera->setCullingMode(osg::Camera::NO_CULLING);
+
 
 	// Stats Handler
 	osgViewer::StatsHandler *stats_handler = new osgViewer::StatsHandler;

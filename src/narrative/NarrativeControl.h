@@ -33,7 +33,6 @@ public:
 	void openNarrative(); // if index <0 then it uses the the narrative box selection
 	void setNarrative(int index);
 	void closeNarrative();
-	void openSlide();
 
 	void selectNarratives(std::set<int> narratives);
 	void selectSlides(int narrative, std::set<int> slides);
@@ -61,6 +60,7 @@ public:
 	void setSlideCamera();
 	
 public slots:
+	void openSlide();
 
 	//editDlg buttons
 	void exitEdit();
@@ -73,6 +73,8 @@ public slots:
 	void resizeLabel(QSize size, int idx);
 	void textEditLabel(QString str, int idx);
 	void deleteLabel(int idx);
+
+	void debug();
 
 private:
 	int nextSelectionAfterDelete(int total, std::set<int> selection);

@@ -92,6 +92,8 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_slide_box, &SlideScrollBox::sThumbnailsDirty, this, 
 		[this]() {redrawThumbnails(m_slide_box->getDirtySlides()); }
 		);
+
+	connect(window->ui.actionControl_Debug, &QAction::triggered, this, &NarrativeControl::debug);
 }
 
 NarrativeControl::~NarrativeControl()
@@ -179,6 +181,13 @@ void NarrativeControl::deleteLabel(int idx)
 	item->setThumbnailDirty(true);
 }
 
+void NarrativeControl::debug()
+{
+	qDebug() << "Narrative Control Debug";
+	qDebug() << "current narrative" << m_current_narrative;
+	qDebug() << "current slide" << m_current_slide;
+}
+
 void NarrativeControl::load(NarrativeGroup *narratives)
 {
 	m_narrative_box->clear();
@@ -218,7 +227,9 @@ void NarrativeControl::setNarrative(int index)
 
 void NarrativeControl::closeNarrative()
 {
+	qDebug() << "close narrative";
 	m_current_narrative = -1;
+	m_current_slide = -1;
 	this->m_window->ui.topBar->showNarratives();
 	m_canvas->clearCanvas();
 }
@@ -390,7 +401,6 @@ void NarrativeControl::newSlide()
 	NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
 	slide->setCameraMatrix(matrix);
 
-	m_slide_box->setLastSelected(m_current_slide + 1);
 	openSlide();
 }
 

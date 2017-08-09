@@ -450,6 +450,7 @@ border-color: rgb(238, 238, 238);
     <addaction name="actionProgress"/>
     <addaction name="actionOSG_Debug"/>
     <addaction name="actionCamera_Debug"/>
+    <addaction name="actionControl_Debug"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -538,7 +539,7 @@ border-color: rgb(238, 238, 238);
     <string>OSG Debug</string>
    </property>
    <property name="shortcut">
-    <string>F10</string>
+    <string>F9</string>
    </property>
   </action>
   <action name="actionCamera_Debug">
@@ -546,7 +547,7 @@ border-color: rgb(238, 238, 238);
     <string>Camera Debug</string>
    </property>
    <property name="shortcut">
-    <string>F11</string>
+    <string>F10</string>
    </property>
   </action>
   <action name="actionFirst_Person_Navigation">
@@ -603,6 +604,14 @@ border-color: rgb(238, 238, 238);
    </property>
    <property name="shortcut">
     <string>2</string>
+   </property>
+  </action>
+  <action name="actionControl_Debug">
+   <property name="text">
+    <string>Control Debug</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
    </property>
   </action>
  </widget>
