@@ -66,6 +66,7 @@
     <ClCompile Include="..\..\ObjectManipulator.cpp" />
     <ClCompile Include="..\..\OSGViewerWidget.cpp" />
     <ClCompile Include="..\..\ScrollBoxItem.cpp" />
+    <ClCompile Include="..\..\SerializerGroup.cpp" />
     <ClCompile Include="..\..\SerializerModelGroup.cpp" />
     <ClCompile Include="..\..\SerializerModelInformation.cpp" />
     <ClCompile Include="..\..\SerializerVSimRoot.cpp" />

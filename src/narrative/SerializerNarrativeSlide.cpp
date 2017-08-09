@@ -6,7 +6,7 @@ REGISTER_OBJECT_WRAPPER(
 	NarrativeSlide,
 	new ::NarrativeSlide,
 	::NarrativeSlide,
-	"osg::Object osg::Node osg::Group ::NarrativeSlide" )
+	"osg::Object osg::Node osg::Group ::Group ::NarrativeSlide" )
 {
 	ADD_MATRIXD_SERIALIZER(CameraMatrix, osg::Matrixd());
 	ADD_FLOAT_SERIALIZER(Duration, 15.0f);
