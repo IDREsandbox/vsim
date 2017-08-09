@@ -238,6 +238,7 @@ void NarrativeControl::openSlide()
 {
 	m_current_slide = m_slide_box->getLastSelected();
 	if (m_current_slide < 0) return;
+	qDebug() << "opening slide" << m_current_slide;
 
 	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
 	m_canvas->clearCanvas();
