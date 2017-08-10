@@ -103,6 +103,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	// Key tracking
 	this->installEventFilter(&m_key_tracker);
+	this->installEventFilter(this);
 
 	// Mouse tracking
 	this->setMouseTracking(true);
@@ -228,6 +229,21 @@ void OSGViewerWidget::reset()
 	// for some reason osg::lookAt gives the inverse...
 	osg::Matrixd mat = osg::Matrix::lookAt(bound.center() + osg::Vec3d(0.0, -dist, 0.0f), bound.center(), osg::Vec3(0, 0, 1));
 	setCameraMatrix(osg::Matrix::inverse(mat));
+}
+
+bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)
+{
+	if (e->type() == QEvent::ShortcutOverride) {
+		if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
+			QKeyEvent *keyEvent = static_cast<QKeyEvent*>(e);
+			int key = keyEvent->key();
+			if (key == 'W' || key == 'A' || key == 'S' || key == 'D') {
+				e->accept();
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void OSGViewerWidget::paintEvent(QPaintEvent *e)

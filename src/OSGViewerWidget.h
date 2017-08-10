@@ -51,6 +51,9 @@ public:
 	// TODO? Just use QWidget::Render
 	// QImage takePictureAt(osg::Camera*);
 
+	// filter out ctrl-s when in wasd
+	bool eventFilter(QObject *obj, QEvent *e);
+
 protected:
 	virtual void paintEvent(QPaintEvent* paintEvent);
 	virtual void paintGL();
