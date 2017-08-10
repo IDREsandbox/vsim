@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QtWidgets/QMenu>
 #include <QContextMenuEvent>
+#include <QDrag>
 #include <set>
 
 #include "ScrollBoxItem.h"
@@ -33,6 +34,11 @@ public:
 	virtual void insertItem(int position, ScrollBoxItem*);
 	void deleteItem(int position);
 
+	// these are used to link new/delete signals from groups to creation of new items
+	void addNewItem();
+	void insertNewItem(int position);
+	virtual ScrollBoxItem *createItem(osg::Node*);
+
 	ScrollBoxItem *getItem(int position);
 	void clear();
 
@@ -51,8 +57,14 @@ public:
 	bool isSelected(int);
 	void forceSelect(int); // hack, for the narrative player, does not emit signals
 
+	// positioning
 	void setSpacing(int);
+	// returns the item index under the cursor where point is based on the scroll area widget
+	// the float is the position from [-x, 1] where 0 is the left side, 1 is the right side, - is in the space before the widget
+	std::pair<int, float> posToIndex(int px);
+	void refresh(); // redraw items (after deletion or something)
 
+	// menus
 	void setMenu(QMenu *menu);
 	void setItemMenu(QMenu *menu);
 
@@ -61,27 +73,33 @@ public:
 
 signals:
 	void sSelectionChange();
+	// to is the new index of the first item if the drop were to occur
+	void sMove(std::set<int> from, int to);
 
 protected:
-	// these are used to link new/delete signals from groups to creation of new items
-	void insertNewItem(int position);
-	virtual ScrollBoxItem *createItem(osg::Node*);
-
 	// qt overrides
 	virtual void resizeEvent(QResizeEvent* event);
 	virtual void wheelEvent(QWheelEvent* event);
 
-	void mousePressEvent(QMouseEvent* event);
-	void itemMousePressEvent(QMouseEvent* event, int index);
+	void mouseMoveEvent(QMouseEvent *event);
+	void mousePressEvent(QMouseEvent *event);
+	void mouseReleaseEvent(QMouseEvent *event);
+	void itemMousePressEvent(QMouseEvent *event, int index);
+	void itemMouseReleaseEvent(QMouseEvent *event, int index);
+
+	void dragEnterEvent(QDragEnterEvent *event);
+	void dragLeaveEvent(QDragLeaveEvent *event);
+	void dragMoveEvent(QDragMoveEvent *event);
+	void dropEvent(QDropEvent *event);
 
 protected:
-	void refresh(); // redraw items (after deletion or something)
 	//void setWidgetWidth();
 	//void positionChildren();
 	//void refreshGeometry();
-	
+
 	QWidget* m_scroll_area_widget;
 	QList<ScrollBoxItem*> m_items;
+	QWidget *m_drop_highlight;
 
 	int m_last_selected;
 	std::set<int> m_selection;
@@ -92,6 +110,14 @@ protected:
 	int m_spacing = 10;
 	//float m_ratio; // width to height ratio for items
 	//float m_space_ratio; // TODO: width to height ratio for spaces
+
+	bool m_mouse_down;
+	QPoint m_mouse_down_pos;
+	float m_minimum_drag_dist;
+
+	bool m_dragging;
+	QPoint m_dragpos;
+	int m_drag_index;
 
 	QMenu *m_menu;
 	QMenu *m_item_menu;

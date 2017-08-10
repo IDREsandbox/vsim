@@ -130,12 +130,12 @@ void SlideScrollItem::setSlide(NarrativeSlide *slide)
 	}
 
 	m_slide = slide;
+
+	if (slide == nullptr) return;
+
 	setDuration(slide->getStayOnNode(), slide->getDuration());
 	setTransition(slide->getTransitionDuration());
-	//setImage(Util::imageOsgToQt(slide->getThumbnail()));
 
-	//connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, &SlideScrollItem::setDuration);
-	
 	connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, [this](bool stay) {setDuration(m_slide->getStayOnNode(), m_slide->getDuration());});
 	connect(slide, &NarrativeSlide::sDurationChanged, this, [this](float duration) {setDuration(m_slide->getStayOnNode(), m_slide->getDuration());});
 	connect(slide, &NarrativeSlide::sTransitionDurationChanged, this, &SlideScrollItem::setTransition);
