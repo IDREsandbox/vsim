@@ -4,7 +4,10 @@
 #include "HorizontalScrollBox.h"
 
 HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
-	: QScrollArea(parent)
+	: QScrollArea(parent),
+	m_menu(nullptr),
+	m_item_menu(nullptr),
+	m_group(nullptr)
 {
 	this->setObjectName(QStringLiteral("scrollArea"));
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -57,20 +60,12 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 
 	this->horizontalScrollBar()->setStyleSheet(scrollbar_style);
 
-	//// handle right-clicks for background, TODO: use a different menu
-	//m_scroll_area_widget->setContextMenuPolicy(Qt::CustomContextMenu);
-	//connect(m_scroll_area_widget, &QWidget::customContextMenuRequested, this,
-	//	[this](const QPoint& pos) {
-	//	qDebug() << "narrative list gui - background context menu";
-	//	m_slide_menu->exec(m_scroll_area_widget->mapToGlobal(pos)); }
-	//);
 }
 
 void HorizontalScrollBox::addItem(ScrollBoxItem *item)
 {
 	insertItem(m_items.size(), item);
 	horizontalScrollBar()->setValue(horizontalScrollBar()->maximum());
-	
 }
 
 void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
@@ -87,17 +82,35 @@ void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 	select(index);
 	item->show();
 	refresh();
+	m_last_selected = index;
+}
+
+void HorizontalScrollBox::insertNewItem(int index)
+{
+	osg::Node *node = nullptr;
+	if (m_group != nullptr && index <= m_group->getNumChildren()) {
+		node = m_group->getChild(index);
+		qDebug() << "getting child" << index << node;
+	}
+
+	ScrollBoxItem *item = createItem(node); // create the item, virtual
+	if (item == nullptr) return;
+	HorizontalScrollBox::insertItem(index, item);
 }
 
 void HorizontalScrollBox::clear()
 {
+	qDebug() << "clearing";
+
 	for (auto ptr : m_items) {
 		delete ptr;
 	}
 	m_items.clear();
 	m_selection.clear();
-	m_focus = -1;
 	m_last_selected = -1;
+
+	if (m_group) disconnect(m_group, 0, this, 0);
+	m_group = nullptr;
 
 	refresh();
 }
@@ -130,6 +143,23 @@ void HorizontalScrollBox::clearSelection()
 	emit sSelectionChange();
 }
 
+void HorizontalScrollBox::setSelection(std::set<int> selection)
+{
+	clearSelection();
+	for (auto i : selection) {
+		if (i < 0 || i >= m_items.size()) continue;
+		addToSelection(i);
+	}
+
+	// have the viewport focus the first selected item
+	if (!selection.empty()) {
+		int first = *selection.begin();
+		if (first < 0) return;
+		if (first >= m_items.size()) return;
+		ensureWidgetVisible(m_items[first]);
+	}
+}
+
 const std::set<int>& HorizontalScrollBox::getSelection()
 {
 	return m_selection;
@@ -147,6 +177,10 @@ ScrollBoxItem *HorizontalScrollBox::getItem(int position)
 	}
 	return nullptr;
 }
+
+// simple code given an abstract selection thing
+// on selection change (index, bool)
+// m_items[index]->colorSelect(bool);
 
 void HorizontalScrollBox::addToSelection(int index)
 {
@@ -177,18 +211,40 @@ bool HorizontalScrollBox::isSelected(int index)
 
 void HorizontalScrollBox::deleteItem(int position)
 {
+	m_last_selected = -1;
 	clearSelection();
 	ScrollBoxItem* item = m_items.takeAt(position);
 	delete item;
 	refresh();
 }
 
-void HorizontalScrollBox::openMenu(QPoint globalPos)
+void HorizontalScrollBox::setMenu(QMenu * menu)
 {
+	m_menu = menu;
 }
 
-void HorizontalScrollBox::openItemMenu(QPoint globalPos)
+void HorizontalScrollBox::setItemMenu(QMenu * menu)
 {
+	m_item_menu = menu;
+}
+
+void HorizontalScrollBox::setGroup(Group * group)
+{
+	// disconnect incoming signals if already connected to a narrative
+	if (m_group != nullptr) disconnect(m_group, 0, this, 0);
+
+	clear();
+	m_group = group;
+	if (group == nullptr) return;
+
+	// listen to the insert and remove signals from group
+	// so that we can add/remove from the slide box accordingly
+	connect(m_group, &Group::sNew, this, &HorizontalScrollBox::insertNewItem);
+	connect(m_group, &Group::sDelete, this, &HorizontalScrollBox::deleteItem);
+
+	for (uint i = 0; i < group->getNumChildren(); i++) {
+		insertNewItem(i);
+	}
 }
 
 void HorizontalScrollBox::setSpacing(int space)
@@ -202,6 +258,11 @@ void HorizontalScrollBox::forceSelect(int index)
 	blockSignals(true);
 	select(index);
 	blockSignals(false);
+}
+
+ScrollBoxItem * HorizontalScrollBox::createItem(osg::Node *)
+{
+	return nullptr;
 }
 
 void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
@@ -234,8 +295,10 @@ void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 	qDebug() << "scroll area mouse event\n";
 	clearSelection();
 	if (event->button() == Qt::RightButton) {
-		qDebug() << "open area mouse press";
-		openMenu(event->globalPos());
+		qDebug() << "open area right click";
+		if (m_menu != nullptr) {
+			m_menu->exec(event->globalPos());
+		}
 	}
 }
 
@@ -272,7 +335,8 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 		if (!isSelected(index)) {
 			select(index);
 		}
-		openItemMenu(event->globalPos());
+		// open menu
+		if (m_item_menu) m_item_menu->exec(event->globalPos());
 		refresh();
 	}
 }

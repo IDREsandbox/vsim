@@ -8,6 +8,7 @@
 #include "HorizontalScrollBox.h"
 #include "SlideScrollItem.h"
 #include "NarrativeSlideDurationDialog.h"
+#include "Narrative2.h"
 
 class SlideScrollBox : public HorizontalScrollBox {
 	Q_OBJECT
@@ -15,32 +16,26 @@ class SlideScrollBox : public HorizontalScrollBox {
 public:
 	SlideScrollBox(QWidget * parent = nullptr);
 
-	// controller interface
-	SlideScrollItem *addItem();
-	SlideScrollItem *addItem(int idx);
 	SlideScrollItem *getItem(int index);
+	
+	ScrollBoxItem *createItem(osg::Node *node) override;
 
-	// gui display some dialogs
-	// opens based on selection, emits signals
-	void transitionDialog();
-	void durationDialog();
-	float execTransitionDialog(float duration); // ?? on reject, >= 0 on accept with duration
-	float execDurationDialog(float duration); // < 0 on reject, = 0 for hold, > 0 for timed slide duration
-
-	// virtual overrides
-	virtual void openMenu(QPoint globalPos);
-	virtual void openItemMenu(QPoint globalPos);
+	std::vector<SlideScrollItem*> getDirtySlides(); // slides whose thumbnails need to be drawn
 	
 signals:
-	void sSetTransitionDuration(float);
-	void sSetDuration(float); // 0 if pause at node
+	void sSetTransitionDuration();
+	void sSetDuration(); // 0 if pause at node
 	void sDeleteSlides();
 	void sNewSlide(int);
 	void sEditSlide();
 	void sSetCamera();
 
+	void sThumbnailsDirty();
+
 protected:
 	void keyPressEvent(QKeyEvent *event);
+
+	void paintEvent(QPaintEvent *event);
 
 private:
 	// slide menu

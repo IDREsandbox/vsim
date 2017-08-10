@@ -7,7 +7,7 @@ REGISTER_OBJECT_WRAPPER(
 	Narrative2,
 	new ::Narrative2,
 	::Narrative2,
-	"osg::Object osg::Node osg::Group ::Narrative2" )
+	"osg::Object osg::Node osg::Group ::Group ::Narrative2" )
 {
 	ADD_STRING_SERIALIZER(Title, "Untitled");
 	ADD_STRING_SERIALIZER(Author, "");

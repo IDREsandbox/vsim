@@ -6,11 +6,11 @@ REGISTER_OBJECT_WRAPPER(
 	NarrativeSlide,
 	new ::NarrativeSlide,
 	::NarrativeSlide,
-	"osg::Object osg::Node osg::Group ::NarrativeSlide" )
+	"osg::Object osg::Node osg::Group ::Group ::NarrativeSlide" )
 {
 	ADD_MATRIXD_SERIALIZER(CameraMatrix, osg::Matrixd());
 	ADD_FLOAT_SERIALIZER(Duration, 15.0f);
 	ADD_BOOL_SERIALIZER(StayOnNode, false);
 	ADD_FLOAT_SERIALIZER(TransitionDuration, 4.0f);
-	ADD_IMAGE_SERIALIZER(Thumbnail, osg::Image, NULL);
+	//ADD_IMAGE_SERIALIZER(Thumbnail, osg::Image, NULL);
 }

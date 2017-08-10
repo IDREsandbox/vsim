@@ -70,11 +70,11 @@ signals:
 	// ui, signal emitters
 public:
 	Ui::MainWindow ui;
-	NarrativeInfoDialog *m_narrative_info_dialog;
 
 public:
 	OSGViewerWidget *m_osg_widget;
 	labelCanvas *m_drag_area;
+	QUndoStack *m_undo_stack;
 	labelCanvasView *m_view;
 };
 

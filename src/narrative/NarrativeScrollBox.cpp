@@ -1,6 +1,8 @@
 ﻿#include "NarrativeScrollBox.h"
 
-NarrativeScrollBox::NarrativeScrollBox(QWidget * parent) : HorizontalScrollBox(parent) {
+NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
+	: HorizontalScrollBox(parent)
+{
 	
 	// initialize menus
 	m_slide_menu = new QMenu(tr("Slide context menu"), this);
@@ -19,35 +21,24 @@ NarrativeScrollBox::NarrativeScrollBox(QWidget * parent) : HorizontalScrollBox(p
 	connect(m_action_delete, &QAction::triggered, this, &NarrativeScrollBox::sDelete);
 	connect(m_action_info, &QAction::triggered, this, &NarrativeScrollBox::sInfo);
 	connect(m_action_open, &QAction::triggered, this, &NarrativeScrollBox::sOpen);
-	
 
-	//connect(m_action_new, &QAction::triggered, this, [this]() {
-	//	addItem("weow", "cool");
-	//});
-	//connect(m_action_delete, &QAction::triggered, this, [this]() {
-	//	this->deleteSelection();
-	//});
-
+	setMenu(m_slide_menu);
+	setItemMenu(m_slide_menu);
 }
 
 NarrativeScrollBox::~NarrativeScrollBox() {
 	
 }
 
-void NarrativeScrollBox::addItem(const std::string & title, const std::string & description)
+ScrollBoxItem * NarrativeScrollBox::createItem(osg::Node * node)
 {
-	NarrativeScrollItem *item = new NarrativeScrollItem();
-	item->setInfo(title, description);
+	qDebug() << "create item narrative ?" << node;
+	Narrative2 *narrative = dynamic_cast<Narrative2*>(node);
+	if (narrative == nullptr) {
+		qWarning() << "insert new narrative" << node << "is not a NarrativeSlide";
+		return nullptr;
+	}
+	NarrativeScrollItem *item = new NarrativeScrollItem(narrative);
 	connect(item, &NarrativeScrollItem::sDoubleClick, this, &NarrativeScrollBox::sOpen);
-	HorizontalScrollBox::addItem(item);
+	return item;
 }
-
-void NarrativeScrollBox::openMenu(QPoint globalPos)
-{
-	m_slide_menu->exec(globalPos);
-}
-void NarrativeScrollBox::openItemMenu(QPoint globalPos)
-{
-	m_slide_menu->exec(globalPos);
-}
-

@@ -72,7 +72,7 @@ void NarrativePlayer::update(double dt_sec)
 	}
 
 	if (!m_transitioning) { // not transitioning, waiting on slide
-		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		const NarrativeSlide *current_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 
 		if (current_node == nullptr) {
 			qWarning() << "Error: narrative player current slide is null";
@@ -101,8 +101,8 @@ void NarrativePlayer::update(double dt_sec)
 		}
 
 		// get source slide
-		const NarrativeSlide *source_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide - 1);
-		const NarrativeSlide *dest_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		const NarrativeSlide *source_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide - 1);
+		const NarrativeSlide *dest_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 		double transition_duration = dest_node->getTransitionDuration();
 
 		// advance time
@@ -138,13 +138,13 @@ void NarrativePlayer::play()
 	if (m_current_narrative == -1 || m_current_slide == -1) {
 		return;
 	}
-	const NarrativeSlide *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
+	const NarrativeSlide *next_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide + 1);
 	if (next_node == nullptr) { // check if at the end
 		qInfo() << "Can't play - at the end";
 		//pause();
 		return;
 	}
-	const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+	const NarrativeSlide *current_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 	if (current_node == nullptr) {
 		qInfo() << "Narrative player - error narrative is null";
 		return;
@@ -157,7 +157,7 @@ void NarrativePlayer::play()
 	m_narratives->exitEdit();
 
 	NarrativeSlideLabels* data;
-	NarrativeSlide *curSl = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+	NarrativeSlide *curSl = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 	for (uint i = 0; i < curSl->getNumChildren(); i++) {
 		data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
 		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
@@ -178,7 +178,7 @@ void NarrativePlayer::next()
 	qInfo() << "Narrative Player - next";
 	// if not playing, we still want to do the transition on next()
 	if (!m_transitioning) {
-		const NarrativeSlide *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
+		const NarrativeSlide *next_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide + 1);
 		printf("next node %p\n", next_node);
 		if (next_node == nullptr) { // check if at the end
 			pause();
@@ -203,7 +203,7 @@ void NarrativePlayer::next()
 		m_transitioning = false;
 		m_slide_time_sec = 0;
 
-		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		const NarrativeSlide *current_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 		setCameraMatrix(current_node->getCameraMatrix());
 		
 		m_canvas->clearCanvas();
@@ -211,7 +211,7 @@ void NarrativePlayer::next()
 		m_canvas->setGraphicsEffect(effect);
 
 		NarrativeSlideLabels* data;
-		NarrativeSlide *curSl = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		NarrativeSlide *curSl = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 		for (uint i = 0; i < curSl->getNumChildren(); i++) {
 			data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
 			//qDebug() << i;
@@ -220,7 +220,7 @@ void NarrativePlayer::next()
 		}
 
 		// if there is no next node, we're done
-		const NarrativeSlide *next_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide + 1);
+		const NarrativeSlide *next_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide + 1);
 		if (next_node == nullptr) {
 			qInfo() << "Narrative Player - last slide reached";
 			pause();
@@ -230,7 +230,7 @@ void NarrativePlayer::next()
 
 	// after the switch and slide update, check if there is a StayOnNode
 	if (m_transitioning == false && isPlaying()) {
-		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		const NarrativeSlide *current_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 		if (current_node->getStayOnNode()) {
 			pause();
 		}
@@ -247,7 +247,7 @@ void NarrativePlayer::pause()
 		return;
 	}
 	
-	NarrativeSlide *new_slide = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+	NarrativeSlide *new_slide = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 	if (new_slide == nullptr) {
 		qWarning() << "Pause error, current slide is null";
 		return;
@@ -272,7 +272,7 @@ void NarrativePlayer::setCameraMatrix(osg::Matrixd camera_matrix)
 
 //bool NarrativePlayer::setSlide(int narrative, int slide)
 //{
-//	NarrativeSlide *new_slide = m_narratives->getNarrativeNode(narrative, slide);
+//	NarrativeSlide *new_slide = m_narratives->getNarrativeSlide(narrative, slide);
 //	if (new_slide == nullptr) {
 //		return false;
 //	}
@@ -304,7 +304,7 @@ void NarrativePlayer::selectionChange()
 		m_current_slide = *slide_sel.rbegin();
 
 		qDebug() << "Narrative Player - slide selection" << m_current_narrative << m_current_slide;
-		const NarrativeSlide *current_node = m_narratives->getNarrativeNode(m_current_narrative, m_current_slide);
+		const NarrativeSlide *current_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
 		if (current_node == nullptr) {
 			qWarning() << "Error: can't set narrative player view to selection, indices: " << m_current_narrative << m_current_slide;
 		}

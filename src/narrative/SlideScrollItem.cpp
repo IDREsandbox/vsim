@@ -1,15 +1,16 @@
 ﻿#include "SlideScrollItem.h"
+#include "Util.h"
 
 SlideScrollItem::SlideScrollItem() 
-	: ScrollBoxItem() 
+	: ScrollBoxItem(), 
+	m_slide(nullptr)
 {
 	ui.setupUi(this);
 
 	ui.transition_label->installEventFilter(this);
 	ui.duration_label->installEventFilter(this);
 
-	setTransition(2.0f);
-	setDuration(0.0f);
+	m_thumbnail_dirty = true;
 }
 
 void SlideScrollItem::setImage(const QImage & img)
@@ -17,29 +18,38 @@ void SlideScrollItem::setImage(const QImage & img)
 	ui.image_label->setPixmap(QPixmap::fromImage(img));
 }
 
-float SlideScrollItem::getTransition()
-{
-	return m_transition_duration;
-}
-float SlideScrollItem::getDuration()
-{
-	return m_duration;
-}
+//float SlideScrollItem::getTransition()
+//{
+//	return m_transition_duration;
+//}
+//float SlideScrollItem::getDuration()
+//{
+//	return m_duration;
+//}
 void SlideScrollItem::setTransition(float duration)
 {
-	m_transition_duration = duration;
 	ui.transition_label->setText(QString::number(duration, 'f', 1) + "s");
 }
 
-void SlideScrollItem::setDuration(float duration)
+void SlideScrollItem::setDuration(bool stay, float duration)
 {
-	m_duration = duration;
-	if (m_duration <= 0) {
+	if (stay) {
 		ui.duration_label->setText("-");
 	}
 	else {
 		ui.duration_label->setText(QString::number(duration, 'f', 1) + "s");
 	}
+}
+
+bool SlideScrollItem::thumbnailDirty()
+{
+	return m_thumbnail_dirty;
+}
+
+void SlideScrollItem::setThumbnailDirty(bool dirty)
+{
+	m_thumbnail_dirty = dirty;
+	if (dirty) emit sThumbnailDirty();
 }
 
 void SlideScrollItem::setIndex(int index)
@@ -78,11 +88,10 @@ int SlideScrollItem::widthFromHeight(int height)
 void SlideScrollItem::colorFocus(bool color)
 {
 }
-
 void SlideScrollItem::colorSelect(bool color)
 {
 	if (color) {
-		this->setStyleSheet("background-color: rgba(0,0,255,50);");
+		this->setStyleSheet("background-color: rgba(0,100,255,200);");
 	}
 	else {
 		this->setStyleSheet("background-color: rgba(0,0,0,0);");
@@ -106,6 +115,41 @@ bool SlideScrollItem::eventFilter(QObject * obj, QEvent * event)
 		}
 	}
 	return false;
+}
+
+SlideScrollItem::SlideScrollItem(NarrativeSlide *slide)
+	: SlideScrollItem()
+{
+	setSlide(slide);
+}
+
+void SlideScrollItem::setSlide(NarrativeSlide *slide)
+{
+	if (m_slide != nullptr) {
+		disconnect(m_slide, 0, this, 0);
+	}
+
+	m_slide = slide;
+	setDuration(slide->getStayOnNode(), slide->getDuration());
+	setTransition(slide->getTransitionDuration());
+	//setImage(Util::imageOsgToQt(slide->getThumbnail()));
+
+	//connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, &SlideScrollItem::setDuration);
+	
+	connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, [this](bool stay) {setDuration(m_slide->getStayOnNode(), m_slide->getDuration());});
+	connect(slide, &NarrativeSlide::sDurationChanged, this, [this](float duration) {setDuration(m_slide->getStayOnNode(), m_slide->getDuration());});
+	connect(slide, &NarrativeSlide::sTransitionDurationChanged, this, &SlideScrollItem::setTransition);
+
+	// TODO: how should this thumbnail stuff work?
+	connect(slide, &NarrativeSlide::sCameraMatrixChanged, this, [this]() {
+		setThumbnailDirty(true);
+	});
+
+}
+
+NarrativeSlide *SlideScrollItem::getSlide()
+{
+	return m_slide;
 }
 
 

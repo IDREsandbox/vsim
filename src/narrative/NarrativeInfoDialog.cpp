@@ -10,52 +10,28 @@ NarrativeInfoDialog::NarrativeInfoDialog(QWidget * parent)
 	//setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 }
 
-NarrativeInfoDialog::NarrativeInfoDialog(QWidget * parent, const NarrativeInfo &info)
+NarrativeInfoDialog::NarrativeInfoDialog(const Narrative2 *nar, QWidget *parent)
 	: NarrativeInfoDialog(parent)
 {
-	m_info = info;
-	setGui();
+	ui.editTitle->setText(QString::fromStdString(nar->getTitle()));
+	ui.editDescription->setText(QString::fromStdString(nar->getDescription()));
+	ui.editContact->setText(QString::fromStdString(nar->getAuthor()));
 }
 
 NarrativeInfoDialog::~NarrativeInfoDialog() {
 }
 
-void NarrativeInfoDialog::setInfo(const Narrative2 &nar)
+std::string NarrativeInfoDialog::getTitle() const
 {
-	m_info = {
-		nar.getName(),
-		nar.getDescription(),
-		nar.getAuthor()
-	};
-	setGui();
+	return ui.editTitle->text().toStdString();
 }
 
-const NarrativeInfo & NarrativeInfoDialog::getInfo()
-{	
-	return m_info;
-}
-
-void NarrativeInfoDialog::clear()
+std::string NarrativeInfoDialog::getDescription() const
 {
-	m_info = {};
-	setGui();
+	return ui.editDescription->toPlainText().toStdString();
 }
 
-void NarrativeInfoDialog::accept()
+std::string NarrativeInfoDialog::getAuthor() const
 {
-	m_info = {
-		ui.editTitle->text().toStdString(),
-		ui.editDescription->toPlainText().toStdString(),
-		ui.editContact->toPlainText().toStdString()
-	};
-	QDialog::accept();
+	return ui.editContact->toPlainText().toStdString();
 }
-
-void NarrativeInfoDialog::setGui()
-{
-	ui.editTitle->setText(QString::fromStdString(m_info.m_title));
-	ui.editDescription->setText(QString::fromStdString(m_info.m_description));
-	ui.editContact->setText(QString::fromStdString(m_info.m_contact));
-}
-
-
