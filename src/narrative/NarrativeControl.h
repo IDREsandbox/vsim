@@ -50,6 +50,7 @@ public:
 	void newNarrative();
 	void editNarrativeInfo();
 	void deleteNarratives();
+	void moveNarratives(std::set<int> from, int to);
 
 	// Slides
 	void newSlide();
@@ -58,6 +59,7 @@ public:
 	void setSlideDuration();
 	void setSlideTransition();
 	void setSlideCamera();
+	void moveSlides(std::set<int> from, int to);
 	
 public slots:
 	void openSlide();

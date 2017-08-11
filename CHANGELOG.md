@@ -1,5 +1,11 @@
 # Changelog
 
+## 2017-08-10
+### Added
+- Drag and drop for narratives and slides
+- Slider motion while dragging along edges
+- Move command and signal for Group
+
 ## 2017-08-8
 ### Added
 - Undo/redo for narratives and slides

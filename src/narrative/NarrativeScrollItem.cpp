@@ -13,7 +13,6 @@ NarrativeScrollItem::NarrativeScrollItem(Narrative2 *narrative)
 
 void NarrativeScrollItem::setNarrative(Narrative2 *narrative)
 {
-	qDebug() << "set narrative disconnect";
 	// disconnect current narrative
 	for (auto conn : m_connections)	disconnect(conn);
 
@@ -40,9 +39,15 @@ void NarrativeScrollItem::setNarrative(Narrative2 *narrative)
 
 void NarrativeScrollItem::mousePressEvent(QMouseEvent * event)
 {
-	if (event->type() == QEvent::MouseButtonDblClick) {
-		emit sDoubleClick();
-	}
+	//if (event->type() == QEvent::MouseButtonDblClick) {
+	//	qDebug() << "nsi double click";
+	//	emit sDoubleClick();
+	//}
 	ScrollBoxItem::mousePressEvent(event);
+}
+
+void NarrativeScrollItem::mouseDoubleClickEvent(QMouseEvent * event)
+{
+	emit sDoubleClick();
 }
 

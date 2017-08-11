@@ -10,6 +10,8 @@
 #include <osg/io_utils>
 #include <QUndoStack>
 
+#include <QElapsedTimer>
+
 NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	: QObject(parent), 
 	m_window(window), 
@@ -35,6 +37,8 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_narrative_box, &NarrativeScrollBox::sOpen, this, &NarrativeControl::openNarrative);
 	connect(m_window->ui.topBar->ui.open, &QPushButton::clicked, this, &NarrativeControl::openNarrative);
 
+	connect(m_narrative_box, &NarrativeScrollBox::sMove, this, &NarrativeControl::moveNarratives);
+
 	// SLIDE CONTROL
 	// new
 	connect(m_slide_box, &SlideScrollBox::sNewSlide, this, &NarrativeControl::newSlide);
@@ -51,6 +55,9 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_slide_box, &SlideScrollBox::sSetTransitionDuration, this, &NarrativeControl::setSlideTransition);
 	// camera
 	connect(m_slide_box, &SlideScrollBox::sSetCamera, this, &NarrativeControl::setSlideCamera);
+	// move
+	connect(m_slide_box, &SlideScrollBox::sMove, this, &NarrativeControl::moveSlides);
+
 	// back
 	connect(m_window->ui.topBar->ui.left_2, &QPushButton::clicked, this, &NarrativeControl::closeNarrative);
 	//change
@@ -167,6 +174,25 @@ void NarrativeControl::deleteNarratives()
 	m_undo_stack->endMacro();
 }
 
+void NarrativeControl::moveNarratives(std::set<int> from, int to)
+{
+	// map this to single move commands
+	std::vector<std::pair<int, int>> mapping;
+	std::set<int> to_set;
+	auto it = from.begin();
+	for (int i = 0; i < from.size(); i++) {
+		mapping.push_back(std::make_pair(*it, to + i));
+		to_set.insert(to + i);
+		++it;
+	}
+
+	m_undo_stack->beginMacro("Move Narratives");
+	m_undo_stack->push(new SelectNarrativesCommand(this, from, ON_UNDO));
+	m_undo_stack->push(new Group::MoveNodesCommand(m_narrative_group, mapping));
+	m_undo_stack->push(new SelectNarrativesCommand(this, to_set, ON_REDO));
+	m_undo_stack->endMacro();
+}
+
 void NarrativeControl::deleteLabel(int idx)
 {
 	m_current_slide = m_slide_box->getLastSelected();
@@ -190,6 +216,7 @@ void NarrativeControl::debug()
 
 void NarrativeControl::load(NarrativeGroup *narratives)
 {
+	qDebug() << "Clearing narrative control";
 	m_narrative_box->clear();
 	m_slide_box->clear(); 
 	m_current_narrative = -1;
@@ -413,7 +440,7 @@ void NarrativeControl::deleteSlides()
 
 	int next_selection = nextSelectionAfterDelete(nar->getNumChildren(), selection);
 	
-	m_undo_stack->beginMacro("Delete Narratives");
+	m_undo_stack->beginMacro("Delete Slides");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, selection, ON_UNDO));
 	// we need to delete in reverse order to get the indices right
 	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
@@ -465,7 +492,7 @@ void NarrativeControl::setSlideTransition()
 	// intial values for the dialog by looking up the first selection
 	int slide_index = *selection.begin();
 	NarrativeSlide *first_slide = getNarrativeSlide(m_current_narrative, slide_index);
-	float duration = QInputDialog::getDouble(nullptr, "Transition Time", "Transition Time (seconds)", first_slide->getDuration(), 0.0, 3600.0, 1, nullptr, Qt::WindowSystemMenuHint);
+	float duration = QInputDialog::getDouble(nullptr, "Transition Time", "Transition Time (seconds)", first_slide->getTransitionDuration(), 0.0, 3600.0, 1, nullptr, Qt::WindowSystemMenuHint);
 
 	m_undo_stack->beginMacro("Set Transition Duration");
 	for (auto index : selection) {
@@ -481,7 +508,7 @@ void NarrativeControl::setSlideCamera()
 	std::set<int> selection = m_slide_box->getSelection();
 	osg::Matrixd matrix = m_window->m_osg_widget->getCameraMatrix();
 
-	m_undo_stack->beginMacro("Set Transition Duration");
+	m_undo_stack->beginMacro("Set Camera");
 	for (auto index : selection) {
 		NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
 		m_undo_stack->push(new NarrativeSlide::SetCameraMatrixCommand(slide, matrix));
@@ -490,12 +517,31 @@ void NarrativeControl::setSlideCamera()
 	m_undo_stack->endMacro();
 }
 
+void NarrativeControl::moveSlides(std::set<int> from, int to)
+{
+	// map this to single move commands
+	std::vector<std::pair<int, int>> mapping;
+	std::set<int> to_set;
+	auto it = from.begin();
+	for (int i = 0; i < from.size(); i++) {
+		mapping.push_back(std::make_pair(*it, to + i));
+		to_set.insert(to + i);
+		++it;
+	}
+
+	m_undo_stack->beginMacro("Move Slides");
+	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, from, ON_UNDO));
+	m_undo_stack->push(new Group::MoveNodesCommand(getNarrative(m_current_narrative), mapping));
+	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, to_set, ON_REDO));
+	m_undo_stack->endMacro();
+}
+
 void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> slides)
 {
 	osg::Matrixd old_matrix = m_window->m_osg_widget->getCameraMatrix();
 	osg::Matrixd current_matrix;
 	current_matrix(0, 0) = INFINITY; // make the matrix nonsense so that it draws at least once
-	QImage thumbnail = generateThumbnail();
+	QImage thumbnail;
 
 	for (auto slide : slides) {
 		qDebug() << "redrawing thumbnail" << slide->getIndex();
@@ -514,19 +560,27 @@ void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> slid
 
 QImage NarrativeControl::generateThumbnail(int option)
 {
+	QElapsedTimer timer;
+	timer.start();
+
 	// widget dimensions
 	QRect dims = m_window->centralWidget()->geometry(); 
 
 	// screenshot dimensions
 	QRect ssdims = Util::rectFit(dims, 16.0 / 9.0);
-	ssdims.setY(ssdims.y() + 50);
+	//QRect ssdims = Util::rectFit(QRect(0, 0, 300, 300), 16.0 / 9.0);
+	//ssdims.setY(ssdims.y() + 50);
 
 
 	QImage img(ssdims.width(), ssdims.height(), QImage::Format_ARGB32);
 	QPainter painter(&img);
 
 	if (option == 1) {
+		QRect old_geometry = m_window->m_osg_widget->geometry();
+		//m_window->m_osg_widget->setGeometry(0, 0, 300, 300);
 		m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
+		//m_window->m_osg_widget->setGeometry(old_geometry);
+
 		m_window->m_drag_area->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawChildren | QWidget::IgnoreMask);
 	}
 	else if (option == 2) {
@@ -536,6 +590,9 @@ QImage NarrativeControl::generateThumbnail(int option)
 	// optional, fewer big screenshots
 	QImage smallimg;
 	smallimg = img.scaled(288, 162, Qt::IgnoreAspectRatio);
+
+	int ns = timer.nsecsElapsed();
+	qDebug() << "thumbnail time ms" << ns / 1.0e6;
 	return smallimg;
 }
 

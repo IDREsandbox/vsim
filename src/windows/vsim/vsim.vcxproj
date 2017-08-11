@@ -40,6 +40,7 @@
     <ClCompile Include="..\..\editButtons.cpp" />
     <ClCompile Include="..\..\FirstPersonManipulator.cpp" />
     <ClCompile Include="..\..\FlightManipulator.cpp" />
+    <ClCompile Include="..\..\Group.cpp" />
     <ClCompile Include="..\..\HorizontalScrollBox.cpp" />
     <ClCompile Include="..\..\KeyTracker.cpp" />
     <ClCompile Include="..\..\labelCanvas.cpp" />

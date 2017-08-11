@@ -46,7 +46,7 @@ NarrativePlayer::NarrativePlayer(QObject *parent, MainWindow *window, NarrativeC
 
 	m_previous_time = m_window->getViewer()->elapsedTime();
 	m_timer = new QTimer(this);
-	m_timer->setInterval(0);
+	m_timer->setInterval(15);
 	m_timer->setSingleShot(false);
 	m_timer->start();
 

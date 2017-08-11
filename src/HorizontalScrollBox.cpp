@@ -1,13 +1,19 @@
 #include <QScrollBar>
 #include <QResizeEvent>
 #include <QMouseEvent>
+#include <QMimeData>
 #include "HorizontalScrollBox.h"
+#include <vector>
+#include <algorithm>
 
 HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	: QScrollArea(parent),
 	m_menu(nullptr),
 	m_item_menu(nullptr),
-	m_group(nullptr)
+	m_group(nullptr),
+	m_dragging(false),
+	m_mouse_down(false),
+	m_minimum_drag_dist(5)
 {
 	this->setObjectName(QStringLiteral("scrollArea"));
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -22,7 +28,16 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 		//"}"
 	);
 	this->setWidget(m_scroll_area_widget);
-	
+
+	m_drop_highlight = new QWidget(m_scroll_area_widget);
+	m_drop_highlight->setStyleSheet("background-color: rgb(255,255,255)");
+	m_drop_highlight->hide();
+
+	m_move_timer = new QTimer();
+	m_move_timer->setInterval(15);
+	m_move_timer->start();
+	connect(m_move_timer, &QTimer::timeout, this, &HorizontalScrollBox::moveTimer);
+
 	//m_height = m_scroll_area_widget->height();
 	m_height = this->height();
 
@@ -60,6 +75,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 
 	this->horizontalScrollBar()->setStyleSheet(scrollbar_style);
 
+	setAcceptDrops(true);
 }
 
 void HorizontalScrollBox::addItem(ScrollBoxItem *item)
@@ -70,8 +86,6 @@ void HorizontalScrollBox::addItem(ScrollBoxItem *item)
 
 void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 {
-	
-	qDebug() << "narrative list gui - insert item at" << index;
 	item->setParent(m_scroll_area_widget);
 	// approximate geometry, will be fixed later on in refresh()
 	item->setGeometry(0, 0, m_height, 2.5*m_height);
@@ -79,18 +93,24 @@ void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 	m_items.insert(index, item);
 	// steal all mouse events on items, alternatively we could use a filter
 	connect(item, &ScrollBoxItem::sMousePressEvent, this, &HorizontalScrollBox::itemMousePressEvent);
+	connect(item, &ScrollBoxItem::sMouseReleaseEvent, this, &HorizontalScrollBox::itemMouseReleaseEvent);
+
 	select(index);
 	item->show();
 	refresh();
 	m_last_selected = index;
 }
 
-void HorizontalScrollBox::insertNewItem(int index)
+void HorizontalScrollBox::addNewItem()
+{
+	insertNewItem(m_items.size());
+}
+
+void HorizontalScrollBox::insertNewItem(uint index)
 {
 	osg::Node *node = nullptr;
 	if (m_group != nullptr && index <= m_group->getNumChildren()) {
 		node = m_group->getChild(index);
-		qDebug() << "getting child" << index << node;
 	}
 
 	ScrollBoxItem *item = createItem(node); // create the item, virtual
@@ -100,8 +120,6 @@ void HorizontalScrollBox::insertNewItem(int index)
 
 void HorizontalScrollBox::clear()
 {
-	qDebug() << "clearing";
-
 	for (auto ptr : m_items) {
 		delete ptr;
 	}
@@ -188,7 +206,7 @@ void HorizontalScrollBox::addToSelection(int index)
 	m_items[index]->colorSelect(true);
 	emit sSelectionChange();
 }
-void HorizontalScrollBox::removeFromSelection(int index) 
+void HorizontalScrollBox::removeFromSelection(int index)
 {
 	m_selection.erase(index);
 	m_items[index]->colorSelect(false);
@@ -197,6 +215,10 @@ void HorizontalScrollBox::removeFromSelection(int index)
 
 void HorizontalScrollBox::select(int index)
 {
+	// if already selected
+	if (m_selection.size() == 1 && m_selection.find(index) != m_selection.end()) {
+		return;
+	}
 	clearSelection();
 	m_selection.insert(index);
 	m_items[index]->colorSelect(true);
@@ -241,6 +263,7 @@ void HorizontalScrollBox::setGroup(Group * group)
 	// so that we can add/remove from the slide box accordingly
 	connect(m_group, &Group::sNew, this, &HorizontalScrollBox::insertNewItem);
 	connect(m_group, &Group::sDelete, this, &HorizontalScrollBox::deleteItem);
+	connect(m_group, &Group::sItemsMoved, this, &HorizontalScrollBox::moveItems);
 
 	for (uint i = 0; i < group->getNumChildren(); i++) {
 		insertNewItem(i);
@@ -253,6 +276,90 @@ void HorizontalScrollBox::setSpacing(int space)
 	refresh();
 }
 
+std::pair<int, float> HorizontalScrollBox::posToIndex(int px)
+{
+	int xpos = 0;
+	if (m_items.size() == 0) {
+		return std::make_pair(0, -.1f);
+	}
+
+	for (int i = 0; i < m_items.size(); i++) {
+		// point is in the spacer?
+		if (px < xpos + m_spacing) {
+			return std::make_pair(i, -.1f);
+		}
+
+		ScrollBoxItem *o = m_items.at(i);
+		int bwidth = o->widthFromHeight(m_height);
+
+		// point is in the widget?
+		if (px <= xpos + m_spacing + bwidth) {
+			return std::make_pair(i, (px - xpos) / (float)(bwidth));
+		}
+
+		xpos += bwidth;
+		xpos += m_spacing;
+	}
+	// at the end, return spacer at the end
+	return std::make_pair(m_items.size(), -.1f);
+}
+
+void HorizontalScrollBox::refresh()
+{
+	for (int i = 0; i < m_items.size(); i++) {
+		m_items[i]->setIndex(i);
+	}
+
+	if (m_items.size() == 0) {
+		m_scroll_area_widget->setMinimumWidth(0);
+		return;
+	}
+
+	// do we draw a drag-n-drop box?
+	int spacer_index = -1; // spacer 0 is before item 0
+	if (m_dragging) {
+		m_drop_highlight->show();
+		QPoint scrollspace = m_scroll_area_widget->mapFromGlobal(this->mapToGlobal(m_dragpos));
+		//qDebug() << "local coords" << scrollspace << posToIndex(scrollspace.x());
+		std::pair<int, float> pair = posToIndex(scrollspace.x());
+		if (pair.second < .5) { // draw in this spacer
+			spacer_index = pair.first;
+		}
+		else {
+			spacer_index = pair.first + 1;
+		}
+		m_drag_index = spacer_index;
+	}
+	else {
+		m_drop_highlight->hide();
+	}
+
+
+	int xpos = m_spacing;
+
+	int bheight = m_height;
+
+	for (int i = 0; i < m_items.size(); i++) {
+		ScrollBoxItem *o = m_items.at(i);
+		int bwidth = o->widthFromHeight(bheight);
+
+		//QRect geom(xpos, margins.top(), bwidth, bheight);
+		QRect geom(xpos, 0, bwidth, bheight);
+		o->setGeometry(geom);
+
+		if (m_dragging && spacer_index == i) {
+			m_drop_highlight->setGeometry(xpos - m_spacing, 0, m_spacing, m_height);
+		}
+		xpos += bwidth;
+		xpos += m_spacing;
+	}
+	if (m_dragging && spacer_index >= m_items.size()) {
+		m_drop_highlight->setGeometry(xpos - m_spacing, 0, m_spacing, m_height);
+	}
+
+	m_scroll_area_widget->setMinimumWidth(xpos);
+}
+
 void HorizontalScrollBox::forceSelect(int index)
 {
 	blockSignals(true);
@@ -263,6 +370,23 @@ void HorizontalScrollBox::forceSelect(int index)
 ScrollBoxItem * HorizontalScrollBox::createItem(osg::Node *)
 {
 	return nullptr;
+}
+
+void HorizontalScrollBox::moveItems(std::vector<std::pair<int, int>> mapping)
+{
+	std::vector<std::pair<ScrollBoxItem*,int>> removed;
+	for (int i = mapping.size() - 1; i >= 0; i--) {
+		removed.push_back(
+			std::make_pair(m_items.takeAt(mapping[i].first), mapping[i].second));
+	}
+	// sort by destination
+	std::sort(removed.begin(), removed.end(),
+		[](auto &left, auto &right) { return left.second < right.second; });
+	// now re-enter them in forward order
+	for (auto i : removed) {
+		m_items.insert(i.second, i.first);
+	}
+	refresh();
 }
 
 void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
@@ -290,6 +414,40 @@ void HorizontalScrollBox::wheelEvent(QWheelEvent* event)
 	horizontalScrollBar()->setValue(horizontalScrollBar()->value() - event->delta());
 }
 
+void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
+{
+	// If mouse down & beyond drag threshold then start dragging
+	qDebug() << "drag" << m_dragging;
+	QPoint diff = event->globalPos() - m_mouse_down_pos;
+	if (diff.manhattanLength() > m_minimum_drag_dist
+		&& m_dragging == false
+		&& !m_selection.empty()) {
+		// Begin drag
+		QDrag *drag = new QDrag(this);
+		if (m_last_selected < 0) return;
+		ScrollBoxItem *item = getItem(m_last_selected);
+		QPixmap pixmap(item->width(), item->height());
+		item->render(&pixmap, QPoint(), QRegion(0, 0, item->width(), item->height()));
+		drag->setPixmap(pixmap);
+
+		QMimeData *data = new QMimeData;
+		data->setData("application/x-slideitem", "");
+		drag->setMimeData(data);
+		drag->setHotSpot(event->globalPos() - item->mapToGlobal(QPoint(0, 0)));
+		qDebug() << "drag start";
+
+		// set dragging flag
+		m_dragging = true;
+		m_dragpos = event->pos();
+
+		Qt::DropAction result = drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::MoveAction);
+		qDebug() << "drop result" << result;
+		m_dragging = false;
+	}
+	//m_mouse_down_pos = event->globalPos();
+	//m_mouse_down = true;
+}
+
 void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 {
 	qDebug() << "scroll area mouse event\n";
@@ -300,6 +458,11 @@ void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 			m_menu->exec(event->globalPos());
 		}
 	}
+}
+
+void HorizontalScrollBox::mouseReleaseEvent(QMouseEvent * event)
+{
+	m_mouse_down = false;
 }
 
 void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
@@ -325,7 +488,15 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 			qDebug() << "item press - shift";
 		}
 		else {
-			select(index);
+			// left click a selected item -> begin dragging
+			//if (isSelected(index)) {
+			if (!isSelected(index)) {
+				select(index);
+			}
+
+			m_mouse_down_pos = event->globalPos();
+			m_mouse_down = true;
+
 		}
 		refresh();
 	}
@@ -340,38 +511,111 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 		refresh();
 	}
 }
+void HorizontalScrollBox::itemMouseReleaseEvent(QMouseEvent * event, int index)
+{
+	if (event->button() == Qt::LeftButton) {
+		if (!(event->modifiers() & Qt::ControlModifier)) {
+			// If already in selection then select() on release
+			// this is so that you can start dragging w/o deselecting everything
+			qDebug() << "release";
+			if (isSelected(index)) {
+				m_last_selected = index;
+				select(index);
+			}
+		}
+	}
+}
+
+void HorizontalScrollBox::dragEnterEvent(QDragEnterEvent * event)
+{
+	if (event->mimeData()->hasFormat("application/x-slideitem")) {
+		event->accept();
+		//m_dragging = true;
+		//m_dragpos = event->pos();
+		//refresh();
+	}
+	qDebug() << "drag enter";
+}
+
+void HorizontalScrollBox::dragLeaveEvent(QDragLeaveEvent * event)
+{
+	qDebug() << "drag leave";
+	if (m_dragging) {
+		m_dragging = false;
+		refresh();
+	}
+}
 
 void HorizontalScrollBox::setLastSelected(int idx) {
 	m_last_selected = idx;
 }
 
-void HorizontalScrollBox::refresh()
+void HorizontalScrollBox::dragMoveEvent(QDragMoveEvent * event)
 {
-	for (int i = 0; i < m_items.size(); i++) {
-		m_items[i]->setIndex(i);
+	if (event->mimeData()->hasFormat("application/x-slideitem")) {
+		m_dragging = true;
+		m_dragpos = event->pos();
+		refresh();
 	}
 
-	if (m_items.size() == 0) {
-		m_scroll_area_widget->setMinimumWidth(0);
-		return;
-	}
-
-	int xpos = m_spacing;
-
-	int bheight = m_height;
-
-	for (int i = 0; i < m_items.size(); i++) {
-		ScrollBoxItem *o = m_items.at(i);
-		int bwidth = o->widthFromHeight(bheight);
-
-		//QRect geom(xpos, margins.top(), bwidth, bheight);
-		QRect geom(xpos, 0, bwidth, bheight);
-		o->setGeometry(geom);
-
-		xpos += bwidth;
-		xpos += m_spacing;
-	}
-
-	m_scroll_area_widget->setMinimumWidth(xpos);
+	//qDebug() << "drag move";
 }
 
+void HorizontalScrollBox::dropEvent(QDropEvent * event)
+{
+	if (event->mimeData()->hasFormat("application/x-slideitem")) {
+		event->accept();
+		std::set<int> selection = getSelection();
+		// calculate the destination position
+		// m_drag_index is the spacer index
+		// new position is (spacer index) - (number of items removed before it)
+		int dest_index = m_drag_index;
+		for (auto i : selection) {
+			if (i < m_drag_index) {
+				dest_index--;
+			}
+		}
+
+		// calculate the new order
+		std::vector<int> new_order;
+		for (int i = 0; i < m_items.size(); i++) {
+			// if not in selection
+			if (selection.find(i) == selection.end()) {
+				new_order.push_back(i);
+			}
+		}
+		new_order.insert(new_order.begin() + dest_index, selection.begin(), selection.end());
+
+		// if the order hasn't changed, then don't emit a move signal
+		if (!std::is_sorted(new_order.begin(), new_order.end())) {
+			emit sMove(getSelection(), dest_index);
+		}
+
+		//qDebug() << "new order";
+		//for (auto i : new_order) qDebug() << i;
+	}
+	m_dragging = false;
+	m_drop_highlight->hide();
+	qDebug() << "DROPPED";
+}
+void HorizontalScrollBox::moveTimer()
+{
+	if (m_dragging) {
+		int mx = m_dragpos.x();
+		int my = m_dragpos.y();
+		if (my > -20 && my < height() + 20) {
+			QAbstractSlider *bar = horizontalScrollBar();
+			if (mx < 40) {
+				// scroll left
+				// rate is linear with position
+				int dx = (40 - mx) / 5.0;
+				bar->setSliderPosition(bar->sliderPosition() - dx);
+			}
+			if (mx > width() - 40) {
+				int dx = (mx - width() + 40) / 5.0;
+				bar->setSliderPosition(bar->sliderPosition() + dx);
+
+			}
+		}
+	}
+}
