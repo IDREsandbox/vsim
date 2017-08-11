@@ -90,7 +90,6 @@ MainWindow::MainWindow(QWidget *parent)
 			qDebug() << "goback";
 			this->ui.topBar->showNarratives();
 		});
-
 }
 
 void MainWindow::ErrorDialog(const std::string & msg)

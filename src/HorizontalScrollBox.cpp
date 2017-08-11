@@ -34,7 +34,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_drop_highlight->hide();
 
 	m_move_timer = new QTimer();
-	m_move_timer->setInterval(0);
+	m_move_timer->setInterval(30);
 	m_move_timer->start();
 	connect(m_move_timer, &QTimer::timeout, this, &HorizontalScrollBox::moveTimer);
 
@@ -108,7 +108,7 @@ void HorizontalScrollBox::addNewItem()
 	insertNewItem(m_items.size());
 }
 
-void HorizontalScrollBox::insertNewItem(int index)
+void HorizontalScrollBox::insertNewItem(uint index)
 {
 	osg::Node *node = nullptr;
 	if (m_group != nullptr && index <= m_group->getNumChildren()) {
@@ -605,11 +605,11 @@ void HorizontalScrollBox::moveTimer()
 			if (mx < 40) {
 				// scroll left
 				// rate is linear with position
-				int dx = (40 - mx) / 10.0;
+				int dx = (40 - mx) / 5.0;
 				bar->setSliderPosition(bar->sliderPosition() - dx);
 			}
 			if (mx > width() - 40) {
-				int dx = (mx - width() + 40) / 10.0;
+				int dx = (mx - width() + 40) / 5.0;
 				bar->setSliderPosition(bar->sliderPosition() + dx);
 
 			}

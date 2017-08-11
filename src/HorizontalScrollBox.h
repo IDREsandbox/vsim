@@ -37,7 +37,7 @@ public:
 
 	// these are used to link new/delete signals from groups to creation of new items
 	void addNewItem();
-	void insertNewItem(int position);
+	void insertNewItem(uint position);
 	virtual ScrollBoxItem *createItem(osg::Node*);
 	void moveItems(std::vector<std::pair<int,int>> mapping); // assumes sorted
 	ScrollBoxItem *getItem(int position);

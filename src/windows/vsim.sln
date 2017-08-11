@@ -8,6 +8,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HorizontalScrollBox_experiment", "HorizontalScrollBox_experiment\HorizontalScrollBox_experiment.vcxproj", "{FC2D387C-89CB-42EF-BF86-9AF01ABF5FF0}"
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
