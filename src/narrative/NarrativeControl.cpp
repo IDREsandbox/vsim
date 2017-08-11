@@ -439,7 +439,7 @@ void NarrativeControl::deleteSlides()
 
 	int next_selection = nextSelectionAfterDelete(nar->getNumChildren(), selection);
 	
-	m_undo_stack->beginMacro("Delete Narratives");
+	m_undo_stack->beginMacro("Delete Slides");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, selection, ON_UNDO));
 	// we need to delete in reverse order to get the indices right
 	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
@@ -491,7 +491,7 @@ void NarrativeControl::setSlideTransition()
 	// intial values for the dialog by looking up the first selection
 	int slide_index = *selection.begin();
 	NarrativeSlide *first_slide = getNarrativeSlide(m_current_narrative, slide_index);
-	float duration = QInputDialog::getDouble(nullptr, "Transition Time", "Transition Time (seconds)", first_slide->getDuration(), 0.0, 3600.0, 1, nullptr, Qt::WindowSystemMenuHint);
+	float duration = QInputDialog::getDouble(nullptr, "Transition Time", "Transition Time (seconds)", first_slide->getTransitionDuration(), 0.0, 3600.0, 1, nullptr, Qt::WindowSystemMenuHint);
 
 	m_undo_stack->beginMacro("Set Transition Duration");
 	for (auto index : selection) {
@@ -507,7 +507,7 @@ void NarrativeControl::setSlideCamera()
 	std::set<int> selection = m_slide_box->getSelection();
 	osg::Matrixd matrix = m_window->m_osg_widget->getCameraMatrix();
 
-	m_undo_stack->beginMacro("Set Transition Duration");
+	m_undo_stack->beginMacro("Set Camera");
 	for (auto index : selection) {
 		NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
 		m_undo_stack->push(new NarrativeSlide::SetCameraMatrixCommand(slide, matrix));
