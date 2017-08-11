@@ -10,6 +10,8 @@
 #include <osg/io_utils>
 #include <QUndoStack>
 
+#include <QElapsedTimer>
+
 NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	: QObject(parent), 
 	m_window(window), 
@@ -538,7 +540,7 @@ void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> slid
 	osg::Matrixd old_matrix = m_window->m_osg_widget->getCameraMatrix();
 	osg::Matrixd current_matrix;
 	current_matrix(0, 0) = INFINITY; // make the matrix nonsense so that it draws at least once
-	QImage thumbnail = generateThumbnail();
+	QImage thumbnail;
 
 	for (auto slide : slides) {
 		qDebug() << "redrawing thumbnail" << slide->getIndex();
@@ -557,19 +559,27 @@ void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> slid
 
 QImage NarrativeControl::generateThumbnail(int option)
 {
+	QElapsedTimer timer;
+	timer.start();
+
 	// widget dimensions
 	QRect dims = m_window->centralWidget()->geometry(); 
 
 	// screenshot dimensions
 	QRect ssdims = Util::rectFit(dims, 16.0 / 9.0);
-	ssdims.setY(ssdims.y() + 50);
+	//QRect ssdims = Util::rectFit(QRect(0, 0, 300, 300), 16.0 / 9.0);
+	//ssdims.setY(ssdims.y() + 50);
 
 
 	QImage img(ssdims.width(), ssdims.height(), QImage::Format_ARGB32);
 	QPainter painter(&img);
 
 	if (option == 1) {
+		QRect old_geometry = m_window->m_osg_widget->geometry();
+		//m_window->m_osg_widget->setGeometry(0, 0, 300, 300);
 		m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
+		//m_window->m_osg_widget->setGeometry(old_geometry);
+
 		m_window->m_drag_area->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawChildren | QWidget::IgnoreMask);
 	}
 	else if (option == 2) {
@@ -579,6 +589,9 @@ QImage NarrativeControl::generateThumbnail(int option)
 	// optional, fewer big screenshots
 	QImage smallimg;
 	smallimg = img.scaled(288, 162, Qt::IgnoreAspectRatio);
+
+	int ns = timer.nsecsElapsed();
+	qDebug() << "thumbnail time ms" << ns / 1.0e6;
 	return smallimg;
 }
 

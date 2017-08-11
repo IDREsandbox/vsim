@@ -540,7 +540,10 @@ void HorizontalScrollBox::dragEnterEvent(QDragEnterEvent * event)
 void HorizontalScrollBox::dragLeaveEvent(QDragLeaveEvent * event)
 {
 	qDebug() << "drag leave";
-	m_dragging = false;
+	if (m_dragging) {
+		m_dragging = false;
+		refresh();
+	}
 }
 
 void HorizontalScrollBox::setLastSelected(int idx) {
