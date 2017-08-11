@@ -15,6 +15,7 @@ public:
 signals:
 	void sNew(int);
 	void sDelete(int);
+	void sItemsMoved(std::vector<std::pair<int,int>>); // items sorted by .first
 	
 public: // COMMANDS
 	template <typename T>
@@ -69,6 +70,18 @@ public: // COMMANDS
 		Group *m_group;
 		osg::ref_ptr<T> m_node;
 		int m_index;
+	};
+
+	class MoveNodesCommand : public QUndoCommand {
+	public:
+		// mapping .first is from, .second is to
+		MoveNodesCommand(Group *group, std::vector<std::pair<int, int>> mapping, QUndoCommand *parent = nullptr);
+		void undo();
+		void redo();
+	private:
+		void move(std::vector<std::pair<int, int>>); // generic version handles undo and redo
+		Group *m_group;
+		std::vector<std::pair<int, int>> m_mapping;
 	};
 };
 

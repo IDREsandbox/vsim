@@ -259,6 +259,7 @@ void HorizontalScrollBox::setGroup(Group * group)
 	// so that we can add/remove from the slide box accordingly
 	connect(m_group, &Group::sNew, this, &HorizontalScrollBox::insertNewItem);
 	connect(m_group, &Group::sDelete, this, &HorizontalScrollBox::deleteItem);
+	connect(m_group, &Group::sItemsMoved, this, &HorizontalScrollBox::moveItems);
 
 	for (uint i = 0; i < group->getNumChildren(); i++) {
 		insertNewItem(i);
@@ -365,6 +366,23 @@ void HorizontalScrollBox::forceSelect(int index)
 ScrollBoxItem * HorizontalScrollBox::createItem(osg::Node *)
 {
 	return nullptr;
+}
+
+void HorizontalScrollBox::moveItems(std::vector<std::pair<int, int>> mapping)
+{
+	std::vector<std::pair<ScrollBoxItem*,int>> removed;
+	for (int i = mapping.size() - 1; i >= 0; i--) {
+		removed.push_back(
+			std::make_pair(m_items.takeAt(mapping[i].first), mapping[i].second));
+	}
+	// sort by destination
+	std::sort(removed.begin(), removed.end(),
+		[](auto &left, auto &right) { return left.second < right.second; });
+	// now re-enter them in forward order
+	for (auto i : removed) {
+		m_items.insert(i.second, i.first);
+	}
+	refresh();
 }
 
 void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
@@ -568,5 +586,6 @@ void HorizontalScrollBox::dropEvent(QDropEvent * event)
 		//for (auto i : new_order) qDebug() << i;
 	}
 	m_dragging = false;
+	m_drop_highlight->hide();
 	qDebug() << "DROPPED";
 }

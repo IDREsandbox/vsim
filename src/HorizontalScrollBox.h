@@ -38,7 +38,7 @@ public:
 	void addNewItem();
 	void insertNewItem(int position);
 	virtual ScrollBoxItem *createItem(osg::Node*);
-
+	void moveItems(std::vector<std::pair<int,int>> mapping); // assumes sorted
 	ScrollBoxItem *getItem(int position);
 	void clear();
 
