@@ -34,7 +34,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_drop_highlight->hide();
 
 	m_move_timer = new QTimer();
-	m_move_timer->setInterval(30);
+	m_move_timer->setInterval(15);
 	m_move_timer->start();
 	connect(m_move_timer, &QTimer::timeout, this, &HorizontalScrollBox::moveTimer);
 
@@ -86,8 +86,6 @@ void HorizontalScrollBox::addItem(ScrollBoxItem *item)
 
 void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 {
-
-	qDebug() << "narrative list gui - insert item at" << index;
 	item->setParent(m_scroll_area_widget);
 	// approximate geometry, will be fixed later on in refresh()
 	item->setGeometry(0, 0, m_height, 2.5*m_height);
@@ -113,7 +111,6 @@ void HorizontalScrollBox::insertNewItem(uint index)
 	osg::Node *node = nullptr;
 	if (m_group != nullptr && index <= m_group->getNumChildren()) {
 		node = m_group->getChild(index);
-		qDebug() << "getting child" << index << node;
 	}
 
 	ScrollBoxItem *item = createItem(node); // create the item, virtual
@@ -123,8 +120,6 @@ void HorizontalScrollBox::insertNewItem(uint index)
 
 void HorizontalScrollBox::clear()
 {
-	qDebug() << "clearing";
-
 	for (auto ptr : m_items) {
 		delete ptr;
 	}
@@ -220,6 +215,10 @@ void HorizontalScrollBox::removeFromSelection(int index)
 
 void HorizontalScrollBox::select(int index)
 {
+	// if already selected
+	if (m_selection.size() == 1 && m_selection.find(index) != m_selection.end()) {
+		return;
+	}
 	clearSelection();
 	m_selection.insert(index);
 	m_items[index]->colorSelect(true);
@@ -418,7 +417,7 @@ void HorizontalScrollBox::wheelEvent(QWheelEvent* event)
 void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 {
 	// If mouse down & beyond drag threshold then start dragging
-
+	qDebug() << "drag" << m_dragging;
 	QPoint diff = event->globalPos() - m_mouse_down_pos;
 	if (diff.manhattanLength() > m_minimum_drag_dist
 		&& m_dragging == false
@@ -443,6 +442,7 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 
 		Qt::DropAction result = drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::MoveAction);
 		qDebug() << "drop result" << result;
+		m_dragging = false;
 	}
 	//m_mouse_down_pos = event->globalPos();
 	//m_mouse_down = true;

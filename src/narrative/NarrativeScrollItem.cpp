@@ -13,7 +13,6 @@ NarrativeScrollItem::NarrativeScrollItem(Narrative2 *narrative)
 
 void NarrativeScrollItem::setNarrative(Narrative2 *narrative)
 {
-	qDebug() << "set narrative disconnect";
 	// disconnect current narrative
 	for (auto conn : m_connections)	disconnect(conn);
 

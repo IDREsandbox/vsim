@@ -79,5 +79,4 @@ void NarrativeSlide::setTransitionDuration(float tduration)
 	}
 	m_transition_duration = tduration;
 	emit sTransitionDurationChanged(tduration);
-	qDebug() << "emit duration change";
 }

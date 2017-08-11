@@ -216,6 +216,7 @@ void NarrativeControl::debug()
 
 void NarrativeControl::load(NarrativeGroup *narratives)
 {
+	qDebug() << "Clearing narrative control";
 	m_narrative_box->clear();
 	m_slide_box->clear(); 
 	m_current_narrative = -1;
