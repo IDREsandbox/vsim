@@ -8,6 +8,7 @@
 #include <QContextMenuEvent>
 #include <QDrag>
 #include <set>
+#include <QTimer>
 
 #include "ScrollBoxItem.h"
 #include "Group.h"
@@ -93,6 +94,8 @@ protected:
 	void dropEvent(QDropEvent *event);
 
 protected:
+	// The auto-sliding effect when you're dragging a widget needs a loop
+	void moveTimer();
 	//void setWidgetWidth();
 	//void positionChildren();
 	//void refreshGeometry();
@@ -111,13 +114,16 @@ protected:
 	//float m_ratio; // width to height ratio for items
 	//float m_space_ratio; // TODO: width to height ratio for spaces
 
-	bool m_mouse_down;
-	QPoint m_mouse_down_pos;
-	float m_minimum_drag_dist;
+	// drag and drop has a lot of state
+	bool m_mouse_down; // has there been a mouse press?
+	QPoint m_mouse_down_pos; // press position
+	float m_minimum_drag_dist; // minimum mouse move before drag starts
 
-	bool m_dragging;
-	QPoint m_dragpos;
-	int m_drag_index;
+	bool m_dragging; // is dragging?
+	QPoint m_dragpos; // last known drag point
+	int m_drag_index; // last known spacer index for dropping
+
+	QTimer *m_move_timer;
 
 	QMenu *m_menu;
 	QMenu *m_item_menu;

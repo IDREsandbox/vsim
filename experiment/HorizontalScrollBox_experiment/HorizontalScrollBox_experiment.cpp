@@ -36,8 +36,8 @@ int main(int argc, char *argv[])
 		std::cout << "\n";
 	});
 	
-	a.setStartDragDistance(10);
-	a.setStartDragTime(100);
+	//a.setStartDragDistance(10);
+	//a.setStartDragTime(100);
 
 	SlideScrollBox *slide_box = new SlideScrollBox(&window);
 	//QObject::connect(slide_box, &SlideScrollBox::sSetDuration, [slide_box](float d) { slide_box->setDuration(d); });
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	//slide_box->setStyleSheet("background-color: rgba(0,0,0,200);");
 	//narrative_box->setStyleSheet("QMenu { color: rgb(40,40,40); }");
 
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 8; i++) {
 		narrative_box->addNewItem();
 	}
 	//for (int i = 0; i < 4; i++) {
@@ -65,6 +65,12 @@ int main(int argc, char *argv[])
 	//for (int i = 0; i < 4; i++) {
 	//	slide_box->addItem();
 	//}
+
+	//QTimer timer;
+	//timer.setInterval(0);
+	//int x = 0;
+	//QObject::connect(&timer, &QTimer::timeout, [&x]() {qDebug() << "cat" << x; x++; });
+	//timer.start();
 
 	window.show();
 

@@ -33,6 +33,11 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_drop_highlight->setStyleSheet("background-color: rgb(255,255,255)");
 	m_drop_highlight->hide();
 
+	m_move_timer = new QTimer();
+	m_move_timer->setInterval(0);
+	m_move_timer->start();
+	connect(m_move_timer, &QTimer::timeout, this, &HorizontalScrollBox::moveTimer);
+
 	//m_height = m_scroll_area_widget->height();
 	m_height = this->height();
 
@@ -549,6 +554,7 @@ void HorizontalScrollBox::dragMoveEvent(QDragMoveEvent * event)
 		m_dragpos = event->pos();
 		refresh();
 	}
+
 	//qDebug() << "drag move";
 }
 
@@ -588,4 +594,25 @@ void HorizontalScrollBox::dropEvent(QDropEvent * event)
 	m_dragging = false;
 	m_drop_highlight->hide();
 	qDebug() << "DROPPED";
+}
+void HorizontalScrollBox::moveTimer()
+{
+	if (m_dragging) {
+		int mx = m_dragpos.x();
+		int my = m_dragpos.y();
+		if (my > -20 && my < height() + 20) {
+			QAbstractSlider *bar = horizontalScrollBar();
+			if (mx < 40) {
+				// scroll left
+				// rate is linear with position
+				int dx = (40 - mx) / 10.0;
+				bar->setSliderPosition(bar->sliderPosition() - dx);
+			}
+			if (mx > width() - 40) {
+				int dx = (mx - width() + 40) / 10.0;
+				bar->setSliderPosition(bar->sliderPosition() + dx);
+
+			}
+		}
+	}
 }
