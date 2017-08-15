@@ -1,5 +1,9 @@
 # Changelog
 
+## 2017-08-14
+### Added
+- Import/export for narratives
+
 ## 2017-08-10
 ### Added
 - Drag and drop for narratives and slides

@@ -13,11 +13,8 @@ class NarrativeGroup : public Group {
 public:
 	NarrativeGroup() {}
 	NarrativeGroup(const NarrativeGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
+	NarrativeGroup(osg::Group *old_group);
 	META_Node(, NarrativeGroup)
-
-signals:
-	void sNewNarrative(int);
-	void sDeleteNarrative(int);
 
 public: // COMMANDS
 	class NewNarrativeCommand : public Group::NewNodeCommand<Narrative2> {
@@ -29,6 +26,17 @@ public: // COMMANDS
 	public:
 		DeleteNarrativeCommand(NarrativeGroup *group, int index, QUndoCommand *parent = nullptr)
 			: Group::DeleteNodeCommand<Narrative2>(group, index, parent) {}
+	};
+
+	// add a narrative to the end, for importing
+	class AddNarrativeCommand : public QUndoCommand {
+	public:
+		AddNarrativeCommand(NarrativeGroup *group, Narrative2 *narrative, QUndoCommand *parent = nullptr);
+		void undo();
+		void redo();
+	private:
+		NarrativeGroup *m_group;
+		osg::ref_ptr<Narrative2> m_narrative;
 	};
 };
 

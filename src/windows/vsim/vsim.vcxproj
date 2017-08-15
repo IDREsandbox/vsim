@@ -51,6 +51,7 @@
     <ClCompile Include="..\..\mrichtextedit.cpp" />
     <ClCompile Include="..\..\mtextedit.cpp" />
     <ClCompile Include="..\..\narrative\Narrative2.cpp" />
+    <ClCompile Include="..\..\narrative\NarrativeGroup.cpp" />
     <ClCompile Include="..\..\narrative\NarrativeInfoDialog.cpp" />
     <ClCompile Include="..\..\narrative\NarrativeControl.cpp" />
     <ClCompile Include="..\..\narrative\NarrativeSlide.cpp" />
