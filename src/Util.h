@@ -21,6 +21,8 @@ namespace Util
 	// osg::Image to QImage
 	QImage imageOsgToQt(const osg::Image *oimg);
 
+	QString setToString(std::set<int> set);
+
 	double clamp(double value, double min, double max);
 
 	// forces an angle between 0 and 180

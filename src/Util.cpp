@@ -107,6 +107,16 @@ QImage Util::imageOsgToQt(const osg::Image *oimg)
 	return QImage(oimg->data(), oimg->s(), oimg->t(), QImage::Format_RGBA8888);
 }
 
+QString Util::setToString(std::set<int> set)
+{
+	QString str = "";
+	for (auto i : set) {
+		str += QString::number(i);
+		str += " ";
+	}
+	return str;
+}
+
 double Util::clamp(double value, double min, double max)
 {
 	if (value > max) return max;
