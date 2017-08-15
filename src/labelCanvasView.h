@@ -9,6 +9,7 @@
 
 class labelCanvas;
 
+// QGraphicsView gives a simple way to resize slides and their text labels. We tried things like painting a scaled QTextDocument and messing with QTextEdit but it was no fun. This could have been inside Canvas but this was just easier.
 class labelCanvasView : public QGraphicsView
 {
 	Q_OBJECT
