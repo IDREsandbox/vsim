@@ -1,5 +1,9 @@
 # Changelog
 
+## 2017-08-15
+### Fixed
+- QTextEdit + QGraphicsView transparency bug fix
+
 ## 2017-08-10
 ### Added
 - Drag and drop for narratives and slides
