@@ -13,7 +13,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_group(nullptr),
 	m_dragging(false),
 	m_mouse_down(false),
-	m_minimum_drag_dist(5)
+	m_minimum_drag_dist(10)
 {
 	this->setObjectName(QStringLiteral("scrollArea"));
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
