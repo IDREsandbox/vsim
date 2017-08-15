@@ -1,5 +1,33 @@
-          GNU LESSER GENERAL PUBLIC LICENSE
-               Version 2.1, February 1999
+OpenSceneGraph - OSGPL 0.0 (wxWindows, LGPL)
+Qt 5.9 - LGPL 3
+MRichTextEdit, Jirí Procházka and Digia Plc - LGPL 2.1
+OSGWidget, Bastian Rieck - MIT License
+
+------------------------------------------------------------------------------
+
+                OpenSceneGraph Public License, Version 0.0
+                ==========================================
+                
+  Copyright (C) 2002 Robert Osfield.
+  
+  Everyone is permitted to copy and distribute verbatim copies
+  of this licence document, but changing it is not allowed.
+
+                       OPENSCENEGRAPH PUBLIC LICENCE
+     TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  This library is free software; you can redistribute it and/or modify it
+  under the terms of the OpenSceneGraph Public License (OSGPL) version 0.0
+  or later.
+  
+  Notes: the OSGPL is based on the LGPL, with the 4 exceptions laid
+  out in the wxWindows section below.  The LGPL is contained in the
+  final section of this license.
+
+------------------------------------------------------------------------------
+
+		  GNU LESSER GENERAL PUBLIC LICENSE
+		       Version 2.1, February 1999
 
  Copyright (C) 1991, 1999 Free Software Foundation, Inc.
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -10,7 +38,7 @@
  as the successor of the GNU Library Public License, version 2, hence
  the version number 2.1.]
 
-                Preamble
+			    Preamble
 
   The licenses for most software are designed to take away your
 freedom to share and change it.  By contrast, the GNU General Public
@@ -146,7 +174,7 @@ such a program is covered only if its contents constitute a work based
 on the Library (independent of the use of the Library in a tool for
 writing it).  Whether that is true depends on what the Library does
 and what the program that uses the Library does.
-
+  
   1. You may copy and distribute verbatim copies of the Library's
 complete source code as you receive it, in any medium, provided that
 you conspicuously and appropriately publish on each copy an
@@ -432,7 +460,7 @@ decision will be guided by the two goals of preserving the free status
 of all derivatives of our free software and of promoting the sharing
 and reuse of software generally.
 
-                NO WARRANTY
+			    NO WARRANTY
 
   15. BECAUSE THE LIBRARY IS LICENSED FREE OF CHARGE, THERE IS NO
 WARRANTY FOR THE LIBRARY, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
@@ -455,7 +483,7 @@ FAILURE OF THE LIBRARY TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
 SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGES.
 
-             END OF TERMS AND CONDITIONS
+		     END OF TERMS AND CONDITIONS
 
            How to Apply These Terms to Your New Libraries
 
@@ -501,5 +529,24 @@ necessary.  Here is a sample; alter the names:
 
 That's all there is to it!
 
+-------------------------------------------------------------------------------
+OSGWidget
+Copyright (C) 2014 Bastian Rieck <bastian@annwfn.net>
 
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
