@@ -1,6 +1,9 @@
 # Changelog
 
 ## 2017-08-15
+### Added
+- Import/export for narratives
+
 ### Fixed
 - QTextEdit + QGraphicsView transparency bug fix
 

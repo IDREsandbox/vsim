@@ -10,6 +10,7 @@
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 
+#include <QObject>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QProgressDialog>
 #include <QtWidgets/QAction>
@@ -17,8 +18,6 @@
 #include "Util.h"
 #include "deprecated/narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
-
-#include <QObject>
 
 #define OPTIMIZE 0
 
@@ -35,6 +34,8 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(window, &MainWindow::sImportModel, this, &VSimApp::importModel);
 	connect(window, &MainWindow::sNew, this, &VSimApp::reset);
 	connect(window, &MainWindow::sSaveCurrent, this, &VSimApp::saveCurrentVSim);
+	connect(window->ui.actionImport_Narratives, &QAction::triggered, this, &VSimApp::importNarratives);
+	connect(window->ui.actionExport_Narratives, &QAction::triggered, this, &VSimApp::exportNarratives);
 
 	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, [this]() {m_root->debug(); });
 	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this, &VSimApp::debugCamera);
@@ -88,7 +89,7 @@ bool VSimApp::importModel(const std::string& filename)
 	// otherwise
 	loadedModel = osgDB::readNodeFile(filename);
 	if (!loadedModel.get()) {
-		qWarning() << "error loading file %s\n" << filename.c_str();
+		qWarning() << "Error importing" << filename.c_str();
 		QMessageBox::warning(m_window, "Import Error", "Error loading file " + QString::fromStdString(filename));
 		return false;
 	}
@@ -209,6 +210,131 @@ bool VSimApp::saveCurrentVSim()
 		return true;
 	}
 	saveVSim(m_filename);
+	return true;
+}
+
+bool VSimApp::exportNarratives()
+{
+	// figure out the selected narratives, if none are selected then error
+	osg::ref_ptr<osg::Group> export_group = new NarrativeGroup;
+	NarrativeControl::SelectionLevel level = m_narrative_control->getSelectionLevel();
+	std::set<int> selection;
+	if (level == NarrativeControl::NARRATIVES) {
+		// export the entire selection
+		selection = m_window->ui.topBar->ui.narratives->getSelection();
+		if (selection.empty()) {
+			QMessageBox::warning(m_window, "Export Narratives Error", "No narratives selected");
+			return false;
+		}
+	}
+	else {
+		int nar = m_narrative_control->getCurrentNarrative();
+		if (nar == -1) return false;
+		selection.insert(nar);
+	}
+	// add all children to the export group
+	for (auto index : selection) {
+		export_group->addChild(m_root->narratives()->getChild(index));
+	}
+
+	// Open up the save dialog
+	qDebug() << "Export narratives";
+	QString filename = QFileDialog::getSaveFileName(m_window, "Export Narratives", "", "Narrative file (*.nar)");
+	if (filename == "") {
+		qDebug() << "Export narratives cancel";
+		return false;
+	}
+
+	// Open the file, create the osg reader/writer
+	qDebug() << "Exporting narratives" << filename;
+	std::ofstream ofs;
+	ofs.open(filename.toStdString(), std::ios::binary);
+	if (!ofs.good()) {
+		QMessageBox::warning(m_window, "Export Error", "Error opening file for writing " + filename);
+		return false;
+	}
+
+	osgDB::ReaderWriter *rw = osgDB::Registry::instance()->getReaderWriterForExtension("osgb");
+	if (!rw) {
+		QMessageBox::warning(m_window, "Export Error", "Error creating osgb writer " + filename);
+		return false;
+	}
+
+	qDebug() << "Exporting narratives" << Util::setToString(selection);
+	osgDB::Options* options = new osgDB::Options;
+	//options->setPluginStringData("fileType", "Ascii");
+	options->setPluginStringData("WriteImageHint", "IncludeData");
+	osgDB::ReaderWriter::WriteResult result = rw->writeNode(*export_group, ofs, options);
+
+	if (result.success()) {
+		return true;
+	}
+	else {
+		QMessageBox::warning(m_window, "Save Error", "Error writing osg nodes " + filename);
+		return false;
+	}
+}
+
+bool VSimApp::importNarratives()
+{
+	// Open dialog
+	qDebug("Importing narratives");
+	QString filename = QFileDialog::getOpenFileName(m_window, "Import Narratives", "", "Narrative files (*.nar);;All types (*.*)");
+	if (filename == "") {
+		qDebug() << "import cancel";
+		return false;
+	}
+
+	osg::ref_ptr<osg::Node> loadedModel;
+
+	// open file
+	std::ifstream ifs;
+	ifs.open(filename.toStdString(), std::ios::binary);
+	if (!ifs.good()) {
+		QMessageBox::warning(m_window, "Import Narratives Error", "Error opening file " + filename);
+		return false;
+	}
+	// create reader/writer
+	osgDB::ReaderWriter *rw = osgDB::Registry::instance()->getReaderWriterForExtension("osgb");
+	if (!rw) {
+		QMessageBox::warning(m_window, "Import Narratives Error", "Error creating osgb writer " + filename);
+		return false;
+	}
+
+	// perform read
+	osgDB::ReaderWriter::ReadResult result = rw->readNode(ifs);
+	if (result.success()) {
+		loadedModel = result.takeNode();
+	}
+	else {
+		QMessageBox::warning(m_window, "Import Narratives Error", "Error reading nodes " + filename);
+		return false;
+	}
+
+	// check if a NarrativeGroup
+	NarrativeGroup *group = nullptr;
+	NarrativeGroup *cast = dynamic_cast<NarrativeGroup*>(loadedModel.get());
+	osg::Group *cast_old = dynamic_cast<osg::Group*>(loadedModel.get());
+	Narrative *nar = dynamic_cast<Narrative*>(loadedModel.get());
+
+	if (cast) {
+		group = cast;
+	}
+	else if (cast_old) {
+		group = new NarrativeGroup(cast_old);
+	}
+	else if (nar) {
+		qDebug() << "file is an old narrative";
+		group = new NarrativeGroup;
+		group->addChild(new Narrative2(nar));
+	}
+	else {
+		qWarning() << "Error importing narratives - root node is not a NarrativeGroup or osg::Group";
+		QMessageBox::warning(m_window, "Import Error", "Error loading file " + filename);
+		return false;
+	}
+
+	m_narrative_control->loadNarratives(group);
 	return true;
 }
 

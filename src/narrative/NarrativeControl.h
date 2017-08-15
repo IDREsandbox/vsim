@@ -34,12 +34,18 @@ public:
 	void setNarrative(int index);
 	void closeNarrative();
 
+	enum SelectionLevel {
+		NARRATIVES,
+		SLIDES,
+		LABELS
+	};
+	SelectionLevel getSelectionLevel();
 	void selectNarratives(std::set<int> narratives);
 	void selectSlides(int narrative, std::set<int> slides);
-	void selectLabels(int narrative, int slide, std::set<int> labels);
+	//void selectLabels(int narrative, int slide, std::set<int> labels);
 
-	// this should be const or it is dangerous to have public
-	// it means that ppl can change narrative data w/o it being updated by the gui
+	int getCurrentNarrative();
+	int getCurrentSlide();
 	Narrative2 *getNarrative(int index);
 	NarrativeSlide *getNarrativeSlide(int narrative, int slide);
 
@@ -51,6 +57,8 @@ public:
 	void editNarrativeInfo();
 	void deleteNarratives();
 	void moveNarratives(std::set<int> from, int to);
+	// for importing narratives
+	void loadNarratives(NarrativeGroup *group);
 
 	// Slides
 	void newSlide();
