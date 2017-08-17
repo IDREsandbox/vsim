@@ -38,6 +38,8 @@ public:
 	bool openVSim(const std::string& filename);
 	bool saveVSim(const std::string& filename);
 	bool saveCurrentVSim();
+	bool exportNarratives();
+	bool importNarratives();
 
 	osg::Group* getRoot() const { return m_root.get(); }
 

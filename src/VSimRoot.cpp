@@ -17,32 +17,15 @@ VSimRoot::VSimRoot(osg::Group * old_group)
 	qDebug() << "converting to vsim" << old_group->getNumChildren();
 	// find ModelInformation
 
-	// find EResources
-	// findOrCreateChildGroup(root, "EmbeddedResources");
+	// NarrativeGroup
+	// The conversion constructor removes Narratives from old_group so we don't worry about it
+	m_narratives = new NarrativeGroup(old_group);
+	m_narratives->setName("Narratives");
 
-	// Scan the root for different things, convert them, put them into the Narratives group
-	uint numChildren = old_group->getNumChildren();
-	for (uint i = 0; i < numChildren; i++) {
+	// Move everything unknown to the model group for displaying
+	for (uint i = 0; i < old_group->getNumChildren(); i++) {
 		osg::Node *node = old_group->getChild(i);
-
-		if (!node) {
-			qDebug() << "child" << i << "is null ptr?";
-		}
-
-		qDebug() << "found in root -" << QString::fromStdString(node->className());
-
-		Narrative *old_narrative = dynamic_cast<Narrative*>(node);
-		if (old_narrative) {
-			qDebug() << "Found an old narrative" << QString::fromStdString(old_narrative->getName()) << "- converting";
-			Narrative2 *new_narrative = new Narrative2(old_narrative);
-
-			m_narratives->addChild(new_narrative);
-		}
-		// don't know the type? just copy to the model group
-		else {
-			m_models->addChild(node);
-		}
-
+		m_models->addChild(old_group->getChild(i));
 	}
 }
 

@@ -13,7 +13,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_group(nullptr),
 	m_dragging(false),
 	m_mouse_down(false),
-	m_minimum_drag_dist(5)
+	m_minimum_drag_dist(10)
 {
 	this->setObjectName(QStringLiteral("scrollArea"));
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -469,6 +469,7 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 {
 	if (event->button() == Qt::LeftButton) {
 		qDebug() << "item press - lmb";
+		int previous_selected = m_last_selected;
 		m_last_selected = index;
 		if (event->type() == QEvent::MouseButtonDblClick) {
 			qDebug() << "item press - double click";
@@ -479,13 +480,27 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 		}
 
 		if (event->modifiers() & Qt::ControlModifier) {
+			// ctrl - add/remove from selection
 			if (isSelected(index)) {
 				removeFromSelection(index);
 			}
 			else {
 				addToSelection(index);
 			}
-			qDebug() << "item press - shift";
+			qDebug() << "item ctrl press" << m_last_selected;
+		}
+		else if (event->modifiers() & Qt::ShiftModifier
+			&& m_last_selected != -1 
+			&& previous_selected != -1) {
+			// shift - range selection
+			if (m_last_selected != -1 && previous_selected != -1) {
+				int left = std::min(m_last_selected, previous_selected);
+				int right = std::max(m_last_selected, previous_selected);
+				for (int i = left; i <= right; i++) {
+					addToSelection(i);
+				}
+				qDebug() << "item range select" << left << right;
+			}
 		}
 		else {
 			// left click a selected item -> begin dragging
@@ -514,7 +529,7 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 void HorizontalScrollBox::itemMouseReleaseEvent(QMouseEvent * event, int index)
 {
 	if (event->button() == Qt::LeftButton) {
-		if (!(event->modifiers() & Qt::ControlModifier)) {
+		if (!(event->modifiers() & Qt::ControlModifier) && !(event->modifiers() & Qt::ShiftModifier)) {
 			// If already in selection then select() on release
 			// this is so that you can start dragging w/o deselecting everything
 			qDebug() << "release";

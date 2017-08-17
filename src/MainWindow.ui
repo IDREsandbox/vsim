@@ -438,6 +438,8 @@ border-color: rgb(238, 238, 238);
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="actionImport_Model"/>
+    <addaction name="actionImport_Narratives"/>
+    <addaction name="actionExport_Narratives"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -612,6 +614,16 @@ border-color: rgb(238, 238, 238);
    </property>
    <property name="shortcut">
     <string>F11</string>
+   </property>
+  </action>
+  <action name="actionExport_Narratives">
+   <property name="text">
+    <string>Export Narratives...</string>
+   </property>
+  </action>
+  <action name="actionImport_Narratives">
+   <property name="text">
+    <string>Import Narratives...</string>
    </property>
   </action>
  </widget>

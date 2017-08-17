@@ -31,6 +31,8 @@ dragLabel::dragLabel(labelCanvas* parent, std::string style)
 	dragEdge = 0;
 	//scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
 
+	setFrameShape(QFrame::NoFrame);
+
 	this->setWordWrapMode(QTextOption::WordWrap);
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

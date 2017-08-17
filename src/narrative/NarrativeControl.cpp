@@ -176,7 +176,6 @@ void NarrativeControl::deleteNarratives()
 
 void NarrativeControl::moveNarratives(std::set<int> from, int to)
 {
-	// map this to single move commands
 	std::vector<std::pair<int, int>> mapping;
 	std::set<int> to_set;
 	auto it = from.begin();
@@ -190,6 +189,30 @@ void NarrativeControl::moveNarratives(std::set<int> from, int to)
 	m_undo_stack->push(new SelectNarrativesCommand(this, from, ON_UNDO));
 	m_undo_stack->push(new Group::MoveNodesCommand(m_narrative_group, mapping));
 	m_undo_stack->push(new SelectNarrativesCommand(this, to_set, ON_REDO));
+	m_undo_stack->endMacro();
+}
+
+void NarrativeControl::loadNarratives(NarrativeGroup * group)
+{
+	// figure out selection
+	uint n = group->getNumChildren();
+	int selection_begin = n;
+	std::set<int> selection;
+	for (uint i = 0; i < n; i++) {
+		selection.insert(selection_begin + i);
+	}
+	int next_selection = nextSelectionAfterDelete(n, selection);
+
+	m_undo_stack->beginMacro("Import Narratives");
+	m_undo_stack->push(new SelectNarrativesCommand(this, { next_selection }, ON_UNDO));
+	for (uint i = 0; i < n; i++) {
+		Narrative2 *narrative = dynamic_cast<Narrative2*>(group->getChild(i));
+		if (narrative == nullptr) {
+			qWarning() << "Non-narrative detected when loading narrative group";
+		}
+		m_undo_stack->push(new NarrativeGroup::AddNarrativeCommand(m_narrative_group, narrative));
+	}
+	m_undo_stack->push(new SelectNarrativesCommand(this, selection, ON_REDO));
 	m_undo_stack->endMacro();
 }
 
@@ -291,6 +314,13 @@ void NarrativeControl::newLabelButton(QString style) {
 	m_canvas->newLabel(style);
 }
 
+NarrativeControl::SelectionLevel NarrativeControl::getSelectionLevel()
+{
+	if (m_current_narrative == -1) return NARRATIVES;
+	if (m_current_slide == -1) return SLIDES;
+	return LABELS;
+}
+
 void NarrativeControl::selectNarratives(std::set<int> narratives)
 {
 	closeNarrative();
@@ -374,6 +404,16 @@ int NarrativeControl::nextSelectionAfterDelete(int total, std::set<int> selectio
 		next_selection = first_index - 1; // select the previous item
 	}
 	return next_selection;
+}
+
+int NarrativeControl::getCurrentNarrative()
+{
+	return m_current_narrative;
+}
+
+int NarrativeControl::getCurrentSlide()
+{
+	return m_current_slide;
 }
 
 Narrative2 *NarrativeControl::getNarrative(int index)
