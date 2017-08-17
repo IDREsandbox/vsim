@@ -3,6 +3,7 @@
 ## 2017-08-15
 ### Added
 - Import/export for narratives
+- Shift selection for scroll boxes
 
 ### Fixed
 - QTextEdit + QGraphicsView transparency bug fix
