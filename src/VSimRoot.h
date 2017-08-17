@@ -32,4 +32,14 @@ private:
 	osg::ref_ptr<ModelGroup> m_models;
 };
 
+class DebugVisitor : public osg::NodeVisitor {
+public:
+	DebugVisitor() : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), m_tabs(0) {}
+	virtual void apply(osg::Group &group) override;
+	virtual void apply(osg::Node &node) override;
+
+private:
+	int m_tabs;
+};
+
 #endif

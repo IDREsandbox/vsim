@@ -1,4 +1,5 @@
 #include "VSimRoot.h"
+#include <iostream>
 
 VSimRoot::VSimRoot() {
 	qDebug() << "root constructor, adding children";
@@ -77,6 +78,9 @@ void VSimRoot::debug()
 	for (uint i = 0; i < m_models->getNumChildren(); i++) {
 		qInfo() << "Model" << QString::fromStdString(m_models->getChild(i)->getName());
 	}
+
+	DebugVisitor v;
+	m_models->accept(v);
 }
 
 void VSimRoot::merge(VSimRoot *other)
@@ -101,4 +105,19 @@ void VSimRoot::merge(VSimRoot *other)
 		osg::Node *node = other->getChild(i);
 		addChild(node);
 	}
+}
+
+void DebugVisitor::apply(osg::Group &group)
+{
+	std::cout << std::string(m_tabs, '\t');
+	std::cout << group.className() << " " << group.getName() << " " << group.getNumChildren() << '\n';
+
+	m_tabs++;
+	traverse(group);
+	m_tabs--;
+}
+
+void DebugVisitor::apply(osg::Node & node)
+{
+	std::cout << std::string(m_tabs, '\t') << node.className() << " " << node.getName() << "\n";
 }
