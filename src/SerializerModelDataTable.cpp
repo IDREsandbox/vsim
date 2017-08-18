@@ -16,7 +16,7 @@ static bool readDataTable(osgDB::InputStream& is, ModelDataTable& table)
 	for (unsigned int i = 0; i < size; i++)
 	{
 		qDebug() << "reading mapping";
-		osg::Node* node = dynamic_cast<ModelDataTable*>(is.readObject());
+		osg::Node* node = dynamic_cast<osg::Node*>(is.readObject());
 		if (!node) {
 			qDebug() << "ModelDataTable serializer - failed to read node" << i;
 			return false;

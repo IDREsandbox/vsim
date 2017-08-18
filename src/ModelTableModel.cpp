@@ -31,7 +31,7 @@ QVariant ModelTableModel::data(const QModelIndex &index, int role) const
 
 	// 0: Name, 1: ClassName
 	osg::Node *node = getNode(index);
-	ModelData *meta = ModelData::getModelNode(node);
+	ModelData *meta = m_group->dataTable()->getData(node);
 
 	int col = index.column();
 	switch (col) {
@@ -95,9 +95,9 @@ QModelIndex ModelTableModel::index(int row, int column, const QModelIndex &paren
 		return QModelIndex();
 	}
 
-	// get the nth child, ignoring ModelNodes
+	// get the nth child
 	osg::Node *child = pgroup->getChild(row);
-	ModelData *meta = ModelData::getModelNode(child);
+	ModelData *meta = m_group->dataTable()->getData(child);
 
 	if (!child || !meta && column >= 2) {
 		return QModelIndex(); // blanks if there is no meta info
@@ -135,10 +135,6 @@ int ModelTableModel::rowCount(const QModelIndex &parent) const
 		group = node->asGroup();
 	}
 	if (!group) return 0;
-
-	// Model Nodes don't count as children
-	ModelData *meta = ModelData::getModelNode(group);
-	if (meta) return group->getNumChildren() - 1;
 
 	return group->getNumChildren();
 }

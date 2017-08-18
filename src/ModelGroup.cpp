@@ -28,13 +28,13 @@ void ModelGroup::merge(ModelGroup *other)
 
 ModelDataTable * ModelGroup::dataTable() const
 {
-	qDebug() << "get data table" << m_data_table.get();
+	//qDebug() << "get data table" << m_data_table.get();
 	return m_data_table.get();
 }
 
 const ModelDataTable * ModelGroup::getDataTable() const
 {
-	qDebug() << "get data table const" << m_data_table.get();
+	//qDebug() << "get data table const" << m_data_table.get();
 	return m_data_table.get();
 }
 
@@ -42,7 +42,7 @@ void ModelGroup::setDataTable(ModelDataTable *table)
 {
 	if (!table) m_data_table = new ModelDataTable;
 	else m_data_table = table;
-	qDebug() << "set data table" << m_data_table.get();
+	//qDebug() << "set data table" << m_data_table.get();
 }
 
 int ModelGroup::getYear() const

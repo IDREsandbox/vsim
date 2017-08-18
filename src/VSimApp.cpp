@@ -24,16 +24,20 @@
 
 VSimApp::VSimApp(MainWindow* window)
 	: m_window(window),
-	m_root(nullptr)
+	m_filename(""),
+	m_root(new VSimRoot),
+	m_model_table_model(m_root->models())
 {
 	m_viewer = window->getViewer();
 	m_narrative_control = new NarrativeControl(this, m_window);
 	m_narrative_player = new NarrativePlayer(this, m_window, m_narrative_control);
 
+	m_window->m_outliner->setModel(&m_model_table_model);
+
 	connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
 	connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
 	connect(window, &MainWindow::sImportModel, this, &VSimApp::importModel);
-	connect(window, &MainWindow::sNew, this, &VSimApp::reset);
+	connect(window, &MainWindow::sNew, this, &VSimApp::init);
 	connect(window, &MainWindow::sSaveCurrent, this, &VSimApp::saveCurrentVSim);
 	connect(window->ui.actionImport_Narratives, &QAction::triggered, this, &VSimApp::importNarratives);
 	connect(window->ui.actionExport_Narratives, &QAction::triggered, this, &VSimApp::exportNarratives);
@@ -41,7 +45,7 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, [this]() {m_root->debug(); });
 	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this, &VSimApp::debugCamera);
 
-	reset();
+	initWithVSim(m_root);
 }
 
 bool VSimApp::init()
@@ -67,21 +71,21 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	else {
 		qDebug() << "is in fact a vsimroot";
 	}
-	m_root = root;
-	m_viewer->setSceneData(m_root->models()); // ideally this would be only models, but its easy to mess things up
-
-	m_narrative_control->load(m_root->narratives());
-
+	
+	// move all of the gui stuff over to the new root
+	m_viewer->setSceneData(root->models()); // ideally this would be only models, but its easy to mess things up
+	m_model_table_model.setGroup(root->models());
+	m_narrative_control->load(root->narratives());
+	
 	m_window->m_undo_stack->clear();
 	m_window->m_osg_widget->reset();
-	//m_viewer->getCamera()->setProjectionMatrixAsPerspective(75.0f, )
+
+	// dereference the old root, apply the new one
+	m_root = root;
 	
 	return true;
 }
-void VSimApp::reset()
-{
-	init();
-}
+
 
 bool VSimApp::importModel(const std::string& filename)
 {

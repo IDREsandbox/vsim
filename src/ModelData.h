@@ -25,13 +25,6 @@ signals:
 	void sYearBeginChange(int);
 	void sYearEndChange(int);
 
-public:
-	// Add metadata to an existing osg::Group
-	static ModelData *addModelNode(osg::Group *g);
-	static void removeModelNode(osg::Group *g);
-	static ModelData *getModelNode(osg::Node *g);
-	static ModelData *getModelNode(osg::Group *g);
-
 public: // COMMANDS
 	// Warning there is no 0 checking in here, no exceptions or anything, so just don't pass in0 
 	class SetYearBeginCommand : public ModifyCommand<ModelData, int> {

@@ -86,11 +86,12 @@ void VSimRoot::debug()
 	ModelData *data = new ModelData;
 	data->setYearEnd(1000);
 	data->setYearBegin(100);
-	m_models->dataTable()->addMapping(this, data);
-	ModelData *data2 = new ModelData;
-	data->setYearEnd(4949);
-	data->setYearBegin(111);
-	m_models->dataTable()->addMapping(this, data2);
+	m_models->dataTable()->addMapping(m_models->getChild(0), data);
+	
+	qDebug() << "Extra Data Mappings";
+	for (auto &kv : m_models->dataTable()->m_table) {
+		qDebug() << kv.first << kv.second << kv.second->getYearBegin() << kv.second->getYearEnd();
+	}
 }
 
 void VSimRoot::merge(VSimRoot *other)

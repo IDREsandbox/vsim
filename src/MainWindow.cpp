@@ -90,6 +90,12 @@ MainWindow::MainWindow(QWidget *parent)
 			qDebug() << "goback";
 			this->ui.topBar->showNarratives();
 		});
+
+	// model outliner
+	m_outliner = new ModelOutliner();
+	connect(ui.actionModel_Outliner, &QAction::triggered, m_outliner, [this]() {
+		m_outliner->show();
+	});
 }
 
 void MainWindow::ErrorDialog(const std::string & msg)

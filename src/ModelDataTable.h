@@ -14,6 +14,8 @@ public:
 
 	void addMapping(osg::Node *node, ModelData *data);
 
+	ModelData *getData(osg::Node *node);
+
 public:
 	std::set<osg::Observer> m_observers;
 	std::map<osg::Node*, osg::ref_ptr<ModelData>> m_table;

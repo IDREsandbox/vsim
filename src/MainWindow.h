@@ -15,6 +15,8 @@
 #include "dragLabelInput.h"
 #include "labelCanvas.h"
 #include "labelCanvasView.h"
+#include "TimeSlider.h"
+#include "ModelOutliner.h"
 
 //#include "VSimApp.h"
 
@@ -76,6 +78,7 @@ public:
 	labelCanvas *m_drag_area;
 	QUndoStack *m_undo_stack;
 	labelCanvasView *m_view;
+	ModelOutliner *m_outliner;
 };
 
 
