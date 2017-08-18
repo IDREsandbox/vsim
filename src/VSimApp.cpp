@@ -54,13 +54,7 @@ bool VSimApp::init()
 	initWithVSim(new VSimRoot);
 	return true;
 }
-bool VSimApp::initWithModel(osg::Node *model)
-{
-	init();
-	m_root->models()->addChild(model);
-	m_window->m_osg_widget->reset();
-	return true;
-}
+
 bool VSimApp::initWithVSim(osg::Node *new_node)
 {
 	VSimRoot *root = dynamic_cast<VSimRoot*>(new_node);
@@ -87,9 +81,17 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 }
 
 
+void VSimApp::addModel(osg::Node *node, const std::string &name)
+{
+	m_root->models()->addChild(node);
+	node->setName(name);
+	m_window->m_osg_widget->reset();
+}
+
 bool VSimApp::importModel(const std::string& filename)
 {
 	osg::ref_ptr<osg::Node> loadedModel(NULL);
+	// TODO: special import for vsim files
 
 	// otherwise
 	loadedModel = osgDB::readNodeFile(filename);
@@ -98,8 +100,7 @@ bool VSimApp::importModel(const std::string& filename)
 		QMessageBox::warning(m_window, "Import Error", "Error loading file " + QString::fromStdString(filename));
 		return false;
 	}
-	m_root->models()->addChild(loadedModel);
-	m_window->m_osg_widget->reset();
+	addModel(loadedModel, Util::getFilename(filename));
 	return true;
 }
 
@@ -151,7 +152,13 @@ bool VSimApp::openVSim(const std::string & filename)
 	else {
 		qDebug() << "loading a non osg model";
 		loadedModel = osgDB::readNodeFile(filename);
-		init_success = initWithModel(loadedModel);
+		if (!loadedModel) {
+			QMessageBox::warning(m_window, "Load Error", "Failed to load model " + QString::fromStdString(filename));
+			return false;
+		}
+		init();
+		addModel(loadedModel, Util::getFilename(filename));
+		init_success = true;
 	}
 
 	if (!init_success) {

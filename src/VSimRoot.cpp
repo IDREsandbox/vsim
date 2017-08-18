@@ -81,12 +81,6 @@ void VSimRoot::debug()
 
 	DebugVisitor v;
 	m_models->accept(v);
-
-	qDebug() << "Adding some data mappings" << m_models->dataTable();
-	ModelData *data = new ModelData;
-	data->setYearEnd(1000);
-	data->setYearBegin(100);
-	m_models->dataTable()->addMapping(m_models->getChild(0), data);
 	
 	qDebug() << "Extra Data Mappings";
 	for (auto &kv : m_models->dataTable()->m_table) {

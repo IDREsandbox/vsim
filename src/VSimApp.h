@@ -31,9 +31,9 @@ public:
 
 	// this is called on every new, reset, etc
 	bool initWithVSim(osg::Node *root); 
-	bool initWithModel(osg::Node *model); 
 	bool init();
 	
+	void addModel(osg::Node *node, const std::string &name);
 	bool importModel(const std::string& filename); // TODO: more complicated logic with vsim
 	bool openVSim(const std::string& filename);
 	bool saveVSim(const std::string& filename);
