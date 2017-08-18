@@ -23,7 +23,8 @@
 
 
 VSimApp::VSimApp(MainWindow* window)
-	: m_window(window)
+	: m_window(window),
+	m_root(nullptr)
 {
 	m_viewer = window->getViewer();
 	m_narrative_control = new NarrativeControl(this, m_window);

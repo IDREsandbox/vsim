@@ -1,6 +1,9 @@
 #include <QtWidgets/QApplication>
 #include "MainWindow.h"
 #include "VSimApp.h"
+#include "ModelTableModel.h"
+
+#include <QTreeView>
 
 int main(int argc, char *argv[])
 {
@@ -12,6 +15,16 @@ int main(int argc, char *argv[])
 	VSimApp vsim(&window);
 
 	vsim.openVSim("assets/default.vsim");
+
+
+	//ModelData::addModelNode(vsim.getRoot()->models());
+	//
+	//ModelTableModel model(vsim.getRoot()->models(), nullptr);
+
+	//QTreeView table;
+	//table.setModel(&model);
+	//table.show();
+
 	//vsim.openVSim("T:/Projects/_UCLA/NewRunTimeSoftware/ModelTests/Pantheon/Pantheon_v1_wNarratives.vsim");
 	return a.exec();
 }

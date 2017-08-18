@@ -41,7 +41,7 @@ public:
 	bool exportNarratives();
 	bool importNarratives();
 
-	osg::Group* getRoot() const { return m_root.get(); }
+	VSimRoot* getRoot() const { return m_root.get(); }
 
 	std::string getFileName();
 	void setFileName(const std::string &);

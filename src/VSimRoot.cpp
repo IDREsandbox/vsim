@@ -81,6 +81,16 @@ void VSimRoot::debug()
 
 	DebugVisitor v;
 	m_models->accept(v);
+
+	qDebug() << "Adding some data mappings" << m_models->dataTable();
+	ModelData *data = new ModelData;
+	data->setYearEnd(1000);
+	data->setYearBegin(100);
+	m_models->dataTable()->addMapping(this, data);
+	ModelData *data2 = new ModelData;
+	data->setYearEnd(4949);
+	data->setYearBegin(111);
+	m_models->dataTable()->addMapping(this, data2);
 }
 
 void VSimRoot::merge(VSimRoot *other)
@@ -95,10 +105,7 @@ void VSimRoot::merge(VSimRoot *other)
 		m_narratives->addChild(other_narratives->getChild(i));
 	}
 
-	osg::Group *other_models = other->models();
-	for (uint i = 0; i < other_models->getNumChildren(); i++) {
-		m_models->addChild(other_models->getChild(i));
-	}
+	m_models->merge(other->models());
 
 	// what are we supposed to do with all of the other children? copy them over?
 	for (uint i = 0; i < other->getNumChildren(); i++) {
