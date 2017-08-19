@@ -58,7 +58,7 @@ Qt::ItemFlags ModelTableModel::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
 		return 0;
-	return Qt::ItemIsEnabled;
+	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	//return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }
 
