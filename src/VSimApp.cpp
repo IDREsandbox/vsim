@@ -36,6 +36,8 @@ VSimApp::VSimApp(MainWindow* window)
 	m_narrative_player = new NarrativePlayer(this, m_window, m_narrative_control);
 
 	m_window->outliner()->setModel(&m_model_table_model);
+	m_window->outliner()->header()->resizeSection(0, 200);
+	m_window->outliner()->setGeometry(100, 100, 505, 600);
 
 	connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
 	connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);

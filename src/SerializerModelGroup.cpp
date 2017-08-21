@@ -8,5 +8,4 @@ REGISTER_OBJECT_WRAPPER(
 	::ModelGroup,
 	"osg::Object osg::Node osg::Group ::Group ::ModelGroup")
 {
-	ADD_OBJECT_SERIALIZER(DataTable, ::ModelDataTable, nullptr);
 }

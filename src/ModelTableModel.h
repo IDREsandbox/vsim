@@ -23,7 +23,7 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
 	Qt::ItemFlags flags(const QModelIndex &index) const override;
-	//bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 	//bool setHeaderData(int section, Qt::Orientation orientation,
 	//	const QVariant &value, int role = Qt::EditRole) override;
 
@@ -37,6 +37,7 @@ public:
 
 	void setGroup(ModelGroup *group);
 
+	static void removeUserValue(osg::Node *node, const std::string &name);
 private:
 	osg::ref_ptr<ModelGroup> m_group;
 };
