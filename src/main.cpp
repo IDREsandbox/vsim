@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	window.show();
 	VSimApp vsim(&window);
 
-	vsim.openVSim("assets/default.vsim");
+	vsim.openVSim("C:/users/dstephan/Desktop/TimeSlider.osgt");
 
 	//vsim.openVSim("T:/Projects/_UCLA/NewRunTimeSoftware/ModelTests/Pantheon/Pantheon_v1_wNarratives.vsim");
 	return a.exec();

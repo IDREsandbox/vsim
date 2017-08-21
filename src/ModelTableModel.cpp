@@ -1,7 +1,7 @@
 #include "ModelTableModel.h"
-#include "ModelData.h"
 
 #include <QDebug>
+#include <osg/ValueObject>
 
 ModelTableModel::ModelTableModel(ModelGroup *group, QObject *parent)
 	: QAbstractItemModel(parent),
@@ -15,9 +15,6 @@ ModelTableModel::~ModelTableModel()
 
 int ModelTableModel::columnCount(const QModelIndex &parent) const
 {
-	//ModelData *meta = ModelData::getModelNode(getNode(parent));
-	//if (!meta) return 2;
-	//else return 4;
 	return 4;
 }
 
@@ -31,7 +28,9 @@ QVariant ModelTableModel::data(const QModelIndex &index, int role) const
 
 	// 0: Name, 1: ClassName
 	osg::Node *node = getNode(index);
-	ModelData *meta = m_group->dataTable()->getData(node);
+
+	int value;
+	bool ok;
 
 	int col = index.column();
 	switch (col) {
@@ -42,24 +41,72 @@ QVariant ModelTableModel::data(const QModelIndex &index, int role) const
 		return node->className();
 		break;
 	case 2:
-		if (!meta) return QModelIndex();
-		return meta->getYearBegin();
+		ok = node->getUserValue("yearBegin", value);
+		if (ok) return value;
+		else return QVariant();
 		break;
 	case 3:
-		if (!meta) return QModelIndex();
-		return meta->getYearEnd();
+		ok = node->getUserValue("yearEnd", value);
+		if (ok) return value;
+		else return QVariant();
 		break;
-	default:
-		return QModelIndex();
 	}
+	return QVariant();
 }
 
 Qt::ItemFlags ModelTableModel::flags(const QModelIndex &index) const
 {
-	if (!index.isValid())
-		return 0;
-	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	if (!index.isValid()) return 0;
+	int col = index.column();
+	if (col == 1) return Qt::ItemIsEnabled;
+
+	if (col == 2 || col == 3) {
+		// if the filename is T: begin end, then not editable
+		int begin, end;
+		if (ModelGroup::nodeTimeInName(getNode(index)->getName(), &begin, &end)) 
+			return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	}
+	// check if actually editable
+	
+	return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
 	//return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
+}
+
+bool ModelTableModel::setData(const QModelIndex & index, const QVariant & value, int role)
+{
+	if (!index.isValid()) {
+		return false;
+	}
+
+	int col = index.column();
+	osg::Node *node = static_cast<osg::Node*>(index.internalPointer());
+
+	switch (col) {
+	case 0:
+		// TODO make command?
+		node->setName(value.toString().toStdString());
+		break;
+	case 1:
+		return false;
+		break;
+	case 2:
+		if (!value.isValid() || value == 0) {
+			removeUserValue(node, "yearBegin");
+			return true;
+		}
+		node->setUserValue("yearBegin", value.toInt());
+		return true;
+		break;
+	case 3:
+		if (!value.isValid() || value == 0) {
+			removeUserValue(node, "yearEnd");
+			return true;
+		}
+		node->setUserValue("yearEnd", value.toInt());
+		return true;
+		break;
+	}
+	return false;
 }
 
 QVariant ModelTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -97,11 +144,8 @@ QModelIndex ModelTableModel::index(int row, int column, const QModelIndex &paren
 
 	// get the nth child
 	osg::Node *child = pgroup->getChild(row);
-	ModelData *meta = m_group->dataTable()->getData(child);
 
-	if (!child || !meta && column >= 2) {
-		return QModelIndex(); // blanks if there is no meta info
-	}
+	if (column >= 4) return QModelIndex();
 
 	//qDebug() << "CREATE INDEX" << row << column << child;
 	return createIndex(row, column, child);
@@ -247,6 +291,12 @@ void ModelTableModel::setGroup(ModelGroup * group)
 	beginResetModel();
 	m_group = group;
 	endResetModel();
+}
+
+void ModelTableModel::removeUserValue(osg::Node *node, const std::string & name)
+{
+	osg::UserDataContainer *cont = node->getUserDataContainer();
+	cont->removeUserObject(cont->getUserObjectIndex(name));
 }
 
 

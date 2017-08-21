@@ -110,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent)
 		});
 
 	// model outliner
-	m_outliner = new ModelOutliner();
+	m_outliner = new ModelOutliner(this);
 	connect(ui->actionModel_Outliner, &QAction::triggered, m_outliner, [this]() {
 		m_outliner->show();
 	});

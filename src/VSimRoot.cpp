@@ -82,10 +82,10 @@ void VSimRoot::debug()
 	DebugVisitor v;
 	m_models->accept(v);
 	
-	qDebug() << "Extra Data Mappings";
-	for (auto &kv : m_models->dataTable()->m_table) {
-		qDebug() << kv.first << kv.second << kv.second->getYearBegin() << kv.second->getYearEnd();
-	}
+	//qDebug() << "Extra Data Mappings";
+	//for (auto &kv : m_models->dataTable()->m_table) {
+	//	qDebug() << kv.first << kv.second << kv.second->getYearBegin() << kv.second->getYearEnd();
+	//}
 }
 
 void VSimRoot::merge(VSimRoot *other)
