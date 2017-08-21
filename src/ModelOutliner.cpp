@@ -101,6 +101,7 @@ ModelOutliner::ModelOutliner(QWidget *parent)
 {
 	setWindowTitle("Model Outliner");
 	setWindowFlags(Qt::Window);
+	setGeometry(0, 0, 200, 600);
 
 	auto *oldd = itemDelegate();
 	qDebug() << "old item delegate" << oldd;
@@ -109,7 +110,6 @@ ModelOutliner::ModelOutliner(QWidget *parent)
 	setSelectionBehavior(QAbstractItemView::SelectItems);
 
 	
-
 	auto d = new OutlinerTimeDelegate(this);
 	setItemDelegateForColumn(2, d);
 	setItemDelegateForColumn(3, d);

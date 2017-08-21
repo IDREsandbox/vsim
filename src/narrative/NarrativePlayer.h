@@ -8,6 +8,8 @@
 #include <osg/Matrix>
 #include "labelCanvas.h"
 
+#include "OSGViewerWidget.h"
+
 // NarrativePlayer owns the camera
 class NarrativePlayer : public QObject
 {

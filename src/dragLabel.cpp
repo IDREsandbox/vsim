@@ -6,6 +6,7 @@
 #include "MainWindow.h"
 #include "dragLabel.h"
 #include "mrichtextedit.h"
+#include "dragLabelInput.h"
 
 //constructor for novel generation
 dragLabel::dragLabel(labelCanvas* parent, std::string style) 

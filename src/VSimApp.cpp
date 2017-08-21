@@ -18,6 +18,9 @@
 #include "Util.h"
 #include "deprecated/narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
+#include "OSGViewerWidget.h"
+#include "MainWindow.h"
+#include "ModelOutliner.h"
 
 #define OPTIMIZE 0
 
@@ -32,18 +35,18 @@ VSimApp::VSimApp(MainWindow* window)
 	m_narrative_control = new NarrativeControl(this, m_window);
 	m_narrative_player = new NarrativePlayer(this, m_window, m_narrative_control);
 
-	m_window->m_outliner->setModel(&m_model_table_model);
+	m_window->outliner()->setModel(&m_model_table_model);
 
 	connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
 	connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
 	connect(window, &MainWindow::sImportModel, this, &VSimApp::importModel);
 	connect(window, &MainWindow::sNew, this, &VSimApp::init);
 	connect(window, &MainWindow::sSaveCurrent, this, &VSimApp::saveCurrentVSim);
-	connect(window->ui.actionImport_Narratives, &QAction::triggered, this, &VSimApp::importNarratives);
-	connect(window->ui.actionExport_Narratives, &QAction::triggered, this, &VSimApp::exportNarratives);
+	connect(window, &MainWindow::sImportNarratives, this, &VSimApp::importNarratives);
+	connect(window, &MainWindow::sExportNarratives, this, &VSimApp::exportNarratives);
 
-	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, [this]() {m_root->debug(); });
-	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this, &VSimApp::debugCamera);
+	connect(window, &MainWindow::sDebugOSG, m_root, &VSimRoot::debug);
+	connect(window, &MainWindow::sDebugCamera, this, &VSimApp::debugCamera);
 
 	initWithVSim(m_root);
 }
@@ -233,7 +236,7 @@ bool VSimApp::exportNarratives()
 	std::set<int> selection;
 	if (level == NarrativeControl::NARRATIVES) {
 		// export the entire selection
-		selection = m_window->ui.topBar->ui.narratives->getSelection();
+		selection = m_window->topBar()->ui.narratives->getSelection();
 		if (selection.empty()) {
 			QMessageBox::warning(m_window, "Export Narratives Error", "No narratives selected");
 			return false;
