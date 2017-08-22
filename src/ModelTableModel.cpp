@@ -5,8 +5,9 @@
 
 ModelTableModel::ModelTableModel(ModelGroup *group, QObject *parent)
 	: QAbstractItemModel(parent),
-	m_group(group)
+	m_group(nullptr)
 {
+	setGroup(group);
 }
 
 ModelTableModel::~ModelTableModel()
@@ -43,12 +44,14 @@ QVariant ModelTableModel::data(const QModelIndex &index, int role) const
 	case 2:
 		ok = node->getUserValue("yearBegin", value);
 		if (ok) return value;
-		else return QVariant();
+		if (role == Qt::EditRole) return 0; // this makes the editor a spinbox
+		return QVariant();
 		break;
 	case 3:
 		ok = node->getUserValue("yearEnd", value);
 		if (ok) return value;
-		else return QVariant();
+		if (role == Qt::EditRole) return 0;
+		return QVariant();
 		break;
 	}
 	return QVariant();
@@ -80,33 +83,31 @@ bool ModelTableModel::setData(const QModelIndex & index, const QVariant & value,
 
 	int col = index.column();
 	osg::Node *node = static_cast<osg::Node*>(index.internalPointer());
-
+	std::string prop;
 	switch (col) {
 	case 0:
 		// TODO make command?
 		node->setName(value.toString().toStdString());
+		// If the name has time values, then apply those
+		TimeInitVisitor::touch(node);
+		m_group->sUserValueChanged(node, "yearBegin"); // send an update the gui when name changes
 		break;
 	case 1:
 		return false;
 		break;
 	case 2:
-		if (!value.isValid() || value == 0) {
-			removeUserValue(node, "yearBegin");
-			m_group->sUserValueChanged(node, "yearBegin");
-			return true;
-		}
-		node->setUserValue("yearBegin", value.toInt());
-		m_group->sUserValueChanged(node, "yearBegin");
-		return true;
-		break;
 	case 3:
-		if (!value.isValid() || value == 0) {
-			removeUserValue(node, "yearEnd");
-			m_group->sUserValueChanged(node, "yearEnd");
+		if (col == 2) prop = "yearBegin";
+		else prop = "yearEnd";
+		qDebug() << "set value" << QString::fromStdString(prop) << value;
+		int val = value.toInt();
+		if (!value.isValid() || val == 0) {
+			removeUserValue(node, prop);
+			m_group->sUserValueChanged(node, prop);
 			return true;
 		}
-		node->setUserValue("yearEnd", value.toInt());
-		m_group->sUserValueChanged(node, "yearEnd");
+		node->setUserValue(prop, val);
+		m_group->sUserValueChanged(node, prop);
 		return true;
 		break;
 	}
@@ -215,14 +216,26 @@ osg::Node * ModelTableModel::getNode(QModelIndex index) const
 
 void ModelTableModel::setGroup(ModelGroup * group)
 {
+	if (m_group != nullptr) disconnect(m_group, 0, this, 0);
 	beginResetModel();
 	m_group = group;
+
+	// listen to new signals
+	connect(group, &Group::sNew, [this]() {
+		emit layoutAboutToBeChanged();
+		emit layoutChanged();
+	});
+
 	endResetModel();
 }
 
 void ModelTableModel::removeUserValue(osg::Node *node, const std::string & name)
 {
 	osg::UserDataContainer *cont = node->getUserDataContainer();
+	if (!cont) {
+		qDebug() << "removing user value" << QString::fromStdString(name) << "container is null";
+		return;
+	}
 	cont->removeUserObject(cont->getUserObjectIndex(name));
 }
 

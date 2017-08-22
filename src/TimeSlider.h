@@ -19,7 +19,6 @@ public:
 
 	void setGroup(ModelGroup *group);
 
-	void setYear(int year);
 	void enableSlider(bool);
 
 	// make calls out to ModelGroup

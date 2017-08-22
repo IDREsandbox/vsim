@@ -14,7 +14,6 @@ TimeSlider::TimeSlider(QWidget *parent)
 	setEnabled(true);
 	
 	ui->slider->setValue(1);
-
 	ui->slider->setPageStep(10);
 
 	this->setWindowFlags(Qt::Dialog);
@@ -48,18 +47,6 @@ void TimeSlider::setGroup(ModelGroup * group)
 	// hacky initialization
 	onRangeChange();
 	onYearChange();
-}
-
-void TimeSlider::setYear(int year)
-{
-//	if (year == 0) {
-//		ui->slider->setEnabled(false);
-//		ui->beginLabel->setEnabled(false);
-//		ui->endLabel->setEnabled(false);
-//		return;
-//	}
-//	ui->slider->setValue(year);
-//	ui->currentLabel->setText(QString::number(year));
 }
 
 void TimeSlider::enableSlider(bool enable)
@@ -102,7 +89,7 @@ void TimeSlider::onRangeChange()
 	std::set<int> years = m_group->getKeyYears();
 	qDebug() << "on range change" << Util::setToString(years);
 	int min, max;
-	if (years.size() <= 1) {
+	if (years.size() == 0) {
 		years = { -2000, 2000 };
 		max = 2000;
 		min = -2000;

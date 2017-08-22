@@ -28,7 +28,6 @@ MainWindow::MainWindow(QWidget *parent)
 	// window stuff
 	setMinimumSize(1280, 720);
 	ui->statusbar->showMessage("the best status bar", 0);
-	setWindowIcon(QIcon("assets/vsim.ico"));
 	setWindowTitle("VSim");
 	setAcceptDrops(true);
 	qDebug() << "root: " << QDir::currentPath();
@@ -79,12 +78,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 	connect(ui->actionOSG_Debug, &QAction::triggered, this, &MainWindow::sDebugOSG);
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
-
-	void sImportNarratives();
-	void sExportNarratives();
-
-	void sDebugOSG();
-	void sDebugCamera();
 
 	// camera manipulator
 	connect(ui->actionFirst_Person_Navigation, &QAction::triggered, m_osg_widget,

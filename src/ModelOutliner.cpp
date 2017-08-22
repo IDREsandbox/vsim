@@ -76,27 +76,6 @@ bool OutlinerTimeDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 	//return false;
 }
 
-//QWidget * OutlinerTimeDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const
-//{
-//	if (!index.data().isValid()) {
-//		QPushButton *button = new QPushButton(parent);
-//		connect(button, &QPushButton::released, this,
-//			[]() {
-//			//qDebug() << "really pressed";
-//		});
-//
-//		return button;
-//	}
-//	return QStyledItemDelegate::createEditor(parent, option, index);
-//}
-
-
-//void OutlinerTimeDelegate::setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const
-//{
-//	qDebug() << "set model data";
-//	QStyledItemDelegate::setModelData(editor, model, index);
-//}
-
 ModelOutliner::ModelOutliner(QWidget *parent)
 	: QTreeView(parent)
 {

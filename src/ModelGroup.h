@@ -5,8 +5,9 @@
 #include <osg/Group>
 #include <QUndoStack>
 #include <QDebug>
+#include "Group.h"
 
-class ModelGroup : public QObject, public osg::Group {
+class ModelGroup : public Group {
 	Q_OBJECT
 public:
 	ModelGroup();
@@ -84,6 +85,7 @@ class TimeInitVisitor : public osg::NodeVisitor {
 public:
 	TimeInitVisitor();
 	virtual void apply(osg::Group &node) override;
+	static void touch(osg::Node *node);
 private:
 	int m_year;
 };

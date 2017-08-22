@@ -12,8 +12,9 @@ int main(int argc, char *argv[])
 		startup = argv[1];
 	}
 	QApplication a(argc, argv);
-	MainWindow window;
 	a.addLibraryPath("plugins");
+	a.setWindowIcon(QIcon("assets/vsim.png"));
+	MainWindow window;
 
 	window.show();
 	VSimApp vsim(&window);

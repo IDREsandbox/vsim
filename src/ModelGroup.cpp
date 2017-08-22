@@ -78,8 +78,13 @@ bool ModelGroup::addChild(osg::Node *child)
 {
 	bool ok = Group::addChild(child);
 	if (!ok) return false;
+
+	// time init the child
 	TimeInitVisitor v; // check for T: start end
 	child->accept(v);
+
+	Group::sNew(getNumChildren() - 1);
+
 	// FIXME HACK: this should actually be like 10x signals, one for each change, but since the gui just rescans everything...
 	emit sUserValueChanged(this, "yearBegin");
 	return true;
@@ -101,22 +106,24 @@ TimeInitVisitor::TimeInitVisitor()
 	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
 {
 }
-void TimeInitVisitor::apply(osg::Group &node)
+void TimeInitVisitor::apply(osg::Group &group)
 {
-	std::string name = node.getName();
-	qDebug() << "applying to" << QString::fromStdString(name);
-
+	for (uint i = 0; i < group.getNumChildren(); i++) {
+		touch(group.getChild(i));
+	}
+	traverse(group);
+}
+void TimeInitVisitor::touch(osg::Node *node) {
 	int begin, end;
-	bool match = ModelGroup::nodeTimeInName(node.getName(), &begin, &end);
+	bool match = ModelGroup::nodeTimeInName(node->getName(), &begin, &end);
 	if (match) {
 		if (begin != 0) {
-			node.setUserValue("yearBegin", begin);
+			node->setUserValue("yearBegin", begin);
 		}
 		if (end != 0) {
-			node.setUserValue("yearEnd", end);
+			node->setUserValue("yearEnd", end);
 		}
 	}
-	traverse(node);
 }
 
 TimeGetVisitor::TimeGetVisitor(std::set<int>* out)
@@ -138,6 +145,8 @@ void TimeGetVisitor::apply(osg::Group &group)
 	}
 	traverse(group);
 }
+
+
 
 TimeMaskVisitor::TimeMaskVisitor(int year)
 	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),

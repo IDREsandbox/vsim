@@ -636,10 +636,10 @@ border-color: rgb(238, 238, 238);
   </action>
   <action name="actionModel_Outliner">
    <property name="text">
-    <string>Model Outliner</string>
+    <string>Models</string>
    </property>
    <property name="shortcut">
-    <string>O</string>
+    <string>M</string>
    </property>
   </action>
   <action name="actionTime_Slider">

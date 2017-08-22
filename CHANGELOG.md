@@ -2,8 +2,8 @@
 
 ## 2017-08-21
 ### Added
-- Model Outliner
-- Time Slider
+- Model Outliner (M)
+- Time Slider (T)
 - First argument to exe is the startup file
 
 ### Changed
