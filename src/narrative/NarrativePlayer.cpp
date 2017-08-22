@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <Util.h>
 #include "NarrativePlayer.h"
+#include "labelCanvasView.h"
 
 #include <osg/io_utils>
 
@@ -14,15 +15,15 @@ NarrativePlayer::NarrativePlayer(QObject *parent, MainWindow *window, NarrativeC
 	m_transitioning(false),
 	m_slide_time_sec(0)
 {
-	m_narrative_box = m_window->ui.topBar->ui.narratives;
-	m_slide_box = m_window->ui.topBar->ui.slides;
+	m_narrative_box = m_window->topBar()->ui.narratives;
+	m_slide_box = m_window->topBar()->ui.slides;
 	m_canvas = m_window->m_drag_area;
 
 	effect = new QGraphicsOpacityEffect(m_canvas);
 
 	// play pause
-	connect(m_window->ui.topBar->ui.play_2, &QPushButton::clicked, this, &NarrativePlayer::play);
-	connect(m_window->ui.topBar->ui.pause_2, &QPushButton::clicked, this, &NarrativePlayer::pause);
+	connect(m_window->topBar()->ui.play_2, &QPushButton::clicked, this, &NarrativePlayer::play);
+	connect(m_window->topBar()->ui.pause_2, &QPushButton::clicked, this, &NarrativePlayer::pause);
 
 	// open
 	connect(m_narrative_box, &NarrativeScrollBox::sOpen, this,
@@ -30,12 +31,12 @@ NarrativePlayer::NarrativePlayer(QObject *parent, MainWindow *window, NarrativeC
 		qDebug() << "Narrative player - open";
 	});
 
-	connect(m_window->ui.topBar->ui.open, &QPushButton::clicked, this, 
+	connect(m_window->topBar()->ui.open, &QPushButton::clicked, this, 
 		[this]() {
 		qDebug() << "Narrative player - open";
 	});
 
-	connect(m_window->ui.topBar->ui.left_2, &QPushButton::clicked, this, 
+	connect(m_window->topBar()->ui.left_2, &QPushButton::clicked, this, 
 		[this]() {
 		qDebug() << "Narrative player - close";
 	});
@@ -122,7 +123,7 @@ void NarrativePlayer::update(double dt_sec)
 		//std::cout << Util::viewMatrixLerp(t, source_node->getCameraMatrix(), dest_node->getCameraMatrix()) << endl;
 
 		effect->setOpacity(1 - t - .5);
-		m_window->m_view->setGraphicsEffect(effect);
+		m_window->canvasView()->setGraphicsEffect(effect);
 
 		osg::Matrixd new_matrix = Util::viewMatrixLerp(t, source_node->getCameraMatrix(), dest_node->getCameraMatrix());
 

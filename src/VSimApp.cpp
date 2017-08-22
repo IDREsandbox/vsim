@@ -18,29 +18,41 @@
 #include "Util.h"
 #include "deprecated/narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
+#include "OSGViewerWidget.h"
+#include "MainWindow.h"
+#include "ModelOutliner.h"
+#include "TimeSlider.h"
 
 #define OPTIMIZE 0
 
 
 VSimApp::VSimApp(MainWindow* window)
-	: m_window(window)
+	: m_window(window),
+	m_filename(""),
+	m_root(new VSimRoot),
+	m_model_table_model(m_root->models())
 {
 	m_viewer = window->getViewer();
 	m_narrative_control = new NarrativeControl(this, m_window);
 	m_narrative_player = new NarrativePlayer(this, m_window, m_narrative_control);
 
+	// This is a really awkward place... but this has to be done after setting model
+	m_window->outliner()->setModel(&m_model_table_model);
+	m_window->outliner()->header()->resizeSection(0, 200);
+	m_window->outliner()->resize(505, 600);
+
 	connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
 	connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
 	connect(window, &MainWindow::sImportModel, this, &VSimApp::importModel);
-	connect(window, &MainWindow::sNew, this, &VSimApp::reset);
+	connect(window, &MainWindow::sNew, this, &VSimApp::init);
 	connect(window, &MainWindow::sSaveCurrent, this, &VSimApp::saveCurrentVSim);
-	connect(window->ui.actionImport_Narratives, &QAction::triggered, this, &VSimApp::importNarratives);
-	connect(window->ui.actionExport_Narratives, &QAction::triggered, this, &VSimApp::exportNarratives);
+	connect(window, &MainWindow::sImportNarratives, this, &VSimApp::importNarratives);
+	connect(window, &MainWindow::sExportNarratives, this, &VSimApp::exportNarratives);
 
-	connect(m_window->ui.actionOSG_Debug, &QAction::triggered, this, [this]() {m_root->debug(); });
-	connect(m_window->ui.actionCamera_Debug, &QAction::triggered, this, &VSimApp::debugCamera);
+	connect(window, &MainWindow::sDebugOSG, m_root, &VSimRoot::debug);
+	connect(window, &MainWindow::sDebugCamera, this, &VSimApp::debugCamera);
 
-	reset();
+	initWithVSim(m_root);
 }
 
 bool VSimApp::init()
@@ -49,13 +61,7 @@ bool VSimApp::init()
 	initWithVSim(new VSimRoot);
 	return true;
 }
-bool VSimApp::initWithModel(osg::Node *model)
-{
-	init();
-	m_root->models()->addChild(model);
-	m_window->m_osg_widget->reset();
-	return true;
-}
+
 bool VSimApp::initWithVSim(osg::Node *new_node)
 {
 	VSimRoot *root = dynamic_cast<VSimRoot*>(new_node);
@@ -66,25 +72,34 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	else {
 		qDebug() << "is in fact a vsimroot";
 	}
-	m_root = root;
-	m_viewer->setSceneData(m_root->models()); // ideally this would be only models, but its easy to mess things up
-
-	m_narrative_control->load(m_root->narratives());
-
+	
+	// move all of the gui stuff over to the new root
+	m_viewer->setSceneData(root->models()); // ideally this would be only models, but its easy to mess things up
+	m_model_table_model.setGroup(root->models());
+	m_narrative_control->load(root->narratives());
+	m_window->timeSlider()->setGroup(root->models());
+	
 	m_window->m_undo_stack->clear();
 	m_window->m_osg_widget->reset();
-	//m_viewer->getCamera()->setProjectionMatrixAsPerspective(75.0f, )
+
+	// dereference the old root, apply the new one
+	m_root = root;
 	
 	return true;
 }
-void VSimApp::reset()
+
+
+void VSimApp::addModel(osg::Node *node, const std::string &name)
 {
-	init();
+	m_root->models()->addChild(node);
+	node->setName(name);
+	m_window->m_osg_widget->reset();
 }
 
 bool VSimApp::importModel(const std::string& filename)
 {
 	osg::ref_ptr<osg::Node> loadedModel(NULL);
+	// TODO: special import for vsim files
 
 	// otherwise
 	loadedModel = osgDB::readNodeFile(filename);
@@ -93,8 +108,7 @@ bool VSimApp::importModel(const std::string& filename)
 		QMessageBox::warning(m_window, "Import Error", "Error loading file " + QString::fromStdString(filename));
 		return false;
 	}
-	m_root->models()->addChild(loadedModel);
-	m_window->m_osg_widget->reset();
+	addModel(loadedModel, Util::getFilename(filename));
 	return true;
 }
 
@@ -146,7 +160,13 @@ bool VSimApp::openVSim(const std::string & filename)
 	else {
 		qDebug() << "loading a non osg model";
 		loadedModel = osgDB::readNodeFile(filename);
-		init_success = initWithModel(loadedModel);
+		if (!loadedModel) {
+			QMessageBox::warning(m_window, "Load Error", "Failed to load model " + QString::fromStdString(filename));
+			return false;
+		}
+		init();
+		addModel(loadedModel, Util::getFilename(filename));
+		init_success = true;
 	}
 
 	if (!init_success) {
@@ -221,7 +241,7 @@ bool VSimApp::exportNarratives()
 	std::set<int> selection;
 	if (level == NarrativeControl::NARRATIVES) {
 		// export the entire selection
-		selection = m_window->ui.topBar->ui.narratives->getSelection();
+		selection = m_window->topBar()->ui.narratives->getSelection();
 		if (selection.empty()) {
 			QMessageBox::warning(m_window, "Export Narratives Error", "No narratives selected");
 			return false;

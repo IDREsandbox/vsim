@@ -14,6 +14,7 @@
 #include "MainWindow.h"
 #include "VSimRoot.h"
 #include "narrative/NarrativePlayer.h"
+#include "ModelTableModel.h"
 
 class NarrativeControl;
 class MainWindow;
@@ -30,10 +31,9 @@ public:
 
 	// this is called on every new, reset, etc
 	bool initWithVSim(osg::Node *root); 
-	bool initWithModel(osg::Node *model); 
 	bool init();
 	
-	void reset();
+	void addModel(osg::Node *node, const std::string &name);
 	bool importModel(const std::string& filename); // TODO: more complicated logic with vsim
 	bool openVSim(const std::string& filename);
 	bool saveVSim(const std::string& filename);
@@ -41,7 +41,7 @@ public:
 	bool exportNarratives();
 	bool importNarratives();
 
-	osg::Group* getRoot() const { return m_root.get(); }
+	VSimRoot* getRoot() const { return m_root.get(); }
 
 	std::string getFileName();
 	void setFileName(const std::string &);
@@ -54,8 +54,10 @@ private:
 	osgViewer::Viewer* m_viewer;
 
 	std::string m_filename;
-	osg::ref_ptr<VSimRoot> m_root;
 	bool m_model_loaded;
+
+	osg::ref_ptr<VSimRoot> m_root;
+	ModelTableModel m_model_table_model;
 
 	NarrativePlayer *m_narrative_player;
 	NarrativeControl *m_narrative_control;

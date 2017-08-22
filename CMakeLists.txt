@@ -102,6 +102,7 @@ endforeach(test)
 #install
 install(TARGETS VSim DESTINATION .)
 install(DIRECTORY assets DESTINATION .)
+install(FILES CHANGELOG.md COPYRIGHT LICENSE README.md THIRD-PARTY-NOTICES DESTINATION .)
 
 if (WIN32)
   # DLL copying

@@ -53,6 +53,12 @@ std::string Util::getExtension(const std::string& filename)
     }
 }
 
+std::string Util::getFilename(const std::string & path)
+{
+	int endpath = path.find_last_of("\\/");
+	return path.substr(endpath + 1);
+}
+
 QRect Util::rectFit(QRect container, float whratio)
 {
 	float container_ratio = container.width() / (float) container.height();

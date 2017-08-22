@@ -114,4 +114,6 @@ private:
 	osg::ref_ptr<T> m_node;
 	int m_index;
 };
+
+
 #endif

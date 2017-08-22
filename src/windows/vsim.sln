@@ -7,6 +7,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vsim", "vsim\vsim.vcxproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HorizontalScrollBox_experiment", "HorizontalScrollBox_experiment\HorizontalScrollBox_experiment.vcxproj", "{FC2D387C-89CB-42EF-BF86-9AF01ABF5FF0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TimeSlider_experiment", "TimeSlider_experiment\TimeSlider_experiment.vcxproj", "{81056841-24BE-4F5A-8D4B-17E16DD9FABF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Outliner_experiment", "Outliner_experiment\Outliner_experiment.vcxproj", "{6BCDE541-3119-4CFC-9402-8C616DF84DA1}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -34,6 +38,22 @@ Global
 		{FC2D387C-89CB-42EF-BF86-9AF01ABF5FF0}.Release|x64.Build.0 = Release|x64
 		{FC2D387C-89CB-42EF-BF86-9AF01ABF5FF0}.Release|x86.ActiveCfg = Release|Win32
 		{FC2D387C-89CB-42EF-BF86-9AF01ABF5FF0}.Release|x86.Build.0 = Release|Win32
+		{81056841-24BE-4F5A-8D4B-17E16DD9FABF}.Debug|x64.ActiveCfg = Debug|x64
+		{81056841-24BE-4F5A-8D4B-17E16DD9FABF}.Debug|x64.Build.0 = Debug|x64
+		{81056841-24BE-4F5A-8D4B-17E16DD9FABF}.Debug|x86.ActiveCfg = Debug|Win32
+		{81056841-24BE-4F5A-8D4B-17E16DD9FABF}.Debug|x86.Build.0 = Debug|Win32
+		{81056841-24BE-4F5A-8D4B-17E16DD9FABF}.Release|x64.ActiveCfg = Release|x64
+		{81056841-24BE-4F5A-8D4B-17E16DD9FABF}.Release|x64.Build.0 = Release|x64
+		{81056841-24BE-4F5A-8D4B-17E16DD9FABF}.Release|x86.ActiveCfg = Release|Win32
+		{81056841-24BE-4F5A-8D4B-17E16DD9FABF}.Release|x86.Build.0 = Release|Win32
+		{6BCDE541-3119-4CFC-9402-8C616DF84DA1}.Debug|x64.ActiveCfg = Debug|x64
+		{6BCDE541-3119-4CFC-9402-8C616DF84DA1}.Debug|x64.Build.0 = Debug|x64
+		{6BCDE541-3119-4CFC-9402-8C616DF84DA1}.Debug|x86.ActiveCfg = Debug|Win32
+		{6BCDE541-3119-4CFC-9402-8C616DF84DA1}.Debug|x86.Build.0 = Debug|Win32
+		{6BCDE541-3119-4CFC-9402-8C616DF84DA1}.Release|x64.ActiveCfg = Release|x64
+		{6BCDE541-3119-4CFC-9402-8C616DF84DA1}.Release|x64.Build.0 = Release|x64
+		{6BCDE541-3119-4CFC-9402-8C616DF84DA1}.Release|x86.ActiveCfg = Release|Win32
+		{6BCDE541-3119-4CFC-9402-8C616DF84DA1}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -12,43 +12,48 @@
 
 #include <QElapsedTimer>
 
+#include "MainWindow.h"
+#include "OSGViewerWidget.h"
+#include "NarrativeInfoDialog.h"
+#include "labelCanvasView.h"
+
 NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	: QObject(parent), 
 	m_window(window), 
 	m_current_narrative(-1),
 	m_model(nullptr)
 {
-	m_narrative_box = window->ui.topBar->ui.narratives;
-	m_slide_box = window->ui.topBar->ui.slides;
+	m_narrative_box = window->topBar()->ui.narratives;
+	m_slide_box = window->topBar()->ui.slides;
 	m_canvas = window->m_drag_area;
 	m_undo_stack = window->m_undo_stack;
 
 	// NARRATIVE CONTROL
 	// new
 	connect(m_narrative_box, &NarrativeScrollBox::sNew, this, &NarrativeControl::newNarrative);
-	connect(m_window->ui.topBar->ui.plus, &QPushButton::clicked, this, &NarrativeControl::newNarrative);
+	connect(m_window->topBar()->ui.plus, &QPushButton::clicked, this, &NarrativeControl::newNarrative);
 	// delete
 	connect(m_narrative_box, &NarrativeScrollBox::sDelete, this, &NarrativeControl::deleteNarratives);
-	connect(m_window->ui.topBar->ui.minus, &QPushButton::clicked, this, &NarrativeControl::deleteNarratives);
+	connect(m_window->topBar()->ui.minus, &QPushButton::clicked, this, &NarrativeControl::deleteNarratives);
 	// info
 	connect(m_narrative_box, &NarrativeScrollBox::sInfo, this, &NarrativeControl::editNarrativeInfo);
-	connect(m_window->ui.topBar->ui.info, &QPushButton::clicked, this, &NarrativeControl::editNarrativeInfo);
+	connect(m_window->topBar()->ui.info, &QPushButton::clicked, this, &NarrativeControl::editNarrativeInfo);
 	// open
 	connect(m_narrative_box, &NarrativeScrollBox::sOpen, this, &NarrativeControl::openNarrative);
-	connect(m_window->ui.topBar->ui.open, &QPushButton::clicked, this, &NarrativeControl::openNarrative);
+	connect(m_window->topBar()->ui.open, &QPushButton::clicked, this, &NarrativeControl::openNarrative);
 
 	connect(m_narrative_box, &NarrativeScrollBox::sMove, this, &NarrativeControl::moveNarratives);
 
 	// SLIDE CONTROL
 	// new
 	connect(m_slide_box, &SlideScrollBox::sNewSlide, this, &NarrativeControl::newSlide);
-	connect(m_window->ui.topBar->ui.plus_2, &QPushButton::clicked, this, &NarrativeControl::newSlide);
+	connect(m_window->topBar()->ui.plus_2, &QPushButton::clicked, this, &NarrativeControl::newSlide);
 	// delete
 	connect(m_slide_box, &SlideScrollBox::sDeleteSlides, this, &NarrativeControl::deleteSlides);
-	connect(m_window->ui.topBar->ui.minus_2, &QPushButton::clicked, this, &NarrativeControl::deleteSlides);
+	connect(m_window->topBar()->ui.minus_2, &QPushButton::clicked, this, &NarrativeControl::deleteSlides);
 	// edit
 	connect(m_slide_box, &SlideScrollBox::sEditSlide, this, &NarrativeControl::editSlide);
-	connect(m_window->ui.topBar->ui.open_2, &QPushButton::clicked, this, &NarrativeControl::editSlide);
+	connect(m_window->topBar()->ui.open_2, &QPushButton::clicked, this, &NarrativeControl::editSlide);
 	// duration
 	connect(m_slide_box, &SlideScrollBox::sSetDuration, this, &NarrativeControl::setSlideDuration);
 	// transition
@@ -59,7 +64,7 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_slide_box, &SlideScrollBox::sMove, this, &NarrativeControl::moveSlides);
 
 	// back
-	connect(m_window->ui.topBar->ui.left_2, &QPushButton::clicked, this, &NarrativeControl::closeNarrative);
+	connect(m_window->topBar()->ui.left_2, &QPushButton::clicked, this, &NarrativeControl::closeNarrative);
 	//change
 	connect(m_slide_box, SIGNAL(sSelectionChange()), this, SLOT(openSlide()));
 	
@@ -100,7 +105,7 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 		[this]() {redrawThumbnails(m_slide_box->getDirtySlides()); }
 		);
 
-	connect(window->ui.actionControl_Debug, &QAction::triggered, this, &NarrativeControl::debug);
+	connect(window, &MainWindow::sDebugOSG, this, &NarrativeControl::debug);
 }
 
 NarrativeControl::~NarrativeControl()
@@ -261,11 +266,11 @@ void NarrativeControl::openNarrative()
 void NarrativeControl::setNarrative(int index)
 {
 	qDebug() << "open narrative at" << index;
-	this->m_window->ui.topBar->showSlides();
+	this->m_window->topBar()->showSlides();
 	m_current_narrative = index;
 
 	Narrative2 *nar = getNarrative(index);
-	this->m_window->ui.topBar->setSlidesHeader(nar->getTitle());
+	this->m_window->topBar()->setSlidesHeader(nar->getTitle());
 	m_slide_box->setGroup(nar);
 	this->exitEdit();
 
@@ -280,7 +285,7 @@ void NarrativeControl::closeNarrative()
 	qDebug() << "close narrative";
 	m_current_narrative = -1;
 	m_current_slide = -1;
-	this->m_window->ui.topBar->showNarratives();
+	this->m_window->topBar()->showNarratives();
 	m_canvas->clearCanvas();
 }
 
@@ -307,7 +312,7 @@ void NarrativeControl::deleteLabelButton() {
 
 void NarrativeControl::exitEdit() {
 	editDlg->hide();
-	m_window->m_view->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+	m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 }
 
 void NarrativeControl::newLabelButton(QString style) {
@@ -492,7 +497,7 @@ void NarrativeControl::deleteSlides()
 }
 
 void NarrativeControl::editSlide() {
-	m_window->m_view->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+	m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, false);
 	editDlg->show();
 }
 

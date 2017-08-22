@@ -470,9 +470,17 @@ border-color: rgb(238, 238, 238);
      <string>Edit</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuWindows">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <addaction name="actionModel_Outliner"/>
+    <addaction name="actionTime_Slider"/>
+   </widget>
    <addaction name="menuhello_to_the_world"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
+   <addaction name="menuWindows"/>
    <addaction name="menuTest"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -624,6 +632,22 @@ border-color: rgb(238, 238, 238);
   <action name="actionImport_Narratives">
    <property name="text">
     <string>Import Narratives...</string>
+   </property>
+  </action>
+  <action name="actionModel_Outliner">
+   <property name="text">
+    <string>Models</string>
+   </property>
+   <property name="shortcut">
+    <string>M</string>
+   </property>
+  </action>
+  <action name="actionTime_Slider">
+   <property name="text">
+    <string>Time Slider</string>
+   </property>
+   <property name="shortcut">
+    <string>T</string>
    </property>
   </action>
  </widget>
