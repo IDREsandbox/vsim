@@ -111,8 +111,14 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// model outliner
 	m_outliner = new ModelOutliner(this);
-	connect(ui->actionModel_Outliner, &QAction::triggered, m_outliner, [this]() {
+	connect(ui->actionModel_Outliner, &QAction::triggered, this, [this]() {
 		m_outliner->show();
+		m_outliner->setFocus();
+	});
+	m_time_slider = new TimeSlider(this);
+	connect(ui->actionTime_Slider, &QAction::triggered, this, [this]() {
+		m_time_slider->show();
+		m_time_slider->setFocus();
 	});
 }
 
@@ -154,6 +160,11 @@ labelCanvasView *MainWindow::canvasView() const
 ModelOutliner * MainWindow::outliner() const
 {
 	return m_outliner;
+}
+
+TimeSlider * MainWindow::timeSlider() const
+{
+	return m_time_slider;
 }
 
 MainWindowTopBar *MainWindow::topBar() const

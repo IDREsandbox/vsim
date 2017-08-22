@@ -1,5 +1,14 @@
 # Changelog
 
+## 2017-08-21
+### Added
+- Model Outliner
+- Time Slider
+- First argument to exe is the startup file
+
+### Changed
+- MainWindow ui pointer and fwd declarations
+
 ## 2017-08-15
 ### Added
 - Import/export for narratives

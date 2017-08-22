@@ -2,6 +2,8 @@
 #define TICKSLIDER_H
 #include <QSlider>
 #include <QDebug>
+#include <set>
+#include <vector>
 
 class TickSlider : public QSlider {
 	Q_OBJECT
@@ -10,8 +12,6 @@ class TickSlider : public QSlider {
 public:
 	TickSlider(QWidget *parent = Q_NULLPTR);
 	~TickSlider();
-
-	std::vector<int> m_hotspots;
 
 	// Draw tickmarks
 	void paintEvent(QPaintEvent *e) override;
@@ -22,7 +22,10 @@ public:
 
 	void setTickColor(const QColor color);
 
+	void setTicks(std::set<int> positions);
+
 private:
+	std::vector<int> m_hotspots;
 	QColor m_tick_color;
 };
 

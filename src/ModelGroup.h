@@ -20,6 +20,8 @@ public:
 	// 0 shows all models
 	int getYear() const;
 	void setYear(int year);
+	bool timeEnabled() const;
+	void enableTime(bool enable);
 
 	std::set<int> getKeyYears();
 
@@ -28,12 +30,14 @@ public:
 	static bool nodeTimeInName(const std::string &name, int * begin, int * end);
 
 signals:
+	void sTimeEnableChange(bool enabled);
 	void sYearChange(int year);
 
 	void sUserValueChanged(osg::Node *node, std::string name);
 
 private:
 	int m_year;
+	bool m_time_enabled;
 };
 
 //

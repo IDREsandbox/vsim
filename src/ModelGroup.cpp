@@ -4,7 +4,8 @@
 #include "Util.h"
 
 ModelGroup::ModelGroup()
-	: m_year(0)
+	: m_year(0),
+	m_time_enabled(false)
 {
 	//qDebug() << "new model table" << m_data_table.get();
 }
@@ -32,10 +33,34 @@ void ModelGroup::setYear(int year)
 	m_year = year;
 
 	// make a year traverser
-	TimeMaskVisitor v(year);
-	accept(v);
+	if (m_time_enabled) {
+		TimeMaskVisitor v(year);
+		accept(v);
+	}
 
 	emit sYearChange(year);
+}
+
+bool ModelGroup::timeEnabled() const
+{
+	return m_time_enabled;
+}
+
+void ModelGroup::enableTime(bool enable)
+{
+	if (m_time_enabled == enable) return;
+
+	m_time_enabled = enable;
+	emit sTimeEnableChange(enable);
+
+	if (m_time_enabled) {
+		TimeMaskVisitor v(getYear());
+		accept(v);
+	}
+	else {
+		TimeMaskVisitor v(0);
+		accept(v);
+	}
 }
 
 std::set<int> ModelGroup::getKeyYears()
@@ -55,6 +80,8 @@ bool ModelGroup::addChild(osg::Node *child)
 	if (!ok) return false;
 	TimeInitVisitor v; // check for T: start end
 	child->accept(v);
+	// FIXME HACK: this should actually be like 10x signals, one for each change, but since the gui just rescans everything...
+	emit sUserValueChanged(this, "yearBegin");
 	return true;
 }
 
@@ -106,9 +133,10 @@ void TimeGetVisitor::apply(osg::Group &group)
 		beginok = node->getUserValue("yearBegin", begin);
 		endok = node->getUserValue("yearEnd", end);
 
-		//m_out->insert(info->getYearEnd() + 1);
-		//m_out->insert(info->getYearBegin());
+		if (beginok) m_out->insert(begin);
+		if (endok) m_out->insert(end + 1);
 	}
+	traverse(group);
 }
 
 TimeMaskVisitor::TimeMaskVisitor(int year)
@@ -140,4 +168,5 @@ void TimeMaskVisitor::apply(osg::Group &group)
 			node->setNodeMask(0);
 		}
 	}
+	traverse(group);
 }

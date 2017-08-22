@@ -1,10 +1,12 @@
 ﻿#ifndef TIMESLIDER_H
 #define TIMESLIDER_H
 #include <QWidget>
-#include "ui_timeslider.h"
 
 #include "ModelGroup.h"
 #include <osg/Group>
+#include <memory>
+
+namespace Ui { class TimeSlider; }
 
 // Passive view
 class TimeSlider : public QWidget {
@@ -18,10 +20,19 @@ public:
 	void setGroup(ModelGroup *group);
 
 	void setYear(int year);
-	void enable(bool);
+	void enableSlider(bool);
+
+	// make calls out to ModelGroup
+	void onValueChange(int value);
+	void onCheckbox(int state);
+
+	// slots
+	void onYearChange();
+	void onRangeChange();
+	void onTimeEnableChange(bool enable);
 
 private:
-	Ui::TimeSlider ui;
+	std::unique_ptr<Ui::TimeSlider> ui;
 
 	bool m_enabled;
 

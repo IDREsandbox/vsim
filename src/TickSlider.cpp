@@ -7,10 +7,13 @@ TickSlider::TickSlider(QWidget *parent)
 	: QSlider(parent),
 	m_tick_color(Qt::black)
 {
-	setTickInterval(1000000); // biggest hack, chances are... the beginning will marked with a tick, and will cover this
+	// The problem is that if we want the cool looking handle we have to enable QSlider ticks (which we don't want)
+	// I was looking at ways to inject slider style options into the paintEvent and couldn't figure it out
+	// Solution: just paint one tick, and paint out black mark on top of it
+	setTickInterval(1000000);
 	setTickPosition(QSlider::TicksAbove);
 
-	m_hotspots = { -50, -20, -11, 11, 29, 31, 43, 50 };
+	m_hotspots = { };
 
 	//setStyleSheet(
 	//"QSlider::groove:horizontal			   "
@@ -39,14 +42,12 @@ TickSlider::TickSlider(QWidget *parent)
 	connect(this, &QAbstractSlider::valueChanged, this, [this](int value) {qDebug() << "value change" << value; 
 		//pixelPosToRangeValue();
 		qDebug() << "p from v" << valueToTickPos(value);
-
-
 	});
 	connect(this, &QAbstractSlider::sliderPressed, this, [this]() {qDebug() << "slider press"; });
 	connect(this, &QAbstractSlider::sliderReleased, this, [this]() {qDebug() << "slider release"; });
 	connect(this, &QAbstractSlider::actionTriggered, this,
 		[this](int action) {
-		
+
 		qDebug() << "action triggered" << (QAbstractSlider::SliderAction) action << this->value();
 		// change step size to like 30
 		if (action == QAbstractSlider::SliderPageStepAdd) {
@@ -138,6 +139,14 @@ int TickSlider::pixelPosToRangeValue(int pos) const
 void TickSlider::setTickColor(const QColor color)
 {
 	m_tick_color = color;
+}
+
+void TickSlider::setTicks(std::set<int> positions)
+{
+	m_hotspots.clear();
+	for (auto x : positions) {
+		m_hotspots.push_back(x);
+	}
 }
 
 

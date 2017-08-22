@@ -21,6 +21,7 @@
 #include "OSGViewerWidget.h"
 #include "MainWindow.h"
 #include "ModelOutliner.h"
+#include "TimeSlider.h"
 
 #define OPTIMIZE 0
 
@@ -35,6 +36,7 @@ VSimApp::VSimApp(MainWindow* window)
 	m_narrative_control = new NarrativeControl(this, m_window);
 	m_narrative_player = new NarrativePlayer(this, m_window, m_narrative_control);
 
+	// This really shouldn't be here...
 	m_window->outliner()->setModel(&m_model_table_model);
 	m_window->outliner()->header()->resizeSection(0, 200);
 	m_window->outliner()->setGeometry(100, 100, 505, 600);
@@ -75,6 +77,7 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	m_viewer->setSceneData(root->models()); // ideally this would be only models, but its easy to mess things up
 	m_model_table_model.setGroup(root->models());
 	m_narrative_control->load(root->narratives());
+	m_window->timeSlider()->setGroup(root->models());
 	
 	m_window->m_undo_stack->clear();
 	m_window->m_osg_widget->reset();

@@ -1,28 +1,28 @@
 ﻿#include "TimeSlider.h"
+#include "ui_timeslider.h"
 #include <QDebug>
+#include "Util.h"
 
 TimeSlider::TimeSlider(QWidget *parent)
 	: QWidget(parent),
+	ui(new Ui::TimeSlider),
 	m_group(nullptr)
 {
-	ui.setupUi(this);
-	ui.slider->setMinimum(-50);
-	ui.slider->setMaximum(50);
+	ui->setupUi(this);
+	ui->slider->setMinimum(-50);
+	ui->slider->setMaximum(50);
 	setEnabled(true);
 	
-	ui.slider->setValue(1);
+	ui->slider->setValue(1);
 
-	ui.slider->setPageStep(10);
+	ui->slider->setPageStep(10);
 
-	connect(ui.checkBox, &QCheckBox::stateChanged, [this]() {
-		enable(ui.checkBox->isChecked());
-	});
+	this->setWindowFlags(Qt::Dialog);
 
-	connect(ui.slider, &QSlider::valueChanged, [this](int value) {
-		ui.beginLabel->setText(QString::number(ui.slider->minimum()));
-		ui.endLabel->setText(QString::number(ui.slider->maximum()));
-		ui.currentLabel->setText(QString::number(ui.slider->value()));
-	});
+	connect(ui->checkBox, &QCheckBox::stateChanged, this, &TimeSlider::onCheckbox);
+	connect(ui->slider, &QSlider::valueChanged, this, &TimeSlider::onValueChange);
+
+	enableSlider(false);
 }
 
 TimeSlider::~TimeSlider() {
@@ -36,37 +36,90 @@ void TimeSlider::setGroup(ModelGroup * group)
 	if (group == nullptr) {
 		return;
 	}
-	connect(m_group, &ModelGroup::sYearChange, this, &TimeSlider::setYear);
+	connect(m_group, &ModelGroup::sYearChange, this, &TimeSlider::onYearChange);
+	connect(m_group, &ModelGroup::sUserValueChanged, this,
+		[this](osg::Node *node, std::string name) {
+			if (name == "yearBegin" || name == "yearEnd") {
+				onRangeChange();
+			}
+		});
+	connect(m_group, &ModelGroup::sTimeEnableChange, this, &TimeSlider::onTimeEnableChange);
 
-	//m_group->
+	// hacky initialization
+	onRangeChange();
+	onYearChange();
 }
 
 void TimeSlider::setYear(int year)
 {
-	if (year == 0) {
-		ui.slider->setEnabled(false);
-		ui.beginLabel->setEnabled(false);
-		ui.endLabel->setEnabled(false);
-		return;
-	}
-	ui.slider->setValue(year);
-	ui.currentLabel->setText(QString::number(year));
+//	if (year == 0) {
+//		ui->slider->setEnabled(false);
+//		ui->beginLabel->setEnabled(false);
+//		ui->endLabel->setEnabled(false);
+//		return;
+//	}
+//	ui->slider->setValue(year);
+//	ui->currentLabel->setText(QString::number(year));
 }
 
-void TimeSlider::enable(bool enable)
+void TimeSlider::enableSlider(bool enable)
 {
-	if (enable) {
-		ui.slider->setEnabled(true);
-		ui.beginLabel->setEnabled(true);
-		ui.currentLabel->setEnabled(true);
-		ui.endLabel->setEnabled(true);
-		ui.checkBox->setChecked(true);
+	ui->slider->setEnabled(enable);
+	ui->beginLabel->setEnabled(enable);
+	ui->currentLabel->setEnabled(enable);
+	ui->endLabel->setEnabled(enable);
+	ui->checkBox->setChecked(enable);
+}
+
+void TimeSlider::onValueChange(int value)
+{
+	// tell the group to change data
+	if (value == 0) value = 1;
+	m_group->setYear(value);
+}
+
+void TimeSlider::onCheckbox(int state)
+{
+	if (state == Qt::Unchecked) {
+		m_group->enableTime(false);
 	}
 	else {
-		ui.slider->setEnabled(false);
-		ui.beginLabel->setEnabled(false);
-		ui.currentLabel->setEnabled(false);
-		ui.endLabel->setEnabled(false);
-		ui.checkBox->setChecked(false);
+		m_group->enableTime(true);
+		m_group->setYear(ui->slider->value());
 	}
+}
+
+void TimeSlider::onYearChange()
+{
+	int year = m_group->getYear();
+	qDebug() << "on year change" << year;
+	ui->slider->setValue(year);
+	ui->currentLabel->setText(QString::number(year));
+}
+
+void TimeSlider::onRangeChange()
+{
+	std::set<int> years = m_group->getKeyYears();
+	qDebug() << "on range change" << Util::setToString(years);
+	int min, max;
+	if (years.size() <= 1) {
+		years = { -2000, 2000 };
+		max = 2000;
+		min = -2000;
+	}
+	else {
+		min = *years.begin();
+		max = *years.rbegin();
+	}
+	ui->slider->setMinimum(min);
+	ui->slider->setMaximum(max);
+	ui->slider->setTicks(years);
+
+	ui->beginLabel->setText(QString::number(min));
+	ui->endLabel->setText(QString::number(max));
+}
+
+void TimeSlider::onTimeEnableChange(bool enable)
+{
+	enableSlider(enable);
 }

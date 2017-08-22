@@ -15,10 +15,11 @@
 //extern osgViewer::Viewer* g_viewer;
 
 class VSimApp;
+class OSGViewerWidget;
 class labelCanvas;
 class labelCanvasView;
 class ModelOutliner;
-class OSGViewerWidget;
+class TimeSlider;
 
 class MainWindow : public QMainWindow
 {
@@ -39,6 +40,7 @@ public:
 	MainWindowTopBar *topBar() const;
 	labelCanvasView *canvasView() const;
 	ModelOutliner *outliner() const;
+	TimeSlider *timeSlider() const;
 
 	// event stuff
 	void paintEvent(QPaintEvent* event);
@@ -83,6 +85,7 @@ public:
 	labelCanvas *m_drag_area;
 	labelCanvasView *m_view;
 	ModelOutliner *m_outliner;
+	TimeSlider *m_time_slider;
 };
 
 

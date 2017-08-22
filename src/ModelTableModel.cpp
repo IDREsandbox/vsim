@@ -92,17 +92,21 @@ bool ModelTableModel::setData(const QModelIndex & index, const QVariant & value,
 	case 2:
 		if (!value.isValid() || value == 0) {
 			removeUserValue(node, "yearBegin");
+			m_group->sUserValueChanged(node, "yearBegin");
 			return true;
 		}
 		node->setUserValue("yearBegin", value.toInt());
+		m_group->sUserValueChanged(node, "yearBegin");
 		return true;
 		break;
 	case 3:
 		if (!value.isValid() || value == 0) {
 			removeUserValue(node, "yearEnd");
+			m_group->sUserValueChanged(node, "yearEnd");
 			return true;
 		}
 		node->setUserValue("yearEnd", value.toInt());
+		m_group->sUserValueChanged(node, "yearEnd");
 		return true;
 		break;
 	}
@@ -182,83 +186,6 @@ int ModelTableModel::rowCount(const QModelIndex &parent) const
 
 	return group->getNumChildren();
 }
-
-//bool ModelTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
-//{
-//	if (role != Qt::EditRole)
-//		return false;
-//
-//	TreeItem *item = getItem(index);
-//	bool result = item->setData(index.column(), value);
-//
-//	if (result)
-//		emit dataChanged(index, index);
-//
-//	return result;
-//}
-//
-//bool ModelTableModel::setHeaderData(int section, Qt::Orientation orientation,
-//	const QVariant &value, int role)
-//{
-//	if (role != Qt::EditRole || orientation != Qt::Horizontal)
-//		return false;
-//
-//	bool result = rootItem->setData(section, value);
-//
-//	if (result)
-//		emit headerDataChanged(orientation, section, section);
-//
-//	return result;
-//}
-
-//bool TreeModel::insertColumns(int position, int columns, const QModelIndex &parent)
-//{
-//	bool success;
-//
-//	beginInsertColumns(parent, position, position + columns - 1);
-//	success = rootItem->insertColumns(position, columns);
-//	endInsertColumns();
-//
-//	return success;
-//}
-//
-//bool TreeModel::insertRows(int position, int rows, const QModelIndex &parent)
-//{
-//	TreeItem *parentItem = getItem(parent);
-//	bool success;
-//
-//	beginInsertRows(parent, position, position + rows - 1);
-//	success = parentItem->insertChildren(position, rows, rootItem->columnCount());
-//	endInsertRows();
-//
-//	return success;
-//}
-//
-//bool ModelTableModel::removeColumns(int position, int columns, const QModelIndex &parent)
-//{
-//	bool success;
-//
-//	beginRemoveColumns(parent, position, position + columns - 1);
-//	success = rootItem->removeColumns(position, columns);
-//	endRemoveColumns();
-//
-//	if (rootItem->columnCount() == 0)
-//		removeRows(0, rowCount());
-//
-//	return success;
-//}
-//
-//bool ModelTableModel::removeRows(int position, int rows, const QModelIndex &parent)
-//{
-//	TreeItem *parentItem = getItem(parent);
-//	bool success = true;
-//
-//	beginRemoveRows(parent, position, position + rows - 1);
-//	success = parentItem->removeChildren(position, rows);
-//	endRemoveRows();
-//
-//	return success;
-//}
 
 QModelIndex ModelTableModel::indexOf(osg::Node *node) const
 {

@@ -30,7 +30,7 @@ void OutlinerTimeDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 			//QApplication::style()->drawControl(QStyle::CE_PushButton, &button, painter);
 		}
 		else {
-			// paint a little [-] button			
+			// paint a little [-] button
 			QStyleOptionButton button;
 			QRect r = option.rect;
 			button.rect = QRect(r.right() - 20, r.top(), 20, r.height());
@@ -43,7 +43,7 @@ void OutlinerTimeDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 }
 bool OutlinerTimeDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
-	if (event->type() == QEvent::MouseButtonPress)
+	if (event->type() == QEvent::MouseButtonPress && index.flags() & Qt::ItemIsEditable)
 	{
 		if (!index.data().isValid()) {
 			//// create a new thing
