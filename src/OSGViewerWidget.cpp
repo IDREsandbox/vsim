@@ -62,7 +62,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	// Stats Handler
 	osgViewer::StatsHandler *stats_handler = new osgViewer::StatsHandler;
-	stats_handler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_T);
+	stats_handler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_U);
 	stats_handler->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_Y);
 	viewer_->addEventHandler(stats_handler);
 	
