@@ -5,7 +5,6 @@
 #include <QtGui>
 #include <QtCore>
 #include <QList>
-#include "labelCanvas.h"
 
 class labelCanvas;
 

@@ -39,16 +39,10 @@ TickSlider::TickSlider(QWidget *parent)
 	//"	margin: -30px 0;						   "
 	//"}										   "
 	//);
-	connect(this, &QAbstractSlider::valueChanged, this, [this](int value) {qDebug() << "value change" << value; 
-		//pixelPosToRangeValue();
-		qDebug() << "p from v" << valueToTickPos(value);
-	});
-	connect(this, &QAbstractSlider::sliderPressed, this, [this]() {qDebug() << "slider press"; });
-	connect(this, &QAbstractSlider::sliderReleased, this, [this]() {qDebug() << "slider release"; });
 	connect(this, &QAbstractSlider::actionTriggered, this,
 		[this](int action) {
 
-		qDebug() << "action triggered" << (QAbstractSlider::SliderAction) action << this->value();
+		//qDebug() << "action triggered" << (QAbstractSlider::SliderAction) action << this->value();
 		// change step size to like 30
 		if (action == QAbstractSlider::SliderPageStepAdd) {
 			int old_value = this->value();

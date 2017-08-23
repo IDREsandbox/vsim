@@ -1,15 +1,18 @@
 /*
  *  VSimApp.h
- *	This class has everything important.
+ *	Owns most of the big classes
+ *  Handles file operations
  *
  */
 
-#ifndef _VSIMAPP_H_
-#define _VSIMAPP_H_
+#ifndef VSIMAPP_H
+#define VSIMAPP_H
 
 #include <osg/ref_ptr>
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
+#include <QTimer>
+#include <QElapsedTimer>
 
 #include "MainWindow.h"
 #include "VSimRoot.h"
@@ -47,8 +50,14 @@ public:
 	void setFileName(const std::string &);
 
 	void debugCamera();
+	void updateTime();
+signals:
+	void tick(double sec);
+	void foo();
 
 private:
+	QTimer *m_timer;
+	QElapsedTimer *m_dt_timer;
 
 	MainWindow* m_window;
 	osgViewer::Viewer* m_viewer;

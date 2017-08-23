@@ -34,7 +34,7 @@ public:
 	void LoadingDialog(const std::string& msg);
 
 	// linking
-	//OSGViewerWidget *getViewerWidget() const { return m_osg_widget;	}
+	OSGViewerWidget *getViewerWidget() const;
 	osgViewer::Viewer* getViewer() const;
 
 	MainWindowTopBar *topBar() const;
@@ -73,6 +73,7 @@ signals:
 
 	void sDebugOSG();
 	void sDebugCamera();
+	void sDebugControl();
 
 	// ui, signal emitters
 public:

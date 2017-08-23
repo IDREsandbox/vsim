@@ -60,6 +60,8 @@ dragLabel::dragLabel(std::string str, std::string style, labelCanvas* parent, fl
 
 	dragEdge = 0;
 
+	setFrameShape(QFrame::NoFrame);
+
 	this->setWordWrapMode(QTextOption::WordWrap);
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

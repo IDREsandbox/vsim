@@ -95,10 +95,8 @@ void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
 	connect(item, &ScrollBoxItem::sMousePressEvent, this, &HorizontalScrollBox::itemMousePressEvent);
 	connect(item, &ScrollBoxItem::sMouseReleaseEvent, this, &HorizontalScrollBox::itemMouseReleaseEvent);
 
-	select(index);
 	item->show();
 	refresh();
-	m_last_selected = index;
 }
 
 void HorizontalScrollBox::addNewItem()
@@ -117,6 +115,15 @@ void HorizontalScrollBox::insertNewItem(uint index)
 	if (item == nullptr) return;
 	HorizontalScrollBox::insertItem(index, item);
 }
+
+ScrollBoxItem *HorizontalScrollBox::getItem(int position)
+{
+	if (position < m_items.size()) {
+		return m_items.at(position);
+	}
+	return nullptr;
+}
+
 
 void HorizontalScrollBox::clear()
 {
@@ -152,30 +159,59 @@ void HorizontalScrollBox::deleteSelection()
 	refresh();
 }
 
-void HorizontalScrollBox::clearSelection()
-{
-	for (auto i : m_items) {
-		i->colorSelect(false);
-	}
-	m_selection.clear();
-	emit sSelectionChange();
-}
 
-void HorizontalScrollBox::setSelection(std::set<int> selection)
+void HorizontalScrollBox::setSelection(std::set<int> set, int last)
 {
-	clearSelection();
-	for (auto i : selection) {
-		if (i < 0 || i >= m_items.size()) continue;
-		addToSelection(i);
+	auto it = set.begin();
+	for (size_t i = 0; i < m_items.size(); i++) {
+		// move the iterator forward
+		while (it != set.end() && i > *it) ++it;
+		if (it == set.end() || *it > i) {
+			m_items[i]->colorSelect(false);
+		}
+		else if (*it == i) {
+			m_items[i]->colorSelect(true);
+		}
 	}
+	m_selection = set;
+	m_last_selected = last;
 
 	// have the viewport focus the first selected item
-	if (!selection.empty()) {
-		int first = *selection.begin();
+	if (!set.empty()) {
+		int first = *set.begin();
 		if (first < 0) return;
 		if (first >= m_items.size()) return;
 		ensureWidgetVisible(m_items[first]);
 	}
+	emit sSelectionChange();
+}
+
+void HorizontalScrollBox::addToSelection(int index)
+{
+	qDebug() << "add to selection" << index;
+	m_selection.insert(index);
+	m_items[index]->colorSelect(true);
+	m_last_selected = index;
+	qDebug() << "emitting signal";
+	emit sSelectionChange();
+}
+
+void HorizontalScrollBox::removeFromSelection(int index)
+{
+	m_selection.erase(index);
+	m_items[index]->colorSelect(false);
+	m_last_selected = *m_selection.rbegin(); // set last selected to the end
+	emit sSelectionChange();
+}
+
+void HorizontalScrollBox::select(int index)
+{
+	setSelection({ index }, index);
+}
+
+void HorizontalScrollBox::clearSelection()
+{
+	setSelection({}, -1);
 }
 
 const std::set<int>& HorizontalScrollBox::getSelection()
@@ -188,41 +224,8 @@ int HorizontalScrollBox::getLastSelected()
 	return m_last_selected;
 }
 
-ScrollBoxItem *HorizontalScrollBox::getItem(int position)
-{
-	if (position < m_items.size()) {
-		return m_items.at(position);
-	}
-	return nullptr;
-}
-
-// simple code given an abstract selection thing
-// on selection change (index, bool)
-// m_items[index]->colorSelect(bool);
-
-void HorizontalScrollBox::addToSelection(int index)
-{
-	m_selection.insert(index);
-	m_items[index]->colorSelect(true);
-	emit sSelectionChange();
-}
-void HorizontalScrollBox::removeFromSelection(int index)
-{
-	m_selection.erase(index);
-	m_items[index]->colorSelect(false);
-	emit sSelectionChange();
-}
-
-void HorizontalScrollBox::select(int index)
-{
-	// if already selected
-	if (m_selection.size() == 1 && m_selection.find(index) != m_selection.end()) {
-		return;
-	}
-	clearSelection();
-	m_selection.insert(index);
-	m_items[index]->colorSelect(true);
-	emit sSelectionChange();
+void HorizontalScrollBox::setLastSelected(int idx) {
+	m_last_selected = idx;
 }
 
 bool HorizontalScrollBox::isSelected(int index)
@@ -267,6 +270,9 @@ void HorizontalScrollBox::setGroup(Group * group)
 
 	for (uint i = 0; i < group->getNumChildren(); i++) {
 		insertNewItem(i);
+	}
+	if (m_items.size() > 0) {
+		select(0);
 	}
 }
 
@@ -360,12 +366,12 @@ void HorizontalScrollBox::refresh()
 	m_scroll_area_widget->setMinimumWidth(xpos);
 }
 
-void HorizontalScrollBox::forceSelect(int index)
-{
-	blockSignals(true);
-	select(index);
-	blockSignals(false);
-}
+//void HorizontalScrollBox::forceSelect(int index)
+//{
+//	blockSignals(true);
+//	select(index);
+//	blockSignals(false);
+//}
 
 ScrollBoxItem * HorizontalScrollBox::createItem(osg::Node *)
 {
@@ -417,7 +423,7 @@ void HorizontalScrollBox::wheelEvent(QWheelEvent* event)
 void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 {
 	// If mouse down & beyond drag threshold then start dragging
-	qDebug() << "drag" << m_dragging;
+	//qDebug() << "drag" << m_dragging;
 	QPoint diff = event->globalPos() - m_mouse_down_pos;
 	if (diff.manhattanLength() > m_minimum_drag_dist
 		&& m_dragging == false
@@ -532,7 +538,6 @@ void HorizontalScrollBox::itemMouseReleaseEvent(QMouseEvent * event, int index)
 		if (!(event->modifiers() & Qt::ControlModifier) && !(event->modifiers() & Qt::ShiftModifier)) {
 			// If already in selection then select() on release
 			// this is so that you can start dragging w/o deselecting everything
-			qDebug() << "release";
 			if (isSelected(index)) {
 				m_last_selected = index;
 				select(index);
@@ -561,9 +566,6 @@ void HorizontalScrollBox::dragLeaveEvent(QDragLeaveEvent * event)
 	}
 }
 
-void HorizontalScrollBox::setLastSelected(int idx) {
-	m_last_selected = idx;
-}
 
 void HorizontalScrollBox::dragMoveEvent(QDragMoveEvent * event)
 {
