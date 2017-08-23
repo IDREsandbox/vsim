@@ -1,62 +1,70 @@
 #ifndef NARRATIVEPLAYER_H
 #define NARRATIVEPLAYER_H
 
-#include "narrative/NarrativeControl.h"
-#include "narrative/NarrativeSlide.h"
-#include "MainWindow.h"
 #include <QObject>
 #include <osg/Matrix>
-#include "labelCanvas.h"
 
-#include "OSGViewerWidget.h"
+class NarrativeControl;
+class NarrativeSlide;
 
-// NarrativePlayer owns the camera
+// State machine ish
 class NarrativePlayer : public QObject
 {
 	Q_OBJECT
 public:
-	NarrativePlayer(QObject *parent, MainWindow *window, NarrativeControl *narratives);
+	NarrativePlayer(QObject *parent, NarrativeControl *narratives);
+	enum State {
+		STOPPED,
+		ATNODE,
+		TRANSITIONING
+	};
+	enum Advance {
+		FORWARD,
+		BACKWARD
+	};
 
-	void update(double dt_sec);
+	// slots
 	void play();
-	void pause();
+	void stop();
+	void update(double dt_sec);
+	void rightArrow();
+	void leftArrow();
+	//void leftClick();
+	void timerExpire(); // our own timers
+	void editEvent(); // selection changes
+
 	// advances the slide or transition, immediately pauses on failure or PauseOnNode
-	void next();
+	void next(Advance fwdback);
 
-	bool isPlaying();
+	// state transitions
+	void toTransitioning();
+	void toAtNode();
+	void toStopped();
 
-	void setCameraMatrix(osg::Matrixd camera_matrix);
+	// signals out, if you want to remove dependency then replace with signals
+	bool setSlide(int index);
+	void setCameraInTransition(double t);
 
-	// goto and pause at a slide
-	// set the slide selection
-	// bool setSlide(int narrative, int slide); // TODO
-
-public: //slots
-	void selectionChange();
+signals: // more signals out, removes the viewer widget dependency
+	void updateCamera(osg::Matrixd camera_matrix);
+	void enableNavigation(bool enable); // TODO
 
 private:
 	// pointers
-	MainWindow *m_window;
 	NarrativeControl *m_narratives;
-	NarrativeScrollBox *m_narrative_box;
-	SlideScrollBox *m_slide_box;
 
-	// important stuff
-	int m_current_narrative;
-	int m_current_slide;
-	bool m_playing;
-	bool m_transitioning; // transitions are BEFORE current narrative and slide
+	State m_state;
 	double m_slide_time_sec;
 
-	double m_previous_time;
-	QTimer *m_timer; // frame timer, used for updates
+	// This is so that calling setSelection doesn't cause us to stop
+	bool m_expect_selection_change;
 
-	QGraphicsOpacityEffect* effect;
+	//QGraphicsOpacityEffect* effect;
 
 	//void figureOutFrozenCamera(); // locks the camera if playing or frozen
 	// remembers the previous navigation mode to switch back to after finishing playing
-	OSGViewerWidget::NavigationMode m_old_navigation_mode;
-	labelCanvas* m_canvas;
+	//OSGViewerWidget::NavigationMode m_old_navigation_mode;
+	//labelCanvas* m_canvas;
 };
 
 #endif /* NARRATIVEPLAYER_H */

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2017-08-23
+### Changed
+- Narrative slide transitions use a cubic polynomial
+- NewNodeCommand has getNode for initialization stuff
+
+### Fixed
+- Narrative player code cleaned up a bit, see the state machine diagram
+- Selections cleaned up a bit
+
 ## 2017-08-21
 ### Added
 - Model Outliner (M)

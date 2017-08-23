@@ -54,6 +54,9 @@ public:
 	// filter out ctrl-s when in wasd
 	bool eventFilter(QObject *obj, QEvent *e);
 
+signals:
+	void frame(double dt_sec);
+
 protected:
 	virtual void paintEvent(QPaintEvent* paintEvent);
 	virtual void paintGL();

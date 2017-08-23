@@ -39,6 +39,9 @@ public: // COMMANDS
 			m_group->insertChild(m_index, m_node);
 			m_group->sNew(m_index);
 		}
+		T *getNode() {
+			return m_node;
+		}
 	private:
 		Group *m_group;
 		osg::ref_ptr<T> m_node;

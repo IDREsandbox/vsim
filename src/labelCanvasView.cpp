@@ -1,5 +1,5 @@
 #include "labelCanvasView.h"
-
+#include "labelCanvas.h"
 
 labelCanvasView::labelCanvasView(QWidget* parent, labelCanvas* canvas)
 {

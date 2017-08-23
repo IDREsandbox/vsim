@@ -18,6 +18,7 @@
 #include "Util.h"
 #include "deprecated/narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
+#include "narrative/NarrativeControl.h"
 #include "OSGViewerWidget.h"
 #include "MainWindow.h"
 #include "ModelOutliner.h"
@@ -33,8 +34,26 @@ VSimApp::VSimApp(MainWindow* window)
 	m_model_table_model(m_root->models())
 {
 	m_viewer = window->getViewer();
+
+	// timers
+	m_timer = new QTimer;
+	m_timer->setInterval(10);
+	m_timer->setSingleShot(false);
+	m_dt_timer = new QElapsedTimer;
+	m_timer->start();
+	m_dt_timer->start();
+	connect(m_timer, &QTimer::timeout, this, &VSimApp::updateTime);
+
 	m_narrative_control = new NarrativeControl(this, m_window);
-	m_narrative_player = new NarrativePlayer(this, m_window, m_narrative_control);
+
+	// Narrative player
+	m_narrative_player = new NarrativePlayer(this, m_narrative_control);
+	connect(window->topBar()->ui.play_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::play);
+	connect(window->topBar()->ui.pause_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::stop);
+	connect(m_narrative_player, &NarrativePlayer::updateCamera, m_window->getViewerWidget(), &OSGViewerWidget::setCameraMatrix);
+	connect(this, &VSimApp::tick, m_narrative_player, &NarrativePlayer::update);
+	//connect(this, &VSimApp::foo, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
+	connect(this, &VSimApp::tick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 
 	// This is a really awkward place... but this has to be done after setting model
 	m_window->outliner()->setModel(&m_model_table_model);
@@ -70,7 +89,7 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 		root = new VSimRoot(new_node->asGroup());
 	}
 	else {
-		qDebug() << "is in fact a vsimroot";
+		qDebug() << "Root is a VSimRoot";
 	}
 	
 	// move all of the gui stuff over to the new root
@@ -248,7 +267,7 @@ bool VSimApp::exportNarratives()
 		}
 	}
 	else {
-		int nar = m_narrative_control->getCurrentNarrative();
+		int nar = m_narrative_control->getCurrentNarrativeIndex();
 		if (nar == -1) return false;
 		selection.insert(nar);
 	}
@@ -380,4 +399,11 @@ void VSimApp::debugCamera()
 	Util::quatToYPR(rot, &y, &p, &r);
 	std::cout << "matrix " << matrix << "\ntranslation " << trans << "\nscale " << scale << "\nrotation " << rot << "\n";
 	qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI;
+}
+
+void VSimApp::updateTime()
+{
+	double dt = m_dt_timer->nsecsElapsed() / 1.0e9;
+	m_dt_timer->restart();
+	emit tick(dt);
 }

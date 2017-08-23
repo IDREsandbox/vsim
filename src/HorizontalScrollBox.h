@@ -35,6 +35,8 @@ public:
 	virtual void insertItem(int position, ScrollBoxItem*);
 	void deleteItem(int position);
 
+	void deleteSelection();
+
 	// these are used to link new/delete signals from groups to creation of new items
 	void addNewItem();
 	void insertNewItem(uint position);
@@ -43,23 +45,24 @@ public:
 	ScrollBoxItem *getItem(int position);
 	void clear();
 
-	// selection
-	void deleteSelection();
-	void clearSelection();
-	void setSelection(std::set<int>); // does negative checking
-	const std::set<int>& getSelection();
-	int getLastSelected();
-	//void select(ScrollBoxItem*);
-	void setLastSelected(int);
-
+	// selection - these set selection, lastSelected, and emit events
+	void setSelection(std::set<int> set, int last);
 	void addToSelection(int);
 	void removeFromSelection(int);
+	void clearSelection();
 	void select(int);
+
+	// lastSelected must be in the selection
+	int getLastSelected();
+	void setLastSelected(int);
+	const std::set<int>& getSelection();
+
 	bool isSelected(int);
-	void forceSelect(int); // hack, for the narrative player, does not emit signals
+	//void forceSelect(int); // hack, for the narrative player, does not emit signals
 
 	// positioning
 	void setSpacing(int);
+
 	// returns the item index under the cursor where point is based on the scroll area widget
 	// the float is the position from [-x, 1] where 0 is the left side, 1 is the right side, - is in the space before the widget
 	std::pair<int, float> posToIndex(int px);
