@@ -9,6 +9,7 @@
 #include "editButtons.h"
 
 class dragLabel;
+class NarrativeSlide;
 
 class labelCanvas : public QWidget
 {
@@ -22,6 +23,8 @@ public:
 	//void showSlides(int idx);
 	//void editCanvas();
 	void clearCanvas();
+
+	void setSlide(NarrativeSlide *slide);
 
 public slots:
 	void newLabel(QString style);
@@ -44,6 +47,7 @@ public:
 	int idx = 0;
 	int lastSelected = 0;
 
+	NarrativeSlide *m_slide;
 	//float scaleFactor = 1;
 };
 

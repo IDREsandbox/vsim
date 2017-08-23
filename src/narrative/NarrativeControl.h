@@ -56,7 +56,8 @@ signals:
 public:
 
 	void redrawThumbnails(const std::vector<SlideScrollItem*> slides);
-	QImage generateThumbnail(int option = 1);
+	//QImage generateThumbnail(int option = 1);
+	QImage generateThumbnail(NarrativeSlide *slide);
 
 	// Narratives
 	void newNarrative();

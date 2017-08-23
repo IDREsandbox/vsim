@@ -293,6 +293,7 @@ void NarrativeControl::closeNarrative()
 
 bool NarrativeControl::setSlide(int index)
 {
+	qDebug() << "Narrative Control - set slide" << index;
 	if (m_current_narrative < 0) {
 		m_current_slide = -1;
 		return false;
@@ -306,15 +307,7 @@ bool NarrativeControl::setSlide(int index)
 
 	m_current_slide = index;
 
-	// TODO: replace this chunk with m_canvas->setGroup(slide)
-	m_canvas->clearCanvas();
-	NarrativeSlideLabels* data;
-
-	for (uint i = 0; i < slide->getNumChildren(); i++) {
-		data = dynamic_cast<NarrativeSlideLabels*>(slide->getChild(i));
-		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
-			data->getrH());
-	}
+	m_canvas->setSlide(slide);
 
 	return true;
 }
@@ -373,7 +366,7 @@ void NarrativeControl::newLabel(std::string str, int idx) {
 	curSl->addChild(lab);
 
 	//m_canvas->exitEdit();
-	QImage new_thumbnail = generateThumbnail();
+	QImage new_thumbnail = generateThumbnail(curSl);
 	//m_canvas->editCanvas();
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
@@ -626,62 +619,56 @@ void NarrativeControl::moveSlides(std::set<int> from, int to)
 }
 
 
-void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> slides)
+void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> items)
 {
-	osg::Matrixd old_matrix = m_window->m_osg_widget->getCameraMatrix();
-	osg::Matrixd current_matrix;
-	current_matrix(0, 0) = INFINITY; // make the matrix nonsense so that it draws at least once
-	QImage thumbnail;
 
-	for (auto slide : slides) {
-		qDebug() << "redrawing thumbnail" << slide->getIndex();
-		// if the matrix is the same, then don't bother re-rendering
-		osg::Matrixd potential_matrix = slide->getSlide()->getCameraMatrix();
-		if (potential_matrix != current_matrix) {
-			current_matrix = potential_matrix;
-			m_window->m_osg_widget->setCameraMatrix(current_matrix);
-			thumbnail = generateThumbnail();
-		}
+	for (auto item : items) {
+		qDebug() << "redrawing thumbnail" << item->getIndex();
+		QImage thumbnail;
 
-		slide->setImage(thumbnail);
-		slide->setThumbnailDirty(false);
+		thumbnail = generateThumbnail(item->getSlide());
+
+		item->setImage(thumbnail);
+		item->setThumbnailDirty(false);
 	}
-
-	m_window->m_osg_widget->setCameraMatrix(old_matrix);
 }
 
-QImage NarrativeControl::generateThumbnail(int option)
+QImage NarrativeControl::generateThumbnail(NarrativeSlide *slide)
 {
 	QElapsedTimer timer;
 	timer.start();
 
+	// set the camera, create a dummy canvas
+	osg::Matrixd old_matrix = m_window->getViewerWidget()->getCameraMatrix();
+	m_window->getViewerWidget()->setCameraMatrix(slide->getCameraMatrix());
+
+	auto container = m_window->getViewerWidget();
+	labelCanvas canvas;
+	labelCanvasView view(m_window->getViewerWidget(), &canvas);
+	canvas.setGeometry(0, 0, container->width(), container->height());
+	canvas.setSlide(slide);
+
 	// widget dimensions
-	QRect dims = m_window->centralWidget()->geometry(); 
+	QRect dims = m_window->getViewerWidget()->geometry();
 
 	// screenshot dimensions
 	QRect ssdims = Util::rectFit(dims, 16.0 / 9.0);
 	//QRect ssdims = Util::rectFit(QRect(0, 0, 300, 300), 16.0 / 9.0);
 	//ssdims.setY(ssdims.y() + 50);
 
-
 	QImage img(ssdims.width(), ssdims.height(), QImage::Format_ARGB32);
 	QPainter painter(&img);
 
-	if (option == 1) {
-		QRect old_geometry = m_window->m_osg_widget->geometry();
-		//m_window->m_osg_widget->setGeometry(0, 0, 300, 300);
-		m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
-		//m_window->m_osg_widget->setGeometry(old_geometry);
+	// render
+	m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
+	canvas.render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawChildren | QWidget::IgnoreMask);
 
-		m_window->m_drag_area->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawChildren | QWidget::IgnoreMask);
-	}
-	else if (option == 2) {
-		m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
-	}
-
-	// optional, fewer big screenshots
+	// scale down the image
 	QImage smallimg;
 	smallimg = img.scaled(288, 162, Qt::IgnoreAspectRatio);
+
+	// revert the camera
+	m_window->getViewerWidget()->setCameraMatrix(old_matrix);
 
 	int ns = timer.nsecsElapsed();
 	qDebug() << "thumbnail time ms" << ns / 1.0e6;
