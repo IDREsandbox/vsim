@@ -31,8 +31,9 @@ Building (For more cmake notes see cmake.txt)
  4. To package (into installer)
 	`cpack .`
  6. Running tests `cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --config RELEASE --target RUN_TESTS`
+ 7. If you add new files or make big changes `touch CMakeLists.txt` refreshes the source list
 
-CMake inside Visual Studio 2017
+CMake inside Visual Studio 2017 (doesn't fully work yet)
 
  1. VS2017 has some cmake support. Open the vsim folder through VS.
  2. Poke the CMakeLists.txt, it should try to run cmake and fail
