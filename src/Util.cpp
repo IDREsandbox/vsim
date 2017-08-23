@@ -225,6 +225,13 @@ osg::Matrixd Util::transpose(osg::Matrixd m)
 	return result;
 }
 
+double Util::simpleCubic(double x0, double x1, double t)
+{
+	double ht = -2 * pow(t, 3) + 3 * pow(t, 2);
+	//qDebug() << "cubic" << ht << lerp(x0, x1, ht);
+	return lerp(x0, x1, ht);
+}
+
 Util::endPt Util::hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl) {
 	osg::Matrixd curveMat(b[0], b[1], b[2], b[3], a[0], a[1], a[2], a[3], db[0], db[1], db[2], db[3], da[0], da[1], da[2], da[3]);
 	osg::Matrixd hermiteMat(-2, 3, 0, 0, 2, -3, 0, 1, 1, -1, 0, 0, 1, -2, 1, 0);
@@ -239,22 +246,24 @@ Util::endPt Util::hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::V
 	return result;
 }
 
-
 osg::Matrixd Util::camMatHerm(double t, osg::Matrixd m0, osg::Matrixd m1) {
 	osg::Vec3d pos0 = m0.getTrans();
 	osg::Vec3d pos1 = m1.getTrans();
-	
+
 	Util::endPt res = Util::hermiteCurve(osg::Vec4d(pos0[0], pos0[1], pos0[2], 1), osg::Vec4d(pos1[0], pos1[1], pos1[2], 1), osg::Vec4d(15, 0, 0, 0), osg::Vec4d(15, 0, 0, 0), t, .5);
 	return osg::Matrixd::lookAt(osg::Vec3d(res.pos), osg::Vec3d(res.pos + res.tan), osg::Vec3d(0, 0, 1)); //osg::Matrixd::inverse(
 }
 
-osg::Matrixd Util::viewMatrixLerp(double t, osg::Matrixd m0, osg::Matrixd m1)
+osg::Matrixd Util::cameraMatrixInterp(osg::Matrixd m0, osg::Matrixd m1, double t)
 {
 	// linear interpolation of position
 	osg::Vec3d pos0 = m0.getTrans();
 	osg::Vec3d pos1 = m1.getTrans();
 
-	osg::Vec3d pos = Util::lerp(t, pos0, pos1);
+	osg::Vec3d pos;
+	pos[0] = Util::simpleCubic(pos0[0], pos1[0], t);
+	pos[1] = Util::simpleCubic(pos0[1], pos1[1], t);
+	pos[2] = Util::simpleCubic(pos0[2], pos1[2], t);
 
 	// linear interpolation of yaw and pitch
 	double yaw0, pitch0, roll0;
@@ -269,9 +278,9 @@ osg::Matrixd Util::viewMatrixLerp(double t, osg::Matrixd m0, osg::Matrixd m1)
 
 	//qDebug() << "rollin" << roll0 << roll1;
 
-	double pitch = Util::lerp(t, pitch0, pitch1);
-	double yaw = Util::lerp(t, yaw0, yaw1);
-	double roll = Util::lerp(t, roll0, roll1);
+	double pitch = Util::simpleCubic(pitch0, pitch1, t);
+	double yaw = Util::simpleCubic(yaw0, yaw1, t);
+	double roll = Util::simpleCubic(roll0, roll1, t);
 	osg::Quat rot = Util::YPRToQuat(yaw, pitch, roll);
 
 	//std::cout << "yaw " << yaw*180/M_PI << " pitch " << pitch * 180 / M_PI << " roll " << roll * 180 / M_PI << " xyz " << pos << "\n";

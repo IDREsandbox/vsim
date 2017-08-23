@@ -41,13 +41,11 @@ public:
 	void toAtNode();
 	void toStopped();
 
-	// signals out, if you want testing then replace these somehow (with signals)
+	// signals out, if you want to remove dependency then replace with signals
 	bool setSlide(int index);
 	void setCameraInTransition(double t);
-	//void setCameraMatrix(osg::Matrixd camera_matrix);
-	//void enableNavigation(bool enable); 
 
-signals:
+signals: // more signals out, removes the viewer widget dependency
 	void updateCamera(osg::Matrixd camera_matrix);
 	void enableNavigation(bool enable); // TODO
 

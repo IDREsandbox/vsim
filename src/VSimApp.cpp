@@ -89,7 +89,7 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 		root = new VSimRoot(new_node->asGroup());
 	}
 	else {
-		qDebug() << "is in fact a vsimroot";
+		qDebug() << "Root is a VSimRoot";
 	}
 	
 	// move all of the gui stuff over to the new root

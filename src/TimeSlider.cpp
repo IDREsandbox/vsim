@@ -79,7 +79,6 @@ void TimeSlider::onCheckbox(int state)
 void TimeSlider::onYearChange()
 {
 	int year = m_group->getYear();
-	qDebug() << "on year change" << year;
 	ui->slider->setValue(year);
 	ui->currentLabel->setText(QString::number(year));
 }
@@ -87,7 +86,6 @@ void TimeSlider::onYearChange()
 void TimeSlider::onRangeChange()
 {
 	std::set<int> years = m_group->getKeyYears();
-	qDebug() << "on range change" << Util::setToString(years);
 	int min, max;
 	if (years.size() == 0) {
 		years = { -2000, 2000 };

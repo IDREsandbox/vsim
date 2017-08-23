@@ -307,12 +307,11 @@ bool NarrativeControl::setSlide(int index)
 	m_current_slide = index;
 
 	// TODO: replace this chunk with m_canvas->setGroup(slide)
-	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
 	m_canvas->clearCanvas();
 	NarrativeSlideLabels* data;
 
-	for (uint i = 0; i < curSl->getNumChildren(); i++) {
-		data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
+	for (uint i = 0; i < slide->getNumChildren(); i++) {
+		data = dynamic_cast<NarrativeSlideLabels*>(slide->getChild(i));
 		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
 			data->getrH());
 	}
@@ -404,6 +403,7 @@ void NarrativeControl::resizeLabel(QSize size, int idx) {
 }
 
 void NarrativeControl::textEditLabel(QString str, int idx) {
+	qDebug() << "edit text";
 	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
 	NarrativeSlideLabels* lab = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
 	lab->setText(str.toStdString());
@@ -446,9 +446,6 @@ Narrative2 * NarrativeControl::getCurrentNarrative()
 NarrativeSlide * NarrativeControl::getCurrentSlide()
 {
 	if (m_current_narrative < 0) return nullptr;
-	
-
-
 	return getNarrativeSlide(m_current_narrative, m_current_slide);
 }
 
@@ -471,8 +468,6 @@ NarrativeSlide * NarrativeControl::getNarrativeSlide(int narrative, int slide)
 
 void NarrativeControl::onSlideSelection()
 {
-	qDebug() << "ON SLIDE SELECTION";
-
 	if (m_current_narrative < 0) {
 		qWarning() << "Narrative Control - slide selection while current narrative null";
 		return;

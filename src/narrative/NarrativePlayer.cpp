@@ -33,7 +33,6 @@ void NarrativePlayer::update(double dt_sec)
 		//qDebug() << "atnode" << m_slide_time_sec / slide->getDuration();
 		m_slide_time_sec += dt_sec;
 		if (m_slide_time_sec >= slide->getDuration()) {
-			// TODO NEXT
 			timerExpire();
 		}
 	}
@@ -49,7 +48,6 @@ void NarrativePlayer::update(double dt_sec)
 			timerExpire();
 		}
 	}
-	
 }
 
 void NarrativePlayer::rightArrow()
@@ -197,7 +195,7 @@ void NarrativePlayer::setCameraInTransition(double t)
 
 	osg::Matrixd new_matrix;
 	if (t >= 1) new_matrix = to->getCameraMatrix();
-	else new_matrix = Util::viewMatrixLerp(t, from->getCameraMatrix(), to->getCameraMatrix());
+	else new_matrix = Util::cameraMatrixInterp(from->getCameraMatrix(), to->getCameraMatrix(), t);
 	//std::cout << Util::camMatHerm(t, source_node->getCameraMatrix(), dest_node->getCameraMatrix()) << endl;
 
 	emit updateCamera(new_matrix);

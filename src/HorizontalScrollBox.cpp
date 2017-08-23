@@ -255,7 +255,6 @@ void HorizontalScrollBox::setItemMenu(QMenu * menu)
 
 void HorizontalScrollBox::setGroup(Group * group)
 {
-	qDebug() << "SET GROUP";
 	// disconnect incoming signals if already connected to a narrative
 	if (m_group != nullptr) disconnect(m_group, 0, this, 0);
 
@@ -270,13 +269,10 @@ void HorizontalScrollBox::setGroup(Group * group)
 	connect(m_group, &Group::sItemsMoved, this, &HorizontalScrollBox::moveItems);
 
 	for (uint i = 0; i < group->getNumChildren(); i++) {
-		qDebug() << "-----inserting";
 		insertNewItem(i);
 	}
 	if (m_items.size() > 0) {
-		qDebug() << "select ZERO";
 		select(0);
-		qDebug() << "after 0";
 	}
 }
 
@@ -542,7 +538,6 @@ void HorizontalScrollBox::itemMouseReleaseEvent(QMouseEvent * event, int index)
 		if (!(event->modifiers() & Qt::ControlModifier) && !(event->modifiers() & Qt::ShiftModifier)) {
 			// If already in selection then select() on release
 			// this is so that you can start dragging w/o deselecting everything
-			qDebug() << "release";
 			if (isSelected(index)) {
 				m_last_selected = index;
 				select(index);
