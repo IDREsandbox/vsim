@@ -251,10 +251,11 @@ bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)
 
 void OSGViewerWidget::paintEvent(QPaintEvent *e)
 {
-	// a frame
 	qint64 dt = m_frame_timer.nsecsElapsed();
 	m_frame_timer.restart();
 	double dt_sec = (double)dt / 1.0e9;
+
+	emit frame(dt_sec);
 
 	NavigationMode mode = getActualNavigationMode();
 	if (mode == NAVIGATION_FIRST_PERSON) {

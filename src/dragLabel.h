@@ -6,8 +6,9 @@
 #include <QtGui/QMouseEvent>
 #include <iostream>
 #include <QtCore/QBasicTimer>
-#include "MainWindow.h"
 #include "labelCanvas.h"
+
+class labelCanvas;
 
 class dragLabel : public QTextEdit
 {

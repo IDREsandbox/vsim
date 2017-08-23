@@ -5,7 +5,7 @@
 #include <QtGui>
 #include <QtCore>
 #include <QList>
-#include "dragLabel.h"
+
 #include "editButtons.h"
 
 class dragLabel;

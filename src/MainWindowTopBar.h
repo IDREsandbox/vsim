@@ -1,6 +1,5 @@
-﻿#pragma once
-#ifndef MAINWINDOWTOPBAR_HPP
-#define MAINWINDOWTOPBAR_HPP
+﻿#ifndef MAINWINDOWTOPBAR_H
+#define MAINWINDOWTOPBAR_H
 #include <QFrame>
 #include "ui_mainwindowtopbar.h"
 
@@ -23,4 +22,4 @@ public:
 	Ui::MainWindowTopBar ui;
 };
 
-#endif // MAINWINDOWTOPBAR_HPP
+#endif // MAINWINDOWTOPBAR_H

@@ -3,316 +3,213 @@
 #include "NarrativePlayer.h"
 #include "labelCanvasView.h"
 
+#include "narrative/NarrativeControl.h"
+#include "narrative/NarrativeSlide.h"
+
 #include <osg/io_utils>
 
-NarrativePlayer::NarrativePlayer(QObject *parent, MainWindow *window, NarrativeControl *narratives)
+NarrativePlayer::NarrativePlayer(QObject *parent, NarrativeControl *narratives)
 	: QObject(parent),
-	m_window(window),
 	m_narratives(narratives),
-	m_current_narrative(-1),
-	m_current_slide(-1),
-	m_playing(false),
-	m_transitioning(false),
-	m_slide_time_sec(0)
+	m_state(STOPPED),
+	m_slide_time_sec(0),
+	m_expect_selection_change(false)
 {
-	m_narrative_box = m_window->topBar()->ui.narratives;
-	m_slide_box = m_window->topBar()->ui.slides;
-	m_canvas = m_window->m_drag_area;
-
-	effect = new QGraphicsOpacityEffect(m_canvas);
-
-	// play pause
-	connect(m_window->topBar()->ui.play_2, &QPushButton::clicked, this, &NarrativePlayer::play);
-	connect(m_window->topBar()->ui.pause_2, &QPushButton::clicked, this, &NarrativePlayer::pause);
-
-	// open
-	connect(m_narrative_box, &NarrativeScrollBox::sOpen, this,
-	[this]() {
-		qDebug() << "Narrative player - open";
-	});
-
-	connect(m_window->topBar()->ui.open, &QPushButton::clicked, this, 
-		[this]() {
-		qDebug() << "Narrative player - open";
-	});
-
-	connect(m_window->topBar()->ui.left_2, &QPushButton::clicked, this, 
-		[this]() {
-		qDebug() << "Narrative player - close";
-	});
-
-	// narrative selection change
-	connect(m_narrative_box, &NarrativeScrollBox::sSelectionChange, this, &NarrativePlayer::selectionChange);
-	connect(m_slide_box, &SlideScrollBox::sSelectionChange, this, &NarrativePlayer::selectionChange);
-
-	m_previous_time = m_window->getViewer()->elapsedTime();
-	m_timer = new QTimer(this);
-	m_timer->setInterval(15);
-	m_timer->setSingleShot(false);
-	m_timer->start();
-
-	connect(m_timer, &QTimer::timeout, this,
-		[this]() {
-			m_window->m_osg_widget->update();
-			
-			// timestep
-			double current_time = m_window->getViewer()->elapsedTime();
-			update(current_time - m_previous_time);
-			m_previous_time = current_time;
-		});
+	connect(m_narratives, &NarrativeControl::selectionChanged, this, &NarrativePlayer::editEvent);
 }
 void NarrativePlayer::update(double dt_sec)
 {
-	if (!isPlaying()) {
+	if (m_state == STOPPED) return;
+	if (m_state == ATNODE && m_narratives->getCurrentSlide()->getStayOnNode()) return;
+
+	NarrativeSlide *slide = m_narratives->getCurrentSlide();
+	if (slide == nullptr) {
+		qDebug() << "Narrative Player - update, current slide is null";
+		toStopped();
 		return;
 	}
-	if (m_current_narrative == -1 || m_current_slide == -1) {
-		qDebug() << "update error narrative";
-		pause();
-		return;
-	}
 
-	if (!m_transitioning) { // not transitioning, waiting on slide
-		const NarrativeSlide *current_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
-
-		if (current_node == nullptr) {
-			qWarning() << "Error: narrative player current slide is null";
-			pause();
-			return;
-		}
-
+	if (m_state == ATNODE) {
+		//qDebug() << "atnode" << m_slide_time_sec / slide->getDuration();
 		m_slide_time_sec += dt_sec;
-		double wait_time = current_node->getDuration();
-		if (m_slide_time_sec >= wait_time) {
-			next();
+		if (m_slide_time_sec >= slide->getDuration()) {
+			// TODO NEXT
+			timerExpire();
 		}
 	}
-	else { // transitioning
-		if (m_current_slide <= 0) {
-			qWarning() << "Error: player is transitioning in slide 0" << m_current_slide;
-			pause();
-			return;
-		}
-		int num_nodes = m_narratives->getNarrative(m_current_narrative)->getNumChildren();
-
-		if (m_current_slide >= num_nodes) {
-			qWarning() << "Error: narrative player's current slide # is greater than the number of slides";
-			pause();
-			return;
-		}
-
-		// get source slide
-		const NarrativeSlide *source_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide - 1);
-		const NarrativeSlide *dest_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
-		double transition_duration = dest_node->getTransitionDuration();
-
-		// advance time
+	else { // TRANSITIONING
 		m_slide_time_sec += dt_sec;
+		double t = m_slide_time_sec / slide->getTransitionDuration();
+		//qDebug() << "transition" << t;
+		//effect->setOpacity(1 - t - .5);
+		//m_window->canvasView()->setGraphicsEffect(effect);
+		setCameraInTransition(t);
 
-		// time progress from [0,1], so we can do simple interpolation
-		double t = m_slide_time_sec / transition_duration;
-
-		// have we finished?
 		if (t >= 1.0) {
-			next();
-			return;
+			timerExpire();
 		}
-		//qDebug() << "transitioning:" << t;
-
-		//std::cout << Util::camMatHerm(t, source_node->getCameraMatrix(), dest_node->getCameraMatrix()) << endl;
-		//std::cout << Util::viewMatrixLerp(t, source_node->getCameraMatrix(), dest_node->getCameraMatrix()) << endl;
-
-		effect->setOpacity(1 - t - .5);
-		m_window->canvasView()->setGraphicsEffect(effect);
-
-		osg::Matrixd new_matrix = Util::viewMatrixLerp(t, source_node->getCameraMatrix(), dest_node->getCameraMatrix());
-
-		setCameraMatrix(new_matrix);
 	}
+	
+}
+
+void NarrativePlayer::rightArrow()
+{
+	next(FORWARD);
+}
+
+void NarrativePlayer::leftArrow()
+{
+	next(BACKWARD);
+}
+
+//void NarrativePlayer::leftClick()
+//{
+//	next(FORWARD);
+//}
+
+void NarrativePlayer::timerExpire()
+{
+	next(FORWARD);
+}
+
+void NarrativePlayer::editEvent()
+{
+	// if we caused the selection change then don't do anything
+	if (m_expect_selection_change) {
+		return;
+	}
+	// update camera and everything
+	NarrativeSlide *slide = m_narratives->getCurrentSlide();
+	qDebug() << "edit event - current slide" << m_narratives->getCurrentSlideIndex();
+	if (slide) {
+		qDebug() << "update camera";
+		updateCamera(slide->getCameraMatrix());
+	}
+
+	toStopped();
 }
 
 void NarrativePlayer::play()
 {
-	m_canvas->clearCanvas();
-	
-	qDebug() << "play";
-	if (m_current_narrative == -1 || m_current_slide == -1) {
+	if (m_state == ATNODE && m_narratives->getCurrentSlide()->getStayOnNode()) {
+		qDebug() << "play - continue";
+		next(FORWARD);
 		return;
 	}
-	const NarrativeSlide *next_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide + 1);
-	if (next_node == nullptr) { // check if at the end
-		qInfo() << "Can't play - at the end";
-		//pause();
-		return;
+	if (m_state == STOPPED) {
+		qDebug() << "play";
+		emit enableNavigation(false);
+		toAtNode();
 	}
-	const NarrativeSlide *current_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
-	if (current_node == nullptr) {
-		qInfo() << "Narrative player - error narrative is null";
-		return;
-	}
-
-	m_playing = true;
-	m_transitioning = false;
-	m_slide_time_sec = 0;
-
-	m_narratives->exitEdit();
-
-	NarrativeSlideLabels* data;
-	NarrativeSlide *curSl = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
-	for (uint i = 0; i < curSl->getNumChildren(); i++) {
-		data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
-		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
-			data->getrH());
-	}
-
-	// if we're at a pause node, then we should skip to the next transition
-	if (current_node->getStayOnNode()) {
-		next();
-	}
-	
-	m_old_navigation_mode = m_window->m_osg_widget->getNavigationMode();
-	m_window->m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_SIMPLE);
 }
 
-void NarrativePlayer::next()
+void NarrativePlayer::stop()
+{
+	qDebug() << "stop";
+	toStopped();
+}
+
+void NarrativePlayer::next(Advance dir)
 {
 	qInfo() << "Narrative Player - next";
-	// if not playing, we still want to do the transition on next()
-	if (!m_transitioning) {
-		const NarrativeSlide *next_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide + 1);
-		printf("next node %p\n", next_node);
-		if (next_node == nullptr) { // check if at the end
-			pause();
-			return;
-		}
-		// if the next slide has a transition, then transitioning, otherwise skip
-		if (next_node->getTransitionDuration() <= .00001) {
-			m_transitioning = false;
-		}
-		else {
-			m_transitioning = true;
-		}
+	int si = m_narratives->getCurrentSlideIndex(); // current slide index
+	int si2; // next slide index
 
-		m_current_slide++;
-		m_slide_time_sec = 0;
-		m_slide_box->forceSelect(m_current_slide);
-		return;
+	if (m_state == ATNODE) {
+		if (dir == BACKWARD) si2 = si; // don't change slide
+		else si2 = si + 1; // do change slide
+
+	}
+	else if (m_state == TRANSITIONING) {
+		if (dir == BACKWARD) si2 = si - 1; // don't change slide
+		else si2 = si; // do change slide
+
 	}
 
-	// if transitioning, jump to the finish
-	else {
-		m_transitioning = false;
-		m_slide_time_sec = 0;
-
-		const NarrativeSlide *current_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
-		setCameraMatrix(current_node->getCameraMatrix());
-		
-		m_canvas->clearCanvas();
-		effect->setOpacity(1);
-		m_canvas->setGraphicsEffect(effect);
-
-		NarrativeSlideLabels* data;
-		NarrativeSlide *curSl = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
-		for (uint i = 0; i < curSl->getNumChildren(); i++) {
-			data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
-			//qDebug() << i;
-			m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
-				data->getrH());
-		}
-
-		// if there is no next node, we're done
-		const NarrativeSlide *next_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide + 1);
-		if (next_node == nullptr) {
-			qInfo() << "Narrative Player - last slide reached";
-			pause();
+	// change the slide if necessary
+	if (si != si2) {
+		qDebug() << "have to change the slide";
+		bool ok = setSlide(si2);
+		if (!ok) {
+			// this happens if we're at the beginning or end
+			qDebug() << "failed to change slide, stopping";
+			toStopped();
 			return;
 		}
 	}
 
-	// after the switch and slide update, check if there is a StayOnNode
-	if (m_transitioning == false && isPlaying()) {
-		const NarrativeSlide *current_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
-		if (current_node->getStayOnNode()) {
-			pause();
-		}
+	if (m_state == ATNODE) {
+		toTransitioning();
+	}
+	else if (m_state == TRANSITIONING) {
+		toAtNode();
 	}
 }
 
-void NarrativePlayer::pause()
+void NarrativePlayer::toTransitioning()
 {
-	if (!m_playing) return;
+	m_slide_time_sec = 0;
+	m_state = TRANSITIONING;
+}
 
-	qInfo() << "Narrative Player - pause";
-	if (m_transitioning) {
-		m_current_slide = m_current_slide - 1;
+void NarrativePlayer::toAtNode()
+{
+	emit updateCamera(m_narratives->getCurrentSlide()->getCameraMatrix());
+	m_slide_time_sec = 0;
+	m_state = ATNODE;
+}
+
+void NarrativePlayer::toStopped()
+{
+	if (m_state == STOPPED) return;
+	qDebug() << "to stopped";
+	m_state = STOPPED;
+	enableNavigation(true);
+}
+
+bool NarrativePlayer::setSlide(int index)
+{
+	// set the slide while edit event
+	int ni = m_narratives->getCurrentNarrativeIndex();
+	NarrativeSlide *slide = m_narratives->getNarrativeSlide(ni, index);
+	if (slide == nullptr) return false;
+
+	m_expect_selection_change = true;
+	m_narratives->selectSlides(ni, {index});
+	m_expect_selection_change = false;
+
+	return true;
+	//return m_narratives->openSlide(m_ni, index);
+}
+
+void NarrativePlayer::setCameraInTransition(double t)
+{
+	int m_current_slide = m_narratives->getCurrentSlideIndex();
+	if (m_current_slide == 0) {
+		updateCamera(m_narratives->getCurrentSlide()->getCameraMatrix());
 		return;
 	}
-	
-	NarrativeSlide *new_slide = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
-	if (new_slide == nullptr) {
-		qWarning() << "Pause error, current slide is null";
-		return;
-	}
 
-	m_slide_box->forceSelect(m_current_slide);
-	m_playing = false;
-	m_transitioning = false;
-	setCameraMatrix(new_slide->getCameraMatrix());
+	NarrativeSlide *to = m_narratives->getCurrentSlide();
+	int nar_index = m_narratives->getCurrentNarrativeIndex();
+	int prev_index = m_narratives->getCurrentSlideIndex() - 1;
+	NarrativeSlide *from = m_narratives->getNarrativeSlide(nar_index, prev_index);
 
-	m_window->m_osg_widget->setNavigationMode(m_old_navigation_mode);
+	osg::Matrixd new_matrix;
+	if (t >= 1) new_matrix = to->getCameraMatrix();
+	else new_matrix = Util::viewMatrixLerp(t, from->getCameraMatrix(), to->getCameraMatrix());
+	//std::cout << Util::camMatHerm(t, source_node->getCameraMatrix(), dest_node->getCameraMatrix()) << endl;
+
+	emit updateCamera(new_matrix);
 }
-bool NarrativePlayer::isPlaying()
-{
-	return m_playing;
-}
-
-void NarrativePlayer::setCameraMatrix(osg::Matrixd camera_matrix)
-{
-	m_window->m_osg_widget->setCameraMatrix(camera_matrix);
-}
-
-//bool NarrativePlayer::setSlide(int narrative, int slide)
+//
+//void NarrativePlayer::enableNavigation(bool enable)
 //{
-//	NarrativeSlide *new_slide = m_narratives->getNarrativeSlide(narrative, slide);
-//	if (new_slide == nullptr) {
-//		return false;
-//	}
-//	m_current_narrative = narrative;
-//	m_current_slide = slide;
-//	m_slide_box->forceSelect(m_current_slide);
-//	m_playing = false;
-//	m_transitioning = false;
-//	setCameraMatrix(new_slide->getCameraMatrix());
-//	
-//	return true;
+//	//if (!enable) {
+//	//	// remember the navigation mode
+//	//	m_old_navigation_mode = m_window->m_osg_widget->getNavigationMode();
+//	//	m_window->m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_SIMPLE);
+//	//}
 //}
 
-void NarrativePlayer::selectionChange()
-{
-	std::set<int> nar_sel = m_narrative_box->getSelection();
-	if (nar_sel.empty()) {
-		m_current_narrative = -1;
-	}
-	else {
-		m_current_narrative = *nar_sel.rbegin();
-	}
-
-	std::set<int> slide_sel = m_slide_box->getSelection();
-	if (slide_sel.empty()) {
-		m_current_slide = -1;
-	}
-	else {
-		m_current_slide = *slide_sel.rbegin();
-
-		qDebug() << "Narrative Player - slide selection" << m_current_narrative << m_current_slide;
-		const NarrativeSlide *current_node = m_narratives->getNarrativeSlide(m_current_narrative, m_current_slide);
-		if (current_node == nullptr) {
-			qWarning() << "Error: can't set narrative player view to selection, indices: " << m_current_narrative << m_current_slide;
-		}
-		else {
-			setCameraMatrix(current_node->getCameraMatrix());
-		}
-	}
-	pause();
-}
 

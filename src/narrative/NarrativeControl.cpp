@@ -66,7 +66,7 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	// back
 	connect(m_window->topBar()->ui.left_2, &QPushButton::clicked, this, &NarrativeControl::closeNarrative);
 	//change
-	connect(m_slide_box, SIGNAL(sSelectionChange()), this, SLOT(openSlide()));
+	connect(m_slide_box, &SlideScrollBox::sSelectionChange, this, &NarrativeControl::onSlideSelection);
 	
 	//CANVAS CONTROL
 	// new
@@ -105,7 +105,7 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 		[this]() {redrawThumbnails(m_slide_box->getDirtySlides()); }
 		);
 
-	connect(window, &MainWindow::sDebugOSG, this, &NarrativeControl::debug);
+	connect(window, &MainWindow::sDebugControl, this, &NarrativeControl::debug);
 }
 
 NarrativeControl::~NarrativeControl()
@@ -240,6 +240,8 @@ void NarrativeControl::debug()
 	qDebug() << "Narrative Control Debug";
 	qDebug() << "current narrative" << m_current_narrative;
 	qDebug() << "current slide" << m_current_slide;
+	qDebug() << "nar box" << Util::setToString(m_narrative_box->getSelection());
+	qDebug() << "slide box" << Util::setToString(m_slide_box->getSelection());
 }
 
 void NarrativeControl::load(NarrativeGroup *narratives)
@@ -276,7 +278,7 @@ void NarrativeControl::setNarrative(int index)
 
 	if (nar->getNumChildren() > 0) {
 		m_slide_box->setLastSelected(0);
-		openSlide();
+		setSlide(0);
 	}
 }
 
@@ -289,21 +291,33 @@ void NarrativeControl::closeNarrative()
 	m_canvas->clearCanvas();
 }
 
-void NarrativeControl::openSlide() 
+bool NarrativeControl::setSlide(int index)
 {
-	m_current_slide = m_slide_box->getLastSelected();
-	if (m_current_slide < 0) return;
-	qDebug() << "opening slide" << m_current_slide;
+	if (m_current_narrative < 0) {
+		m_current_slide = -1;
+		return false;
+	}
+	NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
+	if (!slide) {
+		m_current_slide = -1;
+		m_canvas->clearCanvas();
+		return false;
+	}
 
+	m_current_slide = index;
+
+	// TODO: replace this chunk with m_canvas->setGroup(slide)
 	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
 	m_canvas->clearCanvas();
 	NarrativeSlideLabels* data;
 
 	for (uint i = 0; i < curSl->getNumChildren(); i++) {
 		data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(i));
-		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(), 
+		m_canvas->newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
 			data->getrH());
 	}
+
+	return true;
 }
 
 void NarrativeControl::deleteLabelButton() {
@@ -329,7 +343,8 @@ NarrativeControl::SelectionLevel NarrativeControl::getSelectionLevel()
 void NarrativeControl::selectNarratives(std::set<int> narratives)
 {
 	closeNarrative();
-	m_narrative_box->setSelection(narratives);
+	m_narrative_box->setSelection(narratives, *narratives.begin());
+	emit selectionChanged();
 }
 
 void NarrativeControl::selectSlides(int narrative, std::set<int> slides)
@@ -337,8 +352,9 @@ void NarrativeControl::selectSlides(int narrative, std::set<int> slides)
 	if (m_current_narrative != narrative) {
 		setNarrative(narrative);
 	}
-	m_narrative_box->setSelection({narrative});
-	m_slide_box->setSelection({slides});
+	m_narrative_box->setSelection({narrative}, narrative);
+	m_slide_box->setSelection({slides}, *slides.begin());
+	emit selectionChanged();
 }
 
 void NarrativeControl::newLabel(std::string str, int idx) {
@@ -411,14 +427,29 @@ int NarrativeControl::nextSelectionAfterDelete(int total, std::set<int> selectio
 	return next_selection;
 }
 
-int NarrativeControl::getCurrentNarrative()
+int NarrativeControl::getCurrentNarrativeIndex()
 {
 	return m_current_narrative;
 }
 
-int NarrativeControl::getCurrentSlide()
+int NarrativeControl::getCurrentSlideIndex()
 {
 	return m_current_slide;
+}
+
+Narrative2 * NarrativeControl::getCurrentNarrative()
+{
+	if (m_current_narrative < 0) return nullptr;
+	return getNarrative(m_current_narrative);
+}
+
+NarrativeSlide * NarrativeControl::getCurrentSlide()
+{
+	if (m_current_narrative < 0) return nullptr;
+	
+
+
+	return getNarrativeSlide(m_current_narrative, m_current_slide);
 }
 
 Narrative2 *NarrativeControl::getNarrative(int index)
@@ -436,6 +467,20 @@ NarrativeSlide * NarrativeControl::getNarrativeSlide(int narrative, int slide)
 	if (!nar) return nullptr;
 	if (slide < 0 || (uint)slide >= nar->getNumChildren()) return nullptr;
 	return dynamic_cast<NarrativeSlide*>(nar->getChild(slide));
+}
+
+void NarrativeControl::onSlideSelection()
+{
+	qDebug() << "ON SLIDE SELECTION";
+
+	if (m_current_narrative < 0) {
+		qWarning() << "Narrative Control - slide selection while current narrative null";
+		return;
+	}
+
+	setSlide(m_slide_box->getLastSelected());
+
+	emit selectionChanged();
 }
 
 void NarrativeControl::newSlide()
@@ -461,20 +506,24 @@ void NarrativeControl::newSlide()
 	else if (index == 0) undo_selection = index;
 	else undo_selection = index - 1;
 
+	// make new slide, initialize matrix and stuff
+	auto newcmd = new Narrative2::NewSlideCommand(nar, index);
+	NarrativeSlide *slide = newcmd->getNode();
+	slide->setCameraMatrix(matrix);
+
 	// perform command
 	m_undo_stack->beginMacro("New Slide");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, { undo_selection }, ON_UNDO));
-	m_undo_stack->push(new Narrative2::NewSlideCommand(nar, index));
+	m_undo_stack->push(newcmd);
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, { index }, ON_REDO));
 	m_undo_stack->endMacro();
 
 	qDebug() << "after push";
 
-	// initialization
-	NarrativeSlide *slide = getNarrativeSlide(m_current_narrative, index);
-	slide->setCameraMatrix(matrix);
+	qDebug() << "after set camera matrix";
+	std::cout << m_window->getViewer()->getCameraManipulator()->getMatrix();
 
-	openSlide();
+	setSlide(nar->getNumChildren() - 1);
 }
 
 void NarrativeControl::deleteSlides()
@@ -581,6 +630,7 @@ void NarrativeControl::moveSlides(std::set<int> from, int to)
 	m_undo_stack->endMacro();
 }
 
+
 void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> slides)
 {
 	osg::Matrixd old_matrix = m_window->m_osg_widget->getCameraMatrix();
@@ -601,6 +651,8 @@ void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> slid
 		slide->setImage(thumbnail);
 		slide->setThumbnailDirty(false);
 	}
+
+	m_window->m_osg_widget->setCameraMatrix(old_matrix);
 }
 
 QImage NarrativeControl::generateThumbnail(int option)

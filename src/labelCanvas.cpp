@@ -1,5 +1,5 @@
-
 #include "labelCanvas.h"
+#include "dragLabel.h"
 
 labelCanvas::labelCanvas(QWidget* parent)
 	: QWidget(parent)

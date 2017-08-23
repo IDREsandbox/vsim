@@ -78,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	connect(ui->actionOSG_Debug, &QAction::triggered, this, &MainWindow::sDebugOSG);
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
+	connect(ui->actionControl_Debug, &QAction::triggered, this, &MainWindow::sDebugControl);
 
 	// camera manipulator
 	connect(ui->actionFirst_Person_Navigation, &QAction::triggered, m_osg_widget,
@@ -139,6 +140,11 @@ void MainWindow::LoadingDialog(const std::string & msg)
 	connect(pd, &QProgressDialog::canceled, this, [] {printf("CLOSEDD!!!\n"); });
 }
 
+
+OSGViewerWidget * MainWindow::getViewerWidget() const
+{
+	return m_osg_widget;
+}
 
 osgViewer::Viewer *MainWindow::getViewer() const
 {
