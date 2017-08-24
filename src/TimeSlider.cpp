@@ -2,6 +2,7 @@
 #include "ui_timeslider.h"
 #include <QDebug>
 #include "Util.h"
+#include "ModelGroup.h"
 
 TimeSlider::TimeSlider(QWidget *parent)
 	: QWidget(parent),
@@ -47,6 +48,7 @@ void TimeSlider::setGroup(ModelGroup * group)
 	// hacky initialization
 	onRangeChange();
 	onYearChange();
+	onTimeEnableChange(m_group->timeEnabled());
 }
 
 void TimeSlider::enableSlider(bool enable)

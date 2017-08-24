@@ -3,15 +3,18 @@
 
 #include <set>
 #include <osg/Node>
-#include "narrative/NarrativeGroup.h"
-#include "narrative/Narrative2.h"
-#include "narrative/NarrativeScrollBox.h"
-#include "narrative/SlideScrollBox.h"
-#include "narrative/NarrativeSlideLabels.h"
-#include "HorizontalScrollBox.h"
-#include "MainWindow.h"
-#include "dragLabel.h"
-#include "editButtons.h"
+#include <QWidget>
+#include <QUndoStack>
+
+class MainWindow;
+class NarrativeGroup;
+class Narrative2;
+class NarrativeSlide;
+class NarrativeScrollBox;
+class SlideScrollBox;
+class labelCanvas;
+class editButtons;
+class SlideScrollItem;
 
 // Bridges osg and gui for narratives
 class NarrativeControl : public QObject

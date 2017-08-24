@@ -15,7 +15,16 @@
 #include "MainWindow.h"
 #include "OSGViewerWidget.h"
 #include "NarrativeInfoDialog.h"
+#include "narrative/NarrativeGroup.h"
+#include "narrative/Narrative2.h"
+#include "narrative/NarrativeScrollBox.h"
+#include "narrative/SlideScrollBox.h"
+#include "narrative/SlideScrollItem.h"
+#include "narrative/NarrativeSlideLabels.h"
+#include "dragLabel.h"
+#include "labelCanvas.h"
 #include "labelCanvasView.h"
+#include "editButtons.h"
 
 NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	: QObject(parent), 

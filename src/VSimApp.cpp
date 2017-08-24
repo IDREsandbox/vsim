@@ -14,6 +14,8 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QProgressDialog>
 #include <QtWidgets/QAction>
+#include <QFileDialog>
+
 #include "VSimApp.h"
 #include "Util.h"
 #include "deprecated/narrative/Narrative.h"
@@ -59,6 +61,7 @@ VSimApp::VSimApp(MainWindow* window)
 	m_window->outliner()->setModel(&m_model_table_model);
 	m_window->outliner()->header()->resizeSection(0, 200);
 	m_window->outliner()->resize(505, 600);
+	qDebug() << m_window->outliner()->windowFlags();
 
 	connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
 	connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
