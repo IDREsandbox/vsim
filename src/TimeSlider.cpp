@@ -13,7 +13,7 @@ TimeSlider::TimeSlider(QWidget *parent)
 	ui->slider->setMaximum(50);
 	setEnabled(true);
 	
-	ui->slider->setValue(1);
+	ui->slider->setValue(0); // something outrageous to cause re-scan
 	ui->slider->setPageStep(10);
 
 	this->setWindowFlags(Qt::Dialog);
@@ -85,6 +85,7 @@ void TimeSlider::onYearChange()
 
 void TimeSlider::onRangeChange()
 {
+	int old_value = ui->slider->value();
 	std::set<int> years = m_group->getKeyYears();
 	int min, max;
 	if (years.size() == 0) {
@@ -99,6 +100,11 @@ void TimeSlider::onRangeChange()
 	ui->slider->setMinimum(min);
 	ui->slider->setMaximum(max);
 	ui->slider->setTicks(years);
+
+	if (old_value == 0 || old_value < min || old_value > max) {
+		// if out of range then jump to beginning
+		ui->slider->setValue(min);
+	}
 
 	ui->beginLabel->setText(QString::number(min));
 	ui->endLabel->setText(QString::number(max));
