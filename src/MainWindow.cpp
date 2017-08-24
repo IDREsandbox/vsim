@@ -202,8 +202,17 @@ void MainWindow::dropEvent(QDropEvent * event)
 void MainWindow::actionNew()
 {
 	qDebug("new");
-	//m_vsimapp->reset();
-	emit sNew();
+
+	QMessageBox::StandardButton reply = 
+		QMessageBox::question(
+			this, 
+			"New file", 
+			"Are you sure you want to create a new file?", 
+			QMessageBox::Yes | QMessageBox::No);
+
+	if (reply == QMessageBox::Yes) {
+		emit sNew();
+	}
 }
 void MainWindow::actionOpen()
 {
