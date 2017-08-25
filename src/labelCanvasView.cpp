@@ -35,3 +35,9 @@ void labelCanvasView::resizeEvent(QResizeEvent* event)
 	this->scale(scaleFactor, scaleFactor);
 }
 
+void labelCanvasView::keyPressEvent(QKeyEvent * e)
+{
+	qDebug() << "view key press event";
+	QGraphicsView::keyPressEvent(e);
+}
+

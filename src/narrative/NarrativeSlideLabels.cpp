@@ -5,22 +5,25 @@ NarrativeSlideLabels::NarrativeSlideLabels()
 	m_rX(0.5),
 	m_rY(0.5),
 	m_rW(0.25),
-	m_rH(0.2)
+	m_rH(0.2),
+	m_widget_style("background: rgba(0, 0, 0, 70);")
 {
 	m_document = new QTextDocument(this);
-	m_document->setDefaultStyleSheet("background: rgba(0, 0, 0, 70); color: rgb(255, 255, 255);");
+	m_document->setDefaultStyleSheet("p {color: rgb(255, 255, 255);}");
 	m_document->setHtml("New Label");
 }
+
 
 NarrativeSlideLabels::NarrativeSlideLabels(const NarrativeSlideLabels & n, const osg::CopyOp & copyop)
 	: osg::Node(n, copyop),
 	m_rX(n.m_rX),
 	m_rY(n.m_rY),
 	m_rW(n.m_rW),
-	m_rH(n.m_rH)
+	m_rH(n.m_rH),
+	m_widget_style("background: rgba(0, 0, 0, 70);")
 {
 	m_document = new QTextDocument(this);
-	m_document->setDefaultStyleSheet("background: rgba(0, 0, 0, 70); color: rgb(255, 255, 255);");
+	m_document->setDefaultStyleSheet("p {color: rgb(255, 255, 255);}");
 	m_document->setHtml("New Label");
 }
 
@@ -90,6 +93,16 @@ const std::string& NarrativeSlideLabels::getStyle() const
 void NarrativeSlideLabels::setStyle(const std::string& style)
 {
 	m_document->setDefaultStyleSheet(QString::fromStdString(style));
+}
+
+const std::string & NarrativeSlideLabels::getWidgetStyle() const
+{
+	return m_widget_style;
+}
+
+void NarrativeSlideLabels::setWidgetStyle(const std::string & widgetStyle)
+{
+	m_widget_style = widgetStyle;
 }
 
 void NarrativeSlideLabels::move(float x, float y)

@@ -10,6 +10,7 @@ class MainWindow;
 class NarrativeGroup;
 class Narrative2;
 class NarrativeSlide;
+class NarrativeSlideLabels;
 class NarrativeScrollBox;
 class SlideScrollBox;
 class labelCanvas;
@@ -30,7 +31,6 @@ public:
 	// Selection
 	void openNarrative(); // if index <0 then it uses the the narrative box selection
 	void setNarrative(int index);
-	void closeNarrative();
 
 	bool setSlide(int index);
 
@@ -49,7 +49,8 @@ public:
 	Narrative2 *getCurrentNarrative();
 	NarrativeSlide *getCurrentSlide();
 	Narrative2 *getNarrative(int index);
-	NarrativeSlide *getNarrativeSlide(int narrative, int slide);
+	NarrativeSlide *getSlide(int narrative, int slide);
+	NarrativeSlideLabels *getLabel(int narrative, int slide, int label);
 
 	void onSlideSelection();
 
@@ -85,14 +86,13 @@ public slots:
 	//editDlg buttons
 	void exitEdit();
 	void deleteLabelButton();
-	void newLabelButton(QString style);
 
 	//Canvas
-	void newLabel(const std::string &text, const std::string &style);
+	void newLabel(const std::string &text, const std::string &style, const std::string &widget_style);
 	void deleteLabel(int idx);
 	void moveLabel(float rx, float ry, int idx);
 	void resizeLabel(float rw, float rh, int idx);
-	//void textEditLabel(QString str, int idx);
+	void editLabel(int idx);
 	
 	void debug();
 

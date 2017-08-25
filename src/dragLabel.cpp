@@ -108,7 +108,7 @@ void dragLabel::mousePressEvent(QMouseEvent *event)
 	par->setSelection(m_index);
 
 	QRect bottomRight = QRect(width() - (width() / 6), height() - (height() / 6), width() / 6, height() / 6);
-	int border = 5;
+	int border = 8;
 	QRect center_rect = QRect(border, border, width() - 2 * border, height() - 2 * border);
 	qDebug() << "mouse press" << event->pos() << center_rect << bottomRight;
 	// Check if in the bottom right
@@ -116,6 +116,8 @@ void dragLabel::mousePressEvent(QMouseEvent *event)
 		qDebug() << "pressed corner";
 		m_dragging = true;
 		m_resizing = 1;
+		m_startwidth = width();
+		m_startheight = height();
 	}
 	// if the press isn't in the center rect, then it's on the edge
 	else if (!center_rect.contains(event->pos())) {
@@ -166,8 +168,8 @@ void dragLabel::mouseReleaseEvent(QMouseEvent *event)
 		// move event
 		else {
 			
-			ratioX = size().width() / (float)par->size().width();
-			ratioY = size().height() / (float)par->size().height();
+			ratioX = pos().x() / (float)par->size().width();
+			ratioY = pos().y() / (float)par->size().height();
 			qDebug() << "mouse release set position" << ratioX << ratioY;
 			emit sSetPos(ratioX, ratioY, m_index);
 		}
@@ -184,16 +186,14 @@ void dragLabel::mouseMoveEvent(QMouseEvent *event)
 	{
 		if (!m_resizing)
 		{
-			qDebug() << "moving";
 			// move the label but don't update the data
 			this->move(mapToParent(event->pos() - m_drag_start));
 		}
 
 		else if (m_resizing)
 		{
-			qDebug() << "resizing";
 			// resize but don't update data
-			this->resize(this->width() + (event->pos().x() - m_drag_start.x()), this->height() + (event->pos().y() - m_drag_start.y()));
+			this->resize(m_startwidth + (event->pos().x() - m_drag_start.x()), m_startheight + (event->pos().y() - m_drag_start.y()));
 		}
 	}
 
@@ -251,11 +251,17 @@ void dragLabel::setLabel(NarrativeSlideLabels * label)
 	ratioY = label->getrY();
 	canvasResize();
 
-	setStyleSheet(label->getDocument()->defaultStyleSheet());
-	
+	qDebug() << "setting style sheet" << QString::fromStdString(label->getWidgetStyle());
+	setStyleSheet(QString::fromStdString(label->getWidgetStyle()));
+
 	// connections - move and resize
 	connect(m_label, &NarrativeSlideLabels::sMoved, this, &dragLabel::setPos);
 	connect(m_label, &NarrativeSlideLabels::sResized, this, &dragLabel::setSize);
+
+	// Since the document stuff is directly connected we still have to get edit signals
+	// down to control somehow
+	QTextDocument *doc = label->getDocument();
+	connect(doc, &QTextDocument::undoCommandAdded, this, [this]() {emit sEdited(getIndex()); });
 }
 
 void dragLabel::ValignMiddle(QTextEdit* pTextEdit)

@@ -30,9 +30,13 @@ public:
 	void insertNewLabel(int index);
 	void deleteLabel(int index);
 
+	// for stealing undo/redo from children
+	bool eventFilter(QObject * obj, QEvent * e) override;
+
 signals:
 	void sSetPos(float rx, float ry, int index);
 	void sSetSize(float rw, float rh, int index);
+	void sEdited(int index);
 
 public:
 	QVector<dragLabel*> m_items;
@@ -41,17 +45,7 @@ public:
 	int idx = 0;
 	int lastSelected = 0;
 
-	UndoRedoFilter *m_undo_redo_filter;
-
 	NarrativeSlide *m_slide;
-};
-
-// filters out ctrl-z and ctrl-y
-class UndoRedoFilter : public QObject {
-public:
-	UndoRedoFilter(QObject *parent) : QObject(parent) {}
-
-	bool eventFilter(QObject *obj, QEvent *e) override;
 };
 
 #endif // LABELCANVAS_H

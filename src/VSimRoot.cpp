@@ -1,5 +1,6 @@
 #include "VSimRoot.h"
 #include <iostream>
+#include "narrative/NarrativeSlideLabels.h"
 
 VSimRoot::VSimRoot() {
 	qDebug() << "root constructor, adding children";

@@ -19,6 +19,8 @@ public:
 
 	void resizeEvent(QResizeEvent* event);
 
+	void keyPressEvent(QKeyEvent *e) override;
+
 private:
 	labelCanvas* m_canvas;
 	QWidget* m_par;

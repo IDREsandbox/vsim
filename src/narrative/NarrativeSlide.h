@@ -10,7 +10,8 @@
 #include <QUndoStack>
 #include "Command.h"
 #include "Group.h"
-#include "narrative/NarrativeSlideLabels.h"
+
+class NarrativeSlideLabels;
 
 class NarrativeSlide : public Group
 {
@@ -40,9 +41,6 @@ signals:
 	void sStayOnNodeChanged(bool);
 	void sTransitionDurationChanged(float);
 
-	void sNewLabel(NarrativeSlideLabels*);
-	void sDeleteLabel(NarrativeSlideLabels*);
-
 public: // COMMANDS
 
 	class SetStayOnNodeCommand : public ModifyCommand<NarrativeSlide, bool> {
@@ -64,18 +62,6 @@ public: // COMMANDS
 	public:
 		SetCameraMatrixCommand(NarrativeSlide *slide, osg::Matrixd camera, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getCameraMatrix, &setCameraMatrix, camera, slide, parent) {}
-	};
-
-
-	class NewLabelCommand : public Group::NewNodeCommand<NarrativeSlideLabels> {
-	public:
-		NewLabelCommand(NarrativeSlide *group, int index, QUndoCommand *parent = nullptr)
-			: Group::NewNodeCommand<NarrativeSlideLabels>(group, index, parent) {}
-	};
-	class DeleteLabelCommand : public Group::DeleteNodeCommand<NarrativeSlideLabels> {
-	public:
-		DeleteLabelCommand(NarrativeSlide *group, int index, QUndoCommand *parent = nullptr)
-			: Group::DeleteNodeCommand<NarrativeSlideLabels>(group, index, parent) {}
 	};
 
 private:

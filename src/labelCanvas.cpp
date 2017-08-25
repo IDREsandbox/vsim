@@ -21,7 +21,6 @@ labelCanvas::labelCanvas(QWidget* parent)
 	invisible->setGeometry(0, 0, 1, 1);
 	invisible->setStyleSheet("color:rgba(255, 255, 255, 0); background:transparent;");
 
-	m_undo_redo_filter = new UndoRedoFilter(this);
 
 	//editDlg = new editButtons(this);
 	//this->scene()->addWidget(editDlg);
@@ -118,9 +117,13 @@ void labelCanvas::insertNewLabel(int index)
 		m_items[i]->setIndex(i);
 	}
 
+	// steal undo/redo
+	new_item->installEventFilter(this);
+
 	// forward signals
 	connect(new_item, &dragLabel::sSetPos, this, &labelCanvas::sSetPos);
 	connect(new_item, &dragLabel::sSetSize, this, &labelCanvas::sSetSize);
+	connect(new_item, &dragLabel::sEdited, this, &labelCanvas::sEdited);
 }
 
 void labelCanvas::deleteLabel(int index) {
@@ -133,13 +136,18 @@ void labelCanvas::deleteLabel(int index) {
 	}
 }
 
-bool UndoRedoFilter::eventFilter(QObject * obj, QEvent * e)
+bool labelCanvas::eventFilter(QObject * obj, QEvent * e)
 {
-	if (e->type() == QEvent::KeyPress) {
+	if (e->type() == QEvent::KeyPress || e->type() == QEvent::ShortcutOverride) {
 		QKeyEvent *ke = static_cast<QKeyEvent*>(e);
 		if (ke->matches(QKeySequence::Redo) || ke->matches(QKeySequence::Undo)) {
+			qDebug() << "text steal event";
+			// also give the event to me
+			QApplication::sendEvent(this, ke);
 			return true;
 		}
 	}
+
+
 	return false;
 }

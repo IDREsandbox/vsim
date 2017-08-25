@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_drag_area = new labelCanvas();
 	m_drag_area->setGeometry(0, 0, this->size().width(), this->size().height());
 	m_drag_area->setMinimumSize(800, 600);
-	m_view = new labelCanvasView(ui->root, m_drag_area);
+	m_view = new labelCanvasView(m_osg_widget, m_drag_area);
 	ui->rootLayout->addWidget(m_view, 0, 0);
 
 	// vsimapp file stuff

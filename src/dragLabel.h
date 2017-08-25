@@ -48,6 +48,7 @@ signals:
 	//void sTextSet(QString, int);
 	void sSetSize(float rw, float rh, int);
 	void sSetPos(float rx, float ry, int);
+	void sEdited(int index);
 
 public:
 	labelCanvas* par;
@@ -66,6 +67,10 @@ public:
 
 	float ratioX;
 	float ratioY;
+
+	// width and height when dragging started
+	int m_startwidth;
+	int m_startheight;
 	
 	bool m_dragging;
 	bool m_resizing;

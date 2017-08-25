@@ -169,7 +169,7 @@ bool NarrativePlayer::setSlide(int index)
 {
 	// set the slide while edit event
 	int ni = m_narratives->getCurrentNarrativeIndex();
-	NarrativeSlide *slide = m_narratives->getNarrativeSlide(ni, index);
+	NarrativeSlide *slide = m_narratives->getSlide(ni, index);
 	if (slide == nullptr) return false;
 
 	m_expect_selection_change = true;
@@ -191,7 +191,7 @@ void NarrativePlayer::setCameraInTransition(double t)
 	NarrativeSlide *to = m_narratives->getCurrentSlide();
 	int nar_index = m_narratives->getCurrentNarrativeIndex();
 	int prev_index = m_narratives->getCurrentSlideIndex() - 1;
-	NarrativeSlide *from = m_narratives->getNarrativeSlide(nar_index, prev_index);
+	NarrativeSlide *from = m_narratives->getSlide(nar_index, prev_index);
 
 	osg::Matrixd new_matrix;
 	if (t >= 1) new_matrix = to->getCameraMatrix();

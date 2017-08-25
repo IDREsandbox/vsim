@@ -1,4 +1,5 @@
 #include "narrative/NarrativeSlide.h"
+#include "narrative/NarrativeSlideLabels.h"
 
 NarrativeSlide::NarrativeSlide()
 	: Group(),

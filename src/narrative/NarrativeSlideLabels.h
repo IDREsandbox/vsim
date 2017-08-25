@@ -33,6 +33,8 @@ public:
 	void setText(const std::string& text);
 	const std::string& getStyle() const;
 	void setStyle(const std::string& style);
+	const std::string& getWidgetStyle() const;
+	void setWidgetStyle(const std::string& widgetStyle);
 
 	void move(float x, float y);
 	void resize(float w, float h);
@@ -87,11 +89,12 @@ public:
 	float m_rH;
 
 	QTextDocument *m_document;
-
 	// These are just temporaries for the serializer, the actual data is stored in the document
 	// the issue is that const std::string& are references to strings that dont exists
 	mutable std::string m_text;
 	mutable std::string m_style;
+
+	std::string m_widget_style; // for background color
 };
 
 #endif /* NARRATIVESLIDELABELS_H */
