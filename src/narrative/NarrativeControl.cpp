@@ -743,7 +743,8 @@ QImage NarrativeControl::generateThumbnail(NarrativeSlide *slide)
 
 	// render
 	m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
-	canvas.render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawChildren | QWidget::IgnoreMask);
+	qDebug() << "render canvas size" << canvas.size();
+	canvas.render(&painter, QPoint(0, 0), QRect(QPoint(0, 0),canvas.size()), QWidget::DrawChildren | QWidget::IgnoreMask);
 
 	// scale down the image
 	QImage smallimg;

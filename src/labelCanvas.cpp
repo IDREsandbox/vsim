@@ -21,6 +21,7 @@ labelCanvas::labelCanvas(QWidget* parent)
 	invisible->setGeometry(0, 0, 1, 1);
 	invisible->setStyleSheet("color:rgba(255, 255, 255, 0); background:transparent;");
 
+	//setStyleSheet(".labelCanvas{background-color: rgba(0,255,0,50);}");
 
 	//editDlg = new editButtons(this);
 	//this->scene()->addWidget(editDlg);
@@ -150,4 +151,9 @@ bool labelCanvas::eventFilter(QObject * obj, QEvent * e)
 
 
 	return false;
+}
+
+QSize labelCanvas::baseSize() const
+{
+	return QSize(1280, 720);
 }

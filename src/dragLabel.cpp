@@ -22,6 +22,8 @@ dragLabel::dragLabel(labelCanvas *parent)
 
 	setFrameShape(QFrame::NoFrame);
 
+	setMinimumSize(80, 50);
+
 	this->setWordWrapMode(QTextOption::WordWrap);
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -162,16 +164,20 @@ void dragLabel::mouseReleaseEvent(QMouseEvent *event)
 			// recalculate percentages
 			ratioWidth = size().width() / (float)par->size().width();
 			ratioHeight = size().height() / (float)par->size().height();
-			qDebug() << "mouse release set size";
+			qDebug() << "mouse release set size" << ratioWidth << ratioHeight << size();
 			emit sSetSize(ratioWidth, ratioHeight, m_index);
+			qDebug() << "mouse release after set size" << ratioWidth << ratioHeight << size();
 		}
 		// move event
 		else {
 			
 			ratioX = pos().x() / (float)par->size().width();
 			ratioY = pos().y() / (float)par->size().height();
+			qDebug() << "parent size" << par->size();
 			qDebug() << "mouse release set position" << ratioX << ratioY;
 			emit sSetPos(ratioX, ratioY, m_index);
+			qDebug() << "parent size2" << par->size();
+			qDebug() << "mouse release after set position" << ratioX << ratioY << pos();
 		}
 	}
 
@@ -212,13 +218,14 @@ void dragLabel::mouseMoveEvent(QMouseEvent *event)
 
 void dragLabel::canvasResize()
 { //must call this inside of canvas' resizeEvent handler
-	int newW = std::round(float(par->size().width() * ratioWidth));
-	int newH = std::round(float(par->size().height() * ratioHeight));
+	qDebug() << "parent stuff" << par->geometry() << par->size();
+	int newW = std::round(float(par->baseSize().width() * ratioWidth));
+	int newH = std::round(float(par->baseSize().height() * ratioHeight));
 
 	this->resize(newW, newH);
 
-	int newX = std::round(float(par->size().width() * ratioX));
-	int newY = std::round(float(par->size().height() * ratioY));
+	int newX = std::round(float(par->baseSize().width() * ratioX));
+	int newY = std::round(float(par->baseSize().height() * ratioY));
 
 	this->move(newX, newY);
 }
