@@ -162,7 +162,7 @@ void NarrativePlayer::toStopped()
 	if (m_state == STOPPED) return;
 	qDebug() << "to stopped";
 	m_state = STOPPED;
-	enableNavigation(true);
+	emit enableNavigation(true);
 }
 
 bool NarrativePlayer::setSlide(int index)

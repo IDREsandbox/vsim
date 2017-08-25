@@ -57,6 +57,8 @@ VSimApp::VSimApp(MainWindow* window)
 	//connect(this, &VSimApp::foo, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 	connect(this, &VSimApp::tick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 
+	connect(m_narrative_player, &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
+
 	// This is a really awkward place... but this has to be done after setting model
 	m_window->outliner()->setModel(&m_model_table_model);
 	m_window->outliner()->header()->resizeSection(0, 200);
@@ -402,6 +404,20 @@ void VSimApp::debugCamera()
 	Util::quatToYPR(rot, &y, &p, &r);
 	std::cout << "matrix " << matrix << "\ntranslation " << trans << "\nscale " << scale << "\nrotation " << rot << "\n";
 	qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI;
+
+	std::cout << "zero everything\n";
+	auto q = Util::YPRToQuat(0, 0, 0);
+	std::cout << osg::Matrixd::rotate(q);
+
+	osg::Matrix base(
+		1, 0, 0, 0,
+		0, 0, 1, 0,
+		0, -1, 0, 0,
+		0, 0, 0, 1);
+	double yaw, pitch, roll;
+	Util::quatToYPR(base.getRotate(), &yaw, &pitch, &roll);
+	qDebug() << yaw * M_PI/180 << pitch * M_PI / 180 << roll * M_PI / 180;
+
 }
 
 void VSimApp::updateTime()
