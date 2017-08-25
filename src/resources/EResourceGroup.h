@@ -6,7 +6,7 @@
 #include <osg/Group>
 #include "Command.h"
 #include "Group.h"
-#include "EResource.h"
+#include "resources/EResource.h"
 
 class EResourceGroup : public Group {
 	Q_OBJECT
@@ -14,6 +14,7 @@ class EResourceGroup : public Group {
 public:
 	EResourceGroup() {}
 	EResourceGroup(const EResourceGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
+	//EResourceGroup(osg::Group *old_group);
 	META_Node(, EResourceGroup)
 
 signals :
@@ -30,6 +31,15 @@ public: // COMMANDS
 	public:
 		DeleteEResourceCommand(EResourceGroup *group, int index, QUndoCommand *parent = nullptr)
 			: Group::DeleteNodeCommand<EResource>(group, index, parent) {}
+	};
+	class AddEResourceCommand : public QUndoCommand {
+	public:
+		AddEResourceCommand(EResourceGroup *group, EResource *narrative, QUndoCommand *parent = nullptr);
+		void undo();
+		void redo();
+	private:
+		EResourceGroup *m_group;
+		osg::ref_ptr<EResource> m_resource;
 	};
 };
 

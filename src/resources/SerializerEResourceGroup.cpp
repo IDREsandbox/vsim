@@ -1,6 +1,6 @@
 #include <osgDB/ObjectWrapper>
 
-#include "EResourceGroup.h"
+#include "resources/EResourceGroup.h"
 
 REGISTER_OBJECT_WRAPPER(
 	EResourceGroup,

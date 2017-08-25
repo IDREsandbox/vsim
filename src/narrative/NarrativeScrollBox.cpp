@@ -32,6 +32,7 @@ NarrativeScrollBox::~NarrativeScrollBox() {
 
 ScrollBoxItem * NarrativeScrollBox::createItem(osg::Node * node)
 {
+	qDebug() << "text";
 	Narrative2 *narrative = dynamic_cast<Narrative2*>(node);
 	if (narrative == nullptr) {
 		qWarning() << "Narrative scroll box insert new narrative. Node" << node << "is not a NarrativeSlide, creating a null item anyway";

@@ -106,11 +106,6 @@ private:
 	QUndoStack *m_undo_stack;
 };
 
-enum SelectionCommandWhen {
-	ON_UNDO,
-	ON_REDO,
-	ON_BOTH
-};
 
 class SelectNarrativesCommand : public QUndoCommand {
 public:

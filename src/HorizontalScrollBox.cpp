@@ -369,6 +369,7 @@ void HorizontalScrollBox::forceSelect(int index)
 
 ScrollBoxItem * HorizontalScrollBox::createItem(osg::Node *)
 {
+	qDebug() << "null";
 	return nullptr;
 }
 

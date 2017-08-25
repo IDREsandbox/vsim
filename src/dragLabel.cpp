@@ -60,6 +60,8 @@ dragLabel::dragLabel(std::string str, std::string style, labelCanvas* parent, fl
 
 	dragEdge = 0;
 
+	setFrameShape(QFrame::NoFrame);
+
 	this->setWordWrapMode(QTextOption::WordWrap);
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -131,6 +133,12 @@ void dragLabel::mouseReleaseEvent(QMouseEvent *event)
 
 void dragLabel::timerEvent(QTimerEvent *event) {
 	timer.stop();
+}
+
+void dragLabel::keyReleaseEvent(QKeyEvent* event)
+{
+	emit sTextSet(this->toHtml(), m_index);
+	QTextEdit::keyReleaseEvent(event);
 }
 
 void dragLabel::mouseMoveEvent(QMouseEvent *event)

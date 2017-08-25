@@ -3,15 +3,15 @@
 #include <QWidget>
 #include "ui_ERScrollItem.h"
 #include "ScrollBoxItem.h"
-#include "resources/EResourcesNode.h"
+#include "resources/EResource.h"
 
 class ERScrollItem : public ScrollBoxItem {
 	Q_OBJECT
-
+	
 public:
 	ERScrollItem();
-	ERScrollItem(EResourcesNode *er);
-	void setER(EResourcesNode *er);
+	ERScrollItem(EResource *er);
+	void setER(EResource *er);
 
 	virtual int widthFromHeight(int height);
 
@@ -23,7 +23,7 @@ signals:
 
 private:
 	Ui::ERScrollItem ui;
-	EResourcesNode *m_er;
+	EResource *m_er;
 };
 
 #endif // ERSCROLLITEM_H

@@ -28,6 +28,7 @@ public:
 	void mouseReleaseEvent(QMouseEvent *event);
 	void timerEvent(QTimerEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
+	void keyReleaseEvent(QKeyEvent *event);
 	//void recalcFontRatios();
 
 	void paintEvent(QPaintEvent *event);

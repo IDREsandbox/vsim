@@ -32,7 +32,7 @@ ERScrollBox::~ERScrollBox() {
 
 ScrollBoxItem * ERScrollBox::createItem(osg::Node * node)
 {
-	EResourcesNode *er = dynamic_cast<EResourcesNode*>(node);
+	EResource *er = dynamic_cast<EResource*>(node);
 	if (er == nullptr) {
 		qWarning() << "ER scroll box insert new ER. Node" << node << "is not a ER, creating a null item anyway";
 		//return nullptr;

@@ -4,9 +4,9 @@
 #include <string>
 #include <osg/Node>
 #include <QObject>
-#include "narrative/NarrativeSlide.h"
-#include "deprecated/resources/EResourcesNode.h"
+//#include "deprecated/resources/EResourcesNode.h"
 #include "Group.h"
+#include "Command.h"
 
 class EResource : public Group {
 	Q_OBJECT
@@ -14,7 +14,7 @@ class EResource : public Group {
 public:
 	EResource();
 	EResource(const EResource& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
-	EResource(const EResourcesNode *old); // converts old resource to a new one
+	//EResource(const EResourcesNode *old); // converts old resource to a new one
 	virtual ~EResource();
 
 	META_Node(, EResource)
@@ -60,26 +60,28 @@ public:
 	int getBlue()const;
 	void setBlue(int blue);
 
-signals:
-	void sResourceNameChanged(const std::string&);
-	void sResourceAuthorChanged(const std::string&);
-	void sResourceDescriptionChanged(const std::string&);
-	void sResourceTypeChanged(const std::string&);
-	void sResourcePathChanged(const std::string&);
-	void sGlobalChanged(int);
-	void sCopyRightChanged(int);
-	void sMinYearChanged(int);
-	void sMaxYearChanged(int);
-	void sRepositionChanged(int);
-	void sAutoLaunchChanged(int);
-	void sLocalRangeChanged(float);
-	void sErTypeChanged(int);
-	void sViewMatrixChanged(const osg::Matrixd&);
+	void setIndex(int idx);
 
-	void sCategoryNameChanged(const std::string&);
-	void sRedChanged(int);
-	void sBlueChanged(int);
-	void sGreenChanged(int);
+signals:
+	void sResourceNameChanged(const std::string&, int);
+	void sResourceAuthorChanged(const std::string&, int);
+	void sResourceDescriptionChanged(const std::string&, int);
+	void sResourceTypeChanged(const std::string&, int);
+	void sResourcePathChanged(const std::string&, int);
+	void sGlobalChanged(int, int);
+	void sCopyRightChanged(int, int);
+	void sMinYearChanged(int, int);
+	void sMaxYearChanged(int, int);
+	void sRepositionChanged(int, int);
+	void sAutoLaunchChanged(int, int);
+	void sLocalRangeChanged(float, int);
+	void sErTypeChanged(int, int);
+	void sViewMatrixChanged(const osg::Matrixd&, int);
+
+	void sCategoryNameChanged(const std::string&, int);
+	void sRedChanged(int, int);
+	void sBlueChanged(int, int);
+	void sGreenChanged(int, int);
 
 public: // resource commands
 	class SetResourceNameCommand : public ModifyCommand<EResource, const std::string&> {
@@ -184,7 +186,7 @@ private:
 	std::string m_authors;
 	int m_global;
 	int m_reposition;
-	int m_launch;
+	int m_launch; // 0 off, 1 on, 2 text
 	int m_copyright;
 	int m_min_year; // default -99999
 	int m_max_year; // default 99999
@@ -202,6 +204,8 @@ private:
 	int m_blue;
 	int m_red;
 	int m_green;
+
+	int m_index;
 };
 
 #endif /* ERESOURCE_H */

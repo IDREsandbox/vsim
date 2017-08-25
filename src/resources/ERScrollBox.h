@@ -2,8 +2,8 @@
 #define ERSCROLLBOX_H
 
 #include "HorizontalScrollBox.h"
-#include "ERScrollItem.h"
-#include "resources/ERGroup.h"
+#include "resources/ERScrollItem.h"
+#include "resources/EResourceGroup.h"
 
 class ERScrollBox : public HorizontalScrollBox {
 	Q_OBJECT
