@@ -55,7 +55,7 @@ public:
 	void onSlideSelection();
 
 signals:
-	void selectionChanged();
+	void selectionChanged(); // this should happen after any edit event, 
 
 public:
 
