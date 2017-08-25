@@ -35,15 +35,16 @@ namespace Util
 	double closestAngle(double x, double y);
 
 	// Converts the quaternion quat to yaw, pitch, and roll
-	// assumes z up, x fwd, y left
+	// assumes z up, x right, y fwd
 	// yaw is rotation ccw about world z, so facing left (w/ respect to x fwd) is +90
-	// pitch is rotation ccw about y, so tilted down is -45 pitch
+	// pitch is rotation ccw about world x, so tilted down is -45 pitch
+	// roll is ccw about world y, so facing +y and rolling right is positive
 	// yaw and roll are [0,2PI]
 	// pitch is [-PI/2, PI/2]
 	void quatToYPR(const osg::Quat& quat, double *yaw, double *pitch, double *roll);
 
 	// Converts yaw, pitch, and roll to a quaternion
-	// assumes z up, x right, y fwd
+	// assumes world z up, x right, y fwd
 	osg::Quat YPRToQuat(double yaw, double pitch, double roll);
 
 	// linear interpolation, t:[0,1]

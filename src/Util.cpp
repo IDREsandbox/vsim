@@ -170,12 +170,15 @@ void Util::quatToYPR(const osg::Quat &quat, double *yaw, double *pitch, double *
 	fwd[1] = -m(2, 1);
 	fwd[2] = -m(2, 2);
 	
-	double theta = atan2(fwd.y(), fwd.x());
-	double r = 1; // it should be normalized already... I'm not certain though
-	double phi = acos(fwd.z() / r);
+	// yaw, rotation of fwd relative to fwd
+	double theta = atan2(-fwd.x(), fwd.y());
+	// angle from ground looking up
+	double phi = asin(fwd.z());
 
 	*yaw = angleWrap(theta);
-	*pitch = phi - M_PI_2;
+	*pitch = phi;
+
+	//std::cout << "fwd " << fwd << "\n" << "fwdz " << fwd.z() << " pitch " << *pitch * 180/M_PI << " yaw " << fwd.z() << "\n";
 
 	// calculating roll
 	// roll is the angle difference between flatright and right
@@ -184,23 +187,27 @@ void Util::quatToYPR(const osg::Quat &quat, double *yaw, double *pitch, double *
 	flatright.normalize();
 	
 	double roll2 = acos(right * flatright);
-	// if roll goes below horizontal flip around 180
-	if (right[2] < 0) {
-		roll2 = 2*M_PI - roll2;
+	// if right is above the horizontal, then negate
+	if (right[2] > 0) {
+		roll2 = -roll2;
 	}
-	// its backwards... since x is world forward
-	*roll = angleWrap(-roll2);
+
+	// it's backwards... since x is world forward
+	*roll = angleWrap(roll2);
+	*roll = 0; // TODO FIXME HACK, fix later
 }
 
 osg::Quat Util::YPRToQuat(double yaw, double pitch, double roll)
 {
 	// start with the camera facing forward in the world
 	osg::Matrix base(
-		0, -1, 0, 0,
+		1, 0, 0, 0,
 		0, 0, 1, 0,
-		-1, 0, 0, 0,
+		0, -1, 0, 0,
 		0, 0, 0, 1);
-	return (base * osg::Matrix::rotate(osg::Quat(roll, osg::Vec3(1, 0, 0), pitch, osg::Vec3(0, 1, 0), yaw, osg::Vec3(0, 0, 1)))).getRotate();
+	// * osg::Matrix::rotate(yaw, osg::Vec3(0, 0, 1))
+	return (base * osg::Matrix::rotate(pitch, osg::Vec3(1, 0, 0)) * osg::Matrix::rotate(yaw, osg::Vec3(0, 0, 1))).getRotate();
+	//return (base * osg::Matrix::rotate(osg::Quat(roll, osg::Vec3(1, 0, 0), pitch, osg::Vec3(0, 1, 0), yaw, osg::Vec3(0, 0, 1)))).getRotate();
 }
 
 osg::Vec4d Util::mult_vec(osg::Matrixd M, osg::Vec4d v)
@@ -276,15 +283,40 @@ osg::Matrixd Util::cameraMatrixInterp(osg::Matrixd m0, osg::Matrixd m1, double t
 	pitch1 = closestAngle(pitch0, pitch1);
 	roll1 = closestAngle(roll0, roll1);
 
-	//qDebug() << "rollin" << roll0 << roll1;
+	//qDebug() << "rollin" << yaw0 << pitch0 << roll0;
 
 	double pitch = Util::simpleCubic(pitch0, pitch1, t);
 	double yaw = Util::simpleCubic(yaw0, yaw1, t);
 	double roll = Util::simpleCubic(roll0, roll1, t);
 	osg::Quat rot = Util::YPRToQuat(yaw, pitch, roll);
+	
 
 	//std::cout << "yaw " << yaw*180/M_PI << " pitch " << pitch * 180 / M_PI << " roll " << roll * 180 / M_PI << " xyz " << pos << "\n";
+	//auto mr0 = osg::Matrix::translate(pos);
+	auto mr1 = osg::Matrix::rotate(rot);
+	//auto mr2 = osg::Matrix::rotate(rot) *  osg::Matrix::translate(pos);
+	//std::cout << "trans" << mr0 << "rot" << mr1 << "both" << mr2;
+	//std::cout << "rot" << mr1;
 
+	double y0, p0, r0;
+	quatToYPR(rot, &y0, &p0, &r0);
+	//std::cout << "** yaw " << y0 * 180 / M_PI << " pitch " << p0 * 180 / M_PI << " roll " << r0 * 180 / M_PI << "\n";
+
+
+	//std::cout << "up " << mr1(1, 0) << " " << mr1(1, 1) << " " << mr1(1, 2) << "\n";
+	//mr1.set(
+	//	-0.996293, 0.086027, -0.000173833, 0,
+	//	-0.0368997, -0.425514, 0.904199, 0,
+	//	0.0777116, 0.900854, 0.427111, 0,
+	//	-15.1441, 92.4202, 143.864, 1
+	//);
+	//mr1.set(
+	//	-1, 0,0,0,
+	//	0,0, 1, 0,
+	//	0,1,0,0,
+	//	-15.1441, 92.4202, 143.864, 1
+	//);
+	//return mr1;
 	return osg::Matrix::rotate(rot) * osg::Matrix::translate(pos);
 }
 
