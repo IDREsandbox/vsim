@@ -278,6 +278,7 @@ void NarrativeControl::setNarrative(int index)
 		m_current_slide = -1;
 		this->m_window->topBar()->showNarratives();
 		m_canvas->clearCanvas();
+		emit selectionChanged();
 		return;
 	}
 
@@ -294,6 +295,7 @@ void NarrativeControl::setNarrative(int index)
 		m_slide_box->setLastSelected(0);
 		setSlide(0);
 	}
+	emit selectionChanged();
 }
 
 bool NarrativeControl::setSlide(int index)
@@ -316,7 +318,7 @@ bool NarrativeControl::setSlide(int index)
 	if (!m_slide_box->isSelected(index)) m_slide_box->select(index);
 
 	m_canvas->setSlide(slide);
-
+	emit selectionChanged();
 	return true;
 }
 
