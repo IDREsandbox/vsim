@@ -71,7 +71,7 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(window, &MainWindow::sImportNarratives, this, &VSimApp::importNarratives);
 	connect(window, &MainWindow::sExportNarratives, this, &VSimApp::exportNarratives);
 
-	connect(window, &MainWindow::sDebugOSG, m_root, &VSimRoot::debug);
+	connect(window, &MainWindow::sDebugOSG, this, [this]() {m_root->debug(); });
 	connect(window, &MainWindow::sDebugCamera, this, &VSimApp::debugCamera);
 
 	initWithVSim(m_root);

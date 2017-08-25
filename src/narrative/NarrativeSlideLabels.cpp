@@ -5,10 +5,11 @@ NarrativeSlideLabels::NarrativeSlideLabels()
 	m_rX(0.5),
 	m_rY(0.5),
 	m_rW(0.25),
-	m_rH(0.2),
-	m_text("New Label"),
-	m_style("background: rgba(0, 0, 0, 70); color: rgb(255, 255, 255);")
+	m_rH(0.2)
 {
+	m_document = new QTextDocument(this);
+	m_document->setDefaultStyleSheet("background: rgba(0, 0, 0, 70); color: rgb(255, 255, 255);");
+	m_document->setHtml("New Label");
 }
 
 NarrativeSlideLabels::NarrativeSlideLabels(const NarrativeSlideLabels & n, const osg::CopyOp & copyop)
@@ -16,10 +17,11 @@ NarrativeSlideLabels::NarrativeSlideLabels(const NarrativeSlideLabels & n, const
 	m_rX(n.m_rX),
 	m_rY(n.m_rY),
 	m_rW(n.m_rW),
-	m_rH(n.m_rH),
-	m_text(n.m_text),
-	m_style(n.m_style)
+	m_rH(n.m_rH)
 {
+	m_document = new QTextDocument(this);
+	m_document->setDefaultStyleSheet("background: rgba(0, 0, 0, 70); color: rgb(255, 255, 255);");
+	m_document->setHtml("New Label");
 }
 
 //TODO: add op to copy from legacy narr
@@ -70,20 +72,98 @@ void NarrativeSlideLabels::setrH(float h)
 
 const std::string& NarrativeSlideLabels::getText() const
 {
+	m_text = m_document->toHtml().toStdString();
 	return m_text;
 }
 
 void NarrativeSlideLabels::setText(const std::string& text)
 {
-	m_text = text;
+	m_document->setHtml(QString::fromStdString(text));
 }
 
 const std::string& NarrativeSlideLabels::getStyle() const
 {
+	m_style = m_document->defaultStyleSheet().toStdString();
 	return m_style;
 }
 
 void NarrativeSlideLabels::setStyle(const std::string& style)
 {
-	m_style = style;
+	m_document->setDefaultStyleSheet(QString::fromStdString(style));
 }
+
+void NarrativeSlideLabels::move(float x, float y)
+{
+	if (x == m_rX && y == m_rY) return;
+	m_rX = x;
+	m_rY = y;
+	emit sMoved(x, y);
+}
+
+void NarrativeSlideLabels::resize(float w, float h)
+{
+	if (w == m_rW && h == m_rH) return;
+	m_rW = w;
+	m_rH = h;
+	emit sResized(w, h);
+}
+
+QTextDocument * NarrativeSlideLabels::getDocument() const
+{
+	return m_document;
+}
+
+NarrativeSlideLabels::MoveCommand::MoveCommand(NarrativeSlideLabels *label, float newx, float newy, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_label(label),
+	m_newx(newx),
+	m_newy(newy)
+{
+	m_oldx = label->getrX();
+	m_oldy = label->getrY();
+}
+
+void NarrativeSlideLabels::MoveCommand::undo()
+{
+	m_label->move(m_oldx, m_oldy);
+}
+
+void NarrativeSlideLabels::MoveCommand::redo()
+{
+	m_label->move(m_newx, m_newy);
+}
+
+NarrativeSlideLabels::ResizeCommand::ResizeCommand(NarrativeSlideLabels *label, float neww, float newh, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_label(label),
+	m_neww(neww),
+	m_newh(newh)
+{
+	m_oldw = label->getrW();
+	m_oldh = label->getrH();
+}
+
+void NarrativeSlideLabels::ResizeCommand::undo()
+{
+	m_label->resize(m_oldw, m_oldh);
+}
+
+void NarrativeSlideLabels::ResizeCommand::redo()
+{
+	m_label->resize(m_neww, m_newh);
+}
+
+NarrativeSlideLabels::DocumentEditWrapperCommand::DocumentEditWrapperCommand(QTextDocument *doc, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_doc(doc)
+{
+}
+void NarrativeSlideLabels::DocumentEditWrapperCommand::undo()
+{
+	m_doc->undo();
+}
+void NarrativeSlideLabels::DocumentEditWrapperCommand::redo()
+{
+	m_doc->redo();
+}
+

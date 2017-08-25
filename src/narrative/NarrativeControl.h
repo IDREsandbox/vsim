@@ -42,7 +42,7 @@ public:
 	SelectionLevel getSelectionLevel();
 	void selectNarratives(std::set<int> narratives);
 	void selectSlides(int narrative, std::set<int> slides);
-	//void selectLabels(int narrative, int slide, std::set<int> labels);
+	void selectLabel(int narrative, int slide, int label);
 
 	int getCurrentNarrativeIndex();
 	int getCurrentSlideIndex();
@@ -88,12 +88,12 @@ public slots:
 	void newLabelButton(QString style);
 
 	//Canvas
-	void newLabel(std::string, int idx);
-	void moveLabel(QPoint pos, int idx);
-	void resizeLabel(QSize size, int idx);
-	void textEditLabel(QString str, int idx);
+	void newLabel(const std::string &text, const std::string &style);
 	void deleteLabel(int idx);
-
+	void moveLabel(float rx, float ry, int idx);
+	void resizeLabel(float rw, float rh, int idx);
+	//void textEditLabel(QString str, int idx);
+	
 	void debug();
 
 private:
@@ -145,17 +145,17 @@ private:
 	std::set<int> m_slides;
 };
 
-//class SelectLabelsCommand : public QUndoCommand {
-//public:
-//	SelectLabelsCommand(NarrativeControl *control, int narrative, int slide, std::set<int> labels, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
-//	void undo();
-//	void redo();
-//private:
-//	NarrativeControl *m_control;
-//	SelectionCommandWhen m_when;
-//	int m_narrative;
-//	int m_slides;
-//	std::set<int> m_labels;
-//};
+class SelectLabelCommand : public QUndoCommand {
+public:
+	SelectLabelCommand(NarrativeControl *control, int narrative, int slide, int label, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+	void undo();
+	void redo();
+private:
+	NarrativeControl *m_control;
+	SelectionCommandWhen m_when;
+	int m_narrative;
+	int m_slide;
+	int m_label;
+};
 
 #endif

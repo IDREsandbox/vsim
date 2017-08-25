@@ -10,6 +10,7 @@
 
 class dragLabel;
 class NarrativeSlide;
+class UndoRedoFilter;
 
 class labelCanvas : public QWidget
 {
@@ -19,36 +20,38 @@ public:
 	labelCanvas(QWidget* parent = nullptr);
 	~labelCanvas();
 
-	//void resizeEvent(QResizeEvent* event);
-	//void showSlides(int idx);
-	//void editCanvas();
 	void clearCanvas();
+
+	int getSelection() const;
+	void setSelection(int index);
 
 	void setSlide(NarrativeSlide *slide);
 
-public slots:
-	void newLabel(QString style);
-	void newLabel(std::string style, std::string text, float rX, float rY, float rW, float rH);
-	void deleteLabel();
-	//void exitEdit();
+	void insertNewLabel(int index);
+	void deleteLabel(int index);
 
 signals:
-	void sSuperTextSet(QString, int);
-	void sSuperSizeSet(QSize, int);
-	void sSuperPosSet(QPoint, int);
-	void sNewLabel(std::string, int);
-	void sDeleteLabel(int);
+	void sSetPos(float rx, float ry, int index);
+	void sSetSize(float rw, float rh, int index);
 
 public:
 	QVector<dragLabel*> m_items;
-	//QGraphicsScene* m_scene;
 	QWidget* invisible;
-	//editButtons* editDlg;
+
 	int idx = 0;
 	int lastSelected = 0;
 
+	UndoRedoFilter *m_undo_redo_filter;
+
 	NarrativeSlide *m_slide;
-	//float scaleFactor = 1;
+};
+
+// filters out ctrl-z and ctrl-y
+class UndoRedoFilter : public QObject {
+public:
+	UndoRedoFilter(QObject *parent) : QObject(parent) {}
+
+	bool eventFilter(QObject *obj, QEvent *e) override;
 };
 
 #endif // LABELCANVAS_H

@@ -71,6 +71,12 @@ void VSimRoot::debug()
 		for (uint j = 0; j < nar->getNumChildren(); j++) {
 			NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(nar->getChild(j));
 			qInfo() << "\tSlide" << j << slide->getTransitionDuration();
+
+
+			for (uint k = 0; k < slide->getNumChildren(); k++) {
+				NarrativeSlideLabels *label = dynamic_cast<NarrativeSlideLabels*>(slide->getChild(k));
+				qInfo() << "\t\tLabel" << k << QString::fromStdString(label->getText());
+			}
 		}
 	}
 

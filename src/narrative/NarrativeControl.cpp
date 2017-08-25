@@ -73,19 +73,19 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	connect(m_slide_box, &SlideScrollBox::sMove, this, &NarrativeControl::moveSlides);
 
 	// back
-	connect(m_window->topBar()->ui.left_2, &QPushButton::clicked, this, &NarrativeControl::closeNarrative);
+	connect(m_window->topBar()->ui.left_2, &QPushButton::clicked, this, [this]() {setNarrative(-1); });
 	//change
 	connect(m_slide_box, &SlideScrollBox::sSelectionChange, this, &NarrativeControl::onSlideSelection);
 	
 	//CANVAS CONTROL
 	// new
-	connect(m_canvas, SIGNAL(sNewLabel(std::string, int)), this, SLOT(newLabel(std::string, int)));
+	//connect(m_canvas, &labelCanvas::sNewLabel, this, &NarrativeControl::newLabel); // doesn't exist
 	// move
-	connect(m_canvas, SIGNAL(sSuperSizeSet(QSize, int)), this, SLOT(resizeLabel(QSize, int)));
-	// resize
-	connect(m_canvas, SIGNAL(sSuperPosSet(QPoint, int)), this, SLOT(moveLabel(QPoint, int)));
+	connect(m_canvas, &labelCanvas::sSetSize, this, &NarrativeControl::resizeLabel);
+	connect(m_canvas, &labelCanvas::sSetPos, this, &NarrativeControl::moveLabel);
+
 	// text change
-	connect(m_canvas, SIGNAL(sSuperTextSet(QString, int)), this, SLOT(textEditLabel(QString, int)));
+	//connect(m_canvas, SIGNAL(sSuperTextSet(QString, int)), this, SLOT(textEditLabel(QString, int))); // these two are directly connected
 	// delete
 	connect(m_canvas, SIGNAL(sDeleteLabel(int)), this, SLOT(deleteLabel(int)));
 
@@ -230,20 +230,6 @@ void NarrativeControl::loadNarratives(NarrativeGroup * group)
 	m_undo_stack->endMacro();
 }
 
-void NarrativeControl::deleteLabel(int idx)
-{
-	m_current_slide = m_slide_box->getLastSelected();
-	if (m_current_slide < 0) return;
-
-	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
-	NarrativeSlideLabels* data = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
-
-	curSl->removeChild(data);
-
-	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
-	item->setThumbnailDirty(true);
-}
-
 void NarrativeControl::debug()
 {
 	qDebug() << "Narrative Control Debug";
@@ -258,10 +244,8 @@ void NarrativeControl::load(NarrativeGroup *narratives)
 	qDebug() << "Clearing narrative control";
 	m_narrative_box->clear();
 	m_slide_box->clear(); 
-	m_current_narrative = -1;
-	m_current_slide = -1;
 	m_narrative_group = narratives;
-	closeNarrative();
+	setNarrative(-1);
 
 	m_narrative_box->setGroup(narratives);
 }
@@ -276,6 +260,15 @@ void NarrativeControl::openNarrative()
 
 void NarrativeControl::setNarrative(int index)
 {
+	if (index == m_current_narrative) return;
+	if (index < 0) {
+		m_current_narrative = -1;
+		m_current_slide = -1;
+		this->m_window->topBar()->showNarratives();
+		m_canvas->clearCanvas();
+		return;
+	}
+
 	qDebug() << "open narrative at" << index;
 	this->m_window->topBar()->showSlides();
 	m_current_narrative = index;
@@ -291,17 +284,9 @@ void NarrativeControl::setNarrative(int index)
 	}
 }
 
-void NarrativeControl::closeNarrative()
-{
-	qDebug() << "close narrative";
-	m_current_narrative = -1;
-	m_current_slide = -1;
-	this->m_window->topBar()->showNarratives();
-	m_canvas->clearCanvas();
-}
-
 bool NarrativeControl::setSlide(int index)
 {
+	if (m_current_slide == index) return true;
 	qDebug() << "Narrative Control - set slide" << index;
 	if (m_current_narrative < 0) {
 		m_current_slide = -1;
@@ -322,7 +307,8 @@ bool NarrativeControl::setSlide(int index)
 }
 
 void NarrativeControl::deleteLabelButton() {
-	m_canvas->deleteLabel();
+	int selection = m_canvas->getSelection();
+	deleteLabel(selection);
 }
 
 void NarrativeControl::exitEdit() {
@@ -331,7 +317,7 @@ void NarrativeControl::exitEdit() {
 }
 
 void NarrativeControl::newLabelButton(QString style) {
-	m_canvas->newLabel(style);
+	newLabel("<p>New label</p>", "p {" + style.toStdString() + "}"); // TODO move this out?
 }
 
 NarrativeControl::SelectionLevel NarrativeControl::getSelectionLevel()
@@ -343,7 +329,7 @@ NarrativeControl::SelectionLevel NarrativeControl::getSelectionLevel()
 
 void NarrativeControl::selectNarratives(std::set<int> narratives)
 {
-	closeNarrative();
+	setNarrative(-1);
 	m_narrative_box->setSelection(narratives, *narratives.begin());
 	emit selectionChanged();
 }
@@ -358,58 +344,102 @@ void NarrativeControl::selectSlides(int narrative, std::set<int> slides)
 	emit selectionChanged();
 }
 
-void NarrativeControl::newLabel(std::string str, int idx) {
-	NarrativeSlideLabels* lab = new NarrativeSlideLabels();
-	dragLabel* temp = m_canvas->m_items.at(idx);
-	lab->setrX(temp->ratioX);
-	lab->setrY(temp->ratioY);
-	lab->setrW(temp->ratioWidth);
-	lab->setrH(temp->ratioHeight);
-	lab->setText(temp->toHtml().toStdString());
-	lab->setStyle(str);
+void NarrativeControl::selectLabel(int narrative, int slide, int label)
+{
+	setNarrative(narrative);
+	setSlide(slide);
+	m_canvas->setSelection(label);
+}
 
-	m_current_slide = m_slide_box->getLastSelected();
-	if (m_current_slide < 0) return;
+void NarrativeControl::newLabel(const std::string &text, const std::string &style) {
+	NarrativeSlide *slide = getCurrentSlide();
+	if (!slide) {
+		qWarning() << "Narrative Control - creating label without slide open";
+		return;
+	}
+	// new index at the end
+	int idx = slide->getNumChildren();
 
-	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
-	curSl->addChild(lab);
+	auto cmd = new Group::NewNodeCommand<NarrativeSlideLabels>(slide, idx);
+	NarrativeSlideLabels *label = cmd->getNode();
+	// initialization
+	//lab->setrX(temp->ratioX);
+	//lab->setrY(temp->ratioY);
+	//lab->setrW(temp->ratioWidth);
+	//lab->setrH(temp->ratioHeight);
+	label->setText(text);
+	label->setStyle(style);
 
-	//m_canvas->exitEdit();
-	QImage new_thumbnail = generateThumbnail(curSl);
-	//m_canvas->editCanvas();
+	// push command
+	m_undo_stack->beginMacro("New Label");
+	m_undo_stack->push(cmd);
+	m_undo_stack->push(new SelectLabelCommand(this, m_current_narrative, m_current_slide, idx, ON_REDO));
+	m_undo_stack->endMacro();
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
 	item->setThumbnailDirty(true);
 }
 
-void NarrativeControl::moveLabel(QPoint pos, int idx) {
-	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
-	NarrativeSlideLabels* lab = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
-	dragLabel* temp = m_canvas->m_items.at(idx);
-	lab->setrX(temp->ratioX);
-	lab->setrY(temp->ratioY);
+void NarrativeControl::deleteLabel(int idx)
+{
+	NarrativeSlide *slide = getCurrentSlide();
+	if (slide == nullptr) return;
+
+	// consistency check
+	if (idx >= slide->getNumChildren() || idx < 0) {
+		qWarning() << "Delete label out of range" << idx << "/" << slide->getNumChildren();
+	}
+
+	// push delete command
+	m_undo_stack->beginMacro("Import Narratives");
+	m_undo_stack->push(new SelectLabelCommand(this, m_current_narrative, m_current_slide, idx, ON_UNDO));
+	m_undo_stack->push(new Group::DeleteNodeCommand<NarrativeSlideLabels>(slide, idx));
+	m_undo_stack->endMacro();
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
 	item->setThumbnailDirty(true);
 }
 
-void NarrativeControl::resizeLabel(QSize size, int idx) {
-	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
-	NarrativeSlideLabels* lab = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
-	dragLabel* temp = m_canvas->m_items.at(idx);
-	lab->setrH(temp->ratioHeight);
-	lab->setrW(temp->ratioWidth);
+void NarrativeControl::moveLabel(float rx, float ry, int idx) {
+	NarrativeSlide *slide = getCurrentSlide();
+	if (!slide) {
+		qWarning() << "Narrative Control - move label without slide open";
+		return;
+	}
+	NarrativeSlideLabels *label = dynamic_cast<NarrativeSlideLabels*>(slide->getChild(idx));
+
+	m_undo_stack->beginMacro("New Label");
+	m_undo_stack->push(new NarrativeSlideLabels::MoveCommand(label, rx, ry));
+	m_undo_stack->push(new SelectLabelCommand(this, m_current_narrative, m_current_slide, idx));
+	m_undo_stack->endMacro();
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
 	item->setThumbnailDirty(true);
 }
 
-void NarrativeControl::textEditLabel(QString str, int idx) {
-	qDebug() << "edit text";
-	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
-	NarrativeSlideLabels* lab = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
-	lab->setText(str.toStdString());
+void NarrativeControl::resizeLabel(float rw, float rh, int idx) {
+	NarrativeSlide *slide = getCurrentSlide();
+	if (!slide) {
+		qWarning() << "Narrative Control - resize label without slide open";
+		return;
+	}
+	NarrativeSlideLabels *label = dynamic_cast<NarrativeSlideLabels*>(slide->getChild(idx));
+
+	m_undo_stack->beginMacro("New Label");
+	m_undo_stack->push(new NarrativeSlideLabels::ResizeCommand(label, rw, rh));
+	m_undo_stack->push(new SelectLabelCommand(this, m_current_narrative, m_current_slide, idx));
+	m_undo_stack->endMacro();
+
+	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
+	item->setThumbnailDirty(true);
 }
+
+//void NarrativeControl::textEditLabel(QString str, int idx) {
+//	qDebug() << "edit text";
+//	NarrativeSlide* curSl = getNarrativeSlide(m_current_narrative, m_current_slide);
+//	NarrativeSlideLabels* lab = dynamic_cast<NarrativeSlideLabels*>(curSl->getChild(idx));
+//	lab->setText(str.toStdString());
+//}
 
 int NarrativeControl::nextSelectionAfterDelete(int total, std::set<int> selection)
 {
@@ -719,5 +749,27 @@ void SelectSlidesCommand::undo() {
 void SelectSlidesCommand::redo() {
 	if (m_when != ON_UNDO) {
 		m_control->selectSlides(m_narrative, m_slides);
+	}
+}
+
+SelectLabelCommand::SelectLabelCommand(NarrativeControl * control, int narrative, int slide, int label, SelectionCommandWhen when, QUndoCommand * parent)
+	: QUndoCommand(parent),
+	m_control(control),
+	m_narrative(narrative),
+	m_slide(slide),
+	m_label(label),
+	m_when(when)
+{
+}
+void SelectLabelCommand::undo()
+{
+	if (m_when != ON_REDO) {
+		m_control->selectLabel(m_narrative, m_slide, m_label);
+	}
+}
+void SelectLabelCommand::redo()
+{
+	if (m_when != ON_UNDO) {
+		m_control->selectLabel(m_narrative, m_slide, m_label);
 	}
 }

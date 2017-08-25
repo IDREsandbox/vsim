@@ -23,7 +23,6 @@ signals:
 private:
 	Ui::NarrativeScrollItem ui;
 	Narrative2 *m_narrative;
-	QList<QMetaObject::Connection> m_connections;
 };
 
 #endif // NARRATIVESCROLLITEM_H
