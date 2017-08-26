@@ -1,8 +1,11 @@
-
 #include "labelCanvas.h"
+#include "dragLabel.h"
+
+#include "narrative/NarrativeSlide.h"
 
 labelCanvas::labelCanvas(QWidget* parent)
-	: QWidget(parent)
+	: QWidget(parent),
+	m_slide(nullptr)
 {
 	//m_scene = new QGraphicsScene();
 	//this->setScene(m_scene);
@@ -69,6 +72,21 @@ void labelCanvas::clearCanvas()
 		delete w;
 	//this->scene()->clear();
 	//this->scene()->addWidget(editDlg);
+}
+
+void labelCanvas::setSlide(NarrativeSlide * slide)
+{
+	if (m_slide) disconnect(m_slide, 0, this, 0);
+	m_slide = slide;
+	clearCanvas();
+	if (!slide) return;
+
+	NarrativeSlideLabels* data;
+	for (uint i = 0; i < slide->getNumChildren(); i++) {
+		data = dynamic_cast<NarrativeSlideLabels*>(slide->getChild(i));
+		newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
+			data->getrH());
+	}
 }
 
 // labelCanvas::resizeEvent(QResizeEvent* event) 

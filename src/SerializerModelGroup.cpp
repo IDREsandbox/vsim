@@ -6,6 +6,6 @@ REGISTER_OBJECT_WRAPPER(
 	ModelGroup,
 	new ::ModelGroup,
 	::ModelGroup,
-	"osg::Object osg::Node osg::Group ::NarrativeGroup")
+	"osg::Object osg::Node osg::Group ::Group ::ModelGroup")
 {
 }

@@ -1,25 +1,28 @@
 
+# Model View
+
+See the draw.io link for some pictures
+
 ##Qt Model View
 
-has its own ModelView framework
-It's organized in tables, with columns and rows
-Hierarchy is possible with parents
-
-- It's possible to make Item classes for each data class, ex. NarrativeItem which maps the indexes to data... but maybe it's too much work?
+Qt has its own ModelView framework.
+It's organized as hierarchal tables, with columns, rows, and parents
+If you wrap data into a Qt Model you get a bunch of GUI elements for free (tree/table/list views)
+View items can be customized by using delegates.
 
 Used for:
 
-- Models?
+- Model outliner
 
 
 ##Our Model View
 
-Narratives have a custom MVP-like structure
+Narratives have a custom MVP-like structure. I played with a bunch of different designs... they all have a lot of repetition, but this is what we ended up with:
 
+Used for:
 
-What is our own?
-I played with a bunch of different designs... they all have a lot of repetition
-
+- Narratives/Slides/Labels
+- Embedded Resources
 
 ###Model
 
@@ -27,6 +30,7 @@ The model is the osg tree. Data nodes like NarrativeSlide emit signals when data
 
 Group operations such as adding/removing items are handled by the Group class. There are generic undoable commands for adding/removing nodes from a group (see Group::NewNodeCommand<T>).
 
+Because removing happens one element at a time, there is a lot of O(n^2) shenanigans... I'm assuming this won't be a problem in the future.
 
 ###Control
 
@@ -45,7 +49,7 @@ HorizontalScrollBox is a view of Group. The connection is made with setGroup. sN
 
 NarrativeScrollItem is a view of a single narrative. The connection is made with setNarrative(Narrative2*). The item listens to data changed signals like sAuthorChanged(string) and reacts by changing the gui.
 
-Edit signals often don't directly manipulate the gui. For example, Edit Duration on a SlideScrollItem -> Edit Duration (index) on SlideScrollBox -> Edit Duration creates a dialog, returns from dialog creates SetDurationCommand (Control) -> setDuration (NarrativeSlide) -> sDurationChanged signal (NarrativeSlide) -> duration label setText (SlideScrollItem)
+Edit signals often don't directly manipulate the gui. For example, Edit Duration on a SlideScrollItem -> Edit Duration Signal from SlideScrollBox -> Edit Duration creates a dialog, returns from dialog and creates SetDurationCommand (Control) -> setDuration (NarrativeSlide), this is where the actual data changes -> sDurationChanged signal (NarrativeSlide) -> duration label setText (SlideScrollItem)
 
 
 ##Considerations
@@ -53,13 +57,13 @@ Edit signals often don't directly manipulate the gui. For example, Edit Duration
 ###Why model/view/something?
 
 - Technically the goal is to make it easier to test... but we don't have unit tests so that doesn't really matter.
-- I mostly wanted a flow that makes sense, isn't too repetitive, has some separation.
+- I mostly wanted a flow that makes sense, isn't too repetitive, and has some separation of gui and data. Also I had to fit in undo/redo and multi operations
 
 ###Why do we have our own?
 
 - Multiple types (Narratives/Slides/Labels) in a fixed hierarchy. For a Qt Model View this means dynamic casting all over the place.
-- The indexing for the Qt model meant big switch tables. (3 types) x (k data items) x (n data operations) = big code mess of switch cases.
-- Not necessary. We don't really need the default views for any of the narrative data. A tree view might be nice but it's unnecessary.
+- The integer indexing for the Qt model means big switch tables. (3 types) x (k data items) x (n data operations) = big code mess of switch cases.
+- Qt views are not necessary. We don't really need the default views for any of the narrative data. A tree view might be nice but it's unnecessary.
 - Undo/redo is a pain with Qt models
 
 ###Why does the control exist? Edit signals could pass directly from items to data
@@ -68,7 +72,6 @@ Edit signals often don't directly manipulate the gui. For example, Edit Duration
 - Set operations are easier from a bigger control class. Macros make it so that the model can remain free of set operations, hence simpler.
 - Selection undo/redo is (probably) easier from a bigger control class.
 - The need for an owner of current narrative, current slide, selection level (narratives or slides or labels), selection sets.
-
 
 TODO: explain this
 

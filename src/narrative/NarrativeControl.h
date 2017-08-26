@@ -13,10 +13,7 @@
 #include "dragLabel.h"
 #include "editButtons.h"
 
-// Interface to the underlying osg data for narratives
-// Exactly one should exist per VSimApp
-// TODO: convert to QAbstractItemModel, remove focus state, remove thumbnail code
-// TODO: undo/redo
+// Bridges osg and gui for narratives
 class NarrativeControl : public QObject
 {
 	Q_OBJECT
@@ -24,15 +21,15 @@ public:
 	NarrativeControl(QObject *parent, MainWindow *window);
 	virtual ~NarrativeControl();
 
-	// initializes gui from osg data, pass in a group of Narratives
-	//void load(osg::Group *narratives);
-	//void loadSlides(Narrative2 *narrative);
+	// initializes gui from osg data
 	void load(NarrativeGroup *narratives);
 
-	// selection and focus
+	// Selection
 	void openNarrative(); // if index <0 then it uses the the narrative box selection
 	void setNarrative(int index);
 	void closeNarrative();
+
+	bool setSlide(int index);
 
 	enum SelectionLevel {
 		NARRATIVES,
@@ -44,13 +41,23 @@ public:
 	void selectSlides(int narrative, std::set<int> slides);
 	//void selectLabels(int narrative, int slide, std::set<int> labels);
 
-	int getCurrentNarrative();
-	int getCurrentSlide();
+	int getCurrentNarrativeIndex();
+	int getCurrentSlideIndex();
+	Narrative2 *getCurrentNarrative();
+	NarrativeSlide *getCurrentSlide();
 	Narrative2 *getNarrative(int index);
 	NarrativeSlide *getNarrativeSlide(int narrative, int slide);
 
+	void onSlideSelection();
+
+signals:
+	void selectionChanged();
+
+public:
+
 	void redrawThumbnails(const std::vector<SlideScrollItem*> slides);
-	QImage generateThumbnail(int option = 1);
+	//QImage generateThumbnail(int option = 1);
+	QImage generateThumbnail(NarrativeSlide *slide);
 
 	// Narratives
 	void newNarrative();
@@ -68,9 +75,9 @@ public:
 	void setSlideTransition();
 	void setSlideCamera();
 	void moveSlides(std::set<int> from, int to);
+
 	
 public slots:
-	void openSlide();
 
 	//editDlg buttons
 	void exitEdit();

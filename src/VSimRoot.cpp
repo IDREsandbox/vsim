@@ -1,4 +1,5 @@
 #include "VSimRoot.h"
+#include <iostream>
 
 VSimRoot::VSimRoot() {
 	qDebug() << "root constructor, adding children";
@@ -77,6 +78,14 @@ void VSimRoot::debug()
 	for (uint i = 0; i < m_models->getNumChildren(); i++) {
 		qInfo() << "Model" << QString::fromStdString(m_models->getChild(i)->getName());
 	}
+
+	DebugVisitor v;
+	m_models->accept(v);
+	
+	//qDebug() << "Extra Data Mappings";
+	//for (auto &kv : m_models->dataTable()->m_table) {
+	//	qDebug() << kv.first << kv.second << kv.second->getYearBegin() << kv.second->getYearEnd();
+	//}
 }
 
 void VSimRoot::merge(VSimRoot *other)
@@ -91,14 +100,26 @@ void VSimRoot::merge(VSimRoot *other)
 		m_narratives->addChild(other_narratives->getChild(i));
 	}
 
-	osg::Group *other_models = other->models();
-	for (uint i = 0; i < other_models->getNumChildren(); i++) {
-		m_models->addChild(other_models->getChild(i));
-	}
+	m_models->merge(other->models());
 
 	// what are we supposed to do with all of the other children? copy them over?
 	for (uint i = 0; i < other->getNumChildren(); i++) {
 		osg::Node *node = other->getChild(i);
 		addChild(node);
 	}
+}
+
+void DebugVisitor::apply(osg::Group &group)
+{
+	std::cout << std::string(m_tabs, '\t');
+	std::cout << group.className() << " " << group.getName() << " " << group.getNumChildren() << '\n';
+
+	m_tabs++;
+	traverse(group);
+	m_tabs--;
+}
+
+void DebugVisitor::apply(osg::Node & node)
+{
+	std::cout << std::string(m_tabs, '\t') << node.className() << " " << node.getName() << "\n";
 }

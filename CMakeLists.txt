@@ -60,6 +60,7 @@ file(GLOB_RECURSE VSim_src
   )
 list(FILTER VSim_src EXCLUDE REGEX ".*src/windows.*")
 list(FILTER VSim_src EXCLUDE REGEX ".*src/main.cpp")
+list(FILTER VSim_src EXCLUDE REGEX ".*src/resources*") # REMOVE THIS WHEN YOU MERGE IN ER
 file(GLOB_RECURSE VSim_headers
   src/*.h
   )
@@ -102,6 +103,7 @@ endforeach(test)
 #install
 install(TARGETS VSim DESTINATION .)
 install(DIRECTORY assets DESTINATION .)
+install(FILES CHANGELOG.md COPYRIGHT LICENSE README.md THIRD-PARTY-NOTICES DESTINATION .)
 
 if (WIN32)
   # DLL copying

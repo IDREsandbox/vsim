@@ -1,8 +1,27 @@
 # Changelog
 
+## 2017-08-23
+### Changed
+- Narrative slide transitions use a cubic polynomial
+- NewNodeCommand has getNode for initialization stuff
+
+### Fixed
+- Narrative player code cleaned up a bit, see the state machine diagram
+- Selections cleaned up a bit
+
+## 2017-08-21
+### Added
+- Model Outliner (M)
+- Time Slider (T)
+- First argument to exe is the startup file
+
+### Changed
+- MainWindow ui pointer and fwd declarations
+
 ## 2017-08-15
 ### Added
 - Import/export for narratives
+- Shift selection for scroll boxes
 
 ### Fixed
 - QTextEdit + QGraphicsView transparency bug fix

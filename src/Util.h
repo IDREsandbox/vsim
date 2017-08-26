@@ -11,6 +11,7 @@ namespace Util
 {
 	std::string addExtensionIfNotExist(const std::string& filename, const std::string& ext);
 	std::string getExtension(const std::string& filename);
+	std::string getFilename(const std::string &path);
 	
 	// Fits the largest possible rectangle with given aspect ratio into another rectangle
 	QRect rectFit(QRect container, float whratio);
@@ -47,12 +48,12 @@ namespace Util
 
 	// linear interpolation, t:[0,1]
 	template <typename T>
-	T lerp(double t, T x0, T x1) {
+	T lerp(T x0, T x1, double t) {
 		return x0 * (1.0 - t) + x1 * t;
 	}
 
-	// linear interpolation between two rotation matrices
-	osg::Matrixd viewMatrixLerp(double t, osg::Matrixd m0, osg::Matrixd m1);
+	// linear interpolation between two camera matrices
+	osg::Matrixd cameraMatrixInterp(osg::Matrixd m0, osg::Matrixd m1, double t);
 
 	// Exponential interpolation? Returns the new value of start
 	// - factor is the portion remaining after the stepf
@@ -77,6 +78,9 @@ namespace Util
 	};
 	
 	osg::Matrixd camMatHerm(double t, osg::Matrixd m0, osg::Matrixd m1);
+
+	// a dumb version of hermite curve
+	double simpleCubic(double x0, double x1, double t);
 
 	Util::endPt hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl = .0001);
 }
