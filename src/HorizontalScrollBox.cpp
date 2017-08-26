@@ -375,6 +375,7 @@ void HorizontalScrollBox::refresh()
 
 ScrollBoxItem * HorizontalScrollBox::createItem(osg::Node *)
 {
+	qDebug() << "null";
 	return nullptr;
 }
 

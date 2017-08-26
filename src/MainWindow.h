@@ -10,6 +10,14 @@
 #include <osgViewer/Viewer>
 
 #include "ui_MainWindow.h"
+#include "OSGViewerWidget.h"
+#include "dragLabel.h"
+#include "narrative/NarrativeInfoDialog.h"
+#include "dragLabelInput.h"
+#include "labelCanvas.h"
+#include "labelCanvasView.h"
+#include "resources/ERDisplay.h"
+
 
 //#include "VSimApp.h"
 //extern osgViewer::Viewer* g_viewer;
@@ -48,12 +56,21 @@ public:
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dropEvent(QDropEvent *event);
 
+	EResource* getResource(int idx);
+	void selectResources(std::set<int> res);
+	int nextSelectionAfterDelete(int total, std::set<int> selection);
+
 public slots:
 	void actionNew();
 	void actionOpen();
 	void actionSave();
 	void actionSaveAs();
 	void actionImportModel();
+
+	void newER();
+	void deleteER();
+	void editERInfo();
+	void openResource();
 
 	// TODO
 	// void narListForward();
@@ -86,9 +103,27 @@ public:
 	OSGViewerWidget *m_osg_widget;
 	labelCanvas *m_drag_area;
 	labelCanvasView *m_view;
+	ERDisplay *m_display;
+	osg::ref_ptr<EResourceGroup> m_resource_group;
 	ModelOutliner *m_outliner;
 	TimeSlider *m_time_slider;
 };
 
+enum SelectionCommandWhen {
+	ON_UNDO,
+	ON_REDO,
+	ON_BOTH
+};
+
+class SelectResourcesCommand : public QUndoCommand {
+public:
+	SelectResourcesCommand(MainWindow *control, std::set<int> resources, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+	void undo();
+	void redo();
+private:
+	MainWindow *m_control;
+	SelectionCommandWhen m_when;
+	std::set<int> m_resources;
+};
 
 #endif // MAINWINDOW_H

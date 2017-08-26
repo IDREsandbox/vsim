@@ -11,6 +11,7 @@
 #include "MainWindow.h"
 
 #include "narrative/NarrativeInfoDialog.h"
+#include "resources/ERDialog.h"
 #include "dragLabelInput.h"
 #include "OSGViewerWidget.h"
 #include "labelCanvas.h"
@@ -59,8 +60,16 @@ MainWindow::MainWindow(QWidget *parent)
 	m_drag_area = new labelCanvas();
 	m_drag_area->setGeometry(0, 0, this->size().width(), this->size().height());
 	m_drag_area->setMinimumSize(800, 600);
-	m_view = new labelCanvasView(m_osg_widget, m_drag_area);
+	m_view = new labelCanvasView(ui->root, m_drag_area);
 	ui->rootLayout->addWidget(m_view, 0, 0);
+
+	// embedded resources
+	m_resource_group = new EResourceGroup();
+	ui->local->setGroup(m_resource_group);
+
+	m_display = new ERDisplay(this);
+	m_display->setGeometry(10, 200, 265, 251);
+	m_display->hide();
 
 	// vsimapp file stuff
 	connect(ui->actionNew, &QAction::triggered, this, &MainWindow::actionNew);
@@ -91,6 +100,19 @@ MainWindow::MainWindow(QWidget *parent)
 		[this](bool freeze) {qDebug() << "freeze trigger";  m_osg_widget->setCameraFrozen(freeze); });
 	connect(ui->actionReset_Camera, &QAction::triggered, m_osg_widget, &OSGViewerWidget::reset);
 
+	// embedded resources
+	// new
+	connect(ui->local, &ERScrollBox::sNew, this, &MainWindow::newER);
+	connect(ui->plus_2, &QPushButton::clicked, this, &MainWindow::newER);
+	// delete
+	connect(ui->local, &ERScrollBox::sDelete, this, &MainWindow::deleteER);
+	connect(ui->minus_2, &QPushButton::clicked, this, &MainWindow::deleteER);
+	// edit
+	connect(ui->local, &ERScrollBox::sEdit, this, &MainWindow::editERInfo);
+	connect(ui->edit, &QPushButton::clicked, this, &MainWindow::editERInfo);
+	// open
+	connect(ui->local, &ERScrollBox::sOpen, this, &MainWindow::openResource);
+
 	// show slides or narratives
 	connect(ui->topBar->ui.open, &QPushButton::clicked, this, 
 		[this]() {
@@ -114,6 +136,137 @@ MainWindow::MainWindow(QWidget *parent)
 		m_time_slider->show();
 		m_time_slider->setFocus();
 	});
+}
+
+EResource* MainWindow::getResource(int index)
+{
+	if (index < 0 || (uint)index >= m_resource_group->getNumChildren()) {
+		return nullptr;
+	}
+	osg::Node *c = m_resource_group->getChild(index);
+	return dynamic_cast<EResource*>(c);
+}
+
+void MainWindow::newER()
+{
+	ERDialog dlg;
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return;
+	}
+
+	// for now just add to the end
+	m_undo_stack->beginMacro("New Resource");
+	int num_children = m_resource_group->getNumChildren();
+	m_undo_stack->push(new SelectResourcesCommand(this, { num_children - 1 }, ON_UNDO));
+	m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_resource_group, m_resource_group->getNumChildren()));
+	m_undo_stack->push(new SelectResourcesCommand(this, { num_children }, ON_REDO));
+	m_undo_stack->endMacro();
+
+	EResource *resource = getResource(m_resource_group->getNumChildren() - 1);
+	resource->setIndex(m_resource_group->getNumChildren() - 1);
+	resource->setResourceName(dlg.getTitle());
+	resource->setAuthor(dlg.getAuthor());
+	resource->setResourceDescription(dlg.getDescription());
+	//resource->set
+
+}
+
+void MainWindow::deleteER()
+{
+	std::set<int> selection = ui->local->getSelection();
+	if (selection.empty()) return;
+	int next_selection = nextSelectionAfterDelete(m_resource_group->getNumChildren(), selection);
+
+	// get pointers to nodes to delete
+	m_undo_stack->beginMacro("Delete Resources");
+	m_undo_stack->push(new SelectResourcesCommand(this, selection, ON_UNDO));
+	// delete in reverse order
+	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
+		qDebug() << "pushing delete resource" << *i;
+		m_undo_stack->push(new EResourceGroup::DeleteEResourceCommand(m_resource_group, *i));
+	}
+	m_undo_stack->push(new SelectResourcesCommand(this, { next_selection }, ON_REDO));
+	m_undo_stack->endMacro();
+}
+
+void MainWindow::editERInfo()
+{
+	int active_item = ui->local->getLastSelected();
+	qDebug() << "resource list - begin edit on" << active_item;
+	if (active_item < 0) {
+		qWarning() << "resource list - can't edit with no selection";
+		return;
+	}
+
+	EResource *resource = getResource(active_item);
+
+	ERDialog dlg(resource);
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		qDebug() << "resource list - cancelled edit on" << active_item;
+		return;
+	}
+
+	m_undo_stack->beginMacro("Set Resource Info");
+	m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
+	m_undo_stack->push(new EResource::SetResourceNameCommand(resource, dlg.getTitle()));
+	m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor()));
+	m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription()));
+	m_undo_stack->endMacro();
+}
+
+void MainWindow::openResource()
+{
+	int index = ui->local->getLastSelected();
+	if (index < 0) return;
+
+	EResource *res = getResource(index);
+	m_display->show();
+
+	//m_display->ui.title->setText(QString::fromStdString(res->getResourceName()));
+	m_display->setInfo(res);
+}
+
+int MainWindow::nextSelectionAfterDelete(int total, std::set<int> selection)
+{
+	// figure out the selection after deleting
+	int first_index = *selection.begin();
+	int remaining = total - selection.size();
+	int next_selection;
+	if (remaining == 0) { // everyone's gone
+		next_selection = -1;
+	}
+	else if (remaining >= first_index + 1) {
+		next_selection = first_index; // select next non-deleted item
+	}
+	else {
+		next_selection = first_index - 1; // select the previous item
+	}
+	return next_selection;
+}
+
+void MainWindow::selectResources(std::set<int> res)
+{
+	ui->local->setSelection(res, *res.begin());
+}
+
+SelectResourcesCommand::SelectResourcesCommand(MainWindow *control, std::set<int> resources, SelectionCommandWhen when, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_control(control),
+	m_resources(resources),
+	m_when(when)
+{
+}
+void SelectResourcesCommand::undo() {
+	if (m_when != ON_REDO) {
+		m_control->selectResources(m_resources);
+	}
+}
+void SelectResourcesCommand::redo() {
+	if (m_when != ON_UNDO) {
+		m_control->selectResources(m_resources);
+	}
 }
 
 void MainWindow::ErrorDialog(const std::string & msg)

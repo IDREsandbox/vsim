@@ -286,3 +286,5 @@ __pycache__/
 # Telerik's JustMock configuration file
 *.jmconfig
 src/skploader
+src/MainWindow.cpp
+src/MainWindow.h

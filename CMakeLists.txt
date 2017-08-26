@@ -60,7 +60,6 @@ file(GLOB_RECURSE VSim_src
   )
 list(FILTER VSim_src EXCLUDE REGEX ".*src/windows.*")
 list(FILTER VSim_src EXCLUDE REGEX ".*src/main.cpp")
-list(FILTER VSim_src EXCLUDE REGEX ".*src/resources*") # REMOVE THIS WHEN YOU MERGE IN ER
 file(GLOB_RECURSE VSim_headers
   src/*.h
   )

@@ -20,7 +20,7 @@ public:
 	META_Node(, Narrative2)
 
 	const std::string& getTitle() const;
-	void setTitle(const std::string& title);
+	void setTitle(const std::string& name);
 	const std::string& getAuthor() const;
 	void setAuthor(const std::string& author);
 	const std::string& getDescription() const;
