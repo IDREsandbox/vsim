@@ -66,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// embedded resources
 	m_resource_group = new EResourceGroup();
-	ui.local->setGroup(m_resource_group);
+	ui->local->setGroup(m_resource_group);
 
 	m_display = new ERDisplay(this);
 	m_display->setGeometry(10, 200, 265, 251);
@@ -103,16 +103,16 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// embedded resources
 	// new
-	connect(ui.local, &ERScrollBox::sNew, this, &MainWindow::newER);
-	connect(ui.plus_2, &QPushButton::clicked, this, &MainWindow::newER);
+	connect(ui->local, &ERScrollBox::sNew, this, &MainWindow::newER);
+	connect(ui->plus_2, &QPushButton::clicked, this, &MainWindow::newER);
 	// delete
-	connect(ui.local, &ERScrollBox::sDelete, this, &MainWindow::deleteER);
-	connect(ui.minus_2, &QPushButton::clicked, this, &MainWindow::deleteER);
+	connect(ui->local, &ERScrollBox::sDelete, this, &MainWindow::deleteER);
+	connect(ui->minus_2, &QPushButton::clicked, this, &MainWindow::deleteER);
 	// edit
-	connect(ui.local, &ERScrollBox::sEdit, this, &MainWindow::editERInfo);
-	connect(ui.edit, &QPushButton::clicked, this, &MainWindow::editERInfo);
+	connect(ui->local, &ERScrollBox::sEdit, this, &MainWindow::editERInfo);
+	connect(ui->edit, &QPushButton::clicked, this, &MainWindow::editERInfo);
 	// open
-	connect(ui.local, &ERScrollBox::sOpen, this, &MainWindow::openResource);
+	connect(ui->local, &ERScrollBox::sOpen, this, &MainWindow::openResource);
 
 	// show slides or narratives
 	connect(ui->topBar->ui.open, &QPushButton::clicked, this, 
