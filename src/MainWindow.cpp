@@ -175,7 +175,7 @@ void MainWindow::newER()
 
 void MainWindow::deleteER()
 {
-	std::set<int> selection = ui.local->getSelection();
+	std::set<int> selection = ui->local->getSelection();
 	if (selection.empty()) return;
 	int next_selection = nextSelectionAfterDelete(m_resource_group->getNumChildren(), selection);
 
@@ -193,7 +193,7 @@ void MainWindow::deleteER()
 
 void MainWindow::editERInfo()
 {
-	int active_item = ui.local->getLastSelected();
+	int active_item = ui->local->getLastSelected();
 	qDebug() << "resource list - begin edit on" << active_item;
 	if (active_item < 0) {
 		qWarning() << "resource list - can't edit with no selection";
@@ -219,7 +219,7 @@ void MainWindow::editERInfo()
 
 void MainWindow::openResource()
 {
-	int index = ui.local->getLastSelected();
+	int index = ui->local->getLastSelected();
 	if (index < 0) return;
 
 	EResource *res = getResource(index);
@@ -249,7 +249,7 @@ int MainWindow::nextSelectionAfterDelete(int total, std::set<int> selection)
 
 void MainWindow::selectResources(std::set<int> res)
 {
-	ui.local->setSelection(res);
+	ui->local->setSelection(res, *res.begin());
 }
 
 SelectResourcesCommand::SelectResourcesCommand(MainWindow *control, std::set<int> resources, SelectionCommandWhen when, QUndoCommand *parent)
