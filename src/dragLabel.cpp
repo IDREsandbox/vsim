@@ -6,68 +6,90 @@
 #include "dragLabel.h"
 #include "mrichtextedit.h"
 #include "dragLabelInput.h"
+#include "narrative/NarrativeSlideLabels.h"
 
-//constructor for novel generation
-dragLabel::dragLabel(labelCanvas* parent, std::string style) 
-	: QTextEdit(QString::fromStdString("New Label"), parent)
+dragLabel::dragLabel(labelCanvas *parent)
+	: QTextEdit(parent),
+	par(parent),
+	ratioHeight(.1),
+	ratioWidth(.2),
+	ratioX(.1),
+	ratioY(.1),
+	m_label(nullptr),
+	m_dragging(false),
+	m_resizing(false)
 {
-	setStyleSheet(QString::fromStdString(style));
-	QTextDocument* temp = this->document();
-	temp->setDefaultStyleSheet("p {" + this->styleSheet().split(';').at(0) + ";" + this->styleSheet().split(';').at(2) + ";" + this->styleSheet().split(';').at(5) + ";}");
-	temp->setHtml("<p>" + temp->toHtml() + "</p>");
-
-	par = parent;
-
-	this->setGeometry((par->size().width() / 2) - 125, (par->size().height() / 2) - 55, 250, 110);
-
-	//size ratios
-	ratioHeight = 1.0 - float(float(par->size().height() - this->size().height()) / par->size().height());
-	ratioWidth = 1.0 - float(float(par->size().width() - this->size().width()) / par->size().width());
-
-	//position ratios
-	ratioY = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
-	ratioX = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
-
-	dragEdge = 0;
-	//scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
 
 	setFrameShape(QFrame::NoFrame);
+
+	setMinimumSize(80, 50);
 
 	this->setWordWrapMode(QTextOption::WordWrap);
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
-
-//constructor for generation from data
-dragLabel::dragLabel(std::string str, std::string style, labelCanvas* parent, float rH, float rW, float rY, float rX) 
-	: QTextEdit(QString::fromStdString(str), parent), ratioHeight(rH), ratioWidth(rW), ratioY(rY), ratioX(rX)
-{
-	setStyleSheet(QString::fromStdString(style));
-	QTextDocument* temp = this->document();
-	temp->setDefaultStyleSheet("p {" + this->styleSheet().split(';').at(0) + ";" + this->styleSheet().split(';').at(2) + ";" + this->styleSheet().split(';').at(5) + ";}");
-	temp->setHtml("<p>" + temp->toHtml() + "</p>");
-
-	par = parent;
-
-	int newW = std::round(float(par->size().width() * ratioWidth));
-	int newH = std::round(float(par->size().height() * ratioHeight));
-
-	int newX = std::round(float(par->size().width() * ratioX));
-	int newY = std::round(float(par->size().height() * ratioY));
-
-	this->setGeometry(newX, newY, newW, newH);
-	//scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
-
-	dragEdge = 0;
-
-	setFrameShape(QFrame::NoFrame);
-
-	this->setWordWrapMode(QTextOption::WordWrap);
-	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-	//this->setFrameStyle(QFrame::NoFrame);
-}
+//
+////constructor for novel generation
+//dragLabel::dragLabel(labelCanvas* parent, std::string style) 
+//	: QTextEdit(QString::fromStdString("New Label"), parent)
+//{
+//	setStyleSheet(QString::fromStdString(style));
+//	QTextDocument* temp = this->document();
+//	temp->setDefaultStyleSheet("p {" + this->styleSheet().split(';').at(0) + ";" + this->styleSheet().split(';').at(2) + ";" + this->styleSheet().split(';').at(5) + ";}");
+//	temp->setHtml("<p>" + temp->toHtml() + "</p>");
+//
+//	par = parent;
+//
+//	this->setGeometry((par->size().width() / 2) - 125, (par->size().height() / 2) - 55, 250, 110);
+//
+//	//size ratios
+//	ratioHeight = 1.0 - float(float(par->size().height() - this->size().height()) / par->size().height());
+//	ratioWidth = 1.0 - float(float(par->size().width() - this->size().width()) / par->size().width());
+//
+//	//position ratios
+//	ratioY = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
+//	ratioX = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
+//
+//	dragEdge = 0;
+//	//scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
+//
+//	setFrameShape(QFrame::NoFrame);
+//
+//	this->setWordWrapMode(QTextOption::WordWrap);
+//	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//}
+//
+////constructor for generation from data
+//dragLabel::dragLabel(std::string str, std::string style, labelCanvas* parent, float rH, float rW, float rY, float rX) 
+//	: QTextEdit(QString::fromStdString(str), parent), ratioHeight(rH), ratioWidth(rW), ratioY(rY), ratioX(rX)
+//{
+//	setStyleSheet(QString::fromStdString(style));
+//	QTextDocument* temp = this->document();
+//	temp->setDefaultStyleSheet("p {" + this->styleSheet().split(';').at(0) + ";" + this->styleSheet().split(';').at(2) + ";" + this->styleSheet().split(';').at(5) + ";}");
+//	temp->setHtml("<p>" + temp->toHtml() + "</p>");
+//
+//	par = parent;
+//
+//	int newW = std::round(float(par->size().width() * ratioWidth));
+//	int newH = std::round(float(par->size().height() * ratioHeight));
+//
+//	int newX = std::round(float(par->size().width() * ratioX));
+//	int newY = std::round(float(par->size().height() * ratioY));
+//
+//	this->setGeometry(newX, newY, newW, newH);
+//	//scaleFactor = std::max(float(1.0), float(float(par->size().height()) / float(720)));
+//
+//	dragEdge = 0;
+//
+//	setFrameShape(QFrame::NoFrame);
+//
+//	this->setWordWrapMode(QTextOption::WordWrap);
+//	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//
+//	//this->setFrameStyle(QFrame::NoFrame);
+//}
 
 dragLabel::~dragLabel()
 { }
@@ -84,86 +106,100 @@ int dragLabel::getIndex()
 
 void dragLabel::mousePressEvent(QMouseEvent *event)
 {
-	offset = event->pos();
-	resizeOffset = event->pos();
+	m_drag_start = event->pos();
+	par->setSelection(m_index);
 
-	bottomRight = QRect(width() - (width() / 6), height() - (height() / 6), width() / 6, height() / 6);
-
-	if (bottomRight.contains(event->pos()))
-		dragEdge = 1;
-	else
-		dragEdge = 0;
+	QRect bottomRight = QRect(width() - (width() / 6), height() - (height() / 6), width() / 6, height() / 6);
+	int border = 8;
+	QRect center_rect = QRect(border, border, width() - 2 * border, height() - 2 * border);
+	qDebug() << "mouse press" << event->pos() << center_rect << bottomRight;
+	// Check if in the bottom right
+	if (bottomRight.contains(event->pos())) {
+		qDebug() << "pressed corner";
+		m_dragging = true;
+		m_resizing = 1;
+		m_startwidth = width();
+		m_startheight = height();
+	}
+	// if the press isn't in the center rect, then it's on the edge
+	else if (!center_rect.contains(event->pos())) {
+		qDebug() << "pressed inside";
+		m_dragging = true;
+		m_resizing = 0;
+	}
 
 	QTextEdit::mousePressEvent(event);
 }
 
+void dragLabel::mouseDoubleClickEvent(QMouseEvent * event)
+{
+	par->setSelection(m_index);
+	dragLabelInput *setTextDg = new dragLabelInput(nullptr, this->toHtml());
+	setTextDg->setWindowFlags(Qt::WindowSystemMenuHint);
+
+	int size = this->font().pixelSize();
+
+	int result = setTextDg->exec();
+	if (result == QDialog::Rejected) {
+		return;
+	}
+
+	QString text = setTextDg->getInfo();
+
+	QTextDocument *doc = m_label->getDocument();
+	// edit the document in an undo-able way
+	QTextCursor c(doc);
+	c.beginEditBlock();
+	c.select(QTextCursor::Document);
+	c.removeSelectedText();
+	c.insertHtml(text);
+}
+
 void dragLabel::mouseReleaseEvent(QMouseEvent *event)
 {
-	if (timer.isActive()) {
-		timer.stop();
-
-		dragLabelInput *setTextDg = new dragLabelInput(nullptr, this->toHtml());
-		setTextDg->setWindowFlags(Qt::WindowSystemMenuHint);
-		
-		int size = this->font().pixelSize();
-		
-		int result = setTextDg->exec();
-		if (result == QDialog::Rejected) {
-			return;
+	if (m_dragging) {
+		// resize event
+		if (m_resizing) {
+			
+			// recalculate percentages
+			ratioWidth = size().width() / (float)par->size().width();
+			ratioHeight = size().height() / (float)par->size().height();
+			//qDebug() << "mouse release set size" << ratioWidth << ratioHeight << size();
+			emit sSetSize(ratioWidth, ratioHeight, m_index);
+			//qDebug() << "mouse release after set size" << ratioWidth << ratioHeight << size();
 		}
-
-		QString text = setTextDg->getInfo();
-
-		this->setText(text);
-		QTextDocument* temp = this->document();
-		temp->setDefaultStyleSheet("p {" + this->styleSheet().split(';').at(0) + ";" + this->styleSheet().split(';').at(2) + ";" + this->styleSheet().split(';').at(5) + ";}");
-		temp->setHtml("<p>" + temp->toHtml() + "</p>");
-		emit sTextSet(text, m_index);
-
-		delete setTextDg;
+		// move event
+		else {
+			
+			ratioX = pos().x() / (float)par->size().width();
+			ratioY = pos().y() / (float)par->size().height();
+			//qDebug() << "parent size" << par->size();
+			//qDebug() << "mouse release set position" << ratioX << ratioY;
+			emit sSetPos(ratioX, ratioY, m_index);
+			//qDebug() << "parent size2" << par->size();
+			//qDebug() << "mouse release after set position" << ratioX << ratioY << pos();
+		}
 	}
 
-	else {
-		timer.start(300, this);
-		par->lastSelected = m_index;
-	}
+	m_dragging = false;
 
 	QTextEdit::mouseReleaseEvent(event);
 }
 
-void dragLabel::timerEvent(QTimerEvent *event) {
-	timer.stop();
-}
-
-void dragLabel::keyReleaseEvent(QKeyEvent* event)
-{
-	emit sTextSet(this->toHtml(), m_index);
-	QTextEdit::keyReleaseEvent(event);
-}
-
 void dragLabel::mouseMoveEvent(QMouseEvent *event)
 {
-	if (event->buttons() & Qt::LeftButton)
+	if (event->buttons() & Qt::LeftButton && m_dragging)
 	{
-		if (!dragEdge)
+		if (!m_resizing)
 		{
-			this->move(mapToParent(event->pos() - offset));
-
-			ratioY = 1.0 - float(float(par->size().height() - this->pos().y()) / par->size().height());
-			ratioX = 1.0 - float(float(par->size().width() - this->pos().x()) / par->size().width());
-
-			emit sPosSet(this->pos(), m_index);
+			// move the label but don't update the data
+			this->move(mapToParent(event->pos() - m_drag_start));
 		}
 
-		else if (dragEdge)
+		else if (m_resizing)
 		{
-			this->resize(this->width() + (event->pos().x() - resizeOffset.x()), this->height() + (event->pos().y() - resizeOffset.y()));
-
-			ratioHeight = 1 - float(float(par->size().height() - this->size().height()) / par->size().height());
-			ratioWidth = 1 - float(float(par->size().width() - this->size().width()) / par->size().width());
-
-			resizeOffset = event->pos();
-			emit sSizeSet(this->size(), m_index);
+			// resize but don't update data
+			this->resize(m_startwidth + (event->pos().x() - m_drag_start.x()), m_startheight + (event->pos().y() - m_drag_start.y()));
 		}
 	}
 
@@ -182,42 +218,57 @@ void dragLabel::mouseMoveEvent(QMouseEvent *event)
 
 void dragLabel::canvasResize()
 { //must call this inside of canvas' resizeEvent handler
-	int newW = std::round(float(par->size().width() * ratioWidth));
-	int newH = std::round(float(par->size().height() * ratioHeight));
+	//qDebug() << "parent stuff" << par->geometry() << par->size();
+	int newW = std::round(float(par->baseSize().width() * ratioWidth));
+	int newH = std::round(float(par->baseSize().height() * ratioHeight));
 
 	this->resize(newW, newH);
 
-	int newX = std::round(float(par->size().width() * ratioX));
-	int newY = std::round(float(par->size().height() * ratioY));
+	int newX = std::round(float(par->baseSize().width() * ratioX));
+	int newY = std::round(float(par->baseSize().height() * ratioY));
 
 	this->move(newX, newY);
 }
 
-void dragLabel::paintEvent(QPaintEvent * event)
+void dragLabel::setPos(float x, float y)
 {
-	QTextEdit::paintEvent(event);
-	//zoomIn(10);
-//	QTextEdit::paintEvent(event);
-//	//QPainter painter(viewport());
-//	//painter.scale(scaleFactor, scaleFactor);
-//	//
-//	//ValignMiddle(this);
-//
-//	//QTextDocument* temp = this->document();
-//
-//	//QTextOption textOption(temp->defaultTextOption());
-//	//temp->setTextWidth(this->size().width() / scaleFactor);
-//	//temp->setDefaultStyleSheet("p {" + this->styleSheet().split(';').at(0) + ";" + this->styleSheet().split(';').at(5) + ";}");
-//	//temp->setHtml("<p>" + temp->toHtml() + "</p>");
-//	//textOption.setWrapMode(QTextOption::WordWrap);
-//	//temp->setDefaultTextOption(textOption);
-//
-//	//
-//	//temp->drawContents(&painter, this->contentsRect());
-//
-//	//QRect r = cursorRect();
-//	//r.setWidth(1);
-//	//painter.fillRect(r, Qt::SolidPattern);
+	ratioX = x;
+	ratioY = y;
+	canvasResize();
+}
+
+void dragLabel::setSize(float w, float h)
+{
+	ratioWidth = w;
+	ratioHeight = h;
+	canvasResize();
+}
+
+void dragLabel::setLabel(NarrativeSlideLabels * label)
+{
+	if (m_label != nullptr) disconnect(m_label, 0, this, 0);
+	m_label = label;
+	if (label == nullptr) return;
+
+	// initialize
+	this->setDocument(label->getDocument());
+	ratioWidth = label->getrW();
+	ratioHeight = label->getrH();
+	ratioX = label->getrX();
+	ratioY = label->getrY();
+	canvasResize();
+
+	qDebug() << "setting style sheet" << QString::fromStdString(label->getWidgetStyle());
+	setStyleSheet(QString::fromStdString(label->getWidgetStyle()));
+
+	// connections - move and resize
+	connect(m_label, &NarrativeSlideLabels::sMoved, this, &dragLabel::setPos);
+	connect(m_label, &NarrativeSlideLabels::sResized, this, &dragLabel::setSize);
+
+	// Since the document stuff is directly connected we still have to get edit signals
+	// down to control somehow
+	QTextDocument *doc = label->getDocument();
+	connect(doc, &QTextDocument::undoCommandAdded, this, [this]() {emit sEdited(getIndex()); });
 }
 
 void dragLabel::ValignMiddle(QTextEdit* pTextEdit)

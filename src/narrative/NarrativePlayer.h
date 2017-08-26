@@ -48,6 +48,9 @@ public:
 signals: // more signals out, removes the viewer widget dependency
 	void updateCamera(osg::Matrixd camera_matrix);
 	void enableNavigation(bool enable); // TODO
+	void hideCanvas();
+	void showCanvas();
+
 
 private:
 	// pointers

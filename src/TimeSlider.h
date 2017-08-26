@@ -1,10 +1,10 @@
 ﻿#ifndef TIMESLIDER_H
 #define TIMESLIDER_H
 #include <QWidget>
-
-#include "ModelGroup.h"
 #include <osg/Group>
 #include <memory>
+
+class ModelGroup;
 
 namespace Ui { class TimeSlider; }
 

@@ -3,15 +3,20 @@
 
 #include <set>
 #include <osg/Node>
-#include "narrative/NarrativeGroup.h"
-#include "narrative/Narrative2.h"
-#include "narrative/NarrativeScrollBox.h"
-#include "narrative/SlideScrollBox.h"
-#include "narrative/NarrativeSlideLabels.h"
-#include "HorizontalScrollBox.h"
+#include <QWidget>
+#include <QUndoStack>
 #include "MainWindow.h"
-#include "dragLabel.h"
-#include "editButtons.h"
+
+class MainWindow;
+class NarrativeGroup;
+class Narrative2;
+class NarrativeSlide;
+class NarrativeSlideLabels;
+class NarrativeScrollBox;
+class SlideScrollBox;
+class labelCanvas;
+class editButtons;
+class SlideScrollItem;
 
 // Bridges osg and gui for narratives
 class NarrativeControl : public QObject
@@ -27,7 +32,6 @@ public:
 	// Selection
 	void openNarrative(); // if index <0 then it uses the the narrative box selection
 	void setNarrative(int index);
-	void closeNarrative();
 
 	bool setSlide(int index);
 
@@ -39,19 +43,20 @@ public:
 	SelectionLevel getSelectionLevel();
 	void selectNarratives(std::set<int> narratives);
 	void selectSlides(int narrative, std::set<int> slides);
-	//void selectLabels(int narrative, int slide, std::set<int> labels);
+	void selectLabel(int narrative, int slide, int label);
 
 	int getCurrentNarrativeIndex();
 	int getCurrentSlideIndex();
 	Narrative2 *getCurrentNarrative();
 	NarrativeSlide *getCurrentSlide();
 	Narrative2 *getNarrative(int index);
-	NarrativeSlide *getNarrativeSlide(int narrative, int slide);
+	NarrativeSlide *getSlide(int narrative, int slide);
+	NarrativeSlideLabels *getLabel(int narrative, int slide, int label);
 
 	void onSlideSelection();
 
 signals:
-	void selectionChanged();
+	void selectionChanged(); // this should happen after any edit event, 
 
 public:
 
@@ -76,21 +81,19 @@ public:
 	void setSlideCamera();
 	void moveSlides(std::set<int> from, int to);
 
-	
 public slots:
 
 	//editDlg buttons
 	void exitEdit();
 	void deleteLabelButton();
-	void newLabelButton(QString style);
 
 	//Canvas
-	void newLabel(std::string, int idx);
-	void moveLabel(QPoint pos, int idx);
-	void resizeLabel(QSize size, int idx);
-	void textEditLabel(QString str, int idx);
+	void newLabel(const std::string &text, const std::string &style, const std::string &widget_style);
 	void deleteLabel(int idx);
-
+	void moveLabel(float rx, float ry, int idx);
+	void resizeLabel(float rw, float rh, int idx);
+	void editLabel(int idx);
+	
 	void debug();
 
 private:
@@ -137,17 +140,17 @@ private:
 	std::set<int> m_slides;
 };
 
-//class SelectLabelsCommand : public QUndoCommand {
-//public:
-//	SelectLabelsCommand(NarrativeControl *control, int narrative, int slide, std::set<int> labels, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
-//	void undo();
-//	void redo();
-//private:
-//	NarrativeControl *m_control;
-//	SelectionCommandWhen m_when;
-//	int m_narrative;
-//	int m_slides;
-//	std::set<int> m_labels;
-//};
+class SelectLabelCommand : public QUndoCommand {
+public:
+	SelectLabelCommand(NarrativeControl *control, int narrative, int slide, int label, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+	void undo();
+	void redo();
+private:
+	NarrativeControl *m_control;
+	SelectionCommandWhen m_when;
+	int m_narrative;
+	int m_slide;
+	int m_label;
+};
 
 #endif

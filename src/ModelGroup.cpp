@@ -65,9 +65,9 @@ void ModelGroup::enableTime(bool enable)
 
 std::set<int> ModelGroup::getKeyYears()
 {
-	std::set<int> years;
-	TimeGetVisitor v(&years);
+	TimeGetVisitor v;
 	accept(v);
+	std::set<int> years = v.results();
 
 	if (years.empty()) return years;
 
@@ -126,9 +126,8 @@ void TimeInitVisitor::touch(osg::Node *node) {
 	}
 }
 
-TimeGetVisitor::TimeGetVisitor(std::set<int>* out)
-	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),
-	m_out(out) {}
+TimeGetVisitor::TimeGetVisitor()
+	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN) {}
 void TimeGetVisitor::apply(osg::Group &group)
 {
 	// look for ModelNodes
@@ -140,13 +139,31 @@ void TimeGetVisitor::apply(osg::Group &group)
 		beginok = node->getUserValue("yearBegin", begin);
 		endok = node->getUserValue("yearEnd", end);
 
-		if (beginok) m_out->insert(begin);
-		if (endok) m_out->insert(end + 1);
+		if (beginok) m_begins.insert(begin);
+		if (endok) m_ends.insert(end + 1);
 	}
 	traverse(group);
 }
 
+std::set<int> TimeGetVisitor::results() const
+{
+	// add the ends
+	std::set<int> out = m_ends;
 
+	// remove the last end (to prevent the apocalypse)
+	// should we add (end - 1) to show a range?
+	if (!m_ends.empty()) {
+		if (m_begins.empty() || *m_ends.rbegin() > *m_begins.rbegin()) {
+			int last = *(--out.end());
+			out.erase(last);
+			out.insert(last - 1);
+		}
+	}
+
+	// add the begins
+	out.insert(m_begins.begin(), m_begins.end());
+	return out;
+}
 
 TimeMaskVisitor::TimeMaskVisitor(int year)
 	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),

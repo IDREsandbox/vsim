@@ -13,5 +13,6 @@ REGISTER_OBJECT_WRAPPER(
 	ADD_FLOAT_SERIALIZER(rW, .25);
 	ADD_FLOAT_SERIALIZER(rH, .20);
 	ADD_STRING_SERIALIZER(Text, "New Label");
-	ADD_STRING_SERIALIZER(Style, "background: rgba(0, 0, 0, 70); color: rgb(255, 255, 255);");
+	ADD_STRING_SERIALIZER(Style, "p {color: rgb(255, 255, 255);}");
+	ADD_STRING_SERIALIZER(WidgetStyle, "background: rgba(0, 0, 0, 70);");
 }

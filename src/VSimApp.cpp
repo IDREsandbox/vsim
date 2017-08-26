@@ -14,11 +14,14 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QProgressDialog>
 #include <QtWidgets/QAction>
+#include <QFileDialog>
+
 #include "VSimApp.h"
 #include "Util.h"
 #include "deprecated/narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
 #include "narrative/NarrativeControl.h"
+#include "labelCanvasView.h"
 #include "OSGViewerWidget.h"
 #include "MainWindow.h"
 #include "ModelOutliner.h"
@@ -54,11 +57,15 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(this, &VSimApp::tick, m_narrative_player, &NarrativePlayer::update);
 	//connect(this, &VSimApp::foo, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 	connect(this, &VSimApp::tick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
+	connect(m_narrative_player, &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
+	connect(m_narrative_player, &NarrativePlayer::hideCanvas, window->canvasView(), &labelCanvasView::hide);
+	connect(m_narrative_player, &NarrativePlayer::showCanvas, window->canvasView(), &labelCanvasView::fadeIn);
 
 	// This is a really awkward place... but this has to be done after setting model
 	m_window->outliner()->setModel(&m_model_table_model);
 	m_window->outliner()->header()->resizeSection(0, 200);
 	m_window->outliner()->resize(505, 600);
+	qDebug() << m_window->outliner()->windowFlags();
 
 	connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
 	connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
@@ -68,7 +75,7 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(window, &MainWindow::sImportNarratives, this, &VSimApp::importNarratives);
 	connect(window, &MainWindow::sExportNarratives, this, &VSimApp::exportNarratives);
 
-	connect(window, &MainWindow::sDebugOSG, m_root, &VSimRoot::debug);
+	connect(window, &MainWindow::sDebugOSG, this, [this]() {m_root->debug(); });
 	connect(window, &MainWindow::sDebugCamera, this, &VSimApp::debugCamera);
 
 	initWithVSim(m_root);
@@ -399,6 +406,20 @@ void VSimApp::debugCamera()
 	Util::quatToYPR(rot, &y, &p, &r);
 	std::cout << "matrix " << matrix << "\ntranslation " << trans << "\nscale " << scale << "\nrotation " << rot << "\n";
 	qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI;
+
+	std::cout << "zero everything\n";
+	auto q = Util::YPRToQuat(0, 0, 0);
+	std::cout << osg::Matrixd::rotate(q);
+
+	osg::Matrix base(
+		1, 0, 0, 0,
+		0, 0, 1, 0,
+		0, -1, 0, 0,
+		0, 0, 0, 1);
+	double yaw, pitch, roll;
+	Util::quatToYPR(base.getRotate(), &yaw, &pitch, &roll);
+	qDebug() << yaw * M_PI/180 << pitch * M_PI / 180 << roll * M_PI / 180;
+
 }
 
 void VSimApp::updateTime()

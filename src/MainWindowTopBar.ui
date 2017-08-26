@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>875</width>
-    <height>169</height>
+    <width>724</width>
+    <height>152</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>169</height>
+    <height>200</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -74,63 +74,16 @@ color: rgb(255, 255, 255);
 border-color: rgb(238, 238, 238);</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="3" rowspan="4">
-           <widget class="NarrativeScrollBox" name="narratives" native="true"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="plus">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
+          <item row="0" column="0" colspan="3">
+           <widget class="QLabel" name="label">
+            <property name="lineWidth">
+             <number>0</number>
             </property>
             <property name="text">
-             <string>+</string>
+             <string>Narratives</string>
             </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QPushButton" name="close">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>^</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QPushButton" name="pause">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>||</string>
+            <property name="indent">
+             <number>8</number>
             </property>
            </widget>
           </item>
@@ -138,8 +91,8 @@ border-color: rgb(238, 238, 238);</string>
            <widget class="QPushButton" name="minus">
             <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>40</height>
+              <width>30</width>
+              <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
@@ -153,17 +106,55 @@ border-color: rgb(238, 238, 238);</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="open">
+          <item row="2" column="1">
+           <widget class="QPushButton" name="pause">
             <property name="minimumSize">
              <size>
-              <width>65</width>
-              <height>40</height>
+              <width>30</width>
+              <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>65</width>
+              <width>40</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>||</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="plus">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>+</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="open">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
               <height>40</height>
              </size>
             </property>
@@ -176,8 +167,8 @@ border-color: rgb(238, 238, 238);</string>
            <widget class="QPushButton" name="play">
             <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>40</height>
+              <width>30</width>
+              <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
@@ -191,35 +182,25 @@ border-color: rgb(238, 238, 238);</string>
             </property>
            </widget>
           </item>
+          <item row="0" column="3" rowspan="3">
+           <widget class="NarrativeScrollBox" name="narratives" native="true"/>
+          </item>
           <item row="2" column="2">
            <widget class="QPushButton" name="info">
             <property name="minimumSize">
              <size>
-              <width>65</width>
-              <height>40</height>
+              <width>30</width>
+              <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>65</width>
+              <width>40</width>
               <height>40</height>
              </size>
             </property>
             <property name="text">
              <string>Info</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="3">
-           <widget class="QLabel" name="label">
-            <property name="lineWidth">
-             <number>0</number>
-            </property>
-            <property name="text">
-             <string>Narratives</string>
-            </property>
-            <property name="indent">
-             <number>8</number>
             </property>
            </widget>
           </item>
@@ -252,16 +233,29 @@ border-color: rgb(238, 238, 238);</string>
 color: rgb(255, 255, 255);
 border-color: rgb(238, 238, 238);</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="3" rowspan="4">
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0" colspan="3">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Narrative Title Here</string>
+            </property>
+            <property name="margin">
+             <number>0</number>
+            </property>
+            <property name="indent">
+             <number>8</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3" rowspan="3">
            <widget class="SlideScrollBox" name="slides" native="true"/>
           </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="plus_2">
             <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>40</height>
+              <width>30</width>
+              <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
@@ -275,17 +269,36 @@ border-color: rgb(238, 238, 238);</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="open_2">
+          <item row="1" column="1">
+           <widget class="QPushButton" name="minus_2">
             <property name="minimumSize">
              <size>
-              <width>65</width>
-              <height>40</height>
+              <width>30</width>
+              <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>65</width>
+              <width>40</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>-</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="open_2">
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
               <height>40</height>
              </size>
             </property>
@@ -294,12 +307,12 @@ border-color: rgb(238, 238, 238);</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QPushButton" name="close_2">
+          <item row="2" column="0">
+           <widget class="QPushButton" name="play_2">
             <property name="minimumSize">
              <size>
-              <width>25</width>
-              <height>40</height>
+              <width>30</width>
+              <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
@@ -309,7 +322,7 @@ border-color: rgb(238, 238, 238);</string>
              </size>
             </property>
             <property name="text">
-             <string>^</string>
+             <string>&gt;</string>
             </property>
            </widget>
           </item>
@@ -317,8 +330,8 @@ border-color: rgb(238, 238, 238);</string>
            <widget class="QPushButton" name="pause_2">
             <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>40</height>
+              <width>30</width>
+              <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
@@ -333,68 +346,11 @@ border-color: rgb(238, 238, 238);</string>
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QPushButton" name="info_2">
-            <property name="minimumSize">
-             <size>
-              <width>65</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>65</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Info</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QPushButton" name="play_2">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="minus_2">
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>-</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
            <widget class="QPushButton" name="left_2">
             <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>40</height>
+              <width>30</width>
+              <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
@@ -404,20 +360,7 @@ border-color: rgb(238, 238, 238);</string>
              </size>
             </property>
             <property name="text">
-             <string>&lt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="3">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Narrative Title Here</string>
-            </property>
-            <property name="margin">
-             <number>0</number>
-            </property>
-            <property name="indent">
-             <number>8</number>
+             <string>Back</string>
             </property>
            </widget>
           </item>

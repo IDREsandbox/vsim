@@ -47,6 +47,7 @@ public:
 
 	MainWindowTopBar *topBar() const;
 	labelCanvasView *canvasView() const;
+	labelCanvas *canvas() const;
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
 

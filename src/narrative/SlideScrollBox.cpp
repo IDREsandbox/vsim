@@ -17,6 +17,8 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	m_action_set_camera = new QAction("Set Camera", m_slide_menu);
 	m_action_set_transition = new QAction("Set Transition", m_slide_menu);
 
+	m_action_new->setShortcut(Qt::CTRL + Qt::Key_M);
+
 	m_bar_menu->addAction(m_action_new);
 
 	m_slide_menu->addAction(m_action_new);

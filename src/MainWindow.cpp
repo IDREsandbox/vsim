@@ -60,7 +60,6 @@ MainWindow::MainWindow(QWidget *parent)
 	m_drag_area = new labelCanvas();
 	m_drag_area->setGeometry(0, 0, this->size().width(), this->size().height());
 	m_drag_area->setMinimumSize(800, 600);
-
 	m_view = new labelCanvasView(ui->root, m_drag_area);
 	ui->rootLayout->addWidget(m_view, 0, 0);
 
@@ -310,6 +309,11 @@ labelCanvasView *MainWindow::canvasView() const
 	return m_view;
 }
 
+labelCanvas * MainWindow::canvas() const
+{
+	return m_drag_area;
+}
+
 ModelOutliner * MainWindow::outliner() const
 {
 	return m_outliner;
@@ -356,13 +360,25 @@ void MainWindow::dropEvent(QDropEvent * event)
 void MainWindow::actionNew()
 {
 	qDebug("new");
-	//m_vsimapp->reset();
-	emit sNew();
+
+	QMessageBox::StandardButton reply = 
+		QMessageBox::question(
+			this, 
+			"New file", 
+			"Are you sure you want to create a new file?", 
+			QMessageBox::Yes | QMessageBox::No);
+
+	if (reply == QMessageBox::Yes) {
+		emit sNew();
+	}
 }
 void MainWindow::actionOpen()
 {
 	qDebug("open action");
-	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim", "", "VSim files (*.vsim; *.osg; *.osgt; *.osgb; );;All types (*.*)");
+	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim", "",
+		"VSim files (*.vsim;*.osg;*.osgt;*.osgb; );;"
+		"Model files (*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
+		"All types (*.*)");
 	if (filename == "") {
 		qDebug() << "open cancel";
 		return;
@@ -381,7 +397,10 @@ void MainWindow::actionSave()
 void MainWindow::actionSaveAs()
 {
 	qDebug("saveas");
-	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", "VSim file (*.vsim);;osg ascii file (*.osgt);;osg binary file (*.osgb)");
+	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", 
+		"VSim file (*.vsim);;"
+		"osg ascii file (*.osgt);;"
+		"osg binary file (*.osgb)");
 	if (filename == "") {
 		qDebug() << "saveas cancel";
 		return;
@@ -395,7 +414,9 @@ void MainWindow::actionSaveAs()
 void MainWindow::actionImportModel()
 {
 	qDebug("import");
-	QString filename = QFileDialog::getOpenFileName(this, "Import Model", "", "Model files (*.vsim; *.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds; *.dae);;All types (*.*)");
+	QString filename = QFileDialog::getOpenFileName(this, "Import Model", "",
+		"Model files (*.vsim;*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
+		"All types (*.*)");
 	if (filename == "") {
 		qDebug() << "import cancel";
 		return;

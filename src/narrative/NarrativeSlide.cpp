@@ -1,9 +1,10 @@
 #include "narrative/NarrativeSlide.h"
+#include "narrative/NarrativeSlideLabels.h"
 
 NarrativeSlide::NarrativeSlide()
 	: Group(),
 	m_camera_matrix(),
-	m_duration(15.0f),
+	m_duration(4.0f),
 	m_stay_on_node(false),
 	m_transition_duration(4.0f)
 {

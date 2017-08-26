@@ -2,6 +2,7 @@
 #include "dragLabel.h"
 
 #include "narrative/NarrativeSlide.h"
+#include "narrative/NarrativeSlideLabels.h"
 
 labelCanvas::labelCanvas(QWidget* parent)
 	: QWidget(parent),
@@ -19,6 +20,9 @@ labelCanvas::labelCanvas(QWidget* parent)
 	//this->scene()->addWidget(invisible);
 	invisible->setGeometry(0, 0, 1, 1);
 	invisible->setStyleSheet("color:rgba(255, 255, 255, 0); background:transparent;");
+
+	//m_fade_anim = new QPropertyAnimation(m_fade, "opacity");
+	//setStyleSheet(".labelCanvas{background-color: rgba(0,255,0,50);}");
 
 	//editDlg = new editButtons(this);
 	//this->scene()->addWidget(editDlg);
@@ -74,6 +78,16 @@ void labelCanvas::clearCanvas()
 	//this->scene()->addWidget(editDlg);
 }
 
+int labelCanvas::getSelection() const
+{
+	return lastSelected;
+}
+
+void labelCanvas::setSelection(int index)
+{
+	lastSelected = index;
+}
+
 void labelCanvas::setSlide(NarrativeSlide * slide)
 {
 	if (m_slide) disconnect(m_slide, 0, this, 0);
@@ -83,67 +97,65 @@ void labelCanvas::setSlide(NarrativeSlide * slide)
 
 	NarrativeSlideLabels* data;
 	for (uint i = 0; i < slide->getNumChildren(); i++) {
-		data = dynamic_cast<NarrativeSlideLabels*>(slide->getChild(i));
-		newLabel(data->getStyle(), data->getText(), data->getrX(), data->getrY(), data->getrW(),
-			data->getrH());
+		insertNewLabel(i);
+	}
+	show();
+
+	connect(slide, &NarrativeSlide::sNew, this, &labelCanvas::insertNewLabel);
+	connect(slide, &NarrativeSlide::sDelete, this, &labelCanvas::deleteLabel);
+}
+
+void labelCanvas::insertNewLabel(int index)
+{
+	qDebug() << "insert new label" << index;
+	dragLabel *new_item = new dragLabel(this);
+	m_items.insert(index, new_item);
+	new_item->show();
+
+	// if our group has this item, then bind it
+	new_item->setLabel(dynamic_cast<NarrativeSlideLabels*>(m_slide->getChild(index)));
+
+	// fix up indices
+	for (size_t i = 0; i < m_items.size(); i++) {
+		m_items[i]->setIndex(i);
+	}
+
+	// steal undo/redo
+	new_item->installEventFilter(this);
+
+	// forward signals
+	connect(new_item, &dragLabel::sSetPos, this, &labelCanvas::sSetPos);
+	connect(new_item, &dragLabel::sSetSize, this, &labelCanvas::sSetSize);
+	connect(new_item, &dragLabel::sEdited, this, &labelCanvas::sEdited);
+}
+
+void labelCanvas::deleteLabel(int index) {
+	dragLabel *item = m_items.takeAt(index);
+	delete item;
+
+	// fix up indices
+	for (size_t i = 0; i < m_items.size(); i++) {
+		m_items[i]->setIndex(i);
 	}
 }
 
-// labelCanvas::resizeEvent(QResizeEvent* event) 
-//{
-	//scaleFactor = std::max(float(1.0), float(float(this->size().height()) / float(720)));
-	//this->scale(scaleFactor, scaleFactor);
-	//this->set
-	//this->setWidth() = this->size().width() / scaleFactor;
-	//this->setWidth(this->size().width() / scaleFactor);
-	//foreach(dragLabel* lbl, m_items)
-	//	lbl->canvasResize();
-//}
-
-void labelCanvas::newLabel(QString style)
-{//method for creating novel label
-
-	qDebug() << "newlabel";
-	dragLabel *new_item = new dragLabel(this, style.toStdString());
-	new_item->show();
-	idx = m_items.length();
-	new_item->setIndex(idx);
-	m_items.push_back(new_item);
-
-	//this->scene()->addWidget(new_item);
-
-	connect(new_item, SIGNAL(sTextSet(QString, int)), this, SIGNAL(sSuperTextSet(QString, int)));
-	connect(new_item, SIGNAL(sSizeSet(QSize, int)), this, SIGNAL(sSuperSizeSet(QSize, int)));
-	connect(new_item, SIGNAL(sPosSet(QPoint, int)), this, SIGNAL(sSuperPosSet(QPoint, int)));
-
-	emit sNewLabel(style.toStdString(), idx);
-}
-
-void labelCanvas::newLabel(std::string style, std::string text, float rX, float rY, float rW , float rH)
-{//method for creating label from loaded data via NarrativeControl
-	dragLabel *new_item = new dragLabel(text, style, this, rH, rW, rY, rX);
-	new_item->show();
-	idx = m_items.length();
-	new_item->setIndex(idx);
-	m_items.push_back(new_item);
-
-	//this->scene()->addWidget(new_item);
-
-	connect(new_item, SIGNAL(sTextSet(QString, int)), this, SIGNAL(sSuperTextSet(QString, int)));
-	connect(new_item, SIGNAL(sSizeSet(QSize, int)), this, SIGNAL(sSuperSizeSet(QSize, int)));
-	connect(new_item, SIGNAL(sPosSet(QPoint, int)), this, SIGNAL(sSuperPosSet(QPoint, int)));
-}
-
-void labelCanvas::deleteLabel() {
-	dragLabel* f = m_items.at(lastSelected);
-	m_items.removeAt(lastSelected);
-	delete f;
-
-	emit sDeleteLabel(lastSelected);
-
-	for (int i = 0; i < m_items.count(); ++i)
-	{
-		dragLabel* f = m_items.at(lastSelected);
-		f->m_index = i;
+bool labelCanvas::eventFilter(QObject * obj, QEvent * e)
+{
+	if (e->type() == QEvent::KeyPress || e->type() == QEvent::ShortcutOverride) {
+		QKeyEvent *ke = static_cast<QKeyEvent*>(e);
+		if (ke->matches(QKeySequence::Redo) || ke->matches(QKeySequence::Undo)) {
+			qDebug() << "text steal event";
+			// also give the event to me
+			QApplication::sendEvent(this, ke);
+			return true;
+		}
 	}
+
+
+	return false;
+}
+
+QSize labelCanvas::baseSize() const
+{
+	return QSize(1280, 720);
 }

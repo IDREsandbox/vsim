@@ -33,7 +33,7 @@ public:
 	void setCameraMatrix(osg::Matrixd);
 
 	enum NavigationMode {
-		NAVIGATION_SIMPLE, // does nothing, (used for playing/pausing)
+		NAVIGATION_SIMPLE, // does nothing
 		NAVIGATION_FIRST_PERSON,
 		NAVIGATION_FLIGHT,
 		NAVIGATION_OBJECT
@@ -45,6 +45,9 @@ public:
 
 	void setCameraFrozen(bool freeze);
 	bool getCameraFrozen() const;
+	void enableNavigation(bool enable);
+
+	void figureOutNavigation();
 
 	void reset();
 
@@ -94,6 +97,7 @@ private:
 	osg::ref_ptr<FlightManipulator> m_flight_manipulator;
 	osg::ref_ptr<ObjectManipulator> m_object_manipulator;
 
+	bool m_navigation_disabled;
 	bool m_camera_frozen;
 	bool m_gravity_on;
 	bool m_collisions_on;

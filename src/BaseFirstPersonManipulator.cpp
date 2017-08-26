@@ -87,7 +87,7 @@ void BaseFirstPersonManipulator::rotateByPixels(double dx, double dy)
 	// dy- pitch decreases
 	// sensitivity is degrees/pixel, to convert to radians/pixel use M_PI/180
 	yaw -= dx * m_sensitivity * M_PI / 180;
-	pitch += dy * m_sensitivity * M_PI / 180;
+	pitch -= dy * m_sensitivity * M_PI / 180;
 
 	pitch = Util::clamp(pitch, -M_PI_2 + .01, M_PI_2 - .01);
 

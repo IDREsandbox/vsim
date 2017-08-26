@@ -5,6 +5,7 @@
 #include <osg/Group>
 #include <QUndoStack>
 #include <QDebug>
+#include <set>
 #include "Group.h"
 
 class ModelGroup : public Group {
@@ -93,10 +94,13 @@ private:
 // Returns a set of key transition times
 class TimeGetVisitor : public osg::NodeVisitor {
 public:
-	TimeGetVisitor(std::set<int> *out);
+	TimeGetVisitor();
 	virtual void apply(osg::Group &node) override;
+	std::set<int> results() const;
 private:
-	std::set<int> *m_out;
+	std::set<int> m_begins;
+	std::set<int> m_ends;
+	std::set<int> bar;
 };
 
 // Hides nodes based on year
