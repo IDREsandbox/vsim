@@ -1,4 +1,11 @@
 # Changelog
+## 2017-08-25
+### Added
+- Basic embedded resources
+- Canvas undo/redo
+
+### Fixed
+- Disappearing player bug?
 
 ## 2017-08-23
 ### Changed
