@@ -80,7 +80,6 @@ public:
 	void setSlideCamera();
 	void moveSlides(std::set<int> from, int to);
 
-	
 public slots:
 
 	//editDlg buttons

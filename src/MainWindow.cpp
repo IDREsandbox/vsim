@@ -156,6 +156,11 @@ labelCanvasView *MainWindow::canvasView() const
 	return m_view;
 }
 
+labelCanvas * MainWindow::canvas() const
+{
+	return m_drag_area;
+}
+
 ModelOutliner * MainWindow::outliner() const
 {
 	return m_outliner;

@@ -20,8 +20,16 @@ labelCanvasView::labelCanvasView(QWidget* parent, labelCanvas* canvas)
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	m_scene->addWidget(m_canvas);
-}
 
+	m_fade = new QGraphicsOpacityEffect(this);
+	m_fade->setOpacity(1.0);
+	setGraphicsEffect(m_fade);
+	m_fade_anim = new QPropertyAnimation(m_fade, "opacity", this);
+	m_fade_anim->setDuration(500);
+	m_fade_anim->setStartValue(0);
+	m_fade_anim->setEndValue(1);
+	m_fade_anim->setEasingCurve(QEasingCurve::InBack);
+}
 
 labelCanvasView::~labelCanvasView()
 {
@@ -39,5 +47,17 @@ void labelCanvasView::keyPressEvent(QKeyEvent * e)
 {
 	qDebug() << "view key press event";
 	QGraphicsView::keyPressEvent(e);
+}
+
+void labelCanvasView::fadeIn()
+{
+	if (!isHidden()) return;
+	show();
+	m_fade_anim->start();
+}
+
+void labelCanvasView::hideEvent(QHideEvent * e)
+{
+	QGraphicsView::hideEvent(e);
 }
 

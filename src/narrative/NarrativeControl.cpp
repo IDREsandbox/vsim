@@ -616,6 +616,7 @@ void NarrativeControl::deleteSlides()
 }
 
 void NarrativeControl::editSlide() {
+	qDebug() << "EDIT SLIDE CURRENT SLDIE?" << m_current_narrative << m_current_slide << getCurrentSlide();
 	m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, false);
 	editDlg->show();
 }

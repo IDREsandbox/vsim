@@ -146,12 +146,14 @@ void NarrativePlayer::next(Advance dir)
 
 void NarrativePlayer::toTransitioning()
 {
+	emit hideCanvas();
 	m_slide_time_sec = 0;
 	m_state = TRANSITIONING;
 }
 
 void NarrativePlayer::toAtNode()
 {
+	emit showCanvas();
 	emit updateCamera(m_narratives->getCurrentSlide()->getCameraMatrix());
 	m_slide_time_sec = 0;
 	m_state = ATNODE;
@@ -162,6 +164,7 @@ void NarrativePlayer::toStopped()
 	if (m_state == STOPPED) return;
 	qDebug() << "to stopped";
 	m_state = STOPPED;
+	emit showCanvas();
 	emit enableNavigation(true);
 }
 

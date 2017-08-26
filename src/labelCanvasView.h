@@ -5,6 +5,7 @@
 #include <QtGui>
 #include <QtCore>
 #include <QList>
+#include <QGraphicsOpacityEffect>
 
 class labelCanvas;
 
@@ -21,11 +22,17 @@ public:
 
 	void keyPressEvent(QKeyEvent *e) override;
 
+	void hideEvent(QHideEvent *e) override;
+	void fadeIn();
+
 private:
 	labelCanvas* m_canvas;
 	QWidget* m_par;
 	QGraphicsScene* m_scene;
 	float scaleFactor = 1;
 	float lastScaleFactor = 1;
+
+	QGraphicsOpacityEffect *m_fade;
+	QPropertyAnimation *m_fade_anim;
 };
 #endif // LABELCANVASVIEW_H

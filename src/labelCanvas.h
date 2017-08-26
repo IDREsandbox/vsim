@@ -30,11 +30,12 @@ public:
 	void insertNewLabel(int index);
 	void deleteLabel(int index);
 
+	QSize baseSize() const;
+
 	// for stealing undo/redo from children
 	bool eventFilter(QObject * obj, QEvent * e) override;
 
-	QSize baseSize() const;
-
+	
 signals:
 	void sSetPos(float rx, float ry, int index);
 	void sSetSize(float rw, float rh, int index);
@@ -48,6 +49,7 @@ public:
 	int lastSelected = 0;
 
 	NarrativeSlide *m_slide;
+
 };
 
 #endif // LABELCANVAS_H

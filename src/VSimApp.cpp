@@ -21,6 +21,7 @@
 #include "deprecated/narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
 #include "narrative/NarrativeControl.h"
+#include "labelCanvasView.h"
 #include "OSGViewerWidget.h"
 #include "MainWindow.h"
 #include "ModelOutliner.h"
@@ -56,8 +57,9 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(this, &VSimApp::tick, m_narrative_player, &NarrativePlayer::update);
 	//connect(this, &VSimApp::foo, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 	connect(this, &VSimApp::tick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
-
 	connect(m_narrative_player, &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
+	connect(m_narrative_player, &NarrativePlayer::hideCanvas, window->canvasView(), &labelCanvasView::hide);
+	connect(m_narrative_player, &NarrativePlayer::showCanvas, window->canvasView(), &labelCanvasView::fadeIn);
 
 	// This is a really awkward place... but this has to be done after setting model
 	m_window->outliner()->setModel(&m_model_table_model);

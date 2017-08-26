@@ -21,6 +21,7 @@ labelCanvas::labelCanvas(QWidget* parent)
 	invisible->setGeometry(0, 0, 1, 1);
 	invisible->setStyleSheet("color:rgba(255, 255, 255, 0); background:transparent;");
 
+	//m_fade_anim = new QPropertyAnimation(m_fade, "opacity");
 	//setStyleSheet(".labelCanvas{background-color: rgba(0,255,0,50);}");
 
 	//editDlg = new editButtons(this);
@@ -98,6 +99,7 @@ void labelCanvas::setSlide(NarrativeSlide * slide)
 	for (uint i = 0; i < slide->getNumChildren(); i++) {
 		insertNewLabel(i);
 	}
+	show();
 
 	connect(slide, &NarrativeSlide::sNew, this, &labelCanvas::insertNewLabel);
 	connect(slide, &NarrativeSlide::sDelete, this, &labelCanvas::deleteLabel);
