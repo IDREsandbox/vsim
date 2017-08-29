@@ -41,3 +41,33 @@ ScrollBoxItem * ERScrollBox::createItem(osg::Node * node)
 	connect(item, &ERScrollItem::sDoubleClick, this, &ERScrollBox::sOpen);
 	return item;
 }
+
+void ERScrollBox::setSelection(std::set<int> set, int last)
+{
+	ERScrollItem* curr;
+	auto it = set.begin();
+	for (size_t i = 0; i < m_items.size(); i++) {
+		// move the iterator forward
+		while (it != set.end() && i > *it) ++it;
+		if (it == set.end() || *it > i) {
+			curr = dynamic_cast<ERScrollItem*>(m_items[i]);
+			curr->setStyleSheet("background:rgb(" + QString::number(curr->m_er->getRed()-(curr->m_er->getRed()/2)) + "," + QString::number(curr->m_er->getGreen()-(curr->m_er->getGreen()/2)) + "," + QString::number(curr->m_er->getBlue()-(curr->m_er->getBlue()/2)) + ");");
+		}
+		else if (*it == i) {
+			curr = dynamic_cast<ERScrollItem*>(m_items[i]);
+			curr->setStyleSheet("background:rgb(" + QString::number(curr->m_er->getRed()) + "," + QString::number(curr->m_er->getGreen()) + "," + QString::number(curr->m_er->getBlue()) + ");");
+		}
+	}
+	m_selection = set;
+	m_last_selected = last;
+
+	// have the viewport focus the first selected item
+	if (!set.empty()) {
+		int first = *set.begin();
+		if (first < 0) return;
+		if (first >= m_items.size()) return;
+		ensureWidgetVisible(m_items[first]);
+	}
+	emit sSelectionChange();
+
+}

@@ -23,6 +23,12 @@ void ERScrollItem::setER(EResource *er)
 
 	ui.title->setText(QString::fromStdString(er->getResourceName()));
 
+	connect(er, &EResource::sRedChanged, this,
+		[this]() {this->setStyleSheet("background:rgb(" + QString::number(m_er->getRed()) + "," + QString::number(m_er->getGreen()) + "," + QString::number(m_er->getBlue()) + ");"); });
+	connect(er, &EResource::sGreenChanged, this,
+		[this]() {this->setStyleSheet("background:rgb(" + QString::number(m_er->getRed()) + "," + QString::number(m_er->getGreen()) + "," + QString::number(m_er->getBlue()) + ");"); });
+	connect(er, &EResource::sBlueChanged, this,
+		[this]() {this->setStyleSheet("background:rgb(" + QString::number(m_er->getRed()) + "," + QString::number(m_er->getGreen()) + "," + QString::number(m_er->getBlue()) + ");"); });
 }
 
 int ERScrollItem::widthFromHeight(int height)

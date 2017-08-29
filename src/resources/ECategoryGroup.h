@@ -33,6 +33,15 @@ public: // COMMANDS
 		DeleteECategoryCommand(ECategoryGroup *group, int index, QUndoCommand *parent = nullptr)
 			: Group::DeleteNodeCommand<ECategory>(group, index, parent) {}
 	};
+	class AddECategoryCommand : public QUndoCommand {
+	public:
+		AddECategoryCommand(ECategoryGroup *group, ECategory *ECat, QUndoCommand *parent = nullptr);
+		void undo();
+		void redo();
+	private:
+		ECategoryGroup *m_group;
+		osg::ref_ptr<ECategory> m_category;
+	};
 };
 
 #endif

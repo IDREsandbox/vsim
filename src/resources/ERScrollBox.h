@@ -13,6 +13,7 @@ public:
 	~ERScrollBox();
 
 	ScrollBoxItem *createItem(osg::Node *node) override;
+	void setSelection(std::set<int> set, int last) override;
 
 signals:
 	void sNew();

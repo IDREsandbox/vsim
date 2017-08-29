@@ -67,6 +67,8 @@ MainWindow::MainWindow(QWidget *parent)
 	m_resource_group = new EResourceGroup();
 	ui->local->setGroup(m_resource_group);
 
+	m_cat_group = new ECategoryGroup();
+
 	m_display = new ERDisplay(this);
 	m_display->setGeometry(10, 200, 265, 251);
 	m_display->hide();
@@ -149,13 +151,12 @@ EResource* MainWindow::getResource(int index)
 
 void MainWindow::newER()
 {
-	ERDialog dlg;
+	ERDialog dlg(this);
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		return;
 	}
 
-	// for now just add to the end
 	m_undo_stack->beginMacro("New Resource");
 	int num_children = m_resource_group->getNumChildren();
 	m_undo_stack->push(new SelectResourcesCommand(this, { num_children - 1 }, ON_UNDO));
@@ -168,8 +169,25 @@ void MainWindow::newER()
 	resource->setResourceName(dlg.getTitle());
 	resource->setAuthor(dlg.getAuthor());
 	resource->setResourceDescription(dlg.getDescription());
-	//resource->set
+	resource->setResourcePath(dlg.getPath());
+	//resource->setResourceType(
+	resource->setGlobal(dlg.getGlobal());
+	resource->setCopyRight(dlg.getCopyRight());
+	resource->setMinYear(dlg.getMinYear());
+	resource->setMaxYear(dlg.getMaxYear());
+	resource->setReposition(dlg.getReposition());
+	resource->setAutoLaunch(dlg.getAutoLaunch());
+	resource->setLocalRange(dlg.getLocalRange());
+	resource->setErType(dlg.getErType());
 
+	resource->setViewMatrix(this->getViewer()->getCameraManipulator()->getMatrix());
+
+	//set category details
+	ECategory *category = getCategory(dlg.getCategory());
+	resource->setCategoryName(category->getCategoryName());
+	resource->setRed(category->getRed());
+	resource->setGreen(category->getGreen());
+	resource->setBlue(category->getBlue());
 }
 
 void MainWindow::deleteER()
@@ -201,19 +219,79 @@ void MainWindow::editERInfo()
 
 	EResource *resource = getResource(active_item);
 
-	ERDialog dlg(resource);
+	ERDialog dlg(resource, this);
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		qDebug() << "resource list - cancelled edit on" << active_item;
 		return;
 	}
 
+	ECategory* category = getCategory(dlg.getCategory());
+
 	m_undo_stack->beginMacro("Set Resource Info");
 	m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
-	m_undo_stack->push(new EResource::SetResourceNameCommand(resource, dlg.getTitle()));
-	m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor()));
-	m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription()));
+	if (resource->getResourceName() != dlg.getTitle())
+		m_undo_stack->push(new EResource::SetResourceNameCommand(resource, dlg.getTitle()));
+	if (resource->getAuthor() != dlg.getAuthor())
+		m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor()));
+	if (resource->getResourceDescription() != dlg.getDescription())
+		m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription()));
+	if (resource->getResourcePath() != dlg.getPath())
+		m_undo_stack->push(new EResource::SetResourcePathCommand(resource, dlg.getPath()));
+	if (resource->getGlobal() != dlg.getGlobal())
+		m_undo_stack->push(new EResource::SetGlobalCommand(resource, dlg.getGlobal()));
+	if (resource->getCopyRight() != dlg.getCopyRight())
+		m_undo_stack->push(new EResource::SetCopyRightCommand(resource, dlg.getCopyRight()));
+	if (resource->getMinYear() != dlg.getMinYear())
+		m_undo_stack->push(new EResource::SetMinYearCommand(resource, dlg.getMinYear()));
+	if (resource->getMaxYear() != dlg.getMaxYear())
+		m_undo_stack->push(new EResource::SetMaxYearCommand(resource, dlg.getMaxYear()));
+	if (resource->getReposition() != dlg.getReposition())
+		m_undo_stack->push(new EResource::SetRepositionCommand(resource, dlg.getReposition()));
+	if (resource->getAutoLaunch() != dlg.getAutoLaunch())
+		m_undo_stack->push(new EResource::SetAutoLaunchCommand(resource, dlg.getAutoLaunch()));
+	if (resource->getLocalRange() != dlg.getLocalRange())
+		m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange()));
+	if (resource->getErType() != dlg.getErType())
+		m_undo_stack->push(new EResource::SetErTypeCommand(resource, dlg.getErType()));
+
+	m_undo_stack->push(new EResource::SetViewMatrixCommand(resource, this->getViewer()->getCameraManipulator()->getMatrix()));
+
+	if (resource->getCategoryName() != category->getCategoryName())
+		m_undo_stack->push(new EResource::SetCategoryNameCommand(resource, category->getCategoryName()));
+	if (resource->getRed() != category->getRed())
+		m_undo_stack->push(new EResource::SetRedCommand(resource, category->getRed()));
+	if (resource->getGreen() != category->getGreen())
+		m_undo_stack->push(new EResource::SetGreenCommand(resource, category->getGreen()));
+	if (resource->getBlue() != category->getBlue())
+		m_undo_stack->push(new EResource::SetBlueCommand(resource, category->getBlue()));
 	m_undo_stack->endMacro();
+}
+
+void MainWindow::newERCat(std::string name, int red, int green, int blue)
+{
+	m_undo_stack->beginMacro("New Category");
+	int num_children = m_cat_group->getNumChildren();
+	m_undo_stack->push(new SelectCategoryCommand(this, { num_children - 1 }, ON_UNDO));
+	m_undo_stack->push(new ECategoryGroup::NewECategoryCommand(m_cat_group, m_cat_group->getNumChildren()));
+	m_undo_stack->push(new SelectCategoryCommand(this, { num_children }, ON_REDO));
+	m_undo_stack->endMacro();
+
+	ECategory *category = getCategory(m_cat_group->getNumChildren() - 1);
+	category->setIndex(m_cat_group->getNumChildren() - 1);
+	category->setCategoryName(name);
+	category->setRed(red);
+	category->setBlue(blue);
+	category->setGreen(green);
+}
+
+ECategory* MainWindow::getCategory(int index)
+{
+	if (index < 0 || (uint)index >= m_cat_group->getNumChildren()) {
+		return nullptr;
+	}
+	osg::Node *c = m_cat_group->getChild(index);
+	return dynamic_cast<ECategory*>(c);
 }
 
 void MainWindow::openResource()
@@ -224,8 +302,9 @@ void MainWindow::openResource()
 	EResource *res = getResource(index);
 	m_display->show();
 
-	//m_display->ui.title->setText(QString::fromStdString(res->getResourceName()));
 	m_display->setInfo(res);
+
+	this->getViewer()->getCameraManipulator()->setByMatrix(res->getViewMatrix());
 }
 
 int MainWindow::nextSelectionAfterDelete(int total, std::set<int> selection)
@@ -234,7 +313,7 @@ int MainWindow::nextSelectionAfterDelete(int total, std::set<int> selection)
 	int first_index = *selection.begin();
 	int remaining = total - selection.size();
 	int next_selection;
-	if (remaining == 0) { // everyone's gone
+	if (remaining == 0) {
 		next_selection = -1;
 	}
 	else if (remaining >= first_index + 1) {
@@ -246,9 +325,32 @@ int MainWindow::nextSelectionAfterDelete(int total, std::set<int> selection)
 	return next_selection;
 }
 
+void MainWindow::selectCategories(std::set<int> res)
+{
+	//fill in when UI done
+}
+
 void MainWindow::selectResources(std::set<int> res)
 {
 	ui->local->setSelection(res, *res.begin());
+}
+
+SelectCategoryCommand::SelectCategoryCommand(MainWindow *control, std::set<int> category, SelectionCommandWhen when, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_control(control),
+	m_category(category),
+	m_when(when)
+{
+}
+void SelectCategoryCommand::undo() {
+	if (m_when != ON_REDO) {
+		m_control->selectResources(m_category);
+	}
+}
+void SelectCategoryCommand::redo() {
+	if (m_when != ON_UNDO) {
+		m_control->selectResources(m_category);
+	}
 }
 
 SelectResourcesCommand::SelectResourcesCommand(MainWindow *control, std::set<int> resources, SelectionCommandWhen when, QUndoCommand *parent)

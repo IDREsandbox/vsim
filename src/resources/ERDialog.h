@@ -6,12 +6,13 @@
 
 #include "ui_ERDialog.h"
 #include "resources/EResource.h"
+#include "MainWindow.h"
 
 class ERDialog : public QDialog {
 	Q_OBJECT
 public:
-	ERDialog(QWidget *parent = nullptr);
-	ERDialog(const EResource *er, QWidget *parent = nullptr);
+	ERDialog(MainWindow* mw, QWidget *parent = nullptr);
+	ERDialog(const EResource *er, MainWindow* mw, QWidget *parent = nullptr);
 	~ERDialog();
 
 	std::string getTitle() const;
@@ -27,11 +28,14 @@ public:
 	float getLocalRange() const;
 	int getErType() const;
 
+	int getCategory() const;
+
 	void addNewCat();
 	void chooseFile();
 
 private:
 	void setGui();
+	MainWindow* main;
 	Ui::ERDialog ui;
 };
 

@@ -17,6 +17,7 @@
 #include "labelCanvas.h"
 #include "labelCanvasView.h"
 #include "resources/ERDisplay.h"
+#include "resources/ECategoryGroup.h"
 
 
 //#include "VSimApp.h"
@@ -57,8 +58,11 @@ public:
 	void dropEvent(QDropEvent *event);
 
 	EResource* getResource(int idx);
+	ECategory* getCategory(int idx);
 	void selectResources(std::set<int> res);
+	void selectCategories(std::set<int> res);
 	int nextSelectionAfterDelete(int total, std::set<int> selection);
+	void newERCat(std::string name, int red, int blue, int green);
 
 public slots:
 	void actionNew();
@@ -105,6 +109,7 @@ public:
 	labelCanvasView *m_view;
 	ERDisplay *m_display;
 	osg::ref_ptr<EResourceGroup> m_resource_group;
+	osg::ref_ptr<ECategoryGroup> m_cat_group;
 	ModelOutliner *m_outliner;
 	TimeSlider *m_time_slider;
 };
@@ -113,6 +118,17 @@ enum SelectionCommandWhen {
 	ON_UNDO,
 	ON_REDO,
 	ON_BOTH
+};
+
+class SelectCategoryCommand : public QUndoCommand {
+public:
+	SelectCategoryCommand(MainWindow *control, std::set<int> category, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+	void undo();
+	void redo();
+private:
+	MainWindow *m_control;
+	SelectionCommandWhen m_when;
+	std::set<int> m_category;
 };
 
 class SelectResourcesCommand : public QUndoCommand {

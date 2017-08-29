@@ -46,7 +46,7 @@ public:
 	void clear();
 
 	// selection - these set selection, lastSelected, and emit events
-	void setSelection(std::set<int> set, int last);
+	virtual void setSelection(std::set<int> set, int last);
 	void addToSelection(int);
 	void removeFromSelection(int);
 	void clearSelection();

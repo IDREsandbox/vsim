@@ -391,9 +391,6 @@
     <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeNode.cpp">
       <Filter>Deprecated</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeTransition.cpp">
-      <Filter>Deprecated</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\narrative\SerializerNarrativeSlide.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -680,6 +677,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\resources\SerializerEResourceGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\resources\ECategoryGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\resources\SerializerECategory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\resources\SerializerECategoryGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

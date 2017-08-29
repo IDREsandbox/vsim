@@ -4,6 +4,8 @@ ERDisplay::ERDisplay(QWidget *parent)
 	: QWidget(parent), m_er(nullptr)
 {
 	ui.setupUi(this);
+
+	ui.text->setWordWrap(true);
 }
 
 void ERDisplay::setInfo(EResource* er)

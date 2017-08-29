@@ -9,6 +9,8 @@ class ERScrollItem : public ScrollBoxItem {
 	Q_OBJECT
 	
 public:
+	EResource *m_er;
+
 	ERScrollItem();
 	ERScrollItem(EResource *er);
 	void setER(EResource *er);
@@ -23,7 +25,6 @@ signals:
 
 private:
 	Ui::ERScrollItem ui;
-	EResource *m_er;
 };
 
 #endif // ERSCROLLITEM_H
