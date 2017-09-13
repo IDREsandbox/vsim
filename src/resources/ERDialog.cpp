@@ -57,6 +57,11 @@ ERDialog::ERDialog(const EResource *er, MainWindow* mw, QWidget *parent)
 	ui.upper->setText(QString::fromStdString(std::to_string(er->getMaxYear())));
 	ui.radius->setValue(er->getLocalRange());
 
+	if (er->getGlobal())
+		ui.global->setChecked(true);
+	else
+		ui.local->setChecked(true);
+
 	ui.licensing->setCurrentIndex(er->getCopyRight());
 
 	connect(ui.addnew, &QPushButton::clicked, this, &ERDialog::addNewCat);

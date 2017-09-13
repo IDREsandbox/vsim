@@ -1,0 +1,1260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>462</width>
+    <height>589</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>462</width>
+    <height>589</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>462</width>
+    <height>589</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QDialogButtonBox" name="confirm">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>540</y>
+     <width>341</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QTabWidget" name="labelSettings">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>445</width>
+     <height>520</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>445</width>
+     <height>520</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>445</width>
+     <height>520</height>
+    </size>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="header1">
+    <attribute name="title">
+     <string>Header 1</string>
+    </attribute>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QGroupBox" name="Header1">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Text</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="h1_fontLabel">
+          <property name="text">
+           <string>Font:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="h1_sizeLabel">
+          <property name="text">
+           <string>Size:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="h1_colorLabel">
+          <property name="text">
+           <string>Color:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" colspan="2">
+         <widget class="QLabel" name="h1_opacityLabel">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6">
+         <widget class="QLabel" name="h1_shadowLabel">
+          <property name="text">
+           <string>Shadow:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QFontComboBox" name="h1_fontBox"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="h1_sizeBox"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QPushButton" name="h1_colorPicker">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="h1_zero">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QSlider" name="h1_opacity">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QLabel" name="h1_onehundred">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="6">
+         <widget class="QCheckBox" name="h1_shadow">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="Header1_bod">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Background</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="1" column="2">
+         <widget class="QSlider" name="h1_opacity_bod">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="h1_zero_bod">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="h1_opacityLabel_bod">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="h1_colorPicker_bod">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="h1_colorLabel_bod">
+          <property name="text">
+           <string>Color:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="h1_onehundred_bod">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QSpinBox" name="h1_width"/>
+        </item>
+        <item row="1" column="5">
+         <widget class="QSpinBox" name="h1_height"/>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="h1_widthLabel">
+          <property name="text">
+           <string>Width:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QLabel" name="h1_heightLabel">
+          <property name="text">
+           <string>Height:</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="h1_frame">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>261</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>261</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="header1_prev">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>80</y>
+          <width>231</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Test area!</string>
+        </property>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="header2">
+    <attribute name="title">
+     <string>Header 2</string>
+    </attribute>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QGroupBox" name="Header2">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Text</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="h2_fontLabel">
+          <property name="text">
+           <string>Font:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="h2_sizeLabel">
+          <property name="text">
+           <string>Size:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="h2_colorLabel">
+          <property name="text">
+           <string>Color:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" colspan="2">
+         <widget class="QLabel" name="h2_opacityLabel">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6">
+         <widget class="QLabel" name="h2_shadowLabel">
+          <property name="text">
+           <string>Shadow:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QFontComboBox" name="h2_fontBox"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="h2_sizeBox"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QPushButton" name="h2_colorPicker">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="h2_zero">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QSlider" name="h2_opacity">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QLabel" name="h2_onehundred">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="6">
+         <widget class="QCheckBox" name="h2_shadow">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="Header2_bod">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Background</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="1" column="2">
+         <widget class="QSlider" name="h2_opacity_bod">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="h2_zero_bod">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="h2_opacityLabel_bod">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="h2_colorPicker_bod">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="h2_colorLabel_bod">
+          <property name="text">
+           <string>Color:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="h2_onehundred_bod">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QSpinBox" name="h2_width"/>
+        </item>
+        <item row="1" column="5">
+         <widget class="QSpinBox" name="h2_height"/>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="h2_widthLabel">
+          <property name="text">
+           <string>Width:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QLabel" name="h2_heightLabel">
+          <property name="text">
+           <string>Height:</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="h2_frame">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>261</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>261</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="header2_prev">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>80</y>
+          <width>231</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Test area!</string>
+        </property>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="bodytext">
+    <attribute name="title">
+     <string>Body Text</string>
+    </attribute>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QGroupBox" name="BodyText">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Text</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <widget class="QLabel" name="bt_fontLabel">
+          <property name="text">
+           <string>Font:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="bt_sizeLabel">
+          <property name="text">
+           <string>Size:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="bt_colorLabel">
+          <property name="text">
+           <string>Color:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" colspan="2">
+         <widget class="QLabel" name="bt_opacityLabel">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6">
+         <widget class="QLabel" name="bt_shadowLabel">
+          <property name="text">
+           <string>Shadow:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QFontComboBox" name="bt_fontBox"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="bt_sizeBox"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QPushButton" name="bt_colorPicker">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="bt_zero">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QSlider" name="bt_opacity">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QLabel" name="bt_onehundred">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="6">
+         <widget class="QCheckBox" name="bt_shadow">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="BodyText_bod">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Background</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_8">
+        <item row="1" column="2">
+         <widget class="QSlider" name="bt_opacity_bod">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="bt_zero_bod">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="bt_opacityLabel_bod">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="bt_colorPicker_bod">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="bt_colorLabel_bod">
+          <property name="text">
+           <string>Color:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="bt_onehundred_bod">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QSpinBox" name="bt_width"/>
+        </item>
+        <item row="1" column="5">
+         <widget class="QSpinBox" name="bt_height"/>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="bt_widthLabel">
+          <property name="text">
+           <string>Width:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QLabel" name="bt_heightLabel">
+          <property name="text">
+           <string>Height:</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="bt_frame">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>261</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>261</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="bt_prev">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>90</y>
+          <width>231</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Test area!</string>
+        </property>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="labeltext">
+    <attribute name="title">
+     <string>Label</string>
+    </attribute>
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <widget class="QGroupBox" name="Label">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Text</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QLabel" name="lt_fontLabel">
+          <property name="text">
+           <string>Font:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="lt_sizeLabel">
+          <property name="text">
+           <string>Size:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="lt_colorLabel">
+          <property name="text">
+           <string>Color:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" colspan="2">
+         <widget class="QLabel" name="lt_opacityLabel">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6">
+         <widget class="QLabel" name="lt_shadowLabel">
+          <property name="text">
+           <string>Shadow:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QFontComboBox" name="lt_fontBox"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="lt_sizeBox"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QPushButton" name="lt_colorPicker">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="lt_zero">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QSlider" name="lt_opacity">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QLabel" name="lt_onehundred">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="6">
+         <widget class="QCheckBox" name="lt_shadow">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="Label_bod">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Background</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_9">
+        <item row="1" column="2">
+         <widget class="QSlider" name="lt_opacity_bod">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="lt_zero_bod">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="lt_opacityLabel_bod">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="lt_colorPicker_bod">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="lt_colorLabel_bod">
+          <property name="text">
+           <string>Color:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="lt_onehundred_bod">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QSpinBox" name="lt_width"/>
+        </item>
+        <item row="1" column="5">
+         <widget class="QSpinBox" name="lt_height"/>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="lt_widthLabel">
+          <property name="text">
+           <string>Width:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QLabel" name="lt_heightLabel">
+          <property name="text">
+           <string>Height:</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="lt_frame">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>261</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>261</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="lt_prev">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>90</y>
+          <width>231</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Test area!</string>
+        </property>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="imagelabel">
+    <attribute name="title">
+     <string>Image/Caption</string>
+    </attribute>
+    <layout class="QVBoxLayout" name="verticalLayout_5">
+     <item>
+      <widget class="QGroupBox" name="ImageLabel">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Text</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="0">
+         <widget class="QLabel" name="il_fontLabel">
+          <property name="text">
+           <string>Font:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="il_sizeLabel">
+          <property name="text">
+           <string>Size:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="il_colorLabel">
+          <property name="text">
+           <string>Color:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" colspan="2">
+         <widget class="QLabel" name="il_opacityLabel">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6">
+         <widget class="QLabel" name="il_shadowLabel">
+          <property name="text">
+           <string>Shadow:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QFontComboBox" name="il_fontBox"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="il_sizeBox"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QPushButton" name="il_colorPicker">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="il_zero">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QSlider" name="il_opacity">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QLabel" name="il_onehundred">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="6">
+         <widget class="QCheckBox" name="il_shadow">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="ImageLabel_bod">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>101</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Background</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_10">
+        <item row="1" column="2">
+         <widget class="QSlider" name="il_opacity_bod">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="il_zero_bod">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="il_opacityLabel_bod">
+          <property name="text">
+           <string>Opacity:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="il_colorPicker_bod">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="il_colorLabel_bod">
+          <property name="text">
+           <string>Color:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="il_onehundred_bod">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QSpinBox" name="il_width"/>
+        </item>
+        <item row="1" column="5">
+         <widget class="QSpinBox" name="il_height"/>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="il_widthLabel">
+          <property name="text">
+           <string>Width:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QLabel" name="il_heightLabel">
+          <property name="text">
+           <string>Height:</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="il_frame">
+       <property name="minimumSize">
+        <size>
+         <width>421</width>
+         <height>261</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>421</width>
+         <height>261</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QLabel" name="il_prev">
+        <property name="geometry">
+         <rect>
+          <x>100</x>
+          <y>80</y>
+          <width>231</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Test area!</string>
+        </property>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>confirm</sender>
+   <signal>accepted()</signal>
+   <receiver>Dialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>confirm</sender>
+   <signal>rejected()</signal>
+   <receiver>Dialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

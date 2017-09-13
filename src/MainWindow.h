@@ -97,6 +97,8 @@ signals:
 	void sDebugCamera();
 	void sDebugControl();
 
+	void sEditStyleSettings();
+
 	// ui, signal emitters
 public:
 	std::unique_ptr<Ui::MainWindow> ui;
@@ -108,7 +110,9 @@ public:
 	labelCanvas *m_drag_area;
 	labelCanvasView *m_view;
 	ERDisplay *m_display;
-	osg::ref_ptr<EResourceGroup> m_resource_group;
+	osg::ref_ptr<EResourceGroup> m_resource_group; 
+	osg::ref_ptr<EResourceGroup> m_local_resource_group;
+	osg::ref_ptr<EResourceGroup> m_global_resource_group;
 	osg::ref_ptr<ECategoryGroup> m_cat_group;
 	ModelOutliner *m_outliner;
 	TimeSlider *m_time_slider;

@@ -30,6 +30,12 @@ ERScrollBox::~ERScrollBox() {
 	
 }
 
+void ERScrollBox::filter(int type)
+{
+	
+
+}
+
 ScrollBoxItem * ERScrollBox::createItem(osg::Node * node)
 {
 	EResource *er = dynamic_cast<EResource*>(node);

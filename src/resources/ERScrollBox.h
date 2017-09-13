@@ -14,6 +14,7 @@ public:
 
 	ScrollBoxItem *createItem(osg::Node *node) override;
 	void setSelection(std::set<int> set, int last) override;
+	void filter(int type);
 
 signals:
 	void sNew();
@@ -27,6 +28,8 @@ private:
 	QAction* m_action_delete;
 	QAction* m_action_edit;
 	QAction* m_action_open;
+
+	//int filter; // 0 global, 1 local, 2 
 };
 
 #endif // ERSCROLLBOX_H

@@ -43,4 +43,4 @@ public: // COMMANDS
 	};
 };
 
-#endif
+#endif // ERESOURCEGROUP_H

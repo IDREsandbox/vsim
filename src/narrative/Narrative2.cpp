@@ -10,6 +10,16 @@ Narrative2::Narrative2()
 	m_author(""),
 	m_locked(false)
 {
+	h1 = new LabelStyle("\"Arial\"", 36, 255, 255, 255, 255, false, 0,
+		0, 0, 178, 200, 150, "bold", "center");
+	h2 = new LabelStyle("\"Arial\"", 20, 244, 147, 31, 255, false, 0,
+		0, 0, 178, 200, 150, "bold", "center");
+	bod = new LabelStyle("\"Arial\"", 12, 255, 255, 255, 255, false, 0,
+		0, 0, 178, 200, 150, "regular", "left");
+	lab = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
+		255, 255, 178, 200, 150, "bold", "center");
+	img = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
+		255, 255, 178, 200, 150, "bold", "center");
 }
 
 Narrative2::Narrative2(const Narrative2 & n, const osg::CopyOp & copyop)
@@ -17,7 +27,8 @@ Narrative2::Narrative2(const Narrative2 & n, const osg::CopyOp & copyop)
 	m_title(n.m_title),
 	m_description(n.m_description),
 	m_author(n.m_author),
-	m_locked(n.m_locked)
+	m_locked(n.m_locked),
+	h1(n.h1), h2(n.h2), bod(n.bod), lab(n.lab), img(n.img)
 {
 }
 
@@ -34,6 +45,17 @@ Narrative2::Narrative2(const Narrative * old)
 		NarrativeSlide *new_slide = new NarrativeSlide(node, transition);
 		addChild(new_slide);
 	}
+
+	h1 = new LabelStyle("\"Arial\"", 36, 255, 255, 255, 255, false, 0,
+		0, 0, 178, 200, 150, "bold", "center");
+	h2 = new LabelStyle("\"Arial\"", 20, 244, 147, 31, 255, false, 0,
+		0, 0, 178, 200, 150, "bold", "center");
+	bod = new LabelStyle("\"Arial\"", 12, 255, 255, 255, 255, false, 0,
+		0, 0, 178, 200, 150, "regular", "left");
+	lab = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
+		255, 255, 178, 200, 150, "bold", "center");
+	img = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
+		255, 255, 178, 200, 150, "bold", "center");
 }
 
 Narrative2::~Narrative2()

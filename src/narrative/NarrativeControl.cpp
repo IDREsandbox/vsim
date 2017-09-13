@@ -25,6 +25,8 @@
 #include "labelCanvas.h"
 #include "labelCanvasView.h"
 #include "editButtons.h"
+#include "StyleSettings.h"
+#include "LabelStyle.h"
 
 NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	: QObject(parent), 
@@ -36,6 +38,8 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	m_slide_box = window->topBar()->ui.slides;
 	m_canvas = window->m_drag_area;
 	m_undo_stack = window->m_undo_stack;
+
+	connect(m_window, &MainWindow::sEditStyleSettings, this, &NarrativeControl::editStyleSettings);
 
 	// NARRATIVE CONTROL
 	// new
@@ -99,27 +103,30 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 
 	connect(editDlg->ui.done, &QPushButton::clicked, this, &NarrativeControl::exitEdit);
 	connect(editDlg->ui.delete_2, &QPushButton::clicked, this, &NarrativeControl::deleteLabelButton);
-	connect(editDlg->ui.label, SIGNAL(clicked()), signalMapper, SLOT(map()));
-	connect(editDlg->ui.head1, SIGNAL(clicked()), signalMapper, SLOT(map()));
-	connect(editDlg->ui.head2, SIGNAL(clicked()), signalMapper, SLOT(map()));
-	connect(editDlg->ui.body, SIGNAL(clicked()), signalMapper, SLOT(map()));
+	connect(editDlg->ui.label, &QPushButton::clicked, this, &NarrativeControl::newLab);
+	connect(editDlg->ui.head1, &QPushButton::clicked, this, &NarrativeControl::newH1);
+	connect(editDlg->ui.head2, &QPushButton::clicked, this, &NarrativeControl::newH2);
+	connect(editDlg->ui.body, &QPushButton::clicked, this, &NarrativeControl::newBod);	//connect(editDlg->ui.body, SIGNAL(clicked()), signalMapper, SLOT(map()));
+	connect(editDlg->ui.image, &QPushButton::clicked, this, &NarrativeControl::newImg);
 
-	connect(editDlg->ui.label, &QPushButton::clicked, this, [this]() {newLabel(
+
+
+	/*connect(editDlg->ui.label, &QPushButton::clicked, this, [this]() {newLabel(
 		"<p>New label</p>",
 		"p{color:rgb(0, 0, 0); font-size: 12pt; font-family: \"Arial\"; font-weight: bold; text-align:center;}",
-		"background-color: rgba(255, 255, 255, 70);"); });
+		"background-color: rgba(255, 255, 255, 178);"); });
 	connect(editDlg->ui.head1, &QPushButton::clicked, this, [this]() {newLabel(
 		"<p>Heading 1</p>",
 		"p{color:rgb(240, 240, 240); font-size: 36pt; font-family: \"Arial\"; font-weight: bold; text-align:center;}",
-		"background-color: rgba(0, 0, 0, 70);"); });
+		"background-color: rgba(0, 0, 0, 178);"); });
 	connect(editDlg->ui.head2, &QPushButton::clicked, this, [this]() {newLabel(
 		"<p>Heading 2</p>",
 		"p{color:rgb(224, 147, 31); font-size: 20pt; font-family: \"Arial\"; font-weight: bold; text-align:center;}",
-		"background-color: rgba(0, 0, 0, 70);"); });
+		"background-color: rgba(0, 0, 0, 178);"); });
 	connect(editDlg->ui.body, &QPushButton::clicked, this, [this]() {newLabel(
 		"<p>New body</p>",
 		"p{color:rgb(240, 240, 240); font-size: 12pt; font-family: \"Arial\"; font-weight: regular; text-align:left;}",
-		"background-color: rgba(0, 0, 0, 70);"); });
+		"background-color: rgba(0, 0, 0, 178);"); });*/
 
 	// dirty slide thumbnails
 	connect(m_slide_box, &SlideScrollBox::sThumbnailsDirty, this, 
@@ -131,6 +138,81 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 
 NarrativeControl::~NarrativeControl()
 {
+}
+
+void NarrativeControl::editStyleSettings()
+{
+	int active_item = m_narrative_box->getLastSelected();
+	Narrative2 *narrative = getNarrative(active_item);
+
+	StyleSettings dlg(narrative);
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return;
+	}
+}
+
+void NarrativeControl::newH1()
+{
+	int active_item = m_narrative_box->getLastSelected();
+	Narrative2 *narrative = getNarrative(active_item);
+
+	LabelStyle* lb = narrative->getH1();
+	newLabel(
+		"<p>New Header 1</p>",
+		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font-family: \"" + lb->getFont() +"\"; font-weight: " + lb->getWeight() + "; text-align:" + lb->getAlign() + ";}",
+		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");");
+}
+
+void NarrativeControl::newH2()
+{
+	int active_item = m_narrative_box->getLastSelected();
+	Narrative2 *narrative = getNarrative(active_item);
+
+	LabelStyle* lb = narrative->getH2();
+	newLabel(
+		"<p>New Header 2</p>",
+		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font-family: \"" + lb->getFont() + "\"; font-weight: " + lb->getWeight() + "; text-align:" + lb->getAlign() + ";}",
+		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");");
+}
+
+void NarrativeControl::newBod()
+{
+	int active_item = m_narrative_box->getLastSelected();
+	Narrative2 *narrative = getNarrative(active_item);
+
+	LabelStyle* lb = narrative->getBod();
+	newLabel(
+		"<p>New Body Text</p>",
+		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font-family: \"" + lb->getFont() + "\"; font-weight: " + lb->getWeight() + "; text-align:" + lb->getAlign() + ";}",
+		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");");
+
+}
+
+void NarrativeControl::newLab()
+{
+	int active_item = m_narrative_box->getLastSelected();
+	Narrative2 *narrative = getNarrative(active_item);
+
+	LabelStyle* lb = narrative->getLab();
+	newLabel(
+		"<p>New Label</p>",
+		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font-family: \"" + lb->getFont() + "\"; font-weight: " + lb->getWeight() + "; text-align:" + lb->getAlign() + ";}",
+		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");");
+
+}
+
+void NarrativeControl::newImg()
+{
+	int active_item = m_narrative_box->getLastSelected();
+	Narrative2 *narrative = getNarrative(active_item);
+
+	LabelStyle* lb = narrative->getImg();
+	newLabel(
+		"<p>New Image Label</p>",
+		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font-family: \"" + lb->getFont() + "\"; font-weight: " + lb->getWeight() + "; text-align:" + lb->getAlign() + ";}",
+		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");");
+
 }
 
 void NarrativeControl::newNarrative()

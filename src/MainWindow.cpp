@@ -64,8 +64,11 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->rootLayout->addWidget(m_view, 0, 0);
 
 	// embedded resources
-	m_resource_group = new EResourceGroup();
-	ui->local->setGroup(m_resource_group);
+	m_resource_group = new EResourceGroup(); // for the all-resources view.
+	m_local_resource_group = new EResourceGroup();
+	m_global_resource_group = new EResourceGroup();
+	ui->local->setGroup(m_local_resource_group);
+	ui->global->setGroup(m_global_resource_group);
 
 	m_cat_group = new ECategoryGroup();
 
@@ -90,6 +93,8 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionOSG_Debug, &QAction::triggered, this, &MainWindow::sDebugOSG);
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
 	connect(ui->actionControl_Debug, &QAction::triggered, this, &MainWindow::sDebugControl);
+
+	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
 
 	// camera manipulator
 	connect(ui->actionFirst_Person_Navigation, &QAction::triggered, m_osg_widget,
@@ -158,14 +163,34 @@ void MainWindow::newER()
 	}
 
 	m_undo_stack->beginMacro("New Resource");
-	int num_children = m_resource_group->getNumChildren();
+	int num_children;
+	if (dlg.getGlobal())
+		num_children = m_global_resource_group->getNumChildren();
+	else
+		num_children = m_local_resource_group->getNumChildren();
 	m_undo_stack->push(new SelectResourcesCommand(this, { num_children - 1 }, ON_UNDO));
-	m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_resource_group, m_resource_group->getNumChildren()));
+	if (dlg.getGlobal()) {
+		m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_global_resource_group, m_global_resource_group->getNumChildren()));
+		m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_resource_group, m_resource_group->getNumChildren()));
+	}
+	else {
+		m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_local_resource_group, m_local_resource_group->getNumChildren()));
+		m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_resource_group, m_resource_group->getNumChildren()));
+	}
 	m_undo_stack->push(new SelectResourcesCommand(this, { num_children }, ON_REDO));
 	m_undo_stack->endMacro();
 
-	EResource *resource = getResource(m_resource_group->getNumChildren() - 1);
-	resource->setIndex(m_resource_group->getNumChildren() - 1);
+	EResource* resource;
+	if (dlg.getGlobal()) {
+		osg::Node *c = m_global_resource_group->getChild(m_global_resource_group->getNumChildren() - 1);
+		resource = dynamic_cast<EResource*>(c); // getResource(m_resource_group->getNumChildren() - 1);
+		resource->setIndex(m_global_resource_group->getNumChildren() - 1);
+	}
+	else {
+		osg::Node *c = m_local_resource_group->getChild(m_local_resource_group->getNumChildren() - 1);
+		resource = dynamic_cast<EResource*>(c); // getResource(m_resource_group->getNumChildren() - 1);
+		resource->setIndex(m_local_resource_group->getNumChildren() - 1);
+	}
 	resource->setResourceName(dlg.getTitle());
 	resource->setAuthor(dlg.getAuthor());
 	resource->setResourceDescription(dlg.getDescription());

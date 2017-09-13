@@ -87,7 +87,15 @@ public slots:
 	void exitEdit();
 	void deleteLabelButton();
 
+	void editStyleSettings();
+
 	//Canvas
+	void newH1();
+	void newH2();
+	void newBod();
+	void newLab();
+	void newImg();
+
 	void newLabel(const std::string &text, const std::string &style, const std::string &widget_style);
 	void deleteLabel(int idx);
 	void moveLabel(float rx, float ry, int idx);
@@ -104,6 +112,7 @@ private:
 
 	// std::vector<Narrative*> m_narratives;
 	osg::ref_ptr<NarrativeGroup> m_narrative_group; // the osg side data structure, instead of using a vector
+	//osg::ref_ptr<LabelStyleGroup> m_style_group;
 	osg::Group *m_model;
 
 	MainWindow *m_window; // TODO: remove this after redesign, this should be completely gui independent
