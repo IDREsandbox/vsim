@@ -160,8 +160,8 @@ void NarrativeControl::newH1()
 	LabelStyle* lb = narrative->getH1();
 	newLabel(
 		"<p>New Header 1</p>",
-		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font-family: \"" + lb->getFont() +"\"; font-weight: " + lb->getWeight() + "; text-align:" + lb->getAlign() + ";}",
-		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");");
+		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font:" + lb->getWeight() + " \"" + lb->getFont() + "\"; text-align:" + lb->getAlign() + ";}",
+		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");", float(lb->getHeight()) / m_window->size().height(), float(lb->getWidth()) / m_window->size().width(), lb->getMargin());
 }
 
 void NarrativeControl::newH2()
@@ -172,8 +172,8 @@ void NarrativeControl::newH2()
 	LabelStyle* lb = narrative->getH2();
 	newLabel(
 		"<p>New Header 2</p>",
-		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font-family: \"" + lb->getFont() + "\"; font-weight: " + lb->getWeight() + "; text-align:" + lb->getAlign() + ";}",
-		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");");
+		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font:" + lb->getWeight() + " \"" + lb->getFont() + "\"; text-align:" + lb->getAlign() + ";}",
+		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");", float(lb->getHeight()) / m_window->size().height(), float(lb->getWidth()) / m_window->size().width(), lb->getMargin());
 }
 
 void NarrativeControl::newBod()
@@ -184,8 +184,8 @@ void NarrativeControl::newBod()
 	LabelStyle* lb = narrative->getBod();
 	newLabel(
 		"<p>New Body Text</p>",
-		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font-family: \"" + lb->getFont() + "\"; font-weight: " + lb->getWeight() + "; text-align:" + lb->getAlign() + ";}",
-		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");");
+		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font:" +lb->getWeight() + " \"" + lb->getFont() + "\"; text-align:" + lb->getAlign() + ";}",
+		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");", float(lb->getHeight()) / m_window->size().height(), float(lb->getWidth()) / m_window->size().width(), lb->getMargin());
 
 }
 
@@ -197,8 +197,8 @@ void NarrativeControl::newLab()
 	LabelStyle* lb = narrative->getLab();
 	newLabel(
 		"<p>New Label</p>",
-		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font-family: \"" + lb->getFont() + "\"; font-weight: " + lb->getWeight() + "; text-align:" + lb->getAlign() + ";}",
-		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");");
+		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font:" + lb->getWeight() + " \"" + lb->getFont() + "\"; text-align:" + lb->getAlign() + ";}",
+		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");", float(lb->getHeight()) / m_window->size().height(), float(lb->getWidth()) / m_window->size().width(), lb->getMargin());
 
 }
 
@@ -208,10 +208,11 @@ void NarrativeControl::newImg()
 	Narrative2 *narrative = getNarrative(active_item);
 
 	LabelStyle* lb = narrative->getImg();
+
 	newLabel(
 		"<p>New Image Label</p>",
-		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font-family: \"" + lb->getFont() + "\"; font-weight: " + lb->getWeight() + "; text-align:" + lb->getAlign() + ";}",
-		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");");
+		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font:" + lb->getWeight() + " \"" + lb->getFont() + "\"; text-align:" + lb->getAlign() + ";}",
+		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");", float(lb->getHeight()) / m_window->size().height(), float(lb->getWidth()) / m_window->size().width(), lb->getMargin());
 
 }
 
@@ -445,7 +446,7 @@ void NarrativeControl::selectLabel(int narrative, int slide, int label)
 	m_canvas->setSelection(label);
 }
 
-void NarrativeControl::newLabel(const std::string &text, const std::string &style, const std::string &widget_style) {
+void NarrativeControl::newLabel(const std::string &text, const std::string &style, const std::string &widget_style, float height, float width, int margin) {
 	NarrativeSlide *slide = getCurrentSlide();
 	if (!slide) {
 		qWarning() << "Narrative Control - creating label without slide open";
@@ -465,6 +466,7 @@ void NarrativeControl::newLabel(const std::string &text, const std::string &styl
 	label->setStyle(style); // have to set style before text because that's how the document works
 	label->setWidgetStyle(widget_style);
 	label->setText(text);
+	label->resize(float(width), float(height));
 
 	// push command
 	m_undo_stack->beginMacro("New Label");

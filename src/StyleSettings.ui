@@ -72,105 +72,158 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QGroupBox" name="Header1">
-       <property name="minimumSize">
-        <size>
-         <width>421</width>
-         <height>101</height>
-        </size>
-       </property>
        <property name="maximumSize">
         <size>
          <width>421</width>
-         <height>101</height>
+         <height>129</height>
         </size>
        </property>
        <property name="title">
         <string>Text</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="h1_fontLabel">
-          <property name="text">
-           <string>Font:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="h1_sizeLabel">
-          <property name="text">
-           <string>Size:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="h1_colorLabel">
-          <property name="text">
-           <string>Color:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3" colspan="2">
-         <widget class="QLabel" name="h1_opacityLabel">
-          <property name="text">
-           <string>Opacity:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="6">
-         <widget class="QLabel" name="h1_shadowLabel">
-          <property name="text">
-           <string>Shadow:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QFontComboBox" name="h1_fontBox"/>
-        </item>
-        <item row="1" column="1">
-         <widget class="QComboBox" name="h1_sizeBox"/>
-        </item>
-        <item row="1" column="2">
-         <widget class="QPushButton" name="h1_colorPicker">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3">
-         <widget class="QLabel" name="h1_zero">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="4">
-         <widget class="QSlider" name="h1_opacity">
-          <property name="maximum">
-           <number>255</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="5">
-         <widget class="QLabel" name="h1_onehundred">
-          <property name="text">
-           <string>100</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="6">
-         <widget class="QCheckBox" name="h1_shadow">
-          <property name="layoutDirection">
-           <enum>Qt::RightToLeft</enum>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QLabel" name="h1_fontLabel">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>27</y>
+          <width>411</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Font:                                               Style:                                        Size:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="h1_colorLabel">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>60</y>
+          <width>351</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Color:                 Opacity:  0                                                                255</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="h1_shadowLabel">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>85</y>
+          <width>191</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Shadow:                     Justification:</string>
+        </property>
+       </widget>
+       <widget class="QFontComboBox" name="h1_fontBox">
+        <property name="geometry">
+         <rect>
+          <x>45</x>
+          <y>27</y>
+          <width>112</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="h1_sizeBox">
+        <property name="geometry">
+         <rect>
+          <x>359</x>
+          <y>27</y>
+          <width>51</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="h1_colorPicker">
+        <property name="geometry">
+         <rect>
+          <x>45</x>
+          <y>57</y>
+          <width>32</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QSlider" name="h1_opacity">
+        <property name="geometry">
+         <rect>
+          <x>152</x>
+          <y>57</y>
+          <width>171</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>161</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <widget class="QCheckBox" name="h1_shadow">
+        <property name="geometry">
+         <rect>
+          <x>60</x>
+          <y>90</y>
+          <width>16</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="h1_opacityBox">
+        <property name="geometry">
+         <rect>
+          <x>359</x>
+          <y>58</y>
+          <width>37</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="h1_styleBox">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>27</y>
+          <width>81</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="h1_justify">
+        <property name="geometry">
+         <rect>
+          <x>198</x>
+          <y>90</y>
+          <width>211</width>
+          <height>22</height>
+         </rect>
+        </property>
+       </widget>
       </widget>
      </item>
      <item>
@@ -190,83 +243,123 @@
        <property name="title">
         <string>Background</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_6">
-        <item row="1" column="2">
-         <widget class="QSlider" name="h1_opacity_bod">
-          <property name="maximum">
-           <number>255</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLabel" name="h1_zero_bod">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QLabel" name="h1_opacityLabel_bod">
-          <property name="text">
-           <string>Opacity:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="h1_colorPicker_bod">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="h1_colorLabel_bod">
-          <property name="text">
-           <string>Color:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3">
-         <widget class="QLabel" name="h1_onehundred_bod">
-          <property name="text">
-           <string>100</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="4">
-         <widget class="QSpinBox" name="h1_width"/>
-        </item>
-        <item row="1" column="5">
-         <widget class="QSpinBox" name="h1_height"/>
-        </item>
-        <item row="0" column="4">
-         <widget class="QLabel" name="h1_widthLabel">
-          <property name="text">
-           <string>Width:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
-         <widget class="QLabel" name="h1_heightLabel">
-          <property name="text">
-           <string>Height:</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QSlider" name="h1_opacity_bod">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>30</y>
+          <width>181</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="h1_colorPicker_bod">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>30</y>
+          <width>31</width>
+          <height>23</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="h1_colorLabel_bod">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>371</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Color:                   Opacity:    0                                                                255</string>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="h1_width">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>70</y>
+          <width>43</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <number>500</number>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="h1_height">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>70</y>
+          <width>43</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <number>500</number>
+        </property>
+       </widget>
+       <widget class="QLabel" name="h1_widthLabel">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>321</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Width:                        Height:                                          Margin:</string>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="h1_opacityBox_bod">
+        <property name="geometry">
+         <rect>
+          <x>370</x>
+          <y>30</y>
+          <width>37</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="h1_margin">
+        <property name="geometry">
+         <rect>
+          <x>320</x>
+          <y>70</y>
+          <width>41</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <zorder>h1_widthLabel</zorder>
+       <zorder>h1_colorLabel_bod</zorder>
+       <zorder>h1_opacity_bod</zorder>
+       <zorder>h1_colorPicker_bod</zorder>
+       <zorder>h1_width</zorder>
+       <zorder>h1_height</zorder>
+       <zorder>h1_opacityBox_bod</zorder>
+       <zorder>Header1</zorder>
+       <zorder>h1_margin</zorder>
       </widget>
      </item>
      <item>
       <widget class="QFrame" name="h1_frame">
-       <property name="minimumSize">
-        <size>
-         <width>421</width>
-         <height>261</height>
-        </size>
-       </property>
        <property name="maximumSize">
         <size>
          <width>421</width>
@@ -279,19 +372,15 @@
        <property name="frameShadow">
         <enum>QFrame::Raised</enum>
        </property>
-       <widget class="QLabel" name="header1_prev">
-        <property name="geometry">
-         <rect>
-          <x>90</x>
-          <y>80</y>
-          <width>231</width>
-          <height>101</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Test area!</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="header1_prev">
+          <property name="text">
+           <string>Test area!</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
@@ -745,7 +834,7 @@
         <property name="geometry">
          <rect>
           <x>90</x>
-          <y>90</y>
+          <y>80</y>
           <width>231</width>
           <height>101</height>
          </rect>
@@ -976,7 +1065,7 @@
         <property name="geometry">
          <rect>
           <x>90</x>
-          <y>90</y>
+          <y>80</y>
           <width>231</width>
           <height>101</height>
          </rect>
@@ -1206,7 +1295,7 @@
        <widget class="QLabel" name="il_prev">
         <property name="geometry">
          <rect>
-          <x>100</x>
+          <x>90</x>
           <y>80</y>
           <width>231</width>
           <height>101</height>

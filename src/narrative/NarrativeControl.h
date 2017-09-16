@@ -96,7 +96,7 @@ public slots:
 	void newLab();
 	void newImg();
 
-	void newLabel(const std::string &text, const std::string &style, const std::string &widget_style);
+	void newLabel(const std::string &text, const std::string &style, const std::string &widget_style, float height, float width, int margin);
 	void deleteLabel(int idx);
 	void moveLabel(float rx, float ry, int idx);
 	void resizeLabel(float rw, float rh, int idx);

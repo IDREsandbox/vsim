@@ -17,7 +17,7 @@ public:
 	LabelStyle();
 	LabelStyle(const LabelStyle& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	LabelStyle(const std::string f, int s, int r, int g, int b, float o, bool sh, int rbg, 
-		int bbg, int gbg, float obg, int w, int h, const std::string we, const std::string al);
+		int bbg, int gbg, float obg, int w, int h, const std::string we, const std::string al, int m);
 	virtual ~LabelStyle();
 
 	LabelStyle& operator=(const LabelStyle& other);
@@ -51,6 +51,8 @@ public:
 	void setWidth(int w);
 	int getHeight() const;
 	void setHeight(int h);
+	int getMargin() const;
+	void setMargin(int m);
 
 	const std::string& getWeight() const;
 	void setWeight(const std::string& Weight);
@@ -96,6 +98,7 @@ private:
 	float opacity_bg;
 	int width;
 	int height;
+	int margin;
 
 	std::string weight;
 	std::string align;

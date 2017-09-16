@@ -11,15 +11,15 @@ Narrative2::Narrative2()
 	m_locked(false)
 {
 	h1 = new LabelStyle("\"Arial\"", 36, 255, 255, 255, 255, false, 0,
-		0, 0, 178, 200, 150, "bold", "center");
+		0, 0, 178, 650, 80, "Bold", "Center", 10);
 	h2 = new LabelStyle("\"Arial\"", 20, 244, 147, 31, 255, false, 0,
-		0, 0, 178, 200, 150, "bold", "center");
+		0, 0, 229, 250, 35, "Bold", "Center", 10);
 	bod = new LabelStyle("\"Arial\"", 12, 255, 255, 255, 255, false, 0,
-		0, 0, 178, 200, 150, "regular", "left");
+		0, 0, 178, 250, 255, "Regular", "Left", 10);
 	lab = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
-		255, 255, 178, 200, 150, "bold", "center");
+		255, 255, 255, 175, 25, "Bold", "Center", 10);
 	img = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
-		255, 255, 178, 200, 150, "bold", "center");
+		255, 255, 255, 455, 325, "Italic", "Center", 10);
 }
 
 Narrative2::Narrative2(const Narrative2 & n, const osg::CopyOp & copyop)
@@ -30,6 +30,16 @@ Narrative2::Narrative2(const Narrative2 & n, const osg::CopyOp & copyop)
 	m_locked(n.m_locked),
 	h1(n.h1), h2(n.h2), bod(n.bod), lab(n.lab), img(n.img)
 {
+	h1 = new LabelStyle("\"Arial\"", 36, 255, 255, 255, 255, false, 0,
+		0, 0, 178, 650, 80, "Bold", "Center", 10);
+	h2 = new LabelStyle("\"Arial\"", 20, 244, 147, 31, 255, false, 0,
+		0, 0, 229, 250, 35, "Bold", "Center", 10);
+	bod = new LabelStyle("\"Arial\"", 12, 255, 255, 255, 255, false, 0,
+		0, 0, 178, 250, 255, "Regular", "Left", 10);
+	lab = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
+		255, 255, 255, 175, 25, "Bold", "Center", 10);
+	img = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
+		255, 255, 255, 455, 325, "Italic", "Center", 10);
 }
 
 Narrative2::Narrative2(const Narrative * old)
@@ -47,15 +57,15 @@ Narrative2::Narrative2(const Narrative * old)
 	}
 
 	h1 = new LabelStyle("\"Arial\"", 36, 255, 255, 255, 255, false, 0,
-		0, 0, 178, 200, 150, "bold", "center");
+		0, 0, 178, 650, 80, "Bold", "Center", 10);
 	h2 = new LabelStyle("\"Arial\"", 20, 244, 147, 31, 255, false, 0,
-		0, 0, 178, 200, 150, "bold", "center");
+		0, 0, 229, 250, 35, "Bold", "Center", 10);
 	bod = new LabelStyle("\"Arial\"", 12, 255, 255, 255, 255, false, 0,
-		0, 0, 178, 200, 150, "regular", "left");
+		0, 0, 178, 250, 255, "Regular", "Left", 10);
 	lab = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
-		255, 255, 178, 200, 150, "bold", "center");
+		255, 255, 255, 175, 25, "Bold", "Center", 10);
 	img = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
-		255, 255, 178, 200, 150, "bold", "center");
+		255, 255, 255, 455, 325, "Italic", "Center", 10);
 }
 
 Narrative2::~Narrative2()

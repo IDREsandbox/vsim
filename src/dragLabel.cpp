@@ -110,7 +110,7 @@ void dragLabel::mousePressEvent(QMouseEvent *event)
 	par->setSelection(m_index);
 
 	QRect bottomRight = QRect(width() - (width() / 6), height() - (height() / 6), width() / 6, height() / 6);
-	int border = 8;
+	int border = 10;
 	QRect center_rect = QRect(border, border, width() - 2 * border, height() - 2 * border);
 	qDebug() << "mouse press" << event->pos() << center_rect << bottomRight;
 	// Check if in the bottom right

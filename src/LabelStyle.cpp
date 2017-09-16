@@ -3,7 +3,7 @@
 LabelStyle::LabelStyle() :
 	font("\"Arial\""), size(12), red(240), green(240), blue(240), opacity(255),
 	shadow(false), red_bg(0), green_bg(0), blue_bg(0), opacity_bg(178), width(200), height(150),
-	weight("regular"), align("left")
+	weight("regular"), align("left"), margin(10)
 {
 
 }
@@ -11,16 +11,16 @@ LabelStyle::LabelStyle() :
 LabelStyle::LabelStyle(const LabelStyle& n, const osg::CopyOp& copyop) :
 	font(n.font), size(n.size), red(n.red), green(n.green), blue(n.blue), opacity(n.opacity),
 	shadow(n.shadow), red_bg(n.red_bg), green_bg(n.green_bg), blue_bg(n.blue_bg), opacity_bg(n.opacity_bg), 
-	width(n.width), height(n.height), weight(n.weight), align(n.align)
+	width(n.width), height(n.height), weight(n.weight), align(n.align), margin(n.margin)
 {
 
 }
 
 LabelStyle::LabelStyle(const std::string f, int s, int r, int g, int b, float o, bool sh, int rbg,
-	int bbg, int gbg, float obg, int w, int h, const std::string we, const std::string al) :
+	int bbg, int gbg, float obg, int w, int h, const std::string we, const std::string al, int m) :
 	font(f), size(s), red(r), green(g), blue(b), opacity(o),
 	shadow(sh), red_bg(rbg), green_bg(gbg), blue_bg(bbg), opacity_bg(obg), width(w), height(h),
-	weight(we), align(al)
+	weight(we), align(al), margin(m)
 {
 
 }
@@ -49,6 +49,7 @@ LabelStyle& LabelStyle::operator=(const LabelStyle& other)
 		height = other.height;
 		weight = other.weight;
 		align = other.align;
+		margin = other.margin;
 	}
 
 	return *this;
@@ -176,4 +177,14 @@ const std::string& LabelStyle::getAlign() const
 void LabelStyle::setAlign(const std::string& Align)
 {
 	align = Align;
+}
+
+int LabelStyle::getMargin() const
+{
+	return margin;
+}
+
+void LabelStyle::setMargin(int m)
+{
+	margin = m;
 }
