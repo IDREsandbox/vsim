@@ -467,6 +467,7 @@ void NarrativeControl::newLabel(const std::string &text, const std::string &styl
 	label->setWidgetStyle(widget_style);
 	label->setText(text);
 	label->resize(float(width), float(height));
+	label->setMargin(margin);
 
 	// push command
 	m_undo_stack->beginMacro("New Label");

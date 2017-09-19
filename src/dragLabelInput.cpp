@@ -8,13 +8,14 @@ dragLabelInput::dragLabelInput(QWidget* parent) : QDialog(parent) {
 	//setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 }
 
-dragLabelInput::dragLabelInput(QWidget* parent, const QString &text)
+dragLabelInput::dragLabelInput(QWidget* parent, const QString &text, const std::string style)
 	: dragLabelInput(parent)
 {
 	//ui.setupUi(this);
 	//this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 	this->setFixedWidth(1000);
 	ui.widget->setText(text);
+	ui.widget->setStyleSheet_textEdit(style);
 	m_result = text;
 }
 

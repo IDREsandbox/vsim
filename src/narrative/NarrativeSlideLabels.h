@@ -36,6 +36,9 @@ public:
 	const std::string& getWidgetStyle() const;
 	void setWidgetStyle(const std::string& widgetStyle);
 
+	void setMargin(int m);
+	int getMargin() const;
+
 	void move(float x, float y);
 	void resize(float w, float h);
 
@@ -87,6 +90,7 @@ public:
 	float m_rY;
 	float m_rW;
 	float m_rH;
+	int m_margin;
 
 	QTextDocument *m_document;
 	// These are just temporaries for the serializer, the actual data is stored in the document

@@ -65,6 +65,8 @@ public:
 	float ratioHeight;
 	float ratioWidth;
 
+	int margin;
+
 	float ratioX;
 	float ratioY;
 

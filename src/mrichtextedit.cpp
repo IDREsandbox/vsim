@@ -191,6 +191,11 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
 }
 
 
+void MRichTextEdit::setStyleSheet_textEdit(const std::string str)
+{
+	f_textedit->setStyleSheet(QString::fromStdString(str));
+}
+
 void MRichTextEdit::textSource() {
     QDialog *dialog = new QDialog(this);
     QPlainTextEdit *pte = new QPlainTextEdit(dialog);

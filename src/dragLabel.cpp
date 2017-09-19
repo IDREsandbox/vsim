@@ -17,12 +17,13 @@ dragLabel::dragLabel(labelCanvas *parent)
 	ratioY(.1),
 	m_label(nullptr),
 	m_dragging(false),
-	m_resizing(false)
+	m_resizing(false),
+	margin(10)
 {
 
 	setFrameShape(QFrame::NoFrame);
 
-	setMinimumSize(80, 50);
+	setMinimumSize(80, 40);
 
 	this->setWordWrapMode(QTextOption::WordWrap);
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -134,7 +135,7 @@ void dragLabel::mousePressEvent(QMouseEvent *event)
 void dragLabel::mouseDoubleClickEvent(QMouseEvent * event)
 {
 	par->setSelection(m_index);
-	dragLabelInput *setTextDg = new dragLabelInput(nullptr, this->toHtml());
+	dragLabelInput *setTextDg = new dragLabelInput(nullptr, this->toHtml(), m_label->getWidgetStyle());
 	setTextDg->setWindowFlags(Qt::WindowSystemMenuHint);
 
 	int size = this->font().pixelSize();
@@ -153,6 +154,8 @@ void dragLabel::mouseDoubleClickEvent(QMouseEvent * event)
 	c.select(QTextCursor::Document);
 	c.removeSelectedText();
 	c.insertHtml(text);
+
+	emit sSetPos(ratioX, ratioY, m_index);
 }
 
 void dragLabel::mouseReleaseEvent(QMouseEvent *event)
@@ -244,6 +247,11 @@ void dragLabel::setSize(float w, float h)
 	canvasResize();
 }
 
+//void dragLabel::setMargin(int m)
+//{
+//	margin = m;
+//}
+
 void dragLabel::setLabel(NarrativeSlideLabels * label)
 {
 	if (m_label != nullptr) disconnect(m_label, 0, this, 0);
@@ -268,6 +276,7 @@ void dragLabel::setLabel(NarrativeSlideLabels * label)
 	// Since the document stuff is directly connected we still have to get edit signals
 	// down to control somehow
 	QTextDocument *doc = label->getDocument();
+	//doc->setDocumentMargin(margin);
 	connect(doc, &QTextDocument::undoCommandAdded, this, [this]() {emit sEdited(getIndex()); });
 }
 

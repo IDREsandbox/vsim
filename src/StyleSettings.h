@@ -39,8 +39,13 @@ public:
 	void pickBGColor_h2();
 	void pickBGOpacity_h2();
 	//void pickShadow_h2();
-	//void pickWidth_h2();
-	//void pickHeight_h2();
+	void pickWidth_h2();
+	void pickHeight_h2();
+	void pickFontOpacityBox_h2();
+	void pickBGOpacityBox_h2();
+	void pickJustification_h2();
+	void pickStyle_h2();
+	void pickMargin_h2();
 
 	void pickFontColor_bt();
 	void pickFontSize_bt();
@@ -49,8 +54,13 @@ public:
 	void pickBGColor_bt();
 	void pickBGOpacity_bt();
 	//void pickShadow_bt();
-	//void pickWidth_bt();
-	//void pickHeight_bt();
+	void pickWidth_bt();
+	void pickHeight_bt();
+	void pickFontOpacityBox_bt();
+	void pickBGOpacityBox_bt();
+	void pickJustification_bt();
+	void pickStyle_bt();
+	void pickMargin_bt();
 
 	void pickFontColor_lt();
 	void pickFontSize_lt();
@@ -59,8 +69,13 @@ public:
 	void pickBGColor_lt();
 	void pickBGOpacity_lt();
 	//void pickShadow_lt();
-	//void pickWidth_lt();
-	//void pickHeight_lt();
+	void pickWidth_lt();
+	void pickHeight_lt();
+	void pickFontOpacityBox_lt();
+	void pickBGOpacityBox_lt();
+	void pickJustification_lt();
+	void pickStyle_lt();
+	void pickMargin_lt();
 
 	void pickFontColor_il();
 	void pickFontSize_il();
@@ -69,8 +84,13 @@ public:
 	void pickBGColor_il();
 	void pickBGOpacity_il();
 	//void pickShadow_il();
-	//void pickWidth_il();
-	//void pickHeight_il();
+	void pickWidth_il();
+	void pickHeight_il();
+	void pickFontOpacityBox_il();
+	void pickBGOpacityBox_il();
+	void pickJustification_il();
+	void pickStyle_il();
+	void pickMargin_il();
 
 private:
 	void setGui();

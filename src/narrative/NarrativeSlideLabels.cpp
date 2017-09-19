@@ -1,4 +1,5 @@
 #include "narrative/NarrativeSlideLabels.h"
+#include <qgraphicseffect.h>
 
 NarrativeSlideLabels::NarrativeSlideLabels()
 	: osg::Node(),
@@ -6,11 +7,15 @@ NarrativeSlideLabels::NarrativeSlideLabels()
 	m_rY(0.5),
 	m_rW(0.25),
 	m_rH(0.2),
-	m_widget_style("background: rgba(0, 0, 0, 70);")
+	m_widget_style("background: rgba(0, 0, 0, 70);"),
+	m_margin(10)
 {
 	m_document = new QTextDocument(this);
 	m_document->setDefaultStyleSheet("p {color: rgb(255, 255, 255);}");
 	m_document->setHtml("New Label");
+	m_document->setDocumentMargin(m_margin);
+
+	
 }
 
 
@@ -20,11 +25,13 @@ NarrativeSlideLabels::NarrativeSlideLabels(const NarrativeSlideLabels & n, const
 	m_rY(n.m_rY),
 	m_rW(n.m_rW),
 	m_rH(n.m_rH),
-	m_widget_style("background: rgba(0, 0, 0, 70);")
+	m_widget_style("background: rgba(0, 0, 0, 70);"),
+	m_margin(n.m_margin)
 {
 	m_document = new QTextDocument(this);
 	m_document->setDefaultStyleSheet("p {color: rgb(255, 255, 255);}");
 	m_document->setHtml("New Label");
+	m_document->setDocumentMargin(m_margin);
 }
 
 //TODO: add op to copy from legacy narr
@@ -41,6 +48,17 @@ float NarrativeSlideLabels::getrX() const
 void NarrativeSlideLabels::setrX(float x)
 {
 	m_rX = x;
+}
+
+int NarrativeSlideLabels::getMargin() const
+{
+	return m_margin;
+}
+
+void NarrativeSlideLabels::setMargin(int m)
+{
+	m_margin = m;
+	m_document->setDocumentMargin(m_margin);
 }
 
 float NarrativeSlideLabels::getrY() const

@@ -11,7 +11,7 @@ class dragLabelInput : public QDialog {
 
 public:
 	dragLabelInput(QWidget *parent = nullptr);
-	dragLabelInput(QWidget *parent, const QString&);
+	dragLabelInput(QWidget *parent, const QString&, const std::string);
 	~dragLabelInput();
 
 	const QString& getInfo();
