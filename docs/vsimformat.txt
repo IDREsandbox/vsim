@@ -109,7 +109,7 @@ load it as is, into an osg::Node
   ::ModelInformation with no name, give it a name
 
 
-Import
+#Import
 
 vsim/osgb/osgt
  this is really complicated... it should be the same as load, but append Narratives and Models
@@ -122,25 +122,16 @@ osg/obj/fbx/dae/skt/flt/etc?
  this is a raw model, do importing instead
 
 
-Export
+#Export
 
 vsim/osgb/osgt
  export as is
 
 
 
+#Compatibility Rules
 
+for new and old .vsim binary files to be compatible
+- inheritance cannot change
+- serializer item order cannot change
 
-
-
-The flow of things
-
-reset 
-  calls init(new Group)
-init
-  cleans up old stuff
-  calls convertToNewVSim
-convertToNewVSim
-  
-
-nar

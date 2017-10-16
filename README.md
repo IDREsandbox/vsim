@@ -3,7 +3,31 @@
 
 ## Installation
 
-### Windows - CMake, Visual Studio 2017, Qt 5.9.1
+### Windows - Visual Studio 2017
+
+Setup Qt
+
+1. Download Qt Open Source https://www.qt.io/download-open-source/
+2. Install Qt 5.9.x 64bit VS2017.
+3. In Visual Studio - 
+	- Install QTPackage plugin (Tools > Extensions and Updates, OR https://marketplace.visualstudio.com/items?itemName=havendv.QtPackage)
+	- QT5 > QtOptions - add the Qt versions. Name the x64 version 5.8.
+
+Setup Visual Studio 2017
+
+1. `git clone https://github.com/IDREsandbox/vsim.git`, the solution is in src/windows
+2. PATH - right click vsim project in the Solution Explorer (or click Project in the top tool bar) > Properties > Debugging > Environment 
+	`PATH=$(QTDIR)\bin;$(DEPS)\3rdParty-build\bin;$(DEPS)\osg-build\bin;%PATH%`
+3. Working Directory, this is for the little icon and fonts - `$(ROOT)`
+4. Dependencies - setup a symlink to the dependencies. The project assumes that dependencies are located in the root git directory, so you have to give it a link to the actual dependencies. If you're at the sandbox, dependencies are in vsim/vsim-dependencies.
+	`mklink /D dependencies T:\Projects\_UCLA\vsim\vsim-dependencies`
+	In powershell:
+	`cmd /c mklink /D dependencies T:\Projects\_UCLA\vsim\vsim-dependencies`
+5. Qt Version - right click vsim project in the Solution Explorer > Qt Project Settings > Version > link to the corresponding version (have to do this for 32 and 64 if you have both). 
+
+### Windows - CMake, Visual Studio 2017, Qt 5.9
+
+This is used for command line building of releases
 
 Downloads
 
@@ -33,7 +57,7 @@ Building (For more cmake notes see cmake.txt)
  6. Running tests `cmake -E env CTEST_OUTPUT_ON_FAILURE=1 cmake --build . --config RELEASE --target RUN_TESTS`
  7. If you add new files or make big changes `touch CMakeLists.txt` refreshes the source list
 
-CMake inside Visual Studio 2017 (doesn't fully work yet)
+CMake inside Visual Studio 2017 (doesn't work yet, don't try this)
 
  1. VS2017 has some cmake support. Open the vsim folder through VS.
  2. Poke the CMakeLists.txt, it should try to run cmake and fail
@@ -80,30 +104,6 @@ CMake inside Visual Studio 2017 (doesn't fully work yet)
 	```
  4. Building and installing `cmake --build . --config RELEASE --target install`
  5. Packaging `cpack .`
-
-### Windows - Visual Studio 2015
-
-Setup Qt
-
-1. Download Qt Open Source https://www.qt.io/download-open-source/
-2. Install Qt 5.8 64bit VS2015.
-3. In Visual Studio - 
-	- Install QTPackage plugin (Tools > Extensions and Updates, OR https://marketplace.visualstudio.com/items?itemName=havendv.QtPackage)
-	- QT5 > QtOptions - add the Qt versions. Name the x64 version 5.8.
-
-Setup Visual Studio 2015
-
-1. `git clone https://github.com/IDREsandbox/vsim.git`, the 2015 solution is in src/windows
-2. PATH - right click vsim project in the Solution Explorer (or click Project in the top tool bar) > Properties > Debugging > Environment 
-	`PATH=$(QTDIR)\bin;$(DEPS)\3rdParty-build\msvc2015_$(PlatformArchitecture)\bin;$(DEPS)\OpenSceneGraph-3.4.0-build\msvc2015_$(PlatformArchitecture)\bin;%PATH%`
-3. Working Directory, this is for the little icon and fonts - `$(ROOT)`
-4. Dependencies - setup a symlink to the dependencies. The project assumes that dependencies are located in the root git directory, so you have to give it a link to the actual dependencies. If you're at the sandbox, dependencies are in vsim/vsim-dependencies.
-	`mklink /D dependencies T:\Projects\_UCLA\vsim\vsim-dependencies`
-5. Qt Version - right click vsim project in the Solution Explorer > Qt Project Settings > Version > link to the corresponding version (have to do this for 32 and 64 if you have both). 
-
-
-
-
 
 ## Style guide
 
