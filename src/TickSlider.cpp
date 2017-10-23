@@ -9,7 +9,7 @@ TickSlider::TickSlider(QWidget *parent)
 {
 	// The problem is that if we want the cool looking handle we have to enable QSlider ticks (which we don't want)
 	// I was looking at ways to inject slider style options into the paintEvent and couldn't figure it out
-	// Solution: just paint one tick, and paint out black mark on top of it
+	// Solution: just paint one tick, and paint our black mark on top of it
 	setTickInterval(1000000);
 	setTickPosition(QSlider::TicksAbove);
 
@@ -39,11 +39,10 @@ TickSlider::TickSlider(QWidget *parent)
 	//"	margin: -30px 0;						   "
 	//"}										   "
 	//);
+
+	// snapping behavior
 	connect(this, &QAbstractSlider::actionTriggered, this,
 		[this](int action) {
-
-		//qDebug() << "action triggered" << (QAbstractSlider::SliderAction) action << this->value();
-		// change step size to like 30
 		if (action == QAbstractSlider::SliderPageStepAdd) {
 			int old_value = this->value();
 			// snap to the nearest special something
@@ -54,22 +53,17 @@ TickSlider::TickSlider(QWidget *parent)
 					break;
 				}
 			}
-			qDebug() << "old value" << old_value << "new value" << this->value();
 		}
-		if (action == QAbstractSlider::SliderPageStepSub) {
-
+		// the same thing but backwards
+		else if (action == QAbstractSlider::SliderPageStepSub) {
 			int old_value = this->value();
-			// snap to the nearest special something
 			for (auto it = m_hotspots.rbegin(); it != m_hotspots.rend(); ++it) {
 				if (*it < old_value) {
-					// snap to this guy
 					this->setValue(*it);
 					break;
 				}
 			}
-			qDebug() << "old value" << old_value << "new value" << this->value();
 		}
-
 	});
 
 }

@@ -13,13 +13,15 @@
 #include <osgViewer/Viewer>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <memory>
 
 #include "MainWindow.h"
 #include "VSimRoot.h"
-#include "narrative/NarrativePlayer.h"
 #include "ModelTableModel.h"
+#include "narrative/NarrativeControl.h"
+#include "narrative/NarrativePlayer.h"
 
-class NarrativeControl;
+
 class MainWindow;
 
 class VSimApp : public QObject
@@ -29,11 +31,10 @@ public:
 	VSimApp(MainWindow*);
 	//~VSimApp();
 
-	osgViewer::Viewer* getViewer() { return m_viewer;}
-	NarrativeControl* getNarList() { return m_narrative_control;}
+	osgViewer::Viewer* getViewer();
 
 	// this is called on every new, reset, etc
-	bool initWithVSim(osg::Node *root); 
+	bool initWithVSim(osg::Node *root);
 	bool init();
 	
 	void addModel(osg::Node *node, const std::string &name);
@@ -68,8 +69,8 @@ private:
 	osg::ref_ptr<VSimRoot> m_root;
 	ModelTableModel m_model_table_model;
 
-	NarrativePlayer *m_narrative_player;
-	NarrativeControl *m_narrative_control;
+	std::unique_ptr<NarrativeControl> m_narrative_control;
+	std::unique_ptr<NarrativePlayer> m_narrative_player;
 };
 
 extern VSimApp* g_vsimapp;

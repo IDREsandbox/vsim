@@ -1,5 +1,4 @@
 #include "narrative/NarrativeControl.h"
-#include "narrative/Narrative2.h"
 #include "Util.h"
 
 #include <QObject>
