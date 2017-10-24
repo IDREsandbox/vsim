@@ -484,7 +484,7 @@ void NarrativeControl::deleteLabel(int idx)
 	if (slide == nullptr) return;
 
 	// consistency check
-	if (idx < 0 || idx >= slide->getNumChildren()) {
+	if (idx < 0 || (uint) idx >= slide->getNumChildren()) {
 		qWarning() << "Delete label out of range" << idx << "/" << slide->getNumChildren();
 	}
 

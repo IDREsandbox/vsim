@@ -24,6 +24,13 @@ VSimRoot::VSimRoot(osg::Group * old_group)
 	m_narratives = new NarrativeGroup(old_group);
 	m_narratives->setName("Narratives");
 
+	m_resources = new EResourceGroup(old_group);
+	m_resources->setName("Resources");
+
+	// The old categories worked by scanning all of the resources
+	m_categories = new ECategoryGroup(m_resources.get());
+	m_categories->setName("ERCategories");
+
 	// Move everything unknown to the model group for displaying
 	for (uint i = 0; i < old_group->getNumChildren(); i++) {
 		osg::Node *node = old_group->getChild(i);
@@ -73,14 +80,24 @@ void VSimRoot::debug()
 			NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(nar->getChild(j));
 			qInfo() << "\tSlide" << j << slide->getTransitionDuration();
 
-
 			for (uint k = 0; k < slide->getNumChildren(); k++) {
 				NarrativeSlideLabels *label = dynamic_cast<NarrativeSlideLabels*>(slide->getChild(k));
 				qInfo() << "\t\tLabel" << k << QString::fromStdString(label->getText());
 			}
 		}
 	}
-
+	qInfo() << "Embedded Resources:" << m_resources->getNumChildren();
+	for (uint i = 0; i < m_resources->getNumChildren(); i++) {
+		EResource *er = dynamic_cast<EResource*>(m_resources->getChild(i));
+		if (!er) continue;
+		qInfo() << "Resource" << i << QString::fromStdString(er->getResourceName());
+	}
+	qInfo() << "Categories:" << m_categories->getNumChildren();
+	for (uint i = 0; i < m_categories->getNumChildren(); i++) {
+		ECategory *cat = dynamic_cast<ECategory*>(m_categories->getChild(i));
+		if (!cat) continue;
+		qInfo() << "Category" << i << QString::fromStdString(cat->getCategoryName());
+	}
 	qInfo() << "Models:" << m_models->getNumChildren();
 	for (uint i = 0; i < m_models->getNumChildren(); i++) {
 		qInfo() << "Model" << QString::fromStdString(m_models->getChild(i)->getName());
@@ -88,11 +105,6 @@ void VSimRoot::debug()
 
 	DebugVisitor v;
 	m_models->accept(v);
-	
-	//qDebug() << "Extra Data Mappings";
-	//for (auto &kv : m_models->dataTable()->m_table) {
-	//	qDebug() << kv.first << kv.second << kv.second->getYearBegin() << kv.second->getYearEnd();
-	//}
 }
 
 void VSimRoot::merge(VSimRoot *other)

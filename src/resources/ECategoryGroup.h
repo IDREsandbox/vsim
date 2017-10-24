@@ -8,6 +8,7 @@
 #include "Command.h"
 #include "Group.h"
 #include "resources/EResource.h"
+#include "resources/EResourceGroup.h"
 #include "resources/ECategory.h"
 
 class ECategoryGroup : public Group {
@@ -16,6 +17,7 @@ class ECategoryGroup : public Group {
 public:
 	ECategoryGroup() {}
 	ECategoryGroup(const ECategoryGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
+	ECategoryGroup(osg::Group *group); // conversion, pass in something that hold EResources
 	META_Node(, ECategoryGroup)
 
 signals :

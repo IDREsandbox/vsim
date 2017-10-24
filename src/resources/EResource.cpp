@@ -13,8 +13,8 @@ EResource::EResource()
 	m_reposition(0),
 	m_launch(0),
 	m_copyright(0),
-	m_min_year(-99999),
-	m_max_year(99999),
+	m_min_year(0),
+	m_max_year(0),
 	m_local_range(0),
 	m_ertype(0),
 	m_filter(0),
@@ -25,6 +25,7 @@ EResource::EResource()
 	m_blue(0),
 	m_green(0),
 	m_red(0),
+	m_category(nullptr),
 	m_index(-1)
 {
 }
@@ -52,6 +53,7 @@ EResource::EResource(const EResource& er, const osg::CopyOp& copyop)
 	m_blue(er.m_blue),
 	m_green(er.m_green),
 	m_red(er.m_red),
+	m_category(er.m_category),
 	m_index(er.m_index)
 {
 }
@@ -260,5 +262,15 @@ void EResource::setBlue(int blue)
 { 
 	m_blue = blue; 
 	emit sBlueChanged(blue, m_index);
+}
+
+const ECategory * EResource::getCategory() const
+{
+	return m_category.get();
+}
+
+void EResource::setCategory(ECategory * category)
+{
+	m_category = category;
 }
 

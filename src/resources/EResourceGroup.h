@@ -14,7 +14,7 @@ class EResourceGroup : public Group {
 public:
 	EResourceGroup() {}
 	EResourceGroup(const EResourceGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
-	//EResourceGroup(osg::Group *old_group);
+	EResourceGroup(osg::Group *old_group);
 	META_Node(, EResourceGroup)
 
 signals :

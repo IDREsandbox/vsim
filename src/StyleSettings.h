@@ -3,7 +3,7 @@
 #define STYLESETTINGS_HPP
 #include <QDialog>
 #include <QDialogButtonBox>
-#include "Narrative2.h"
+#include "narrative/Narrative2.h"
 #include "LabelStyle.h"
 
 #include "ui_StyleSettings.h"

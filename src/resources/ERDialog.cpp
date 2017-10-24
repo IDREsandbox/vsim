@@ -33,7 +33,7 @@ ERDialog::ERDialog(MainWindow* mw, QWidget * parent)
 	ECategory *category = main->getCategory(0);
 	if (category != NULL)
 	{
-		for (int i = 0; i <= main->m_cat_group->getNumChildren() - 1; i++)
+		for (uint i = 0; i <= main->m_cat_group->getNumChildren() - 1; i++)
 		{
 			category = main->getCategory(i);
 			ui.categories->addItem(QString::fromStdString(category->getCategoryName()));
@@ -70,7 +70,7 @@ ERDialog::ERDialog(const EResource *er, MainWindow* mw, QWidget *parent)
 	ECategory *category = main->getCategory(0);
 	if (category != NULL)
 	{
-		for (int i = 0; i <= main->m_cat_group->getNumChildren() - 1; i++)
+		for (uint i = 0; i <= main->m_cat_group->getNumChildren() - 1; i++)
 		{
 			category = main->getCategory(i);
 			if (category->getCategoryName() == er->getCategoryName())

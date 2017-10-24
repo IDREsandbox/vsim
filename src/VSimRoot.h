@@ -5,6 +5,8 @@
 #include <osg/NodeVisitor>
 #include "narrative/NarrativeGroup.h"
 #include "ModelGroup.h"
+#include "resources/EResourceGroup.h"
+#include "resources/ECategoryGroup.h"
 
 class VSimRoot : public QObject, public osg::Group {
 	Q_OBJECT
@@ -30,6 +32,8 @@ public:
 private:
 	osg::ref_ptr<NarrativeGroup> m_narratives;
 	osg::ref_ptr<ModelGroup> m_models;
+	osg::ref_ptr<EResourceGroup> m_resources;
+	osg::ref_ptr<ECategoryGroup> m_categories;
 };
 
 class DebugVisitor : public osg::NodeVisitor {

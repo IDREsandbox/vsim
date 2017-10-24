@@ -33,15 +33,15 @@ public: // COMMANDS
 		DeleteLabelStyleCommand(LabelStyleGroup *group, int index, QUndoCommand *parent = nullptr)
 			: Group::DeleteNodeCommand<LabelStyle>(group, index, parent) {}
 	};
-	class AddEResourceCommand : public QUndoCommand {
-	public:
-		AddLabelStyleCommand(LabelStyleGroup *group, LabelStyle *style, QUndoCommand *parent = nullptr);
-		void undo();
-		void redo();
-	private:
-		LabelStyleGroup *m_group;
-		osg::ref_ptr<LabelStyle> m_style;
-	};
+	//class AddEResourceCommand : public QUndoCommand {
+	//public:
+	//	AddLabelStyleCommand(LabelStyleGroup *group, LabelStyle *style, QUndoCommand *parent = nullptr);
+	//	void undo();
+	//	void redo();
+	//private:
+	//	LabelStyleGroup *m_group;
+	//	osg::ref_ptr<LabelStyle> m_style;
+	//};
 };
 
 #endif // LABELSTYLEGROUP_H

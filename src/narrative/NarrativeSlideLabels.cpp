@@ -3,10 +3,10 @@
 
 NarrativeSlideLabels::NarrativeSlideLabels()
 	: osg::Node(),
-	m_rX(0.5),
-	m_rY(0.5),
-	m_rW(0.25),
-	m_rH(0.2),
+	m_rX(0.5f),
+	m_rY(0.5f),
+	m_rW(0.25f),
+	m_rH(0.2f),
 	m_widget_style("background: rgba(0, 0, 0, 70);"),
 	m_margin(10)
 {

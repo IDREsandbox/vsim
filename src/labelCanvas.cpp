@@ -95,7 +95,6 @@ void labelCanvas::setSlide(NarrativeSlide * slide)
 	clearCanvas();
 	if (!slide) return;
 
-	NarrativeSlideLabels* data;
 	for (uint i = 0; i < slide->getNumChildren(); i++) {
 		insertNewLabel(i);
 	}

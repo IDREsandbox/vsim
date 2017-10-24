@@ -45,7 +45,7 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 # for some reason find_package doesn't work for libraries
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
-include_directories(${PROJECT_BINARY_DIR}/VSim_objects_autogen/include)
+include_directories(${PROJECT_BINARY_DIR}/VSim_objects_autogen/include_Release)
 add_definitions(${Qt5Widgets_DEFINITIONS})
 add_definitions(${Qt5Test_DEFINITIONS})
 
@@ -68,7 +68,7 @@ file(GLOB_RECURSE VSim_serializers
   src/*Serializer*.cpp
   )
 
-message("sources - " ${VSim_src})
+message("sources - " "${VSim_src}")
 
 # file(GLOB VSim_src 
 #   "src/*.h" 
@@ -126,177 +126,102 @@ if (WIN32)
   endif()
 
   # visual studio path https://stackoverflow.com/questions/28533012/how-to-set-runtime-path-for-cmake-custom-command-on-windows
-  set(CMAKE_MSVCIDE_RUN_PATH "${OPENSCENEGRAPH_BINARY_DIR};${OPENSCENEGRAPH_BINARY_DIR}/osgPlugins-3.4.0/;${THIRDPARTY_BINARY_DIR};${QT_DIR}/bin/")
-  message("msvc path" ${CMAKE_MSVCIDE_RUN_PATH})
+  # set(CMAKE_MSVCIDE_RUN_PATH "${OPENSCENEGRAPH_BINARY_DIR};${OPENSCENEGRAPH_BINARY_DIR}/osgPlugins-3.4.0/;${THIRDPARTY_BINARY_DIR};${QT_DIR}/bin/")
+  # message("msvc path" ${CMAKE_MSVCIDE_RUN_PATH})
 
-  set(THIRDPARTYDLLS 
-    libpng
-    zlib
-    )
-  set(OSGDLLS 
-    osg130-osg
-    osg130-osgAnimation
-    osg130-osgDB
-    osg130-osgFX
-    osg130-osgGA
-    osg130-osgManipulator
-    osg130-osgParticle
-    osg130-osgPresentation
-    osg130-osgShadow
-    osg130-osgSim
-    osg130-osgTerrain
-    osg130-osgText
-    osg130-osgUtil
-    osg130-osgViewer
-    osg130-osgVolume
-    osg130-osgWidget
-  #  osg130-osgQt
-    ot20-OpenThreads
-    )
-  set(OSGPLUGINDLLS
-    osgdb_3dc
-    osgdb_3ds
-    osgdb_ac
-    osgdb_bmp
-    osgdb_bsp
-    osgdb_bvh
-    osgdb_cfg
-    osgdb_dds
-    osgdb_deprecated_osg
-    osgdb_deprecated_osganimation
-    osgdb_deprecated_osgfx
-    osgdb_deprecated_osgparticle
-    osgdb_deprecated_osgshadow
-    osgdb_deprecated_osgsim
-    osgdb_deprecated_osgterrain
-    osgdb_deprecated_osgtext
-    osgdb_deprecated_osgviewer
-    osgdb_deprecated_osgvolume
-    osgdb_deprecated_osgwidget
-    osgdb_dw
-    osgdb_dxf
-    osgdb_freetype
-  #  osgdb_geo
-    osgdb_gif
-    osgdb_glsl
-    osgdb_gz
-    osgdb_hdr
-    osgdb_ive
-    osgdb_jpeg
-    osgdb_logo
-    osgdb_lwo
-    osgdb_lws
-    osgdb_md2
-    osgdb_mdl
-    osgdb_normals
-    osgdb_obj
-    osgdb_openflight
-    osgdb_osg
-    osgdb_osga
-    osgdb_osgshadow
-    osgdb_osgterrain
-    osgdb_osgtgz
-    osgdb_osgviewer
-  #  osgdb_p3d
-    osgdb_pic
-    osgdb_ply
-    osgdb_png
-    osgdb_pnm
-    osgdb_pov
-    osgdb_pvr
-    osgdb_revisions
-    osgdb_rgb
-    osgdb_rot
-    osgdb_scale
-    osgdb_serializers_osg
-    osgdb_serializers_osganimation
-    osgdb_serializers_osgfx
-    osgdb_serializers_osgmanipulator
-    osgdb_serializers_osgparticle
-    osgdb_serializers_osgshadow
-    osgdb_serializers_osgsim
-    osgdb_serializers_osgterrain
-    osgdb_serializers_osgtext
-    osgdb_serializers_osgvolume
-    osgdb_shp
-    osgdb_stl
-    osgdb_tga
-    osgdb_tgz
-    osgdb_tiff
-    osgdb_trans
-    osgdb_txf
-    osgdb_vtf
-    osgdb_x
-    osgdb_zip
-    )
-  set(OPENSCENEGRAPH_PLUGIN_PREFIX osgPlugins-3.4.0)
+  # osg dlls
+  file(GLOB DLL_SEARCH ${OPENSCENEGRAPH_BINARY_DIR}/*.dll)
+  # take off the path & extension -> DLL_LIST
+  list(FILTER DLL_SEARCH EXCLUDE REGEX ".*d.dll")
+  foreach(DLL ${DLL_SEARCH})
+    get_filename_component(COMP ${DLL} NAME_WE)
+	list(APPEND DLL_LIST ${COMP})
+  endforeach(DLL)
+  message("DLL LIST:\n" "${DLL_LIST}")
 
+  # find the plugin directory
+  file(GLOB OSG_PLUGIN_DIR ${OPENSCENEGRAPH_BINARY_DIR}/osgPlugins*)
+  get_filename_component(OSG_PLUGIN_PREFIX ${OSG_PLUGIN_DIR} NAME)
+  message("PLUGIN PREFIX: " ${OSG_PLUGIN_PREFIX})
+  # do the same thing as before -> PLUGIN_LIST
+  file(GLOB PLUGIN_SEARCH ${OSG_PLUGIN_DIR}/*.dll)
+  list(FILTER PLUGIN_SEARCH EXCLUDE REGEX ".*d.dll")
+  foreach(DLL ${PLUGIN_SEARCH})
+    get_filename_component(COMP ${DLL} NAME_WE)
+	list(APPEND PLUGIN_LIST ${COMP})
+  endforeach(DLL)
+  message("PLUGIN LIST:\n" "${PLUGIN_LIST}")
+
+  set(THIRDPARTYDLLS
+   libpng16
+   zlib
+   )
   add_custom_command(
-    TARGET VSim 
+    TARGET VSim
     PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory
-        $<TARGET_FILE_DIR:VSim>/${OPENSCENEGRAPH_PLUGIN_PREFIX}
+        $<TARGET_FILE_DIR:VSim>/${OSG_PLUGIN_PREFIX}
   )
 
-  # copy THIRDPARTY dlls on postbuild
+  # copy thirdparty dlls on postbuild
   foreach(DLL ${THIRDPARTYDLLS})
     set(PREFIX ${THIRDPARTY_BINARY_DIR}/${DLL})
-  #  add_custom_command(
-  #    TARGET VSim 
-  #    PRE_BUILD
-  #    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  #        ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-  #        $<TARGET_FILE_DIR:VSim>
-  #  )
+    add_custom_command(
+     TARGET VSim
+     PRE_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+         ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
+         $<TARGET_FILE_DIR:VSim>
+    )
     install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
-  endforeach(DLL)
-
+  endforeach(dll)
+  
   # copy OSG dlls on postbuild
-  foreach(DLL ${OSGDLLS})
+  foreach(DLL ${DLL_LIST})
     set(PREFIX ${OPENSCENEGRAPH_BINARY_DIR}/${DLL})
-  #  add_custom_command(
-  #    TARGET VSim 
-  #    PRE_BUILD
-  #    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  #        ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-  #        $<TARGET_FILE_DIR:VSim>
-  #  )
+   add_custom_command(
+     TARGET VSim 
+     PRE_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+         ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
+         $<TARGET_FILE_DIR:VSim>
+   )
     install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
   endforeach(DLL)
 
   # copy OSG plugin dlls
-  foreach(DLL ${OSGPLUGINDLLS})
-    set(PREFIX ${OPENSCENEGRAPH_BINARY_DIR}/${OPENSCENEGRAPH_PLUGIN_PREFIX}/${DLL})
-  #  add_custom_command(
-  #    TARGET VSim 
-  #    POST_BUILD
-  #    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  #        ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-  #        $<TARGET_FILE_DIR:VSim>/${OPENSCENEGRAPH_PLUGIN_PREFIX}/
-  #  )
-    install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION "${OPENSCENEGRAPH_PLUGIN_PREFIX}/")
+  foreach(DLL ${PLUGIN_LIST})
+    set(PREFIX ${OPENSCENEGRAPH_BINARY_DIR}/${OSG_PLUGIN_PREFIX}/${DLL})
+   add_custom_command(
+     TARGET VSim
+     POST_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+         ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
+         $<TARGET_FILE_DIR:VSim>/${OSG_PLUGIN_PREFIX}/
+   )
+    install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION "${OSG_PLUGIN_PREFIX}/")
   endforeach(DLL)
 
   # Qt
-  foreach(dll 
+  foreach(dll
       Qt5::Core
       Qt5::Gui
       Qt5::Widgets
       )
     # copy to the Release directory
-  #  add_custom_command(
-  #    TARGET VSim 
-  #    POST_BUILD
-  #    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  #      $<TARGET_FILE:${dll}>
-  #      $<TARGET_FILE_DIR:VSim>
-  #  )
+    add_custom_command(
+      TARGET VSim
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:${dll}>
+        $<TARGET_FILE_DIR:VSim>
+    )
     # copy to the install directory
     get_target_property(dll_location ${dll} LOCATION)
     install(FILES $<TARGET_FILE:${dll}> DESTINATION ".")
     message("imported target: ${dll}, path: ${dll_location}")
   endforeach(dll)
-
+  
   # Qt plugins
   foreach(dll
       ${Qt5Gui_PLUGINS}
@@ -313,7 +238,6 @@ if (WIN32)
 
   # windows platform
   install(FILES ${QT_DIR}/plugins/platforms/qwindows.dll DESTINATION platforms)
-
 endif(WIN32)
 
 IF(CMAKE_BUILD_TYPE MATCHES DEBUG)

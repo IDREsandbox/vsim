@@ -7,6 +7,7 @@
 //#include "deprecated/resources/EResourcesNode.h"
 #include "Group.h"
 #include "Command.h"
+#include "ECategory.h"
 
 class EResource : public Group {
 	Q_OBJECT
@@ -59,6 +60,9 @@ public:
 	void setGreen(int green);
 	int getBlue()const;
 	void setBlue(int blue);
+
+	const ECategory *getCategory() const;
+	void setCategory(ECategory *category);
 
 	void setIndex(int idx);
 
@@ -199,11 +203,13 @@ private:
 
 	bool m_inview;
 
-	// categories 
+	// categories, deprecated
 	std::string m_cat_name;
 	int m_blue;
 	int m_red;
 	int m_green;
+
+	osg::ref_ptr<ECategory> m_category;
 
 	int m_index;
 };
