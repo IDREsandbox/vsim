@@ -86,16 +86,16 @@ add_executable(VSim src/main.cpp ${VSim_serializers})
 target_link_libraries(VSim_objects Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
 target_link_libraries(VSim VSim_objects)
 
-
-
 # tests
 set(tests
   Util_test
+  Selection_test
   )
 foreach(test ${tests})
   add_executable(${test} tests/${test}.cpp)
   add_test(NAME ${test} COMMAND ${test})
-  target_link_libraries(${test} ${VSim_objects})
+  add_dependencies(${test} VSim_objects)
+  target_link_libraries(${test} VSim_objects)
   target_link_libraries(${test} Qt5::Widgets Qt5::Test)
   target_link_libraries(${test} ${OPENSCENEGRAPH_LIBRARIES})
 endforeach(test)
@@ -174,7 +174,7 @@ if (WIN32)
          $<TARGET_FILE_DIR:VSim>
     )
     install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
-  endforeach(dll)
+  endforeach(DLL)
   
   # copy OSG dlls on postbuild
   foreach(DLL ${DLL_LIST})
@@ -207,17 +207,20 @@ if (WIN32)
       Qt5::Core
       Qt5::Gui
       Qt5::Widgets
+	  Qt5::Test
       )
     # copy to the Release directory
     add_custom_command(
       TARGET VSim
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:${dll}>
+		$<TARGET_FILE:${dll}>
         $<TARGET_FILE_DIR:VSim>
     )
+	# if you want the debug dll location
+	#get_target_property(debug_path ${dll} IMPORTED_LOCATION_DEBUG)
+	#$<$<CONFIG:Debug>:${debug_path}>$<$<NOT:$<CONFIG:Debug>>:${release_path}>
     # copy to the install directory
-    get_target_property(dll_location ${dll} LOCATION)
     install(FILES $<TARGET_FILE:${dll}> DESTINATION ".")
     message("imported target: ${dll}, path: ${dll_location}")
   endforeach(dll)

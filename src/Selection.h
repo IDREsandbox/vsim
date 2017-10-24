@@ -13,14 +13,14 @@ public:
 
 	// selection - these set selection, lastSelected, and emit events
 	virtual void setSelection(std::set<int> set, int last);
-	void addToSelection(int);
+	void addToSelection(int); // sets last selected
 	void removeFromSelection(int);
 	void clearSelection();
 	void select(int);
 
 	// lastSelected must be in the selection
+	// -1 means none
 	int getLastSelected();
-	void setLastSelected(int);
 	const std::set<int>& getSelection();
 
 	bool isSelected(int);
