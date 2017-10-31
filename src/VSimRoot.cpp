@@ -11,7 +11,10 @@ VSimRoot::VSimRoot() {
 	m_models->setName("Models");
 }
 VSimRoot::VSimRoot(const VSimRoot& n, const osg::CopyOp& copyop)
-	: VSimRoot() {}
+	: VSimRoot() 
+{
+	qDebug() << "vs root copy op";
+}
 
 VSimRoot::VSimRoot(osg::Group * old_group)
 	: VSimRoot()
@@ -63,6 +66,59 @@ void VSimRoot::setModels(ModelGroup * models)
 	m_models = models;
 }
 
+EResourceGroup * VSimRoot::resources() const
+{
+	return m_resources;
+}
+
+const EResourceGroup * VSimRoot::getResources() const
+{
+	return m_resources;
+}
+
+void VSimRoot::setResources(EResourceGroup * resources)
+{
+	m_resources = resources;
+}
+
+ECategoryGroup * VSimRoot::categories() const
+{
+	return m_categories;
+}
+
+const ECategoryGroup * VSimRoot::getCategories() const
+{
+	return m_categories;
+}
+
+void VSimRoot::setCategories(ECategoryGroup * categories)
+{
+	m_categories = categories;
+}
+
+int VSimRoot::getFoo() const
+{
+	return 3;
+}
+
+void VSimRoot::setFoo(int x)
+{
+}
+int VSimRoot::getFoob() const
+{
+	return 2;
+}
+void VSimRoot::setFoob(int x)
+{
+}
+int VSimRoot::getFoox() const
+{
+	return foox;
+}
+void VSimRoot::setFoox(int x)
+{
+	foox = x;
+}
 void VSimRoot::debug()
 {
 	qInfo() << "root";

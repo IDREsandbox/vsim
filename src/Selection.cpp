@@ -83,3 +83,21 @@ bool Selection::isSelected(int x)
 {
 	return (m_selection.find(x) != m_selection.end());
 }
+
+int Selection::nextAfterDelete(int total, std::set<int> selection)
+{
+	// figure out the selection after deleting
+	int first_index = *selection.begin();
+	int remaining = total - (int)selection.size();
+	int next_selection;
+	if (remaining == 0) { // everyone's gone
+		next_selection = -1;
+	}
+	else if (remaining >= first_index + 1) {
+		next_selection = first_index; // select next non-deleted item
+	}
+	else {
+		next_selection = first_index - 1; // select the previous item
+	}
+	return next_selection;
+}

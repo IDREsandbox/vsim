@@ -18,10 +18,10 @@
 #include "MainWindow.h"
 #include "VSimRoot.h"
 #include "ModelTableModel.h"
-#include "narrative/NarrativeControl.h"
-#include "narrative/NarrativePlayer.h"
 
-
+class NarrativeControl;
+class NarrativePlayer;
+class ERControl;
 class MainWindow;
 
 class VSimApp : public QObject
@@ -36,7 +36,7 @@ public:
 	// this is called on every new, reset, etc
 	bool initWithVSim(osg::Node *root);
 	bool init();
-	
+
 	void addModel(osg::Node *node, const std::string &name);
 	bool importModel(const std::string& filename); // TODO: more complicated logic with vsim
 	bool openVSim(const std::string& filename);
@@ -69,8 +69,9 @@ private:
 	osg::ref_ptr<VSimRoot> m_root;
 	ModelTableModel m_model_table_model;
 
-	std::unique_ptr<NarrativeControl> m_narrative_control;
-	std::unique_ptr<NarrativePlayer> m_narrative_player;
+	NarrativeControl *m_narrative_control;
+	ERControl *m_er_control;
+	NarrativePlayer *m_narrative_player;
 };
 
 extern VSimApp* g_vsimapp;

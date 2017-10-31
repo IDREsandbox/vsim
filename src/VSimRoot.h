@@ -23,9 +23,25 @@ public:
 	NarrativeGroup *narratives() const;
 	const NarrativeGroup *getNarratives() const; // need the const version for the serializer
 	void setNarratives(NarrativeGroup *narratives);
+
 	ModelGroup *models() const;
 	const ModelGroup *getModels() const;
 	void setModels(ModelGroup *models);
+
+	EResourceGroup *resources() const;
+	const EResourceGroup *getResources() const;
+	void setResources(EResourceGroup *resources);
+
+	ECategoryGroup *categories() const;
+	const ECategoryGroup *getCategories() const;
+	void setCategories(ECategoryGroup *categories);
+
+	int getFoo() const;
+	void setFoo(int x);
+	int getFoob() const;
+	void setFoob(int x);
+	int getFoox() const;
+	void setFoox(int x);
 
 	void debug();
 
@@ -34,6 +50,8 @@ private:
 	osg::ref_ptr<ModelGroup> m_models;
 	osg::ref_ptr<EResourceGroup> m_resources;
 	osg::ref_ptr<ECategoryGroup> m_categories;
+
+	int foox;
 };
 
 class DebugVisitor : public osg::NodeVisitor {

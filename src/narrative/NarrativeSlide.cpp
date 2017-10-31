@@ -81,3 +81,12 @@ void NarrativeSlide::setTransitionDuration(float tduration)
 	m_transition_duration = tduration;
 	emit sTransitionDurationChanged(tduration);
 }
+
+float NarrativeSlide::getFoo() const
+{
+	return 0.0f;
+}
+
+void NarrativeSlide::setFoo(float)
+{
+}

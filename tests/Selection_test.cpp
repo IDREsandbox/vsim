@@ -71,6 +71,17 @@ private slots:
 		QCOMPARE(s.isSelected(0), false);
 		QCOMPARE(s.isSelected(17), false);
 	}
+	void nextAfterDeleteTest() {
+		std::set<int> list = {4,6};
+		// test after
+		QCOMPARE(Selection::nextAfterDelete(3, {0}), 0);
+		// test inbetween
+		QCOMPARE(Selection::nextAfterDelete(7, {4,6}), 4);
+		// test previous
+		QCOMPARE(Selection::nextAfterDelete(5, {4}), 3);
+		// test empty
+		QCOMPARE(Selection::nextAfterDelete(3, {0,1,2}), -1);
+	}
 
 };
 

@@ -252,9 +252,6 @@ border-color: rgb(238, 238, 238);</string>
     <property name="title">
      <string>Test</string>
     </property>
-    <addaction name="actionError"/>
-    <addaction name="actionMessage"/>
-    <addaction name="actionProgress"/>
     <addaction name="actionOSG_Debug"/>
     <addaction name="actionCamera_Debug"/>
     <addaction name="actionControl_Debug"/>
@@ -281,8 +278,11 @@ border-color: rgb(238, 238, 238);</string>
      <string>Window</string>
     </property>
     <addaction name="actionModel_Outliner"/>
+    <addaction name="actionEmbedded_Resources"/>
     <addaction name="actionTime_Slider"/>
     <addaction name="actionFont_Color_Styles"/>
+    <addaction name="separator"/>
+    <addaction name="actionHistory"/>
    </widget>
    <addaction name="menuhello_to_the_world"/>
    <addaction name="menuEdit"/>
@@ -460,6 +460,16 @@ border-color: rgb(238, 238, 238);</string>
   <action name="actionFont_Color_Styles">
    <property name="text">
     <string>Font and Color Styles</string>
+   </property>
+  </action>
+  <action name="actionHistory">
+   <property name="text">
+    <string>History</string>
+   </property>
+  </action>
+  <action name="actionEmbedded_Resources">
+   <property name="text">
+    <string>Embedded Resources</string>
    </property>
   </action>
  </widget>

@@ -86,10 +86,6 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionImport_Narratives, &QAction::triggered, this, &MainWindow::sImportNarratives);
 	connect(ui->actionExport_Narratives, &QAction::triggered, this, &MainWindow::sExportNarratives);
 
-	connect(ui->actionError, &QAction::triggered, this, [this] { this->ErrorDialog("heyo this is quite the error message"); });
-	connect(ui->actionMessage, &QAction::triggered, this, [this] { this->MessageDialog("A beautiful message"); });
-	connect(ui->actionProgress, &QAction::triggered, this, [this] { this->LoadingDialog("zzz"); });
-
 	connect(ui->actionOSG_Debug, &QAction::triggered, this, &MainWindow::sDebugOSG);
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
 	connect(ui->actionControl_Debug, &QAction::triggered, this, &MainWindow::sDebugControl);
@@ -107,18 +103,18 @@ MainWindow::MainWindow(QWidget *parent)
 		[this](bool freeze) {qDebug() << "freeze trigger";  m_osg_widget->setCameraFrozen(freeze); });
 	connect(ui->actionReset_Camera, &QAction::triggered, m_osg_widget, &OSGViewerWidget::reset);
 
-	// embedded resources
-	// new
-	connect(ui->local, &ERScrollBox::sNew, this, &MainWindow::newER);
-	connect(ui->plus_2, &QPushButton::clicked, this, &MainWindow::newER);
-	// delete
-	connect(ui->local, &ERScrollBox::sDelete, this, &MainWindow::deleteER);
-	connect(ui->minus_2, &QPushButton::clicked, this, &MainWindow::deleteER);
-	// edit
-	connect(ui->local, &ERScrollBox::sEdit, this, &MainWindow::editERInfo);
-	connect(ui->edit, &QPushButton::clicked, this, &MainWindow::editERInfo);
-	// open
-	connect(ui->local, &ERScrollBox::sOpen, this, &MainWindow::openResource);
+	//// embedded resources
+	//// new
+	//connect(ui->local, &ERScrollBox::sNew, this, &MainWindow::newER);
+	//connect(ui->plus_2, &QPushButton::clicked, this, &MainWindow::newER);
+	//// delete
+	//connect(ui->local, &ERScrollBox::sDelete, this, &MainWindow::deleteER);
+	//connect(ui->minus_2, &QPushButton::clicked, this, &MainWindow::deleteER);
+	//// edit
+	//connect(ui->local, &ERScrollBox::sEdit, this, &MainWindow::editERInfo);
+	//connect(ui->edit, &QPushButton::clicked, this, &MainWindow::editERInfo);
+	//// open
+	//connect(ui->local, &ERScrollBox::sOpen, this, &MainWindow::openResource);
 
 	// show slides or narratives
 	connect(ui->topBar->ui.open, &QPushButton::clicked, this, 
@@ -145,192 +141,14 @@ MainWindow::MainWindow(QWidget *parent)
 	});
 }
 
-EResource* MainWindow::getResource(int index)
-{
-	if (index < 0 || (uint)index >= m_resource_group->getNumChildren()) {
-		return nullptr;
-	}
-	osg::Node *c = m_resource_group->getChild(index);
-	return dynamic_cast<EResource*>(c);
-}
-
-void MainWindow::newER()
-{
-	ERDialog dlg(this);
-	int result = dlg.exec();
-	if (result == QDialog::Rejected) {
-		return;
-	}
-
-	m_undo_stack->beginMacro("New Resource");
-	int num_children;
-	if (dlg.getGlobal())
-		num_children = m_global_resource_group->getNumChildren();
-	else
-		num_children = m_local_resource_group->getNumChildren();
-	m_undo_stack->push(new SelectResourcesCommand(this, { num_children - 1 }, ON_UNDO));
-	if (dlg.getGlobal()) {
-		m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_global_resource_group, m_global_resource_group->getNumChildren()));
-		m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_resource_group, m_resource_group->getNumChildren()));
-	}
-	else {
-		m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_local_resource_group, m_local_resource_group->getNumChildren()));
-		m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_resource_group, m_resource_group->getNumChildren()));
-	}
-	m_undo_stack->push(new SelectResourcesCommand(this, { num_children }, ON_REDO));
-	m_undo_stack->endMacro();
-
-	EResource* resource;
-	if (dlg.getGlobal()) {
-		osg::Node *c = m_global_resource_group->getChild(m_global_resource_group->getNumChildren() - 1);
-		resource = dynamic_cast<EResource*>(c); // getResource(m_resource_group->getNumChildren() - 1);
-		resource->setIndex(m_global_resource_group->getNumChildren() - 1);
-	}
-	else {
-		osg::Node *c = m_local_resource_group->getChild(m_local_resource_group->getNumChildren() - 1);
-		resource = dynamic_cast<EResource*>(c); // getResource(m_resource_group->getNumChildren() - 1);
-		resource->setIndex(m_local_resource_group->getNumChildren() - 1);
-	}
-	resource->setResourceName(dlg.getTitle());
-	resource->setAuthor(dlg.getAuthor());
-	resource->setResourceDescription(dlg.getDescription());
-	resource->setResourcePath(dlg.getPath());
-	//resource->setResourceType(
-	resource->setGlobal(dlg.getGlobal());
-	resource->setCopyRight(dlg.getCopyRight());
-	resource->setMinYear(dlg.getMinYear());
-	resource->setMaxYear(dlg.getMaxYear());
-	resource->setReposition(dlg.getReposition());
-	resource->setAutoLaunch(dlg.getAutoLaunch());
-	resource->setLocalRange(dlg.getLocalRange());
-	resource->setErType(dlg.getErType());
-
-	resource->setViewMatrix(this->getViewer()->getCameraManipulator()->getMatrix());
-
-	//set category details
-	ECategory *category = getCategory(dlg.getCategory());
-	resource->setCategoryName(category->getCategoryName());
-	resource->setRed(category->getRed());
-	resource->setGreen(category->getGreen());
-	resource->setBlue(category->getBlue());
-}
-
-void MainWindow::deleteER()
-{
-	std::set<int> selection = ui->local->getSelection();
-	if (selection.empty()) return;
-	int next_selection = nextSelectionAfterDelete(m_resource_group->getNumChildren(), selection);
-
-	// get pointers to nodes to delete
-	m_undo_stack->beginMacro("Delete Resources");
-	m_undo_stack->push(new SelectResourcesCommand(this, selection, ON_UNDO));
-	// delete in reverse order
-	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
-		qDebug() << "pushing delete resource" << *i;
-		m_undo_stack->push(new EResourceGroup::DeleteEResourceCommand(m_resource_group, *i));
-	}
-	m_undo_stack->push(new SelectResourcesCommand(this, { next_selection }, ON_REDO));
-	m_undo_stack->endMacro();
-}
-
-void MainWindow::editERInfo()
-{
-	int active_item = ui->local->getLastSelected();
-	qDebug() << "resource list - begin edit on" << active_item;
-	if (active_item < 0) {
-		qWarning() << "resource list - can't edit with no selection";
-		return;
-	}
-
-	EResource *resource = getResource(active_item);
-
-	ERDialog dlg(resource, this);
-	int result = dlg.exec();
-	if (result == QDialog::Rejected) {
-		qDebug() << "resource list - cancelled edit on" << active_item;
-		return;
-	}
-
-	ECategory* category = getCategory(dlg.getCategory());
-
-	m_undo_stack->beginMacro("Set Resource Info");
-	m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
-	if (resource->getResourceName() != dlg.getTitle())
-		m_undo_stack->push(new EResource::SetResourceNameCommand(resource, dlg.getTitle()));
-	if (resource->getAuthor() != dlg.getAuthor())
-		m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor()));
-	if (resource->getResourceDescription() != dlg.getDescription())
-		m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription()));
-	if (resource->getResourcePath() != dlg.getPath())
-		m_undo_stack->push(new EResource::SetResourcePathCommand(resource, dlg.getPath()));
-	if (resource->getGlobal() != dlg.getGlobal())
-		m_undo_stack->push(new EResource::SetGlobalCommand(resource, dlg.getGlobal()));
-	if (resource->getCopyRight() != dlg.getCopyRight())
-		m_undo_stack->push(new EResource::SetCopyRightCommand(resource, dlg.getCopyRight()));
-	if (resource->getMinYear() != dlg.getMinYear())
-		m_undo_stack->push(new EResource::SetMinYearCommand(resource, dlg.getMinYear()));
-	if (resource->getMaxYear() != dlg.getMaxYear())
-		m_undo_stack->push(new EResource::SetMaxYearCommand(resource, dlg.getMaxYear()));
-	if (resource->getReposition() != dlg.getReposition())
-		m_undo_stack->push(new EResource::SetRepositionCommand(resource, dlg.getReposition()));
-	if (resource->getAutoLaunch() != dlg.getAutoLaunch())
-		m_undo_stack->push(new EResource::SetAutoLaunchCommand(resource, dlg.getAutoLaunch()));
-	if (resource->getLocalRange() != dlg.getLocalRange())
-		m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange()));
-	if (resource->getErType() != dlg.getErType())
-		m_undo_stack->push(new EResource::SetErTypeCommand(resource, dlg.getErType()));
-
-	m_undo_stack->push(new EResource::SetViewMatrixCommand(resource, this->getViewer()->getCameraManipulator()->getMatrix()));
-
-	if (resource->getCategoryName() != category->getCategoryName())
-		m_undo_stack->push(new EResource::SetCategoryNameCommand(resource, category->getCategoryName()));
-	if (resource->getRed() != category->getRed())
-		m_undo_stack->push(new EResource::SetRedCommand(resource, category->getRed()));
-	if (resource->getGreen() != category->getGreen())
-		m_undo_stack->push(new EResource::SetGreenCommand(resource, category->getGreen()));
-	if (resource->getBlue() != category->getBlue())
-		m_undo_stack->push(new EResource::SetBlueCommand(resource, category->getBlue()));
-	m_undo_stack->endMacro();
-}
-
-void MainWindow::newERCat(std::string name, int red, int green, int blue)
-{
-	m_undo_stack->beginMacro("New Category");
-	int num_children = m_cat_group->getNumChildren();
-	m_undo_stack->push(new SelectCategoryCommand(this, { num_children - 1 }, ON_UNDO));
-	m_undo_stack->push(new ECategoryGroup::NewECategoryCommand(m_cat_group, m_cat_group->getNumChildren()));
-	m_undo_stack->push(new SelectCategoryCommand(this, { num_children }, ON_REDO));
-	m_undo_stack->endMacro();
-
-	ECategory *category = getCategory(m_cat_group->getNumChildren() - 1);
-	category->setIndex(m_cat_group->getNumChildren() - 1);
-	category->setCategoryName(name);
-	category->setRed(red);
-	category->setBlue(blue);
-	category->setGreen(green);
-}
-
-ECategory* MainWindow::getCategory(int index)
-{
-	if (index < 0 || (uint)index >= m_cat_group->getNumChildren()) {
-		return nullptr;
-	}
-	osg::Node *c = m_cat_group->getChild(index);
-	return dynamic_cast<ECategory*>(c);
-}
-
-void MainWindow::openResource()
-{
-	int index = ui->local->getLastSelected();
-	if (index < 0) return;
-
-	EResource *res = getResource(index);
-	m_display->show();
-
-	m_display->setInfo(res);
-
-	this->getViewer()->getCameraManipulator()->setByMatrix(res->getViewMatrix());
-}
+//EResource* MainWindow::getResource(int index)
+//{
+//	if (index < 0 || (uint)index >= m_resource_group->getNumChildren()) {
+//		return nullptr;
+//	}
+//	osg::Node *c = m_resource_group->getChild(index);
+//	return dynamic_cast<EResource*>(c);
+//}
 
 int MainWindow::nextSelectionAfterDelete(int total, std::set<int> selection)
 {
@@ -395,31 +213,6 @@ void SelectResourcesCommand::redo() {
 		m_control->selectResources(m_resources);
 	}
 }
-
-void MainWindow::ErrorDialog(const std::string & msg)
-{
-	QErrorMessage* dialog = new QErrorMessage(this);
-	dialog->showMessage(msg.c_str());
-}
-
-void MainWindow::MessageDialog(const std::string & msg)
-{
-	QMessageBox::warning(this, "super warning", msg.c_str());
-}
-
-void MainWindow::LoadingDialog(const std::string & msg)
-{
-	//auto pd = new QProgressDialog("Loading model.", "Cancel", 0, 100, this);
-	//
-	printf("foostart!\n");
-	auto pd = new QProgressDialog("Loading model.", "Cancel", 0, 100, this);
-	pd->setValue(40);
-	pd->setWindowModality(Qt::WindowModal);
-	pd->setMinimumDuration(0);
-	pd->show();
-	connect(pd, &QProgressDialog::canceled, this, [] {printf("CLOSEDD!!!\n"); });
-}
-
 
 OSGViewerWidget * MainWindow::getViewerWidget() const
 {

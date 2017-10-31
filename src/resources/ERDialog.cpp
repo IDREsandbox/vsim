@@ -30,15 +30,15 @@ ERDialog::ERDialog(MainWindow* mw, QWidget * parent)
 	connect(ui.addnew, &QPushButton::clicked, this, &ERDialog::addNewCat);
 	connect(ui.choose, &QPushButton::clicked, this, &ERDialog::chooseFile);
 
-	ECategory *category = main->getCategory(0);
-	if (category != NULL)
-	{
-		for (uint i = 0; i <= main->m_cat_group->getNumChildren() - 1; i++)
-		{
-			category = main->getCategory(i);
-			ui.categories->addItem(QString::fromStdString(category->getCategoryName()));
-		}
-	}
+	//ECategory *category = main->getCategory(0);
+	//if (category != NULL)
+	//{
+	//	for (uint i = 0; i <= main->m_cat_group->getNumChildren() - 1; i++)
+	//	{
+	//		category = main->getCategory(i);
+	//		ui.categories->addItem(QString::fromStdString(category->getCategoryName()));
+	//	}
+	//}
 }
 
 ERDialog::ERDialog(const EResource *er, MainWindow* mw, QWidget *parent)
@@ -67,16 +67,16 @@ ERDialog::ERDialog(const EResource *er, MainWindow* mw, QWidget *parent)
 	connect(ui.addnew, &QPushButton::clicked, this, &ERDialog::addNewCat);
 	connect(ui.choose, &QPushButton::clicked, this, &ERDialog::chooseFile);
 
-	ECategory *category = main->getCategory(0);
-	if (category != NULL)
-	{
-		for (uint i = 0; i <= main->m_cat_group->getNumChildren() - 1; i++)
-		{
-			category = main->getCategory(i);
-			if (category->getCategoryName() == er->getCategoryName())
-				ui.categories->setCurrentIndex(i);
-		}
-	}
+	//ECategory *category = main->getCategory(0);
+	//if (category != NULL)
+	//{
+	//	for (uint i = 0; i <= main->m_cat_group->getNumChildren() - 1; i++)
+	//	{
+	//		category = main->getCategory(i);
+	//		if (category->getCategoryName() == er->getCategoryName())
+	//			ui.categories->setCurrentIndex(i);
+	//	}
+	//}
 }
 
 ERDialog::~ERDialog() {
@@ -167,7 +167,7 @@ void ERDialog::addNewCat()
 
 	ui.categories->addItem(QString::fromStdString(dlg.getCatTitle()));
 
-	main->newERCat(dlg.getCatTitle(), dlg.getRed(), dlg.getGreen(), dlg.getBlue());
+	//main->newERCat(dlg.getCatTitle(), dlg.getRed(), dlg.getGreen(), dlg.getBlue());
 
 	ui.categories->setCurrentIndex(main->m_cat_group->getNumChildren() - 1);
 }

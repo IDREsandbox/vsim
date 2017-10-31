@@ -105,7 +105,6 @@ public slots:
 	void debug();
 
 private:
-	int nextSelectionAfterDelete(int total, std::set<int> selection);
 
 	int m_current_narrative;
 	int m_current_slide;
@@ -113,7 +112,6 @@ private:
 	// std::vector<Narrative*> m_narratives;
 	osg::ref_ptr<NarrativeGroup> m_narrative_group; // the osg side data structure, instead of using a vector
 	//osg::ref_ptr<LabelStyleGroup> m_style_group;
-	osg::Group *m_model;
 
 	MainWindow *m_window; // TODO: remove this after redesign, this should be completely gui independent
 	NarrativeScrollBox *m_narrative_box;

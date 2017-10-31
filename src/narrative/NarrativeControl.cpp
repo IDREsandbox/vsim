@@ -26,12 +26,13 @@
 #include "editButtons.h"
 #include "StyleSettings.h"
 #include "LabelStyle.h"
+#include "Selection.h"
 
 NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	: QObject(parent), 
 	m_window(window), 
 	m_current_narrative(-1),
-	m_model(nullptr)
+	m_narrative_group(nullptr)
 {
 	m_narrative_box = window->topBar()->ui.narratives;
 	m_slide_box = window->topBar()->ui.slides;
@@ -268,7 +269,7 @@ void NarrativeControl::deleteNarratives()
 {
 	std::set<int> selection = m_narrative_box->getSelection();
 	if (selection.empty()) return;
-	int next_selection = nextSelectionAfterDelete(m_narrative_group->getNumChildren(), selection);
+	int next_selection = Selection::nextAfterDelete(m_narrative_group->getNumChildren(), selection);
 
 	// get pointers to nodes to delete
 	m_undo_stack->beginMacro("Delete Narratives");
@@ -309,7 +310,7 @@ void NarrativeControl::loadNarratives(NarrativeGroup * group)
 	for (uint i = 0; i < n; i++) {
 		selection.insert(selection_begin + i);
 	}
-	int next_selection = nextSelectionAfterDelete(n, selection);
+	int next_selection = Selection::nextAfterDelete(n, selection);
 
 	m_undo_stack->beginMacro("Import Narratives");
 	m_undo_stack->push(new SelectNarrativesCommand(this, { next_selection }, ON_UNDO));
@@ -560,24 +561,6 @@ void NarrativeControl::editLabel(int idx)
 //	lab->setText(str.toStdString());
 //}
 
-int NarrativeControl::nextSelectionAfterDelete(int total, std::set<int> selection)
-{
-	// figure out the selection after deleting
-	int first_index = *selection.begin();
-	int remaining = total - selection.size();
-	int next_selection;
-	if (remaining == 0) { // everyone's gone
-		next_selection = -1;
-	}
-	else if (remaining >= first_index + 1) {
-		next_selection = first_index; // select next non-deleted item
-	}
-	else {
-		next_selection = first_index - 1; // select the previous item
-	}
-	return next_selection;
-}
-
 int NarrativeControl::getCurrentNarrativeIndex()
 {
 	return m_current_narrative;
@@ -686,7 +669,7 @@ void NarrativeControl::deleteSlides()
 	std::set<int> selection = m_slide_box->getSelection();
 	Narrative2 *nar = getNarrative(m_current_narrative);
 
-	int next_selection = nextSelectionAfterDelete(nar->getNumChildren(), selection);
+	int next_selection = Selection::nextAfterDelete(nar->getNumChildren(), selection);
 	
 	m_undo_stack->beginMacro("Delete Slides");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, selection, ON_UNDO));

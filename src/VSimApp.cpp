@@ -25,9 +25,9 @@
 #include "MainWindow.h"
 #include "ModelOutliner.h"
 #include "TimeSlider.h"
-
-#define OPTIMIZE 0
-
+#include "narrative/NarrativeControl.h"
+#include "narrative/NarrativePlayer.h"
+#include "resources/ERControl.h"
 
 VSimApp::VSimApp(MainWindow* window)
 	: m_window(window),
@@ -39,27 +39,28 @@ VSimApp::VSimApp(MainWindow* window)
 
 	// timers
 	m_timer = new QTimer;
-	m_timer->setInterval(10);
+	m_timer->setInterval(15);
 	m_timer->setSingleShot(false);
 	m_dt_timer = new QElapsedTimer;
 	m_timer->start();
 	m_dt_timer->start();
 	connect(m_timer, &QTimer::timeout, this, &VSimApp::updateTime);
 
-	m_narrative_control = std::unique_ptr<NarrativeControl>(new NarrativeControl(this, m_window));
+	m_narrative_control = new NarrativeControl(this, m_window);
+	m_er_control = new ERControl(this, m_window, m_root->resources(), m_root->categories());
 
 	// Narrative player
-	m_narrative_player = std::unique_ptr<NarrativePlayer>(new NarrativePlayer(this, m_narrative_control.get()));
+	m_narrative_player = new NarrativePlayer(this, m_narrative_control);
 
-	connect(window->topBar()->ui.play_2, &QPushButton::pressed, m_narrative_player.get(), &NarrativePlayer::play);
-	connect(window->topBar()->ui.pause_2, &QPushButton::pressed, m_narrative_player.get(), &NarrativePlayer::stop);
-	connect(m_narrative_player.get(), &NarrativePlayer::updateCamera, m_window->getViewerWidget(), &OSGViewerWidget::setCameraMatrix);
-	connect(this, &VSimApp::tick, m_narrative_player.get(), &NarrativePlayer::update);
+	connect(window->topBar()->ui.play_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::play);
+	connect(window->topBar()->ui.pause_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::stop);
+	connect(m_narrative_player, &NarrativePlayer::updateCamera, m_window->getViewerWidget(), &OSGViewerWidget::setCameraMatrix);
+	connect(this, &VSimApp::tick, m_narrative_player, &NarrativePlayer::update);
 	//connect(this, &VSimApp::foo, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 	connect(this, &VSimApp::tick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
-	connect(m_narrative_player.get(), &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
-	connect(m_narrative_player.get(), &NarrativePlayer::hideCanvas, window->canvasView(), &labelCanvasView::hide);
-	connect(m_narrative_player.get(), &NarrativePlayer::showCanvas, window->canvasView(), &labelCanvasView::fadeIn);
+	connect(m_narrative_player, &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
+	connect(m_narrative_player, &NarrativePlayer::hideCanvas, window->canvasView(), &labelCanvasView::hide);
+	connect(m_narrative_player, &NarrativePlayer::showCanvas, window->canvasView(), &labelCanvasView::fadeIn);
 
 	// This is a really awkward place... but this has to be done after setting model
 	m_window->outliner()->setModel(&m_model_table_model);

@@ -35,6 +35,9 @@ public:	// DATA
 	float getTransitionDuration() const;
 	void setTransitionDuration(float tduration);
 
+	float getFoo() const;
+	void setFoo(float);
+
 signals:
 	void sCameraMatrixChanged(const osg::Matrixd&);
 	void sDurationChanged(float);

@@ -37,11 +37,6 @@ class MainWindow : public QMainWindow
 public:
 	MainWindow(QWidget* parent = nullptr);
 
-	// UI stuff (these are just tests, TODO: remove, just use the built in qt dialogs)
-	void ErrorDialog(const std::string& msg);
-	void MessageDialog(const std::string& msg);
-	void LoadingDialog(const std::string& msg);
-
 	// linking
 	OSGViewerWidget *getViewerWidget() const;
 	osgViewer::Viewer* getViewer() const;
@@ -57,12 +52,9 @@ public:
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dropEvent(QDropEvent *event);
 
-	EResource* getResource(int idx);
-	ECategory* getCategory(int idx);
 	void selectResources(std::set<int> res);
 	void selectCategories(std::set<int> res);
 	int nextSelectionAfterDelete(int total, std::set<int> selection);
-	void newERCat(std::string name, int red, int blue, int green);
 
 public slots:
 	void actionNew();
@@ -70,11 +62,6 @@ public slots:
 	void actionSave();
 	void actionSaveAs();
 	void actionImportModel();
-
-	void newER();
-	void deleteER();
-	void editERInfo();
-	void openResource();
 
 	// TODO
 	// void narListForward();

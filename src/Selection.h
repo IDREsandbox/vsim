@@ -30,6 +30,12 @@ signals:
 	void sRemoved(int); // an index was removed
 	void sChanged(); // anything changes
 
+public:
+	// If sel items are deleted from total, then this returns the item after
+	// sel. If there are no items after then it returns the previous.
+	// If there is nothing left then -1
+	static int nextAfterDelete(int total, std::set<int> selection);
+
 private:
 	//bool m_multiselect;
 
