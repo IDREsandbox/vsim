@@ -124,6 +124,12 @@ private:
 };
 
 
+enum SelectionCommandWhen {
+	ON_UNDO,
+	ON_REDO,
+	ON_BOTH
+};
+
 class SelectNarrativesCommand : public QUndoCommand {
 public:
 	SelectNarrativesCommand(NarrativeControl *control, std::set<int> narratives, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);

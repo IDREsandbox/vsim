@@ -103,19 +103,6 @@ MainWindow::MainWindow(QWidget *parent)
 		[this](bool freeze) {qDebug() << "freeze trigger";  m_osg_widget->setCameraFrozen(freeze); });
 	connect(ui->actionReset_Camera, &QAction::triggered, m_osg_widget, &OSGViewerWidget::reset);
 
-	//// embedded resources
-	//// new
-	//connect(ui->local, &ERScrollBox::sNew, this, &MainWindow::newER);
-	//connect(ui->plus_2, &QPushButton::clicked, this, &MainWindow::newER);
-	//// delete
-	//connect(ui->local, &ERScrollBox::sDelete, this, &MainWindow::deleteER);
-	//connect(ui->minus_2, &QPushButton::clicked, this, &MainWindow::deleteER);
-	//// edit
-	//connect(ui->local, &ERScrollBox::sEdit, this, &MainWindow::editERInfo);
-	//connect(ui->edit, &QPushButton::clicked, this, &MainWindow::editERInfo);
-	//// open
-	//connect(ui->local, &ERScrollBox::sOpen, this, &MainWindow::openResource);
-
 	// show slides or narratives
 	connect(ui->topBar->ui.open, &QPushButton::clicked, this, 
 		[this]() {
@@ -176,42 +163,6 @@ void MainWindow::selectCategories(std::set<int> res)
 void MainWindow::selectResources(std::set<int> res)
 {
 	ui->local->setSelection(res, *res.begin());
-}
-
-SelectCategoryCommand::SelectCategoryCommand(MainWindow *control, std::set<int> category, SelectionCommandWhen when, QUndoCommand *parent)
-	: QUndoCommand(parent),
-	m_control(control),
-	m_category(category),
-	m_when(when)
-{
-}
-void SelectCategoryCommand::undo() {
-	if (m_when != ON_REDO) {
-		m_control->selectResources(m_category);
-	}
-}
-void SelectCategoryCommand::redo() {
-	if (m_when != ON_UNDO) {
-		m_control->selectResources(m_category);
-	}
-}
-
-SelectResourcesCommand::SelectResourcesCommand(MainWindow *control, std::set<int> resources, SelectionCommandWhen when, QUndoCommand *parent)
-	: QUndoCommand(parent),
-	m_control(control),
-	m_resources(resources),
-	m_when(when)
-{
-}
-void SelectResourcesCommand::undo() {
-	if (m_when != ON_REDO) {
-		m_control->selectResources(m_resources);
-	}
-}
-void SelectResourcesCommand::redo() {
-	if (m_when != ON_UNDO) {
-		m_control->selectResources(m_resources);
-	}
 }
 
 OSGViewerWidget * MainWindow::getViewerWidget() const

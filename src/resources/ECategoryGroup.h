@@ -25,15 +25,15 @@ signals :
 	void sDeleteECategory(int);
 
 public: // COMMANDS
-	class NewECategoryCommand : public Group::NewNodeCommand<ECategory> {
+	class NewECategoryCommand : public NewNodeCommand<ECategory> {
 	public:
 		NewECategoryCommand(ECategoryGroup *group, int index, QUndoCommand *parent = nullptr)
-			: Group::NewNodeCommand<ECategory>(group, index, parent) {}
+			: NewNodeCommand<ECategory>(group, index, parent) {}
 	};
-	class DeleteECategoryCommand : public Group::DeleteNodeCommand<ECategory> {
+	class DeleteECategoryCommand : public DeleteNodeCommand<ECategory> {
 	public:
 		DeleteECategoryCommand(ECategoryGroup *group, int index, QUndoCommand *parent = nullptr)
-			: Group::DeleteNodeCommand<ECategory>(group, index, parent) {}
+			: DeleteNodeCommand<ECategory>(group, index, parent) {}
 	};
 	class AddECategoryCommand : public QUndoCommand {
 	public:

@@ -1,12 +1,14 @@
 #ifndef NARRATIVEROOT_H
 #define NARRATIVEROOT_H
 
+#include <QObject>
 #include <osg/Group>
 #include <osg/NodeVisitor>
-#include "narrative/NarrativeGroup.h"
-#include "ModelGroup.h"
-#include "resources/EResourceGroup.h"
-#include "resources/ECategoryGroup.h"
+
+class NarrativeGroup;
+class ModelGroup;
+class EResourceGroup;
+class ECategoryGroup;
 
 class VSimRoot : public QObject, public osg::Group {
 	Q_OBJECT
@@ -35,13 +37,6 @@ public:
 	ECategoryGroup *categories() const;
 	const ECategoryGroup *getCategories() const;
 	void setCategories(ECategoryGroup *categories);
-
-	int getFoo() const;
-	void setFoo(int x);
-	int getFoob() const;
-	void setFoob(int x);
-	int getFoox() const;
-	void setFoox(int x);
 
 	void debug();
 

@@ -88,7 +88,7 @@ signals:
 
 	// ui, signal emitters
 public:
-	std::unique_ptr<Ui::MainWindow> ui;
+	Ui::MainWindow *ui;
 
 public:
 	QUndoStack *m_undo_stack;
@@ -103,34 +103,6 @@ public:
 	osg::ref_ptr<ECategoryGroup> m_cat_group;
 	ModelOutliner *m_outliner;
 	TimeSlider *m_time_slider;
-};
-
-enum SelectionCommandWhen {
-	ON_UNDO,
-	ON_REDO,
-	ON_BOTH
-};
-
-class SelectCategoryCommand : public QUndoCommand {
-public:
-	SelectCategoryCommand(MainWindow *control, std::set<int> category, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
-	void undo();
-	void redo();
-private:
-	MainWindow *m_control;
-	SelectionCommandWhen m_when;
-	std::set<int> m_category;
-};
-
-class SelectResourcesCommand : public QUndoCommand {
-public:
-	SelectResourcesCommand(MainWindow *control, std::set<int> resources, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
-	void undo();
-	void redo();
-private:
-	MainWindow *m_control;
-	SelectionCommandWhen m_when;
-	std::set<int> m_resources;
 };
 
 #endif // MAINWINDOW_H

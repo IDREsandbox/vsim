@@ -52,6 +52,7 @@ public:
 
 	void debugCamera();
 	void updateTime();
+
 signals:
 	void tick(double sec);
 	void foo();

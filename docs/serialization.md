@@ -23,3 +23,4 @@ Dangerous:
 1. Change the inheritance list. Making the old narratives an osg::Group broke it and caused us to make Narrative2.
 2. Change order of serializers.
 3. Remove serializers
+4. Multiple inheritance - `MyClass : public QObject, public osg::Node` works, but when you add new items to the serialization list it breaks

@@ -4,12 +4,30 @@
 #include "resources/EResourceGroup.h"
 #include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
-
-#include "ERDialog.h"
+#include "resources/ERDialog.h"
+#include "resources/ERScrollBox.h"
+#include "resources/NewCatDialog.h"
+#include "MainWindow.h"
 
 ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers, ECategoryGroup *categories)
-	: m_window(window)
+	: QObject(parent), m_window(window), m_ers(nullptr), m_categories(nullptr)
 {
+	m_undo_stack = m_window->m_undo_stack;
+	m_box = m_window->ui->global;
+
+	auto &ui = m_window->ui;
+	// new
+	connect(ui->local, &ERScrollBox::sNew, this, &ERControl::newER);
+	connect(ui->plus_2, &QPushButton::clicked, this, &ERControl::newER);
+	// delete
+	connect(ui->local, &ERScrollBox::sDelete, this, &ERControl::deleteER);
+	connect(ui->minus_2, &QPushButton::clicked, this, &ERControl::deleteER);
+	// edit
+	connect(ui->local, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
+	connect(ui->edit, &QPushButton::clicked, this, &ERControl::editERInfo);
+	// open
+	connect(ui->local, &ERScrollBox::sOpen, this, &ERControl::openResource);
+
 	load(ers, categories);
 }
 
@@ -23,86 +41,58 @@ void ERControl::load(EResourceGroup *ers, ECategoryGroup *categories)
 		return;
 	}
 
+	m_box->setGroup(ers);
 
 }
 
 void ERControl::newER()
 {
-	//ERDialog dlg(this);
-	//int result = dlg.exec();
-	//if (result == QDialog::Rejected) {
-	//	return;
-	//}
+	ERDialog dlg(nullptr, m_categories.get());
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return;
+	}
+	qDebug() << "Command - New Embedded Resource";
+	m_undo_stack->beginMacro("New Resource");
+	int num_children;
 
-	//m_undo_stack->beginMacro("New Resource");
-	//int num_children;
-	//if (dlg.getGlobal())
-	//	num_children = m_global_resource_group->getNumChildren();
-	//else
-	//	num_children = m_local_resource_group->getNumChildren();
-	//m_undo_stack->push(new SelectResourcesCommand(this, { num_children - 1 }, ON_UNDO));
-	//if (dlg.getGlobal()) {
-	//	m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_global_resource_group, m_global_resource_group->getNumChildren()));
-	//	m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_resource_group, m_resource_group->getNumChildren()));
-	//}
-	//else {
-	//	m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_local_resource_group, m_local_resource_group->getNumChildren()));
-	//	m_undo_stack->push(new EResourceGroup::NewEResourceCommand(m_resource_group, m_resource_group->getNumChildren()));
-	//}
-	//m_undo_stack->push(new SelectResourcesCommand(this, { num_children }, ON_REDO));
-	//m_undo_stack->endMacro();
+	EResource *resource = new EResource;
+	resource->setResourceName(dlg.getTitle());
+	resource->setAuthor(dlg.getAuthor());
+	resource->setResourceDescription(dlg.getDescription());
+	resource->setResourcePath(dlg.getPath());
+	//resource->setResourceType(
+	resource->setGlobal(dlg.getGlobal());
+	resource->setCopyRight(dlg.getCopyRight());
+	resource->setMinYear(dlg.getMinYear());
+	resource->setMaxYear(dlg.getMaxYear());
+	resource->setReposition(dlg.getReposition());
+	resource->setAutoLaunch(dlg.getAutoLaunch());
+	resource->setLocalRange(dlg.getLocalRange());
+	resource->setErType(dlg.getErType());
+	resource->setViewMatrix(m_window->m_osg_widget->getCameraMatrix());
 
-	//EResource* resource;
-	//if (dlg.getGlobal()) {
-	//	osg::Node *c = m_global_resource_group->getChild(m_global_resource_group->getNumChildren() - 1);
-	//	resource = dynamic_cast<EResource*>(c); // getResource(m_resource_group->getNumChildren() - 1);
-	//	resource->setIndex(m_global_resource_group->getNumChildren() - 1);
-	//}
-	//else {
-	//	osg::Node *c = m_local_resource_group->getChild(m_local_resource_group->getNumChildren() - 1);
-	//	resource = dynamic_cast<EResource*>(c); // getResource(m_resource_group->getNumChildren() - 1);
-	//	resource->setIndex(m_local_resource_group->getNumChildren() - 1);
-	//}
-	//resource->setResourceName(dlg.getTitle());
-	//resource->setAuthor(dlg.getAuthor());
-	//resource->setResourceDescription(dlg.getDescription());
-	//resource->setResourcePath(dlg.getPath());
-	////resource->setResourceType(
-	//resource->setGlobal(dlg.getGlobal());
-	//resource->setCopyRight(dlg.getCopyRight());
-	//resource->setMinYear(dlg.getMinYear());
-	//resource->setMaxYear(dlg.getMaxYear());
-	//resource->setReposition(dlg.getReposition());
-	//resource->setAutoLaunch(dlg.getAutoLaunch());
-	//resource->setLocalRange(dlg.getLocalRange());
-	//resource->setErType(dlg.getErType());
+	m_undo_stack->push(new Group::AddNodeCommand<EResource>(m_ers, resource));
 
-	//resource->setViewMatrix(this->getViewer()->getCameraManipulator()->getMatrix());
-
-	////set category details
-	//ECategory *category = getCategory(dlg.getCategory());
-	//resource->setCategoryName(category->getCategoryName());
-	//resource->setRed(category->getRed());
-	//resource->setGreen(category->getGreen());
-	//resource->setBlue(category->getBlue());
+	m_undo_stack->endMacro();
 }
 
 void ERControl::deleteER()
 {
-	//std::set<int> selection = ui->local->getSelection();
-	//if (selection.empty()) return;
-	//int next_selection = nextSelectionAfterDelete(m_resource_group->getNumChildren(), selection);
+	std::set<int> selection = m_box->getSelection();
+	if (selection.empty()) return;
 
-	//// get pointers to nodes to delete
-	//m_undo_stack->beginMacro("Delete Resources");
-	//m_undo_stack->push(new SelectResourcesCommand(this, selection, ON_UNDO));
-	//// delete in reverse order
-	//for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
-	//	qDebug() << "pushing delete resource" << *i;
-	//	m_undo_stack->push(new EResourceGroup::DeleteEResourceCommand(m_resource_group, *i));
-	//}
-	//m_undo_stack->push(new SelectResourcesCommand(this, { next_selection }, ON_REDO));
-	//m_undo_stack->endMacro();
+	uint size = m_categories->getNumChildren();
+
+	m_undo_stack->beginMacro("Delete Resources");
+	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
+		if (*i >= size) {
+			qWarning() << "Out of range selection when deleting ERs";
+			continue;
+		}
+		m_undo_stack->push(new Group::DeleteNodeCommand<EResource>(m_ers, *i));
+	}
+	m_undo_stack->endMacro();
 }
 
 void ERControl::editERInfo()
@@ -169,13 +159,19 @@ void ERControl::openResource()
 {
 }
 
-void ERControl::newERCat(const std::string &name, QColor color)
+void ERControl::newERCat()
 {
+	NewCatDialog dlg;
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return;
+	}
+
 	ECategory *category = new ECategory();
-	category->setCategoryName(name);
-	category->setRed(color.red());
-	category->setBlue(color.blue());
-	category->setGreen(color.green());
+	category->setCategoryName(dlg.getCatTitle());
+	category->setRed(dlg.getRed());
+	category->setBlue(dlg.getGreen());
+	category->setGreen(dlg.getBlue());
 	m_categories->addChild(category);
 }
 

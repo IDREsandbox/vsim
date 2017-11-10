@@ -5,14 +5,14 @@
 #include <QDialogButtonBox>
 
 #include "ui_ERDialog.h"
-#include "resources/EResource.h"
-#include "MainWindow.h"
+
+class EResource;
+class ECategoryGroup;
 
 class ERDialog : public QDialog {
 	Q_OBJECT
 public:
-	ERDialog(MainWindow* mw, QWidget *parent = nullptr);
-	ERDialog(const EResource *er, MainWindow* mw, QWidget *parent = nullptr);
+	ERDialog(const EResource *er, const ECategoryGroup *categories, QWidget *parent = nullptr);
 	~ERDialog();
 
 	std::string getTitle() const;
@@ -30,13 +30,14 @@ public:
 
 	int getCategory() const;
 
-	void addNewCat();
 	void chooseFile();
 
+signals:
+	void addNewCat();
+
 private:
-	void setGui();
-	MainWindow* main;
 	Ui::ERDialog ui;
+	const ECategoryGroup* m_categories;
 };
 
 #endif // ERDIALOG_HPP

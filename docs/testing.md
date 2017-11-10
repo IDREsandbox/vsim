@@ -7,7 +7,7 @@ Here's the workflow
 2. Assuming you already have a build directory: `cmake --build . --target SomeClass_test`
 3. Open up a console in build/Debug and run ./SomeClass_test
 
-You might need to run `cmake --build . --target VSim` to copy dll's over for the first time.
+You need to run `cmake --build . --target VSim` to setup dll copying for the first time.
 
 ## Running all of the tests
 

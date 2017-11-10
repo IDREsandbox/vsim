@@ -5,19 +5,14 @@
 #include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
 
-ERDialog::ERDialog(MainWindow* mw, QWidget * parent)
+ERDialog::ERDialog(const EResource *er, const ECategoryGroup *categories, QWidget * parent)
 	: QDialog(parent)
 {
 	ui.setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
-	// if you don't want the icon in the top left, also removes the X button
-	//setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-	
-	main = mw;
 
-	ui.lower->setText("-9999");
-	ui.upper->setText("9999");
-	
+	m_categories = categories;
+
 	ui.licensing->addItem("Copyrighted Resource");
 	ui.licensing->addItem("Fair Use");
 	ui.licensing->addItem("Held by Creator");
@@ -27,56 +22,27 @@ ERDialog::ERDialog(MainWindow* mw, QWidget * parent)
 	ui.licensing->addItem("Web Resource");
 	ui.licensing->setCurrentIndex(0);
 
-	connect(ui.addnew, &QPushButton::clicked, this, &ERDialog::addNewCat);
-	connect(ui.choose, &QPushButton::clicked, this, &ERDialog::chooseFile);
+	if (er == nullptr) {
+		ui.lower->setText("-9999");
+		ui.upper->setText("9999");
+	}
+	else {
+		ui.title->setText(QString::fromStdString(er->getResourceName()));
+		ui.description->setText(QString::fromStdString(er->getResourceDescription()));
+		ui.authors->setText(QString::fromStdString(er->getAuthor()));
+		ui.path->setText(QString::fromStdString(er->getResourcePath()));
+		ui.lower->setText(QString::fromStdString(std::to_string(er->getMinYear())));
+		ui.upper->setText(QString::fromStdString(std::to_string(er->getMaxYear())));
+		ui.radius->setValue(er->getLocalRange());
 
-	//ECategory *category = main->getCategory(0);
-	//if (category != NULL)
-	//{
-	//	for (uint i = 0; i <= main->m_cat_group->getNumChildren() - 1; i++)
-	//	{
-	//		category = main->getCategory(i);
-	//		ui.categories->addItem(QString::fromStdString(category->getCategoryName()));
-	//	}
-	//}
-}
-
-ERDialog::ERDialog(const EResource *er, MainWindow* mw, QWidget *parent)
-	: ERDialog(mw, parent)
-{
-	main = mw;
-
-	ui.lower->setText("-9999");
-	ui.upper->setText("9999");
-
-	ui.title->setText(QString::fromStdString(er->getResourceName()));
-	ui.description->setText(QString::fromStdString(er->getResourceDescription()));
-	ui.authors->setText(QString::fromStdString(er->getAuthor()));
-	ui.path->setText(QString::fromStdString(er->getResourcePath()));
-	ui.lower->setText(QString::fromStdString(std::to_string(er->getMinYear())));
-	ui.upper->setText(QString::fromStdString(std::to_string(er->getMaxYear())));
-	ui.radius->setValue(er->getLocalRange());
-
-	if (er->getGlobal())
-		ui.global->setChecked(true);
-	else
-		ui.local->setChecked(true);
-
-	ui.licensing->setCurrentIndex(er->getCopyRight());
+		if (er->getGlobal())
+			ui.global->setChecked(true);
+		else
+			ui.local->setChecked(true);
+	}
 
 	connect(ui.addnew, &QPushButton::clicked, this, &ERDialog::addNewCat);
 	connect(ui.choose, &QPushButton::clicked, this, &ERDialog::chooseFile);
-
-	//ECategory *category = main->getCategory(0);
-	//if (category != NULL)
-	//{
-	//	for (uint i = 0; i <= main->m_cat_group->getNumChildren() - 1; i++)
-	//	{
-	//		category = main->getCategory(i);
-	//		if (category->getCategoryName() == er->getCategoryName())
-	//			ui.categories->setCurrentIndex(i);
-	//	}
-	//}
 }
 
 ERDialog::~ERDialog() {
@@ -155,21 +121,6 @@ int ERDialog::getErType() const
 int ERDialog::getCategory() const
 {
 	return ui.categories->currentIndex();
-}
-
-void ERDialog::addNewCat()
-{
-	NewCatDialog dlg;
-	int result = dlg.exec();
-	if (result == QDialog::Rejected) {
-		return;
-	}
-
-	ui.categories->addItem(QString::fromStdString(dlg.getCatTitle()));
-
-	//main->newERCat(dlg.getCatTitle(), dlg.getRed(), dlg.getGreen(), dlg.getBlue());
-
-	ui.categories->setCurrentIndex(main->m_cat_group->getNumChildren() - 1);
 }
 
 void ERDialog::chooseFile()

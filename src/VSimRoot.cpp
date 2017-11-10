@@ -1,6 +1,10 @@
 #include "VSimRoot.h"
 #include <iostream>
 #include "narrative/NarrativeSlideLabels.h"
+#include "narrative/NarrativeGroup.h"
+#include "ModelGroup.h"
+#include "resources/EResourceGroup.h"
+#include "resources/ECategoryGroup.h"
 
 VSimRoot::VSimRoot() {
 	qDebug() << "root constructor, adding children";
@@ -9,6 +13,12 @@ VSimRoot::VSimRoot() {
 
 	m_models = new ModelGroup;
 	m_models->setName("Models");
+
+	m_resources = new EResourceGroup;
+	m_models->setName("Resources");
+
+	m_categories = new ECategoryGroup;
+	m_models->setName("Categories");
 }
 VSimRoot::VSimRoot(const VSimRoot& n, const osg::CopyOp& copyop)
 	: VSimRoot() 
@@ -96,29 +106,6 @@ void VSimRoot::setCategories(ECategoryGroup * categories)
 	m_categories = categories;
 }
 
-int VSimRoot::getFoo() const
-{
-	return 3;
-}
-
-void VSimRoot::setFoo(int x)
-{
-}
-int VSimRoot::getFoob() const
-{
-	return 2;
-}
-void VSimRoot::setFoob(int x)
-{
-}
-int VSimRoot::getFoox() const
-{
-	return foox;
-}
-void VSimRoot::setFoox(int x)
-{
-	foox = x;
-}
 void VSimRoot::debug()
 {
 	qInfo() << "root";
