@@ -32,15 +32,17 @@ public:
 
 	// this scroll box takes ownership, so just construct with nullptr
 	void addItem(ScrollBoxItem*);
-	virtual void insertItem(int position, ScrollBoxItem*);
+	void insertItem(int position, ScrollBoxItem*);
 	void deleteItem(int position);
 
 	void deleteSelection();
 
+	// override this to make different kinds of scroll box items
+	virtual ScrollBoxItem *createItem(osg::Node*);
+
 	// these are used to link new/delete signals from groups to creation of new items
 	void addNewItem();
 	void insertNewItem(uint position);
-	virtual ScrollBoxItem *createItem(osg::Node*);
 	void moveItems(std::vector<std::pair<int,int>> mapping); // assumes sorted
 	ScrollBoxItem *getItem(int position);
 	void clear();
@@ -79,6 +81,8 @@ signals:
 	void sSelectionChange();
 	// to is the new index of the first item if the drop were to occur
 	void sMove(std::set<int> from, int to);
+	void sDelete();
+	void sNew();
 
 protected:
 	// qt overrides

@@ -15,8 +15,6 @@ public:
 	ScrollBoxItem *createItem(osg::Node *node) override;
 
 signals:
-	void sNew();
-	void sDelete();
 	void sInfo();
 	void sOpen();
 

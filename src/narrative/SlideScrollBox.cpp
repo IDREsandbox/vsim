@@ -75,11 +75,6 @@ std::vector<SlideScrollItem*> SlideScrollBox::getDirtySlides()
 	return items;
 }
 
-void SlideScrollBox::keyPressEvent(QKeyEvent *event) {
-	qDebug() << "slide key press" << event;
-	HorizontalScrollBox::keyPressEvent(event);
-}
-
 void SlideScrollBox::paintEvent(QPaintEvent * event)
 {
 	auto dirty = getDirtySlides();

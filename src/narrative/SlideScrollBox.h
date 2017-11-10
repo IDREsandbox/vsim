@@ -33,7 +33,6 @@ signals:
 	void sThumbnailsDirty();
 
 protected:
-	void keyPressEvent(QKeyEvent *event);
 
 	void paintEvent(QPaintEvent *event);
 

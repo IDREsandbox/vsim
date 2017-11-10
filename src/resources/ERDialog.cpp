@@ -22,17 +22,17 @@ ERDialog::ERDialog(const EResource *er, const ECategoryGroup *categories, QWidge
 	ui.licensing->addItem("Web Resource");
 	ui.licensing->setCurrentIndex(0);
 
-	if (er == nullptr) {
-		ui.lower->setText("-9999");
-		ui.upper->setText("9999");
+	if (er == nullptr) { // Defaults
+		ui.year_lower->setValue(0);
+		ui.year_upper->setValue(0);
 	}
 	else {
 		ui.title->setText(QString::fromStdString(er->getResourceName()));
 		ui.description->setText(QString::fromStdString(er->getResourceDescription()));
 		ui.authors->setText(QString::fromStdString(er->getAuthor()));
 		ui.path->setText(QString::fromStdString(er->getResourcePath()));
-		ui.lower->setText(QString::fromStdString(std::to_string(er->getMinYear())));
-		ui.upper->setText(QString::fromStdString(std::to_string(er->getMaxYear())));
+		ui.year_lower->setValue(er->getMinYear());
+		ui.year_upper->setValue(er->getMaxYear());
 		ui.radius->setValue(er->getLocalRange());
 
 		if (er->getGlobal())
@@ -50,17 +50,17 @@ ERDialog::~ERDialog() {
 
 std::string ERDialog::getTitle() const
 {
-	return ui.title->toHtml().toStdString();
+	return ui.title->text().toStdString();
 }
 
 std::string ERDialog::getDescription() const
 {
-	return ui.description->toHtml().toStdString();
+	return ui.description->toPlainText().toStdString();
 }
 
 std::string ERDialog::getAuthor() const
 {
-	return ui.authors->toHtml().toStdString();
+	return ui.authors->toPlainText().toStdString();
 }
 
 std::string ERDialog::getPath() const
@@ -75,12 +75,12 @@ int ERDialog::getCopyRight() const
 
 int ERDialog::getMinYear() const
 {
-	return std::stoi(ui.lower->text().toStdString());
+	return ui.year_lower->value();
 }
 
 int ERDialog::getMaxYear() const
 {
-	return std::stoi(ui.upper->text().toStdString());
+	return ui.year_upper->value();
 }
 
 int ERDialog::getGlobal() const

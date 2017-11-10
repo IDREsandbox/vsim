@@ -13,12 +13,10 @@ public:
 	~ERScrollBox();
 
 	ScrollBoxItem *createItem(osg::Node *node) override;
-	void setSelection(std::set<int> set, int last) override;
+
 	void filter(int type);
 
 signals:
-	void sNew();
-	void sDelete();
 	void sEdit(); // only support single edit
 	void sOpen();
 

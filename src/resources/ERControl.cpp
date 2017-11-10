@@ -17,16 +17,16 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers, E
 
 	auto &ui = m_window->ui;
 	// new
-	connect(ui->local, &ERScrollBox::sNew, this, &ERControl::newER);
+	connect(ui->global, &ERScrollBox::sNew, this, &ERControl::newER);
 	connect(ui->plus_2, &QPushButton::clicked, this, &ERControl::newER);
 	// delete
-	connect(ui->local, &ERScrollBox::sDelete, this, &ERControl::deleteER);
+	connect(ui->global, &ERScrollBox::sDelete, this, &ERControl::deleteER);
 	connect(ui->minus_2, &QPushButton::clicked, this, &ERControl::deleteER);
 	// edit
-	connect(ui->local, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
+	connect(ui->global, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
 	connect(ui->edit, &QPushButton::clicked, this, &ERControl::editERInfo);
 	// open
-	connect(ui->local, &ERScrollBox::sOpen, this, &ERControl::openResource);
+	connect(ui->global, &ERScrollBox::sOpen, this, &ERControl::openResource);
 
 	load(ers, categories);
 }
@@ -82,12 +82,12 @@ void ERControl::deleteER()
 	std::set<int> selection = m_box->getSelection();
 	if (selection.empty()) return;
 
-	uint size = m_categories->getNumChildren();
+	uint size = m_ers->getNumChildren();
 
 	m_undo_stack->beginMacro("Delete Resources");
 	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
 		if (*i >= size) {
-			qWarning() << "Out of range selection when deleting ERs";
+			qWarning() << "Out of range selection when deleting ERs" << *i << "/" << size;
 			continue;
 		}
 		m_undo_stack->push(new Group::DeleteNodeCommand<EResource>(m_ers, *i));
