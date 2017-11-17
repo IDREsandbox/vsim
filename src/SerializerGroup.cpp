@@ -6,6 +6,6 @@ REGISTER_OBJECT_WRAPPER(
 	Group,
 	new ::Group,
 	::Group,
-	"osg::Object osg::Node osg::Group")
+	"osg::Object osg::Node osg::Group ::Group")
 {
 }

@@ -754,6 +754,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ERControl.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeTransition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">

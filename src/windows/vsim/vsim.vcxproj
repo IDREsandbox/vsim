@@ -24,6 +24,7 @@
     <ClCompile Include="..\..\deprecated\narrative\NarrativeNode.cpp" />
     <ClCompile Include="..\..\deprecated\narrative\SerializerNarrative.cpp" />
     <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeNode.cpp" />
+    <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeTransition.cpp" />
     <ClCompile Include="..\..\deprecated\osgNewWidget\Canvas.cpp" />
     <ClCompile Include="..\..\deprecated\osgNewWidget\Label.cpp" />
     <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerCanvas.cpp" />
