@@ -17,13 +17,6 @@ public:
 signals:
 	void sInfo();
 	void sOpen();
-
-private:
-	QMenu *m_slide_menu; // context menu
-	QAction *m_action_new;
-	QAction *m_action_delete;
-	QAction *m_action_info;
-	QAction *m_action_open;
 };
 
 #endif // NARRATIVESCROLLBOX_H

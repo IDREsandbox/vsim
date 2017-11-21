@@ -457,10 +457,8 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 
 void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 {
-	qDebug() << "scroll area mouse event\n";
 	clearSelection();
 	if (event->button() == Qt::RightButton) {
-		qDebug() << "open area right click";
 		if (m_menu != nullptr) {
 			m_menu->exec(event->globalPos());
 		}
@@ -475,11 +473,9 @@ void HorizontalScrollBox::mouseReleaseEvent(QMouseEvent * event)
 void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 {
 	if (event->button() == Qt::LeftButton) {
-		qDebug() << "item press - lmb";
 		int previous_selected = m_last_selected;
 		m_last_selected = index;
 		if (event->type() == QEvent::MouseButtonDblClick) {
-			qDebug() << "item press - double click";
 			//emit sDoubleClick();
 			addToSelection(index);
 			refresh();

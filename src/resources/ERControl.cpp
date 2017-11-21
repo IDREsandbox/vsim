@@ -19,29 +19,31 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 
 	auto &ui = m_window->ui;
 	// new
-	connect(ui->global, &ERScrollBox::sNew, this, &ERControl::newER);
+	connect(m_box, &ERScrollBox::sNew, this, &ERControl::newER);
 	connect(ui->plus_2, &QPushButton::clicked, this, &ERControl::newER);
 	// delete
-	connect(ui->global, &ERScrollBox::sDelete, this, &ERControl::deleteER);
+	connect(m_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
 	connect(ui->minus_2, &QPushButton::clicked, this, &ERControl::deleteER);
 	// edit
-	connect(ui->global, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
+	connect(m_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
 	connect(ui->edit, &QPushButton::clicked, this, &ERControl::editERInfo);
 	// open
 	connect(ui->global, &ERScrollBox::sOpen, this, &ERControl::openResource);
+
+	connect(m_box, &ERScrollBox::sSetPosition, this, &ERControl::setPosition);
+	connect(m_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
 
 	load(ers);
 }
 
 void ERControl::load(EResourceGroup *ers)
 {
-	m_ers = ers;
-	
 	if (ers == nullptr) {
+		m_ers = nullptr;
 		m_categories = nullptr;
 		return;
 	}
-
+	m_ers = ers;
 	m_categories = ers->categories();
 
 	m_box->setGroup(ers);
@@ -148,21 +150,40 @@ void ERControl::editERInfo()
 	if (resource->getERType() != dlg.getERType())
 		m_undo_stack->push(new EResource::SetErTypeCommand(resource, dlg.getERType()));
 
-	//m_undo_stack->push(new EResource::SetViewMatrixCommand(resource, this->getViewer()->getCameraManipulator()->getMatrix()));
+	//m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
 
-	//if (resource->getCategoryName() != category->getCategoryName())
-	//	m_undo_stack->push(new EResource::SetCategoryNameCommand(resource, category->getCategoryName()));
-	//if (resource->getRed() != category->getRed())
-	//	m_undo_stack->push(new EResource::SetRedCommand(resource, category->getRed()));
-	//if (resource->getGreen() != category->getGreen())
-	//	m_undo_stack->push(new EResource::SetGreenCommand(resource, category->getGreen()));
-	//if (resource->getBlue() != category->getBlue())
-	//	m_undo_stack->push(new EResource::SetBlueCommand(resource, category->getBlue()));
-	//m_undo_stack->endMacro();
+	m_undo_stack->endMacro();
 }
 
 void ERControl::openResource()
 {
+}
+
+void ERControl::setPosition()
+{
+	int active_item = m_box->getLastSelected();
+	qInfo() << "Set ER position" << active_item;
+	if (active_item < 0) {
+		qWarning() << "Can't set ER position - no selection";
+		return;
+	}
+
+	EResource *resource = m_ers->getResource(active_item);
+	m_undo_stack->beginMacro("Set Resource Info");
+	m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
+	m_undo_stack->endMacro();
+}
+
+void ERControl::gotoPosition()
+{
+	int active_item = m_box->getLastSelected();
+	qInfo() << "Goto ER position" << active_item;
+	if (active_item < 0) {
+		qWarning() << "Can't goto ER position - no selection";
+		return;
+	}
+	EResource *resource = m_ers->getResource(active_item);
+	m_window->getViewerWidget()->setCameraMatrix(resource->getCameraMatrix());
 }
 
 void ERControl::newERCat()

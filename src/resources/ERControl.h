@@ -25,6 +25,8 @@ public:
 	void deleteER();
 	void editERInfo();
 	void openResource();
+	void setPosition();
+	void gotoPosition();
 
 	// opens new cat dialog
 	void newERCat();

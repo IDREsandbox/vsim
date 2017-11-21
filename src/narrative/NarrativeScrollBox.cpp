@@ -3,18 +3,20 @@
 NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
 	: HorizontalScrollBox(parent)
 {
-	
 	// initialize menus
-	m_slide_menu = new QMenu(tr("Slide context menu"), this);
-	m_action_new = new QAction("New Narrative", m_slide_menu);
-	m_action_delete = new QAction("Delete Narrative", m_slide_menu);
-	m_action_info = new QAction("Edit Narrative Info", m_slide_menu);
-	m_action_open = new QAction("Open Narrative", m_slide_menu);
+	QMenu *m_menu = new QMenu(tr("Narrative menu"), this);
+	QMenu *m_item_menu = new QMenu(tr("Narrative item menu"), this);
 
-	m_slide_menu->addAction(m_action_new);
-	m_slide_menu->addAction(m_action_delete);
-	m_slide_menu->addAction(m_action_info);
-	m_slide_menu->addAction(m_action_open);
+	QAction *m_action_new = new QAction("New Narrative", this);
+	QAction *m_action_delete = new QAction("Delete Narrative", this);
+	QAction *m_action_info = new QAction("Edit Narrative Info", this);
+	QAction *m_action_open = new QAction("Open Narrative", this);
+
+	m_menu->addAction(m_action_new);
+	m_item_menu->addAction(m_action_new);
+	m_item_menu->addAction(m_action_delete);
+	m_item_menu->addAction(m_action_info);
+	m_item_menu->addAction(m_action_open);
 
 	// forward signals
 	connect(m_action_new, &QAction::triggered, this, &NarrativeScrollBox::sNew);
@@ -22,8 +24,8 @@ NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
 	connect(m_action_info, &QAction::triggered, this, &NarrativeScrollBox::sInfo);
 	connect(m_action_open, &QAction::triggered, this, &NarrativeScrollBox::sOpen);
 
-	setMenu(m_slide_menu);
-	setItemMenu(m_slide_menu);
+	setMenu(m_menu);
+	setItemMenu(m_item_menu);
 }
 
 NarrativeScrollBox::~NarrativeScrollBox() {

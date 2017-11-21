@@ -1,4 +1,11 @@
 # Changelog
+## 2017-11-21
+### Added
+- Embedded resource positioning
+
+### Fixed
+- Loads old embedded resources
+
 ## 2017-08-25
 ### Added
 - Basic embedded resources
