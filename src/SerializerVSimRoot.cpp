@@ -15,5 +15,4 @@ REGISTER_OBJECT_WRAPPER(
 	ADD_OBJECT_SERIALIZER(Narratives, ::NarrativeGroup, nullptr);
 	ADD_OBJECT_SERIALIZER(Models, ::ModelGroup, nullptr);
 	ADD_OBJECT_SERIALIZER(Resources, ::EResourceGroup, nullptr);
-	ADD_OBJECT_SERIALIZER(Categories, ::ECategoryGroup, nullptr);
 }

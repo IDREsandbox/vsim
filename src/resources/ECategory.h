@@ -29,13 +29,11 @@ public:
 	int getBlue()const;
 	void setBlue(int blue);
 
-	void setIndex(int idx);
-
 signals:
-	void sCNameChanged(const std::string&, int);
-	void sCRedChanged(int, int);
-	void sCBlueChanged(int, int);
-	void sCGreenChanged(int, int);
+	void sCNameChanged(std::string old_name, std::string new_name);
+	void sCRedChanged(int);
+	void sCBlueChanged(int);
+	void sCGreenChanged(int);
 
 private:
 	std::string m_cat_name;
@@ -43,6 +41,5 @@ private:
 	int m_red;
 	int m_green;
 
-	int m_index;
 };
 #endif // ECATEGORY_HPP

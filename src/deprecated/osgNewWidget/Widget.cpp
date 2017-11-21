@@ -36,95 +36,95 @@ Widget::Widget(int flags)
 	m_parent(NULL),
 	m_highlight(false)
 {
-    if (flags & osgNewWidget::WIDGET_WITH_GEOMETRY)
-    {
-        m_bgGeometry = new osg::Geometry();
-        m_bgGeometry->setName("wgeom");
-        osg::Vec3 coords[] =
-        {
-            osg::Vec3(0.0, 0.0, 0.0),
-            osg::Vec3(0.0, 0.0, 0.0),
-            osg::Vec3(0.0, 0.0, 0.0),
-            osg::Vec3(0.0, 0.0, 0.0)
-        };
+    //if (flags & osgNewWidget::WIDGET_WITH_GEOMETRY)
+    //{
+    //    m_bgGeometry = new osg::Geometry();
+    //    m_bgGeometry->setName("wgeom");
+    //    osg::Vec3 coords[] =
+    //    {
+    //        osg::Vec3(0.0, 0.0, 0.0),
+    //        osg::Vec3(0.0, 0.0, 0.0),
+    //        osg::Vec3(0.0, 0.0, 0.0),
+    //        osg::Vec3(0.0, 0.0, 0.0)
+    //    };
 
-        m_bgGeometry->setUseDisplayList(false);
-        m_bgGeometry->setDataVariance(osg::Object::DYNAMIC);
+    //    m_bgGeometry->setUseDisplayList(false);
+    //    m_bgGeometry->setDataVariance(osg::Object::DYNAMIC);
 
-        int numCoords = sizeof(coords)/sizeof(osg::Vec3);
-        osg::Vec3Array* vertices = new osg::Vec3Array(numCoords, coords);
+    //    int numCoords = sizeof(coords)/sizeof(osg::Vec3);
+    //    osg::Vec3Array* vertices = new osg::Vec3Array(numCoords, coords);
 
-        m_bgGeometry->setVertexArray(vertices);
+    //    m_bgGeometry->setVertexArray(vertices);
 
-        osg::Vec4Array* colors = new osg::Vec4Array;
-        colors->push_back(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+    //    osg::Vec4Array* colors = new osg::Vec4Array;
+    //    colors->push_back(osg::Vec4(1.0, 1.0, 1.0, 1.0));
 
-        m_bgGeometry->setColorArray(colors);
-        m_bgGeometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+    //    m_bgGeometry->setColorArray(colors);
+    //    m_bgGeometry->setColorBinding(osg::Geometry::BIND_OVERALL);
 
-        osg::Vec3Array* normals = new osg::Vec3Array;
-        normals->push_back(osg::Vec3(0.0, 0.0, 1.0));
+    //    osg::Vec3Array* normals = new osg::Vec3Array;
+    //    normals->push_back(osg::Vec3(0.0, 0.0, 1.0));
 
-        m_bgGeometry->setNormalArray(normals);
-        m_bgGeometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
+    //    m_bgGeometry->setNormalArray(normals);
+    //    m_bgGeometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
 
-        m_bgGeometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, numCoords));
+    //    m_bgGeometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, numCoords));
 
-        osg::Vec2 texs[] =
-        {
-            osg::Vec2(0.0, 0.0),
-            osg::Vec2(1.0, 0.0),
-            osg::Vec2(1.0, 1.0),
-            osg::Vec2(0.0, 1.0)
-        };
-        int numTexs = sizeof(texs)/sizeof(osg::Vec2);
+    //    osg::Vec2 texs[] =
+    //    {
+    //        osg::Vec2(0.0, 0.0),
+    //        osg::Vec2(1.0, 0.0),
+    //        osg::Vec2(1.0, 1.0),
+    //        osg::Vec2(0.0, 1.0)
+    //    };
+    //    int numTexs = sizeof(texs)/sizeof(osg::Vec2);
 
-        osg::Vec2Array* texsArray = new osg::Vec2Array(numTexs, texs);
-        m_bgGeometry->setTexCoordArray(0, texsArray);
+    //    osg::Vec2Array* texsArray = new osg::Vec2Array(numTexs, texs);
+    //    m_bgGeometry->setTexCoordArray(0, texsArray);
 
-        addDrawable(m_bgGeometry);
-    }
-    if (flags & osgNewWidget::WIDGET_WITH_BORDER)
-    {
-        m_borderGeometry = new osg::Geometry();
-        m_borderGeometry->setName("wbgeom");
-        osg::Vec3Array& a = *static_cast<osg::Vec3Array*>(m_bgGeometry->getVertexArray());
-        osg::Vec3 offset(-0.5, -0.5, 0.0);
-        osg::Vec3 coords[] =
-        {
-            osg::Vec3(a[0] + offset),
-            osg::Vec3(a[1] + offset),
-            osg::Vec3(a[2] + offset),
-            osg::Vec3(a[3] + offset)
-        };
+    //    addDrawable(m_bgGeometry);
+    //}
+    //if (flags & osgNewWidget::WIDGET_WITH_BORDER)
+    //{
+    //    m_borderGeometry = new osg::Geometry();
+    //    m_borderGeometry->setName("wbgeom");
+    //    osg::Vec3Array& a = *static_cast<osg::Vec3Array*>(m_bgGeometry->getVertexArray());
+    //    osg::Vec3 offset(-0.5, -0.5, 0.0);
+    //    osg::Vec3 coords[] =
+    //    {
+    //        osg::Vec3(a[0] + offset),
+    //        osg::Vec3(a[1] + offset),
+    //        osg::Vec3(a[2] + offset),
+    //        osg::Vec3(a[3] + offset)
+    //    };
 
-        m_borderGeometry->setUseDisplayList(false);
-        m_borderGeometry->setDataVariance(osg::Object::DYNAMIC);
+    //    m_borderGeometry->setUseDisplayList(false);
+    //    m_borderGeometry->setDataVariance(osg::Object::DYNAMIC);
 
-        int numCoords = sizeof(coords)/sizeof(osg::Vec3);
-        for (int i = 0; i < numCoords; i++)
-            coords[i].z() += 0.01;
-        osg::Vec3Array* vertices = new osg::Vec3Array(numCoords, coords);
+    //    int numCoords = sizeof(coords)/sizeof(osg::Vec3);
+    //    for (int i = 0; i < numCoords; i++)
+    //        coords[i].z() += 0.01;
+    //    osg::Vec3Array* vertices = new osg::Vec3Array(numCoords, coords);
 
-        m_borderGeometry->setVertexArray(vertices);
+    //    m_borderGeometry->setVertexArray(vertices);
 
-        osg::Vec4Array* colors = new osg::Vec4Array;
-        colors->push_back(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+    //    osg::Vec4Array* colors = new osg::Vec4Array;
+    //    colors->push_back(osg::Vec4(1.0, 1.0, 1.0, 1.0));
 
-        m_borderGeometry->setColorArray(colors);
-        m_borderGeometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+    //    m_borderGeometry->setColorArray(colors);
+    //    m_borderGeometry->setColorBinding(osg::Geometry::BIND_OVERALL);
 
-        osg::Vec3Array* normals = new osg::Vec3Array;
-        normals->push_back(osg::Vec3(0.0, 0.0, 1.0));
+    //    osg::Vec3Array* normals = new osg::Vec3Array;
+    //    normals->push_back(osg::Vec3(0.0, 0.0, 1.0));
 
-        m_borderGeometry->setNormalArray(normals);
-        m_borderGeometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
+    //    m_borderGeometry->setNormalArray(normals);
+    //    m_borderGeometry->setNormalBinding(osg::Geometry::BIND_OVERALL);
 
-        m_borderGeometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINE_LOOP, 0, numCoords));
-        m_borderGeometry->getOrCreateStateSet()->setAttribute(new osg::LineWidth(1.0f));
+    //    m_borderGeometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINE_LOOP, 0, numCoords));
+    //    m_borderGeometry->getOrCreateStateSet()->setAttribute(new osg::LineWidth(1.0f));
 
-        addDrawable(m_borderGeometry);
-    }
+    //    addDrawable(m_borderGeometry);
+    //}
 
     //setNodeMask(osgNewWidget::NODEMASK_2D);
 }

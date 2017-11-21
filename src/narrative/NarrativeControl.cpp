@@ -27,6 +27,7 @@
 #include "StyleSettings.h"
 #include "LabelStyle.h"
 #include "Selection.h"
+#include "MainWindowTopBar.h"
 
 NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	: QObject(parent), 

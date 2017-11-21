@@ -17,9 +17,9 @@ class ERControl : public QObject
 {
 	Q_OBJECT;
 public:
-	ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers, ECategoryGroup *categories);
+	ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers);
 
-	void load(EResourceGroup *ers, ECategoryGroup *categories);
+	void load(EResourceGroup *ers);
 
 	void newER();
 	void deleteER();
@@ -41,5 +41,6 @@ private:
 
 	QUndoStack *m_undo_stack;
 };
+
 
 #endif /* ERCONTROL_H */

@@ -5,8 +5,7 @@ ECategory::ECategory()
 	m_cat_name("Untitled"),
 	m_red(0),
 	m_blue(0),
-	m_green(0),
-	m_index(-1)
+	m_green(0)
 {
 
 }
@@ -15,8 +14,7 @@ ECategory::ECategory(const ECategory& e, const osg::CopyOp& copyop)
 	m_cat_name(e.m_cat_name),
 	m_red(e.m_red),
 	m_blue(e.m_blue),
-	m_green(e.m_green),
-	m_index(e.m_index)
+	m_green(e.m_green)
 {
 
 }
@@ -25,19 +23,15 @@ ECategory::~ECategory()
 {
 }
 
-void ECategory::setIndex(int idx)
-{
-	m_index = idx;
-}
-
 const std::string& ECategory::getCategoryName() const
 {
 	return m_cat_name;
 }
 void ECategory::setCategoryName(const std::string& name)
 {
+	std::string old_name = m_cat_name;
 	m_cat_name = name;
-	emit sCNameChanged(m_cat_name, m_index);
+	emit sCNameChanged(old_name, name);
 }
 
 int ECategory::getRed() const
@@ -47,7 +41,7 @@ int ECategory::getRed() const
 void ECategory::setRed(int red)
 {
 	m_red = red;
-	emit sCRedChanged(m_red, m_index);
+	emit sCRedChanged(m_red);
 }
 int ECategory::getGreen() const
 {
@@ -56,7 +50,7 @@ int ECategory::getGreen() const
 void ECategory::setGreen(int green)
 {
 	m_green = green;
-	emit sCGreenChanged(m_green, m_index);
+	emit sCGreenChanged(m_green);
 }
 int ECategory::getBlue() const
 {
@@ -65,5 +59,5 @@ int ECategory::getBlue() const
 void ECategory::setBlue(int blue)
 {
 	m_blue = blue;
-	emit sCBlueChanged(m_blue, m_index);
+	emit sCBlueChanged(m_blue);
 }

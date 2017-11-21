@@ -11,6 +11,7 @@
 #include <osgWidget/Box>
 #include <osgWidget/EventInterface>
 #include "VSWidget.h"
+#include <QDebug>
 //#include "menu/Settings.h"
 
 
@@ -39,17 +40,17 @@ VSLabel::VSLabel(int flags): osgNewWidget::Label(flags)
 
 VSLabel::VSLabel(const std::string& label, int flags): osgNewWidget::Label(flags)
 {
-	setLabel(label);
+	//setLabel(label);
 	//setFont("C:\\Users\\samin\\Desktop\\DroidSans.ttf");
 	//setFont("T:\\Projects\\_UCLA\\vsim\\vsim\\nrts\\src\\VSim\\windows\\Release\\DroidSans.ttf"); 
-	setFontSize(16);
+	//setFontSize(16);
 	//setFontColor(g_settings.m_widget_font_color);
 	//if (flags & osgNewWidget::WIDGET_WITH_GEOMETRY)
 	//	setColor(g_settings.m_widget_bg_color);
 	//if (flags & osgNewWidget::WIDGET_WITH_BORDER)
 	//	setBorderColor(g_settings.m_widget_frame_color);
 	
-	setSize(osg::Vec2f(26.0f, 26.0f));
+	//setSize(osg::Vec2f(26.0f, 26.0f));
 }
 
 VSLabel::VSLabel(const VSLabel& widget, const osg::CopyOp& copyop):
@@ -63,18 +64,18 @@ VSLabel::~VSLabel()
 
 void VSLabel::setLabel(const std::string& label)
 {
-	if (m_text.get())
-	{
-		osgNewWidget::Label::setLabel(label);
-	}
-	else
-	{
-		//osgNewWidget::Label::setLabel(label);
-		////setFont("C:\\Users\\samin\\Desktop\\DroidSans.ttf");
-		//setFont("T:\\Projects\\_UCLA\\vsim\\vsim\\nrts\\src\\VSim\\windows\\Release\\DroidSans.ttf");
-		//setFontSize(16);
-		//setFontColor(g_settings.m_widget_font_color);
-	}
+	//if (m_text.get())
+	//{
+	//	osgNewWidget::Label::setLabel(label);
+	//}
+	//else
+	//{
+	//	//osgNewWidget::Label::setLabel(label);
+	//	////setFont("C:\\Users\\samin\\Desktop\\DroidSans.ttf");
+	//	//setFont("T:\\Projects\\_UCLA\\vsim\\vsim\\nrts\\src\\VSim\\windows\\Release\\DroidSans.ttf");
+	//	//setFontSize(16);
+	//	//setFontColor(g_settings.m_widget_font_color);
+	//}
 }
 
 // -----------------------------------------------------------------------------

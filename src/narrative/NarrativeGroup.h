@@ -13,7 +13,7 @@ class NarrativeGroup : public Group {
 public:
 	NarrativeGroup() {}
 	NarrativeGroup(const NarrativeGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
-	NarrativeGroup(osg::Group *old_group);
+	NarrativeGroup(const osg::Group *old_group);
 	META_Node(, NarrativeGroup)
 
 public: // COMMANDS

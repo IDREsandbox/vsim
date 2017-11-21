@@ -6,7 +6,7 @@
  */
 
 #include "deprecated/osgNewWidget/Label.h"
-
+#include <QDebug>
 namespace osgNewWidget
 {
 
@@ -15,12 +15,13 @@ Label::Label(int flags) :
 	m_text(NULL),
 	m_labelAlpha(1.0f)
 {
-		std::string temp;
-		temp = getLabel();
-		setLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-		m_letter_size = getTextSize();
-		m_letter_size.x() /= 100;
-		setLabel(temp);
+	//qDebug() << "null mtext";
+		//std::string temp;
+		//temp = getLabel();
+		//setLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+		//m_letter_size = getTextSize();
+		//m_letter_size.x() /= 100;
+		//setLabel(temp);
 }
 
 Label::Label(const Label& label, const osg::CopyOp& copyop)
@@ -28,12 +29,13 @@ Label::Label(const Label& label, const osg::CopyOp& copyop)
 	m_text(label.m_text),
 	m_labelAlpha(label.m_labelAlpha)
 {
-		std::string temp;
-		temp = getLabel();
-		setLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-		m_letter_size = getTextSize();
-		m_letter_size.x() /= 100;
-		setLabel(temp);
+	//qDebug() << "mtext copyop";
+		//std::string temp;
+		//temp = getLabel();
+		//setLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+		//m_letter_size = getTextSize();
+		//m_letter_size.x() /= 100;
+		//setLabel(temp);
 }
 
 Label::~Label()
@@ -77,6 +79,8 @@ const osgText::Text* Label::getText() const
 // Used only by serializer.
 void Label::setText(osgText::Text* text)
 {
+	//std::string s = text->getText().createUTF8EncodedString();
+	//qDebug() << "set text" << QString::fromStdString(s);
 	//OSG_ALWAYS << "setText" << std::endl;
 	m_text = text;
 	m_labelAlpha = m_text->getColor().a();
@@ -96,53 +100,53 @@ void Label::setSize(const osg::Vec2f& size)
 
 void Label::update()
 {
-	if (!m_text.get())
-		return;
-	osg::BoundingBox bb = m_text->getBoundingBox();
-	osg::Vec2f textSize(osg::round(bb.xMax() - bb.xMin()), osg::round(bb.yMax() - bb.yMin()));
+	//if (!m_text.get())
+	//	return;
+	//osg::BoundingBox bb = m_text->getBoundingBox();
+	//osg::Vec2f textSize(osg::round(bb.xMax() - bb.xMin()), osg::round(bb.yMax() - bb.yMin()));
 
-	osg::Vec3f textPos;
-	textPos.z() = (getZOffset() + 1) * 0.01f;
-	osg::Vec2f size = getSize();
-	osg::Vec2f pos = getPosition();
-	textPos.x() = osg::round((size.x() - textSize.x()) / 2.0f + pos.x()) + m_parentOffset.x(); 
-	textPos.y() = osg::round((size.y() - textSize.y()) / 2.0f + pos.y()) + m_parentOffset.y(); 
-	m_text->setPosition(textPos);
-	m_text->dirtyBound();
+	//osg::Vec3f textPos;
+	//textPos.z() = (getZOffset() + 1) * 0.01f;
+	//osg::Vec2f size = getSize();
+	//osg::Vec2f pos = getPosition();
+	//textPos.x() = osg::round((size.x() - textSize.x()) / 2.0f + pos.x()) + m_parentOffset.x(); 
+	//textPos.y() = osg::round((size.y() - textSize.y()) / 2.0f + pos.y()) + m_parentOffset.y(); 
+	//m_text->setPosition(textPos);
+	//m_text->dirtyBound();
 
 }
 
 void Label::setFont(const std::string& font)
 {
-	if (!m_text.get())
-		return;
-	m_text->setFont(font);
-	
-	std::string temp;
-	temp = getLabel();
-	setLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-	m_letter_size = getTextSize();
-	m_letter_size.x() /= 100;
-	setLabel(temp);
-	
-	update();
+	//if (!m_text.get())
+	//	return;
+	//m_text->setFont(font);
+	//
+	//std::string temp;
+	//temp = getLabel();
+	//setLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+	//m_letter_size = getTextSize();
+	//m_letter_size.x() /= 100;
+	//setLabel(temp);
+	//
+	//update();
 }
 
 void Label::setFontSize(unsigned int size)
 {
-	if (!m_text.get())
-		return;
-	m_text->setCharacterSize(size);
-	m_text->setFontResolution(size, size);
+	//if (!m_text.get())
+	//	return;
+	//m_text->setCharacterSize(size);
+	//m_text->setFontResolution(size, size);
 
-	std::string temp;
-	temp = getLabel();
-	setLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-	m_letter_size = getTextSize();
-	m_letter_size.x() /= 100;
-	setLabel(temp);
+	//std::string temp;
+	//temp = getLabel();
+	//setLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+	//m_letter_size = getTextSize();
+	//m_letter_size.x() /= 100;
+	//setLabel(temp);
 
-	update();
+	//update();
 }
 
 osg::Vec4f Label::getFontColor() const

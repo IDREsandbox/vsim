@@ -68,7 +68,7 @@ public: // COMMANDS
 		}
 		void undo() {
 			uint index;
-			if (m_index < 0) index = m_group->getNumChildren();
+			if (m_index < 0) index = m_group->getNumChildren() - 1;
 			else index = (uint)m_index;
 			m_group->removeChild(index);
 			m_group->sDelete(index);

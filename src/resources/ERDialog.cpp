@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <string>
 #include <qfiledialog.h>
 #include "resources/ERDialog.h"
 #include "resources/NewCatDialog.h"
@@ -13,14 +14,10 @@ ERDialog::ERDialog(const EResource *er, const ECategoryGroup *categories, QWidge
 
 	m_categories = categories;
 
-	ui.licensing->addItem("Copyrighted Resource");
-	ui.licensing->addItem("Fair Use");
-	ui.licensing->addItem("Held by Creator");
-	ui.licensing->addItem("Public Domain");
-	ui.licensing->addItem("Unknown Source");
-	ui.licensing->addItem("Used with Permission");
-	ui.licensing->addItem("Web Resource");
-	ui.licensing->setCurrentIndex(0);
+	for (uint i = 0; i < sizeof(EResource::CopyrightStrings) / sizeof(char*); i++) {
+		ui.licensing->addItem(EResource::CopyrightStrings[i]);
+	}
+	ui.licensing->setCurrentIndex(EResource::UNSPECIFIED);
 
 	if (er == nullptr) { // Defaults
 		ui.year_lower->setValue(0);
@@ -68,9 +65,9 @@ std::string ERDialog::getPath() const
 	return ui.path->text().toStdString();
 }
 
-int ERDialog::getCopyRight() const
+EResource::Copyright ERDialog::getCopyright() const
 {
-	return ui.licensing->currentIndex();
+	return (EResource::Copyright)ui.licensing->currentIndex();
 }
 
 int ERDialog::getMinYear() const
@@ -83,24 +80,19 @@ int ERDialog::getMaxYear() const
 	return ui.year_upper->value();
 }
 
-int ERDialog::getGlobal() const
+bool ERDialog::getGlobal() const
 {
 	return ui.global->isChecked();
 }
 
-int ERDialog::getReposition() const
+bool ERDialog::getReposition() const
 {
 	return ui.on->isChecked();
 }
 
-int ERDialog::getAutoLaunch() const
+bool ERDialog::getAutoLaunch() const
 {
-	if (ui.on_2->isChecked())
-		return 1;
-	else if (ui.text->isChecked())
-		return 2;
-	else
-		return 0;
+	return ui.on_2->isChecked() && getERType() != EResource::ANNOTATION;
 }
 
 float ERDialog::getLocalRange() const
@@ -108,14 +100,14 @@ float ERDialog::getLocalRange() const
 	return ui.radius->value();
 }
 
-int ERDialog::getErType() const
+EResource::ERType ERDialog::getERType() const
 {
-	if (ui.url->isChecked())
-		return 1;
+	if (ui.file->isChecked())
+		return EResource::FILE;
 	else if (ui.annotation->isChecked())
-		return 2;
+		return EResource::ANNOTATION;
 	else
-		return 0;
+		return EResource::URL;
 }
 
 int ERDialog::getCategory() const

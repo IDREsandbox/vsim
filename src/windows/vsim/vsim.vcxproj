@@ -35,6 +35,11 @@
     <ClCompile Include="..\..\deprecated\osgNewWidget\SerializerWidget.cpp" />
     <ClCompile Include="..\..\deprecated\osgNewWidget\VSWidget.cpp" />
     <ClCompile Include="..\..\deprecated\osgNewWidget\Widget.cpp" />
+    <ClCompile Include="..\..\deprecated\resources\EResourcesCategory.cpp" />
+    <ClCompile Include="..\..\deprecated\resources\EResourcesList.cpp" />
+    <ClCompile Include="..\..\deprecated\resources\EResourcesNode.cpp" />
+    <ClCompile Include="..\..\deprecated\resources\SerializerEResourcesList.cpp" />
+    <ClCompile Include="..\..\deprecated\resources\SerializerEResourcesNode.cpp" />
     <ClCompile Include="..\..\dragLabel.cpp" />
     <ClCompile Include="..\..\dragLabelInput.cpp" />
     <ClCompile Include="..\..\editButtons.cpp" />
@@ -786,6 +791,9 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I.\..\..\narrative" "-I.\..\.." "-I.\.." "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(DEPS)\OpenSceneGraph\include" "-I$(DEPS)\osg-build\include"</Command>
     </CustomBuild>
+    <ClInclude Include="..\..\deprecated\resources\EResourcesCategory.h" />
+    <ClInclude Include="..\..\deprecated\resources\EResourcesList.h" />
+    <ClInclude Include="..\..\deprecated\resources\EResourcesNode.h" />
     <ClInclude Include="..\..\resources\ResourceSplitter.h" />
     <CustomBuild Include="..\..\StyleSettings.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

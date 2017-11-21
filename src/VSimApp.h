@@ -13,16 +13,13 @@
 #include <osgViewer/Viewer>
 #include <QTimer>
 #include <QElapsedTimer>
-#include <memory>
-
-#include "MainWindow.h"
-#include "VSimRoot.h"
-#include "ModelTableModel.h"
 
 class NarrativeControl;
 class NarrativePlayer;
 class ERControl;
 class MainWindow;
+class VSimRoot;
+class ModelTableModel;
 
 class VSimApp : public QObject
 {
@@ -45,7 +42,7 @@ public:
 	bool exportNarratives();
 	bool importNarratives();
 
-	VSimRoot* getRoot() const { return m_root.get(); }
+	VSimRoot *getRoot() const;
 
 	std::string getFileName();
 	void setFileName(const std::string &);
@@ -61,20 +58,20 @@ private:
 	QTimer *m_timer;
 	QElapsedTimer *m_dt_timer;
 
-	MainWindow* m_window;
-	osgViewer::Viewer* m_viewer;
+	MainWindow *m_window;
+	osgViewer::Viewer *m_viewer;
 
 	std::string m_filename;
 	bool m_model_loaded;
 
 	osg::ref_ptr<VSimRoot> m_root;
-	ModelTableModel m_model_table_model;
+	ModelTableModel *m_model_table_model;
 
 	NarrativeControl *m_narrative_control;
 	ERControl *m_er_control;
 	NarrativePlayer *m_narrative_player;
 };
 
-extern VSimApp* g_vsimapp;
+//extern VSimApp* g_vsimapp;
 
 #endif

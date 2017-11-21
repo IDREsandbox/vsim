@@ -34,17 +34,13 @@ public:
 	const EResourceGroup *getResources() const;
 	void setResources(EResourceGroup *resources);
 
-	ECategoryGroup *categories() const;
-	const ECategoryGroup *getCategories() const;
-	void setCategories(ECategoryGroup *categories);
-
 	void debug();
 
 private:
 	osg::ref_ptr<NarrativeGroup> m_narratives;
 	osg::ref_ptr<ModelGroup> m_models;
 	osg::ref_ptr<EResourceGroup> m_resources;
-	osg::ref_ptr<ECategoryGroup> m_categories;
+	
 
 	int foox;
 };

@@ -8,8 +8,10 @@
 #include "resources/ERScrollBox.h"
 #include "resources/NewCatDialog.h"
 #include "MainWindow.h"
+#include "ui_MainWindow.h"
+#include "OSGViewerWidget.h"
 
-ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers, ECategoryGroup *categories)
+ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	: QObject(parent), m_window(window), m_ers(nullptr), m_categories(nullptr)
 {
 	m_undo_stack = m_window->m_undo_stack;
@@ -28,18 +30,19 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers, E
 	// open
 	connect(ui->global, &ERScrollBox::sOpen, this, &ERControl::openResource);
 
-	load(ers, categories);
+	load(ers);
 }
 
-void ERControl::load(EResourceGroup *ers, ECategoryGroup *categories)
+void ERControl::load(EResourceGroup *ers)
 {
 	m_ers = ers;
-	m_categories = categories;
 	
-	if (ers == nullptr || categories == nullptr) {
-
+	if (ers == nullptr) {
+		m_categories = nullptr;
 		return;
 	}
+
+	m_categories = ers->categories();
 
 	m_box->setGroup(ers);
 
@@ -63,14 +66,14 @@ void ERControl::newER()
 	resource->setResourcePath(dlg.getPath());
 	//resource->setResourceType(
 	resource->setGlobal(dlg.getGlobal());
-	resource->setCopyRight(dlg.getCopyRight());
+	resource->setCopyright(dlg.getCopyright());
 	resource->setMinYear(dlg.getMinYear());
 	resource->setMaxYear(dlg.getMaxYear());
 	resource->setReposition(dlg.getReposition());
 	resource->setAutoLaunch(dlg.getAutoLaunch());
 	resource->setLocalRange(dlg.getLocalRange());
-	resource->setErType(dlg.getErType());
-	resource->setViewMatrix(m_window->m_osg_widget->getCameraMatrix());
+	resource->setERType(dlg.getERType());
+	resource->setCameraMatrix(m_window->m_osg_widget->getCameraMatrix());
 
 	m_undo_stack->push(new Group::AddNodeCommand<EResource>(m_ers, resource));
 
@@ -97,50 +100,53 @@ void ERControl::deleteER()
 
 void ERControl::editERInfo()
 {
-	//int active_item = ui->local->getLastSelected();
-	//qDebug() << "resource list - begin edit on" << active_item;
-	//if (active_item < 0) {
-	//	qWarning() << "resource list - can't edit with no selection";
-	//	return;
-	//}
+	qInfo() << "Edit ER Info";
 
-	//EResource *resource = getResource(active_item);
+	int active_item = m_box->getLastSelected();
+	qDebug() << "resource list - begin edit on" << active_item;
+	if (active_item < 0) {
+		qWarning() << "resource list - can't edit with no selection";
+		return;
+	}
 
-	//ERDialog dlg(resource, this);
-	//int result = dlg.exec();
-	//if (result == QDialog::Rejected) {
-	//	qDebug() << "resource list - cancelled edit on" << active_item;
-	//	return;
-	//}
+	EResource *resource = m_ers->getResource(active_item);
+
+	ERDialog dlg(resource, m_ers->categories());
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		qDebug() << "resource list - cancelled edit on" << active_item;
+		return;
+	}
 
 	//ECategory* category = getCategory(dlg.getCategory());
 
-	//m_undo_stack->beginMacro("Set Resource Info");
+	m_undo_stack->beginMacro("Set Resource Info");
 	//m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
-	//if (resource->getResourceName() != dlg.getTitle())
-	//	m_undo_stack->push(new EResource::SetResourceNameCommand(resource, dlg.getTitle()));
-	//if (resource->getAuthor() != dlg.getAuthor())
-	//	m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor()));
-	//if (resource->getResourceDescription() != dlg.getDescription())
-	//	m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription()));
-	//if (resource->getResourcePath() != dlg.getPath())
-	//	m_undo_stack->push(new EResource::SetResourcePathCommand(resource, dlg.getPath()));
-	//if (resource->getGlobal() != dlg.getGlobal())
-	//	m_undo_stack->push(new EResource::SetGlobalCommand(resource, dlg.getGlobal()));
-	//if (resource->getCopyRight() != dlg.getCopyRight())
-	//	m_undo_stack->push(new EResource::SetCopyRightCommand(resource, dlg.getCopyRight()));
-	//if (resource->getMinYear() != dlg.getMinYear())
-	//	m_undo_stack->push(new EResource::SetMinYearCommand(resource, dlg.getMinYear()));
-	//if (resource->getMaxYear() != dlg.getMaxYear())
-	//	m_undo_stack->push(new EResource::SetMaxYearCommand(resource, dlg.getMaxYear()));
-	//if (resource->getReposition() != dlg.getReposition())
-	//	m_undo_stack->push(new EResource::SetRepositionCommand(resource, dlg.getReposition()));
-	//if (resource->getAutoLaunch() != dlg.getAutoLaunch())
-	//	m_undo_stack->push(new EResource::SetAutoLaunchCommand(resource, dlg.getAutoLaunch()));
-	//if (resource->getLocalRange() != dlg.getLocalRange())
-	//	m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange()));
-	//if (resource->getErType() != dlg.getErType())
-	//	m_undo_stack->push(new EResource::SetErTypeCommand(resource, dlg.getErType()));
+
+	if (resource->getResourceName() != dlg.getTitle())
+		m_undo_stack->push(new EResource::SetResourceNameCommand(resource, dlg.getTitle()));
+	if (resource->getAuthor() != dlg.getAuthor())
+		m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor()));
+	if (resource->getResourceDescription() != dlg.getDescription())
+		m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription()));
+	if (resource->getResourcePath() != dlg.getPath())
+		m_undo_stack->push(new EResource::SetResourcePathCommand(resource, dlg.getPath()));
+	if (resource->getGlobal() != dlg.getGlobal())
+		m_undo_stack->push(new EResource::SetGlobalCommand(resource, dlg.getGlobal()));
+	if (resource->getCopyright() != dlg.getCopyright())
+		m_undo_stack->push(new EResource::SetCopyrightCommand(resource, dlg.getCopyright()));
+	if (resource->getMinYear() != dlg.getMinYear())
+		m_undo_stack->push(new EResource::SetMinYearCommand(resource, dlg.getMinYear()));
+	if (resource->getMaxYear() != dlg.getMaxYear())
+		m_undo_stack->push(new EResource::SetMaxYearCommand(resource, dlg.getMaxYear()));
+	if (resource->getReposition() != dlg.getReposition())
+		m_undo_stack->push(new EResource::SetRepositionCommand(resource, dlg.getReposition()));
+	if (resource->getAutoLaunch() != dlg.getAutoLaunch())
+		m_undo_stack->push(new EResource::SetAutoLaunchCommand(resource, dlg.getAutoLaunch()));
+	if (resource->getLocalRange() != dlg.getLocalRange())
+		m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange()));
+	if (resource->getERType() != dlg.getERType())
+		m_undo_stack->push(new EResource::SetErTypeCommand(resource, dlg.getERType()));
 
 	//m_undo_stack->push(new EResource::SetViewMatrixCommand(resource, this->getViewer()->getCameraManipulator()->getMatrix()));
 

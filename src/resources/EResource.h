@@ -3,89 +3,104 @@
 
 #include <string>
 #include <osg/Node>
+#include <osg/observer_ptr>
 #include <QObject>
+
 //#include "deprecated/resources/EResourcesNode.h"
 #include "Group.h"
 #include "Command.h"
-#include "ECategory.h"
+#include "resources/ECategory.h"
 
-class EResource : public Group {
+class EResourcesNode;
+class ECategoryGroup;
+class EResource : public QObject, public osg::Node {
 	Q_OBJECT
 
 public:
 	EResource();
 	EResource(const EResource& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
-	//EResource(const EResourcesNode *old); // converts old resource to a new one
+	EResource(const EResourcesNode *old, const std::map<std::string, ECategory*> &cats); // converts old resource to a new one
 	virtual ~EResource();
 
 	META_Node(, EResource)
 
 	const std::string& getResourceName() const;
 	void setResourceName(const std::string& name);
-	const std::string& getResourceType() const;
-	void setResourceType(const std::string& type);
 	const std::string& getResourcePath() const;
 	void setResourcePath(const std::string& path);
 	const std::string& getResourceDescription() const;
 	void setResourceDescription(const std::string& description);
 	const std::string& getAuthor() const;
-	void setAuthor(const std::string& authors);
-	int getGlobal() const;
-	void setGlobal(int gorl);
-	int getCopyRight() const;
-	void setCopyRight(int cr);
+	void setAuthor(const std::string& author);
+	bool getGlobal() const;
+	void setGlobal(bool global);
+
+	enum Copyright {
+		COPYRIGHTED,
+		FAIRUSE,
+		HELD,
+		PUBLIC,
+		UNKNOWN,
+		PERMISSION,
+		WEB,
+		UNSPECIFIED
+	};
+	static constexpr const char *CopyrightStrings[] = { "Copyrighted Resource",
+		"Fair Use",
+		"Held by Creator",
+		"Public Domain",
+		"Unknown Source",
+		"Used with Permission",
+		"Web Resource",
+		"Unspecified"
+	};
+
+	Copyright getCopyright() const;
+	void setCopyright(Copyright cr);
 	int getMinYear() const;
 	void setMinYear(int my);
 	int getMaxYear() const;
 	void setMaxYear(int my);
-	int getReposition() const;
-	void setReposition(int reposition);
-	int getAutoLaunch() const;
-	void setAutoLaunch(int launch);
+
+	bool getReposition() const;
+	void setReposition(bool reposition);
+	bool getAutoLaunch() const;
+	void setAutoLaunch(bool launch);
 	float getLocalRange() const;
 	void setLocalRange(float lrange);
-	int getErType() const;
-	void setErType(int ertype);
 
-	const osg::Matrixd& getViewMatrix() const;
-	osg::Matrixd& getViewMatrix();
-	void setViewMatrix(const osg::Matrixd& matrix);
+	enum ERType {
+		URL,
+		ANNOTATION,
+		FILE
+	};
+	ERType getERType() const;
+	void setERType(ERType ertype);
 
-	const std::string& getCategoryName() const;
-	void setCategoryName(const std::string& name);
-
-	int getRed() const;
-	void setRed(int red);
-	int getGreen()const;
-	void setGreen(int green);
-	int getBlue()const;
-	void setBlue(int blue);
+	const osg::Matrixd& getCameraMatrix() const;
+	osg::Matrixd& getCameraMatrix();
+	void setCameraMatrix(const osg::Matrixd& matrix);
 
 	const ECategory *getCategory() const;
 	void setCategory(ECategory *category);
 
-	void setIndex(int idx);
-
 signals:
-	void sResourceNameChanged(const std::string&, int);
-	void sResourceAuthorChanged(const std::string&, int);
-	void sResourceDescriptionChanged(const std::string&, int);
-	void sResourceTypeChanged(const std::string&, int);
-	void sResourcePathChanged(const std::string&, int);
-	void sGlobalChanged(int, int);
-	void sCopyRightChanged(int, int);
-	void sMinYearChanged(int, int);
-	void sMaxYearChanged(int, int);
-	void sRepositionChanged(int, int);
-	void sAutoLaunchChanged(int, int);
-	void sLocalRangeChanged(float, int);
-	void sErTypeChanged(int, int);
-	void sViewMatrixChanged(const osg::Matrixd&, int);
+	void sResourceNameChanged(const std::string&);
+	void sResourceAuthorChanged(const std::string&);
+	void sResourceDescriptionChanged(const std::string&);
+	//void sResourceTypeChanged(const std::string&);
+	void sResourcePathChanged(const std::string&);
+	void sGlobalChanged(bool);
+	void sCopyRightChanged(Copyright);
+	void sMinYearChanged(int);
+	void sMaxYearChanged(int);
+	void sRepositionChanged(bool);
+	void sAutoLaunchChanged(bool);
+	void sLocalRangeChanged(float);
+	void sErTypeChanged(ERType);
+	void sViewMatrixChanged(const osg::Matrixd&);
 
-	void sCategoryNameChanged(const std::string&, int);
-	void sRedChanged(int, int);
-	void sBlueChanged(int, int);
-	void sGreenChanged(int, int);
+	void sCategoryChanged(const ECategory *old_category, const ECategory *new_category);
 
 public: // resource commands
 	class SetResourceNameCommand : public ModifyCommand<EResource, const std::string&> {
@@ -103,25 +118,20 @@ public: // resource commands
 		SetResourceDescriptionCommand(EResource *res, const std::string &desc, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getResourceDescription, &setResourceDescription, desc, res, parent) {}
 	};
-	class SetResourceTypeCommand : public ModifyCommand<EResource, const std::string&> {
-	public:
-		SetResourceTypeCommand(EResource *res, const std::string &type, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getResourceType, &setResourceType, type, res, parent) {}
-	};
 	class SetResourcePathCommand : public ModifyCommand<EResource, const std::string&> {
 	public:
 		SetResourcePathCommand(EResource *res, const std::string &path, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getResourcePath, &setResourcePath, path, res, parent) {}
 	};
-	class SetGlobalCommand : public ModifyCommand<EResource, int> {
+	class SetGlobalCommand : public ModifyCommand<EResource, bool> {
 	public:
-		SetGlobalCommand(EResource *res, int glob, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getGlobal, &setGlobal, glob, res, parent) {}
+		SetGlobalCommand(EResource *res, bool global, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&getGlobal, &setGlobal, global, res, parent) {}
 	};
-	class SetCopyRightCommand : public ModifyCommand<EResource, int> {
+	class SetCopyrightCommand : public ModifyCommand<EResource, Copyright> {
 	public:
-		SetCopyRightCommand(EResource *res, int cr, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getCopyRight, &setCopyRight, cr, res, parent) {}
+		SetCopyrightCommand(EResource *res, Copyright cr, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&getCopyright, &setCopyright, cr, res, parent) {}
 	};
 	class SetMinYearCommand : public ModifyCommand<EResource, int> {
 	public:
@@ -133,14 +143,14 @@ public: // resource commands
 		SetMaxYearCommand(EResource *res, int my, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getMaxYear, &setMaxYear, my, res, parent) {}
 	};
-	class SetRepositionCommand : public ModifyCommand<EResource, int> {
+	class SetRepositionCommand : public ModifyCommand<EResource, bool> {
 	public:
-		SetRepositionCommand(EResource *res, int re, QUndoCommand *parent = nullptr)
+		SetRepositionCommand(EResource *res, bool re, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getReposition, &setReposition, re, res, parent) {}
 	};
-	class SetAutoLaunchCommand : public ModifyCommand<EResource, int> {
+	class SetAutoLaunchCommand : public ModifyCommand<EResource, bool> {
 	public:
-		SetAutoLaunchCommand(EResource *res, int al, QUndoCommand *parent = nullptr)
+		SetAutoLaunchCommand(EResource *res, bool al, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getAutoLaunch, &setAutoLaunch, al, res, parent) {}
 	};
 	class SetLocalRangeCommand : public ModifyCommand<EResource, float> {
@@ -148,68 +158,45 @@ public: // resource commands
 		SetLocalRangeCommand(EResource *res, float lr, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getLocalRange, &setLocalRange, lr, res, parent) {}
 	};
-	class SetErTypeCommand : public ModifyCommand<EResource, int> {
+	class SetErTypeCommand : public ModifyCommand<EResource, ERType> {
 	public:
-		SetErTypeCommand(EResource *res, int er, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getErType, &setErType, er, res, parent) {}
+		SetErTypeCommand(EResource *res, ERType er, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&getERType, &setERType, er, res, parent) {}
 	};
-	class SetViewMatrixCommand : public ModifyCommand<EResource, const osg::Matrixd&> {
+	class SetCameraMatrixCommand : public ModifyCommand<EResource, const osg::Matrixd&> {
 	public:
-		SetViewMatrixCommand(EResource *res, const osg::Matrixd& mat, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getViewMatrix, &setViewMatrix, mat, res, parent) {}
+		SetCameraMatrixCommand(EResource *res, const osg::Matrixd& mat, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&getCameraMatrix, &setCameraMatrix, mat, res, parent) {}
 	};
 
 	// category commands
-	class SetCategoryNameCommand : public ModifyCommand<EResource, const std::string&> {
-	public:
-		SetCategoryNameCommand(EResource *res, const std::string &name, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getCategoryName, &setCategoryName, name, res, parent) {}
-	};
-	class SetRedCommand : public ModifyCommand<EResource, int> {
-	public:
-		SetRedCommand(EResource *res, int red, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getRed, &setRed, red, res, parent) {}
-	};
-	class SetGreenCommand : public ModifyCommand<EResource, int> {
-	public:
-		SetGreenCommand(EResource *res, int green, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getGreen, &setGreen, green, res, parent) {}
-	};
-	class SetBlueCommand : public ModifyCommand<EResource, int> {
-	public:
-		SetBlueCommand(EResource *res, int blue, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getBlue, &setBlue, blue, res, parent) {}
-	};
-
-
+	//class SetCategoryCommand : public ModifyCommand<EResource, ECategory *> {
+	//public:
+	//	SetCategoryNameCommand(EResource *res, ECategory *category, QUndoCommand *parent = nullptr)
+	//		: ModifyCommand(&getCategoryName, &setCategoryName, category, res, parent) {}
+	//};
+	
 private:
 	std::string m_name;
-	std::string m_filetype;
+	//std::string m_filetype;
 	std::string m_filepath;
 	std::string m_description;
 	std::string m_authors;
-	int m_global;
-	int m_reposition;
+	bool m_global;
+	bool m_reposition;
 	int m_launch; // 0 off, 1 on, 2 text
-	int m_copyright;
-	int m_min_year; // default -99999
-	int m_max_year; // default 99999
+	Copyright m_copyright;
+	int m_min_year; // default 0
+	int m_max_year; // default 0
 	float m_local_range; // global should be false to make this valid
-	int m_ertype; // 0 file, 1 link, 2 annotation
-	bool m_filter;
+	ERType m_ertype; // 0 file, 1 link, 2 annotation
 
 	osg::Vec3f m_camera_position;
-	osg::Matrixd m_view_matrix;
+	osg::Matrixd m_camera_matrix;
 
-	bool m_inview;
+	//bool m_inview; // what is this?
 
-	// categories, deprecated
-	std::string m_cat_name;
-	int m_blue;
-	int m_red;
-	int m_green;
-
-	osg::ref_ptr<ECategory> m_category;
+	osg::observer_ptr<ECategory> m_category;
 
 	int m_index;
 };

@@ -757,6 +757,21 @@
     <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeTransition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\deprecated\resources\EResourcesList.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\resources\EResourcesNode.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\resources\SerializerEResourcesList.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\resources\SerializerEResourcesNode.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\deprecated\resources\EResourcesCategory.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">
@@ -854,6 +869,15 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_StyleSettings.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\deprecated\resources\EResourcesList.h">
+      <Filter>Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\deprecated\resources\EResourcesNode.h">
+      <Filter>Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\deprecated\resources\EResourcesCategory.h">
+      <Filter>Deprecated</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

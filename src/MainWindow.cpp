@@ -10,6 +10,8 @@
 
 #include "MainWindow.h"
 
+#include "ui_MainWindow.h"
+
 #include "narrative/NarrativeInfoDialog.h"
 #include "resources/ERDialog.h"
 #include "dragLabelInput.h"
@@ -18,6 +20,8 @@
 #include "labelCanvasView.h"
 #include "TimeSlider.h"
 #include "ModelOutliner.h"
+#include "dragLabel.h"
+#include "resources/ERDisplay.h"
 
 MainWindow::MainWindow(QWidget *parent) 
 	: QMainWindow(parent),
@@ -64,14 +68,6 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->rootLayout->addWidget(m_view, 0, 0);
 
 	// embedded resources
-	m_resource_group = new EResourceGroup(); // for the all-resources view.
-	m_local_resource_group = new EResourceGroup();
-	m_global_resource_group = new EResourceGroup();
-	ui->local->setGroup(m_local_resource_group);
-	ui->global->setGroup(m_global_resource_group);
-
-	m_cat_group = new ECategoryGroup();
-
 	m_display = new ERDisplay(this);
 	m_display->setGeometry(10, 200, 265, 251);
 	m_display->hide();

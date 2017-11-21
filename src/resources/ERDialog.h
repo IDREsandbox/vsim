@@ -5,8 +5,8 @@
 #include <QDialogButtonBox>
 
 #include "ui_ERDialog.h"
+#include "EResource.h"
 
-class EResource;
 class ECategoryGroup;
 
 class ERDialog : public QDialog {
@@ -19,14 +19,14 @@ public:
 	std::string getDescription() const;
 	std::string getAuthor() const;
 	std::string getPath() const;
-	int getCopyRight() const;
+	EResource::Copyright getCopyright() const;
 	int getMinYear() const;
 	int getMaxYear() const;
-	int getGlobal() const;
-	int getReposition() const;
-	int getAutoLaunch() const;
+	bool getGlobal() const;
+	bool getReposition() const;
+	bool getAutoLaunch() const;
 	float getLocalRange() const;
-	int getErType() const;
+	EResource::ERType getERType() const;
 
 	int getCategory() const;
 

@@ -3,7 +3,7 @@
 #include "VSimApp.h"
 #include "ModelTableModel.h"
 
-#include <QTreeView>
+#include <memory>
 
 int main(int argc, char *argv[])
 {
@@ -17,8 +17,7 @@ int main(int argc, char *argv[])
 	MainWindow window;
 
 	window.show();
-	VSimApp vsim(&window);
-
-	vsim.openVSim(startup);
+	std::unique_ptr<VSimApp> vsim(new VSimApp(&window));
+	vsim->openVSim(startup);
 	return a.exec();
 }

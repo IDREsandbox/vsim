@@ -1,39 +1,31 @@
 //#include "deprecated/resources/EResourcesNode.h"
 #include "resources/EResource.h"
-
+#include "deprecated/resources/EResourcesNode.h"
+#include "ECategoryGroup.h"
+#include <QDebug>
 
 EResource::EResource()
-	: Group(),
-	m_name("Untitled"),
-	m_filetype("null"),
-	m_filepath("null"),
+	: m_name("Untitled"),
+	m_filepath(""),
 	m_description(" "),
 	m_authors(" "),
-	m_global(1),
-	m_reposition(0),
-	m_launch(0),
-	m_copyright(0),
+	m_global(true),
+	m_reposition(false),
+	m_launch(false),
+	m_copyright(UNSPECIFIED),
 	m_min_year(0),
 	m_max_year(0),
 	m_local_range(0),
-	m_ertype(0),
-	m_filter(0),
+	m_ertype(ANNOTATION),
 	m_camera_position(osg::Vec3f(0, 0, 0)),
-	m_view_matrix(osg::Matrixd()),
-	m_inview(0),
-	m_cat_name("null"),
-	m_blue(0),
-	m_green(0),
-	m_red(0),
+	m_camera_matrix(osg::Matrixd()),
 	m_category(nullptr),
 	m_index(-1)
 {
 }
 
 EResource::EResource(const EResource& er, const osg::CopyOp& copyop)
-	: Group(er, copyop),
-	m_name(er.m_name),
-	m_filetype(er.m_filetype),
+	: m_name(er.m_name),
 	m_filepath(er.m_filepath),
 	m_description(er.m_description),
 	m_authors(er.m_authors),
@@ -45,18 +37,36 @@ EResource::EResource(const EResource& er, const osg::CopyOp& copyop)
 	m_max_year(er.m_max_year),
 	m_local_range(er.m_local_range),
 	m_ertype(er.m_ertype),
-	m_filter(er.m_filter),
 	m_camera_position(er.m_camera_position),
-	m_view_matrix(er.m_view_matrix),
-	m_inview(er.m_inview),
-	m_cat_name(er.m_cat_name),
-	m_blue(er.m_blue),
-	m_green(er.m_green),
-	m_red(er.m_red),
+	m_camera_matrix(er.m_camera_matrix),
 	m_category(er.m_category),
 	m_index(er.m_index)
 {
 }
+
+EResource::EResource(const EResourcesNode *er, const std::map<std::string, ECategory*> &cats)
+	: m_name(er->getResourceName()),
+	m_filepath(er->getResourcePath()),
+	m_description(er->getResourceDiscription()),
+	m_authors(er->getAuthor()),
+	m_global(er->getGlobal()),
+	m_reposition(er->getReposition()),
+	m_launch(er->getAutoLaunch()),
+	m_copyright((Copyright)er->getCopyRight()),
+	m_min_year(er->getMinYear()),
+	m_max_year(er->getMaxYear()),
+	m_local_range(er->getLocalRange()),
+	m_ertype((ERType)er->getErType()),
+	m_camera_matrix(er->getViewMatrix()),
+	m_camera_position(m_camera_matrix.getTrans())
+{
+	ECategory *cat = nullptr;
+	auto it = cats.find(er->getCategoryName());
+	if (it != cats.end()) cat = it->second;
+
+	m_category = cat;
+}
+
 
 //EResource::EResource(const EResourcesNode *er) 
 //	: Group(),
@@ -88,11 +98,6 @@ EResource::~EResource()
 {
 }
 
-void EResource::setIndex(int idx)
-{
-	m_index = idx;
-}
-
 const std::string& EResource::getResourceName() const 
 { 
 	return m_name; 
@@ -100,17 +105,17 @@ const std::string& EResource::getResourceName() const
 void EResource::setResourceName(const std::string& name) 
 { 
 	m_name = name; 
-	emit sResourceNameChanged(name, m_index);
+	emit sResourceNameChanged(name);
 }
-const std::string& EResource::getResourceType() const 
-{ 
-	return m_filetype; 
-}
-void EResource::setResourceType(const std::string& type) 
-{ 
-	m_filetype = type; 
-	emit sResourceTypeChanged(type, m_index);
-}
+//const std::string& EResource::getResourceType() const 
+//{ 
+//	return m_filetype; 
+//}
+//void EResource::setResourceType(const std::string& type) 
+//{ 
+//	m_filetype = type; 
+//	emit sResourceTypeChanged(type, m_index);
+//}
 const std::string& EResource::getResourcePath() const 
 { 
 	return m_filepath; 
@@ -118,7 +123,7 @@ const std::string& EResource::getResourcePath() const
 void EResource::setResourcePath(const std::string& path) 
 {
 	m_filepath = path; 
-	emit sResourcePathChanged(path, m_index);
+	emit sResourcePathChanged(path);
 }
 const std::string& EResource::getResourceDescription() const 
 { 
@@ -127,7 +132,7 @@ const std::string& EResource::getResourceDescription() const
 void EResource::setResourceDescription(const std::string& description) 
 { 
 	m_description = description; 
-	emit sResourceDescriptionChanged(description, m_index);
+	emit sResourceDescriptionChanged(description);
 }
 const std::string& EResource::getAuthor() const 
 { 
@@ -136,25 +141,25 @@ const std::string& EResource::getAuthor() const
 void EResource::setAuthor(const std::string& authors) 
 { 
 	m_authors = authors; 
-	emit sResourceAuthorChanged(authors, m_index);
+	emit sResourceAuthorChanged(authors);
 }
-int EResource::getGlobal() const 
+bool EResource::getGlobal() const 
 { 
 	return m_global; 
 }
-void EResource::setGlobal(int gorl) 
+void EResource::setGlobal(bool global)
 { 
-	m_global = gorl; 
-	emit sGlobalChanged(gorl, m_index);
+	m_global = global;
+	emit sGlobalChanged(global);
 }
-int EResource::getCopyRight() const 
+EResource::Copyright EResource::getCopyright() const 
 { 
 	return m_copyright; 
 }
-void EResource::setCopyRight(int cr)
+void EResource::setCopyright(EResource::Copyright cr)
 { 
 	m_copyright = cr; 
-	emit sCopyRightChanged(cr, m_index);
+	emit sCopyRightChanged(cr);
 }
 int EResource::getMinYear() const 
 { 
@@ -163,7 +168,7 @@ int EResource::getMinYear() const
 void EResource::setMinYear(int my) 
 { 
 	m_min_year = my; 
-	emit sMinYearChanged(my, m_index);
+	emit sMinYearChanged(my);
 }
 int EResource::getMaxYear() const 
 { 
@@ -172,25 +177,25 @@ int EResource::getMaxYear() const
 void EResource::setMaxYear(int my) 
 { 
 	m_max_year = my; 
-	emit sMaxYearChanged(my, m_index);
+	emit sMaxYearChanged(my);
 }
-int EResource::getReposition() const
+bool EResource::getReposition() const
 { 
 	return m_reposition; 
 }
-void EResource::setReposition(int reposition) 
+void EResource::setReposition(bool reposition)
 { 
 	m_reposition = reposition;
-	emit sRepositionChanged(reposition, m_index);
+	emit sRepositionChanged(reposition);
 }
-int EResource::getAutoLaunch() const 
+bool EResource::getAutoLaunch() const
 { 
 	return m_launch; 
 }
-void EResource::setAutoLaunch(int launch) 
+void EResource::setAutoLaunch(bool launch) 
 { 
 	m_launch = launch; 
-	emit sAutoLaunchChanged(launch, m_index);
+	emit sAutoLaunchChanged(launch);
 }
 float EResource::getLocalRange() const 
 { 
@@ -199,78 +204,41 @@ float EResource::getLocalRange() const
 void EResource::setLocalRange(float lrange) 
 { 
 	m_local_range = lrange; 
-	emit sLocalRangeChanged(lrange, m_index);
+	emit sLocalRangeChanged(lrange);
 }
-int EResource::getErType() const 
+EResource::ERType EResource::getERType() const
 { 
 	return m_ertype; 
 }
-void EResource::setErType(int ertype)
+void EResource::setERType(ERType ertype)
 { 
 	m_ertype = ertype; 
-	emit sErTypeChanged(ertype, m_index);
+	emit sErTypeChanged(ertype);
 }
 
-const osg::Matrixd& EResource::getViewMatrix() const 
+const osg::Matrixd& EResource::getCameraMatrix() const 
 { 
-	return m_view_matrix; 
+	return m_camera_matrix; 
 }
-osg::Matrixd& EResource::getViewMatrix() 
+osg::Matrixd& EResource::getCameraMatrix()
 { 
-	return m_view_matrix; 
+	return m_camera_matrix; 
 }
-void EResource::setViewMatrix(const osg::Matrixd& matrix)
+void EResource::setCameraMatrix(const osg::Matrixd& matrix)
 {
-    m_view_matrix = matrix;
-    m_camera_position = m_view_matrix.getTrans();
-	emit sViewMatrixChanged(matrix, m_index);
+    m_camera_matrix = matrix;
+    m_camera_position = m_camera_matrix.getTrans();
+	emit sViewMatrixChanged(matrix);
 }
 
-const std::string& EResource::getCategoryName() const 
+const ECategory *EResource::getCategory() const 
 { 
-	return m_cat_name; 
+	return m_category.get(); 
 }
-void EResource::setCategoryName(const std::string& name) 
+void EResource::setCategory(ECategory *category) 
 {
-	m_cat_name = name; 
-	emit sCategoryNameChanged(name, m_index);
-}
-
-int EResource::getRed() const 
-{ 
-	return m_red; 
-}
-void EResource::setRed(int red) 
-{ 
-	m_red = red; 
-	emit sRedChanged(red, m_index);
-}
-int EResource::getGreen() const 
-{ 
-	return m_green; 
-}
-void EResource::setGreen(int green) 
-{ 
-	m_green = green; 
-	emit sGreenChanged(green, m_index);
-}
-int EResource::getBlue()const 
-{ 
-	return m_blue; 
-}
-void EResource::setBlue(int blue) 
-{ 
-	m_blue = blue; 
-	emit sBlueChanged(blue, m_index);
-}
-
-const ECategory * EResource::getCategory() const
-{
-	return m_category.get();
-}
-
-void EResource::setCategory(ECategory * category)
-{
+	ECategory *old_cat = m_category.get();
 	m_category = category;
+	emit sCategoryChanged(old_cat, category);
 }
 

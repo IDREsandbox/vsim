@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>422</width>
+    <width>287</width>
     <height>755</height>
    </rect>
   </property>
@@ -24,6 +24,9 @@
        <widget class="QRadioButton" name="file">
         <property name="text">
          <string>File</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -260,13 +263,6 @@
           <widget class="QRadioButton" name="off_2">
            <property name="text">
             <string>Off</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="text">
-           <property name="text">
-            <string>Text</string>
            </property>
           </widget>
          </item>

@@ -4,7 +4,10 @@
 #include "narrative/NarrativeGroup.h"
 #include "ModelGroup.h"
 #include "resources/EResourceGroup.h"
+#include "resources/EResource.h"
 #include "resources/ECategoryGroup.h"
+#include "resources/ECategory.h"
+#include "deprecated/resources/EResourcesList.h"
 
 VSimRoot::VSimRoot() {
 	qDebug() << "root constructor, adding children";
@@ -16,9 +19,6 @@ VSimRoot::VSimRoot() {
 
 	m_resources = new EResourceGroup;
 	m_models->setName("Resources");
-
-	m_categories = new ECategoryGroup;
-	m_models->setName("Categories");
 }
 VSimRoot::VSimRoot(const VSimRoot& n, const osg::CopyOp& copyop)
 	: VSimRoot() 
@@ -33,20 +33,20 @@ VSimRoot::VSimRoot(osg::Group * old_group)
 	// find ModelInformation
 
 	// NarrativeGroup
-	// The conversion constructor removes Narratives from old_group so we don't worry about it
 	m_narratives = new NarrativeGroup(old_group);
 	m_narratives->setName("Narratives");
 
 	m_resources = new EResourceGroup(old_group);
 	m_resources->setName("Resources");
 
-	// The old categories worked by scanning all of the resources
-	m_categories = new ECategoryGroup(m_resources.get());
-	m_categories->setName("ERCategories");
-
 	// Move everything unknown to the model group for displaying
 	for (uint i = 0; i < old_group->getNumChildren(); i++) {
 		osg::Node *node = old_group->getChild(i);
+		if (dynamic_cast<Narrative*>(node)
+			|| dynamic_cast<EResourcesList*>(node)
+			|| dynamic_cast<EResourcesNode*>(node)) {
+			continue;
+		}
 		m_models->addChild(old_group->getChild(i));
 	}
 }
@@ -91,21 +91,6 @@ void VSimRoot::setResources(EResourceGroup * resources)
 	m_resources = resources;
 }
 
-ECategoryGroup * VSimRoot::categories() const
-{
-	return m_categories;
-}
-
-const ECategoryGroup * VSimRoot::getCategories() const
-{
-	return m_categories;
-}
-
-void VSimRoot::setCategories(ECategoryGroup * categories)
-{
-	m_categories = categories;
-}
-
 void VSimRoot::debug()
 {
 	qInfo() << "root";
@@ -129,18 +114,24 @@ void VSimRoot::debug()
 			}
 		}
 	}
+
 	qInfo() << "Embedded Resources:" << m_resources->getNumChildren();
 	for (uint i = 0; i < m_resources->getNumChildren(); i++) {
 		EResource *er = dynamic_cast<EResource*>(m_resources->getChild(i));
-		if (!er) continue;
+		if (!er) {
+			qInfo() << "not an EResource";
+			continue;
+		}
 		qInfo() << "Resource" << i << QString::fromStdString(er->getResourceName());
 	}
-	qInfo() << "Categories:" << m_categories->getNumChildren();
-	for (uint i = 0; i < m_categories->getNumChildren(); i++) {
-		ECategory *cat = dynamic_cast<ECategory*>(m_categories->getChild(i));
+	const ECategoryGroup *cats = m_resources->getCategories();
+	qInfo() << "ER Categories:" << cats->getNumChildren();
+	for (uint i = 0; i < cats->getNumChildren(); i++) {
+		const ECategory *cat = dynamic_cast<const ECategory*>(cats->getChild(i));
 		if (!cat) continue;
 		qInfo() << "Category" << i << QString::fromStdString(cat->getCategoryName());
 	}
+
 	qInfo() << "Models:" << m_models->getNumChildren();
 	for (uint i = 0; i < m_models->getNumChildren(); i++) {
 		qInfo() << "Model" << QString::fromStdString(m_models->getChild(i)->getName());

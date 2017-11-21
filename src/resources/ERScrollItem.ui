@@ -22,13 +22,16 @@ background-color: rgb(48, 48, 48);</string>
     <widget class="QLabel" name="title">
      <property name="styleSheet">
       <string notr="true">color: rgb(255, 255, 255);
-font: 12pt;</string>
+font: 10pt;</string>
      </property>
      <property name="text">
       <string>ER Title</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
