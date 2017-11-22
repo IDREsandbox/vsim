@@ -12,6 +12,8 @@
 #include "ui_MainWindow.h"
 #include "OSGViewerWidget.h"
 
+#include <QDesktopServices>
+
 ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	: QObject(parent), m_window(window), m_ers(nullptr), m_categories(nullptr)
 {
@@ -165,6 +167,12 @@ void ERControl::openResource()
 
 	m_display->setInfo(res);
 	m_display->show();
+
+	if (res->getERType() == EResource::FILE ||
+		res->getERType() == EResource::URL) {
+		qInfo() << "Attempting to open file:" << res->getResourcePath().c_str();
+		QDesktopServices::openUrl(QUrl(res->getResourcePath().c_str()));
+	}
 
 	EResource *resource = m_ers->getResource(index);
 	m_window->getViewerWidget()->setCameraMatrix(resource->getCameraMatrix());
