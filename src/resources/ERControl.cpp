@@ -7,6 +7,7 @@
 #include "resources/ERDialog.h"
 #include "resources/ERScrollBox.h"
 #include "resources/NewCatDialog.h"
+#include "resources/ERDisplay.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "OSGViewerWidget.h"
@@ -16,6 +17,7 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 {
 	m_undo_stack = m_window->m_undo_stack;
 	m_box = m_window->ui->global;
+	m_display = m_window->erDisplay();
 
 	auto &ui = m_window->ui;
 	// new
@@ -157,6 +159,15 @@ void ERControl::editERInfo()
 
 void ERControl::openResource()
 {
+	int index = m_box->getLastSelected();
+	if (index < 0) return;
+	EResource *res = dynamic_cast<EResource*>(m_ers->getChild(index));
+
+	m_display->setInfo(res);
+	m_display->show();
+
+	EResource *resource = m_ers->getResource(index);
+	m_window->getViewerWidget()->setCameraMatrix(resource->getCameraMatrix());
 }
 
 void ERControl::setPosition()

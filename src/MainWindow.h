@@ -37,6 +37,7 @@ public:
 	labelCanvas *canvas() const;
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
+	ERDisplay *erDisplay() const;
 
 	// event stuff
 	void paintEvent(QPaintEvent* event);
@@ -87,7 +88,7 @@ public:
 	OSGViewerWidget *m_osg_widget;
 	labelCanvas *m_drag_area;
 	labelCanvasView *m_view;
-	ERDisplay *m_display;
+	ERDisplay *m_er_display;
 	ModelOutliner *m_outliner;
 	TimeSlider *m_time_slider;
 };

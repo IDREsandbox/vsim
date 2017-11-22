@@ -68,9 +68,9 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->rootLayout->addWidget(m_view, 0, 0);
 
 	// embedded resources
-	m_display = new ERDisplay(this);
-	m_display->setGeometry(10, 200, 265, 251);
-	m_display->hide();
+	m_er_display = new ERDisplay(this);
+	m_er_display->setGeometry(10, 200, 265, 251);
+	m_er_display->hide();
 
 	// vsimapp file stuff
 	connect(ui->actionNew, &QAction::triggered, this, &MainWindow::actionNew);
@@ -189,6 +189,11 @@ ModelOutliner * MainWindow::outliner() const
 TimeSlider * MainWindow::timeSlider() const
 {
 	return m_time_slider;
+}
+
+ERDisplay * MainWindow::erDisplay() const
+{
+	return m_er_display;
 }
 
 MainWindowTopBar *MainWindow::topBar() const

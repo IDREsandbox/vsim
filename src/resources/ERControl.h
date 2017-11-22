@@ -9,6 +9,7 @@ class EResourceGroup;
 class MainWindow;
 class ECategoryGroup;
 class ERDialog;
+class ERDisplay;
 class ERScrollBox;
 
 // manages which ER is active
@@ -37,7 +38,7 @@ private:
 	osg::ref_ptr<EResourceGroup> m_ers;
 	osg::ref_ptr<ECategoryGroup> m_categories;
 
-	ERDialog *m_display;
+	ERDisplay *m_display;
 
 	ERScrollBox *m_box;
 

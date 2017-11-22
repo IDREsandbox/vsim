@@ -32,6 +32,13 @@ public:
 
 	void chooseFile();
 
+	// Choose button depends on type
+	// URL bar depends on type
+	void onTypeChange();
+
+	// Radius depends on global/local
+	void onActivationChange();
+
 signals:
 	void addNewCat();
 

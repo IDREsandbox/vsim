@@ -32,14 +32,37 @@ ERDialog::ERDialog(const EResource *er, const ECategoryGroup *categories, QWidge
 		ui.year_upper->setValue(er->getMaxYear());
 		ui.radius->setValue(er->getLocalRange());
 
-		if (er->getGlobal())
-			ui.global->setChecked(true);
-		else
-			ui.local->setChecked(true);
+		ui.global->setChecked(er->getGlobal());
+		ui.autolaunch->setChecked(er->getAutoLaunch());
+
+		switch (er->getERType()) {
+		case EResource::FILE:
+			ui.file->setChecked(true);
+			break;
+		case EResource::ANNOTATION:
+			ui.annotation->setChecked(true);
+			break;
+		case EResource::URL:
+			ui.url->setChecked(true);
+			break;
+		}
 	}
 
 	connect(ui.addnew, &QPushButton::clicked, this, &ERDialog::addNewCat);
 	connect(ui.choose, &QPushButton::clicked, this, &ERDialog::chooseFile);
+
+	// only one call to onTypeChange occurs when toggles happen
+	auto ontoggletype = [this](bool x) { if (x) this->onTypeChange(); };
+	connect(ui.url, &QRadioButton::toggled, this, ontoggletype);
+	connect(ui.file, &QRadioButton::toggled, this, ontoggletype);
+	connect(ui.annotation, &QRadioButton::toggled, this, ontoggletype);
+
+	auto ontoggleactive = [this](bool x) { if (x) this->onActivationChange(); };
+	connect(ui.global, &QRadioButton::toggled, this, ontoggleactive);
+	connect(ui.local, &QRadioButton::toggled, this, ontoggleactive);
+
+	onActivationChange();
+	onTypeChange();
 }
 
 ERDialog::~ERDialog() {
@@ -62,6 +85,9 @@ std::string ERDialog::getAuthor() const
 
 std::string ERDialog::getPath() const
 {
+	if (ui.annotation->isChecked()) {
+		return "";
+	}
 	return ui.path->text().toStdString();
 }
 
@@ -97,17 +123,23 @@ bool ERDialog::getAutoLaunch() const
 
 float ERDialog::getLocalRange() const
 {
+	if (ui.global->isChecked()) {
+		return 0;
+	}
 	return ui.radius->value();
 }
 
 EResource::ERType ERDialog::getERType() const
 {
-	if (ui.file->isChecked())
+	if (ui.file->isChecked()) {
 		return EResource::FILE;
-	else if (ui.annotation->isChecked())
+	}
+	else if (ui.annotation->isChecked()) {
 		return EResource::ANNOTATION;
-	else
+	}
+	else {
 		return EResource::URL;
+	}
 }
 
 int ERDialog::getCategory() const
@@ -120,4 +152,30 @@ void ERDialog::chooseFile()
 	QFileDialog dlg;
 
 	ui.path->setText(dlg.getOpenFileName());
+}
+
+void ERDialog::onTypeChange()
+{
+	if (ui.file->isChecked()) {
+		ui.path->setEnabled(true);
+		ui.choose->setEnabled(true);
+	}
+	else if (ui.annotation->isChecked()) {
+		ui.path->setEnabled(false);
+		ui.choose->setEnabled(false);
+	}
+	else if (ui.url->isChecked()) {
+		ui.path->setEnabled(true);
+		ui.choose->setEnabled(false);
+	}
+}
+
+void ERDialog::onActivationChange()
+{
+	if (ui.global->isChecked()) {
+		ui.radius->setEnabled(false);
+	}
+	else if (ui.local->isChecked()) {
+		ui.radius->setEnabled(true);
+	}
 }
