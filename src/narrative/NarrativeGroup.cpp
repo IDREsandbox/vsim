@@ -12,24 +12,3 @@ NarrativeGroup::NarrativeGroup(const osg::Group *old_group)
 		}
 	}
 }
-
-NarrativeGroup::AddNarrativeCommand::AddNarrativeCommand(NarrativeGroup * group, Narrative2 * narrative, QUndoCommand * parent)
-	: QUndoCommand(parent),
-	m_group(group),
-	m_narrative(narrative)
-{
-}
-
-void NarrativeGroup::AddNarrativeCommand::undo()
-{
-	uint index = m_group->getNumChildren() - 1;
-	m_group->removeChild(index);
-	m_group->sDelete(index);
-}
-
-void NarrativeGroup::AddNarrativeCommand::redo()
-{
-	uint index = m_group->getNumChildren();
-	m_group->addChild(m_narrative);
-	m_group->sNew(index);
-}

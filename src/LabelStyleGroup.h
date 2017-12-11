@@ -23,16 +23,16 @@ signals :
 	void sDeleteLabelStyle(int);
 
 public: // COMMANDS
-	class NewLabelStyleCommand : public Group::NewNodeCommand<LabelStyle> {
-	public:
-		NewLabelStyleCommand(LabelStyleGroup *group, int index, QUndoCommand *parent = nullptr)
-			: Group::NewNodeCommand<LabelStyle>(group, index, parent) {}
-	};
-	class DeleteLabelStyleCommand : public Group::DeleteNodeCommand<LabelStyle> {
-	public:
-		DeleteLabelStyleCommand(LabelStyleGroup *group, int index, QUndoCommand *parent = nullptr)
-			: Group::DeleteNodeCommand<LabelStyle>(group, index, parent) {}
-	};
+	//class NewLabelStyleCommand : public Group::NewNodeCommand<LabelStyle> {
+	//public:
+	//	NewLabelStyleCommand(LabelStyleGroup *group, int index, QUndoCommand *parent = nullptr)
+	//		: Group::NewNodeCommand<LabelStyle>(group, index, parent) {}
+	//};
+	//class DeleteLabelStyleCommand : public Group::DeleteNodeCommand<LabelStyle> {
+	//public:
+	//	DeleteLabelStyleCommand(LabelStyleGroup *group, int index, QUndoCommand *parent = nullptr)
+	//		: Group::DeleteNodeCommand<LabelStyle>(group, index, parent) {}
+	//};
 	//class AddEResourceCommand : public QUndoCommand {
 	//public:
 	//	AddLabelStyleCommand(LabelStyleGroup *group, LabelStyle *style, QUndoCommand *parent = nullptr);

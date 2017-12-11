@@ -76,6 +76,7 @@ public:
 
 	// Data tracking
 	void setGroup(Group *group);
+	Group *getGroup() const;
 
 signals:
 	void sSelectionChange();

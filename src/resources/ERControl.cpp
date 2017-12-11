@@ -81,7 +81,7 @@ void ERControl::newER()
 	resource->setERType(dlg.getERType());
 	resource->setCameraMatrix(m_window->m_osg_widget->getCameraMatrix());
 
-	m_undo_stack->push(new Group::AddNodeCommand<EResource>(m_ers, resource));
+	m_undo_stack->push(new Group::AddNodeCommand(m_ers, resource));
 
 	m_undo_stack->endMacro();
 }
@@ -99,7 +99,7 @@ void ERControl::deleteER()
 			qWarning() << "Out of range selection when deleting ERs" << *i << "/" << size;
 			continue;
 		}
-		m_undo_stack->push(new Group::DeleteNodeCommand<EResource>(m_ers, *i));
+		m_undo_stack->push(new Group::DeleteNodeCommand(m_ers, *i));
 	}
 	m_undo_stack->endMacro();
 }

@@ -12,108 +12,44 @@ public:
 	Group(const Group& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {};
 	META_Node(, Group)
 
+	// Use this instead of the osg one. For some reason the osg one isn't virtual or const
+	virtual osg::Node *child(unsigned int);
+
 signals:
 	void sNew(int);
 	void sDelete(int);
 	void sItemsMoved(std::vector<std::pair<int,int>>); // items sorted by .first
-	
+
 public: // COMMANDS
-
-	// Creates a new node and inserts it at index
-	template <typename T>
-	class NewNodeCommand : public QUndoCommand {
-	public:
-		NewNodeCommand(
-			Group *group,
-			int index,
-			QUndoCommand *parent = nullptr)
-			: QUndoCommand(parent),
-			m_group(group),
-			m_index(index)
-		{
-			m_node = new T;
-		}
-		void undo() {
-			m_group->removeChild(m_index);
-			m_group->sDelete(m_index);
-		}
-		void redo() {
-			m_group->insertChild(m_index, m_node);
-			m_group->sNew(m_index);
-		}
-		T *getNode() {
-			return m_node;
-		}
-		private:
-			Group *m_group;
-			osg::ref_ptr<T> m_node;
-			int m_index;
-	};
-
 	// Adds an already created node to a group
 	// if index < 0 then it adds it to the end
-	template <typename T>
 	class AddNodeCommand : public QUndoCommand {
 	public:
 		AddNodeCommand(
 			Group *group,
-			T *node,
+			osg::Node *node,
 			int index = -1,
-			QUndoCommand *parent = nullptr)
-			: QUndoCommand(parent),
-			m_group(group),
-			m_node(node),
-			m_index(index)
-		{
-		}
-		void undo() {
-			uint index;
-			if (m_index < 0) index = m_group->getNumChildren() - 1;
-			else index = (uint)m_index;
-			m_group->removeChild(index);
-			m_group->sDelete(index);
-		}
-		void redo() {
-			uint index;
-			if (m_index < 0) index = m_group->getNumChildren();
-			else index = (uint)m_index;
-			m_group->insertChild(index, m_node);
-			m_group->sNew(index);
-		}
-		T *getNode() {
-			return m_node;
-		}
+			QUndoCommand *parent = nullptr);
+		virtual void undo() override;
+		virtual void redo() override;
 	private:
 		Group *m_group;
-		osg::ref_ptr<T> m_node;
+		osg::ref_ptr<osg::Node> m_node;
 		int m_index;
 	};
 
 	// Deletes a node at index
-	template <typename T>
 	class DeleteNodeCommand : public QUndoCommand {
 	public:
 		DeleteNodeCommand(
 			Group *group,
 			int index,
-			QUndoCommand *parent = nullptr)
-			: QUndoCommand(parent),
-			m_group(group),
-			m_index(index)
-		{
-			m_node = dynamic_cast<T*>(group->getChild(index));
-		}
-		void undo() {
-			m_group->insertChild(m_index, m_node);
-			m_group->sNew(m_index);
-		}
-		void redo() {
-			m_group->removeChild(m_index);
-			m_group->sDelete(m_index);
-		}
+			QUndoCommand *parent = nullptr);
+		virtual void undo() override;
+		virtual void redo() override;
 	private:
 		Group *m_group;
-		osg::ref_ptr<T> m_node;
+		osg::ref_ptr<osg::Node> m_node;
 		int m_index;
 	};
 

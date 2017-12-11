@@ -1,8 +1,61 @@
 #include "Group.h"
 #include <QDebug>
 
+osg::Node *Group::child(unsigned int i)
+{
+	return getChild(i);
+}
+
+Group::AddNodeCommand::AddNodeCommand(
+	Group *group,
+	osg::Node *node,
+	int index,
+	QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_group(group),
+	m_node(node),
+	m_index(index)
+{
+}
+
+void Group::AddNodeCommand::undo() {
+	uint index;
+	if (m_index < 0) index = m_group->getNumChildren() - 1;
+	else index = (uint)m_index;
+	m_group->removeChild(index);
+	m_group->sDelete(index);
+}
+void Group::AddNodeCommand::redo() {
+	uint index;
+	if (m_index < 0) index = m_group->getNumChildren();
+	else index = (uint)m_index;
+	m_group->insertChild(index, m_node);
+	m_group->sNew(index);
+}
+
+Group::DeleteNodeCommand::DeleteNodeCommand(
+	Group *group,
+	int index,
+	QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_group(group),
+	m_index(index)
+{
+	m_node = group->child(index);
+}
+
+void Group::DeleteNodeCommand::undo() {
+	m_group->insertChild(m_index, m_node);
+	m_group->sNew(m_index);
+}
+
+void Group::DeleteNodeCommand::redo() {
+	m_group->removeChild(m_index);
+	m_group->sDelete(m_index);
+}
+
 Group::MoveNodesCommand::MoveNodesCommand(
-	Group * group, 
+	Group * group,
 	std::vector<std::pair<int, int>> mapping,
 	QUndoCommand * parent)
 	: QUndoCommand(parent),
@@ -17,7 +70,7 @@ void Group::MoveNodesCommand::undo()
 	std::vector<std::pair<int, int>> reverse_mapping;
 	for (auto i : m_mapping) {
 		reverse_mapping.push_back(std::make_pair(i.second, i.first));
-	} 
+	}
 	move(reverse_mapping);
 }
 

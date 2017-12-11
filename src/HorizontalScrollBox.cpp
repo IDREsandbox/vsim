@@ -276,6 +276,11 @@ void HorizontalScrollBox::setGroup(Group * group)
 	}
 }
 
+Group * HorizontalScrollBox::getGroup() const
+{
+	return m_group;
+}
+
 void HorizontalScrollBox::setSpacing(int space)
 {
 	m_spacing = space;

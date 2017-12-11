@@ -31,7 +31,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->setupUi(this);
 
 	// window stuff
-	setMinimumSize(1280, 720);
+	setMinimumSize(800, 600);
+	resize(1280, 720);
 	ui->statusbar->showMessage("the best status bar", 0);
 	setWindowTitle("VSim");
 	setAcceptDrops(true);

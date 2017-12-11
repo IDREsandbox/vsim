@@ -226,11 +226,12 @@ void NarrativeControl::newNarrative()
 		return;
 	}
 
-	// for now just add to the end
+	Narrative2 *nar = new Narrative2;
+
 	m_undo_stack->beginMacro("New Narrative");
 	int num_children = m_narrative_group->getNumChildren();
 	m_undo_stack->push(new SelectNarrativesCommand(this, { num_children - 1 }, ON_UNDO));
-	m_undo_stack->push(new NarrativeGroup::NewNarrativeCommand(m_narrative_group, m_narrative_group->getNumChildren()));
+	m_undo_stack->push(new Group::AddNodeCommand(m_narrative_group, nar));
 	m_undo_stack->push(new SelectNarrativesCommand(this, { num_children }, ON_REDO));
 	m_undo_stack->endMacro();
 
@@ -278,7 +279,7 @@ void NarrativeControl::deleteNarratives()
 	// delete in reverse order
 	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
 		qDebug() << "pushing delete narrative" << *i;
-		m_undo_stack->push(new NarrativeGroup::DeleteNarrativeCommand(m_narrative_group, *i));
+		m_undo_stack->push(new Group::DeleteNodeCommand(m_narrative_group, *i));
 	}
 	m_undo_stack->push(new SelectNarrativesCommand(this, {next_selection}, ON_REDO));
 	m_undo_stack->endMacro();
@@ -320,7 +321,7 @@ void NarrativeControl::loadNarratives(NarrativeGroup * group)
 		if (narrative == nullptr) {
 			qWarning() << "Non-narrative detected when loading narrative group";
 		}
-		m_undo_stack->push(new NarrativeGroup::AddNarrativeCommand(m_narrative_group, narrative));
+		m_undo_stack->push(new Group::AddNodeCommand(m_narrative_group, narrative));
 	}
 	m_undo_stack->push(new SelectNarrativesCommand(this, selection, ON_REDO));
 	m_undo_stack->endMacro();
@@ -456,8 +457,7 @@ void NarrativeControl::newLabel(const std::string &text, const std::string &styl
 	// new index at the end
 	int idx = slide->getNumChildren();
 
-	auto cmd = new Group::NewNodeCommand<NarrativeSlideLabels>(slide, idx);
-	NarrativeSlideLabels *label = cmd->getNode();
+	NarrativeSlideLabels *label = new NarrativeSlideLabels;
 
 	// initialization
 	//lab->setrX(temp->ratioX);
@@ -472,7 +472,8 @@ void NarrativeControl::newLabel(const std::string &text, const std::string &styl
 
 	// push command
 	m_undo_stack->beginMacro("New Label");
-	m_undo_stack->push(cmd);
+	m_undo_stack->push(new SelectLabelCommand(this, m_current_narrative, m_current_slide, -1, ON_UNDO));
+	m_undo_stack->push(new Group::AddNodeCommand(slide, label, idx));
 	m_undo_stack->push(new SelectLabelCommand(this, m_current_narrative, m_current_slide, idx, ON_REDO));
 	m_undo_stack->endMacro();
 
@@ -493,7 +494,7 @@ void NarrativeControl::deleteLabel(int idx)
 	// push delete command
 	m_undo_stack->beginMacro("Import Narratives");
 	m_undo_stack->push(new SelectLabelCommand(this, m_current_narrative, m_current_slide, idx, ON_UNDO));
-	m_undo_stack->push(new Group::DeleteNodeCommand<NarrativeSlideLabels>(slide, idx));
+	m_undo_stack->push(new Group::DeleteNodeCommand(slide, idx));
 	m_undo_stack->endMacro();
 
 	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
@@ -645,20 +646,16 @@ void NarrativeControl::newSlide()
 	else undo_selection = index - 1;
 
 	// make new slide, initialize matrix and stuff
-	auto newcmd = new Narrative2::NewSlideCommand(nar, index);
-	NarrativeSlide *slide = newcmd->getNode();
+	NarrativeSlide *slide = new NarrativeSlide;
 	slide->setCameraMatrix(matrix);
 
 	// perform command
 	m_undo_stack->beginMacro("New Slide");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, { undo_selection }, ON_UNDO));
-	m_undo_stack->push(newcmd);
+	m_undo_stack->push(new Group::AddNodeCommand(m_narrative_group, slide, index));
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, { index }, ON_REDO));
 	m_undo_stack->endMacro();
 
-	qDebug() << "after push";
-
-	qDebug() << "after set camera matrix";
 	std::cout << m_window->getViewer()->getCameraManipulator()->getMatrix();
 
 	setSlide(nar->getNumChildren() - 1);
@@ -677,7 +674,7 @@ void NarrativeControl::deleteSlides()
 	// we need to delete in reverse order to get the indices right
 	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
 		qDebug() << "pushing delete" << *i;
-		m_undo_stack->push(new Narrative2::DeleteSlideCommand(nar, *i));
+		m_undo_stack->push(new Group::DeleteNodeCommand(nar, *i));
 	}
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, {next_selection}, ON_REDO));
 	m_undo_stack->endMacro();

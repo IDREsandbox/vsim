@@ -73,18 +73,6 @@ public: // COMMANDS
 			: ModifyCommand(&getDescription, &setDescription, desc, nar, parent) {}
 	};
 
-	class NewSlideCommand : public Group::NewNodeCommand<NarrativeSlide> {
-	public:
-		NewSlideCommand(Narrative2 *group, int index, QUndoCommand *parent = nullptr)
-			: Group::NewNodeCommand<NarrativeSlide>(group, index, parent) {}
-	};
-	class DeleteSlideCommand : public Group::DeleteNodeCommand<NarrativeSlide> {
-	public:
-		DeleteSlideCommand(Narrative2 *group, int index, QUndoCommand *parent = nullptr)
-			: Group::DeleteNodeCommand<NarrativeSlide>(group, index, parent) {}
-	};
-
-
 private:
 	std::string m_title;
 	std::string m_description;
