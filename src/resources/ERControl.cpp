@@ -9,7 +9,7 @@
 #include "resources/NewCatDialog.h"
 #include "resources/ERDisplay.h"
 #include "MainWindow.h"
-#include "ui_MainWindow.h"
+#include "../ui_MainWindow.h"
 #include "OSGViewerWidget.h"
 
 #include <QDesktopServices>
@@ -63,7 +63,6 @@ void ERControl::newER()
 	}
 	qDebug() << "Command - New Embedded Resource";
 	m_undo_stack->beginMacro("New Resource");
-	int num_children;
 
 	EResource *resource = new EResource;
 	resource->setResourceName(dlg.getTitle());
@@ -95,7 +94,7 @@ void ERControl::deleteER()
 
 	m_undo_stack->beginMacro("Delete Resources");
 	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
-		if (*i >= size) {
+		if (*i >= (int)size) {
 			qWarning() << "Out of range selection when deleting ERs" << *i << "/" << size;
 			continue;
 		}

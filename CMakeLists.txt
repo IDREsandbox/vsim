@@ -60,7 +60,6 @@ file(GLOB_RECURSE VSim_src
   )
 list(FILTER VSim_src EXCLUDE REGEX ".*src/windows.*")
 list(FILTER VSim_src EXCLUDE REGEX ".*src/main.cpp")
-list(FILTER VSim_src EXCLUDE REGEX ".*src/deprecated/resources*")
 file(GLOB_RECURSE VSim_headers
   src/*.h
   )
@@ -68,7 +67,8 @@ file(GLOB_RECURSE VSim_serializers
   src/*Serializer*.cpp
   )
 
-message("sources - " "${VSim_src}")
+message("SOURCES\n" "${VSim_src}")
+message("SERIALIZERS:\n" "${VSim_serializers}")
 
 # file(GLOB VSim_src 
 #   "src/*.h" 
@@ -90,6 +90,8 @@ target_link_libraries(VSim VSim_objects)
 set(tests
   Util_test
   Selection_test
+  Group_test
+  GroupProxy_test
   )
 foreach(test ${tests})
   add_executable(${test} tests/${test}.cpp)

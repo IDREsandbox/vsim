@@ -6,6 +6,76 @@ osg::Node *Group::child(unsigned int i)
 	return getChild(i);
 }
 
+bool Group::insertChild(unsigned int index, Node *child)
+{
+	bool result = osg::Group::insertChild(index, child);
+	emit sNew(index);
+	return result;
+}
+
+bool Group::removeChildren(unsigned int index, unsigned int numChildrenToRemove)
+{
+	int top = std::min(index + numChildrenToRemove, getNumChildren());
+	bool result = osg::Group::removeChildren(index, numChildrenToRemove);
+	for (int i = top - 1; i >= (int)index; i--) {
+		emit sDelete(index + i);
+	}
+	return result;
+}
+
+bool Group::setChild(unsigned int index, Node *child)
+{
+	bool result = osg::Group::setChild(index, child);
+	emit sSet(index);
+	return result;
+}
+
+void Group::move(const std::vector<std::pair<int, int>>& mapping)
+{
+	unsigned int size = getNumChildren();
+
+	std::vector<osg::ref_ptr<osg::Node>> buffer(size, nullptr);
+	std::vector<bool> moved(size, false);
+
+	// perform movements in buffer
+	for (auto pair : mapping) {
+		if (buffer[pair.second] != nullptr) {
+			qWarning() << "Move failed - two elements move to the same index";
+			return;
+		}
+		buffer[pair.second] = child(pair.first);
+		moved[pair.first] = true;
+	}
+
+	// fill in the holes with the rest
+	unsigned int out = 0;
+	unsigned int in = 0;
+	while (out < size && in < size) {
+		// output already taken
+		if (buffer[out] != nullptr) {
+			out++;
+		}
+		// input already moved
+		else if (moved[in] == true) {
+			in++;
+		}
+		else {
+			buffer[out] = child(in);
+			out++;
+			in++;
+		}
+	}
+
+	// write back the differences
+	for (unsigned int i = 0; i < size; i++) {
+		if (child(i) != buffer[i].get()) {
+			setChild(i, buffer[i].get());
+		}
+	}
+
+	emit sItemsMoved(mapping);
+}
+
 Group::AddNodeCommand::AddNodeCommand(
 	Group *group,
 	osg::Node *node,
@@ -23,14 +93,12 @@ void Group::AddNodeCommand::undo() {
 	if (m_index < 0) index = m_group->getNumChildren() - 1;
 	else index = (uint)m_index;
 	m_group->removeChild(index);
-	m_group->sDelete(index);
 }
 void Group::AddNodeCommand::redo() {
 	uint index;
 	if (m_index < 0) index = m_group->getNumChildren();
 	else index = (uint)m_index;
 	m_group->insertChild(index, m_node);
-	m_group->sNew(index);
 }
 
 Group::DeleteNodeCommand::DeleteNodeCommand(
@@ -46,12 +114,10 @@ Group::DeleteNodeCommand::DeleteNodeCommand(
 
 void Group::DeleteNodeCommand::undo() {
 	m_group->insertChild(m_index, m_node);
-	m_group->sNew(m_index);
 }
 
 void Group::DeleteNodeCommand::redo() {
 	m_group->removeChild(m_index);
-	m_group->sDelete(m_index);
 }
 
 Group::MoveNodesCommand::MoveNodesCommand(
@@ -80,27 +146,6 @@ void Group::MoveNodesCommand::redo()
 }
 
 void Group::MoveNodesCommand::move(std::vector<std::pair<int, int>> mapping) {
-	// remove the items and add them to this vector, <node, to>
-	std::vector<std::pair<osg::ref_ptr<osg::Node>, int>> removed;
-
-	// sort by the from and remove in reverse order <from, to>
-	std::sort(mapping.begin(), mapping.end(),
-		[](auto &left, auto &right) { return left.first < right.first; });
-
-	for (int i = mapping.size() - 1; i >= 0; i--) {
-		removed.push_back(
-			std::make_pair(m_group->getChild(mapping[i].first), mapping[i].second));
-		m_group->removeChild(mapping[i].first);
-	}
-
-	// sort
-	std::sort(removed.begin(), removed.end(),
-		[](auto &left, auto &right) { return left.second < right.second; });
-
-	// now readd them in forward order
-	for (auto i : removed) {
-		m_group->insertChild(i.second, i.first);
-	}
-
+	m_group->move(mapping);
 	m_group->sItemsMoved(mapping);
 }

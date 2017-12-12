@@ -13,11 +13,16 @@ public:
 	META_Node(, Group)
 
 	// Use this instead of the osg one. For some reason the osg one isn't virtual or const
-	virtual osg::Node *child(unsigned int);
+	virtual osg::Node *child(unsigned int index);
+	virtual bool insertChild(unsigned int index, Node *child) override;
+	virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
+	virtual bool setChild(unsigned int index, Node *child) override;
+	virtual void move(const std::vector<std::pair<int, int>>& mapping);
 
 signals:
-	void sNew(int);
-	void sDelete(int);
+	void sNew(int index); // inserted node at index
+	void sDelete(int index); // deleted node at index
+	void sSet(int index); // changed (set) node at index
 	void sItemsMoved(std::vector<std::pair<int,int>>); // items sorted by .first
 
 public: // COMMANDS
