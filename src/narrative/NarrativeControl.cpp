@@ -549,7 +549,6 @@ void NarrativeControl::editLabel(int idx)
 	}
 	QTextDocument *doc = label->getDocument();
 
-	qDebug() << "on undo command added";
 	m_undo_stack->beginMacro("Edit Label");
 	m_undo_stack->push(new NarrativeSlideLabels::DocumentEditWrapperCommand(doc));
 	m_undo_stack->push(new SelectLabelCommand(this, m_current_narrative, m_current_slide, idx));
@@ -637,8 +636,7 @@ void NarrativeControl::newSlide()
 		// insert after the last selected
 		index = m_slide_box->getLastSelected() + 1;
 	}
-	qDebug() << "before push";
-
+	
 	// figure out what to select if we were to undo
 	int undo_selection;
 	if (nar->getNumChildren() == 0) undo_selection = -1;
@@ -652,13 +650,13 @@ void NarrativeControl::newSlide()
 	// perform command
 	m_undo_stack->beginMacro("New Slide");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, { undo_selection }, ON_UNDO));
-	m_undo_stack->push(new Group::AddNodeCommand(m_narrative_group, slide, index));
+	m_undo_stack->push(new Group::AddNodeCommand(nar, slide, index));
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, { index }, ON_REDO));
 	m_undo_stack->endMacro();
 
 	std::cout << m_window->getViewer()->getCameraManipulator()->getMatrix();
 
-	setSlide(nar->getNumChildren() - 1);
+	setSlide(index);
 }
 
 void NarrativeControl::deleteSlides()
