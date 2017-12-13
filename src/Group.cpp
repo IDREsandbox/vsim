@@ -137,15 +137,10 @@ void Group::MoveNodesCommand::undo()
 	for (auto i : m_mapping) {
 		reverse_mapping.push_back(std::make_pair(i.second, i.first));
 	}
-	move(reverse_mapping);
+	m_group->move(reverse_mapping);
 }
 
 void Group::MoveNodesCommand::redo()
 {
-	move(m_mapping);
-}
-
-void Group::MoveNodesCommand::move(std::vector<std::pair<int, int>> mapping) {
-	m_group->move(mapping);
-	m_group->sItemsMoved(mapping);
+	m_group->move(m_mapping);
 }
