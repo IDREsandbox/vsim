@@ -15,6 +15,11 @@ GroupProxy::GroupProxy(Group *base)
 	setBase(base);
 }
 
+Group * GroupProxy::getBase() const
+{
+	return m_base;
+}
+
 void GroupProxy::setBase(Group *base)
 {
 	if (m_base != nullptr) disconnect(m_base, 0, this, 0);
@@ -91,7 +96,8 @@ void GroupProxy::setMapToBase(const std::vector<int>& mapping)
 bool GroupProxy::insertChild (unsigned int index, osg::Node *child)
 {
 	if (!m_base) return false;
-	return m_base->insertChild(mapToBase(index), child);
+	qWarning() << "Insertion into a group proxy - item added to end";
+	return m_base->addChild(child);
 }
 
 bool GroupProxy::removeChildren (unsigned int index, unsigned int numChildrenToRemove)

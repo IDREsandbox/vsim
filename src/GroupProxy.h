@@ -12,7 +12,8 @@ public:
 	GroupProxy(const Group& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {};
 	META_Node(, GroupProxy);
 
-	void setBase(Group *base);
+	Group *getBase() const;
+	virtual void setBase(Group *base);
 
 	int mapToBase(int i);
 	//int mapFromBase(int i);

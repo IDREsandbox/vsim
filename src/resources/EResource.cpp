@@ -231,7 +231,12 @@ void EResource::setCameraMatrix(const osg::Matrixd& matrix)
 	emit sViewMatrixChanged(matrix);
 }
 
-const ECategory *EResource::getCategory() const 
+ECategory * EResource::category() const
+{
+	return m_category.get();
+}
+
+const ECategory *EResource::getCategory() const
 { 
 	return m_category.get(); 
 }

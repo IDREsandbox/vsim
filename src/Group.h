@@ -14,7 +14,8 @@ public:
 
 	// Use this instead of the osg one. For some reason the osg one isn't virtual or const
 	virtual osg::Node *child(unsigned int index);
-	virtual bool insertChild(unsigned int index, Node *child) override;
+	virtual bool addChild(osg::Node *child) override;
+	virtual bool insertChild(unsigned int index, osg::Node *child) override;
 	virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
 	virtual bool setChild(unsigned int index, Node *child) override;
 	virtual void move(const std::vector<std::pair<int, int>>& mapping);

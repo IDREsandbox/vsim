@@ -81,6 +81,7 @@ public:
 	osg::Matrixd& getCameraMatrix();
 	void setCameraMatrix(const osg::Matrixd& matrix);
 
+	ECategory *category() const;
 	const ECategory *getCategory() const;
 	void setCategory(ECategory *category);
 
@@ -100,7 +101,7 @@ signals:
 	void sErTypeChanged(ERType);
 	void sViewMatrixChanged(const osg::Matrixd&);
 
-	void sCategoryChanged(const ECategory *old_category, const ECategory *new_category);
+	void sCategoryChanged(ECategory *old_category, ECategory *new_category);
 
 public: // resource commands
 	class SetResourceNameCommand : public ModifyCommand<EResource, const std::string&> {

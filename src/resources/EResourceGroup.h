@@ -17,7 +17,7 @@ public:
 	EResourceGroup();
 	EResourceGroup(const EResourceGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	EResourceGroup(const osg::Group *old_root);
-	META_Node(, EResourceGroup)
+	META_Node(, EResourceGroup);
 
 	ECategoryGroup *categories() const;
 	const ECategoryGroup *getCategories() const;

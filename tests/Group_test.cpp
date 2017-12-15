@@ -38,6 +38,11 @@ private:
 		}
 	}
 private slots:
+	void dumbCommand() {
+		reset();
+		group->addChild(node0);
+		group->addChild(node1);
+	}
 	void addNodeCommand() {
 		reset();
 		group->addChild(node0);
@@ -112,6 +117,12 @@ private slots:
 		group->removeChildren(0, 2);
 		GROUPCOMPARE(group, {});
 		QCOMPARE(spy.size(), 2);
+	}
+	void addChild() {
+		reset();
+		QSignalSpy spy(group, &Group::sNew);
+		group->addChild(node0);
+		QCOMPARE(spy.size(), 1);
 	}
 };
 

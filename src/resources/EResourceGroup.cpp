@@ -10,6 +10,7 @@
 
 EResourceGroup::EResourceGroup()
 {
+	qDebug() << "Creating EResourceGroup";
 	m_categories = new ECategoryGroup;
 	m_categories->setName("Categories");
 }
@@ -48,7 +49,6 @@ EResourceGroup::EResourceGroup(const osg::Group *old_root)
 				m_categories->addChild(cat);
 			}
 
-
 			// copy the data
 			for (EResourcesNode *node : old_ers->m_list) {
 				EResource *er = new EResource(node, name_map);
@@ -74,5 +74,6 @@ void EResourceGroup::setCategories(ECategoryGroup * categories)
 
 EResource * EResourceGroup::getResource(int i)
 {
-	return dynamic_cast<EResource*>(getChild(i));
+	if (i >= (int)getNumChildren() || i < 0) return nullptr;
+	return dynamic_cast<EResource*>(child(i));
 }

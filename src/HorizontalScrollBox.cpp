@@ -380,7 +380,6 @@ void HorizontalScrollBox::refresh()
 
 ScrollBoxItem * HorizontalScrollBox::createItem(osg::Node *)
 {
-	qDebug() << "null";
 	return nullptr;
 }
 
@@ -615,7 +614,6 @@ void HorizontalScrollBox::dropEvent(QDropEvent * event)
 	}
 	m_dragging = false;
 	m_drop_highlight->hide();
-	qDebug() << "DROPPED";
 }
 void HorizontalScrollBox::moveTimer()
 {
