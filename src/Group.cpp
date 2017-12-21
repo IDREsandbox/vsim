@@ -8,14 +8,12 @@ osg::Node *Group::child(unsigned int i)
 
 bool Group::addChild(osg::Node * child)
 {
-	qDebug() << "add child";
 	return insertChild(getNumChildren(), child);
 }
 
 bool Group::insertChild(unsigned int index, Node *child)
 {
 	bool result = osg::Group::insertChild(index, child);
-	qDebug() << "insert child";
 	emit sNew(index);
 	return result;
 }

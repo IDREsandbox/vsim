@@ -1,3 +1,4 @@
+
 #ifndef ERCONTROL_H
 #define ERCONTROL_H
 
@@ -11,6 +12,7 @@ class ECategoryGroup;
 class ERDialog;
 class ERDisplay;
 class ERScrollBox;
+class ERFilterSortProxy;
 
 // manages which ER is active
 // slots for creating a new ER, editing, etc
@@ -41,8 +43,14 @@ private:
 	ERDisplay *m_display;
 
 	ERScrollBox *m_box;
+	ERScrollBox *m_global_box;
+	ERScrollBox *m_local_box;
 
 	QUndoStack *m_undo_stack;
+
+	osg::ref_ptr<ERFilterSortProxy> m_filter_proxy;
+	osg::ref_ptr<ERFilterSortProxy> m_global_proxy;
+	osg::ref_ptr<ERFilterSortProxy> m_local_proxy;
 };
 
 

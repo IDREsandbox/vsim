@@ -21,7 +21,10 @@
 #include "TimeSlider.h"
 #include "ModelOutliner.h"
 #include "dragLabel.h"
+
 #include "resources/ERDisplay.h"
+#include "resources/ERFilterSortProxy.h"
+#include "resources/ERScrollBox.h"
 
 MainWindow::MainWindow(QWidget *parent) 
 	: QMainWindow(parent),
@@ -68,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_view = new labelCanvasView(ui->root, m_drag_area);
 	ui->rootLayout->addWidget(m_view, 0, 0);
 
-	// embedded resources
+	// er display
 	m_er_display = new ERDisplay(this);
 	m_er_display->setGeometry(10, 200, 265, 251);
 	m_er_display->hide();

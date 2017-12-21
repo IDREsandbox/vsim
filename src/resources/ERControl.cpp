@@ -11,14 +11,22 @@
 #include "MainWindow.h"
 #include "../ui_MainWindow.h"
 #include "OSGViewerWidget.h"
+#include "ERFilterSortProxy.h"
 
 #include <QDesktopServices>
 
 ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
-	: QObject(parent), m_window(window), m_ers(nullptr), m_categories(nullptr)
+	: QObject(parent),
+	m_window(window),
+	m_ers(nullptr),
+	m_categories(nullptr),
+	m_filter_proxy(nullptr),
+	m_global_proxy(nullptr),
+	m_local_proxy(nullptr)
 {
 	m_undo_stack = m_window->m_undo_stack;
-	m_box = m_window->ui->global;
+	m_global_box = m_window->ui->global;
+	m_local_box = m_window->ui->local;
 	m_display = m_window->erDisplay();
 
 	auto &ui = m_window->ui;
@@ -50,8 +58,21 @@ void ERControl::load(EResourceGroup *ers)
 	m_ers = ers;
 	m_categories = ers->categories();
 
-	m_box->setGroup(ers);
+	// set up proxies
+	if (m_filter_proxy == nullptr) {
+		m_filter_proxy = new ERFilterSortProxy(ers);
+		m_global_proxy = new ERFilterSortProxy(m_filter_proxy);
+		m_global_proxy->filterGlobal(ERFilterSortProxy::SHOW_GLOBAL);
+		m_local_proxy = new ERFilterSortProxy(m_filter_proxy);
+		m_global_proxy->filterGlobal(ERFilterSortProxy::SHOW_LOCAL);
+	}
+	else {
+		// we can just re-assign the root one
+		m_filter_proxy->setBase(ers);
+	}
 
+	m_global_box->setGroup(m_global_proxy);
+	m_local_box->setGroup(m_local_proxy);
 }
 
 void ERControl::newER()

@@ -253,6 +253,11 @@ void HorizontalScrollBox::setItemMenu(QMenu * menu)
 	m_item_menu = menu;
 }
 
+void HorizontalScrollBox::setMIMEType(const std::string & type)
+{
+	m_mime_type = QString::fromStdString(type);
+}
+
 void HorizontalScrollBox::setGroup(Group * group)
 {
 	// disconnect incoming signals if already connected to a narrative
@@ -430,9 +435,11 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 	// If mouse down & beyond drag threshold then start dragging
 	//qDebug() << "drag" << m_dragging;
 	QPoint diff = event->globalPos() - m_mouse_down_pos;
-	if (diff.manhattanLength() > m_minimum_drag_dist
+	if (m_mime_type != ""
+		&& diff.manhattanLength() > m_minimum_drag_dist
 		&& m_dragging == false
 		&& !m_selection.empty()) {
+
 		// Begin drag
 		QDrag *drag = new QDrag(this);
 		if (m_last_selected < 0) return;
@@ -442,7 +449,7 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 		drag->setPixmap(pixmap);
 
 		QMimeData *data = new QMimeData;
-		data->setData("application/x-slideitem", "");
+		data->setData(m_mime_type, "");
 		drag->setMimeData(data);
 		drag->setHotSpot(event->globalPos() - item->mapToGlobal(QPoint(0, 0)));
 		qDebug() << "drag start";
@@ -518,7 +525,6 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 
 			m_mouse_down_pos = event->globalPos();
 			m_mouse_down = true;
-
 		}
 		refresh();
 	}
@@ -549,7 +555,7 @@ void HorizontalScrollBox::itemMouseReleaseEvent(QMouseEvent * event, int index)
 
 void HorizontalScrollBox::dragEnterEvent(QDragEnterEvent * event)
 {
-	if (event->mimeData()->hasFormat("application/x-slideitem")) {
+	if (event->mimeData()->hasFormat(m_mime_type)) {
 		event->accept();
 		//m_dragging = true;
 		//m_dragpos = event->pos();
@@ -567,10 +573,9 @@ void HorizontalScrollBox::dragLeaveEvent(QDragLeaveEvent * event)
 	}
 }
 
-
 void HorizontalScrollBox::dragMoveEvent(QDragMoveEvent * event)
 {
-	if (event->mimeData()->hasFormat("application/x-slideitem")) {
+	if (event->mimeData()->hasFormat(m_mime_type)) {
 		m_dragging = true;
 		m_dragpos = event->pos();
 		refresh();
@@ -581,7 +586,7 @@ void HorizontalScrollBox::dragMoveEvent(QDragMoveEvent * event)
 
 void HorizontalScrollBox::dropEvent(QDropEvent * event)
 {
-	if (event->mimeData()->hasFormat("application/x-slideitem")) {
+	if (event->mimeData()->hasFormat(m_mime_type)) {
 		event->accept();
 		std::set<int> selection = getSelection();
 		// calculate the destination position

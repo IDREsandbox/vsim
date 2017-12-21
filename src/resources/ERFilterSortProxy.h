@@ -5,15 +5,14 @@
 #include <list>
 #include <map>
 #include <unordered_map>
-#include "GroupProxy.h"
+#include <vector>
 #include "resources/ECategory.h"
 #include "resources/EResource.h"
-#include "resources/EResourceGroup.h"
 
 class ERFilterSortProxy : public Group {
 	Q_OBJECT
 public:
-	ERFilterSortProxy(EResourceGroup *base);
+	ERFilterSortProxy(Group *base);
 
 	enum SortBy {
 		ALPHABETICAL,
@@ -48,7 +47,7 @@ public:
 	//set position
 
 	// overrides
-	virtual void setBase(EResourceGroup *base);
+	virtual void setBase(Group *base);
 	virtual bool insertChild(unsigned int index, Node *child) override;
 	virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
 	virtual osg::Node *child(unsigned int index) override;
@@ -71,7 +70,7 @@ public:
 	void track(EResource *res);
 
 private:
-	osg::ref_ptr<EResourceGroup> m_base;
+	osg::ref_ptr<Group> m_base;
 
 	SortBy m_sort_by;
 	std::set<ECategory*> m_enable_categories;
@@ -85,8 +84,15 @@ private:
 	//std::map<std::string, int> m_title_map;
 	//std::map<float, int> m_distance_map;
 
+	std::vector<int> m_map_to_base;
+
+	// for ALPHABETICAL
 	std::map<std::string, EResource*> m_title_map;
 	std::unordered_map<EResource*, std::map<std::string, EResource*>::iterator> m_title_hashmap;
+
+	// for NONE
+	std::vector<EResource*> m_included;
+	std::unordered_map<EResource*, std::set<EResource*>::iterator> m_included_map;
 };
 
 #endif

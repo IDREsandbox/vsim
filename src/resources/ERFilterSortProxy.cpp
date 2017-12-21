@@ -1,7 +1,7 @@
 #include "resources/ERFilterSortProxy.h"
 #include <QDebug>
 
-ERFilterSortProxy::ERFilterSortProxy(EResourceGroup *base)
+ERFilterSortProxy::ERFilterSortProxy(Group *base)
 	: m_base(nullptr),
 	m_sort_by(NONE),
 	m_enable_all(false),
@@ -16,8 +16,11 @@ void ERFilterSortProxy::sortBy(SortBy method)
 {
 	if (m_sort_by == method) return;
 	m_sort_by = method;
+	m_included.clear();
+	m_title_hashmap.clear();
+	m_title_map.clear();
 	if (method == NONE) {
-
+		rescan();
 	}
 	else if (method == ALPHABETICAL) {
 		rescan();
@@ -34,10 +37,20 @@ void ERFilterSortProxy::sortBy(SortBy method)
 
 void ERFilterSortProxy::rescan()
 {
-	for (int i = 0; i < (int)m_base->getNumChildren(); i++) {
-		EResource *res = m_base->getResource(i);
-		if (!res) return;
-		checkAndAdd(res);
+	if (m_sort_by == NONE) {
+		m_included.clear();
+		for (int i = 0; i < (int)m_base->getNumChildren(); i++) {
+			EResource *res = dynamic_cast<EResource*>(m_base->child(i));
+			if (!res) return;
+			if (accept(res)) add(res);
+		}
+	}
+	else if (m_sort_by == ALPHABETICAL) {
+		for (int i = 0; i < (int)m_base->getNumChildren(); i++) {
+			EResource *res = dynamic_cast<EResource*>(m_base->child(i));
+			if (!res) return;
+			checkAndAdd(res);
+		}
 	}
 }
 
@@ -114,21 +127,26 @@ void ERFilterSortProxy::enableRange(bool enable)
 {
 }
 
-void ERFilterSortProxy::setBase(EResourceGroup *base)
+void ERFilterSortProxy::setBase(Group *base)
 {
 	if (m_base != nullptr) disconnect(m_base, 0, this, 0);
 	qDebug() << "setting base to" << base;
+	// remove everything signal
+	for (unsigned int i = 0; i < getNumChildren(); i++) {
+		remove(dynamic_cast<EResource*>(child(i)));
+	}
+
 	m_base = base;
 	if (base == nullptr) return;
 
-	// track all of the old items
+	// track all of the existing items
 	for (unsigned int i = 0; i < base->getNumChildren(); i++) {
-		track(base->getResource(i));
+		track(dynamic_cast<EResource*>(m_base->child(i)));
 	}
 
 	// listen to new
 	connect(base, &Group::sNew, this, [this](int index) {
-		EResource *res = m_base->getResource(index);
+		EResource *res = dynamic_cast<EResource*>(m_base->child(index));
 		if (!res) return;
 		track(res);
 	});
@@ -136,7 +154,7 @@ void ERFilterSortProxy::setBase(EResourceGroup *base)
 
 bool ERFilterSortProxy::insertChild(unsigned int index, Node * child)
 {
-	qWarning() << "Insertion into a group proxy - item added to end";
+	//qWarning() << "Insertion into a group proxy - item added to end";
 	return m_base->addChild(child);
 }
 
@@ -157,14 +175,26 @@ bool ERFilterSortProxy::removeChildren(unsigned int index, unsigned int numChild
 
 osg::Node *ERFilterSortProxy::child(unsigned int index)
 {
-	auto it = m_title_map.begin();
-	std::advance(it, index);
-	return it->second;
+	if (m_sort_by == NONE) {
+		return m_included[index];
+	}
+	else if (m_sort_by == ALPHABETICAL) {
+		auto it = m_title_map.begin();
+		std::advance(it, index);
+		return it->second;
+	}
+	return nullptr;
 }
 
 unsigned int ERFilterSortProxy::getNumChildren() const
 {
-	return m_title_map.size();
+	if (m_sort_by == NONE) {
+		return m_included.size();
+	}
+	else if (m_sort_by == ALPHABETICAL) {
+		return m_title_map.size();
+	}
+	return 0;
 }
 
 void ERFilterSortProxy::setPosition(osg::Vec3f pos)
@@ -191,9 +221,14 @@ void ERFilterSortProxy::debug()
 	}
 }
 
-void ERFilterSortProxy::add(EResource * res)
+void ERFilterSortProxy::add(EResource *res)
 {
-	if (m_sort_by == ALPHABETICAL) {
+	if (m_sort_by == NONE) {
+		int index = m_included.size();
+		m_included.push_back(res);
+		emit sNew(index);
+	}
+	else if (m_sort_by == ALPHABETICAL) {
 		// find
 		auto it = m_title_hashmap.find(res);
 
@@ -210,9 +245,15 @@ void ERFilterSortProxy::add(EResource * res)
 	}
 }
 
-void ERFilterSortProxy::remove(EResource * res)
+void ERFilterSortProxy::remove(EResource *res)
 {
-	if (m_sort_by == ALPHABETICAL) {
+	if (m_sort_by == NONE) {
+		auto it = std::find(m_included.begin(), m_included.end(), res);
+		int index = it - m_included.begin();
+		m_included.erase(it);
+		emit sDelete(index);
+	}
+	else if (m_sort_by == ALPHABETICAL) {
 		auto it = m_title_hashmap.find(res);
 
 		// not in the map
@@ -236,7 +277,10 @@ void ERFilterSortProxy::remap(EResource * res)
 
 bool ERFilterSortProxy::inMap(EResource * res)
 {
-	if (m_sort_by == ALPHABETICAL) {
+	if (m_sort_by == NONE) {
+		return std::find(m_included.begin(), m_included.end(), res) != m_included.end();
+	}
+	else if (m_sort_by == ALPHABETICAL) {
 		auto it = m_title_hashmap.find(res);
 		if (it == m_title_hashmap.end()) return false;
 		return false;
@@ -246,8 +290,13 @@ bool ERFilterSortProxy::inMap(EResource * res)
 
 int ERFilterSortProxy::indexOf(EResource * res)
 {
-	// there must be a better way... but whatever
-	if (m_sort_by == ALPHABETICAL) {
+	if (m_sort_by == NONE) {
+		// this one is super hacky
+		//for (auto i = foo.begin(); i != foo.end(); ++i) {
+		//}
+	}
+	else if (m_sort_by == ALPHABETICAL) {
+		// there must be a better way... but whatever
 		auto it = m_title_hashmap.find(res);
 		if (it == m_title_hashmap.end()) return -1;
 		int index = std::distance(m_title_map.begin(), it->second);

@@ -74,8 +74,10 @@ public:
 	void setMenu(QMenu *menu);
 	void setItemMenu(QMenu *menu);
 
+	void setMIMEType(const std::string &type);
+
 	// Data tracking
-	void setGroup(Group *group);
+	virtual void setGroup(Group *group);
 	Group *getGroup() const;
 
 signals:
@@ -135,6 +137,8 @@ protected:
 
 	QMenu *m_menu;
 	QMenu *m_item_menu;
+
+	QString m_mime_type;
 
 	Group *m_group;
 

@@ -39,6 +39,8 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 
 	setMenu(m_bar_menu);
 	setItemMenu(m_slide_menu);
+
+	setMIMEType("application/x-narrative");
 }
 
 SlideScrollItem *SlideScrollBox::getItem(int index)

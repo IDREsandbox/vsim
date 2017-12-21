@@ -1,4 +1,5 @@
 ﻿#include "resources/ERScrollBox.h"
+#include "ERFilterSortProxy.h"
 
 ERScrollBox::ERScrollBox(QWidget * parent)
 	: HorizontalScrollBox(parent)
@@ -36,12 +37,6 @@ ERScrollBox::ERScrollBox(QWidget * parent)
 
 ERScrollBox::~ERScrollBox() {
 	
-}
-
-void ERScrollBox::filter(int type)
-{
-	
-
 }
 
 ScrollBoxItem * ERScrollBox::createItem(osg::Node * node)

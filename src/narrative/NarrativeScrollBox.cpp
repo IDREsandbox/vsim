@@ -26,6 +26,8 @@ NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
 
 	setMenu(m_menu);
 	setItemMenu(m_item_menu);
+
+	setMIMEType("application/x-narrative");
 }
 
 NarrativeScrollBox::~NarrativeScrollBox() {
