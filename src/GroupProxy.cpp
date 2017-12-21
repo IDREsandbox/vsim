@@ -71,7 +71,7 @@ void GroupProxy::setBase(Group *base)
 	});
 }
 
-int GroupProxy::mapToBase(int i)
+int GroupProxy::mapToBase(int i) const
 {
 	if (i >= m_map_to_base.size()) return -1;
 	return m_map_to_base[i];
@@ -114,7 +114,7 @@ bool GroupProxy::removeChildren (unsigned int index, unsigned int numChildrenToR
 	return true;
 }
 
-osg::Node *GroupProxy::child(unsigned int index)
+osg::Node *GroupProxy::child(unsigned int index) const
 {
 	if (!m_base) return nullptr;
 	return m_base->child(mapToBase(index));

@@ -48,26 +48,33 @@ public:
 
 	// overrides
 	virtual void setBase(Group *base);
-	virtual bool insertChild(unsigned int index, Node *child) override;
-	virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
-	virtual osg::Node *child(unsigned int index) override;
+	virtual osg::Node *child(unsigned int index) const override;
 	virtual unsigned int getNumChildren() const override;
 
-	bool accept(EResource *res); // does the filter accept this category
+	// not supported
+	//virtual bool insertChild(unsigned int index, Node *child) override;
+	//virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
+
+	// does the filter accept this category?
+	bool accept(EResource *res);
 
 //private:
 	// add/removes a resource if it is acceptable
-	void checkAndAdd(EResource *res);
+	void checkAndAdd(int base_index);
+
+	// when a name changes or something
+	void onResourceChange(EResource *res);
 
 	// rechecks all resources
 	void rescan();
-	void add(EResource *res);
-	void remove(EResource *res);
-	void remap(EResource *res);
-	bool inMap(EResource *res);
-	int indexOf(EResource *res);
-	int baseIndexOf(EResource *res);
-	void track(EResource *res);
+	void add(int base_index);
+	void remove(int base_index);
+	void clear();
+	//void remap(int base_index);
+	//bool inMap(EResource *res);
+	virtual int indexOf(const osg::Node *node) const override;
+
+	void track(int base_index);
 
 private:
 	osg::ref_ptr<Group> m_base;
@@ -78,7 +85,6 @@ private:
 	std::set<std::string> m_name_filters;
 	bool m_enable_all;
 	FilterGlobal m_filter_global;
-	bool m_enable_local;
 	osg::Vec3f m_position;
 
 	//std::map<std::string, int> m_title_map;
@@ -87,12 +93,12 @@ private:
 	std::vector<int> m_map_to_base;
 
 	// for ALPHABETICAL
-	std::map<std::string, EResource*> m_title_map;
-	std::unordered_map<EResource*, std::map<std::string, EResource*>::iterator> m_title_hashmap;
+	//std::map<std::string, EResource*> m_title_map;
+	//std::unordered_map<EResource*, std::map<std::string, EResource*>::iterator> m_title_hashmap;
 
 	// for NONE
-	std::vector<EResource*> m_included;
-	std::unordered_map<EResource*, std::set<EResource*>::iterator> m_included_map;
+	//std::vector<EResource*> m_included;
+	//std::unordered_map<EResource*, std::set<EResource*>::iterator> m_included_map;
 };
 
 #endif

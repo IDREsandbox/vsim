@@ -15,7 +15,7 @@ public:
 	Group *getBase() const;
 	virtual void setBase(Group *base);
 
-	int mapToBase(int i);
+	int mapToBase(int i) const;
 	//int mapFromBase(int i);
 
 	void setMapToBase(const std::vector<int> &mapping);
@@ -23,7 +23,7 @@ public:
 	// overrides
 	virtual bool insertChild (unsigned int index, Node *child) override;
 	virtual bool removeChildren (unsigned int index, unsigned int numChildrenToRemove) override;
-	virtual osg::Node *child(unsigned int index) override;
+	virtual osg::Node *child(unsigned int index) const override;
 	virtual unsigned int getNumChildren() const override;
 
 private:

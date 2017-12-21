@@ -1,24 +1,21 @@
 #include "resources/ERFilterSortProxy.h"
 #include <QDebug>
+#include "ERFilterSortProxy.h"
 
 ERFilterSortProxy::ERFilterSortProxy(Group *base)
 	: m_base(nullptr),
 	m_sort_by(NONE),
 	m_enable_all(false),
-	m_filter_global(SHOW_BOTH),
-	m_enable_local(false)
+	m_filter_global(SHOW_BOTH)
 {
 	setBase(base);
-	sortBy(ALPHABETICAL);
+	sortBy(NONE);
 }
 
 void ERFilterSortProxy::sortBy(SortBy method)
 {
 	if (m_sort_by == method) return;
 	m_sort_by = method;
-	m_included.clear();
-	m_title_hashmap.clear();
-	m_title_map.clear();
 	if (method == NONE) {
 		rescan();
 	}
@@ -37,26 +34,15 @@ void ERFilterSortProxy::sortBy(SortBy method)
 
 void ERFilterSortProxy::rescan()
 {
-	if (m_sort_by == NONE) {
-		m_included.clear();
-		for (int i = 0; i < (int)m_base->getNumChildren(); i++) {
-			EResource *res = dynamic_cast<EResource*>(m_base->child(i));
-			if (!res) return;
-			if (accept(res)) add(res);
-		}
-	}
-	else if (m_sort_by == ALPHABETICAL) {
-		for (int i = 0; i < (int)m_base->getNumChildren(); i++) {
-			EResource *res = dynamic_cast<EResource*>(m_base->child(i));
-			if (!res) return;
-			checkAndAdd(res);
-		}
+	clear();
+
+	for (int i = 0; i < (int)m_base->getNumChildren(); i++) {
+		checkAndAdd(i);
 	}
 }
 
 bool ERFilterSortProxy::accept(EResource *res)
 {
-	qDebug() << "accept?";
 	// check all
 	if (m_enable_all) return true;
 
@@ -72,24 +58,33 @@ bool ERFilterSortProxy::accept(EResource *res)
 
 	// check global/local
 	bool global = res->getGlobal();
-	qDebug() << "checkgl" << m_filter_global << global << res;
 	if (m_filter_global == SHOW_GLOBAL && !global) return false;
 	if (m_filter_global == SHOW_LOCAL && global) return false;
 
 	return true;
 }
 
-void ERFilterSortProxy::checkAndAdd(EResource * res)
+void ERFilterSortProxy::checkAndAdd(int base_index)
 {
+	EResource *res = dynamic_cast<EResource*>(m_base->child(base_index));
+	if (!res) return;
 	bool ok = accept(res);
 	if (ok) {
-		qDebug() << "resource" << res << QString::fromStdString(res->getResourceName()) << "accepted";
-		add(res);
+		add(base_index);
 	}
 	else {
-		qDebug() << "resource" << res << QString::fromStdString(res->getResourceName()) << "rejected";
-		remove(res);
+		remove(base_index);
 	}
+}
+
+void ERFilterSortProxy::onResourceChange(EResource * res)
+{
+	// find the base index
+	int base_index = m_base->indexOf(res);
+
+	// readd it
+	remove(base_index);
+	checkAndAdd(base_index);
 }
 
 void ERFilterSortProxy::addCategory(ECategory * cat)
@@ -130,71 +125,58 @@ void ERFilterSortProxy::enableRange(bool enable)
 void ERFilterSortProxy::setBase(Group *base)
 {
 	if (m_base != nullptr) disconnect(m_base, 0, this, 0);
-	qDebug() << "setting base to" << base;
-	// remove everything signal
-	for (unsigned int i = 0; i < getNumChildren(); i++) {
-		remove(dynamic_cast<EResource*>(child(i)));
-	}
+	qInfo() << "Setting proxy <<" << this << "base to" << base;
 
 	m_base = base;
 	if (base == nullptr) return;
 
+	// remove everything signal
+	clear();
+
 	// track all of the existing items
 	for (unsigned int i = 0; i < base->getNumChildren(); i++) {
-		track(dynamic_cast<EResource*>(m_base->child(i)));
+		track(i);
+		checkAndAdd(i);
 	}
 
 	// listen to new
 	connect(base, &Group::sNew, this, [this](int index) {
-		EResource *res = dynamic_cast<EResource*>(m_base->child(index));
-		if (!res) return;
-		track(res);
+		// fix up indices
+		// everything after the new item is shifted right 1
+		for (int i = 0; i < m_map_to_base.size(); i++) {
+			if (m_map_to_base[i] >= index) {
+				m_map_to_base[i] += 1;
+			}
+		}
+		track(index);
+		checkAndAdd(index);
+	});
+	connect(base, &Group::sDelete, this, [this](int index) {
+		for (int i = m_map_to_base.size() - 1; i >= 0; i--) {
+			if (m_map_to_base[i] == index) {
+				// this item got deleted
+				m_map_to_base.erase(m_map_to_base.begin() + i);
+				emit sDelete(i);
+			}
+			else if (m_map_to_base[i] > index) {
+				m_map_to_base[i] -= 1;
+			}
+		}
 	});
 }
 
-bool ERFilterSortProxy::insertChild(unsigned int index, Node * child)
+osg::Node *ERFilterSortProxy::child(unsigned int index) const
 {
-	//qWarning() << "Insertion into a group proxy - item added to end";
-	return m_base->addChild(child);
-}
-
-bool ERFilterSortProxy::removeChildren(unsigned int index, unsigned int numChildrenToRemove)
-{
-	std::vector<EResource*> delete_me;
-	auto it = m_title_map.begin();
-	std::advance(it, index);
-	for (unsigned int i = 0; i < numChildrenToRemove; i++) {
-		delete_me.push_back(it->second);
+	if (index >= m_map_to_base.size()) {
+		qWarning() << "proxy get child out of range";
+		return nullptr;
 	}
-
-	for (EResource *res : delete_me) {
-		m_base->removeChild(res);
-	}
-	return true;
-}
-
-osg::Node *ERFilterSortProxy::child(unsigned int index)
-{
-	if (m_sort_by == NONE) {
-		return m_included[index];
-	}
-	else if (m_sort_by == ALPHABETICAL) {
-		auto it = m_title_map.begin();
-		std::advance(it, index);
-		return it->second;
-	}
-	return nullptr;
+	return m_base->child(m_map_to_base[index]);
 }
 
 unsigned int ERFilterSortProxy::getNumChildren() const
 {
-	if (m_sort_by == NONE) {
-		return m_included.size();
-	}
-	else if (m_sort_by == ALPHABETICAL) {
-		return m_title_map.size();
-	}
-	return 0;
+	return m_map_to_base.size();
 }
 
 void ERFilterSortProxy::setPosition(osg::Vec3f pos)
@@ -212,8 +194,9 @@ void ERFilterSortProxy::debug()
 {
 	for (unsigned int i = 0; i < getNumChildren(); i++) {
 		EResource *res = getResource(i);
-		if (!res) qDebug() << i << nullptr;
-		else qDebug() 
+		if (!res) qInfo() << i << nullptr;
+		else qInfo()
+			<< "Debugging proxy:"
 			<< i 
 			<< QString::fromStdString(res->getResourceName()) 
 			<< "g:" 
@@ -221,104 +204,66 @@ void ERFilterSortProxy::debug()
 	}
 }
 
-void ERFilterSortProxy::add(EResource *res)
+void ERFilterSortProxy::add(int base_index)
 {
+	EResource *res = dynamic_cast<EResource*>(m_base->child(base_index));
+	std::function<bool(int, int)> sort_func;
 	if (m_sort_by == NONE) {
-		int index = m_included.size();
-		m_included.push_back(res);
-		emit sNew(index);
+		sort_func = std::less<int>();
 	}
 	else if (m_sort_by == ALPHABETICAL) {
-		// find
-		auto it = m_title_hashmap.find(res);
+		sort_func = [this, res](int left, int right) {
+			EResource *lres = dynamic_cast<EResource*>(m_base->child(left));
+			EResource *rres = dynamic_cast<EResource*>(m_base->child(right));
+			//qDebug() << "comparison:"
+			//	<< left << QString::fromStdString(lres->getResourceName())
+			//	<< right << QString::fromStdString(rres->getResourceName());
+			return lres->getResourceName() < rres->getResourceName();
+		};
+	}
+	auto it = std::lower_bound(m_map_to_base.begin(), m_map_to_base.end(), base_index, sort_func);
+	if (it != m_map_to_base.end() && *it == base_index) {
+		qWarning() << "base index" << *it << "already added to sorted proxy";
+		return;
+	}
+	int new_index = it - m_map_to_base.begin();
+	m_map_to_base.insert(it, base_index);
 
-		// already in the map
-		if (it != m_title_hashmap.end()) return;
+	emit sNew(new_index);
+}
 
-		// insert into our maps
-		auto elem_already = m_title_map.insert({res->getResourceName(), res});
-		m_title_hashmap.insert({res, elem_already.first});
+void ERFilterSortProxy::remove(int base_index)
+{
+	auto it = std::find(m_map_to_base.begin(), m_map_to_base.end(), base_index);
+	if (it == m_map_to_base.end()) return;
+	int index = it - m_map_to_base.begin();
+	m_map_to_base.erase(it);
+	emit sDelete(index);
+}
 
-		// emit add signal... how to get the index?
-		qDebug() << "er filter sort proxy add" << QString::fromStdString(res->getResourceName());
-		emit sNew(std::distance(m_title_map.begin(), elem_already.first));
+void ERFilterSortProxy::clear()
+{
+	for (int i = m_map_to_base.size() - 1; i >= 0; i--) {
+		m_map_to_base.pop_back();
+		emit sDelete(i);
 	}
 }
 
-void ERFilterSortProxy::remove(EResource *res)
+int ERFilterSortProxy::indexOf(const osg::Node *node) const
 {
-	if (m_sort_by == NONE) {
-		auto it = std::find(m_included.begin(), m_included.end(), res);
-		int index = it - m_included.begin();
-		m_included.erase(it);
-		emit sDelete(index);
+	for (int i = 0; i < (int)getNumChildren(); i++) {
+		if (child(i) == node) return i;
 	}
-	else if (m_sort_by == ALPHABETICAL) {
-		auto it = m_title_hashmap.find(res);
-
-		// not in the map
-		if (it == m_title_hashmap.end()) return;
-
-		int index = std::distance(m_title_map.begin(), it->second);
-		// remove from maps
-		m_title_map.erase(it->second);
-		m_title_hashmap.erase(it);
-
-		// emit remove signal
-		emit sDelete(index);
-	}
+	return -1;
 }
 
-void ERFilterSortProxy::remap(EResource * res)
+void ERFilterSortProxy::track(int base_index)
 {
-	remove(res);
-	checkAndAdd(res);
-}
+	EResource *res = dynamic_cast<EResource*>(m_base->child(base_index));
+	if (!res) return;
 
-bool ERFilterSortProxy::inMap(EResource * res)
-{
-	if (m_sort_by == NONE) {
-		return std::find(m_included.begin(), m_included.end(), res) != m_included.end();
-	}
-	else if (m_sort_by == ALPHABETICAL) {
-		auto it = m_title_hashmap.find(res);
-		if (it == m_title_hashmap.end()) return false;
-		return false;
-	}
-	return false;
-}
-
-int ERFilterSortProxy::indexOf(EResource * res)
-{
-	if (m_sort_by == NONE) {
-		// this one is super hacky
-		//for (auto i = foo.begin(); i != foo.end(); ++i) {
-		//}
-	}
-	else if (m_sort_by == ALPHABETICAL) {
-		// there must be a better way... but whatever
-		auto it = m_title_hashmap.find(res);
-		if (it == m_title_hashmap.end()) return -1;
-		int index = std::distance(m_title_map.begin(), it->second);
-	}
-	return 0;
-}
-
-int ERFilterSortProxy::baseIndexOf(EResource *res)
-{
-	return m_base->getChildIndex(res);
-}
-
-void ERFilterSortProxy::track(EResource * res)
-{
-	qDebug() << "tracking" << QString::fromStdString(res->getResourceName());
 	// listen to the new item
-	connect(res, &EResource::sResourceNameChanged, this, [this, res](const std::string& new_name) {
-		if (m_sort_by != ALPHABETICAL) return;
-		// by now the index can be completely messed up...
-		remap(res);
-	});
-	connect(res, &EResource::sCategoryChanged, this, [this, res]() { checkAndAdd(res); });
-	connect(res, &EResource::sGlobalChanged, this, [this, res]() { checkAndAdd(res); });
-	checkAndAdd(res);
+	connect(res, &EResource::sResourceNameChanged, this, [this, res]() { onResourceChange(res); });
+	connect(res, &EResource::sCategoryChanged, this, [this, res]() { onResourceChange(res); });
+	connect(res, &EResource::sGlobalChanged, this, [this, res]() { onResourceChange(res); });
 }

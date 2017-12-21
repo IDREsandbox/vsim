@@ -1,9 +1,9 @@
 #include "Group.h"
 #include <QDebug>
 
-osg::Node *Group::child(unsigned int i)
+osg::Node *Group::child(unsigned int i) const
 {
-	return getChild(i);
+	return _children[i].get();
 }
 
 bool Group::addChild(osg::Node * child)
@@ -79,6 +79,13 @@ void Group::move(const std::vector<std::pair<int, int>>& mapping)
 	}
 
 	emit sItemsMoved(mapping);
+}
+
+int Group::indexOf(const osg::Node * node) const
+{
+	int x = getChildIndex(node);
+	if (x == getNumChildren()) return -1;
+	return x;
 }
 
 Group::AddNodeCommand::AddNodeCommand(
