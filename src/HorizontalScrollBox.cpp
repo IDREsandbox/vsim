@@ -393,7 +393,6 @@ void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
 
 void HorizontalScrollBox::wheelEvent(QWheelEvent* event)
 {
-	qDebug() << event->angleDelta();
 	horizontalScrollBar()->setValue(horizontalScrollBar()->value() - event->delta());
 }
 

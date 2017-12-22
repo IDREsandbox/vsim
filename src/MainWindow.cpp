@@ -26,6 +26,10 @@
 #include "resources/ERFilterSortProxy.h"
 #include "resources/ERScrollBox.h"
 
+#include "VSimApp.h"
+#include "VSimRoot.h"
+#include "ModelTableModel.h"
+
 MainWindow::MainWindow(QWidget *parent) 
 	: QMainWindow(parent),
 	ui(new Ui::MainWindow)
@@ -165,6 +169,29 @@ void MainWindow::selectResources(std::set<int> res)
 	ui->local->setSelection(res, *res.begin());
 }
 
+void MainWindow::setApp(VSimApp * vsim)
+{
+	m_app = vsim;
+
+	connect(this, &MainWindow::sOpenFile, m_app, &VSimApp::openVSim);
+	connect(this, &MainWindow::sSaveFile, m_app, &VSimApp::saveVSim);
+	connect(this, &MainWindow::sImportModel, m_app, &VSimApp::importModel);
+	connect(this, &MainWindow::sNew, m_app, &VSimApp::init);
+	connect(this, &MainWindow::sSaveCurrent, m_app, &VSimApp::saveCurrentVSim);
+	connect(this, &MainWindow::sImportNarratives, m_app, &VSimApp::importNarratives);
+	connect(this, &MainWindow::sExportNarratives, m_app, &VSimApp::exportNarratives);
+
+	outliner()->setModel(m_app->modelTable());
+	outliner()->header()->resizeSection(0, 200);
+	outliner()->resize(505, 600);
+
+	connect(this, &MainWindow::sDebugOSG, this, [this]() {
+		m_app->getRoot()->debug();
+	});
+	connect(this, &MainWindow::sDebugCamera, m_app, &VSimApp::debugCamera);
+
+}
+
 OSGViewerWidget * MainWindow::getViewerWidget() const
 {
 	return m_osg_widget;
@@ -251,7 +278,8 @@ void MainWindow::actionNew()
 void MainWindow::actionOpen()
 {
 	qDebug("open action");
-	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim", "",
+	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim",
+		m_app->getCurrentDirectory(),
 		"VSim files (*.vsim;*.osg;*.osgt;*.osgb; );;"
 		"Model files (*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
@@ -267,16 +295,27 @@ void MainWindow::actionOpen()
 
 void MainWindow::actionSave()
 {
+	if (m_app->getFileName() == "") {
+		actionSaveAs();
+		return;
+	}
+	QFileInfo info(m_app->getFileName().c_str());
+
+	QString ext = info.suffix();
+	if (ext != "vsim" && ext != "osgt" && ext != "osgb") {
+		qDebug() << "save something funny";
+		actionSaveAs();
+		return;
+	}
 	emit sSaveCurrent();
 }
 
 void MainWindow::actionSaveAs()
 {
 	qDebug("saveas");
-	QString filename = QFileDialog::getSaveFileName(this, "Save VSim", "", 
-		"VSim file (*.vsim);;"
-		"osg ascii file (*.osgt);;"
-		"osg binary file (*.osgb)");
+	QString filename = QFileDialog::getSaveFileName(this, "Save VSim",
+		m_app->getFileName().c_str(),
+		"VSim file (*.vsim;*.osgt;*.osgb);;");
 	if (filename == "") {
 		qDebug() << "saveas cancel";
 		return;
@@ -290,7 +329,8 @@ void MainWindow::actionSaveAs()
 void MainWindow::actionImportModel()
 {
 	qDebug("import");
-	QString filename = QFileDialog::getOpenFileName(this, "Import Model", "",
+	QString filename = QFileDialog::getOpenFileName(this, "Import Model",
+		m_app->getCurrentDirectory(),
 		"Model files (*.vsim;*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
 	if (filename == "") {

@@ -66,26 +66,6 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(m_narrative_player, &NarrativePlayer::hideCanvas, window->canvasView(), &labelCanvasView::hide);
 	connect(m_narrative_player, &NarrativePlayer::showCanvas, window->canvasView(), &labelCanvasView::fadeIn);
 
-	// This is a really awkward place... but this has to be done after setting model
-	m_window->outliner()->setModel(m_model_table_model);
-	m_window->outliner()->header()->resizeSection(0, 200);
-	m_window->outliner()->resize(505, 600);
-	qDebug() << m_window->outliner()->windowFlags();
-
-	connect(window, &MainWindow::sOpenFile, this, &VSimApp::openVSim);
-	connect(window, &MainWindow::sSaveFile, this, &VSimApp::saveVSim);
-	connect(window, &MainWindow::sImportModel, this, &VSimApp::importModel);
-	connect(window, &MainWindow::sNew, this, &VSimApp::init);
-	connect(window, &MainWindow::sSaveCurrent, this, &VSimApp::saveCurrentVSim);
-	connect(window, &MainWindow::sImportNarratives, this, &VSimApp::importNarratives);
-	connect(window, &MainWindow::sExportNarratives, this, &VSimApp::exportNarratives);
-
-	connect(window, &MainWindow::sDebugOSG, this, [this]() {
-		m_root->debug();
-		m_er_control->debug();
-	});
-	connect(window, &MainWindow::sDebugCamera, this, &VSimApp::debugCamera);
-
 	initWithVSim(m_root);
 }
 
@@ -94,6 +74,11 @@ bool VSimApp::init()
 	setFileName("");
 	initWithVSim(new VSimRoot);
 	return true;
+}
+
+void VSimApp::setWindow(MainWindow *)
+{
+
 }
 
 osgViewer::Viewer * VSimApp::getViewer()
@@ -261,17 +246,8 @@ bool VSimApp::saveVSim(const std::string& filename)
 
 bool VSimApp::saveCurrentVSim()
 {
-	if (m_filename == "") {
-		m_window->actionSaveAs();
-		return true;
-	}
-	std::string ext = Util::getExtension(m_filename);
-	if (ext != ".vsim") {
-		m_window->actionSaveAs();
-		return true;
-	}
-	saveVSim(m_filename);
-	return true;
+	qDebug() << "save current";
+	return saveVSim(m_filename);
 }
 
 bool VSimApp::exportNarratives()
@@ -300,7 +276,8 @@ bool VSimApp::exportNarratives()
 
 	// Open up the save dialog
 	qDebug() << "Export narratives";
-	QString filename = QFileDialog::getSaveFileName(m_window, "Export Narratives", "", "Narrative file (*.nar)");
+	QString filename = QFileDialog::getSaveFileName(m_window, "Export Narratives",
+		getCurrentDirectory(), "Narrative file (*.nar)");
 	if (filename == "") {
 		qDebug() << "Export narratives cancel";
 		return false;
@@ -340,7 +317,8 @@ bool VSimApp::importNarratives()
 {
 	// Open dialog
 	qDebug("Importing narratives");
-	QString filename = QFileDialog::getOpenFileName(m_window, "Import Narratives", "", "Narrative files (*.nar);;All types (*.*)");
+	QString filename = QFileDialog::getOpenFileName(m_window, "Import Narratives",
+		getCurrentDirectory(), "Narrative files (*.nar);;All types (*.*)");
 	if (filename == "") {
 		qDebug() << "import cancel";
 		return false;
@@ -404,7 +382,13 @@ VSimRoot * VSimApp::getRoot() const
 	return m_root.get();
 }
 
-std::string VSimApp::getFileName()
+QString VSimApp::getCurrentDirectory() const
+{
+	QFileInfo f(m_filename.c_str());
+	return f.dir().path();
+}
+
+std::string VSimApp::getFileName() const
 {
 	return m_filename;
 }
@@ -447,4 +431,9 @@ void VSimApp::updateTime()
 	double dt = m_dt_timer->nsecsElapsed() / 1.0e9;
 	m_dt_timer->restart();
 	emit tick(dt);
+}
+
+ModelTableModel * VSimApp::modelTable() const
+{
+	return m_model_table_model;
 }

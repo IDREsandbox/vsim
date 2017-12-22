@@ -11,10 +11,13 @@ int main(int argc, char *argv[])
 	if (argc >= 2) {
 		startup = argv[1];
 	}
+
 	QApplication a(argc, argv);
 	a.addLibraryPath("plugins");
 	a.setWindowIcon(QIcon("assets/vsim.png"));
+
 	MainWindow window;
+	VSimApp vsim(&window);
 
 	QFile File("assets/style.qss");
 	File.open(QFile::ReadOnly);
@@ -22,7 +25,10 @@ int main(int argc, char *argv[])
 	window.setStyleSheet(style);
 
 	window.show();
-	std::unique_ptr<VSimApp> vsim(new VSimApp(&window));
-	vsim->openVSim(startup);
+
+	window.setApp(&vsim);
+	//vsim.setWindow(&window);
+
+	vsim.openVSim(startup);
 	return a.exec();
 }

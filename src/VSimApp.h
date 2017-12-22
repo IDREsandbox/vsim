@@ -14,6 +14,8 @@
 #include <QTimer>
 #include <QElapsedTimer>
 
+#include "VSimRoot.h"
+
 class NarrativeControl;
 class NarrativePlayer;
 class ERControl;
@@ -26,7 +28,7 @@ class VSimApp : public QObject
 	Q_OBJECT
 public:
 	VSimApp(MainWindow*);
-	//~VSimApp();
+	void setWindow(MainWindow*);
 
 	osgViewer::Viewer* getViewer();
 
@@ -44,11 +46,14 @@ public:
 
 	VSimRoot *getRoot() const;
 
-	std::string getFileName();
+	QString getCurrentDirectory() const;
+	std::string getFileName() const;
 	void setFileName(const std::string &);
 
 	void debugCamera();
 	void updateTime();
+
+	ModelTableModel *modelTable() const;
 
 signals:
 	void tick(double sec);

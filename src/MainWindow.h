@@ -27,6 +27,7 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow(QWidget* parent = nullptr);
+	void setApp(VSimApp *vsim);
 
 	// linking
 	OSGViewerWidget *getViewerWidget() const;
@@ -83,6 +84,7 @@ public:
 	Ui::MainWindow *ui;
 
 public:
+	VSimApp *m_app;
 	QUndoStack *m_undo_stack;
 
 	OSGViewerWidget *m_osg_widget;
