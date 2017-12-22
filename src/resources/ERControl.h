@@ -34,6 +34,12 @@ public:
 	// opens new cat dialog
 	void newERCat();
 
+	void debug();
+
+private:
+	std::set<int> getCombinedSelection();
+	int getCombinedLastSelected();
+
 private:
 	MainWindow *m_window;
 
@@ -42,7 +48,7 @@ private:
 
 	ERDisplay *m_display;
 
-	ERScrollBox *m_box;
+	//ERScrollBox *m_box;
 	ERScrollBox *m_global_box;
 	ERScrollBox *m_local_box;
 

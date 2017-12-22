@@ -42,14 +42,16 @@ public:
 
 	void setPosition(osg::Vec3f pos);
 
-	EResource *getResource(int index);
-	void debug();
-	//set position
-
 	// overrides
 	virtual void setBase(Group *base);
 	virtual osg::Node *child(unsigned int index) const override;
 	virtual unsigned int getNumChildren() const override;
+	virtual int indexOf(const osg::Node *node) const override;
+
+	EResource *getResource(int index) const;
+	void debug();
+
+	//set position
 
 	// not supported
 	//virtual bool insertChild(unsigned int index, Node *child) override;
@@ -58,7 +60,7 @@ public:
 	// does the filter accept this category?
 	bool accept(EResource *res);
 
-//private:
+private:
 	// add/removes a resource if it is acceptable
 	void checkAndAdd(int base_index);
 
@@ -72,7 +74,6 @@ public:
 	void clear();
 	//void remap(int base_index);
 	//bool inMap(EResource *res);
-	virtual int indexOf(const osg::Node *node) const override;
 
 	void track(int base_index);
 

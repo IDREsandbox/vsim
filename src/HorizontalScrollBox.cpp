@@ -23,6 +23,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_scroll_area_widget = new QWidget(this);
 	m_scroll_area_widget->setStyleSheet(
 		"color: rgb(255, 255, 255);"
+		"background-color: rgb(0,0,0,0);"
 		//"QMenu {"
 		//"	background-color: rgb(255,255,255);"
 		//"}"
@@ -40,40 +41,6 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 
 	//m_height = m_scroll_area_widget->height();
 	m_height = this->height();
-
-	const char *scrollbar_style =
-		"QScrollBar:horizontal {		  "
-		"    border: 2px solid grey;	  "
-		"    background: #112244;		  "
-		"    height: 15px;				  "
-		"    margin: 0px 20px 0 20px;	  "
-		"}								  "
-		"QScrollBar::handle:horizontal {  "
-		"    background: #666666;			  "
-		"    min-width: 20px;			  "
-		"}								  "
-		"QScrollBar::add-line:horizontal {"
-		"    border: 2px solid grey;	  "
-		"    background: #112244;		  "
-		"    width: 20px;				  "
-		"    subcontrol-position: right;  "
-		"    subcontrol-origin: margin;	  "
-		"}								  "
-		"								  "
-		"QScrollBar::sub-line:horizontal {"
-		"    border: 2px solid grey;	  "
-		"    background: #112244;		  "
-		"    width: 20px;				  "
-		"    subcontrol-position: left;	  "
-		"    subcontrol-origin: margin;	  "
-		"}								  "
-		"QScrollBar::add-page:horizontal, "
-		"QScrollBar::sub-page:horizontal {"
-		"	background: none;"
-		"}"
-		;
-
-	this->horizontalScrollBar()->setStyleSheet(scrollbar_style);
 
 	setAcceptDrops(true);
 }
@@ -108,7 +75,7 @@ void HorizontalScrollBox::insertNewItem(uint index)
 {
 	osg::Node *node = nullptr;
 	if (m_group != nullptr && index <= m_group->getNumChildren()) {
-		node = m_group->getChild(index);
+		node = m_group->child(index);
 	}
 
 	ScrollBoxItem *item = createItem(node); // create the item, virtual

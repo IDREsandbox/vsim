@@ -152,9 +152,11 @@ void ERFilterSortProxy::setBase(Group *base)
 		checkAndAdd(index);
 	});
 	connect(base, &Group::sDelete, this, [this](int index) {
+		qDebug() << "delete signal in" << index;
 		for (int i = m_map_to_base.size() - 1; i >= 0; i--) {
 			if (m_map_to_base[i] == index) {
 				// this item got deleted
+				qDebug() << "Proxy emit delete signal" << i;
 				m_map_to_base.erase(m_map_to_base.begin() + i);
 				emit sDelete(i);
 			}
@@ -184,7 +186,7 @@ void ERFilterSortProxy::setPosition(osg::Vec3f pos)
 	m_position = pos;
 }
 
-EResource * ERFilterSortProxy::getResource(int i)
+EResource * ERFilterSortProxy::getResource(int i) const
 {
 	if (i >= (int)getNumChildren() || i < 0) return nullptr;
 	return dynamic_cast<EResource*>(child(i));
@@ -196,7 +198,7 @@ void ERFilterSortProxy::debug()
 		EResource *res = getResource(i);
 		if (!res) qInfo() << i << nullptr;
 		else qInfo()
-			<< "Debugging proxy:"
+			<< "Debugging proxy:\n"
 			<< i 
 			<< QString::fromStdString(res->getResourceName()) 
 			<< "g:" 

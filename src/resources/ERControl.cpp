@@ -31,19 +31,24 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 
 	auto &ui = m_window->ui;
 	// new
-	connect(m_box, &ERScrollBox::sNew, this, &ERControl::newER);
+	connect(m_local_box, &ERScrollBox::sNew, this, &ERControl::newER);
+	connect(m_global_box, &ERScrollBox::sNew, this, &ERControl::newER);
 	connect(ui->plus_2, &QPushButton::clicked, this, &ERControl::newER);
 	// delete
-	connect(m_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
+	connect(m_local_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
+	connect(m_global_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
 	connect(ui->minus_2, &QPushButton::clicked, this, &ERControl::deleteER);
 	// edit
-	connect(m_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
+	connect(m_local_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
+	connect(m_global_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
 	connect(ui->edit, &QPushButton::clicked, this, &ERControl::editERInfo);
 	// open
 	connect(ui->global, &ERScrollBox::sOpen, this, &ERControl::openResource);
 
-	connect(m_box, &ERScrollBox::sSetPosition, this, &ERControl::setPosition);
-	connect(m_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
+	connect(m_local_box, &ERScrollBox::sSetPosition, this, &ERControl::setPosition);
+	connect(m_global_box, &ERScrollBox::sSetPosition, this, &ERControl::setPosition);
+	connect(m_local_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
+	connect(m_global_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
 
 	load(ers);
 }
@@ -61,10 +66,11 @@ void ERControl::load(EResourceGroup *ers)
 	// set up proxies
 	if (m_filter_proxy == nullptr) {
 		m_filter_proxy = new ERFilterSortProxy(ers);
+		m_filter_proxy->sortBy(ERFilterSortProxy::ALPHABETICAL);
 		m_global_proxy = new ERFilterSortProxy(m_filter_proxy);
 		m_global_proxy->filterGlobal(ERFilterSortProxy::SHOW_GLOBAL);
 		m_local_proxy = new ERFilterSortProxy(m_filter_proxy);
-		m_global_proxy->filterGlobal(ERFilterSortProxy::SHOW_LOCAL);
+		m_local_proxy->filterGlobal(ERFilterSortProxy::SHOW_LOCAL);
 	}
 	else {
 		// we can just re-assign the root one
@@ -108,8 +114,11 @@ void ERControl::newER()
 
 void ERControl::deleteER()
 {
-	std::set<int> selection = m_box->getSelection();
+	std::set<int> selection = getCombinedSelection();
 	if (selection.empty()) return;
+
+	qDebug() << "delete ERs ---";
+	for (auto i : selection) qDebug() << i;
 
 	uint size = m_ers->getNumChildren();
 
@@ -127,8 +136,7 @@ void ERControl::deleteER()
 void ERControl::editERInfo()
 {
 	qInfo() << "Edit ER Info";
-
-	int active_item = m_box->getLastSelected();
+	int active_item = getCombinedLastSelected();
 	qDebug() << "resource list - begin edit on" << active_item;
 	if (active_item < 0) {
 		qWarning() << "resource list - can't edit with no selection";
@@ -181,7 +189,7 @@ void ERControl::editERInfo()
 
 void ERControl::openResource()
 {
-	int index = m_box->getLastSelected();
+	int index = m_global_box->getLastSelected();
 	if (index < 0) return;
 	EResource *res = dynamic_cast<EResource*>(m_ers->getChild(index));
 
@@ -200,7 +208,7 @@ void ERControl::openResource()
 
 void ERControl::setPosition()
 {
-	int active_item = m_box->getLastSelected();
+	int active_item = getCombinedLastSelected();
 	qInfo() << "Set ER position" << active_item;
 	if (active_item < 0) {
 		qWarning() << "Can't set ER position - no selection";
@@ -215,7 +223,7 @@ void ERControl::setPosition()
 
 void ERControl::gotoPosition()
 {
-	int active_item = m_box->getLastSelected();
+	int active_item = getCombinedLastSelected();
 	qInfo() << "Goto ER position" << active_item;
 	if (active_item < 0) {
 		qWarning() << "Can't goto ER position - no selection";
@@ -239,6 +247,48 @@ void ERControl::newERCat()
 	category->setBlue(dlg.getGreen());
 	category->setGreen(dlg.getBlue());
 	m_categories->addChild(category);
+}
+
+void ERControl::debug()
+{
+	qDebug() << "Debugging ERControl";
+	qDebug() << "local proxy - ";
+	m_local_proxy->debug();
+	qDebug() << "global proxy - ";
+	m_global_proxy->debug();
+}
+
+std::set<int> ERControl::getCombinedSelection()
+{
+	// remap selection to nodes
+	std::set<osg::Node*> nodes;
+	std::set<int> local_selection = m_local_box->getSelection();
+	for (auto i : local_selection) {
+		nodes.insert(m_local_proxy->child(i));
+	}
+	std::set<int> global_selection = m_global_box->getSelection();
+	for (auto i : global_selection) {
+		nodes.insert(m_global_proxy->child(i));
+	}
+
+	// map nodes to indices
+	std::set<int> selection;
+	for (auto node : nodes) {
+		selection.insert(m_ers->indexOf(node));
+	}
+	return selection;
+}
+
+int ERControl::getCombinedLastSelected()
+{
+	HorizontalScrollBox *box;
+	if (QObject::sender() == m_local_box) {
+		box = m_local_box;
+	}
+	else {
+		box = m_global_box;
+	}
+	return box->getLastSelected();
 }
 
 //void ERControl::openResource()

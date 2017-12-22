@@ -16,6 +16,11 @@ int main(int argc, char *argv[])
 	a.setWindowIcon(QIcon("assets/vsim.png"));
 	MainWindow window;
 
+	QFile File("assets/style.qss");
+	File.open(QFile::ReadOnly);
+	QString style = QLatin1String(File.readAll());
+	window.setStyleSheet(style);
+
 	window.show();
 	std::unique_ptr<VSimApp> vsim(new VSimApp(&window));
 	vsim->openVSim(startup);

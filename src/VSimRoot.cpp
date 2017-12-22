@@ -122,7 +122,9 @@ void VSimRoot::debug()
 			qInfo() << "not an EResource";
 			continue;
 		}
-		qInfo() << "Resource" << i << QString::fromStdString(er->getResourceName());
+		qInfo() << "Resource" << i
+			<< QString::fromStdString(er->getResourceName())
+			<< "global:" << er->getGlobal();
 	}
 	const ECategoryGroup *cats = m_resources->getCategories();
 	qInfo() << "ER Categories:" << cats->getNumChildren();
@@ -137,8 +139,8 @@ void VSimRoot::debug()
 		qInfo() << "Model" << QString::fromStdString(m_models->getChild(i)->getName());
 	}
 
-	DebugVisitor v;
-	m_models->accept(v);
+	//DebugVisitor v;
+	//m_models->accept(v);
 }
 
 void VSimRoot::merge(VSimRoot *other)
