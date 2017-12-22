@@ -23,7 +23,7 @@ bool Group::removeChildren(unsigned int index, unsigned int numChildrenToRemove)
 	int top = std::min(index + numChildrenToRemove, getNumChildren());
 	bool result = osg::Group::removeChildren(index, numChildrenToRemove);
 	for (int i = top - 1; i >= (int)index; i--) {
-		emit sDelete(index + i);
+		emit sDelete(i);
 	}
 	return result;
 }

@@ -43,6 +43,20 @@ private slots:
 		group->addChild(node0);
 		group->addChild(node1);
 	}
+	void removeSignals() {
+		reset();
+		group->addChild(node0);
+		group->addChild(node1);
+		group->addChild(node2);
+		group->addChild(node3);
+
+		QSignalSpy deleteSpy(group, &Group::sDelete);
+		group->removeChildren(1, 2);
+		QCOMPARE(deleteSpy.size(), 2);
+		// reverse order deletion signals
+		QCOMPARE(deleteSpy.takeFirst().at(0).toInt(), 2);
+		QCOMPARE(deleteSpy.takeFirst().at(0).toInt(), 1);
+	}
 	void addNodeCommand() {
 		reset();
 		group->addChild(node0);
@@ -73,6 +87,7 @@ private slots:
 		QSignalSpy deleteSpy(group, &Group::sDelete);
 		stack.push(new Group::DeleteNodeCommand(group, 0));
 		QCOMPARE(deleteSpy.size(), 1);
+		QCOMPARE(deleteSpy.takeFirst().at(0).toInt(), 0);
 
 		GROUPCOMPARE(group, { node1 });
 		stack.undo();
