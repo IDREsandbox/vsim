@@ -366,6 +366,7 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 {
 	m_selection->clear();
+	emit sSelectionCleared();
 	if (event->button() == Qt::RightButton) {
 		if (m_menu != nullptr) {
 			m_menu->exec(event->globalPos());
@@ -404,14 +405,16 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 		else {
 			// left click a selected item -> begin dragging
 			//if (isSelected(index)) {
-			m_selection->selectIfNot(index);
+			bool cleared = m_selection->selectIfNot(index);
+			if (cleared) emit sSelectionCleared();
 
 			m_mouse_down_pos = event->globalPos();
 			m_mouse_down = true;
 		}
 	}
 	else if (event->button() == Qt::RightButton) {
-		m_selection->selectIfNot(index);
+		bool cleared = m_selection->selectIfNot(index);
+		if (cleared) emit sSelectionCleared();
 
 		// open menu
 		if (m_item_menu) m_item_menu->exec(event->globalPos());

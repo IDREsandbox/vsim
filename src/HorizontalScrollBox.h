@@ -78,6 +78,8 @@ signals:
 	void sDelete();
 	void sNew();
 
+	void sSelectionCleared(); // hack for joining these boxes together
+
 protected:
 	// qt overrides
 	virtual void resizeEvent(QResizeEvent* event);

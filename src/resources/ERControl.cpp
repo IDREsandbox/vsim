@@ -50,6 +50,13 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	connect(m_local_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
 	connect(m_global_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
 
+	// mash the two selections together
+	connect(m_local_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
+		m_global_box->setSelection({}, -1);
+	});
+	connect(m_global_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
+		m_local_box->setSelection({}, -1);
+	});
 	load(ers);
 }
 

@@ -72,13 +72,15 @@ void Selection::select(int x)
 	set({x}, x);
 }
 
-void Selection::selectIfNot(int index)
+bool Selection::selectIfNot(int index)
 {
 	if (!contains(index)) {
 		select(index);
+		return true;
 	}
 	else {
 		add(index);
+		return false;
 	}
 }
 

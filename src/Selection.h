@@ -16,7 +16,7 @@ public:
 	void remove(int);
 	void clear();
 	void select(int); // removes everything else
-	void selectIfNot(int); // selects if not already
+	bool selectIfNot(int); // selects if not already, returns if cleared
 
 	void shiftSelect(int);
 
