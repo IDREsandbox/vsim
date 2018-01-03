@@ -2,11 +2,14 @@
 #include <algorithm>
 #include <QDebug>
 
-Selection::Selection() 
-	: m_last_selected(-1), m_selection({})
+Selection::Selection(QObject *parent)
+	: QObject(parent),
+	m_last_selected(-1),
+	m_selection({})
 {
 }
-void Selection::setSelection(std::set<int> new_set, int last)
+
+void Selection::set(std::set<int> new_set, int last)
 {
 	// items being removed
 	std::set<int> removed;
@@ -24,7 +27,7 @@ void Selection::setSelection(std::set<int> new_set, int last)
 	}
 	// in case of invalid stuff, just set automatically
 	else if (m_selection.find(last) == m_selection.end() || last == -1) {
-		qDebug() << "Invalid set of last selection in setSelection(), setting to the end";
+		qDebug() << "Invalid set of last selection in set(), setting to the end";
 		m_last_selected = *m_selection.rbegin();
 	}
 	else {
@@ -41,7 +44,7 @@ void Selection::setSelection(std::set<int> new_set, int last)
 	emit sChanged();
 }
 
-void Selection::addToSelection(int x)
+void Selection::add(int x)
 {
 	m_last_selected = x;
 	if (m_selection.find(x) != m_selection.end()) return;
@@ -49,7 +52,7 @@ void Selection::addToSelection(int x)
 	emit sAdded(x);
 }
 
-void Selection::removeFromSelection(int x)
+void Selection::remove(int x)
 {
 	if (m_selection.find(x) == m_selection.end()) return;
 	m_selection.erase(x);
@@ -59,14 +62,42 @@ void Selection::removeFromSelection(int x)
 	emit sRemoved(x);
 }
 
-void Selection::clearSelection()
+void Selection::clear()
 {
-	setSelection({}, -1);
+	set({}, -1);
 }
 
 void Selection::select(int x)
 {
-	setSelection({x}, x);
+	set({x}, x);
+}
+
+void Selection::selectIfNot(int index)
+{
+	if (!contains(index)) {
+		select(index);
+	}
+	else {
+		add(index);
+	}
+}
+
+void Selection::shiftSelect(int next)
+{
+	int prev = m_last_selected;
+	if (prev < 0 && next < 0) {
+		return;
+	}
+	if (prev < 0 && next >= 0) {
+		select(next);
+		return;
+	}
+	m_last_selected = next;
+	int left = std::min(prev, next);
+	int right = std::max(prev, next);
+	for (int i = left; i <= right; i++) {
+		add(i);
+	}
 }
 
 int Selection::getLastSelected()
@@ -79,7 +110,7 @@ const std::set<int>& Selection::getSelection()
 	return m_selection;
 }
 
-bool Selection::isSelected(int x)
+bool Selection::contains(int x)
 {
 	return (m_selection.find(x) != m_selection.end());
 }
@@ -99,5 +130,13 @@ int Selection::nextAfterDelete(int total, std::set<int> selection)
 	else {
 		next_selection = first_index - 1; // select the previous item
 	}
+	return next_selection;
+}
+
+std::set<int> Selection::nextSelectionAfterDelete(int size, std::set<int> selection)
+{
+	std::set<int> next_selection = {};
+	int next = nextAfterDelete(size, selection);
+	if (next >= 0) next_selection = {next};
 	return next_selection;
 }

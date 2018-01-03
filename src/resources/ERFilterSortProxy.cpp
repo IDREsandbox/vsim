@@ -152,11 +152,9 @@ void ERFilterSortProxy::setBase(Group *base)
 		checkAndAdd(index);
 	});
 	connect(base, &Group::sDelete, this, [this](int index) {
-		qDebug() << "delete signal in" << index;
 		for (int i = m_map_to_base.size() - 1; i >= 0; i--) {
 			if (m_map_to_base[i] == index) {
 				// this item got deleted
-				qDebug() << "Proxy emit delete signal" << i;
 				m_map_to_base.erase(m_map_to_base.begin() + i);
 				emit sDelete(i);
 			}

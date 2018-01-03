@@ -2,9 +2,12 @@
 #include <QResizeEvent>
 #include <QMouseEvent>
 #include <QMimeData>
-#include "HorizontalScrollBox.h"
 #include <vector>
 #include <algorithm>
+
+#include "HorizontalScrollBox.h"
+#include "ScrollBoxItem.h"
+#include "Selection.h"
 
 HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	: QScrollArea(parent),
@@ -43,6 +46,16 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_height = this->height();
 
 	setAcceptDrops(true);
+
+	m_selection = new Selection(this);
+	connect(m_selection, &Selection::sAdded, this, [this](int i) {
+		if (i >= m_items.size()) return;
+		m_items[i]->colorSelect(true);
+	});
+	connect(m_selection, &Selection::sRemoved, this, [this](int i) {
+		if (i >= m_items.size()) return;
+		m_items[i]->colorSelect(false);
+	});
 }
 
 void HorizontalScrollBox::addItem(ScrollBoxItem *item)
@@ -73,6 +86,7 @@ void HorizontalScrollBox::addNewItem()
 
 void HorizontalScrollBox::insertNewItem(uint index)
 {
+	m_selection->clear();
 	osg::Node *node = nullptr;
 	if (m_group != nullptr && index <= m_group->getNumChildren()) {
 		node = m_group->child(index);
@@ -98,8 +112,7 @@ void HorizontalScrollBox::clear()
 		delete ptr;
 	}
 	m_items.clear();
-	m_selection.clear();
-	m_last_selected = -1;
+	m_selection->clear();
 
 	if (m_group) disconnect(m_group, 0, this, 0);
 	m_group = nullptr;
@@ -107,104 +120,24 @@ void HorizontalScrollBox::clear()
 	refresh();
 }
 
-void HorizontalScrollBox::deleteSelection()
-{
-	QList<ScrollBoxItem*> newlist;
-	// null out the deleted ones
-	for (auto i : m_selection){
-		delete m_items[i];
-		m_items[i] = NULL;
-	}
-	// copy over
-	for (int i = 0; i < m_items.size(); i++) {
-		auto x = m_items.at(i);
-		if (x != NULL) newlist.append(x);
-	}
-
-	m_items = newlist;
-	m_selection.clear();
-	refresh();
-}
-
-
-void HorizontalScrollBox::setSelection(std::set<int> set, int last)
-{
-	auto it = set.begin();
-	for (size_t i = 0; i < m_items.size(); i++) {
-		// move the iterator forward
-		while (it != set.end() && i > *it) ++it;
-		if (it == set.end() || *it > i) {
-			m_items[i]->colorSelect(false);
-		}
-		else if (*it == i) {
-			m_items[i]->colorSelect(true);
-		}
-	}
-	m_selection = set;
-	m_last_selected = last;
-
-	// have the viewport focus the first selected item
-	if (!set.empty()) {
-		int first = *set.begin();
-		if (first < 0) return;
-		if (first >= m_items.size()) return;
-		ensureWidgetVisible(m_items[first]);
-	}
-	emit sSelectionChange();
-}
-
-void HorizontalScrollBox::addToSelection(int index)
-{
-	qDebug() << "add to selection" << index;
-	m_selection.insert(index);
-	m_items[index]->colorSelect(true);
-	m_last_selected = index;
-	qDebug() << "emitting signal";
-	emit sSelectionChange();
-}
-
-void HorizontalScrollBox::removeFromSelection(int index)
-{
-	m_selection.erase(index);
-	m_items[index]->colorSelect(false);
-	m_last_selected = *m_selection.rbegin(); // set last selected to the end
-	emit sSelectionChange();
-}
-
-void HorizontalScrollBox::select(int index)
-{
-	setSelection({ index }, index);
-}
-
-void HorizontalScrollBox::clearSelection()
-{
-	setSelection({}, -1);
-}
-
 const std::set<int>& HorizontalScrollBox::getSelection()
 {
-	return m_selection;
+	return m_selection->getSelection();
+}
+
+void HorizontalScrollBox::setSelection(const std::set<int>& set, int last)
+{
+	m_selection->set(set, last);
 }
 
 int HorizontalScrollBox::getLastSelected()
 {
-	return m_last_selected;
-}
-
-void HorizontalScrollBox::setLastSelected(int idx) {
-	m_last_selected = idx;
-}
-
-bool HorizontalScrollBox::isSelected(int index)
-{
-	auto it = m_selection.find(index);
-	return it != m_selection.end(); // if end then not selected
+	return m_selection->getLastSelected();
 }
 
 void HorizontalScrollBox::deleteItem(int position)
 {
-	m_last_selected = -1;
-	clearSelection();
+	m_selection->clear();
 	ScrollBoxItem* item = m_items.takeAt(position);
 	delete item;
 	refresh();
@@ -242,9 +175,6 @@ void HorizontalScrollBox::setGroup(Group * group)
 
 	for (uint i = 0; i < group->getNumChildren(); i++) {
 		insertNewItem(i);
-	}
-	if (m_items.size() > 0) {
-		select(0);
 	}
 }
 
@@ -404,12 +334,13 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 	if (m_mime_type != ""
 		&& diff.manhattanLength() > m_minimum_drag_dist
 		&& m_dragging == false
-		&& !m_selection.empty()) {
+		&& m_selection->getLastSelected() >= 0
+		&& m_mouse_down
+		) {
 
 		// Begin drag
 		QDrag *drag = new QDrag(this);
-		if (m_last_selected < 0) return;
-		ScrollBoxItem *item = getItem(m_last_selected);
+		ScrollBoxItem *item = getItem(getLastSelected());
 		QPixmap pixmap(item->width(), item->height());
 		item->render(&pixmap, QPoint(), QRegion(0, 0, item->width(), item->height()));
 		drag->setPixmap(pixmap);
@@ -434,7 +365,7 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 
 void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 {
-	clearSelection();
+	m_selection->clear();
 	if (event->button() == Qt::RightButton) {
 		if (m_menu != nullptr) {
 			m_menu->exec(event->globalPos());
@@ -450,71 +381,48 @@ void HorizontalScrollBox::mouseReleaseEvent(QMouseEvent * event)
 void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 {
 	if (event->button() == Qt::LeftButton) {
-		int previous_selected = m_last_selected;
-		m_last_selected = index;
+		int prev = m_selection->getLastSelected();
 		if (event->type() == QEvent::MouseButtonDblClick) {
 			//emit sDoubleClick();
-			addToSelection(index);
-			refresh();
+			m_selection->add(index);
 			return;
 		}
 
 		if (event->modifiers() & Qt::ControlModifier) {
 			// ctrl - add/remove from selection
-			if (isSelected(index)) {
-				removeFromSelection(index);
+			if (m_selection->contains(index)) {
+				m_selection->remove(index);
 			}
 			else {
-				addToSelection(index);
+				m_selection->add(index);
 			}
-			qDebug() << "item ctrl press" << m_last_selected;
 		}
-		else if (event->modifiers() & Qt::ShiftModifier
-			&& m_last_selected != -1 
-			&& previous_selected != -1) {
+		else if (event->modifiers() & Qt::ShiftModifier) {
 			// shift - range selection
-			if (m_last_selected != -1 && previous_selected != -1) {
-				int left = std::min(m_last_selected, previous_selected);
-				int right = std::max(m_last_selected, previous_selected);
-				for (int i = left; i <= right; i++) {
-					addToSelection(i);
-				}
-				qDebug() << "item range select" << left << right;
-			}
+			m_selection->shiftSelect(index);
 		}
 		else {
 			// left click a selected item -> begin dragging
 			//if (isSelected(index)) {
-			if (!isSelected(index)) {
-				select(index);
-			}
+			m_selection->selectIfNot(index);
 
 			m_mouse_down_pos = event->globalPos();
 			m_mouse_down = true;
 		}
-		refresh();
 	}
 	else if (event->button() == Qt::RightButton) {
-		qDebug() << "item press - rmb";
-		m_last_selected = index;
-		if (!isSelected(index)) {
-			select(index);
-		}
+		m_selection->selectIfNot(index);
+
 		// open menu
 		if (m_item_menu) m_item_menu->exec(event->globalPos());
-		refresh();
 	}
 }
 void HorizontalScrollBox::itemMouseReleaseEvent(QMouseEvent * event, int index)
 {
 	if (event->button() == Qt::LeftButton) {
-		if (!(event->modifiers() & Qt::ControlModifier) && !(event->modifiers() & Qt::ShiftModifier)) {
-			// If already in selection then select() on release
-			// this is so that you can start dragging w/o deselecting everything
-			if (isSelected(index)) {
-				m_last_selected = index;
-				select(index);
-			}
+		if (!(event->modifiers() & Qt::ControlModifier)
+			&& !(event->modifiers() & Qt::ShiftModifier)) {
+			m_selection->select(index);
 		}
 	}
 }
@@ -527,12 +435,10 @@ void HorizontalScrollBox::dragEnterEvent(QDragEnterEvent * event)
 		//m_dragpos = event->pos();
 		//refresh();
 	}
-	qDebug() << "drag enter";
 }
 
 void HorizontalScrollBox::dragLeaveEvent(QDragLeaveEvent * event)
 {
-	qDebug() << "drag leave";
 	if (m_dragging) {
 		m_dragging = false;
 		refresh();
@@ -546,8 +452,6 @@ void HorizontalScrollBox::dragMoveEvent(QDragMoveEvent * event)
 		m_dragpos = event->pos();
 		refresh();
 	}
-
-	//qDebug() << "drag move";
 }
 
 void HorizontalScrollBox::dropEvent(QDropEvent * event)

@@ -117,8 +117,7 @@ void ERControl::deleteER()
 	std::set<int> selection = getCombinedSelection();
 	if (selection.empty()) return;
 
-	qDebug() << "delete ERs ---";
-	for (auto i : selection) qDebug() << i;
+	for (auto i : selection) qDebug() << "delete ER" << i;
 
 	uint size = m_ers->getNumChildren();
 

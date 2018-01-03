@@ -10,8 +10,11 @@
 #include <set>
 #include <QTimer>
 
-#include "ScrollBoxItem.h"
 #include "Group.h"
+
+class Selection;
+class ScrollBoxItem;
+
 //#include "narrative/NarrativeScrollItem.h"
 
 // goals:
@@ -35,8 +38,6 @@ public:
 	void insertItem(int position, ScrollBoxItem*);
 	void deleteItem(int position);
 
-	void deleteSelection();
-
 	// override this to make different kinds of scroll box items
 	virtual ScrollBoxItem *createItem(osg::Node*);
 
@@ -48,19 +49,9 @@ public:
 	void clear();
 
 	// selection - these set selection, lastSelected, and emit events
-	virtual void setSelection(std::set<int> set, int last);
-	void addToSelection(int);
-	void removeFromSelection(int);
-	void clearSelection();
-	void select(int);
-
-	// lastSelected must be in the selection
+	virtual void setSelection(const std::set<int>& set, int last);
 	int getLastSelected();
-	void setLastSelected(int);
 	const std::set<int>& getSelection();
-
-	bool isSelected(int);
-	//void forceSelect(int); // hack, for the narrative player, does not emit signals
 
 	// positioning
 	void setSpacing(int);
@@ -114,8 +105,9 @@ protected:
 	QList<ScrollBoxItem*> m_items;
 	QWidget *m_drop_highlight;
 
-	int m_last_selected;
-	std::set<int> m_selection;
+	Selection *m_selection;
+	//int m_last_selected;
+	//std::set<int> m_selection;
 
 	//int boxHeight() const;
 	//int boxWidth() const;
