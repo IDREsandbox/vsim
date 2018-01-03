@@ -1,8 +1,11 @@
 #include "ScrollBoxItem.h"
 
-ScrollBoxItem::ScrollBoxItem()
-	: QFrame(nullptr)
+ScrollBoxItem::ScrollBoxItem(QWidget *parent)
+	: QFrame(parent),
+	m_selected(false)
 {
+	m_style = "background-color: rgb(48, 48, 48, 200)";
+	m_select_style = "backgroundcolor: rgb(0, 100, 255)";
 }
 
 void ScrollBoxItem::setIndex(int index)
@@ -15,19 +18,15 @@ int ScrollBoxItem::getIndex()
 	return m_index;
 }
 
-void ScrollBoxItem::colorFocus(bool color)
+void ScrollBoxItem::select(bool s)
 {
-	setStyleSheet("background-color: rgb(0, 100, 255);");
-	// do something else? like draw a rectangle
-}
-
-void ScrollBoxItem::colorSelect(bool color)
-{
-	if (color) {
-		setStyleSheet("background-color: rgb(0, 100, 255);");
+	if (m_selected == s) return;
+	m_selected = s;
+	if (s) {
+		setStyleSheet(m_style);
 	}
 	else {
-		setStyleSheet("background-color: rgb(70,70,70);");
+		setStyleSheet(m_select_style);
 	}
 }
 
@@ -46,4 +45,20 @@ void ScrollBoxItem::mouseReleaseEvent(QMouseEvent * event)
 {
 	//qDebug() << "ScrollBoxItem mouse release event ScrollBoxItem" << event->type() << m_index; // << this->text();
 	emit sMouseReleaseEvent(event, m_index);
+}
+
+void ScrollBoxItem::setDeselectStyle(QString style)
+{
+	m_style = style;
+	if (m_selected) {
+		setStyleSheet(style);
+	}
+}
+
+void ScrollBoxItem::setSelectStyle(QString style)
+{
+	m_select_style = style;
+	if (!m_selected) {
+		setStyleSheet(style);
+	}
 }

@@ -11,9 +11,7 @@ class ERScrollItem : public ScrollBoxItem {
 public:
 	EResource *m_er;
 
-	ERScrollItem();
-	ERScrollItem(EResource *er);
-	void setER(EResource *er);
+	ERScrollItem(QWidget *parent);	void setER(EResource *er);
 
 	virtual int widthFromHeight(int height);
 

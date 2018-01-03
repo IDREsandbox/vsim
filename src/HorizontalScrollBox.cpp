@@ -18,22 +18,22 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_mouse_down(false),
 	m_minimum_drag_dist(10)
 {
-	this->setObjectName(QStringLiteral("scrollArea"));
-	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-	this->setWidgetResizable(true);
+	setObjectName("scrollArea");
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+	setWidgetResizable(true);
 
 	m_scroll_area_widget = new QWidget(this);
 	m_scroll_area_widget->setStyleSheet(
-		"color: rgb(255, 255, 255);"
 		"background-color: rgb(0,0,0,0);"
 		//"QMenu {"
 		//"	background-color: rgb(255,255,255);"
 		//"}"
 	);
-	this->setWidget(m_scroll_area_widget);
+	setWidget(m_scroll_area_widget);
 
 	m_drop_highlight = new QWidget(m_scroll_area_widget);
+	m_drop_highlight->setObjectName("dropHighlight");
 	m_drop_highlight->setStyleSheet("background-color: rgb(255,255,255)");
 	m_drop_highlight->hide();
 
@@ -50,11 +50,11 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_selection = new Selection(this);
 	connect(m_selection, &Selection::sAdded, this, [this](int i) {
 		if (i >= m_items.size()) return;
-		m_items[i]->colorSelect(true);
+		m_items[i]->select(true);
 	});
 	connect(m_selection, &Selection::sRemoved, this, [this](int i) {
 		if (i >= m_items.size()) return;
-		m_items[i]->colorSelect(false);
+		m_items[i]->select(false);
 	});
 }
 

@@ -9,8 +9,7 @@ class SlideScrollItem : public ScrollBoxItem {
 	Q_OBJECT
 
 public:
-	SlideScrollItem();
-	SlideScrollItem(NarrativeSlide *);
+	SlideScrollItem(QWidget *parent);
 	void setSlide(NarrativeSlide *);
 	NarrativeSlide *getSlide();
 

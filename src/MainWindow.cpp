@@ -93,7 +93,12 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionOSG_Debug, &QAction::triggered, this, &MainWindow::sDebugOSG);
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
 	connect(ui->actionControl_Debug, &QAction::triggered, this, &MainWindow::sDebugControl);
-
+	connect(ui->actionReload_Style, &QAction::triggered, this, [this]() {
+		QFile File("assets/style.qss");
+		File.open(QFile::ReadOnly);
+		QString style = QLatin1String(File.readAll());
+		setStyleSheet(style);
+	});
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
 
 	// camera manipulator

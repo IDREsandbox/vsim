@@ -13,17 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(48, 48, 48);</string>
-  </property>
   <layout class="QVBoxLayout" name="vertical_layout">
    <item>
     <widget class="QLabel" name="title">
-     <property name="styleSheet">
-      <string notr="true">color: rgb(255, 255, 255);
-font: 10pt;</string>
-     </property>
      <property name="text">
       <string>ER Title</string>
      </property>

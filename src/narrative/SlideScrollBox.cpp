@@ -55,7 +55,8 @@ ScrollBoxItem * SlideScrollBox::createItem(osg::Node * node)
 		qWarning() << "insert new slide" << node << "is not a NarrativeSlide";
 		return nullptr;
 	}
-	SlideScrollItem *item = new SlideScrollItem(slide);
+	SlideScrollItem *item = new SlideScrollItem(this);
+	item->setSlide(slide);
 	connect(item, &SlideScrollItem::sDurationDoubleClick, this, &SlideScrollBox::sSetDuration);
 	connect(item, &SlideScrollItem::sTransitionDoubleClick, this, &SlideScrollBox::sSetTransitionDuration);
 	connect(item, &SlideScrollItem::sThumbnailDirty, this, &SlideScrollBox::sThumbnailsDirty);

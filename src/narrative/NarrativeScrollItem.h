@@ -9,8 +9,7 @@ class NarrativeScrollItem : public ScrollBoxItem {
 	Q_OBJECT
 
 public:
-	NarrativeScrollItem();
-	NarrativeScrollItem(Narrative2 *narrative);
+	NarrativeScrollItem(QWidget *parent);
 	void setNarrative(Narrative2 *narrative);
 
 protected:

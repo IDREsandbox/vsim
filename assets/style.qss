@@ -1,41 +1,48 @@
-QLabel, QPushButton, HorizontalScrollBox, #bottomBar, #topBar {
+#mainSplitter,
+#mainSplitter QPushButton,
+#mainSplitter QLabel,
+#topBar,
+#bottomBar,
+HorizontalScrollBox
+{
 	background: rgba(0, 0, 0, 70);
 	color: rgb(255, 255, 255);
-	border-color: rgb(238, 238, 238);
-}
-QSplitter::handle {
-	background: rgba(0,0,0, 100);
-}
-#bottomBar QSplitter::handle {
-	background: rgba(0,0,0, 50);
 }
 
-QScrollBar:horizontal {		  
-    border: 2px solid grey;	  
-    background: rgba(20, 20, 50, 50);		  
-    height: 15px;				  
-    margin: 0px 20px 0 20px;	  
-}								  
-QScrollBar::handle:horizontal {  
-    background: #666666;			  
-    min-width: 20px;			  
-}								  
-QScrollBar::add-line:horizontal {
-    border: 2px solid grey;	  
-    background: #151515;		  
-    width: 20px;				  
-    subcontrol-position: right;  
-    subcontrol-origin: margin;	  
-}								  
-								  
-QScrollBar::sub-line:horizontal {
-    border: 2px solid grey;	  
-    background: #151515;		  
-    width: 20px;				  
-    subcontrol-position: left;	  
-    subcontrol-origin: margin;	  								  
+QSplitter::handle {
+	background: rgba(0,0,0,100);
 }
-QScrollBar::add-page:horizontal, 
-QScrollBar::sub-page:horizontal {
+
+#bottomBar QSplitter::handle {
+	background: rgba(0,0,0,50);
+}
+
+HorizontalScrollBox QScrollBar:horizontal {
+    border: 2px solid grey;
+    background: rgba(20, 20, 50, 50);
+    height: 15px;
+    margin: 0px 20px 0 20px;
+}
+HorizontalScrollBox QScrollBar::handle:horizontal {
+    background: #666666;
+    min-width: 20px;
+}
+HorizontalScrollBox QScrollBar::add-line:horizontal {
+    border: 2px solid grey;
+    background: #151515;
+    width: 20px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
+}
+
+HorizontalScrollBox QScrollBar::sub-line:horizontal {
+    border: 2px solid grey;
+    background: #151515;
+    width: 20px;
+    subcontrol-position: left;
+    subcontrol-origin: margin;
+}
+HorizontalScrollBox QScrollBar::add-page:horizontal,
+HorizontalScrollBox QScrollBar::sub-page:horizontal {
 	background: none;
 }

@@ -1,14 +1,10 @@
 ﻿#include "resources/ERScrollItem.h"
 
-ERScrollItem::ERScrollItem()
-	: m_er(nullptr)
+ERScrollItem::ERScrollItem(QWidget * parent)
+	: ScrollBoxItem(parent),
+	m_er(nullptr)
 {
 	ui.setupUi(this);
-}
-ERScrollItem::ERScrollItem(EResource *er) 
-	: ERScrollItem()
-{
-	setER(er);
 }
 
 void ERScrollItem::setER(EResource *er)

@@ -1,8 +1,8 @@
 ﻿#include "SlideScrollItem.h"
 #include "Util.h"
 
-SlideScrollItem::SlideScrollItem() 
-	: ScrollBoxItem(), 
+SlideScrollItem::SlideScrollItem(QWidget *parent)
+	: ScrollBoxItem(parent),
 	m_slide(nullptr)
 {
 	ui.setupUi(this);
@@ -115,12 +115,6 @@ bool SlideScrollItem::eventFilter(QObject * obj, QEvent * event)
 		}
 	}
 	return false;
-}
-
-SlideScrollItem::SlideScrollItem(NarrativeSlide *slide)
-	: SlideScrollItem()
-{
-	setSlide(slide);
 }
 
 void SlideScrollItem::setSlide(NarrativeSlide *slide)

@@ -46,7 +46,8 @@ ScrollBoxItem * ERScrollBox::createItem(osg::Node * node)
 		qWarning() << "ER scroll box insert new ER. Node" << node << "is not a ER, creating a null item anyway";
 		//return nullptr;
 	}
-	ERScrollItem *item = new ERScrollItem(er);
+	ERScrollItem *item = new ERScrollItem(this);
+	item->setER(er);
 	connect(item, &ERScrollItem::sDoubleClick, this, &ERScrollBox::sOpen);
 	return item;
 }

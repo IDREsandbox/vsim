@@ -6,23 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>167</width>
-    <height>107</height>
+    <width>166</width>
+    <height>108</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(48, 48, 48);</string>
-  </property>
   <layout class="QVBoxLayout" name="vertical_layout">
    <item>
     <widget class="QLabel" name="title">
      <property name="styleSheet">
-      <string notr="true">color: rgb(255, 255, 255);
-font: 12pt;</string>
+      <string notr="true">font: 12pt;</string>
      </property>
      <property name="text">
       <string>Narrative Title</string>
@@ -34,9 +29,6 @@ font: 12pt;</string>
    </item>
    <item>
     <widget class="QLabel" name="description">
-     <property name="styleSheet">
-      <string notr="true">color: rgb(255, 255, 255);</string>
-     </property>
      <property name="text">
       <string>a compelling sotsoteotseotseotosetosetoet</string>
      </property>
@@ -44,7 +36,7 @@ font: 12pt;</string>
       <bool>false</bool>
      </property>
      <property name="alignment">
-      <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

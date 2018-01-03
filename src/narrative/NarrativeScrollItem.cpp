@@ -1,14 +1,10 @@
 ﻿#include "NarrativeScrollItem.h"
 
-NarrativeScrollItem::NarrativeScrollItem()
-	: m_narrative(nullptr)
+NarrativeScrollItem::NarrativeScrollItem(QWidget *parent)
+	: ScrollBoxItem(parent),
+	m_narrative(nullptr)
 {
 	ui.setupUi(this);
-}
-NarrativeScrollItem::NarrativeScrollItem(Narrative2 *narrative) 
-	: NarrativeScrollItem()
-{
-	setNarrative(narrative);
 }
 
 void NarrativeScrollItem::setNarrative(Narrative2 *narrative)
