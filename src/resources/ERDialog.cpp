@@ -3,50 +3,23 @@
 #include <qfiledialog.h>
 #include "resources/ERDialog.h"
 #include "resources/NewCatDialog.h"
+#include "resources/EResource.h"
 #include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
 
-ERDialog::ERDialog(const EResource *er, const ECategoryGroup *categories, QWidget * parent)
-	: QDialog(parent)
+ERDialog::ERDialog(QWidget * parent)
+	: QDialog(parent),
+	m_categories(nullptr)
 {
 	ui.setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
-
-	m_categories = categories;
 
 	for (uint i = 0; i < sizeof(EResource::CopyrightStrings) / sizeof(char*); i++) {
 		ui.licensing->addItem(EResource::CopyrightStrings[i]);
 	}
 	ui.licensing->setCurrentIndex(EResource::UNSPECIFIED);
 
-	if (er == nullptr) { // Defaults
-		ui.year_lower->setValue(0);
-		ui.year_upper->setValue(0);
-	}
-	else {
-		ui.title->setText(QString::fromStdString(er->getResourceName()));
-		ui.description->setText(QString::fromStdString(er->getResourceDescription()));
-		ui.authors->setText(QString::fromStdString(er->getAuthor()));
-		ui.path->setText(QString::fromStdString(er->getResourcePath()));
-		ui.year_lower->setValue(er->getMinYear());
-		ui.year_upper->setValue(er->getMaxYear());
-		ui.radius->setValue(er->getLocalRange());
-
-		ui.global->setChecked(er->getGlobal());
-		ui.autolaunch->setChecked(er->getAutoLaunch());
-
-		switch (er->getERType()) {
-		case EResource::FILE:
-			ui.file->setChecked(true);
-			break;
-		case EResource::ANNOTATION:
-			ui.annotation->setChecked(true);
-			break;
-		case EResource::URL:
-			ui.url->setChecked(true);
-			break;
-		}
-	}
+	init(nullptr);
 
 	connect(ui.addnew, &QPushButton::clicked, this, &ERDialog::addNewCat);
 	connect(ui.choose, &QPushButton::clicked, this, &ERDialog::chooseFile);
@@ -63,9 +36,56 @@ ERDialog::ERDialog(const EResource *er, const ECategoryGroup *categories, QWidge
 
 	onActivationChange();
 	onTypeChange();
+
+	ui.year_lower->setValue(0);
+	ui.year_upper->setValue(0);
+	ui.annotation->setChecked(true);
+	ui.radius->setValue(10);
 }
 
 ERDialog::~ERDialog() {
+}
+
+void ERDialog::setCategoryGroup(const ECategoryGroup * categories)
+{
+	m_categories = categories;
+}
+
+void ERDialog::init(const EResource * er)
+{
+	if (er == nullptr) { // Defaults
+		ui.title->setText("Untitled");
+		ui.description->setText("");
+		ui.authors->setText("");
+		ui.authors->setText("");
+		// make all of the other fields just copy the previous?
+		return;
+	}
+
+	ui.title->setText(QString::fromStdString(er->getResourceName()));
+	ui.description->setText(QString::fromStdString(er->getResourceDescription()));
+	ui.authors->setText(QString::fromStdString(er->getAuthor()));
+	ui.path->setText(QString::fromStdString(er->getResourcePath()));
+	ui.year_lower->setValue(er->getMinYear());
+	ui.year_upper->setValue(er->getMaxYear());
+	ui.radius->setValue(er->getLocalRange());
+
+	if (er->getGlobal()) ui.global->setChecked(true);
+	else ui.local->setChecked(true);
+
+	ui.autolaunch->setChecked(er->getAutoLaunch());
+
+	switch (er->getERType()) {
+	case EResource::FILE:
+		ui.file->setChecked(true);
+		break;
+	case EResource::ANNOTATION:
+		ui.annotation->setChecked(true);
+		break;
+	case EResource::URL:
+		ui.url->setChecked(true);
+		break;
+	}
 }
 
 std::string ERDialog::getTitle() const

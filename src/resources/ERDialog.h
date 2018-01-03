@@ -4,16 +4,20 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 
+#include "resources/EResource.h"
 #include "ui_ERDialog.h"
-#include "EResource.h"
 
+class EResource;
 class ECategoryGroup;
 
 class ERDialog : public QDialog {
 	Q_OBJECT
 public:
-	ERDialog(const EResource *er, const ECategoryGroup *categories, QWidget *parent = nullptr);
+	ERDialog(QWidget *parent = nullptr);
 	~ERDialog();
+
+	void setCategoryGroup(const ECategoryGroup *categories);
+	void init(const EResource *er);
 
 	std::string getTitle() const;
 	std::string getDescription() const;

@@ -42,6 +42,7 @@ private:
 
 private:
 	MainWindow *m_window;
+	ERDialog *m_dialog;
 
 	osg::ref_ptr<EResourceGroup> m_ers;
 	osg::ref_ptr<ECategoryGroup> m_categories;

@@ -28,6 +28,7 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	m_global_box = m_window->ui->global;
 	m_local_box = m_window->ui->local;
 	m_display = m_window->erDisplay();
+	m_dialog = new ERDialog(m_window);
 
 	auto &ui = m_window->ui;
 	// new
@@ -70,6 +71,8 @@ void ERControl::load(EResourceGroup *ers)
 	m_ers = ers;
 	m_categories = ers->categories();
 
+	m_dialog->setCategoryGroup(m_categories);
+
 	// set up proxies
 	if (m_filter_proxy == nullptr) {
 		m_filter_proxy = new ERFilterSortProxy(ers);
@@ -90,8 +93,8 @@ void ERControl::load(EResourceGroup *ers)
 
 void ERControl::newER()
 {
-	ERDialog dlg(nullptr, m_categories.get());
-	int result = dlg.exec();
+	m_dialog->init(nullptr);
+	int result = m_dialog->exec();
 	if (result == QDialog::Rejected) {
 		return;
 	}
@@ -99,19 +102,19 @@ void ERControl::newER()
 	m_undo_stack->beginMacro("New Resource");
 
 	EResource *resource = new EResource;
-	resource->setResourceName(dlg.getTitle());
-	resource->setAuthor(dlg.getAuthor());
-	resource->setResourceDescription(dlg.getDescription());
-	resource->setResourcePath(dlg.getPath());
+	resource->setResourceName(m_dialog->getTitle());
+	resource->setAuthor(m_dialog->getAuthor());
+	resource->setResourceDescription(m_dialog->getDescription());
+	resource->setResourcePath(m_dialog->getPath());
 	//resource->setResourceType(
-	resource->setGlobal(dlg.getGlobal());
-	resource->setCopyright(dlg.getCopyright());
-	resource->setMinYear(dlg.getMinYear());
-	resource->setMaxYear(dlg.getMaxYear());
-	resource->setReposition(dlg.getReposition());
-	resource->setAutoLaunch(dlg.getAutoLaunch());
-	resource->setLocalRange(dlg.getLocalRange());
-	resource->setERType(dlg.getERType());
+	resource->setGlobal(m_dialog->getGlobal());
+	resource->setCopyright(m_dialog->getCopyright());
+	resource->setMinYear(m_dialog->getMinYear());
+	resource->setMaxYear(m_dialog->getMaxYear());
+	resource->setReposition(m_dialog->getReposition());
+	resource->setAutoLaunch(m_dialog->getAutoLaunch());
+	resource->setLocalRange(m_dialog->getLocalRange());
+	resource->setERType(m_dialog->getERType());
 	resource->setCameraMatrix(m_window->m_osg_widget->getCameraMatrix());
 
 	m_undo_stack->push(new Group::AddNodeCommand(m_ers, resource));
@@ -151,8 +154,8 @@ void ERControl::editERInfo()
 
 	EResource *resource = m_ers->getResource(active_item);
 
-	ERDialog dlg(resource, m_ers->categories());
-	int result = dlg.exec();
+	m_dialog->init(resource);
+	int result = m_dialog->exec();
 	if (result == QDialog::Rejected) {
 		qDebug() << "resource list - cancelled edit on" << active_item;
 		return;
@@ -163,30 +166,30 @@ void ERControl::editERInfo()
 	m_undo_stack->beginMacro("Set Resource Info");
 	//m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
 
-	if (resource->getResourceName() != dlg.getTitle())
-		m_undo_stack->push(new EResource::SetResourceNameCommand(resource, dlg.getTitle()));
-	if (resource->getAuthor() != dlg.getAuthor())
-		m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor()));
-	if (resource->getResourceDescription() != dlg.getDescription())
-		m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription()));
-	if (resource->getResourcePath() != dlg.getPath())
-		m_undo_stack->push(new EResource::SetResourcePathCommand(resource, dlg.getPath()));
-	if (resource->getGlobal() != dlg.getGlobal())
-		m_undo_stack->push(new EResource::SetGlobalCommand(resource, dlg.getGlobal()));
-	if (resource->getCopyright() != dlg.getCopyright())
-		m_undo_stack->push(new EResource::SetCopyrightCommand(resource, dlg.getCopyright()));
-	if (resource->getMinYear() != dlg.getMinYear())
-		m_undo_stack->push(new EResource::SetMinYearCommand(resource, dlg.getMinYear()));
-	if (resource->getMaxYear() != dlg.getMaxYear())
-		m_undo_stack->push(new EResource::SetMaxYearCommand(resource, dlg.getMaxYear()));
-	if (resource->getReposition() != dlg.getReposition())
-		m_undo_stack->push(new EResource::SetRepositionCommand(resource, dlg.getReposition()));
-	if (resource->getAutoLaunch() != dlg.getAutoLaunch())
-		m_undo_stack->push(new EResource::SetAutoLaunchCommand(resource, dlg.getAutoLaunch()));
-	if (resource->getLocalRange() != dlg.getLocalRange())
-		m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange()));
-	if (resource->getERType() != dlg.getERType())
-		m_undo_stack->push(new EResource::SetErTypeCommand(resource, dlg.getERType()));
+	if (resource->getResourceName() != m_dialog->getTitle())
+		m_undo_stack->push(new EResource::SetResourceNameCommand(resource, m_dialog->getTitle()));
+	if (resource->getAuthor() != m_dialog->getAuthor())
+		m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, m_dialog->getAuthor()));
+	if (resource->getResourceDescription() != m_dialog->getDescription())
+		m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, m_dialog->getDescription()));
+	if (resource->getResourcePath() != m_dialog->getPath())
+		m_undo_stack->push(new EResource::SetResourcePathCommand(resource, m_dialog->getPath()));
+	if (resource->getGlobal() != m_dialog->getGlobal())
+		m_undo_stack->push(new EResource::SetGlobalCommand(resource, m_dialog->getGlobal()));
+	if (resource->getCopyright() != m_dialog->getCopyright())
+		m_undo_stack->push(new EResource::SetCopyrightCommand(resource, m_dialog->getCopyright()));
+	if (resource->getMinYear() != m_dialog->getMinYear())
+		m_undo_stack->push(new EResource::SetMinYearCommand(resource, m_dialog->getMinYear()));
+	if (resource->getMaxYear() != m_dialog->getMaxYear())
+		m_undo_stack->push(new EResource::SetMaxYearCommand(resource, m_dialog->getMaxYear()));
+	if (resource->getReposition() != m_dialog->getReposition())
+		m_undo_stack->push(new EResource::SetRepositionCommand(resource, m_dialog->getReposition()));
+	if (resource->getAutoLaunch() != m_dialog->getAutoLaunch())
+		m_undo_stack->push(new EResource::SetAutoLaunchCommand(resource, m_dialog->getAutoLaunch()));
+	if (resource->getLocalRange() != m_dialog->getLocalRange())
+		m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, m_dialog->getLocalRange()));
+	if (resource->getERType() != m_dialog->getERType())
+		m_undo_stack->push(new EResource::SetErTypeCommand(resource, m_dialog->getERType()));
 
 	//m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
 
@@ -195,7 +198,7 @@ void ERControl::editERInfo()
 
 void ERControl::openResource()
 {
-	int index = m_global_box->getLastSelected();
+	int index = getCombinedLastSelected();
 	if (index < 0) return;
 	EResource *res = dynamic_cast<EResource*>(m_ers->getChild(index));
 
@@ -287,26 +290,29 @@ std::set<int> ERControl::getCombinedSelection()
 
 int ERControl::getCombinedLastSelected()
 {
-	HorizontalScrollBox *box;
-	if (QObject::sender() == m_local_box) {
-		box = m_local_box;
+	QObject *sender = QObject::sender();
+	ERFilterSortProxy *proxy;
+	int last;
+	if (sender == m_local_box) {
+		qDebug() << "local box sent";
+		last = m_local_box->getLastSelected();
+		proxy = m_local_proxy;
+	}
+	else if (sender == m_global_box) {
+		qDebug() << "global box sent";
+		last = m_global_box->getLastSelected();
+		proxy = m_global_proxy;
 	}
 	else {
-		box = m_global_box;
+		qDebug() << "who sent this?" << sender;
+		return -1;
 	}
-	return box->getLastSelected();
-}
 
-//void ERControl::openResource()
-//{
-//	//int index = ui->local->getLastSelected();
-//	//if (index < 0) return;
-//	int index = 0;
-//
-//	EResource *res = dynamic_cast<EResource*>(m_categories->getChild(index));
-//	
-//	m_display->show();
-//	m_display->setInfo(res);
-//
-//	//this->getViewer()->getCameraManipulator()->setByMatrix(res->getViewMatrix());
-//}
+	if (last < 0) return -1;
+	osg::Node *node = proxy->child(last);
+	int last_base = m_ers->indexOf(node);
+
+	if (last_base >= m_ers->getNumChildren()) return -1;
+	qDebug() << "last:" << last_base;
+	return last_base;
+}
