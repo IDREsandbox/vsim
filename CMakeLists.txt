@@ -93,7 +93,6 @@ set(tests
   Group_test
   GroupProxy_test
   ERFilterSortProxy_test
-  Dumb_test
   )
 foreach(test ${tests})
   add_executable(${test} tests/${test}.cpp)

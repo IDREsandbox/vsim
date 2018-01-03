@@ -4,17 +4,11 @@
 #include <QObject>
 #include <set>
 
-struct SelectionStruct {
-	std::set<int> selection;
-	int last;
-};
-
 // Abstract representation of a selection
-
 class Selection : public QObject {
 	Q_OBJECT
 public:
-	Selection(QObject *parent);
+	Selection(QObject *parent = nullptr);
 
 	// selection - these set selection, lastSelected, and emit events
 	virtual void set(std::set<int> set, int last);
@@ -30,7 +24,6 @@ public:
 	// -1 means none
 	int getLastSelected();
 	const std::set<int>& getSelection();
-	const SelectionStruct& get();
 
 	bool contains(int);
 
