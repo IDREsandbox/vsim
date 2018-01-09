@@ -4,7 +4,6 @@
  *  Created on: Feb 22, 2011
  *      Author: eduardo
  */
-
 #ifndef NARRATIVENODE_H_
 #define NARRATIVENODE_H_
 

@@ -2,8 +2,6 @@
 #define CHECKABLELISTPROXY_H
 
 #include <QAbstractProxyModel>
-#include <QIdentityProxyModel>
-#include <unordered_map>
 
 // This proxy is makes every item of a list (column 0) checkable and adds a row at the top for "(Check All)"
 class CheckableListProxy : public QAbstractProxyModel {
@@ -27,7 +25,7 @@ public:
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-	QModelIndex buddy(const QModelIndex &index) const override;
+	virtual QModelIndex buddy(const QModelIndex &index) const override;
 
 	bool isChecked(int row) const;
 	std::vector<bool> getChecked() const;
@@ -41,9 +39,5 @@ private:
 	int m_checked_count;
 	int m_unchecked_count;
 	Qt::CheckState m_check_all;
-
-	// map to iterators to list
-	std::unordered_map<int, int> m_check_map;
-
 };
 #endif

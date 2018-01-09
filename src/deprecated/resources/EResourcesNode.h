@@ -4,8 +4,6 @@
  *  Created on: December 15, 2011
  *      Author: Franklin Fang
  */
-
-
 #ifndef ERESOURCES_NODE_H_
 #define ERESOURCES_NODE_H_
 

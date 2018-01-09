@@ -4,7 +4,6 @@
  *  Created on: December 30, 2011
  *      Author: Franklin Fang
  */
-
 #ifndef ERCATEGORY_H_
 #define ERCATEGORY_H_
 

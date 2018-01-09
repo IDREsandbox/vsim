@@ -1,4 +1,3 @@
-#pragma once
 #ifndef LABELSTYLE_H
 #define LABELSTYLE_H
 

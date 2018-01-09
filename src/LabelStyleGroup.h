@@ -1,4 +1,3 @@
-#pragma once
 #ifndef LABELSTYLEGROUP
 #define LABELSTYLEGROUP_H
 

@@ -4,7 +4,6 @@
  *  Created on: May 4, 2011
  *	Author: eduardo
  */
-
 #ifndef OSGNW_CANVAS_H_
 #define OSGNW_CANVAS_H_
 

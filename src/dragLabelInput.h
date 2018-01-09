@@ -1,4 +1,3 @@
-#pragma once
 #ifndef DRAGLABELINPUT_HPP
 #define DRAGLABELINPUT_HPP
 #include <QDialog>

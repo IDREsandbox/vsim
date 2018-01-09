@@ -1,4 +1,3 @@
-#pragma once
 #ifndef STYLESETTINGS_HPP
 #define STYLESETTINGS_HPP
 #include <QDialog>

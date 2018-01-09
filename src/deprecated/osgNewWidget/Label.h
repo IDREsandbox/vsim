@@ -4,7 +4,6 @@
  *  Created on: May 4, 2011
  *	Author: eduardo
  */
-
 #ifndef OSGNW_LABEL_H_
 #define OSGNW_LABEL_H_
 

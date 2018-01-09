@@ -1,5 +1,4 @@
-﻿#pragma once
-#ifndef NARRATIVEINFODIALOG_HPP
+﻿#ifndef NARRATIVEINFODIALOG_HPP
 #define NARRATIVEINFODIALOG_HPP
 #include <QDialog>
 #include <QDialogButtonBox>
