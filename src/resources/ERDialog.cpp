@@ -1,15 +1,18 @@
 #include <QDebug>
 #include <string>
-#include <qfiledialog.h>
+#include <QListView>
+#include <QFileDialog>
+#include <QMessageBox>
 #include "resources/ERDialog.h"
 #include "resources/NewCatDialog.h"
 #include "resources/EResource.h"
 #include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
+#include "EditDeleteDelegate.h"
+#include "GroupModel.h"
 
-ERDialog::ERDialog(QWidget * parent)
-	: QDialog(parent),
-	m_categories(nullptr)
+ERDialog::ERDialog(QAbstractItemModel *category_model, EditDeleteDelegate *category_editor, QWidget * parent)
+	: QDialog(parent)
 {
 	ui.setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -21,7 +24,6 @@ ERDialog::ERDialog(QWidget * parent)
 
 	init(nullptr);
 
-	connect(ui.addnew, &QPushButton::clicked, this, &ERDialog::addNewCat);
 	connect(ui.choose, &QPushButton::clicked, this, &ERDialog::chooseFile);
 
 	// only one call to onTypeChange occurs when toggles happen
@@ -41,9 +43,17 @@ ERDialog::ERDialog(QWidget * parent)
 	ui.year_upper->setValue(0);
 	ui.annotation->setChecked(true);
 	ui.radius->setValue(10);
-}
 
-ERDialog::~ERDialog() {
+	// category stuff
+	m_category_view = new QListView(this);
+	m_category_view->setModel(category_model);
+	m_category_delegate = category_editor;
+	m_category_view->setItemDelegate(category_editor);
+	ui.categories->setMouseTracking(true);
+	ui.categories->setModel(category_model);
+	ui.categories->setView(m_category_view);
+
+	connect(ui.addnew, &QPushButton::pressed, this, &ERDialog::sNewCategory);
 }
 
 void ERDialog::setCategoryGroup(const ECategoryGroup * categories)

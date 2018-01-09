@@ -7,6 +7,7 @@
 #include <QObject>
 #include "Group.h"
 #include "Command.h"
+#include <QColor>
 
 class ECategory : public Group {
 	Q_OBJECT
@@ -28,12 +29,12 @@ public:
 	void setGreen(int green);
 	int getBlue()const;
 	void setBlue(int blue);
+	QColor getColor() const;
+	void setColor(QColor color);
 
 signals:
 	void sCNameChanged(std::string old_name, std::string new_name);
-	void sCRedChanged(int);
-	void sCBlueChanged(int);
-	void sCGreenChanged(int);
+	void sColorChanged(QColor color);
 
 private:
 	std::string m_cat_name;

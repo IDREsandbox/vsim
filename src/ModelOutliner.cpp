@@ -8,6 +8,27 @@
 #include <QPushButton>
 
 
+ModelOutliner::ModelOutliner(QWidget *parent)
+	: QTreeView(parent)
+{
+	setWindowTitle("Models");
+	setWindowFlags(Qt::Dialog);
+
+	auto *oldd = itemDelegate();
+	qDebug() << "old item delegate" << oldd;
+
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
+	setSelectionBehavior(QAbstractItemView::SelectItems);
+
+	OutlinerTimeDelegate *d = new OutlinerTimeDelegate(this);
+	setItemDelegateForColumn(2, d);
+	setItemDelegateForColumn(3, d);
+
+	qDebug() << "header" << header() << (void*)header();
+	//header()->setStretchLastSection(false);
+
+	//horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+}
 
 OutlinerTimeDelegate::OutlinerTimeDelegate(QObject *parent)
 	: QStyledItemDelegate(parent)
@@ -74,26 +95,4 @@ bool OutlinerTimeDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
 
 	return QStyledItemDelegate::editorEvent(event, model, option, index);
 	//return false;
-}
-
-ModelOutliner::ModelOutliner(QWidget *parent)
-	: QTreeView(parent)
-{
-	setWindowTitle("Models");
-	setWindowFlags(Qt::Dialog);
-
-	auto *oldd = itemDelegate();
-	qDebug() << "old item delegate" << oldd;
-
-	setSelectionMode(QAbstractItemView::ExtendedSelection);
-	setSelectionBehavior(QAbstractItemView::SelectItems);
-
-	OutlinerTimeDelegate *d = new OutlinerTimeDelegate(this);
-	setItemDelegateForColumn(2, d);
-	setItemDelegateForColumn(3, d);
-
-	qDebug() << "header" << header() << (void*)header();
-	//header()->setStretchLastSection(false);
-	
-	//horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }

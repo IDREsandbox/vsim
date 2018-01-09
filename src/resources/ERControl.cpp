@@ -13,6 +13,10 @@
 #include "OSGViewerWidget.h"
 #include "ERFilterSortProxy.h"
 
+#include "resources/ECategoryModel.h"
+#include "EditDeleteDelegate.h"
+#include "CheckableListProxy.h"
+
 #include <QDesktopServices>
 
 ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
@@ -22,13 +26,39 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	m_categories(nullptr),
 	m_filter_proxy(nullptr),
 	m_global_proxy(nullptr),
-	m_local_proxy(nullptr)
+	m_local_proxy(nullptr),
+	m_category_model(nullptr)
 {
 	m_undo_stack = m_window->m_undo_stack;
 	m_global_box = m_window->ui->global;
 	m_local_box = m_window->ui->local;
 	m_display = m_window->erDisplay();
-	m_dialog = new ERDialog(m_window);
+
+	m_category_model = new ECategoryModel(this); // -> group
+	m_category_sort_proxy = new QSortFilterProxyModel(this); // -> model
+	m_category_sort_proxy->setSourceModel(m_category_model);
+	m_category_sort_proxy->setSortRole(Qt::DisplayRole);
+	m_category_sort_proxy->setDynamicSortFilter(true);
+	m_category_sort_proxy->sort(0);
+	m_category_checkbox_proxy = new CheckableListProxy(this); // -> sort proxy
+	m_category_checkbox_proxy->setSourceModel(m_category_sort_proxy);
+
+	//QListView *lv1 = new QListView(m_window);
+	//lv1->setModel(m_category_model);
+	//lv1->setGeometry(50, 50, 100, 200);
+	//lv1->show();
+	//QListView *lv2 = new QListView(m_window);
+	//lv2->setModel(m_category_sort_proxy);
+	//lv2->setGeometry(150, 50, 100, 200);
+	//lv2->show();
+	//QListView *lv3 = new QListView(m_window);
+	//lv3->setModel(m_category_checkbox_proxy);
+	//lv3->setGeometry(250, 50, 100, 200);
+	//lv3->show();
+
+	m_category_delegate = new EditDeleteDelegate(this);
+	connect(m_category_delegate, &EditDeleteDelegate::sDelete, this, &ERControl::execDeleteCategory);
+	connect(m_category_delegate, &EditDeleteDelegate::sEdit, this, &ERControl::execEditCategory);
 
 	auto &ui = m_window->ui;
 	// new
@@ -71,7 +101,7 @@ void ERControl::load(EResourceGroup *ers)
 	m_ers = ers;
 	m_categories = ers->categories();
 
-	m_dialog->setCategoryGroup(m_categories);
+	m_category_model->setGroup(m_categories);
 
 	// set up proxies
 	if (m_filter_proxy == nullptr) {
@@ -93,8 +123,10 @@ void ERControl::load(EResourceGroup *ers)
 
 void ERControl::newER()
 {
-	m_dialog->init(nullptr);
-	int result = m_dialog->exec();
+	ERDialog dlg(m_category_sort_proxy, m_category_delegate);
+	connect(&dlg, &ERDialog::sNewCategory, this, &ERControl::execNewCategory);
+
+	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		return;
 	}
@@ -102,19 +134,19 @@ void ERControl::newER()
 	m_undo_stack->beginMacro("New Resource");
 
 	EResource *resource = new EResource;
-	resource->setResourceName(m_dialog->getTitle());
-	resource->setAuthor(m_dialog->getAuthor());
-	resource->setResourceDescription(m_dialog->getDescription());
-	resource->setResourcePath(m_dialog->getPath());
+	resource->setResourceName(dlg.getTitle());
+	resource->setAuthor(dlg.getAuthor());
+	resource->setResourceDescription(dlg.getDescription());
+	resource->setResourcePath(dlg.getPath());
 	//resource->setResourceType(
-	resource->setGlobal(m_dialog->getGlobal());
-	resource->setCopyright(m_dialog->getCopyright());
-	resource->setMinYear(m_dialog->getMinYear());
-	resource->setMaxYear(m_dialog->getMaxYear());
-	resource->setReposition(m_dialog->getReposition());
-	resource->setAutoLaunch(m_dialog->getAutoLaunch());
-	resource->setLocalRange(m_dialog->getLocalRange());
-	resource->setERType(m_dialog->getERType());
+	resource->setGlobal(dlg.getGlobal());
+	resource->setCopyright(dlg.getCopyright());
+	resource->setMinYear(dlg.getMinYear());
+	resource->setMaxYear(dlg.getMaxYear());
+	resource->setReposition(dlg.getReposition());
+	resource->setAutoLaunch(dlg.getAutoLaunch());
+	resource->setLocalRange(dlg.getLocalRange());
+	resource->setERType(dlg.getERType());
 	resource->setCameraMatrix(m_window->m_osg_widget->getCameraMatrix());
 
 	m_undo_stack->push(new Group::AddNodeCommand(m_ers, resource));
@@ -144,18 +176,18 @@ void ERControl::deleteER()
 
 void ERControl::editERInfo()
 {
-	qInfo() << "Edit ER Info";
 	int active_item = getCombinedLastSelected();
-	qDebug() << "resource list - begin edit on" << active_item;
 	if (active_item < 0) {
 		qWarning() << "resource list - can't edit with no selection";
 		return;
 	}
-
 	EResource *resource = m_ers->getResource(active_item);
 
-	m_dialog->init(resource);
-	int result = m_dialog->exec();
+	ERDialog dlg(m_category_sort_proxy, m_category_delegate);
+	connect(&dlg, &ERDialog::sNewCategory, this, &ERControl::execNewCategory);
+
+	dlg.init(resource);
+	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		qDebug() << "resource list - cancelled edit on" << active_item;
 		return;
@@ -166,30 +198,30 @@ void ERControl::editERInfo()
 	m_undo_stack->beginMacro("Set Resource Info");
 	//m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
 
-	if (resource->getResourceName() != m_dialog->getTitle())
-		m_undo_stack->push(new EResource::SetResourceNameCommand(resource, m_dialog->getTitle()));
-	if (resource->getAuthor() != m_dialog->getAuthor())
-		m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, m_dialog->getAuthor()));
-	if (resource->getResourceDescription() != m_dialog->getDescription())
-		m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, m_dialog->getDescription()));
-	if (resource->getResourcePath() != m_dialog->getPath())
-		m_undo_stack->push(new EResource::SetResourcePathCommand(resource, m_dialog->getPath()));
-	if (resource->getGlobal() != m_dialog->getGlobal())
-		m_undo_stack->push(new EResource::SetGlobalCommand(resource, m_dialog->getGlobal()));
-	if (resource->getCopyright() != m_dialog->getCopyright())
-		m_undo_stack->push(new EResource::SetCopyrightCommand(resource, m_dialog->getCopyright()));
-	if (resource->getMinYear() != m_dialog->getMinYear())
-		m_undo_stack->push(new EResource::SetMinYearCommand(resource, m_dialog->getMinYear()));
-	if (resource->getMaxYear() != m_dialog->getMaxYear())
-		m_undo_stack->push(new EResource::SetMaxYearCommand(resource, m_dialog->getMaxYear()));
-	if (resource->getReposition() != m_dialog->getReposition())
-		m_undo_stack->push(new EResource::SetRepositionCommand(resource, m_dialog->getReposition()));
-	if (resource->getAutoLaunch() != m_dialog->getAutoLaunch())
-		m_undo_stack->push(new EResource::SetAutoLaunchCommand(resource, m_dialog->getAutoLaunch()));
-	if (resource->getLocalRange() != m_dialog->getLocalRange())
-		m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, m_dialog->getLocalRange()));
-	if (resource->getERType() != m_dialog->getERType())
-		m_undo_stack->push(new EResource::SetErTypeCommand(resource, m_dialog->getERType()));
+	if (resource->getResourceName() != dlg.getTitle())
+		m_undo_stack->push(new EResource::SetResourceNameCommand(resource, dlg.getTitle()));
+	if (resource->getAuthor() != dlg.getAuthor())
+		m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor()));
+	if (resource->getResourceDescription() != dlg.getDescription())
+		m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription()));
+	if (resource->getResourcePath() != dlg.getPath())
+		m_undo_stack->push(new EResource::SetResourcePathCommand(resource, dlg.getPath()));
+	if (resource->getGlobal() != dlg.getGlobal())
+		m_undo_stack->push(new EResource::SetGlobalCommand(resource, dlg.getGlobal()));
+	if (resource->getCopyright() != dlg.getCopyright())
+		m_undo_stack->push(new EResource::SetCopyrightCommand(resource, dlg.getCopyright()));
+	if (resource->getMinYear() != dlg.getMinYear())
+		m_undo_stack->push(new EResource::SetMinYearCommand(resource, dlg.getMinYear()));
+	if (resource->getMaxYear() != dlg.getMaxYear())
+		m_undo_stack->push(new EResource::SetMaxYearCommand(resource, dlg.getMaxYear()));
+	if (resource->getReposition() != dlg.getReposition())
+		m_undo_stack->push(new EResource::SetRepositionCommand(resource, dlg.getReposition()));
+	if (resource->getAutoLaunch() != dlg.getAutoLaunch())
+		m_undo_stack->push(new EResource::SetAutoLaunchCommand(resource, dlg.getAutoLaunch()));
+	if (resource->getLocalRange() != dlg.getLocalRange())
+		m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange()));
+	if (resource->getERType() != dlg.getERType())
+		m_undo_stack->push(new EResource::SetErTypeCommand(resource, dlg.getERType()));
 
 	//m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
 
@@ -242,8 +274,38 @@ void ERControl::gotoPosition()
 	m_window->getViewerWidget()->setCameraMatrix(resource->getCameraMatrix());
 }
 
-void ERControl::newERCat()
+void ERControl::execDeleteCategory(QAbstractItemModel * model, const QModelIndex & index)
 {
+	ECategory *cat =
+		dynamic_cast<ECategory*>(
+			static_cast<osg::Node*>(
+				model->data(index, GroupModel::PointerRole).value<void*>()));
+	QMessageBox::StandardButton reply =
+		QMessageBox::question(
+			nullptr,
+			"Delete Category",
+			"Are you sure you want to delete this category?",
+			QMessageBox::Yes | QMessageBox::No);
+	if (reply != QMessageBox::Yes) return;
+	qDebug() << "DO THE DELETE";
+}
+
+void ERControl::execEditCategory(QAbstractItemModel * model, const QModelIndex & index)
+{
+	ECategory *cat =
+		dynamic_cast<ECategory*>(
+			static_cast<osg::Node*>(
+				model->data(index, GroupModel::PointerRole).value<void*>()));
+	NewCatDialog dlg("Edit Category");
+	dlg.setColor(cat->getColor());
+	dlg.setTitle(QString::fromStdString(cat->getCategoryName()));
+	dlg.exec();
+	qDebug() << "DO THE EDIT";
+}
+
+void ERControl::execNewCategory()
+{
+	qDebug() << "EXED NEW CATEGORY??";
 	NewCatDialog dlg;
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
@@ -251,10 +313,8 @@ void ERControl::newERCat()
 	}
 
 	ECategory *category = new ECategory();
-	category->setCategoryName(dlg.getCatTitle());
-	category->setRed(dlg.getRed());
-	category->setBlue(dlg.getGreen());
-	category->setGreen(dlg.getBlue());
+	category->setCategoryName(dlg.getCatTitle().toStdString());
+	category->setColor(dlg.getColor());
 	m_categories->addChild(category);
 }
 
@@ -265,6 +325,13 @@ void ERControl::debug()
 	m_local_proxy->debug();
 	qDebug() << "global proxy - ";
 	m_global_proxy->debug();
+
+	qDebug() << "Categories";
+	for (unsigned int i = 0; i < m_categories->getNumChildren(); i++) {
+		ECategory *cat = m_categories->category(i);
+		qDebug() << i << ":" << "node" << (void*)m_categories->child(i) <<
+			"cat" << (void*)cat << QString::fromStdString(cat->getCategoryName()) << cat->getColor();
+	}
 }
 
 std::set<int> ERControl::getCombinedSelection()

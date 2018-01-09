@@ -16,6 +16,7 @@ public:
 	ECategoryGroup(const ECategoryGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	META_Node(, ECategoryGroup);
 
+	ECategory *category(int index) const;
 };
 
 #endif

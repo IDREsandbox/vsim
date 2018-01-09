@@ -54,6 +54,8 @@ public:
 	void updateTime();
 
 	ModelTableModel *modelTable() const;
+	NarrativeControl *narrativeControl() const;
+	ERControl *erControl() const;
 
 signals:
 	void tick(double sec);

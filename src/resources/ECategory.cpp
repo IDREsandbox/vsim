@@ -41,7 +41,6 @@ int ECategory::getRed() const
 void ECategory::setRed(int red)
 {
 	m_red = red;
-	emit sCRedChanged(m_red);
 }
 int ECategory::getGreen() const
 {
@@ -50,7 +49,6 @@ int ECategory::getGreen() const
 void ECategory::setGreen(int green)
 {
 	m_green = green;
-	emit sCGreenChanged(m_green);
 }
 int ECategory::getBlue() const
 {
@@ -59,5 +57,17 @@ int ECategory::getBlue() const
 void ECategory::setBlue(int blue)
 {
 	m_blue = blue;
-	emit sCBlueChanged(m_blue);
+}
+
+QColor ECategory::getColor() const
+{
+	return QColor(m_red, m_green, m_blue);
+}
+
+void ECategory::setColor(QColor color)
+{
+	m_red = color.red();
+	m_green = color.green();
+	m_blue = color.blue();
+	emit sColorChanged(color);
 }

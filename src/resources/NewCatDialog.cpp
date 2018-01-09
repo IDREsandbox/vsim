@@ -1,11 +1,16 @@
 #include "resources/NewCatDialog.h"
 #include <qcolordialog.h>
+#include <QDebug>
 
-NewCatDialog::NewCatDialog(QWidget *parent)
+NewCatDialog::NewCatDialog(QString window_title, QWidget *parent)
 	: QDialog(parent)
 {
 	ui.setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+	setWindowTitle(window_title);
+
+	setColor(QColor(0, 0, 150));
 
 	connect(ui.catColor, &QPushButton::clicked, this, &NewCatDialog::pickColor);
 }
@@ -13,21 +18,29 @@ NewCatDialog::~NewCatDialog()
 {
 }
 
-std::string NewCatDialog::getCatTitle() const
+void NewCatDialog::setTitle(QString title)
 {
-	return ui.catName->text().toStdString();
+	ui.catName->setText(title);
 }
-int NewCatDialog::getRed() const
+
+QString NewCatDialog::getCatTitle() const
 {
-	return color.red();
+	return ui.catName->text();
 }
-int NewCatDialog::getGreen()const
+
+void NewCatDialog::setColor(QColor color)
 {
-	return color.green();
+	m_color = color;
+	QString style = "background:rgb("
+		+ QString::number(color.red()) + ","
+		+ QString::number(color.green()) + ","
+		+ QString::number(color.blue()) + ");";
+	ui.catColor->setStyleSheet(style);
 }
-int NewCatDialog::getBlue()const
+
+QColor NewCatDialog::getColor() const
 {
-	return color.blue();
+	return m_color;
 }
 
 void NewCatDialog::pickColor()
@@ -38,6 +51,5 @@ void NewCatDialog::pickColor()
 		return;
 	}
 
-	color = dlg.selectedColor();
-	ui.catColor->setStyleSheet(QString::fromStdString("background:rgb(" + std::to_string(color.red()) + "," + std::to_string(color.green()) + "," + std::to_string(color.blue()) + ");"));
+	setColor(dlg.selectedColor());
 }

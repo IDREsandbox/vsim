@@ -10,21 +10,20 @@
 class NewCatDialog : public QDialog {
 	Q_OBJECT
 public:
-	NewCatDialog(QWidget *parent = nullptr);
+	NewCatDialog(QString window_title = "New Category", QWidget *parent = nullptr);
 	~NewCatDialog();
 
-	std::string getCatTitle() const;
-	int getRed() const;
-	int getGreen()const;
-	int getBlue()const;
+	void setTitle(QString title);
+	QString getCatTitle() const;
+	void setColor(QColor);
+	QColor getColor() const;
 
 public slots:
 	void pickColor();
 
 private:
-	void setGui();
-	QColor color;
 	Ui::NewCatDialog ui;
+	QColor m_color;
 };
 
 #endif // NEWCATDIALOG_HPP

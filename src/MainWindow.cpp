@@ -25,6 +25,7 @@
 #include "resources/ERDisplay.h"
 #include "resources/ERFilterSortProxy.h"
 #include "resources/ERScrollBox.h"
+#include "resources/ERControl.h"
 
 #include "VSimApp.h"
 #include "VSimRoot.h"
@@ -192,6 +193,7 @@ void MainWindow::setApp(VSimApp * vsim)
 
 	connect(this, &MainWindow::sDebugOSG, this, [this]() {
 		m_app->getRoot()->debug();
+		m_app->erControl()->debug();
 	});
 	connect(this, &MainWindow::sDebugCamera, m_app, &VSimApp::debugCamera);
 

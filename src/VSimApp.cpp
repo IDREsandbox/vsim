@@ -437,3 +437,13 @@ ModelTableModel * VSimApp::modelTable() const
 {
 	return m_model_table_model;
 }
+
+NarrativeControl * VSimApp::narrativeControl() const
+{
+	return m_narrative_control;
+}
+
+ERControl * VSimApp::erControl() const
+{
+	return m_er_control;
+}
