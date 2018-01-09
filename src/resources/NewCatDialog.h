@@ -1,4 +1,3 @@
-#pragma once
 #ifndef NEWCATDOALOG_HPP
 #define NEWCATDIALOG_HPP
 #include <QDialog>

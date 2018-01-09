@@ -45,6 +45,7 @@ ERDialog::ERDialog(QAbstractItemModel *category_model, EditDeleteDelegate *categ
 	ui.radius->setValue(10);
 
 	// category stuff
+	m_category_model = category_model;
 	m_category_view = new QListView(this);
 	m_category_view->setModel(category_model);
 	m_category_delegate = category_editor;
@@ -172,9 +173,16 @@ EResource::ERType ERDialog::getERType() const
 	}
 }
 
-int ERDialog::getCategory() const
+ECategory *ERDialog::getCategory() const
 {
-	return ui.categories->currentIndex();
+	if (m_category_model->rowCount() == 0) return nullptr;
+	QModelIndex index = m_category_model->index(ui.categories->currentIndex(), 0);
+	if (!index.isValid()) return nullptr;
+	ECategory *cat =
+		dynamic_cast<ECategory*>(
+			static_cast<osg::Node*>(
+				m_category_model->data(index, GroupModel::PointerRole).value<void*>()));
+	return cat;
 }
 
 void ERDialog::chooseFile()

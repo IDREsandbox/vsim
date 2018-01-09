@@ -46,6 +46,7 @@ QColor NewCatDialog::getColor() const
 void NewCatDialog::pickColor()
 {
 	QColorDialog dlg;
+	dlg.setCurrentColor(m_color);
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		return;

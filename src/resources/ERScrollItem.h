@@ -9,11 +9,16 @@ class ERScrollItem : public ScrollBoxItem {
 	Q_OBJECT
 	
 public:
-	EResource *m_er;
+	ERScrollItem(QWidget *parent);
 
-	ERScrollItem(QWidget *parent);	void setER(EResource *er);
+	void setER(EResource *er);
+	void setCat(ECategory *cat);
 
 	virtual int widthFromHeight(int height);
+
+	void setColor(QColor color);
+
+	static QString colorString(QColor color);
 
 protected:
 	void mouseDoubleClickEvent(QMouseEvent *event);
@@ -23,6 +28,8 @@ signals:
 
 private:
 	Ui::ERScrollItem ui;
+	EResource *m_er;
+	ECategory *m_cat;
 };
 
 #endif // ERSCROLLITEM_H

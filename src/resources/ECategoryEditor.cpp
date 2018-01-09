@@ -43,22 +43,20 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	m_category_checkbox_proxy = new CheckableListProxy(this); // -> sort proxy
 	m_category_checkbox_proxy->setSourceModel(m_category_sort_proxy);
 
-	//QListView *lv1 = new QListView(m_window);
-	//lv1->setModel(m_category_model);
-	//lv1->setGeometry(50, 50, 100, 200);
-	//lv1->show();
-	//QListView *lv2 = new QListView(m_window);
-	//lv2->setModel(m_category_sort_proxy);
-	//lv2->setGeometry(150, 50, 100, 200);
-	//lv2->show();
-	//QListView *lv3 = new QListView(m_window);
-	//lv3->setModel(m_category_checkbox_proxy);
-	//lv3->setGeometry(250, 50, 100, 200);
-	//lv3->show();
+	QListView *lv1 = new QListView(m_window);
+	lv1->setModel(m_category_model);
+	lv1->setGeometry(50, 50, 100, 200);
+	lv1->show();
+	QListView *lv2 = new QListView(m_window);
+	lv2->setModel(m_category_sort_proxy);
+	lv2->setGeometry(150, 50, 100, 200);
+	lv2->show();
+	QListView *lv3 = new QListView(m_window);
+	lv3->setModel(m_category_checkbox_proxy);
+	lv3->setGeometry(250, 50, 100, 200);
+	lv3->show();
 
-	m_category_delegate = new EditDeleteDelegate(this);
-	connect(m_category_delegate, &EditDeleteDelegate::sDelete, this, &ERControl::execDeleteCategory);
-	connect(m_category_delegate, &EditDeleteDelegate::sEdit, this, &ERControl::execEditCategory);
+	EditDeleteDelegate *m_category_delegate = new EditDeleteDelegate(this);
 
 	auto &ui = m_window->ui;
 	// new
@@ -123,8 +121,19 @@ void ERControl::load(EResourceGroup *ers)
 
 void ERControl::newER()
 {
-	ERDialog dlg(m_category_sort_proxy, m_category_delegate);
-	connect(&dlg, &ERDialog::sNewCategory, this, &ERControl::execNewCategory);
+	ERDialog dlg(m_category_sort_proxy, m_categories.get(), m_window);
+	connect(&dlg, &ERDialog::sNewCategory, this,
+		[this]() {
+		NewCatDialog dlg("New Category", m_window);
+		int result = dlg.exec();
+		if (result == QDialog::Rejected) {
+			return;
+		}
+		ECategory *cat = new ECategory;
+		cat->setColor(dlg.getColor());
+		cat->setCategoryName(dlg.getCatTitle().toStdString());
+		m_undo_stack->push(new Group::AddNodeCommand(m_categories, cat));
+	});
 
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
@@ -176,16 +185,17 @@ void ERControl::deleteER()
 
 void ERControl::editERInfo()
 {
+	qInfo() << "Edit ER Info";
 	int active_item = getCombinedLastSelected();
+	qDebug() << "resource list - begin edit on" << active_item;
 	if (active_item < 0) {
 		qWarning() << "resource list - can't edit with no selection";
 		return;
 	}
+
 	EResource *resource = m_ers->getResource(active_item);
 
-	ERDialog dlg(m_category_sort_proxy, m_category_delegate);
-	connect(&dlg, &ERDialog::sNewCategory, this, &ERControl::execNewCategory);
-
+	ERDialog dlg(m_category_sort_proxy, m_categories, m_window);
 	dlg.init(resource);
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
@@ -222,8 +232,6 @@ void ERControl::editERInfo()
 		m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange()));
 	if (resource->getERType() != dlg.getERType())
 		m_undo_stack->push(new EResource::SetErTypeCommand(resource, dlg.getERType()));
-	if (resource->getCategory() != dlg.getCategory())
-		m_undo_stack->push(new EResource::SetCategoryCommand(resource, dlg.getCategory()));
 
 	//m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
 
@@ -276,51 +284,7 @@ void ERControl::gotoPosition()
 	m_window->getViewerWidget()->setCameraMatrix(resource->getCameraMatrix());
 }
 
-void ERControl::execDeleteCategory(QAbstractItemModel * model, const QModelIndex & index)
-{
-	QMessageBox::StandardButton reply =
-		QMessageBox::question(
-			nullptr,
-			"Delete Category",
-			"Are you sure you want to delete this category?",
-			QMessageBox::Yes | QMessageBox::No);
-	if (reply != QMessageBox::Yes) return;
-
-	ECategory *cat =
-		dynamic_cast<ECategory*>(
-			static_cast<osg::Node*>(
-				model->data(index, GroupModel::PointerRole).value<void*>()));
-
-	if (!cat) return;
-
-	m_undo_stack->beginMacro("Delete Category");
-	std::set<EResource*> resources = cat->resources();
-	for (auto res : resources) {
-		// null out resource categories so that they get restored on undo
-		m_undo_stack->push(new EResource::SetCategoryCommand(res, nullptr));
-	}
-	m_undo_stack->push(new Group::DeleteNodeCommand(m_categories, m_categories->indexOf(cat)));
-	m_undo_stack->endMacro();
-}
-
-void ERControl::execEditCategory(QAbstractItemModel * model, const QModelIndex & index)
-{
-	ECategory *cat =
-		dynamic_cast<ECategory*>(
-			static_cast<osg::Node*>(
-				model->data(index, GroupModel::PointerRole).value<void*>()));
-	NewCatDialog dlg("Edit Category");
-	dlg.setColor(cat->getColor());
-	dlg.setTitle(QString::fromStdString(cat->getCategoryName()));
-	dlg.exec();
-
-	m_undo_stack->beginMacro("Edit Category");
-	m_undo_stack->push(new ECategory::SetCategoryNameCommand(cat, dlg.getCatTitle().toStdString()));
-	m_undo_stack->push(new ECategory::SetColorCommand(cat, dlg.getColor()));
-	m_undo_stack->endMacro();
-}
-
-void ERControl::execNewCategory()
+void ERControl::newERCat()
 {
 	NewCatDialog dlg;
 	int result = dlg.exec();

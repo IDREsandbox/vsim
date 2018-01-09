@@ -1,4 +1,3 @@
-#pragma once
 #ifndef ECATEGORY_H
 #define ECATEGORY_H
 
@@ -9,6 +8,7 @@
 #include "Command.h"
 #include <QColor>
 
+class EResource;
 class ECategory : public Group {
 	Q_OBJECT
 
@@ -22,19 +22,37 @@ public:
 
 	const std::string& getCategoryName() const;
 	void setCategoryName(const std::string& name);
-
+	QColor getColor() const;
+	void setColor(QColor color);
+	// these are for the serializer
 	int getRed() const;
 	void setRed(int red);
 	int getGreen()const;
 	void setGreen(int green);
 	int getBlue()const;
 	void setBlue(int blue);
-	QColor getColor() const;
-	void setColor(QColor color);
+
+	// don't use these - connection/disconnection work is handled by EResource
+	void addResource(EResource *res);
+	void removeResource(EResource *res);
+	const std::set<EResource*> &resources() const;
 
 signals:
 	void sCNameChanged(std::string old_name, std::string new_name);
 	void sColorChanged(QColor color);
+
+// COMMANDS
+public:
+	class SetCategoryNameCommand : public ModifyCommand<ECategory, const std::string&> {
+	public:
+		SetCategoryNameCommand(ECategory *cat, const std::string &name, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&getCategoryName, &setCategoryName, name, cat, parent) {}
+	};
+	class SetColorCommand : public ModifyCommand<ECategory, QColor> {
+	public:
+		SetColorCommand(ECategory *cat, QColor color, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&getColor, &setColor, color, cat, parent) {}
+	};
 
 private:
 	std::string m_cat_name;
@@ -42,5 +60,6 @@ private:
 	int m_red;
 	int m_green;
 
+	std::set<EResource*> m_resources;
 };
 #endif // ECATEGORY_HPP

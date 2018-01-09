@@ -36,7 +36,7 @@ public:
 	float getLocalRange() const;
 	EResource::ERType getERType() const;
 
-	int getCategory() const;
+	ECategory *getCategory() const;
 
 	void chooseFile();
 
@@ -56,6 +56,7 @@ private:
 	Ui::ERDialog ui;
 	const ECategoryGroup* m_categories;
 
+	QAbstractItemModel *m_category_model;
 	NewCatDialog *m_new_cat_dialog;
 	QListView *m_category_view;
 	EditDeleteDelegate *m_category_delegate;

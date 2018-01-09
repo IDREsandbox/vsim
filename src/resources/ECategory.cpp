@@ -9,6 +9,7 @@ ECategory::ECategory()
 {
 
 }
+
 ECategory::ECategory(const ECategory& e, const osg::CopyOp& copyop)
 	: Group(e, copyop),
 	m_cat_name(e.m_cat_name),
@@ -32,6 +33,19 @@ void ECategory::setCategoryName(const std::string& name)
 	std::string old_name = m_cat_name;
 	m_cat_name = name;
 	emit sCNameChanged(old_name, name);
+}
+
+QColor ECategory::getColor() const
+{
+	return QColor(m_red, m_green, m_blue);
+}
+
+void ECategory::setColor(QColor color)
+{
+	m_red = color.red();
+	m_green = color.green();
+	m_blue = color.blue();
+	emit sColorChanged(color);
 }
 
 int ECategory::getRed() const
@@ -59,15 +73,17 @@ void ECategory::setBlue(int blue)
 	m_blue = blue;
 }
 
-QColor ECategory::getColor() const
+void ECategory::addResource(EResource * res)
 {
-	return QColor(m_red, m_green, m_blue);
+	m_resources.insert(res);
 }
 
-void ECategory::setColor(QColor color)
+void ECategory::removeResource(EResource * res)
 {
-	m_red = color.red();
-	m_green = color.green();
-	m_blue = color.blue();
-	emit sColorChanged(color);
+	m_resources.erase(res);
+}
+
+const std::set<EResource*>& ECategory::resources() const
+{
+	return m_resources;
 }

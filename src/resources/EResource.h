@@ -45,7 +45,8 @@ public:
 		WEB,
 		UNSPECIFIED
 	};
-	static constexpr const char *CopyrightStrings[] = { "Copyrighted Resource",
+	static constexpr const char *CopyrightStrings[] = {
+		"Copyrighted Resource",
 		"Fair Use",
 		"Held by Creator",
 		"Public Domain",
@@ -171,11 +172,11 @@ public: // resource commands
 	};
 
 	// category commands
-	//class SetCategoryCommand : public ModifyCommand<EResource, ECategory *> {
-	//public:
-	//	SetCategoryNameCommand(EResource *res, ECategory *category, QUndoCommand *parent = nullptr)
-	//		: ModifyCommand(&getCategoryName, &setCategoryName, category, res, parent) {}
-	//};
+	class SetCategoryCommand : public ModifyCommand<EResource, ECategory*> {
+	public:
+		SetCategoryCommand(EResource *res, ECategory *category, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&EResource::category, &setCategory, category, res, parent) {}
+	};
 	
 private:
 	std::string m_name;
