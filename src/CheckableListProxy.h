@@ -29,6 +29,8 @@ public:
 
 	bool isChecked(int row) const;
 	std::vector<bool> getChecked() const;
+	void setCheckAll(bool value);
+	Qt::CheckState getCheckAll() const;
 
 private:
 	void resetChecks();

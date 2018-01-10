@@ -14,6 +14,7 @@ class ERDisplay;
 class ERScrollBox;
 class ECategoryControl;
 class ERFilterSortProxy;
+class ERFilterArea;
 
 // manages which ER is active
 // slots for creating a new ER, editing, etc
@@ -45,6 +46,7 @@ private:
 	osg::ref_ptr<ECategoryGroup> m_categories;
 
 	ERDisplay *m_display;
+	ERFilterArea *m_filter_area;
 
 	ERScrollBox *m_global_box;
 	ERScrollBox *m_local_box;

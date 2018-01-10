@@ -8,6 +8,7 @@
 #include "resources/ERScrollBox.h"
 #include "resources/NewCatDialog.h"
 #include "resources/ERDisplay.h"
+#include "resources/ERFilterArea.h"
 #include "MainWindow.h"
 #include "../ui_MainWindow.h"
 #include "OSGViewerWidget.h"
@@ -28,6 +29,7 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	m_global_box = m_window->ui->global;
 	m_local_box = m_window->ui->local;
 	m_display = m_window->erDisplay();
+	m_filter_area = m_window->erFilterArea();
 
 	m_category_control = new ECategoryControl(m_window, nullptr);
 
@@ -35,15 +37,15 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	// new
 	connect(m_local_box, &ERScrollBox::sNew, this, &ERControl::newER);
 	connect(m_global_box, &ERScrollBox::sNew, this, &ERControl::newER);
-	connect(ui->plus_2, &QPushButton::clicked, this, &ERControl::newER);
+	connect(ui->newERButton, &QAbstractButton::clicked, this, &ERControl::newER);
 	// delete
 	connect(m_local_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
 	connect(m_global_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
-	connect(ui->minus_2, &QPushButton::clicked, this, &ERControl::deleteER);
+	connect(ui->deleteERButton, &QAbstractButton::clicked, this, &ERControl::deleteER);
 	// edit
 	connect(m_local_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
 	connect(m_global_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
-	connect(ui->edit, &QPushButton::clicked, this, &ERControl::editERInfo);
+	connect(ui->editERButton, &QAbstractButton::clicked, this, &ERControl::editERInfo);
 	// open
 	connect(ui->global, &ERScrollBox::sOpen, this, &ERControl::openResource);
 
@@ -92,6 +94,10 @@ void ERControl::load(EResourceGroup *ers)
 	m_local_box->setGroup(m_local_proxy);
 
 	m_category_control->load(m_categories);
+
+	m_filter_area->reset();
+	m_filter_area->setModel(m_filter_proxy);
+	m_filter_area->setCategoryModel(m_category_control->categoryModel());
 }
 
 void ERControl::newER()
@@ -141,6 +147,8 @@ void ERControl::deleteER()
 			qWarning() << "Out of range selection when deleting ERs" << *i << "/" << size;
 			continue;
 		}
+		EResource *res = m_ers->getResource(*i);
+		m_undo_stack->push(new EResource::SetCategoryCommand(res, nullptr));
 		m_undo_stack->push(new Group::DeleteNodeCommand(m_ers, *i));
 	}
 	m_undo_stack->endMacro();

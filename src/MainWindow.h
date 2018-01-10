@@ -20,6 +20,7 @@ class ModelOutliner;
 class TimeSlider;
 class MainWindowTopBar;
 class ERDisplay;
+class ERFilterArea;
 
 class MainWindow : public QMainWindow
 {
@@ -39,6 +40,7 @@ public:
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
 	ERDisplay *erDisplay() const;
+	ERFilterArea *erFilterArea() const;
 
 	// event stuff
 	void paintEvent(QPaintEvent* event);
@@ -91,6 +93,7 @@ public:
 	labelCanvas *m_drag_area;
 	labelCanvasView *m_view;
 	ERDisplay *m_er_display;
+	ERFilterArea *m_er_filter_area;
 	ModelOutliner *m_outliner;
 	TimeSlider *m_time_slider;
 };

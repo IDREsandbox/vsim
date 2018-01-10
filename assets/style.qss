@@ -1,16 +1,19 @@
 #mainSplitter,
 #mainSplitter QPushButton,
+#mainSplitter QToolButton,
 #mainSplitter QLabel,
+#mainSplitter QCheckBox,
+#mainSplitter QGroupBox,
 #topBar,
 #bottomBar,
+#erFilterArea,
 HorizontalScrollBox
 {
-	background: rgba(0, 0, 0, 70);
+	background: rgba(0, 0, 0, 90);
 	color: rgb(255, 255, 255);
 }
-
 QSplitter::handle {
-	background: rgba(0,0,0,100);
+	background: rgba(0,0,0,140);
 }
 
 #bottomBar QSplitter::handle {

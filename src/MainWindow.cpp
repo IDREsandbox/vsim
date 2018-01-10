@@ -26,6 +26,7 @@
 #include "resources/ERFilterSortProxy.h"
 #include "resources/ERScrollBox.h"
 #include "resources/ERControl.h"
+#include "resources/ERFilterArea.h"
 
 #include "VSimApp.h"
 #include "VSimRoot.h"
@@ -76,10 +77,34 @@ MainWindow::MainWindow(QWidget *parent)
 	m_view = new labelCanvasView(ui->root, m_drag_area);
 	ui->rootLayout->addWidget(m_view, 0, 0);
 
+	// middle spacer
+	// - grid layout with graphics view
+	// - anchor layout in the graphics view
+	// - er_displays and er_filter_area
+	QGridLayout *middle_layout = new QGridLayout(ui->middleSpacer);
+	//QGraphicsView *middle_view = new QGraphicsView(ui->middleSpacer);
+	//middle_layout->addWidget(middle_view);
+	//QGraphicsAnchorLayout *middle_layout = new QGraphicsAnchorLayout(middle_view);
+
 	// er display
-	m_er_display = new ERDisplay(this);
-	m_er_display->setGeometry(10, 200, 265, 251);
+	m_er_display = new ERDisplay(ui->middleSpacer);
+	m_er_display->setGeometry(10, 10, 265, 251);
+	m_er_display->setObjectName("erDisplay");
 	m_er_display->hide();
+
+	// er filter widget
+	//QWidget *filter_area_padding_layout = new QGridLayout();
+	//middle_layout->addLayout(filter_area_padding_layout, 0, 0);
+	m_er_filter_area = new ERFilterArea(ui->middleSpacer);
+	m_er_filter_area->move(100, 100);
+	m_er_filter_area->setObjectName("erFilterArea");
+	m_er_filter_area->show();
+	middle_layout->addWidget(m_er_filter_area, 0, 0, Qt::AlignLeft | Qt::AlignBottom);
+
+	connect(ui->filter, &QPushButton::pressed, this,
+		[this]() {
+		m_er_filter_area->setVisible(!m_er_filter_area->isVisible());
+	});
 
 	// vsimapp file stuff
 	connect(ui->actionNew, &QAction::triggered, this, &MainWindow::actionNew);
@@ -232,6 +257,11 @@ TimeSlider * MainWindow::timeSlider() const
 ERDisplay * MainWindow::erDisplay() const
 {
 	return m_er_display;
+}
+
+ERFilterArea * MainWindow::erFilterArea() const
+{
+	return m_er_filter_area;
 }
 
 MainWindowTopBar *MainWindow::topBar() const

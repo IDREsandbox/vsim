@@ -1,9 +1,13 @@
 #include "resources/ERFilterSortProxy.h"
 #include <QDebug>
-#include "ERFilterSortProxy.h"
+
+#include "resources/ECategory.h"
+#include "resources/EResource.h"
+#include "resources/ECategoryGroup.h"
 
 ERFilterSortProxy::ERFilterSortProxy(Group *base)
 	: m_base(nullptr),
+	m_categories(nullptr),
 	m_sort_by(NONE),
 	m_enable_all(false),
 	m_filter_global(SHOW_BOTH)
@@ -47,10 +51,8 @@ bool ERFilterSortProxy::accept(EResource *res)
 	if (m_enable_all) return true;
 
 	// check categories
-	if (!m_enable_categories.empty()) {
-		bool cat_ok = (m_enable_categories.find(res->category()) != m_enable_categories.end());
-		if (!cat_ok) return false;
-	}
+	bool cat_ok = (m_enable_categories.find(res->category()) != m_enable_categories.end());
+	if (!cat_ok) return false;
 
 	// check filetype
 
@@ -89,9 +91,17 @@ void ERFilterSortProxy::onResourceChange(EResource * res)
 
 void ERFilterSortProxy::addCategory(ECategory * cat)
 {
+	m_enable_categories.insert(cat);
+	rescan();
 }
 
 void ERFilterSortProxy::removeCategory(ECategory * cat)
+{
+	m_enable_categories.erase(cat);
+	rescan();
+}
+
+void ERFilterSortProxy::allCategories(bool all)
 {
 }
 
@@ -163,6 +173,34 @@ void ERFilterSortProxy::setBase(Group *base)
 			}
 		}
 	});
+}
+
+void ERFilterSortProxy::setCategories(ECategoryGroup * categories)
+{
+	if (m_categories) disconnect(m_categories, 0, this, 0);
+	m_categories = categories;
+
+	// add all of them
+	for (int i = 0; i < (int)m_categories->getNumChildren(); i++) {
+		ECategory *cat = m_categories->category(i);
+		if (!cat) continue;
+		m_enable_categories.insert(cat);
+	}
+
+	// react to new and delete
+	connect(categories, &Group::sNew, this,
+		[this](int index) {
+		ECategory *cat = m_categories->category(index);
+		if (!cat) return;
+		m_enable_categories.insert(cat);
+	});
+	connect(categories, &Group::sDelete, this,
+		[this](int index) {
+		ECategory *cat = m_categories->category(index);
+		if (!cat) return;
+		m_enable_categories.insert(cat);
+	});
+	rescan();
 }
 
 osg::Node *ERFilterSortProxy::child(unsigned int index) const

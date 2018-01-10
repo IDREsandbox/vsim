@@ -4,7 +4,7 @@
 #include "ui_ERDisplay.h"
 #include "resources/EResource.h"
 
-class ERDisplay : public QWidget {
+class ERDisplay : public QFrame {
 	Q_OBJECT
 
 public:

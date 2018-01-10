@@ -1,7 +1,7 @@
 #include "resources/ERDisplay.h"
 
 ERDisplay::ERDisplay(QWidget *parent)
-	: QWidget(parent), m_er(nullptr)
+	: QFrame(parent), m_er(nullptr)
 {
 	ui.setupUi(this);
 

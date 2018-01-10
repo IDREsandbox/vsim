@@ -6,13 +6,20 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
-#include "resources/ECategory.h"
-#include "resources/EResource.h"
+
+#include "Group.h"
+
+class EResource;
+class ECategory;
+class ECategoryGroup;
 
 class ERFilterSortProxy : public Group {
 	Q_OBJECT
 public:
 	ERFilterSortProxy(Group *base);
+
+	void setBase(Group *base);
+	void setCategories(ECategoryGroup *categories);
 
 	enum SortBy {
 		ALPHABETICAL,
@@ -24,6 +31,7 @@ public:
 
 	void addCategory(ECategory *cat);
 	void removeCategory(ECategory *cat);
+	void allCategories(bool all);
 
 	void addFiletype(const std::string& extension);
 	void removeFiletype(const std::string& extension);
@@ -43,7 +51,6 @@ public:
 	void setPosition(osg::Vec3f pos);
 
 	// overrides
-	virtual void setBase(Group *base);
 	virtual osg::Node *child(unsigned int index) const override;
 	virtual unsigned int getNumChildren() const override;
 	virtual int indexOf(const osg::Node *node) const override;
@@ -79,6 +86,7 @@ private:
 
 private:
 	osg::ref_ptr<Group> m_base;
+	osg::ref_ptr<ECategoryGroup> m_categories;
 
 	SortBy m_sort_by;
 	std::set<ECategory*> m_enable_categories;
