@@ -13,14 +13,13 @@ class ECategoryGroup;
 class EditDeleteDelegate;
 class ECategory;
 class NewCatDialog;
+class ECategoryControl;
 
 class ERDialog : public QDialog {
 	Q_OBJECT
 public:
-	ERDialog(QAbstractItemModel *category_model, EditDeleteDelegate *category_editor, QWidget *parent = nullptr);
+	ERDialog(ECategoryControl *category_control, QWidget *parent = nullptr);
 
-	// only call this once?
-	void setCategoryGroup(const ECategoryGroup *categories);
 	void init(const EResource *er);
 
 	std::string getTitle() const;
@@ -36,7 +35,9 @@ public:
 	float getLocalRange() const;
 	EResource::ERType getERType() const;
 
+	ECategory *categoryAt(int index) const;
 	ECategory *getCategory() const;
+	void setCategory(const ECategory *cat);
 
 	void chooseFile();
 
@@ -54,12 +55,11 @@ signals:
 
 private:
 	Ui::ERDialog ui;
-	const ECategoryGroup* m_categories;
 
-	QAbstractItemModel *m_category_model;
-	NewCatDialog *m_new_cat_dialog;
 	QListView *m_category_view;
 	EditDeleteDelegate *m_category_delegate;
+
+	ECategoryControl *m_control;
 };
 
 #endif // ERDIALOG_HPP

@@ -1,9 +1,9 @@
 #include "resources/ERControl.h"
-
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"
 #include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
+#include "resources/ECategoryControl.h"
 #include "resources/ERDialog.h"
 #include "resources/ERScrollBox.h"
 #include "resources/NewCatDialog.h"
@@ -12,10 +12,6 @@
 #include "../ui_MainWindow.h"
 #include "OSGViewerWidget.h"
 #include "ERFilterSortProxy.h"
-
-#include "resources/ECategoryModel.h"
-#include "EditDeleteDelegate.h"
-#include "CheckableListProxy.h"
 
 #include <QDesktopServices>
 
@@ -26,39 +22,14 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	m_categories(nullptr),
 	m_filter_proxy(nullptr),
 	m_global_proxy(nullptr),
-	m_local_proxy(nullptr),
-	m_category_model(nullptr)
+	m_local_proxy(nullptr)
 {
 	m_undo_stack = m_window->m_undo_stack;
 	m_global_box = m_window->ui->global;
 	m_local_box = m_window->ui->local;
 	m_display = m_window->erDisplay();
 
-	m_category_model = new ECategoryModel(this); // -> group
-	m_category_sort_proxy = new QSortFilterProxyModel(this); // -> model
-	m_category_sort_proxy->setSourceModel(m_category_model);
-	m_category_sort_proxy->setSortRole(Qt::DisplayRole);
-	m_category_sort_proxy->setDynamicSortFilter(true);
-	m_category_sort_proxy->sort(0);
-	m_category_checkbox_proxy = new CheckableListProxy(this); // -> sort proxy
-	m_category_checkbox_proxy->setSourceModel(m_category_sort_proxy);
-
-	//QListView *lv1 = new QListView(m_window);
-	//lv1->setModel(m_category_model);
-	//lv1->setGeometry(50, 50, 100, 200);
-	//lv1->show();
-	//QListView *lv2 = new QListView(m_window);
-	//lv2->setModel(m_category_sort_proxy);
-	//lv2->setGeometry(150, 50, 100, 200);
-	//lv2->show();
-	//QListView *lv3 = new QListView(m_window);
-	//lv3->setModel(m_category_checkbox_proxy);
-	//lv3->setGeometry(250, 50, 100, 200);
-	//lv3->show();
-
-	m_category_delegate = new EditDeleteDelegate(this);
-	connect(m_category_delegate, &EditDeleteDelegate::sDelete, this, &ERControl::execDeleteCategory);
-	connect(m_category_delegate, &EditDeleteDelegate::sEdit, this, &ERControl::execEditCategory);
+	m_category_control = new ECategoryControl(m_window, nullptr);
 
 	auto &ui = m_window->ui;
 	// new
@@ -96,12 +67,12 @@ void ERControl::load(EResourceGroup *ers)
 	if (ers == nullptr) {
 		m_ers = nullptr;
 		m_categories = nullptr;
+		m_category_control->load(nullptr);
 		return;
 	}
+
 	m_ers = ers;
 	m_categories = ers->categories();
-
-	m_category_model->setGroup(m_categories);
 
 	// set up proxies
 	if (m_filter_proxy == nullptr) {
@@ -119,12 +90,13 @@ void ERControl::load(EResourceGroup *ers)
 
 	m_global_box->setGroup(m_global_proxy);
 	m_local_box->setGroup(m_local_proxy);
+
+	m_category_control->load(m_categories);
 }
 
 void ERControl::newER()
 {
-	ERDialog dlg(m_category_sort_proxy, m_category_delegate);
-	connect(&dlg, &ERDialog::sNewCategory, this, &ERControl::execNewCategory);
+	ERDialog dlg(m_category_control);
 
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
@@ -183,8 +155,7 @@ void ERControl::editERInfo()
 	}
 	EResource *resource = m_ers->getResource(active_item);
 
-	ERDialog dlg(m_category_sort_proxy, m_category_delegate);
-	connect(&dlg, &ERDialog::sNewCategory, this, &ERControl::execNewCategory);
+	ERDialog dlg(m_category_control);
 
 	dlg.init(resource);
 	int result = dlg.exec();
@@ -276,64 +247,6 @@ void ERControl::gotoPosition()
 	m_window->getViewerWidget()->setCameraMatrix(resource->getCameraMatrix());
 }
 
-void ERControl::execDeleteCategory(QAbstractItemModel * model, const QModelIndex & index)
-{
-	QMessageBox::StandardButton reply =
-		QMessageBox::question(
-			nullptr,
-			"Delete Category",
-			"Are you sure you want to delete this category?",
-			QMessageBox::Yes | QMessageBox::No);
-	if (reply != QMessageBox::Yes) return;
-
-	ECategory *cat =
-		dynamic_cast<ECategory*>(
-			static_cast<osg::Node*>(
-				model->data(index, GroupModel::PointerRole).value<void*>()));
-
-	if (!cat) return;
-
-	m_undo_stack->beginMacro("Delete Category");
-	std::set<EResource*> resources = cat->resources();
-	for (auto res : resources) {
-		// null out resource categories so that they get restored on undo
-		m_undo_stack->push(new EResource::SetCategoryCommand(res, nullptr));
-	}
-	m_undo_stack->push(new Group::DeleteNodeCommand(m_categories, m_categories->indexOf(cat)));
-	m_undo_stack->endMacro();
-}
-
-void ERControl::execEditCategory(QAbstractItemModel * model, const QModelIndex & index)
-{
-	ECategory *cat =
-		dynamic_cast<ECategory*>(
-			static_cast<osg::Node*>(
-				model->data(index, GroupModel::PointerRole).value<void*>()));
-	NewCatDialog dlg("Edit Category");
-	dlg.setColor(cat->getColor());
-	dlg.setTitle(QString::fromStdString(cat->getCategoryName()));
-	dlg.exec();
-
-	m_undo_stack->beginMacro("Edit Category");
-	m_undo_stack->push(new ECategory::SetCategoryNameCommand(cat, dlg.getCatTitle().toStdString()));
-	m_undo_stack->push(new ECategory::SetColorCommand(cat, dlg.getColor()));
-	m_undo_stack->endMacro();
-}
-
-void ERControl::execNewCategory()
-{
-	NewCatDialog dlg;
-	int result = dlg.exec();
-	if (result == QDialog::Rejected) {
-		return;
-	}
-
-	ECategory *category = new ECategory();
-	category->setCategoryName(dlg.getCatTitle().toStdString());
-	category->setColor(dlg.getColor());
-	m_categories->addChild(category);
-}
-
 void ERControl::debug()
 {
 	qDebug() << "Debugging ERControl";
@@ -376,26 +289,32 @@ int ERControl::getCombinedLastSelected()
 	QObject *sender = QObject::sender();
 	ERFilterSortProxy *proxy;
 	int last;
+	// use the sender to determine the last selected
 	if (sender == m_local_box) {
-		qDebug() << "local box sent";
 		last = m_local_box->getLastSelected();
 		proxy = m_local_proxy;
 	}
 	else if (sender == m_global_box) {
-		qDebug() << "global box sent";
 		last = m_global_box->getLastSelected();
 		proxy = m_global_proxy;
 	}
 	else {
-		qDebug() << "who sent this?" << sender;
-		return -1;
+		// just take whatever
+		if (m_local_box->getLastSelected() != -1) {
+			last = m_local_box->getLastSelected();
+			proxy = m_local_proxy;
+		}
+		else {
+			last = m_global_box->getLastSelected();
+			proxy = m_global_proxy;
+		}
 	}
 
+	// convert into original index
 	if (last < 0) return -1;
 	osg::Node *node = proxy->child(last);
 	int last_base = m_ers->indexOf(node);
 
 	if (last_base >= m_ers->getNumChildren()) return -1;
-	qDebug() << "last:" << last_base;
 	return last_base;
 }

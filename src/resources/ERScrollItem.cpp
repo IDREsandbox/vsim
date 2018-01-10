@@ -68,7 +68,6 @@ void ERScrollItem::setColor(QColor color)
 	else {
 		select_text_color = QColor(255, 255, 255);
 	}
-	qDebug() << "Colors:" << color << select_color;
 
 	QString s = "background:rgb(%1, %2, %3);";
 	//qDebug() << "STYLESHEET - \n" << "ERScrollItem { "

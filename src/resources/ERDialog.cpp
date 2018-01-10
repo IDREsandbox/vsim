@@ -8,11 +8,13 @@
 #include "resources/EResource.h"
 #include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
+#include "resources/ECategoryControl.h"
 #include "EditDeleteDelegate.h"
 #include "GroupModel.h"
 
-ERDialog::ERDialog(QAbstractItemModel *category_model, EditDeleteDelegate *category_editor, QWidget * parent)
-	: QDialog(parent)
+ERDialog::ERDialog(ECategoryControl * category_control, QWidget * parent)
+	: QDialog(parent),
+	m_control(category_control)
 {
 	ui.setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -45,21 +47,25 @@ ERDialog::ERDialog(QAbstractItemModel *category_model, EditDeleteDelegate *categ
 	ui.radius->setValue(10);
 
 	// category stuff
-	m_category_model = category_model;
 	m_category_view = new QListView(this);
-	m_category_view->setModel(category_model);
-	m_category_delegate = category_editor;
-	m_category_view->setItemDelegate(category_editor);
+	m_category_view->setModel(m_control->categoryModel());
+	m_category_delegate = new EditDeleteDelegate(this);
+	m_category_view->setItemDelegate(m_category_delegate);
 	ui.categories->setMouseTracking(true);
-	ui.categories->setModel(category_model);
+	ui.categories->setModel(m_control->categoryModel());
 	ui.categories->setView(m_category_view);
 
-	connect(ui.addnew, &QPushButton::pressed, this, &ERDialog::sNewCategory);
-}
-
-void ERDialog::setCategoryGroup(const ECategoryGroup * categories)
-{
-	m_categories = categories;
+	connect(ui.addnew, &QPushButton::pressed, this,
+		[this]() {
+		ECategory *cat = m_control->execNewCategory();
+		setCategory(cat);
+	});
+	connect(m_category_delegate, &EditDeleteDelegate::sEdit, this,
+		[this](QAbstractItemModel *model, const QModelIndex &index) {
+		ECategory *cat = m_control->execEditCategory(model, index);
+		setCategory(cat);
+	});
+	connect(m_category_delegate, &EditDeleteDelegate::sDelete, m_control, &ECategoryControl::execDeleteCategory);
 }
 
 void ERDialog::init(const EResource * er)
@@ -97,6 +103,9 @@ void ERDialog::init(const EResource * er)
 		ui.url->setChecked(true);
 		break;
 	}
+
+	// setup the category selection
+	setCategory(er->category());
 }
 
 std::string ERDialog::getTitle() const
@@ -173,16 +182,32 @@ EResource::ERType ERDialog::getERType() const
 	}
 }
 
-ECategory *ERDialog::getCategory() const
+ECategory * ERDialog::categoryAt(int i) const
 {
-	if (m_category_model->rowCount() == 0) return nullptr;
-	QModelIndex index = m_category_model->index(ui.categories->currentIndex(), 0);
-	if (!index.isValid()) return nullptr;
+	if (i >= ui.categories->count()) return nullptr; // i out of range
+	QModelIndex index = m_control->categoryModel()->index(i, 0);
+	if (!index.isValid()) return nullptr; // invalid in model
 	ECategory *cat =
 		dynamic_cast<ECategory*>(
 			static_cast<osg::Node*>(
-				m_category_model->data(index, GroupModel::PointerRole).value<void*>()));
+				m_control->categoryModel()->data(index, GroupModel::PointerRole).value<void*>()));
 	return cat;
+}
+
+ECategory *ERDialog::getCategory() const
+{
+	return categoryAt(ui.categories->currentIndex());
+}
+
+void ERDialog::setCategory(const ECategory * cat)
+{
+	if (!cat) return;
+	for (int i = 0; i < ui.categories->count(); i++) {
+		if (cat == categoryAt(i)) {
+			ui.categories->setCurrentIndex(i);
+			break;
+		}
+	}
 }
 
 void ERDialog::chooseFile()

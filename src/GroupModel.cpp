@@ -42,7 +42,6 @@ QVariant GroupModel::data(const QModelIndex & index, int role) const
 {
 	if (!m_group) return QVariant();
 	if (role == PointerRole) {
-		qDebug() << "pointer role" << (void*)m_group->child(index.row());
 		return QVariant::fromValue((void*)m_group->child(index.row()));
 	}
 	return QVariant();
