@@ -153,13 +153,13 @@ MainWindow::MainWindow(QWidget *parent)
 	// model outliner
 	m_outliner = new ModelOutliner(this);
 	connect(ui->actionModel_Outliner, &QAction::triggered, this, [this]() {
-		m_outliner->show();
-		m_outliner->setFocus();
+		m_outliner->setVisible(!m_outliner->isVisible());
+		if (m_outliner->isVisible()) m_outliner->setFocus();
 	});
 	m_time_slider = new TimeSlider(this);
 	connect(ui->actionTime_Slider, &QAction::triggered, this, [this]() {
-		m_time_slider->show();
-		m_time_slider->setFocus();
+		m_time_slider->setVisible(!m_time_slider->isVisible());
+		if (m_time_slider->isVisible()) m_time_slider->setFocus();
 	});
 }
 
@@ -215,6 +215,7 @@ void MainWindow::setApp(VSimApp * vsim)
 	outliner()->setModel(m_app->modelTable());
 	outliner()->header()->resizeSection(0, 200);
 	outliner()->resize(505, 600);
+	outliner()->expandAll();
 
 	connect(this, &MainWindow::sDebugOSG, this, [this]() {
 		m_app->getRoot()->debug();

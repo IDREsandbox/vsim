@@ -15,7 +15,6 @@ ModelOutliner::ModelOutliner(QWidget *parent)
 	setWindowFlags(Qt::Dialog);
 
 	auto *oldd = itemDelegate();
-	qDebug() << "old item delegate" << oldd;
 
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setSelectionBehavior(QAbstractItemView::SelectItems);
@@ -24,10 +23,7 @@ ModelOutliner::ModelOutliner(QWidget *parent)
 	setItemDelegateForColumn(2, d);
 	setItemDelegateForColumn(3, d);
 
-	qDebug() << "header" << header() << (void*)header();
-	//header()->setStretchLastSection(false);
-
-	//horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	setIndentation(16);
 }
 
 OutlinerTimeDelegate::OutlinerTimeDelegate(QObject *parent)

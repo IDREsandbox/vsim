@@ -8,12 +8,11 @@ class ModelGroup;
 
 namespace Ui { class TimeSlider; }
 
-// Passive view
+// Time controller
 class TimeSlider : public QWidget {
 	Q_OBJECT
 
 public:
-	;
 	TimeSlider(QWidget *parent = Q_NULLPTR);
 	~TimeSlider();
 
@@ -35,7 +34,6 @@ private:
 
 	bool m_enabled;
 
-	
 	osg::ref_ptr<ModelGroup> m_group;
 };
 

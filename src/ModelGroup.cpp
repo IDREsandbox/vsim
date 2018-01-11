@@ -7,6 +7,7 @@ ModelGroup::ModelGroup()
 	: m_year(0),
 	m_time_enabled(false)
 {
+	enableTime(true);
 	//qDebug() << "new model table" << m_data_table.get();
 }
 

@@ -321,6 +321,9 @@
    <property name="shortcut">
     <string>Ctrl+N</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionOpen">
    <property name="text">
@@ -328,6 +331,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionImport_Model">
@@ -342,6 +348,9 @@
    <property name="shortcut">
     <string>Ctrl+S</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionSave_As">
    <property name="text">
@@ -349,6 +358,9 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionError">
@@ -471,6 +483,9 @@
    <property name="shortcut">
     <string>M</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
   </action>
   <action name="actionTime_Slider">
    <property name="text">
@@ -478,6 +493,12 @@
    </property>
    <property name="shortcut">
     <string>T</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionFont_Color_Styles">
@@ -488,6 +509,12 @@
   <action name="actionHistory">
    <property name="text">
     <string>History</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionEmbedded_Resources">

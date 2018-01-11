@@ -22,7 +22,6 @@ TimeSlider::TimeSlider(QWidget *parent)
 	connect(ui->checkBox, &QCheckBox::stateChanged, this, &TimeSlider::onCheckbox);
 	connect(ui->slider, &QSlider::valueChanged, this, &TimeSlider::onValueChange);
 
-	enableSlider(false);
 }
 
 TimeSlider::~TimeSlider() {
@@ -45,10 +44,14 @@ void TimeSlider::setGroup(ModelGroup * group)
 		});
 	connect(m_group, &ModelGroup::sTimeEnableChange, this, &TimeSlider::onTimeEnableChange);
 
+	setEnabled(true);
+
 	// hacky initialization
 	onRangeChange();
 	onYearChange();
 	onTimeEnableChange(m_group->timeEnabled());
+
+	ui->slider->setValue(ui->slider->minimum());
 }
 
 void TimeSlider::enableSlider(bool enable)
