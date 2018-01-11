@@ -9,7 +9,7 @@
 ERFilterArea::ERFilterArea(QWidget *parent)
 	: QFrame(parent),
 	m_model(nullptr),
-	m_category_model(nullptr)
+	m_category_checkbox_model(nullptr)
 {
 	ui.setupUi(this);
 
@@ -20,9 +20,6 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 
 	// category view
 	// ui.categoriesBox->setModel(m_category_model);
-
-	m_category_checkbox_model = new CheckableListProxy(this);
-	ui.categoriesBox->setModel(m_category_checkbox_model);
 
 	//m_category_view = new QListView(ui.categoriesBox);
 	//m_category_delegate = new EditDeleteDelegate(this);
@@ -55,10 +52,10 @@ void ERFilterArea::setModel(ERFilterSortProxy * model)
 	m_model = model;
 }
 
-void ERFilterArea::setCategoryModel(QAbstractItemModel * categories)
+void ERFilterArea::setCategoryModel(CheckableListProxy * categories)
 {
-	m_category_model = categories;
-	m_category_checkbox_model->setSourceModel(categories);
+	ui.categoriesBox->setModel(categories);
+	m_category_checkbox_model = categories;
 }
 
 void ERFilterArea::reset()
@@ -69,7 +66,7 @@ void ERFilterArea::reset()
 	ui.radiusCheckBox->setCheckState(Qt::Checked);
 	ui.searchLineEdit->clear();
 	ui.sortByBox->setCurrentIndex(0);
-	m_type_checkbox_model->setCheckAll(true);
-	m_type_checkbox_model->setCheckAll(true);
+	if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
+	if (m_type_checkbox_model) m_type_checkbox_model->setCheckAll(true);
 	ui.filetypesBox->setCurrentText("FO");
 }

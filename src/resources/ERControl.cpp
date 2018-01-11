@@ -12,7 +12,8 @@
 #include "MainWindow.h"
 #include "../ui_MainWindow.h"
 #include "OSGViewerWidget.h"
-#include "ERFilterSortProxy.h"
+#include "resources/ERFilterSortProxy.h"
+#include "CheckableListProxy.h"
 
 #include <QDesktopServices>
 
@@ -31,7 +32,21 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	m_display = m_window->erDisplay();
 	m_filter_area = m_window->erFilterArea();
 
+	m_filter_proxy = new ERFilterSortProxy(nullptr);
+	m_filter_proxy->sortBy(ERFilterSortProxy::ALPHABETICAL);
+	m_global_proxy = new ERFilterSortProxy(m_filter_proxy);
+	m_global_proxy->showGlobal(true);
+	m_global_proxy->showLocal(false);
+	m_local_proxy = new ERFilterSortProxy(m_filter_proxy);
+	m_local_proxy->showGlobal(false);
+	m_local_proxy->showLocal(true);
+
 	m_category_control = new ECategoryControl(m_window, nullptr);
+
+	m_category_checkbox_model = new CheckableListProxy(this);
+	m_category_checkbox_model->setSourceModel(m_category_control->categoryModel());
+	m_filter_area->setCategoryModel(m_category_checkbox_model);
+	m_filter_proxy->setCategories(m_category_checkbox_model);
 
 	auto &ui = m_window->ui;
 	// new
@@ -76,19 +91,7 @@ void ERControl::load(EResourceGroup *ers)
 	m_ers = ers;
 	m_categories = ers->categories();
 
-	// set up proxies
-	if (m_filter_proxy == nullptr) {
-		m_filter_proxy = new ERFilterSortProxy(ers);
-		m_filter_proxy->sortBy(ERFilterSortProxy::ALPHABETICAL);
-		m_global_proxy = new ERFilterSortProxy(m_filter_proxy);
-		m_global_proxy->filterGlobal(ERFilterSortProxy::SHOW_GLOBAL);
-		m_local_proxy = new ERFilterSortProxy(m_filter_proxy);
-		m_local_proxy->filterGlobal(ERFilterSortProxy::SHOW_LOCAL);
-	}
-	else {
-		// we can just re-assign the root one
-		m_filter_proxy->setBase(ers);
-	}
+	m_filter_proxy->setBase(ers);
 
 	m_global_box->setGroup(m_global_proxy);
 	m_local_box->setGroup(m_local_proxy);
@@ -96,8 +99,6 @@ void ERControl::load(EResourceGroup *ers)
 	m_category_control->load(m_categories);
 
 	m_filter_area->reset();
-	m_filter_area->setModel(m_filter_proxy);
-	m_filter_area->setCategoryModel(m_category_control->categoryModel());
 }
 
 void ERControl::newER()

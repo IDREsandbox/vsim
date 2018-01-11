@@ -15,6 +15,7 @@ class ERScrollBox;
 class ECategoryControl;
 class ERFilterSortProxy;
 class ERFilterArea;
+class CheckableListProxy;
 
 // manages which ER is active
 // slots for creating a new ER, editing, etc
@@ -53,9 +54,12 @@ private:
 
 	QUndoStack *m_undo_stack;
 
+	// filter stuff
 	osg::ref_ptr<ERFilterSortProxy> m_filter_proxy;
 	osg::ref_ptr<ERFilterSortProxy> m_global_proxy;
 	osg::ref_ptr<ERFilterSortProxy> m_local_proxy;
+
+	CheckableListProxy *m_category_checkbox_model;
 
 	ECategoryControl *m_category_control;
 

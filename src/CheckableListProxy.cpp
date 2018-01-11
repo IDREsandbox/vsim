@@ -234,7 +234,8 @@ bool CheckableListProxy::setData(const QModelIndex & index, const QVariant & val
 			m_unchecked_count++;
 		}
 		updateTristate();
-		emit dataChanged(index, index);
+		//qDebug() << " -- data changed in model, emitting" << index.row() << index.row();
+		emit dataChanged(index, index, {Qt::ItemDataRole::CheckStateRole});
 		return true;
 	}
 
@@ -280,7 +281,7 @@ void CheckableListProxy::setCheckAll(bool value)
 	// everything changed
 	emit dataChanged(
 		CheckableListProxy::index(0, 0),
-		CheckableListProxy::index(rowCount(), 0),
+		CheckableListProxy::index(rowCount() - 1, 0),
 		{ Qt::CheckStateRole });
 }
 

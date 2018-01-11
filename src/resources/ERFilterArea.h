@@ -14,7 +14,7 @@ class ERFilterArea : public QFrame {
 public:
 	ERFilterArea(QWidget *parent);
 	void setModel(ERFilterSortProxy *model);
-	void setCategoryModel(QAbstractItemModel *categories);
+	void setCategoryModel(CheckableListProxy *categories);
 
 	void reset();
 
@@ -22,10 +22,9 @@ private:
 	Ui::ERFilterArea ui;
 
 	ERFilterSortProxy *m_model;
-	QAbstractItemModel *m_category_model;
 
 	//EditDeleteDelegate *m_category_delegate;
-	QListView *m_category_view;
+	//QListView *m_category_view;
 	CheckableListProxy *m_category_checkbox_model;
 
 	//QListView *m_type_view;

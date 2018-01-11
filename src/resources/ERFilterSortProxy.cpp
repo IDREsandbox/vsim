@@ -1,16 +1,23 @@
 #include "resources/ERFilterSortProxy.h"
 #include <QDebug>
+#include <set>
 
 #include "resources/ECategory.h"
 #include "resources/EResource.h"
 #include "resources/ECategoryGroup.h"
+#include "CheckableListProxy.h"
+#include "GroupModel.h"
 
 ERFilterSortProxy::ERFilterSortProxy(Group *base)
 	: m_base(nullptr),
-	m_categories(nullptr),
 	m_sort_by(NONE),
-	m_enable_all(false),
-	m_filter_global(SHOW_BOTH)
+	m_category_filters(nullptr),
+	m_type_filters(nullptr),
+	m_show_global(true),
+	m_show_local(true),
+	m_enable_range(true),
+	m_enable_years(true),
+	m_show_all(false)
 {
 	setBase(base);
 	sortBy(NONE);
@@ -31,6 +38,80 @@ void ERFilterSortProxy::sortBy(SortBy method)
 	}
 }
 
+void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
+{
+	if (m_category_filters != nullptr) disconnect(m_category_filters, 0, this, 0);
+	m_category_filters = cats;
+
+	if (!m_category_filters) return;
+
+	// add -> do nothing
+	connect(cats, &QAbstractItemModel::rowsInserted, this,
+		[this](const QModelIndex &parent, int first, int last) {
+		for (int i = first; i <= last; i++) {
+			updateCategorySet(i);
+		}
+	});
+
+	// remove -> remove from set
+	connect(cats, &QAbstractItemModel::rowsAboutToBeRemoved, this,
+		[this, cats](const QModelIndex &parent, int first, int last) {
+
+		for (int i = first; i <= last; i++) {
+			ECategory *cat = GroupModel::get<ECategory*>(cats, i);
+			if (!cat) continue;
+			m_categories_enabled.erase(cat);
+		}
+		rescan();
+	});
+
+	// change -> add/remove accordingly
+	connect(cats, &QAbstractItemModel::dataChanged, this,
+		[this, cats](const QModelIndex &topLeft,
+			const QModelIndex &bottomRight,
+			const QVector<int> &roles = QVector<int>()) {
+		bool ok = false;
+		// look for the checkbox role
+		for (auto role : roles) {
+			if (role == Qt::ItemDataRole::CheckStateRole) {
+				ok = true;
+				break;
+			}
+		}
+		if (!ok) return;
+
+		for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
+			updateCategorySet(i);
+		}
+		rescan();
+	});
+
+	// reset
+	connect(cats, &QAbstractItemModel::modelReset, this,
+		[this, cats]() {
+		for (int i = 1; i < cats->rowCount(); i++) {
+			updateCategorySet(i);
+		}
+		rescan();
+	});
+}
+
+void ERFilterSortProxy::setFiletypes(CheckableListProxy * types)
+{
+	if (m_type_filters != nullptr) disconnect(m_type_filters, 0, this, 0);
+	m_type_filters = types;
+}
+
+void ERFilterSortProxy::showLocal(bool local)
+{
+	m_show_local = local;
+}
+
+void ERFilterSortProxy::showGlobal(bool global)
+{
+	m_show_global = global;
+}
+
 //ERFilterSortProxy::SortBy ERFilterSortProxy::getSortMethod() const
 //{
 //	return m_sort_by;
@@ -40,30 +121,60 @@ void ERFilterSortProxy::rescan()
 {
 	clear();
 
+	if (!m_base) return;
+
 	for (int i = 0; i < (int)m_base->getNumChildren(); i++) {
 		checkAndAdd(i);
 	}
 }
 
-bool ERFilterSortProxy::accept(EResource *res)
+bool ERFilterSortProxy::accept(osg::Node *node)
 {
+	EResource *res = dynamic_cast<EResource*>(node);
+	if (!res) return false;
+
 	// check all
-	if (m_enable_all) return true;
+	if (m_show_all) return true;
 
 	// check categories
-	bool cat_ok = (m_enable_categories.find(res->category()) != m_enable_categories.end());
-	if (!cat_ok) return false;
+	if (m_category_filters && res->getCategory() != nullptr) {
+		bool cat_ok = (m_categories_enabled.find(res->getCategory()) != m_categories_enabled.end());
+		if (!cat_ok) return false;
+	}
 
 	// check filetype
+	if (m_type_filters) {
+		//if (!checkTitle(res->getResourceName())) return false;
+	}
 
-	// check titles
+	// check title
+
+	// check distance
+	//m_enable_range;
+
+	// check years
+	//m_enable_years;
 
 	// check global/local
 	bool global = res->getGlobal();
-	if (m_filter_global == SHOW_GLOBAL && !global) return false;
-	if (m_filter_global == SHOW_LOCAL && global) return false;
+	if (!m_show_global && global) return false;
+	if (!m_show_local && !global) return false;
 
 	return true;
+}
+
+bool ERFilterSortProxy::lessThan(int left, int right)
+{
+	if (m_sort_by == NONE) {
+		return left < right;
+	}
+	else if (m_sort_by == ALPHABETICAL) {
+		EResource *lres = dynamic_cast<EResource*>(m_base->child(left));
+		EResource *rres = dynamic_cast<EResource*>(m_base->child(right));
+		if (!lres || !rres) return false;
+		return lres->getResourceName() < rres->getResourceName();
+	}
+	return false;
 }
 
 void ERFilterSortProxy::checkAndAdd(int base_index)
@@ -89,47 +200,19 @@ void ERFilterSortProxy::onResourceChange(EResource * res)
 	checkAndAdd(base_index);
 }
 
-void ERFilterSortProxy::addCategory(ECategory * cat)
-{
-	m_enable_categories.insert(cat);
-	rescan();
-}
-
-void ERFilterSortProxy::removeCategory(ECategory * cat)
-{
-	m_enable_categories.erase(cat);
-	rescan();
-}
-
-void ERFilterSortProxy::allCategories(bool all)
-{
-}
-
-void ERFilterSortProxy::addFiletype(const std::string & extension)
-{
-}
-
-void ERFilterSortProxy::removeFiletype(const std::string & extension)
-{
-}
-
-void ERFilterSortProxy::addTitleSearch(const std::string & extension)
-{
-}
-
-void ERFilterSortProxy::removeTitleSearch(const std::string & extension)
-{
-}
-
-void ERFilterSortProxy::filterGlobal(FilterGlobal what)
-{
-	if (m_filter_global == what) return;
-	m_filter_global = what;
-	rescan();
-}
-
 void ERFilterSortProxy::enableRange(bool enable)
 {
+	m_enable_range = enable;
+}
+
+void ERFilterSortProxy::enableYears(bool enable)
+{
+	m_enable_years = enable;
+}
+
+void ERFilterSortProxy::setTitleSearch(const std::string & title)
+{
+	m_title_search = title;
 }
 
 void ERFilterSortProxy::setBase(Group *base)
@@ -145,7 +228,7 @@ void ERFilterSortProxy::setBase(Group *base)
 
 	// track all of the existing items
 	for (unsigned int i = 0; i < base->getNumChildren(); i++) {
-		track(i);
+		track(m_base->child(i));
 		checkAndAdd(i);
 	}
 
@@ -158,7 +241,7 @@ void ERFilterSortProxy::setBase(Group *base)
 				m_map_to_base[i] += 1;
 			}
 		}
-		track(index);
+		track(m_base->child(index));
 		checkAndAdd(index);
 	});
 	connect(base, &Group::sDelete, this, [this](int index) {
@@ -174,39 +257,40 @@ void ERFilterSortProxy::setBase(Group *base)
 		}
 	});
 }
-
-void ERFilterSortProxy::setCategories(ECategoryGroup * categories)
-{
-	if (m_categories) disconnect(m_categories, 0, this, 0);
-	m_categories = categories;
-
-	// add all of them
-	for (int i = 0; i < (int)m_categories->getNumChildren(); i++) {
-		ECategory *cat = m_categories->category(i);
-		if (!cat) continue;
-		m_enable_categories.insert(cat);
-	}
-
-	// react to new and delete
-	connect(categories, &Group::sNew, this,
-		[this](int index) {
-		ECategory *cat = m_categories->category(index);
-		if (!cat) return;
-		m_enable_categories.insert(cat);
-	});
-	connect(categories, &Group::sDelete, this,
-		[this](int index) {
-		ECategory *cat = m_categories->category(index);
-		if (!cat) return;
-		m_enable_categories.insert(cat);
-	});
-	rescan();
-}
+//
+//void ERFilterSortProxy::setCategories(ECategoryGroup * categories)
+//{
+//	if (m_categories) disconnect(m_categories, 0, this, 0);
+//	m_categories = categories;
+//
+//	// add all of them
+//	for (int i = 0; i < (int)m_categories->getNumChildren(); i++) {
+//		ECategory *cat = m_categories->category(i);
+//		if (!cat) continue;
+//		m_enable_categories.insert(cat);
+//	}
+//
+//	// react to new and delete
+//	connect(categories, &Group::sNew, this,
+//		[this](int index) {
+//		ECategory *cat = m_categories->category(index);
+//		if (!cat) return;
+//		m_enable_categories.insert(cat);
+//	});
+//	connect(categories, &Group::sDelete, this,
+//		[this](int index) {
+//		ECategory *cat = m_categories->category(index);
+//		if (!cat) return;
+//		m_enable_categories.insert(cat);
+//	});
+//	rescan();
+//}
 
 osg::Node *ERFilterSortProxy::child(unsigned int index) const
 {
+	if (!m_base) return nullptr;
 	if (index >= m_map_to_base.size()) {
-		qWarning() << "proxy get child out of range";
+		qWarning() << "proxy child out of range" << index << this;
 		return nullptr;
 	}
 	return m_base->child(m_map_to_base[index]);
@@ -214,6 +298,7 @@ osg::Node *ERFilterSortProxy::child(unsigned int index) const
 
 unsigned int ERFilterSortProxy::getNumChildren() const
 {
+	if (!m_base) return 0;
 	return m_map_to_base.size();
 }
 
@@ -244,22 +329,8 @@ void ERFilterSortProxy::debug()
 
 void ERFilterSortProxy::add(int base_index)
 {
-	EResource *res = dynamic_cast<EResource*>(m_base->child(base_index));
-	std::function<bool(int, int)> sort_func;
-	if (m_sort_by == NONE) {
-		sort_func = std::less<int>();
-	}
-	else if (m_sort_by == ALPHABETICAL) {
-		sort_func = [this, res](int left, int right) {
-			EResource *lres = dynamic_cast<EResource*>(m_base->child(left));
-			EResource *rres = dynamic_cast<EResource*>(m_base->child(right));
-			//qDebug() << "comparison:"
-			//	<< left << QString::fromStdString(lres->getResourceName())
-			//	<< right << QString::fromStdString(rres->getResourceName());
-			return lres->getResourceName() < rres->getResourceName();
-		};
-	}
-	auto it = std::lower_bound(m_map_to_base.begin(), m_map_to_base.end(), base_index, sort_func);
+	std::function<bool(int, int)> m_func = [this](int l, int r) { return lessThan(l, r); };
+	auto it = std::lower_bound(m_map_to_base.begin(), m_map_to_base.end(), base_index, m_func);
 	if (it != m_map_to_base.end() && *it == base_index) {
 		qWarning() << "base index" << *it << "already added to sorted proxy";
 		return;
@@ -287,17 +358,47 @@ void ERFilterSortProxy::clear()
 	}
 }
 
+void ERFilterSortProxy::updateCategorySet(int model_row)
+{
+	if (model_row == 0) return;
+	ECategory *cat = GroupModel::get<ECategory*>(m_category_filters, model_row);
+	if (!cat) return;
+	Qt::CheckState checked = 
+		m_category_filters->data(
+			m_category_filters->index(model_row, 0), Qt::ItemDataRole::CheckStateRole)
+		.value<Qt::CheckState>();
+
+	if (checked == Qt::Checked) {
+		if (m_categories_enabled.find(cat) == m_categories_enabled.end()) {
+			m_categories_enabled.insert(cat);
+		}
+	}
+	else {
+		int del = m_categories_enabled.erase(cat);
+	}
+}
+
+bool ERFilterSortProxy::checkTitle(const std::string & s) const
+{
+	if (!m_type_filters) return true;
+
+	// do some regex
+
+	return true;
+}
+
 int ERFilterSortProxy::indexOf(const osg::Node *node) const
 {
+	if (!m_base) return -1;
 	for (int i = 0; i < (int)getNumChildren(); i++) {
 		if (child(i) == node) return i;
 	}
 	return -1;
 }
 
-void ERFilterSortProxy::track(int base_index)
+void ERFilterSortProxy::track(osg::Node *node)
 {
-	EResource *res = dynamic_cast<EResource*>(m_base->child(base_index));
+	EResource *res = dynamic_cast<EResource*>(node);
 	if (!res) return;
 
 	// listen to the new item

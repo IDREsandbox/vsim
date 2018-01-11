@@ -14,6 +14,12 @@ public:
 	enum UserDataRole {
 		PointerRole = Qt::UserRole
 	};
+	template <class T>
+	static T get(QAbstractItemModel *model, int row) {
+		return dynamic_cast<T>(
+			static_cast<osg::Node*>(
+				model->data(model->index(row, 0), PointerRole).value<void*>()));
+	}
 
 	GroupModel(QObject *parent);
 

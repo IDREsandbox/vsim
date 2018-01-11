@@ -12,6 +12,7 @@
 class EResource;
 class ECategory;
 class ECategoryGroup;
+class CheckableListProxy;
 
 class ERFilterSortProxy : public Group {
 	Q_OBJECT
@@ -19,7 +20,25 @@ public:
 	ERFilterSortProxy(Group *base);
 
 	void setBase(Group *base);
-	void setCategories(ECategoryGroup *categories);
+
+	// group overrides
+	virtual osg::Node *child(unsigned int index) const override;
+	virtual unsigned int getNumChildren() const override;
+	virtual int indexOf(const osg::Node *node) const override;
+	// not supported
+	//virtual bool insertChild(unsigned int index, Node *child) override;
+	//virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
+
+	// filter sort overrides
+	virtual bool accept(osg::Node *node);
+	virtual bool lessThan(int left, int right);
+	virtual void track(osg::Node *node);
+
+	EResource *getResource(int index) const;
+	void debug();
+
+	// configuration
+	//void setCategories(ECategoryGroup *categories);
 
 	enum SortBy {
 		ALPHABETICAL,
@@ -29,45 +48,20 @@ public:
 	void sortBy(SortBy method);
 	//SortBy getSortMethod() const;
 
-	void addCategory(ECategory *cat);
-	void removeCategory(ECategory *cat);
-	void allCategories(bool all);
+	void setCategories(CheckableListProxy *cats);
+	void setFiletypes(CheckableListProxy *types);
 
-	void addFiletype(const std::string& extension);
-	void removeFiletype(const std::string& extension);
-
-	void addTitleSearch(const std::string& extension);
-	void removeTitleSearch(const std::string& extension);
-
-	enum FilterGlobal {
-		SHOW_BOTH,
-		SHOW_GLOBAL,
-		SHOW_LOCAL
-	};
-	void filterGlobal(FilterGlobal what);
-
+	void showLocal(bool local);
+	void showGlobal(bool global);
 	void enableRange(bool enable);
+	void enableYears(bool enable);
+
+	void setTitleSearch(const std::string &title);
 
 	void setPosition(osg::Vec3f pos);
 
-	// overrides
-	virtual osg::Node *child(unsigned int index) const override;
-	virtual unsigned int getNumChildren() const override;
-	virtual int indexOf(const osg::Node *node) const override;
 
-	EResource *getResource(int index) const;
-	void debug();
-
-	//set position
-
-	// not supported
-	//virtual bool insertChild(unsigned int index, Node *child) override;
-	//virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
-
-	// does the filter accept this category?
-	bool accept(EResource *res);
-
-private:
+protected:
 	// add/removes a resource if it is acceptable
 	void checkAndAdd(int base_index);
 
@@ -82,32 +76,33 @@ private:
 	//void remap(int base_index);
 	//bool inMap(EResource *res);
 
-	void track(int base_index);
+private:
+	void updateCategorySet(int model_row);
+	bool checkTitle(const std::string &s) const;
 
 private:
+	// filter sort proxy
 	osg::ref_ptr<Group> m_base;
-	osg::ref_ptr<ECategoryGroup> m_categories;
-
-	SortBy m_sort_by;
-	std::set<ECategory*> m_enable_categories;
-	std::set<std::string> m_enable_filetypes;
-	std::set<std::string> m_name_filters;
-	bool m_enable_all;
-	FilterGlobal m_filter_global;
-	osg::Vec3f m_position;
-
-	//std::map<std::string, int> m_title_map;
-	//std::map<float, int> m_distance_map;
-
 	std::vector<int> m_map_to_base;
 
-	// for ALPHABETICAL
-	//std::map<std::string, EResource*> m_title_map;
-	//std::unordered_map<EResource*, std::map<std::string, EResource*>::iterator> m_title_hashmap;
+	// ER specific
+	SortBy m_sort_by;
 
-	// for NONE
-	//std::vector<EResource*> m_included;
-	//std::unordered_map<EResource*, std::set<EResource*>::iterator> m_included_map;
+	CheckableListProxy *m_category_filters;
+	std::set<const ECategory*> m_categories_enabled;
+	CheckableListProxy *m_type_filters;
+	std::set<std::string> m_types_enabled;
+
+	bool m_show_global;
+	bool m_show_local;
+	bool m_enable_range;
+	bool m_enable_years;
+
+	std::string m_title_search;
+	
+	bool m_show_all;
+
+	osg::Vec3f m_position;
 };
 
 #endif
