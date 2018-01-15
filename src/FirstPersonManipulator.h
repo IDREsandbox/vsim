@@ -31,7 +31,7 @@ class FirstPersonManipulator : public BaseFirstPersonManipulator
 
 	// max speed is controlled exponentially by "ticks"
 	// +4 ticks is double, -4 is half
-	void accelerate(int ticks);
+	//void accelerate(int ticks);
 
 	// meters per second
 	double getMaxSpeed();

@@ -28,30 +28,29 @@ void FlightManipulator::stop()
 void FlightManipulator::update(double dt_sec, KeyTracker *keys, osg::Node *world) {
 	// update speed
 	Qt::MouseButtons mouse_buttons = keys->mouseButtons();
-	if (mouse_buttons & Qt::LeftButton) {
-		m_speed += m_acceleration * dt_sec;
-	}
-	if (mouse_buttons & Qt::RightButton) {
-		m_speed -= m_acceleration * dt_sec;
-	}
 
-	// always do strafing
-	double dx = Util::exponentialSmooth2(&m_scurrent_x, m_starget_x, m_strafe_smoothing, dt_sec, .001);
-	double dy = Util::exponentialSmooth2(&m_scurrent_y, m_starget_y, m_strafe_smoothing, dt_sec, .001);
-	moveUp(-dy * m_strafe_sensitivity);
-	moveRight(dx * m_strafe_sensitivity);
-
-	// only rotate if not strafing
+	// strafing
 	if (mouse_buttons & Qt::MiddleButton || keys->keyPressed(Qt::Key_Alt)) {
+		double multiplier = m_strafe_sensitivity * dt_sec * getSpeedMultiplier();
+		moveUp(m_mouse_x * multiplier);
+		moveRight(-m_mouse_y * multiplier);
+
 	}
+	// moving and rotating
 	else {
+		if (mouse_buttons & Qt::LeftButton) {
+			m_speed += m_acceleration * dt_sec * getSpeedMultiplier();
+		}
+		if (mouse_buttons & Qt::RightButton) {
+			m_speed -= m_acceleration * dt_sec * getSpeedMultiplier();
+		}
+
 		rotateByPixels(m_mouse_x * dt_sec, m_mouse_y * dt_sec);
+		if (std::abs(m_speed) >= .001) {
+			moveForward(m_speed * dt_sec);
+		}
 	}
 
-	// update position
-	if (std::abs(m_speed) >= .001) {
-		moveForward(m_speed * dt_sec);
-	}
 	BaseFirstPersonManipulator::update(dt_sec, keys, world);
 }
 
@@ -60,10 +59,10 @@ void FlightManipulator::setMousePosition(double posx, double posy)
 	m_mouse_x = posx;
 	m_mouse_y = posy;
 }
-
-void FlightManipulator::strafe(int dx, int dy)
-{
-	m_starget_x += dx;
-	m_starget_y += dy;
-}
+//
+//void FlightManipulator::strafe(int dx, int dy)
+//{
+//	m_starget_x += dx;
+//	m_starget_y += dy;
+//}
 

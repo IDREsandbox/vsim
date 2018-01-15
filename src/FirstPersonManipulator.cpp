@@ -85,16 +85,15 @@ void FirstPersonManipulator::mouseMove(int dx, int dy)
 	m_y_target += dy;
 }
 
-void FirstPersonManipulator::accelerate(int ticks)
-{
-	m_speed_click += ticks;
-	m_speed_click = std::max(m_speed_click, -28); // lower limit
-	m_speed_click = std::min(m_speed_click, 28); // upper limit
-	qInfo() << "First person speed set to" << m_speed_click << ":" << getMaxSpeed() << "m/s";
-}
+//void FirstPersonManipulator::accelerate(int ticks)
+//{
+//	m_speed_click += ticks;
+//	m_speed_click = std::max(m_speed_click, -28); // lower limit
+//	m_speed_click = std::min(m_speed_click, 28); // upper limit
+//	qInfo() << "First person speed set to" << m_speed_click << ":" << getMaxSpeed() << "m/s";
+//}
 
 double FirstPersonManipulator::getMaxSpeed()
 {
-	double max_speed = m_base_speed * pow(pow(2, .25), m_speed_click);
-	return max_speed;
+	return m_base_speed * getSpeedMultiplier();
 }

@@ -6,6 +6,7 @@
 #include <QtMath> // PI macros
 #include <osg/Vec4>
 #include <osg/Matrix>
+#include <algorithm>
 
 namespace Util
 {
@@ -24,7 +25,10 @@ namespace Util
 
 	QString setToString(std::set<int> set);
 
-	double clamp(double value, double min, double max);
+	template <typename T>
+	T clamp(T value, T min, T max) {
+		return std::min(std::max(value, min), max);
+	}
 
 	// forces an angle between 0 and 180
 	double angleWrap(double x);

@@ -341,12 +341,12 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 {
 	NavigationMode mode = getActualNavigationMode();
-	if (mode == NAVIGATION_FLIGHT) {
-		if (event->key() == Qt::Key_Alt) {
-			m_flight_manipulator->stop();
-			releaseCursor();
-		}
-	}
+	//if (mode == NAVIGATION_FLIGHT) {
+	//	if (event->key() == Qt::Key_Alt) {
+	//		m_flight_manipulator->stop();
+	//		releaseCursor();
+	//	}
+	//}
 
 	QString keyString = event->text();
 	QByteArray keyData = keyString.toLocal8Bit();
@@ -368,19 +368,17 @@ void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 		}
 	}
 	if (mode == NAVIGATION_FLIGHT) {
-		if (m_key_tracker.mouseButton(Qt::MiddleButton) || m_key_tracker.keyPressed(Qt::Key_Alt)) {
-			if (dx != 0 || dy != 0) {
-				m_flight_manipulator->strafe(dx, dy);
-				centerCursor();
-			}
-		}
+		m_flight_manipulator->setMousePosition(dx, dy);
+		// use absolute mouse position instead
+		//if (m_key_tracker.mouseButton(Qt::MiddleButton) || m_key_tracker.keyPressed(Qt::Key_Alt)) {
+		//	if (dx != 0 || dy != 0) {
+		//		m_flight_manipulator->strafe(dx, dy);
+		//		centerCursor();
+		//	}
+		//}
 	}
 	// We'd have to install a global event filter for all mouse move events to go
 	//  through, it's easier just to poll on update.
-	//else if (mode == NAVIGATION_FLIGHT) {
-	//	...
-	//	m_flight_manipulator->setMousePosition(nx, ny);
-	//}
 
 	event->accept();
 	this->getEventQueue()->mouseMotion(static_cast<float>(event->x()),
@@ -393,7 +391,7 @@ void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
 	if (mode == NAVIGATION_FLIGHT) {
 		if (event->button() == Qt::MiddleButton) {
 			m_flight_manipulator->stop();
-			takeCursor();
+			centerCursor();
 		}
 	}
 

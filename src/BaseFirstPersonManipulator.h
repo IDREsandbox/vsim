@@ -23,10 +23,19 @@ public:
 	double getSensitivity() const;
 	void setSensitivity(double);
 
+	// +4 ticks is 2x speed, -4 ticks is 1/2 speed
+	void changeSpeed(int ticks);
+	void setSpeedTick(int ticks);
+	int getSpeedTick(int ticks) const;
+	double getSpeedMultiplier() const;
+
 	void enableGravity(bool enable);
 	void enableCollisions(bool enable);
+
 private:
 	double m_sensitivity;
+
+	int m_speed_tick;
 
 	// stored relative to current position, 
 	// [right up -fwd]

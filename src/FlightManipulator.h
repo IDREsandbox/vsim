@@ -23,7 +23,7 @@ public:
 
 	// On mouse movement call this
 	//  strafe speed is in distance per pixel
-	void strafe(int dx, int dy);
+	//void strafe(int dx, int dy);
 
 private:
 	// current speed moving fwd, can be negative

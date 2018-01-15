@@ -123,13 +123,6 @@ QString Util::setToString(std::set<int> set)
 	return str;
 }
 
-double Util::clamp(double value, double min, double max)
-{
-	if (value > max) return max;
-	if (value < min) return min;
-	return value;
-}
-
 // credits to stackoverflow
 double Util::angleWrap(double x)
 {

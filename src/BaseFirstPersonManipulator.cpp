@@ -124,6 +124,28 @@ void BaseFirstPersonManipulator::setSensitivity(double sensitivity)
 	m_sensitivity = sensitivity;
 }
 
+void BaseFirstPersonManipulator::setSpeedTick(int ticks)
+{
+	m_speed_tick = ticks;
+}
+
+int BaseFirstPersonManipulator::getSpeedTick(int ticks) const
+{
+	return m_speed_tick;
+}
+
+void BaseFirstPersonManipulator::changeSpeed(int ticks)
+{
+	m_speed_tick += ticks;
+	m_speed_tick = Util::clamp(m_speed_tick, -28, 28);
+	qInfo() << "Speed multiplier set to" << m_speed_tick << ":" << getSpeedMultiplier();
+}
+
+double BaseFirstPersonManipulator::getSpeedMultiplier() const
+{
+	return std::pow(std::pow(2, .25), m_speed_tick);
+}
+
 void BaseFirstPersonManipulator::enableGravity(bool enable)
 {
 	m_gravity_velocity = 0;
