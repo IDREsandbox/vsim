@@ -4,17 +4,18 @@
 FlightManipulator::FlightManipulator()
 	: m_mouse_x(0),
 	m_mouse_y(0),
-	m_speed(0),
-	m_scurrent_x(0),
-	m_scurrent_y(0),
-	m_starget_x(0),
-	m_starget_y(0)
+	m_speed(0)
+	//m_scurrent_x(0),
+	//m_scurrent_y(0),
+	//m_starget_x(0),
+	//m_starget_y(0)
 {
 	// parameters
 	setSensitivity(45.0);
 	m_acceleration = 4.0;
-	m_strafe_sensitivity = .01;
-	m_strafe_smoothing = .01;
+	m_strafe_speed = 1.5;
+	//m_strafe_sensitivity = .01;
+	//m_strafe_smoothing = .01;
 }
 
 void FlightManipulator::stop()
@@ -31,9 +32,9 @@ void FlightManipulator::update(double dt_sec, KeyTracker *keys, osg::Node *world
 
 	// strafing
 	if (mouse_buttons & Qt::MiddleButton || keys->keyPressed(Qt::Key_Alt)) {
-		double multiplier = m_strafe_sensitivity * dt_sec * getSpeedMultiplier();
-		moveUp(m_mouse_x * multiplier);
-		moveRight(-m_mouse_y * multiplier);
+		double multiplier = m_strafe_speed * dt_sec * getSpeedMultiplier();
+		moveUp(-m_mouse_y * multiplier);
+		moveRight(m_mouse_x * multiplier);
 
 	}
 	// moving and rotating

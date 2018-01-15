@@ -29,7 +29,8 @@
 #include <QSurfaceFormat>
 
 OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
-	: QOpenGLWidget(parent,	f)
+	: QOpenGLWidget(parent,	f),
+	m_speed_tick(0)
 {
 	// Create viewer, graphics context, and link them together
 	viewer_ = new osgViewer::Viewer;
@@ -97,6 +98,9 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	m_collisions_on = false;
 	m_gravity_on = false;
+
+	m_first_person_manipulator->setSpeedTick(m_speed_tick);
+	m_flight_manipulator->setSpeedTick(m_speed_tick);
 	//setNavigationMode(NAVIGATION_OBJECT);
 	
 	// This ensures that the widget will receive keyboard events. This focus
@@ -188,6 +192,15 @@ OSGViewerWidget::NavigationMode OSGViewerWidget::getActualNavigationMode() const
 	return (m_camera_frozen || m_navigation_disabled) ? NAVIGATION_SIMPLE : m_navigation_mode;
 }
 
+void OSGViewerWidget::adjustSpeed(int tick)
+{
+	m_speed_tick += tick;
+	m_speed_tick = std::max(std::min(m_speed_tick, 28), -28);
+	m_first_person_manipulator->setSpeedTick(m_speed_tick);
+	m_flight_manipulator->setSpeedTick(m_speed_tick);
+	qInfo() << "Speed multiplier" << m_speed_tick << ":" << m_flight_manipulator->getSpeedMultiplier();
+}
+
 void OSGViewerWidget::setCameraFrozen(bool freeze)
 {
 	if (m_navigation_disabled) return;
@@ -227,7 +240,17 @@ void OSGViewerWidget::figureOutNavigation()
 	}
 }
 
+void OSGViewerWidget::flightStartStrafe()
+{
+	m_flight_manipulator->stop();
+	centerCursor();
+}
 
+void OSGViewerWidget::flightStopStrafe()
+{
+	m_flight_manipulator->stop();
+	centerCursor();
+}
 
 void OSGViewerWidget::reset()
 {
@@ -309,8 +332,7 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 	NavigationMode mode = getActualNavigationMode();
 	if (mode == NAVIGATION_FLIGHT) {
 		if (event->key() == Qt::Key_Alt) {
-			m_flight_manipulator->stop();
-			takeCursor();
+			flightStartStrafe();
 		}
 	}
 	if (event->key() == Qt::Key_G) {
@@ -341,22 +363,19 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 {
 	NavigationMode mode = getActualNavigationMode();
-	//if (mode == NAVIGATION_FLIGHT) {
-	//	if (event->key() == Qt::Key_Alt) {
-	//		m_flight_manipulator->stop();
-	//		releaseCursor();
-	//	}
-	//}
+	if (mode == NAVIGATION_FLIGHT) {
+		if (event->key() == Qt::Key_Alt) {
+			flightStopStrafe();
+		}
+	}
 
 	QString keyString = event->text();
 	QByteArray keyData = keyString.toLocal8Bit();
 	this->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KeySymbol(*keyData.data()));
 }
 
-int i = 0;
 void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	i++;
 	NavigationMode mode = getActualNavigationMode();
 	int dx = event->x() - width() / 2;
 	int dy = event->y() - height() / 2;
@@ -390,19 +409,14 @@ void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
 	NavigationMode mode = getActualNavigationMode();
 	if (mode == NAVIGATION_FLIGHT) {
 		if (event->button() == Qt::MiddleButton) {
-			m_flight_manipulator->stop();
-			centerCursor();
+			flightStartStrafe();
 		}
 	}
-
-	// Normal processing
 
 	// 1 = left mouse button
 	// 2 = middle mouse button
 	// 3 = right mouse button
-
 	unsigned int button = 0;
-
 	switch (event->button())
 	{
 	case Qt::LeftButton:
@@ -420,7 +434,6 @@ void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
 	default:
 		break;
 	}
-
 	this->getEventQueue()->mouseButtonPress(static_cast<float>(event->x()),
 		static_cast<float>(event->y()),
 		button);
@@ -432,8 +445,7 @@ void OSGViewerWidget::mouseReleaseEvent(QMouseEvent* event)
 	NavigationMode mode = getActualNavigationMode();
 	if (mode == NAVIGATION_FLIGHT) {
 		if (event->button() == Qt::MiddleButton) {
-			m_flight_manipulator->stop();
-			releaseCursor();
+			flightStopStrafe();
 		}
 	}
 	// 1 = left mouse button
@@ -470,14 +482,15 @@ void OSGViewerWidget::wheelEvent(QWheelEvent* event) {
 	event->accept();
 	int delta = event->delta();
 
-	if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
-		//qDebug() << "mouse wheel delta" << delta;
-		m_first_person_manipulator->accelerate((delta > 0) ? 1 : -1);
+	if (m_navigation_mode == NAVIGATION_FIRST_PERSON
+		|| m_navigation_mode == NAVIGATION_FLIGHT)
+	{
+		adjustSpeed((delta > 0) ? 1 : -1);
 	}
 
+	// osg adapter
 	osgGA::GUIEventAdapter::ScrollingMotion motion = delta > 0 ? osgGA::GUIEventAdapter::SCROLL_UP
 		: osgGA::GUIEventAdapter::SCROLL_DOWN;
-
 	this->getEventQueue()->mouseScroll(motion);
 }
 

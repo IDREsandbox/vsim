@@ -43,11 +43,16 @@ public:
 	NavigationMode getNavigationMode() const;
 	NavigationMode getActualNavigationMode() const; // if frozen returns NAVIGATION_SIMPLE
 
+	void adjustSpeed(int tick);
+
 	void setCameraFrozen(bool freeze);
 	bool getCameraFrozen() const;
 	void enableNavigation(bool enable);
 
 	void figureOutNavigation();
+
+	void flightStartStrafe();
+	void flightStopStrafe();
 
 	void reset();
 
@@ -101,6 +106,7 @@ private:
 	bool m_camera_frozen;
 	bool m_gravity_on;
 	bool m_collisions_on;
+	int m_speed_tick;
 
 	// key press tracker
 	KeyTracker m_key_tracker;

@@ -137,8 +137,6 @@ int BaseFirstPersonManipulator::getSpeedTick(int ticks) const
 void BaseFirstPersonManipulator::changeSpeed(int ticks)
 {
 	m_speed_tick += ticks;
-	m_speed_tick = Util::clamp(m_speed_tick, -28, 28);
-	qInfo() << "Speed multiplier set to" << m_speed_tick << ":" << getSpeedMultiplier();
 }
 
 double BaseFirstPersonManipulator::getSpeedMultiplier() const
