@@ -15,6 +15,7 @@
 #include <QtWidgets/QProgressDialog>
 #include <QtWidgets/QAction>
 #include <QFileDialog>
+#include <QUndoStack>
 
 #include "VSimApp.h"
 #include "Util.h"
@@ -41,6 +42,10 @@ VSimApp::VSimApp(MainWindow* window)
 {
 	m_viewer = window->getViewer();
 
+	// undo stack
+	m_undo_stack = new QUndoStack(this);
+	m_undo_stack->setUndoLimit(50);
+
 	// timers
 	m_timer = new QTimer;
 	m_timer->setInterval(15);
@@ -51,7 +56,7 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(m_timer, &QTimer::timeout, this, &VSimApp::updateTime);
 
 	m_narrative_control = new NarrativeControl(this, m_window);
-	m_er_control = new ERControl(this, m_window, m_root->resources());
+	m_er_control = new ERControl(this, m_window, m_root->resources(), this);
 
 	// Narrative player
 	m_narrative_player = new NarrativePlayer(this, m_narrative_control);
@@ -105,7 +110,7 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	m_er_control->load(root->resources());
 	m_window->timeSlider()->setGroup(root->models());
 	
-	m_window->m_undo_stack->clear();
+	m_undo_stack->clear();
 	m_window->m_osg_widget->reset();
 
 	// dereference the old root, apply the new one
@@ -397,6 +402,26 @@ void VSimApp::setFileName(const std::string &str)
 {
 	m_filename = str;
 	m_window->setWindowTitle("VSim - " + QString::fromStdString(str));
+}
+
+void VSimApp::setStatusMessage(const QString & message, int timeout)
+{
+	m_window->statusBar()->showMessage(message, timeout);
+}
+
+osg::Matrixd VSimApp::getCameraMatrix() const
+{
+	return m_window->getViewerWidget()->getCameraMatrix();
+}
+
+void VSimApp::setCameraMatrix(const osg::Matrixd & matrix)
+{
+	m_window->getViewerWidget()->setCameraMatrix(matrix);
+}
+
+QUndoStack *VSimApp::getUndoStack() const
+{
+	return m_undo_stack;
 }
 
 void VSimApp::debugCamera()

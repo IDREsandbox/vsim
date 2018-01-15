@@ -28,9 +28,10 @@
 #include "LabelStyle.h"
 #include "Selection.h"
 #include "MainWindowTopBar.h"
+#include "VSimApp.h"
 
-NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
-	: QObject(parent), 
+NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *parent)
+	: m_app(app),
 	m_window(window), 
 	m_current_narrative(-1),
 	m_narrative_group(nullptr)
@@ -38,7 +39,7 @@ NarrativeControl::NarrativeControl(QObject *parent, MainWindow *window)
 	m_narrative_box = window->topBar()->ui.narratives;
 	m_slide_box = window->topBar()->ui.slides;
 	m_canvas = window->m_drag_area;
-	m_undo_stack = window->m_undo_stack;
+	m_undo_stack = m_app->getUndoStack();
 
 	connect(m_window, &MainWindow::sEditStyleSettings, this, &NarrativeControl::editStyleSettings);
 

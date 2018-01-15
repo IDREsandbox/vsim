@@ -12,9 +12,10 @@
 #include "EditDeleteDelegate.h"
 #include "GroupModel.h"
 
-ERDialog::ERDialog(ECategoryControl * category_control, QWidget * parent)
+ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWidget * parent)
 	: QDialog(parent),
-	m_control(category_control)
+	m_control(category_control),
+	m_current_dir(current_dir)
 {
 	ui.setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -33,6 +34,8 @@ ERDialog::ERDialog(ECategoryControl * category_control, QWidget * parent)
 	connect(ui.url, &QRadioButton::toggled, this, ontoggletype);
 	connect(ui.file, &QRadioButton::toggled, this, ontoggletype);
 	connect(ui.annotation, &QRadioButton::toggled, this, ontoggletype);
+	connect(ui.relative, &QAbstractButton::toggled, this, &ERDialog::setRelative);
+	connect(ui.path, &QLineEdit::textEdited, this, &ERDialog::setPath);
 
 	auto ontoggleactive = [this](bool x) { if (x) this->onActivationChange(); };
 	connect(ui.global, &QRadioButton::toggled, this, ontoggleactive);
@@ -82,10 +85,10 @@ void ERDialog::init(const EResource * er)
 	ui.title->setText(QString::fromStdString(er->getResourceName()));
 	ui.description->setText(QString::fromStdString(er->getResourceDescription()));
 	ui.authors->setText(QString::fromStdString(er->getAuthor()));
-	ui.path->setText(QString::fromStdString(er->getResourcePath()));
 	ui.year_lower->setValue(er->getMinYear());
 	ui.year_upper->setValue(er->getMaxYear());
 	ui.radius->setValue(er->getLocalRange());
+	ui.licensing->setCurrentIndex(er->getCopyright());
 
 	if (er->getGlobal()) ui.global->setChecked(true);
 	else ui.local->setChecked(true);
@@ -94,16 +97,21 @@ void ERDialog::init(const EResource * er)
 
 	switch (er->getERType()) {
 	case EResource::FILE:
+		qDebug() << "load file ----";
 		ui.file->setChecked(true);
 		break;
 	case EResource::ANNOTATION:
+		qDebug() << "load annooo ----";
 		ui.annotation->setChecked(true);
 		break;
 	case EResource::URL:
+		qDebug() << "load uerll ----";
 		ui.url->setChecked(true);
 		break;
 	}
-
+	ui.path->setText(QString::fromStdString(er->getResourcePath()));
+	checkRelative();
+	
 	// setup the category selection
 	setCategory(er->category());
 }
@@ -125,9 +133,7 @@ std::string ERDialog::getAuthor() const
 
 std::string ERDialog::getPath() const
 {
-	if (ui.annotation->isChecked()) {
-		return "";
-	}
+	if (ui.annotation->isChecked()) return "";
 	return ui.path->text().toStdString();
 }
 
@@ -214,7 +220,71 @@ void ERDialog::chooseFile()
 {
 	QFileDialog dlg;
 
-	ui.path->setText(dlg.getOpenFileName());
+	QString open_dir;
+	if (ui.path->text() == "") {
+		open_dir = m_current_dir;
+	}
+	else {
+		QString abs_path;
+		// if relative, then build the abs path, take the directory
+		if (QDir::isRelativePath(ui.path->text())) {
+			abs_path = m_current_dir + "/" + ui.path->text();
+		}
+		else {
+			abs_path = ui.path->text();
+		}
+		open_dir = QFileInfo(abs_path).absoluteDir().path();
+	}
+	QString file = dlg.getOpenFileName(this, QString(), open_dir);
+	if (file == "") return;
+
+	QString new_path;
+	if (ui.relative->isChecked()) {
+		QDir dir(m_current_dir);
+		new_path = dir.relativeFilePath(file);
+	}
+	else {
+		new_path = file;
+	}
+	ui.path->setText(new_path);
+}
+
+void ERDialog::setPath(const QString & s)
+{
+	checkRelative();
+}
+
+void ERDialog::setRelative(bool relative)
+{
+	QString path = ui.path->text();
+
+	// is the path already relative/absolute?
+	if (QDir::isRelativePath(path) == relative) {
+		// don't do anything
+		return;
+	}
+
+	QString new_path;
+	if (relative) {
+		// make this relative
+		new_path = QDir(m_current_dir).relativeFilePath(path);
+	}
+	else {
+		// want to make this absolute
+		// canonical doesn't work for files that don't exist
+		// QFileInfo(m_current_dir + "/" + path).canonicalFilePath();
+		new_path = QDir::cleanPath(m_current_dir + "/" + path);
+	}
+	ui.path->setText(new_path);
+	//checkRelative(); // possible infinite loop, should still work w/o this
+}
+
+void ERDialog::checkRelative()
+{
+	if (ui.file->isChecked()) {
+		bool rel = QDir::isRelativePath(ui.path->text());
+		ui.relative->setChecked(rel);
+	}
 }
 
 void ERDialog::onTypeChange()
@@ -222,14 +292,18 @@ void ERDialog::onTypeChange()
 	if (ui.file->isChecked()) {
 		ui.path->setEnabled(true);
 		ui.choose->setEnabled(true);
+		ui.relative->setEnabled(true);
+		checkRelative();
 	}
 	else if (ui.annotation->isChecked()) {
 		ui.path->setEnabled(false);
 		ui.choose->setEnabled(false);
+		ui.relative->setEnabled(false);
 	}
 	else if (ui.url->isChecked()) {
 		ui.path->setEnabled(true);
 		ui.choose->setEnabled(false);
+		ui.relative->setEnabled(false);
 	}
 }
 

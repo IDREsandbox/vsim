@@ -18,7 +18,7 @@ class ECategoryControl;
 class ERDialog : public QDialog {
 	Q_OBJECT
 public:
-	ERDialog(ECategoryControl *category_control, QWidget *parent = nullptr);
+	ERDialog(ECategoryControl *category_control, QString current_dir, QWidget *parent = nullptr);
 
 	void init(const EResource *er);
 
@@ -41,6 +41,11 @@ public:
 
 	void chooseFile();
 
+	// the relative thing is really confusing
+	void setPath(const QString &s); // use on load, or text edit
+	void setRelative(bool relative); // use on checkbox change
+	void checkRelative();
+
 	// Choose button depends on type
 	// URL bar depends on type
 	void onTypeChange();
@@ -55,6 +60,9 @@ signals:
 
 private:
 	Ui::ERDialog ui;
+	QString m_current_dir;
+	//QString m_file_path; // relative or absolute
+	//QString m_url;
 
 	QListView *m_category_view;
 	EditDeleteDelegate *m_category_delegate;

@@ -6,8 +6,9 @@
 #include <QUndoStack>
 #include <QSortFilterProxyModel>
 
-class EResourceGroup;
+class VSimApp;
 class MainWindow;
+class EResourceGroup;
 class ECategoryGroup;
 class ERDialog;
 class ERDisplay;
@@ -23,7 +24,7 @@ class ERControl : public QObject
 {
 	Q_OBJECT;
 public:
-	ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers);
+	ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObject *parent = nullptr);
 
 	void load(EResourceGroup *ers);
 
@@ -41,6 +42,7 @@ private:
 	int getCombinedLastSelected();
 
 private:
+	VSimApp *m_app;
 	MainWindow *m_window;
 
 	osg::ref_ptr<EResourceGroup> m_ers;

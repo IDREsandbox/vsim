@@ -87,7 +87,6 @@ public:
 
 public:
 	VSimApp *m_app;
-	QUndoStack *m_undo_stack;
 
 	OSGViewerWidget *m_osg_widget;
 	labelCanvas *m_drag_area;

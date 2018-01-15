@@ -6,7 +6,7 @@
 #include <QUndoStack>
 #include <QSortFilterProxyModel>
 
-class MainWindow;
+class VSimApp;
 class EResource;
 class ECategoryGroup;
 
@@ -20,7 +20,7 @@ class ECategoryControl : public QObject
 {
 	Q_OBJECT
 public:
-	ECategoryControl(MainWindow *window, QObject *parent = nullptr);
+	ECategoryControl(VSimApp *window, QObject *parent = nullptr);
 
 	void load(ECategoryGroup *cats);
 
@@ -31,6 +31,7 @@ public:
 	QAbstractItemModel *categoryModel() const;
 
 private:
+	VSimApp *m_app;
 	osg::ref_ptr<ECategoryGroup> m_categories;
 
 	QUndoStack *m_undo_stack;

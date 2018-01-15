@@ -7,6 +7,7 @@
 #include <QUndoStack>
 #include "MainWindow.h"
 
+class VSimApp;
 class MainWindow;
 class NarrativeGroup;
 class Narrative2;
@@ -23,7 +24,7 @@ class NarrativeControl : public QObject
 {
 	Q_OBJECT
 public:
-	NarrativeControl(QObject *parent, MainWindow *window);
+	NarrativeControl(VSimApp *app, MainWindow *window, QObject *parent = nullptr);
 	~NarrativeControl();
 
 	// initializes gui from osg data
@@ -105,7 +106,7 @@ public slots:
 	void debug();
 
 private:
-
+	VSimApp * m_app;
 	int m_current_narrative;
 	int m_current_slide;
 
@@ -113,7 +114,7 @@ private:
 	osg::ref_ptr<NarrativeGroup> m_narrative_group; // the osg side data structure, instead of using a vector
 	//osg::ref_ptr<LabelStyleGroup> m_style_group;
 
-	MainWindow *m_window; // TODO: remove this after redesign, this should be completely gui independent
+	MainWindow *m_window;
 	NarrativeScrollBox *m_narrative_box;
 	SlideScrollBox *m_slide_box;
 	labelCanvas *m_canvas;

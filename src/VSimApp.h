@@ -13,6 +13,7 @@
 #include <osgViewer/Viewer>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <QUndoStack>
 
 #include "VSimRoot.h"
 
@@ -50,6 +51,12 @@ public:
 	std::string getFileName() const;
 	void setFileName(const std::string &);
 
+	void setStatusMessage(const QString &message, int timeout = 0);
+	osg::Matrixd getCameraMatrix() const;
+	void setCameraMatrix(const osg::Matrixd &matrix);
+
+	QUndoStack *getUndoStack() const;
+
 	void debugCamera();
 	void updateTime();
 
@@ -62,14 +69,16 @@ signals:
 	void foo();
 
 private:
-	QTimer *m_timer;
-	QElapsedTimer *m_dt_timer;
-
 	MainWindow *m_window;
 	osgViewer::Viewer *m_viewer;
 
+	QUndoStack *m_undo_stack;
+
 	std::string m_filename;
 	bool m_model_loaded;
+
+	QTimer *m_timer;
+	QElapsedTimer *m_dt_timer;
 
 	osg::ref_ptr<VSimRoot> m_root;
 	ModelTableModel *m_model_table_model;

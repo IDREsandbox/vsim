@@ -47,16 +47,6 @@ MainWindow::MainWindow(QWidget *parent)
 	setAcceptDrops(true);
 	qDebug() << "root: " << QDir::currentPath();
 
-	// undo stack
-	m_undo_stack = new QUndoStack(this);
-	m_undo_stack->setUndoLimit(50);
-	QAction *undo_action = m_undo_stack->createUndoAction(this, tr("&Undo"));
-	QAction *redo_action = m_undo_stack->createRedoAction(this, tr("&Redo"));
-	undo_action->setShortcuts(QKeySequence::Undo);
-	redo_action->setShortcuts(QKeySequence::Redo);
-	ui->menuEdit->addAction(undo_action);
-	ui->menuEdit->addAction(redo_action);
-
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui->root);
 	m_osg_widget->lower(); // move this to the back
@@ -203,6 +193,13 @@ void MainWindow::selectResources(std::set<int> res)
 void MainWindow::setApp(VSimApp * vsim)
 {
 	m_app = vsim;
+
+	QAction *undo_action = m_app->getUndoStack()->createUndoAction(this, tr("&Undo"));
+	QAction *redo_action = m_app->getUndoStack()->createRedoAction(this, tr("&Redo"));
+	undo_action->setShortcuts(QKeySequence::Undo);
+	redo_action->setShortcuts(QKeySequence::Redo);
+	ui->menuEdit->addAction(undo_action);
+	ui->menuEdit->addAction(redo_action);
 
 	connect(this, &MainWindow::sOpenFile, m_app, &VSimApp::openVSim);
 	connect(this, &MainWindow::sSaveFile, m_app, &VSimApp::saveVSim);

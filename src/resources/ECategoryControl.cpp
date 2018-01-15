@@ -1,6 +1,8 @@
 #include "resources/ECategoryControl.h"
 
-#include "MainWindow.h"
+#include <QMessageBox>
+
+#include "VSimApp.h"
 #include "resources/EResource.h"
 
 #include "resources/ECategoryModel.h"
@@ -9,10 +11,11 @@
 
 #include "resources/NewCatDialog.h"
 
-ECategoryControl::ECategoryControl(MainWindow * window, QObject * parent)
-	: QObject(parent)
+ECategoryControl::ECategoryControl(VSimApp *app, QObject * parent)
+	: QObject(parent),
+	m_app(app)
 {
-	m_undo_stack = window->m_undo_stack;
+	m_undo_stack = app->getUndoStack();
 
 	m_category_model = new ECategoryModel(this); // -> group
 	m_category_sort_proxy = new QSortFilterProxyModel(this); // -> model

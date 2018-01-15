@@ -49,11 +49,21 @@
    </item>
    <item>
     <widget class="QWidget" name="widget" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_6">
-      <item>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="1" column="2">
+       <widget class="QCheckBox" name="relative">
+        <property name="text">
+         <string>Relative</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
        <widget class="QLineEdit" name="path"/>
       </item>
-      <item>
+      <item row="0" column="2">
        <widget class="QPushButton" name="choose">
         <property name="text">
          <string>Choose</string>

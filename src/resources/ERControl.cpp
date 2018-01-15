@@ -14,11 +14,13 @@
 #include "OSGViewerWidget.h"
 #include "resources/ERFilterSortProxy.h"
 #include "CheckableListProxy.h"
+#include "VSimApp.h"
 
 #include <QDesktopServices>
 
-ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
+ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObject *parent)
 	: QObject(parent),
+	m_app(app),
 	m_window(window),
 	m_ers(nullptr),
 	m_categories(nullptr),
@@ -26,7 +28,7 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	m_global_proxy(nullptr),
 	m_local_proxy(nullptr)
 {
-	m_undo_stack = m_window->m_undo_stack;
+	m_undo_stack = m_app->getUndoStack();
 	m_global_box = m_window->ui->global;
 	m_local_box = m_window->ui->local;
 	m_display = m_window->erDisplay();
@@ -41,7 +43,7 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	m_local_proxy->showGlobal(false);
 	m_local_proxy->showLocal(true);
 
-	m_category_control = new ECategoryControl(m_window, nullptr);
+	m_category_control = new ECategoryControl(app, nullptr);
 
 	m_category_checkbox_model = new CheckableListProxy(this);
 	m_category_checkbox_model->setSourceModel(m_category_control->categoryModel());
@@ -62,7 +64,8 @@ ERControl::ERControl(QObject *parent, MainWindow *window, EResourceGroup *ers)
 	connect(m_global_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
 	connect(ui->editERButton, &QAbstractButton::clicked, this, &ERControl::editERInfo);
 	// open
-	connect(ui->global, &ERScrollBox::sOpen, this, &ERControl::openResource);
+	connect(m_local_box, &ERScrollBox::sOpen, this, &ERControl::openResource);
+	connect(m_global_box, &ERScrollBox::sOpen, this, &ERControl::openResource);
 
 	connect(m_local_box, &ERScrollBox::sSetPosition, this, &ERControl::setPosition);
 	connect(m_global_box, &ERScrollBox::sSetPosition, this, &ERControl::setPosition);
@@ -103,7 +106,7 @@ void ERControl::load(EResourceGroup *ers)
 
 void ERControl::newER()
 {
-	ERDialog dlg(m_category_control);
+	ERDialog dlg(m_category_control, m_app->getCurrentDirectory());
 
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
@@ -117,7 +120,6 @@ void ERControl::newER()
 	resource->setAuthor(dlg.getAuthor());
 	resource->setResourceDescription(dlg.getDescription());
 	resource->setResourcePath(dlg.getPath());
-	//resource->setResourceType(
 	resource->setGlobal(dlg.getGlobal());
 	resource->setCopyright(dlg.getCopyright());
 	resource->setMinYear(dlg.getMinYear());
@@ -126,7 +128,8 @@ void ERControl::newER()
 	resource->setAutoLaunch(dlg.getAutoLaunch());
 	resource->setLocalRange(dlg.getLocalRange());
 	resource->setERType(dlg.getERType());
-	resource->setCameraMatrix(m_window->m_osg_widget->getCameraMatrix());
+	resource->setCameraMatrix(m_app->getCameraMatrix());
+	resource->setCategory(dlg.getCategory());
 
 	m_undo_stack->push(new Group::AddNodeCommand(m_ers, resource));
 
@@ -164,7 +167,7 @@ void ERControl::editERInfo()
 	}
 	EResource *resource = m_ers->getResource(active_item);
 
-	ERDialog dlg(m_category_control);
+	ERDialog dlg(m_category_control, m_app->getCurrentDirectory());
 
 	dlg.init(resource);
 	int result = dlg.exec();
@@ -214,19 +217,23 @@ void ERControl::openResource()
 {
 	int index = getCombinedLastSelected();
 	if (index < 0) return;
-	EResource *res = dynamic_cast<EResource*>(m_ers->getChild(index));
+	EResource *res = m_ers->getResource(index);
+	if (!res) return;
 
 	m_display->setInfo(res);
 	m_display->show();
 
-	if (res->getERType() == EResource::FILE ||
-		res->getERType() == EResource::URL) {
-		qInfo() << "Attempting to open file:" << res->getResourcePath().c_str();
+	if (res->getERType() == EResource::FILE) {
+		QString path = m_app->getCurrentDirectory() + "/" + res->getResourcePath().c_str();
+		qInfo() << "Attempting to open file:" << path;
+		QDesktopServices::openUrl(QUrl(path));
+	}
+	else if (res->getERType() == EResource::URL) {
+		qInfo() << "Attempting to open url:" << res->getResourcePath().c_str();
 		QDesktopServices::openUrl(QUrl(res->getResourcePath().c_str()));
 	}
 
-	EResource *resource = m_ers->getResource(index);
-	m_window->getViewerWidget()->setCameraMatrix(resource->getCameraMatrix());
+	m_app->setCameraMatrix(res->getCameraMatrix());
 }
 
 void ERControl::setPosition()
@@ -240,7 +247,7 @@ void ERControl::setPosition()
 
 	EResource *resource = m_ers->getResource(active_item);
 	m_undo_stack->beginMacro("Set Resource Info");
-	m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
+	m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_app->getCameraMatrix()));
 	m_undo_stack->endMacro();
 }
 
@@ -253,7 +260,7 @@ void ERControl::gotoPosition()
 		return;
 	}
 	EResource *resource = m_ers->getResource(active_item);
-	m_window->getViewerWidget()->setCameraMatrix(resource->getCameraMatrix());
+	m_app->setCameraMatrix(resource->getCameraMatrix());
 }
 
 void ERControl::debug()
