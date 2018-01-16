@@ -552,12 +552,18 @@ void OSGViewerWidget::centerCursor()
 void OSGViewerWidget::takeCursor()
 {
 	grabMouse(Qt::BlankCursor);
-	centerCursor();	
+	centerCursor();
 }
 
 void OSGViewerWidget::releaseCursor()
 {
 	releaseMouse();
+
+	// Sometimes the cursor stays invisible on release, so poking it
+	// here refreshes it
+	QCursor current = cursor();
+	setCursor(Qt::BlankCursor);
+	setCursor(current);
 }
 
 osgGA::EventQueue* OSGViewerWidget::getEventQueue() const
