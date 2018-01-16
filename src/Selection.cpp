@@ -50,6 +50,7 @@ void Selection::add(int x)
 	if (m_selection.find(x) != m_selection.end()) return;
 	m_selection.insert(x);
 	emit sAdded(x);
+	emit sChanged();
 }
 
 void Selection::remove(int x)
@@ -60,6 +61,7 @@ void Selection::remove(int x)
 		m_last_selected = *m_selection.rbegin();
 	}
 	emit sRemoved(x);
+	emit sChanged();
 }
 
 void Selection::clear()
@@ -98,8 +100,11 @@ void Selection::shiftSelect(int next)
 	int left = std::min(prev, next);
 	int right = std::max(prev, next);
 	for (int i = left; i <= right; i++) {
-		add(i);
+		m_selection.insert(i);
+		emit sAdded(i);
 	}
+	m_last_selected = next;
+	emit sChanged();
 }
 
 int Selection::getLastSelected()

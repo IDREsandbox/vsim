@@ -72,6 +72,9 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	connect(m_local_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
 	connect(m_global_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
 
+	connect(m_local_box, &ERScrollBox::sSelectionChange, this, &ERControl::onSelectionChange);
+	connect(m_global_box, &ERScrollBox::sSelectionChange, this, &ERControl::onSelectionChange);
+
 	// mash the two selections together
 	connect(m_local_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
 		m_global_box->setSelection({}, -1);
@@ -220,9 +223,6 @@ void ERControl::openResource()
 	EResource *res = m_ers->getResource(index);
 	if (!res) return;
 
-	m_display->setInfo(res);
-	m_display->show();
-
 	if (res->getERType() == EResource::FILE) {
 		QString path = m_app->getCurrentDirectory() + "/" + res->getResourcePath().c_str();
 		qInfo() << "Attempting to open file:" << path;
@@ -232,9 +232,15 @@ void ERControl::openResource()
 		qInfo() << "Attempting to open url:" << res->getResourcePath().c_str();
 		QDesktopServices::openUrl(QUrl(res->getResourcePath().c_str()));
 	}
-
-	m_app->setCameraMatrix(res->getCameraMatrix());
 }
+
+//void ERControl::showResource()
+//{
+//	//m_display->setInfo(res);
+//	//m_display->show();
+//	//m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .3);
+//	//m_app->setCameraMatrix(res->getCameraMatrix());
+//}
 
 void ERControl::setPosition()
 {
@@ -261,6 +267,36 @@ void ERControl::gotoPosition()
 	}
 	EResource *resource = m_ers->getResource(active_item);
 	m_app->setCameraMatrix(resource->getCameraMatrix());
+}
+
+int i;
+void ERControl::onSelectionChange()
+{
+	QString whodunnit;
+	if (QObject::sender() == m_local_box) whodunnit = "local";
+	else whodunnit = "global";
+	qDebug() << "SELECTION CHANGE - " << i << whodunnit;
+	qDebug() << "NEW ACTIVE ITEM" << getCombinedLastSelected();
+	i++;
+
+	int new_active = getCombinedLastSelected();
+	if (new_active != m_active_item) {
+		// go to and set
+		m_active_item = new_active;
+	
+		EResource *res = m_ers->getResource(m_active_item);
+		if (!res) {
+			qDebug() << " - - - set to none";
+			m_display->setInfo(nullptr);
+			m_display->hide();
+			return;
+		}
+
+		qDebug() << " - - - set to memme" << m_active_item;
+		m_display->setInfo(res);
+		m_display->show();
+		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .3);
+	}
 }
 
 void ERControl::debug()
@@ -306,16 +342,16 @@ int ERControl::getCombinedLastSelected()
 	ERFilterSortProxy *proxy;
 	int last;
 	// use the sender to determine the last selected
-	if (sender == m_local_box) {
+	if (sender == m_local_box && m_local_box->getLastSelected() != -1) {
 		last = m_local_box->getLastSelected();
 		proxy = m_local_proxy;
 	}
-	else if (sender == m_global_box) {
+	else if (sender == m_global_box && m_global_box->getLastSelected() != -1) {
 		last = m_global_box->getLastSelected();
 		proxy = m_global_proxy;
 	}
 	else {
-		// just take whatever
+		// just take whatever is selected
 		if (m_local_box->getLastSelected() != -1) {
 			last = m_local_box->getLastSelected();
 			proxy = m_local_proxy;

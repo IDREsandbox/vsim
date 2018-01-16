@@ -261,9 +261,9 @@ osg::Matrixd Util::cameraMatrixInterp(osg::Matrixd m0, osg::Matrixd m1, double t
 	osg::Vec3d pos1 = m1.getTrans();
 
 	osg::Vec3d pos;
-	pos[0] = Util::simpleCubic(pos0[0], pos1[0], t);
-	pos[1] = Util::simpleCubic(pos0[1], pos1[1], t);
-	pos[2] = Util::simpleCubic(pos0[2], pos1[2], t);
+	pos[0] = Util::lerp(pos0[0], pos1[0], t);
+	pos[1] = Util::lerp(pos0[1], pos1[1], t);
+	pos[2] = Util::lerp(pos0[2], pos1[2], t);
 
 	// linear interpolation of yaw and pitch
 	double yaw0, pitch0, roll0;
@@ -278,9 +278,9 @@ osg::Matrixd Util::cameraMatrixInterp(osg::Matrixd m0, osg::Matrixd m1, double t
 
 	//qDebug() << "rollin" << yaw0 << pitch0 << roll0;
 
-	double pitch = Util::simpleCubic(pitch0, pitch1, t);
-	double yaw = Util::simpleCubic(yaw0, yaw1, t);
-	double roll = Util::simpleCubic(roll0, roll1, t);
+	double pitch = Util::lerp(pitch0, pitch1, t);
+	double yaw = Util::lerp(yaw0, yaw1, t);
+	double roll = Util::lerp(roll0, roll1, t);
 	osg::Quat rot = Util::YPRToQuat(yaw, pitch, roll);
 	
 

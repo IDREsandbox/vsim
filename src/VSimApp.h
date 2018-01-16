@@ -37,6 +37,8 @@ public:
 	bool initWithVSim(osg::Node *root);
 	bool init();
 
+	void update(float dt_sec);
+
 	void addModel(osg::Node *node, const std::string &name);
 	bool importModel(const std::string& filename); // TODO: more complicated logic with vsim
 	bool openVSim(const std::string& filename);
@@ -54,11 +56,11 @@ public:
 	void setStatusMessage(const QString &message, int timeout = 0);
 	osg::Matrixd getCameraMatrix() const;
 	void setCameraMatrix(const osg::Matrixd &matrix);
+	void setCameraMatrixSmooth(const osg::Matrixd &matrix, float time);
 
 	QUndoStack *getUndoStack() const;
 
 	void debugCamera();
-	void updateTime();
 
 	ModelTableModel *modelTable() const;
 	NarrativeControl *narrativeControl() const;
@@ -86,6 +88,10 @@ private:
 	NarrativeControl *m_narrative_control;
 	ERControl *m_er_control;
 	NarrativePlayer *m_narrative_player;
+
+	osg::Matrixd m_camera_start;
+	osg::Matrixd m_camera_target;
+	QTimer *m_camera_timer;
 };
 
 //extern VSimApp* g_vsimapp;

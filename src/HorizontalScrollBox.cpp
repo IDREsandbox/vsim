@@ -56,6 +56,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 		if (i >= m_items.size()) return;
 		m_items[i]->select(false);
 	});
+	connect(m_selection, &Selection::sChanged, this, &HorizontalScrollBox::sSelectionChange);
 }
 
 void HorizontalScrollBox::addItem(ScrollBoxItem *item)

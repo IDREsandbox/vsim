@@ -47,13 +47,17 @@ VSimApp::VSimApp(MainWindow* window)
 	m_undo_stack->setUndoLimit(50);
 
 	// timers
-	m_timer = new QTimer;
+	m_timer = new QTimer(this);
 	m_timer->setInterval(15);
 	m_timer->setSingleShot(false);
 	m_dt_timer = new QElapsedTimer;
 	m_timer->start();
 	m_dt_timer->start();
-	connect(m_timer, &QTimer::timeout, this, &VSimApp::updateTime);
+	connect(m_timer, &QTimer::timeout, this, [this]() {
+		double dt = m_dt_timer->nsecsElapsed() / 1.0e9;
+		m_dt_timer->restart();
+		update(dt);
+	});
 
 	m_narrative_control = new NarrativeControl(this, m_window);
 	m_er_control = new ERControl(this, m_window, m_root->resources(), this);
@@ -71,6 +75,12 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(m_narrative_player, &NarrativePlayer::hideCanvas, window->canvasView(), &labelCanvasView::hide);
 	connect(m_narrative_player, &NarrativePlayer::showCanvas, window->canvasView(), &labelCanvasView::fadeIn);
 
+	m_camera_timer = new QTimer(this);
+	connect(m_camera_timer, &QTimer::timeout, this, [this]() {
+		setCameraMatrix(m_camera_target);
+		qDebug() << "camera timer timout!!!";
+	});
+
 	initWithVSim(m_root);
 }
 
@@ -79,6 +89,20 @@ bool VSimApp::init()
 	setFileName("");
 	initWithVSim(new VSimRoot);
 	return true;
+}
+
+void VSimApp::update(float dt_sec)
+{
+	emit tick(dt_sec);
+	//qDebug() << "update";
+
+	// camera transition?
+	//qDebug() << "WEFIWEJFOWEIFJWEIOFJWEIOFJ #IO!$!@$";
+	if (m_camera_timer->isActive()) {
+		qDebug() << "timer";
+		float t = (1 - m_camera_timer->remainingTime() / (float)m_camera_timer->interval());
+		setCameraMatrix(Util::cameraMatrixInterp(m_camera_start, m_camera_target, Util::simpleCubic(0, 1, t)));
+	}
 }
 
 void VSimApp::setWindow(MainWindow *)
@@ -419,6 +443,17 @@ void VSimApp::setCameraMatrix(const osg::Matrixd & matrix)
 	m_window->getViewerWidget()->setCameraMatrix(matrix);
 }
 
+void VSimApp::setCameraMatrixSmooth(const osg::Matrixd & matrix, float time)
+{
+	qDebug() << "set camera matrix smooth";
+	m_camera_start = getCameraMatrix();
+	m_camera_target = matrix;
+	m_camera_timer->setInterval(time*1000);
+	m_camera_timer->setSingleShot(true);
+	m_camera_timer->start();
+	qDebug() << "is it really started?" << m_camera_timer->isActive();
+}
+
 QUndoStack *VSimApp::getUndoStack() const
 {
 	return m_undo_stack;
@@ -449,13 +484,6 @@ void VSimApp::debugCamera()
 	Util::quatToYPR(base.getRotate(), &yaw, &pitch, &roll);
 	qDebug() << yaw * M_PI/180 << pitch * M_PI / 180 << roll * M_PI / 180;
 
-}
-
-void VSimApp::updateTime()
-{
-	double dt = m_dt_timer->nsecsElapsed() / 1.0e9;
-	m_dt_timer->restart();
-	emit tick(dt);
 }
 
 ModelTableModel * VSimApp::modelTable() const

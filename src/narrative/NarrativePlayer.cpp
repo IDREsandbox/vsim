@@ -198,7 +198,8 @@ void NarrativePlayer::setCameraInTransition(double t)
 
 	osg::Matrixd new_matrix;
 	if (t >= 1) new_matrix = to->getCameraMatrix();
-	else new_matrix = Util::cameraMatrixInterp(from->getCameraMatrix(), to->getCameraMatrix(), t);
+
+	else new_matrix = Util::cameraMatrixInterp(from->getCameraMatrix(), to->getCameraMatrix(), Util::simpleCubic(0, 1, t));
 	//std::cout << Util::camMatHerm(t, source_node->getCameraMatrix(), dest_node->getCameraMatrix()) << endl;
 
 	emit updateCamera(new_matrix);

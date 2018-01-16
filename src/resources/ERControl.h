@@ -31,9 +31,12 @@ public:
 	void newER();
 	void deleteER();
 	void editERInfo();
-	void openResource();
+	void openResource(); // open the file
 	void setPosition();
 	void gotoPosition();
+
+	// show and goto resource
+	void onSelectionChange();
 
 	void debug();
 
@@ -48,6 +51,7 @@ private:
 	osg::ref_ptr<EResourceGroup> m_ers;
 	osg::ref_ptr<ECategoryGroup> m_categories;
 
+	int m_active_item;
 	ERDisplay *m_display;
 	ERFilterArea *m_filter_area;
 
