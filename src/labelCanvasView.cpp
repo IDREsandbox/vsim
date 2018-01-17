@@ -8,21 +8,22 @@ labelCanvasView::labelCanvasView(QWidget *parent)
 	m_base_height(720)
 {
 	m_scene = new QGraphicsScene(parent);
-	m_canvas = new labelCanvas(this);
-	m_fadeout_canvas = new labelCanvas(this);
+	m_canvas = new labelCanvas();
+	m_fadeout_canvas = new labelCanvas();
 	this->setScene(m_scene);
 
 	this->setStyleSheet("background: transparent");
-	m_canvas->setStyleSheet("background: transparent");
-	m_fadeout_canvas->setStyleSheet("background: transparent");
+	m_canvas->setStyleSheet("background: rgba(255,0,0,100);");
+	m_fadeout_canvas->setStyleSheet("background: rgba(0,255,0,100);");
+
+	m_scene->addWidget(m_canvas);
+	m_scene->addWidget(m_fadeout_canvas);
+	m_canvas->show();
 
 	this->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-	m_scene->addWidget(m_canvas);
-	m_scene->addWidget(m_fadeout_canvas);
 
 	m_fade = new QGraphicsOpacityEffect(this);
 	m_fade->setOpacity(1.0);

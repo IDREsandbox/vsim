@@ -64,6 +64,10 @@ EResource::EResource(const EResourcesNode *er, const std::map<std::string, ECate
 	auto it = cats.find(er->getCategoryName());
 	if (it != cats.end()) cat = it->second;
 
+	if (er->getMinYear() != 0 || er->getMaxYear() != 0) {
+		qDebug() << "- nonzero resource year:" << QString::fromStdString(er->getResourceName()) << m_min_year << m_max_year;
+	}
+
 	m_category = cat;
 }
 

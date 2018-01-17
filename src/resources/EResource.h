@@ -71,9 +71,9 @@ public:
 	void setLocalRange(float lrange);
 
 	enum ERType {
+		FILE,
 		URL,
-		ANNOTATION,
-		FILE
+		ANNOTATION
 	};
 	ERType getERType() const;
 	void setERType(ERType ertype);

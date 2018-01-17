@@ -84,7 +84,6 @@ MainWindow::MainWindow(QWidget *parent)
 	//QWidget *filter_area_padding_layout = new QGridLayout();
 	//middle_layout->addLayout(filter_area_padding_layout, 0, 0);
 	m_er_filter_area = new ERFilterArea(ui->middleSpacer);
-	m_er_filter_area->move(100, 100);
 	m_er_filter_area->setObjectName("erFilterArea");
 	m_er_filter_area->hide();
 	middle_layout->addWidget(m_er_filter_area, 0, 0, Qt::AlignLeft | Qt::AlignBottom);
