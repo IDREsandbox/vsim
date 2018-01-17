@@ -36,12 +36,7 @@ void TimeSlider::setGroup(ModelGroup * group)
 		return;
 	}
 	connect(m_group, &ModelGroup::sYearChange, this, &TimeSlider::onYearChange);
-	connect(m_group, &ModelGroup::sUserValueChanged, this,
-		[this](osg::Node *node, std::string name) {
-			if (name == "yearBegin" || name == "yearEnd") {
-				onRangeChange();
-			}
-		});
+	connect(m_group, &ModelGroup::sNodeYearChanged, this, &TimeSlider::onRangeChange);
 	connect(m_group, &ModelGroup::sTimeEnableChange, this, &TimeSlider::onTimeEnableChange);
 
 	setEnabled(true);

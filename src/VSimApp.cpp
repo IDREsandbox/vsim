@@ -38,7 +38,7 @@ VSimApp::VSimApp(MainWindow* window)
 	: m_window(window),
 	m_filename(""),
 	m_root(new VSimRoot),
-	m_model_table_model(new ModelTableModel(m_root->models(), this))
+	m_model_table_model(new ModelTableModel(this))
 {
 	m_viewer = window->getViewer();
 

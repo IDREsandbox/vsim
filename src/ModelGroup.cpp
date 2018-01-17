@@ -24,6 +24,22 @@ void ModelGroup::merge(ModelGroup *other)
 	}
 }
 
+void ModelGroup::setNodeYear(osg::Node *node, int year, bool begin)
+{
+	std::string prop;
+	if (begin) prop = "yearBegin";
+	else prop = "yearEnd";
+
+	if (year == 0) {
+		osg::UserDataContainer *cont = node->getUserDataContainer();
+		cont->removeUserObject(cont->getUserObjectIndex(prop));
+	}
+	else {
+		node->setUserValue(prop, year);
+	}
+	emit sNodeYearChanged(node, year, begin);
+}
+
 int ModelGroup::getYear() const
 {
 	return m_year;
@@ -81,13 +97,9 @@ bool ModelGroup::addChild(osg::Node *child)
 	if (!ok) return false;
 
 	// time init the child
-	TimeInitVisitor v; // check for T: start end
+	TimeInitVisitor v(this); // check for T: start end
 	child->accept(v);
 
-	Group::sNew(getNumChildren() - 1);
-
-	// FIXME HACK: this should actually be like 10x signals, one for each change, but since the gui just rescans everything...
-	emit sUserValueChanged(this, "yearBegin");
 	return true;
 }
 
@@ -103,26 +115,29 @@ bool ModelGroup::nodeTimeInName(const std::string & name, int * begin, int * end
 	return false;
 }
 
-TimeInitVisitor::TimeInitVisitor()
-	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+TimeInitVisitor::TimeInitVisitor(ModelGroup * group)
+	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),
+	m_group(group)
 {
 }
+
 void TimeInitVisitor::apply(osg::Group &group)
 {
 	for (uint i = 0; i < group.getNumChildren(); i++) {
-		touch(group.getChild(i));
+		touch(m_group, group.getChild(i));
 	}
 	traverse(group);
 }
-void TimeInitVisitor::touch(osg::Node *node) {
+
+void TimeInitVisitor::touch(ModelGroup *group, osg::Node *node) {
 	int begin, end;
 	bool match = ModelGroup::nodeTimeInName(node->getName(), &begin, &end);
 	if (match) {
 		if (begin != 0) {
-			node->setUserValue("yearBegin", begin);
+			group->setNodeYear(node, begin, true);
 		}
 		if (end != 0) {
-			node->setUserValue("yearEnd", end);
+			group->setNodeYear(node, end, false);
 		}
 	}
 }

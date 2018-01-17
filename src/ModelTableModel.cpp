@@ -3,15 +3,22 @@
 #include <QDebug>
 #include <osg/ValueObject>
 
-ModelTableModel::ModelTableModel(ModelGroup *group, QObject *parent)
-	: QAbstractItemModel(parent),
-	m_group(nullptr)
+ModelTableModel::ModelTableModel(QObject *parent)
+	: GroupModel(parent),
+	m_model_group(nullptr)
 {
-	setGroup(group);
 }
 
-ModelTableModel::~ModelTableModel()
+void ModelTableModel::setGroup(Group * group)
 {
+	// check type
+	ModelGroup *model_group = dynamic_cast<ModelGroup*>(group);
+	if (!model_group) {
+		m_model_group = nullptr;
+		GroupModel::setGroup(nullptr);
+		return;
+	}
+	GroupModel::setGroup(group);
 }
 
 int ModelTableModel::columnCount(const QModelIndex &parent) const
@@ -25,7 +32,7 @@ QVariant ModelTableModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 
 	if (role != Qt::DisplayRole && role != Qt::EditRole)
-		return QVariant();
+		return GroupModel::data(index, role);
 
 	// 0: Name, 1: ClassName
 	osg::Node *node = getNode(index);
@@ -70,7 +77,7 @@ Qt::ItemFlags ModelTableModel::flags(const QModelIndex &index) const
 			return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
 	// check if actually editable
-	
+
 	return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
 	//return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }
@@ -89,26 +96,16 @@ bool ModelTableModel::setData(const QModelIndex & index, const QVariant & value,
 		// TODO make command?
 		node->setName(value.toString().toStdString());
 		// If the name has time values, then apply those
-		TimeInitVisitor::touch(node);
-		m_group->sUserValueChanged(node, "yearBegin"); // send an update the gui when name changes
+		TimeInitVisitor::touch(m_model_group, node);
 		break;
 	case 1:
 		return false;
 		break;
 	case 2:
+		m_model_group->setNodeYear(node, value.toInt(), true);
+		break;
 	case 3:
-		if (col == 2) prop = "yearBegin";
-		else prop = "yearEnd";
-		qDebug() << "set value" << QString::fromStdString(prop) << value;
-		int val = value.toInt();
-		if (!value.isValid() || val == 0) {
-			removeUserValue(node, prop);
-			m_group->sUserValueChanged(node, prop);
-			return true;
-		}
-		node->setUserValue(prop, val);
-		m_group->sUserValueChanged(node, prop);
-		return true;
+		m_model_group->setNodeYear(node, value.toInt(), false);
 		break;
 	}
 	return false;
@@ -130,113 +127,22 @@ QVariant ModelTableModel::headerData(int section, Qt::Orientation orientation, i
 			return QVariant();
 		}
 	}
-	
 	return QVariant();
 }
 
-QModelIndex ModelTableModel::index(int row, int column, const QModelIndex &parent) const
+void ModelTableModel::connectGroup(Group * g)
 {
-	if (!hasIndex(row, column, parent))	return QModelIndex();
+	m_model_group = dynamic_cast<ModelGroup*>(g);
+	if (!m_model_group) return;
 
-	osg::Node *pnode = getNode(parent);
-	osg::Group *pgroup = pnode->asGroup();
-	
-	// osg::Nodes have no child tables because the data of this node 
-	// is stored in their parent table
-	if (!pgroup) {
-		return QModelIndex();
-	}
-
-	// get the nth child
-	osg::Node *child = pgroup->getChild(row);
-
-	if (column >= 4) return QModelIndex();
-
-	//qDebug() << "CREATE INDEX" << row << column << child;
-	return createIndex(row, column, child);
-}
-
-QModelIndex ModelTableModel::parent(const QModelIndex &index) const
-{
-	if (!index.isValid()) return QModelIndex();
-
-	osg::Node *node = getNode(index);
-	if (node == m_group) {
-		qDebug() << "does this happen?";
-		return QModelIndex();
-	}
-
-	osg::Group *parent = node->getParent(0);
-
-	return indexOf(parent);
-}
-
-int ModelTableModel::rowCount(const QModelIndex &parent) const
-{
-	osg::Group *group;
-	if (!parent.isValid()) {
-		// do fun stuff
-		group = m_group;
-		//qDebug() << "root children count";
-	}
-	else {
-		osg::Node *node = getNode(parent);
-		group = node->asGroup();
-	}
-	if (!group) return 0;
-
-	return group->getNumChildren();
-}
-
-QModelIndex ModelTableModel::indexOf(osg::Node *node) const
-{
-	if (node == nullptr) {
-		qDebug() << "null indexof";
-		return QModelIndex();
-	}
-
-	// Is this the root?
-	ModelGroup *mg = dynamic_cast<ModelGroup*>(node);
-	if (mg) {
-		return QModelIndex();
-	}
-
-	size_t row = 0;
-	node->getParent(0)->getChildIndex(node);
-
-	return createIndex(row, 0, node);
-}
-
-osg::Node * ModelTableModel::getNode(QModelIndex index) const
-{
-	if (!index.isValid()) return m_group;
-	osg::Node *node = static_cast<osg::Node*>(index.internalPointer());
-	return node;
-}
-
-void ModelTableModel::setGroup(ModelGroup * group)
-{
-	if (m_group != nullptr) disconnect(m_group, 0, this, 0);
-	beginResetModel();
-	m_group = group;
-
-	// listen to new signals
-	connect(group, &Group::sNew, [this]() {
-		emit layoutAboutToBeChanged();
-		emit layoutChanged();
+	connect(m_model_group, &ModelGroup::sNodeYearChanged, this,
+		[this](osg::Node *node, int year, bool begin) {
+		QModelIndex index = indexOf(node);
+		int column = begin ? 2 : 3;
+		QModelIndex outIndex = this->index(index.row(), column, index.parent());
+		emit dataChanged(outIndex, outIndex, { Qt::DisplayRole, Qt::EditRole });
 	});
-
-	endResetModel();
 }
 
-void ModelTableModel::removeUserValue(osg::Node *node, const std::string & name)
-{
-	osg::UserDataContainer *cont = node->getUserDataContainer();
-	if (!cont) {
-		qDebug() << "removing user value" << QString::fromStdString(name) << "container is null";
-		return;
-	}
-	cont->removeUserObject(cont->getUserObjectIndex(name));
-}
 
 

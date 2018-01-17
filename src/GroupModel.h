@@ -1,8 +1,8 @@
 #ifndef GROUPMODEL_H
 #define GROUPMODEL_H
 
-#include <functional>
 #include <QAbstractItemModel>
+#include <osg/Node>
 
 class Group;
 
@@ -22,6 +22,12 @@ public:
 	}
 
 	GroupModel(QObject *parent);
+	virtual void setGroup(Group *group);
+
+	// tree like
+	void setHierarchal(bool hierarchal);
+	osg::Node *getNode(const QModelIndex &index) const;
+	QModelIndex indexOf(osg::Node *node) const;
 
 	// overrides
 	//virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -33,8 +39,6 @@ public:
 	virtual QVariant data(const QModelIndex &index, int role) const override;
 	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-	void setGroup(Group *group);
-
 	// dynamic definition
 	//typedef std::function<QVariant(const Group*, int, Qt::ItemDataRole)> GetterFunc;
 	//void addColumn(GetterFunc getter);
@@ -42,13 +46,11 @@ public:
 	// list of stuff
 	// addColumn(type?, name, getter, setter, flags);
 
-	virtual int itemType(int index) const;
-
 protected:
-	//int m_num_columns;
-	//std::vector<int> m_types;
-	//std::vector<GetterFunc> m_getters;
+	virtual void connectGroup(Group *g);
 
 	Group *m_group;
+
+	bool m_hierarchal;
 };
 #endif

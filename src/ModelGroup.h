@@ -18,6 +18,9 @@ public:
 	// merge another model group
 	void merge(ModelGroup *other);
 
+	// node edit
+	void setNodeYear(osg::Node *node, int year, bool begin);
+
 	// Set the year to view, hides/shows models accordingly
 	// 0 shows all models
 	int getYear() const;
@@ -35,7 +38,7 @@ signals:
 	void sTimeEnableChange(bool enabled);
 	void sYearChange(int year);
 
-	void sUserValueChanged(osg::Node *node, std::string name);
+	void sNodeYearChanged(osg::Node *node, int year, bool begin);
 
 private:
 	int m_year;
@@ -84,10 +87,11 @@ private:
 // based on names
 class TimeInitVisitor : public osg::NodeVisitor {
 public:
-	TimeInitVisitor();
+	TimeInitVisitor(ModelGroup *group);
 	virtual void apply(osg::Group &node) override;
-	static void touch(osg::Node *node);
+	static void touch(ModelGroup *group, osg::Node *node);
 private:
+	ModelGroup * m_group;
 	int m_year;
 };
 
