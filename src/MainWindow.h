@@ -9,6 +9,7 @@
 #include <QDropEvent>
 #include <QUndoStack>
 #include <osgViewer/Viewer>
+#include <QActionGroup>
 
 namespace Ui { class MainWindow; }
 
@@ -28,7 +29,10 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow(QWidget* parent = nullptr);
+
+	// app connection
 	void setApp(VSimApp *vsim);
+	void onReset();
 
 	// linking
 	OSGViewerWidget *getViewerWidget() const;
@@ -95,6 +99,11 @@ public:
 	ERFilterArea *m_er_filter_area;
 	ModelOutliner *m_outliner;
 	TimeSlider *m_time_slider;
+
+	QActionGroup *m_navigation_action_group;
+	QAction *m_action_first_person;
+	QAction *m_action_flight;
+	QAction *m_action_object;
 };
 
 #endif // MAINWINDOW_H

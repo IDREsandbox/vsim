@@ -40,6 +40,7 @@ public:
 	};
 
 	void setNavigationMode(NavigationMode);
+	void setNavigationModeInternal(NavigationMode);
 	NavigationMode getNavigationMode() const;
 	NavigationMode getActualNavigationMode() const; // if frozen returns NAVIGATION_SIMPLE
 
@@ -49,7 +50,7 @@ public:
 	bool getCameraFrozen() const;
 	void enableNavigation(bool enable);
 
-	void figureOutNavigation();
+	void stopNavigation();
 
 	void flightStartStrafe();
 	void flightStopStrafe();
@@ -64,6 +65,9 @@ public:
 
 signals:
 	void frame(double dt_sec);
+
+	void sNavigationModeChanged(NavigationMode);
+	void sCameraFrozen(bool);
 
 protected:
 	virtual void paintEvent(QPaintEvent* paintEvent);

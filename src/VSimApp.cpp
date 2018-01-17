@@ -72,13 +72,10 @@ VSimApp::VSimApp(MainWindow* window)
 	//connect(this, &VSimApp::foo, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 	connect(this, &VSimApp::tick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 	connect(m_narrative_player, &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
-	connect(m_narrative_player, &NarrativePlayer::hideCanvas, window->canvasView(), &labelCanvasView::hide);
-	connect(m_narrative_player, &NarrativePlayer::showCanvas, window->canvasView(), &labelCanvasView::fadeIn);
 
 	m_camera_timer = new QTimer(this);
 	connect(m_camera_timer, &QTimer::timeout, this, [this]() {
 		setCameraMatrix(m_camera_target);
-		qDebug() << "camera timer timout!!!";
 	});
 
 	initWithVSim(m_root);
@@ -94,14 +91,13 @@ bool VSimApp::init()
 void VSimApp::update(float dt_sec)
 {
 	emit tick(dt_sec);
-	//qDebug() << "update";
 
-	// camera transition?
-	//qDebug() << "WEFIWEJFOWEIFJWEIOFJWEIOFJ #IO!$!@$";
+	// Smooth camera updates
 	if (m_camera_timer->isActive()) {
-		qDebug() << "timer";
 		float t = (1 - m_camera_timer->remainingTime() / (float)m_camera_timer->interval());
 		setCameraMatrix(Util::cameraMatrixInterp(m_camera_start, m_camera_target, Util::simpleCubic(0, 1, t)));
+		//setCameraMatrix(Util::cameraMatrixInterp(m_camera_start, m_camera_target, t));
+
 	}
 }
 
@@ -139,7 +135,8 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 
 	// dereference the old root, apply the new one
 	m_root = root;
-	
+
+	emit sReset();
 	return true;
 }
 
@@ -445,13 +442,11 @@ void VSimApp::setCameraMatrix(const osg::Matrixd & matrix)
 
 void VSimApp::setCameraMatrixSmooth(const osg::Matrixd & matrix, float time)
 {
-	qDebug() << "set camera matrix smooth";
 	m_camera_start = getCameraMatrix();
 	m_camera_target = matrix;
 	m_camera_timer->setInterval(time*1000);
 	m_camera_timer->setSingleShot(true);
 	m_camera_timer->start();
-	qDebug() << "is it really started?" << m_camera_timer->isActive();
 }
 
 QUndoStack *VSimApp::getUndoStack() const

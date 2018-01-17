@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
 	std::string startup = "assets/default.vsim";
 	if (argc >= 2) {
 		startup = argv[1];
+		qDebug() << "startup set to" << QString::fromStdString(startup);
 	}
 
 	QApplication a(argc, argv);

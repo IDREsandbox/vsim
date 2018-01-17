@@ -26,6 +26,7 @@ public:
 	void setSelection(int index);
 
 	void setSlide(NarrativeSlide *slide);
+	NarrativeSlide *getSlide() const;
 
 	void insertNewLabel(int index);
 	void deleteLabel(int index);
@@ -49,7 +50,6 @@ public:
 	int lastSelected = 0;
 
 	NarrativeSlide *m_slide;
-
 };
 
 #endif // LABELCANVAS_H

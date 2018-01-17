@@ -275,8 +275,6 @@ void ERControl::onSelectionChange()
 	QString whodunnit;
 	if (QObject::sender() == m_local_box) whodunnit = "local";
 	else whodunnit = "global";
-	qDebug() << "SELECTION CHANGE - " << i << whodunnit;
-	qDebug() << "NEW ACTIVE ITEM" << getCombinedLastSelected();
 	i++;
 
 	int new_active = getCombinedLastSelected();
@@ -286,13 +284,13 @@ void ERControl::onSelectionChange()
 	
 		EResource *res = m_ers->getResource(m_active_item);
 		if (!res) {
-			qDebug() << " - - - set to none";
+			qInfo() << "Hide ER display";
 			m_display->setInfo(nullptr);
 			m_display->hide();
 			return;
 		}
 
-		qDebug() << " - - - set to memme" << m_active_item;
+		qInfo() << "Set ER display to :" << m_active_item;
 		m_display->setInfo(res);
 		m_display->show();
 		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .3);
@@ -301,16 +299,16 @@ void ERControl::onSelectionChange()
 
 void ERControl::debug()
 {
-	qDebug() << "Debugging ERControl";
-	qDebug() << "local proxy - ";
+	qInfo() << "Debugging ERControl";
+	qInfo() << "local proxy - ";
 	m_local_proxy->debug();
-	qDebug() << "global proxy - ";
+	qInfo() << "global proxy - ";
 	m_global_proxy->debug();
 
-	qDebug() << "Categories";
+	qInfo() << "Categories";
 	for (unsigned int i = 0; i < m_categories->getNumChildren(); i++) {
 		ECategory *cat = m_categories->category(i);
-		qDebug() << i << ":" << "node" << (void*)m_categories->child(i) <<
+		qInfo() << i << ":" << "node" << (void*)m_categories->child(i) <<
 			"cat" << (void*)cat << QString::fromStdString(cat->getCategoryName()) << cat->getColor();
 	}
 }

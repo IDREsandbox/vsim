@@ -13,7 +13,7 @@ FlightManipulator::FlightManipulator()
 	// parameters
 	setSensitivity(45.0);
 	m_acceleration = 4.0;
-	m_strafe_speed = 1.5;
+	m_strafe_speed = 2.0;
 	//m_strafe_sensitivity = .01;
 	//m_strafe_smoothing = .01;
 }

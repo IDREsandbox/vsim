@@ -97,15 +97,12 @@ void ERDialog::init(const EResource * er)
 
 	switch (er->getERType()) {
 	case EResource::FILE:
-		qDebug() << "load file ----";
 		ui.file->setChecked(true);
 		break;
 	case EResource::ANNOTATION:
-		qDebug() << "load annooo ----";
 		ui.annotation->setChecked(true);
 		break;
 	case EResource::URL:
-		qDebug() << "load uerll ----";
 		ui.url->setChecked(true);
 		break;
 	}

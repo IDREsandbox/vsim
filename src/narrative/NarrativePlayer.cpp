@@ -5,6 +5,7 @@
 
 #include "narrative/NarrativeControl.h"
 #include "narrative/NarrativeSlide.h"
+#include "labelCanvasView.h"
 
 #include <osg/io_utils>
 
@@ -15,7 +16,7 @@ NarrativePlayer::NarrativePlayer(QObject *parent, NarrativeControl *narratives)
 	m_slide_time_sec(0),
 	m_expect_selection_change(false)
 {
-	connect(m_narratives, &NarrativeControl::selectionChanged, this, &NarrativePlayer::editEvent);
+	connect(m_narratives, &NarrativeControl::sEditEvent, this, &NarrativePlayer::editEvent);
 }
 void NarrativePlayer::update(double dt_sec)
 {
@@ -52,22 +53,22 @@ void NarrativePlayer::update(double dt_sec)
 
 void NarrativePlayer::rightArrow()
 {
-	next(FORWARD);
+	next();
 }
 
 void NarrativePlayer::leftArrow()
 {
-	next(BACKWARD);
+	//next(false);
 }
 
-//void NarrativePlayer::leftClick()
-//{
-//	next(FORWARD);
-//}
+void NarrativePlayer::leftClick()
+{
+	next();
+}
 
 void NarrativePlayer::timerExpire()
 {
-	next(FORWARD);
+	next();
 }
 
 void NarrativePlayer::editEvent()
@@ -79,8 +80,7 @@ void NarrativePlayer::editEvent()
 	// update camera and everything
 	NarrativeSlide *slide = m_narratives->getCurrentSlide();
 	qDebug() << "edit event - current slide" << m_narratives->getCurrentSlideIndex();
-	if (slide) {
-		qDebug() << "update camera";
+	if (slide) {;
 		updateCamera(slide->getCameraMatrix());
 	}
 
@@ -91,7 +91,7 @@ void NarrativePlayer::play()
 {
 	if (m_state == ATNODE && m_narratives->getCurrentSlide()->getStayOnNode()) {
 		qDebug() << "play - continue";
-		next(FORWARD);
+		next();
 		return;
 	}
 	if (m_state == STOPPED) {
@@ -107,34 +107,9 @@ void NarrativePlayer::stop()
 	toStopped();
 }
 
-void NarrativePlayer::next(Advance dir)
+void NarrativePlayer::next()
 {
 	qInfo() << "Narrative Player - next";
-	int si = m_narratives->getCurrentSlideIndex(); // current slide index
-	int si2; // next slide index
-
-	if (m_state == ATNODE) {
-		if (dir == BACKWARD) si2 = si; // don't change slide
-		else si2 = si + 1; // do change slide
-
-	}
-	else if (m_state == TRANSITIONING) {
-		if (dir == BACKWARD) si2 = si - 1; // don't change slide
-		else si2 = si; // do change slide
-
-	}
-
-	// change the slide if necessary
-	if (si != si2) {
-		qDebug() << "have to change the slide";
-		bool ok = setSlide(si2);
-		if (!ok) {
-			// this happens if we're at the beginning or end
-			qDebug() << "failed to change slide, stopping";
-			toStopped();
-			return;
-		}
-	}
 
 	if (m_state == ATNODE) {
 		toTransitioning();
@@ -146,14 +121,23 @@ void NarrativePlayer::next(Advance dir)
 
 void NarrativePlayer::toTransitioning()
 {
-	emit hideCanvas();
+	bool ok = advanceSlide(true);
+
+	if (!ok) {
+		// couldn't advance
+		qDebug() << "failed to change slide, stopping";
+		toStopped();
+		return;
+	}
+
+	hideCanvas();
 	m_slide_time_sec = 0;
 	m_state = TRANSITIONING;
 }
 
 void NarrativePlayer::toAtNode()
 {
-	emit showCanvas();
+	showCanvas();
 	emit updateCamera(m_narratives->getCurrentSlide()->getCameraMatrix());
 	m_slide_time_sec = 0;
 	m_state = ATNODE;
@@ -164,25 +148,29 @@ void NarrativePlayer::toStopped()
 	if (m_state == STOPPED) return;
 	qDebug() << "to stopped";
 	m_state = STOPPED;
-	emit showCanvas();
+	showCanvas();
 	emit enableNavigation(true);
 }
 
-bool NarrativePlayer::setSlide(int index)
+bool NarrativePlayer::advanceSlide(bool forward)
 {
-	// set the slide while edit event
-	int ni = m_narratives->getCurrentNarrativeIndex();
-	NarrativeSlide *slide = m_narratives->getSlide(ni, index);
-	if (slide == nullptr) return false;
-
+	// try to advance the narrative control
 	m_expect_selection_change = true;
-	m_narratives->selectSlides(ni, {index});
+	bool ok = m_narratives->advanceSlide(forward);
 	m_expect_selection_change = false;
-
+	if (!ok) return false;
 	return true;
-	//return m_narratives->openSlide(m_ni, index);
 }
 
+void NarrativePlayer::hideCanvas()
+{
+	m_narratives->hideCanvas(true);
+}
+
+void NarrativePlayer::showCanvas()
+{
+	m_narratives->showCanvas(false);
+}
 void NarrativePlayer::setCameraInTransition(double t)
 {
 	int m_current_slide = m_narratives->getCurrentSlideIndex();

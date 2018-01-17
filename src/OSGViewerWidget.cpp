@@ -138,39 +138,37 @@ void OSGViewerWidget::setCameraMatrix(osg::Matrixd m)
 void OSGViewerWidget::setNavigationMode(NavigationMode mode)
 {
 	if (m_navigation_disabled) return;
-	
+
+	m_camera_frozen = false;
+	m_navigation_mode = mode;
+	setNavigationModeInternal(mode);
+	emit sCameraFrozen(false);
+	emit sNavigationModeChanged(mode);
+}
+
+void OSGViewerWidget::setNavigationModeInternal(NavigationMode mode)
+{
 	osg::Matrixd old_matrix = getCameraMatrix();
 
 	osgGA::CameraManipulator *new_manipulator;
 	switch (mode) {
 	case NAVIGATION_SIMPLE:
-		qInfo() << "Navigation mode set to Simple";
 		new_manipulator = m_simple_manipulator;
 		break;
 	case NAVIGATION_FIRST_PERSON:
-		qInfo() << "Navigation mode set to First Person";
 		new_manipulator = m_first_person_manipulator;
 		m_first_person_manipulator->stop();
 		break;
 	case NAVIGATION_FLIGHT:
-		qInfo() << "Navigation mode set to Flight";
 		new_manipulator = m_flight_manipulator;
 		m_flight_manipulator->stop();
 		break;
 	case NAVIGATION_OBJECT:
 	default:
-		qInfo() << "Navigation mode set to Object";
 		new_manipulator = m_object_manipulator;
 		m_object_manipulator->finishAnimation(); // same as stop
 		break;
 	}
-
-	m_navigation_mode = mode;
-
-	if (m_camera_frozen) {
-		return;
-	}
-
 	if (mode == NAVIGATION_FIRST_PERSON) {
 		takeCursor();
 	}
@@ -204,9 +202,17 @@ void OSGViewerWidget::adjustSpeed(int tick)
 void OSGViewerWidget::setCameraFrozen(bool freeze)
 {
 	if (m_navigation_disabled) return;
+	qDebug() << "set freeze:" << freeze << "current:" << m_camera_frozen;
 	m_camera_frozen = freeze;
 	setFocus();
-	figureOutNavigation();
+	if (freeze) {
+		setNavigationModeInternal(NAVIGATION_SIMPLE);
+		emit sCameraFrozen(true);
+	}
+	else {
+		setNavigationModeInternal(m_navigation_mode);
+		emit sCameraFrozen(false);
+	}
 }
 
 bool OSGViewerWidget::getCameraFrozen() const
@@ -218,26 +224,18 @@ void OSGViewerWidget::enableNavigation(bool enable)
 {
 	qDebug() << "ENABLE NAVIGATION" << enable;
 	m_navigation_disabled = !enable;
-	figureOutNavigation();
+	setNavigationModeInternal(NAVIGATION_SIMPLE);
 }
 
-void OSGViewerWidget::figureOutNavigation()
+void OSGViewerWidget::stopNavigation()
 {
-	if (m_navigation_disabled || m_camera_frozen) {
-		qInfo() << "Camera freeze";
-		osg::Matrixd old_matrix = getCameraMatrix();
-		viewer_->setCameraManipulator(m_simple_manipulator);
-		setCameraMatrix(old_matrix);
-		releaseCursor();
+	qInfo() << "Camera stop";
+	setNavigationModeInternal(NAVIGATION_SIMPLE);
 
-		// stop all manipulator momentum
-		m_first_person_manipulator->stop();
-		m_flight_manipulator->stop();
-		m_object_manipulator->finishAnimation();
-	}
-	else {
-		setNavigationMode(m_navigation_mode);
-	}
+	// stop all manipulator momentum
+	m_first_person_manipulator->stop();
+	m_flight_manipulator->stop();
+	m_object_manipulator->finishAnimation();
 }
 
 void OSGViewerWidget::flightStartStrafe()

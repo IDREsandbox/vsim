@@ -240,6 +240,7 @@ const ECategory *EResource::getCategory() const
 { 
 	return m_category.get(); 
 }
+
 void EResource::setCategory(ECategory *category) 
 {
 	ECategory *old_cat = m_category.get();

@@ -38,7 +38,8 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 {
 	m_narrative_box = window->topBar()->ui.narratives;
 	m_slide_box = window->topBar()->ui.slides;
-	m_canvas = window->m_drag_area;
+	m_canvas = window->canvas();
+	m_canvas_view = window->canvasView();
 	m_undo_stack = m_app->getUndoStack();
 
 	connect(m_window, &MainWindow::sEditStyleSettings, this, &NarrativeControl::editStyleSettings);
@@ -367,7 +368,7 @@ void NarrativeControl::setNarrative(int index)
 		m_current_slide = -1;
 		this->m_window->topBar()->showNarratives();
 		m_canvas->clearCanvas();
-		emit selectionChanged();
+		emit sEditEvent();
 		return;
 	}
 
@@ -380,10 +381,10 @@ void NarrativeControl::setNarrative(int index)
 	m_slide_box->setGroup(nar);
 	this->exitEdit();
 
-	emit selectionChanged();
+	emit sEditEvent();
 }
 
-bool NarrativeControl::setSlide(int index)
+bool NarrativeControl::setSlide(int index, bool instant)
 {
 	if (m_current_slide == index) return true;
 	qDebug() << "Narrative Control - set slide" << index;
@@ -393,17 +394,107 @@ bool NarrativeControl::setSlide(int index)
 	}
 	NarrativeSlide *slide = getSlide(m_current_narrative, index);
 	if (!slide) {
+		m_canvas_view->setSlide(nullptr, instant);
 		m_current_slide = -1;
-		m_canvas->clearCanvas();
 		return false;
 	}
 
-	m_current_slide = index;
+	// is this index selected? force selection
+	std::set<int> sel = m_slide_box->getSelection();
+	if (sel.find(index) == sel.end()) {
+		m_slide_box->setSelection({index}, index);
+	}
 
-	m_canvas->setSlide(slide);
-	emit selectionChanged();
+	m_current_slide = index;
+	m_canvas_view->setSlide(slide, instant);
+
+	//emit sEditEvent();
 	return true;
 }
+
+//bool NarrativeControl::advance(bool forward)
+//{
+//	SelectionLevel level = getSelectionLevel();
+//	int i;
+//	int next;
+//	if (level == NARRATIVES) {
+//		i = m_narrative_box->getLastSelected();
+//		if (i < 0) next = 0;
+//		else {
+//			if (forward) next = i + 1;
+//			else next = i - 1;
+//		}
+//
+//		if (next < 0 || next >= m_narrative_group->getNumChildren()) return false;
+//		selectNarratives({next});
+//	}
+//	else if (level == SLIDES) {
+//		i = m_current_slide;
+//		if (i < 0) next = 0;
+//		else {
+//			if (forward) next = i + 1;
+//			else next = i - 1;
+//		}
+//
+//		if (next < 0 || next >= getCurrentNarrative()->getNumChildren()) return false;
+//		selectSlides(getCurrentNarrativeIndex(), {next});
+//	}
+//	else {
+//		qDebug() << "can't advance when editing slide";
+//	}
+//}
+
+bool NarrativeControl::advanceSlide(bool forward, bool instant)
+{
+	int ni = getCurrentNarrativeIndex();
+	if (ni < 0) return false;
+
+	int i = m_current_slide;
+	int next;
+	if (i < 0) next = 0;
+	else {
+		if (forward) next = i + 1;
+		else next = i - 1;
+	}
+
+	if (next < 0 || next >= getCurrentNarrative()->getNumChildren()) return false;
+	return setSlide(next, instant);
+}
+
+void NarrativeControl::showCanvas(bool instant)
+{
+	m_canvas_view->showCanvas(instant);
+}
+
+void NarrativeControl::hideCanvas(bool instant)
+{
+	m_canvas_view->hideCanvas(instant);
+}
+
+//void NarrativeControl::hideCanvas()
+//{
+//}
+//
+//void NarrativeControl::fadeOutTo(int index, bool)
+//{
+//
+//	m_canvas_view->fadeOut(slide);
+//	m_narrative_box->;
+//
+//}
+//
+//void NarrativeControl::fadeIn(int index)
+//{
+//	m_canvas_view->fadeIn(slide);
+//
+//}
+
+//bool NarrativeControl::fadeToSlide(int index)
+//{
+//
+//	m_canvas_view->fadeToSlide()
+//	return false;
+//}
 
 void NarrativeControl::deleteLabelButton() {
 	int selection = m_canvas->getSelection();
@@ -426,7 +517,7 @@ void NarrativeControl::selectNarratives(std::set<int> narratives)
 {
 	setNarrative(-1);
 	m_narrative_box->setSelection(narratives, *narratives.begin());
-	emit selectionChanged();
+	emit sEditEvent();
 }
 
 void NarrativeControl::selectSlides(int narrative, std::set<int> slides)
@@ -434,7 +525,7 @@ void NarrativeControl::selectSlides(int narrative, std::set<int> slides)
 	setNarrative(narrative);
 	m_narrative_box->setSelection({narrative}, narrative);
 	m_slide_box->setSelection({slides}, *slides.begin());
-	emit selectionChanged();
+	emit sEditEvent();
 }
 
 void NarrativeControl::selectLabel(int narrative, int slide, int label)
@@ -613,10 +704,13 @@ void NarrativeControl::onSlideSelection()
 		qWarning() << "Narrative Control - slide selection while current narrative null";
 		return;
 	}
+	int s = m_slide_box->getLastSelected();
+
+	if (s == m_current_slide) return;
 
 	setSlide(m_slide_box->getLastSelected());
 
-	emit selectionChanged();
+	emit sEditEvent();
 }
 
 void NarrativeControl::newSlide()
@@ -784,11 +878,8 @@ QImage NarrativeControl::generateThumbnail(NarrativeSlide *slide)
 	osg::Matrixd old_matrix = m_window->getViewerWidget()->getCameraMatrix();
 	m_window->getViewerWidget()->setCameraMatrix(slide->getCameraMatrix());
 
-	auto container = m_window->getViewerWidget();
-	labelCanvas canvas;
-	labelCanvasView view(m_window->getViewerWidget(), &canvas);
-	canvas.setGeometry(0, 0, container->width(), container->height());
-	canvas.setSlide(slide);
+	labelCanvasView view(m_window->getViewerWidget());
+	view.setSlide(slide, true);
 
 	// widget dimensions
 	QRect dims = m_window->getViewerWidget()->geometry();
@@ -803,8 +894,8 @@ QImage NarrativeControl::generateThumbnail(NarrativeSlide *slide)
 
 	// render
 	m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
-	qDebug() << "render canvas size" << canvas.size();
-	canvas.render(&painter, QPoint(0, 0), QRect(QPoint(0, 0),canvas.size()), QWidget::DrawChildren | QWidget::IgnoreMask);
+	qDebug() << "render canvas size" << view.size();
+	view.QWidget::render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), view.size()), QWidget::DrawChildren | QWidget::IgnoreMask);
 
 	// scale down the image
 	QImage smallimg;

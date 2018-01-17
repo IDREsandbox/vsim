@@ -1,4 +1,24 @@
 # Changelog
+
+## 2018-1-16
+### Added
+#### Embedded Resources
+- filtering
+- sorting
+- undo/redo
+- goto and set
+- open
+- open relative paths
+- TODO: import/export
+- ECategory editing and undo/redo
+
+### Changed
+- Changing navigation mode unfreezes
+- Time slider default on
+- Model outliner starts expanded
+- Strafing doesn't take mouse cursor
+- Flight mode speed scaling
+
 ## 2017-11-21
 ### Added
 - Embedded resource positioning

@@ -18,10 +18,6 @@ public:
 		ATNODE,
 		TRANSITIONING
 	};
-	enum Advance {
-		FORWARD,
-		BACKWARD
-	};
 
 	// slots
 	void play();
@@ -29,12 +25,12 @@ public:
 	void update(double dt_sec);
 	void rightArrow();
 	void leftArrow();
-	//void leftClick();
+	void leftClick();
 	void timerExpire(); // our own timers
 	void editEvent(); // selection changes
 
 	// advances the slide or transition, immediately pauses on failure or PauseOnNode
-	void next(Advance fwdback);
+	void next();
 
 	// state transitions
 	void toTransitioning();
@@ -42,15 +38,14 @@ public:
 	void toStopped();
 
 	// signals out, if you want to remove dependency then replace with signals
-	bool setSlide(int index);
+	bool advanceSlide(bool forward);
+	void hideCanvas();
+	void showCanvas();
 	void setCameraInTransition(double t);
 
 signals: // more signals out, removes the viewer widget dependency
 	void updateCamera(osg::Matrixd camera_matrix);
 	void enableNavigation(bool enable); // TODO
-	void hideCanvas();
-	void showCanvas();
-
 
 private:
 	// pointers

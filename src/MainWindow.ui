@@ -283,9 +283,6 @@
     <property name="title">
      <string>Navigation</string>
     </property>
-    <addaction name="actionFirst_Person_Navigation"/>
-    <addaction name="actionFlight_Navigation"/>
-    <addaction name="actionObject_Navigation"/>
     <addaction name="separator"/>
     <addaction name="actionFreeze_Camera"/>
     <addaction name="actionReset_Camera"/>
@@ -403,6 +400,9 @@
    </property>
   </action>
   <action name="actionFirst_Person_Navigation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="enabled">
     <bool>true</bool>
    </property>
@@ -419,6 +419,9 @@
    </property>
   </action>
   <action name="actionObject_Navigation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Object Mode</string>
    </property>
@@ -451,6 +454,9 @@
    </property>
   </action>
   <action name="actionFlight_Navigation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Flight Mode</string>
    </property>

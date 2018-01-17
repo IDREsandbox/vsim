@@ -14,13 +14,10 @@ Be careful with serializers. It's easy to mess up backward/forward compatibility
 
 The ascii format has better compatibility.
 
-Safe:
+Dangerous (everything):
 
 1. Add items to the end of the serializer
-
-Dangerous:
-
-1. Change the inheritance list. Making the old narratives an osg::Group broke it and caused us to make Narrative2.
-2. Change order of serializers.
-3. Remove serializers
-4. Multiple inheritance - `MyClass : public QObject, public osg::Node` works, but when you add new items to the serialization list it breaks
+2. Change the inheritance list. Making the old narratives an osg::Group broke it and caused us to make Narrative2.
+3. Change order of serializers.
+4. Remove serializers
+5. Multiple inheritance - `MyClass : public QObject, public osg::Node` works, but when you add new items to the serialization list it breaks

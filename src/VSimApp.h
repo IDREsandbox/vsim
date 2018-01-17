@@ -69,6 +69,7 @@ public:
 signals:
 	void tick(double sec);
 	void foo();
+	void sReset();
 
 private:
 	MainWindow *m_window;

@@ -61,10 +61,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->mainSplitter->setMouseTracking(true);
 
 	// drag widget
-	m_drag_area = new labelCanvas();
-	m_drag_area->setGeometry(0, 0, this->size().width(), this->size().height());
-	m_drag_area->setMinimumSize(800, 600);
-	m_view = new labelCanvasView(ui->root, m_drag_area);
+	m_view = new labelCanvasView(this);
+	m_drag_area = m_view->canvas();
 	ui->rootLayout->addWidget(m_view, 0, 0);
 
 	// middle spacer
@@ -88,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_er_filter_area = new ERFilterArea(ui->middleSpacer);
 	m_er_filter_area->move(100, 100);
 	m_er_filter_area->setObjectName("erFilterArea");
-	m_er_filter_area->show();
+	m_er_filter_area->hide();
 	middle_layout->addWidget(m_er_filter_area, 0, 0, Qt::AlignLeft | Qt::AlignBottom);
 
 	connect(ui->filter, &QPushButton::pressed, this,
@@ -119,13 +117,69 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// camera manipulator
 	connect(ui->actionFirst_Person_Navigation, &QAction::triggered, m_osg_widget,
-		[this]() {qDebug() << "fp trigger"; m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FIRST_PERSON); });
+		[this]() { m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FIRST_PERSON); });
 	connect(ui->actionFlight_Navigation, &QAction::triggered, m_osg_widget,
-		[this]() {qDebug() << "flight trigger";  m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FLIGHT); });
+		[this]() { m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FLIGHT); });
 	connect(ui->actionObject_Navigation, &QAction::triggered, m_osg_widget,
-		[this]() {qDebug() << "object trigger";  m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_OBJECT); });
+		[this]() { m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_OBJECT); });
 	connect(ui->actionFreeze_Camera, &QAction::toggled, m_osg_widget,
-		[this](bool freeze) {qDebug() << "freeze trigger";  m_osg_widget->setCameraFrozen(freeze); });
+		[this](bool freeze) { m_osg_widget->setCameraFrozen(freeze); });
+
+	// navigation actions
+	m_navigation_action_group = new QActionGroup(this);
+	m_navigation_action_group->setExclusive(true);
+	m_action_first_person = new QAction(m_navigation_action_group);
+	m_action_flight = new QAction(m_navigation_action_group);
+	m_action_object = new QAction(m_navigation_action_group);
+	m_action_first_person->setCheckable(true);
+	m_action_flight->setCheckable(true);
+	m_action_object->setCheckable(true);
+	m_action_first_person->setText("First Person");
+	m_action_flight->setText("Flight");
+	m_action_object->setText("Object");
+	m_action_first_person->setShortcut(QApplication::translate("MainWindow", "1", nullptr));
+	m_action_flight->setShortcut(QApplication::translate("MainWindow", "2", nullptr));
+	m_action_object->setShortcut(QApplication::translate("MainWindow", "3", nullptr));
+	ui->menuView->addSeparator()->setText("Navigation Mode");
+	ui->menuView->addAction(m_action_first_person);
+	ui->menuView->addAction(m_action_flight);
+	ui->menuView->addAction(m_action_object);
+	m_action_first_person->setChecked(true);
+
+	//out
+	connect(m_navigation_action_group, &QActionGroup::triggered, this,
+		[this](QAction *which) {
+		if (which == m_action_first_person) {
+			m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FIRST_PERSON);
+		}
+		else if (which == m_action_flight) {
+			m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FLIGHT);
+		}
+		else if (which == m_action_object) {
+			m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_OBJECT);
+		}
+	});
+	//in
+	connect(m_osg_widget, &OSGViewerWidget::sCameraFrozen, ui->actionFreeze_Camera, &QAction::setChecked);
+	connect(m_osg_widget, &OSGViewerWidget::sNavigationModeChanged,
+		[this](OSGViewerWidget::NavigationMode mode) {
+		if (mode == OSGViewerWidget::NAVIGATION_FIRST_PERSON) {
+			m_action_first_person->setChecked(true);
+			//m_action_flight->setChecked(false);
+			//m_action_object->setChecked(false);
+		}
+		else if (mode == OSGViewerWidget::NAVIGATION_FLIGHT) {
+			//actionFirst_Person_Navigation->setChecked(false);
+			m_action_flight->setChecked(true);
+			//actionObject_Navigation->setChecked(false);
+		}
+		else if (mode == OSGViewerWidget::NAVIGATION_OBJECT) {
+			//actionFirst_Person_Navigation->setChecked(false);
+			//actionFlight_Navigation->setChecked(false);
+			m_action_object->setChecked(true);
+		}
+	});
+
 	connect(ui->actionReset_Camera, &QAction::triggered, m_osg_widget, &OSGViewerWidget::reset);
 
 	// show slides or narratives
@@ -214,12 +268,18 @@ void MainWindow::setApp(VSimApp * vsim)
 	outliner()->resize(505, 600);
 	outliner()->expandAll();
 
+	connect(m_app, &VSimApp::sReset, this, &MainWindow::onReset);
 	connect(this, &MainWindow::sDebugOSG, this, [this]() {
 		m_app->getRoot()->debug();
 		m_app->erControl()->debug();
 	});
 	connect(this, &MainWindow::sDebugCamera, m_app, &VSimApp::debugCamera);
 
+}
+
+void MainWindow::onReset()
+{
+	outliner()->expandAll();
 }
 
 OSGViewerWidget * MainWindow::getViewerWidget() const

@@ -34,7 +34,12 @@ public:
 	void openNarrative(); // if index <0 then it uses the the narrative box selection
 	void setNarrative(int index);
 
-	bool setSlide(int index);
+	bool setSlide(int index, bool instant = true);
+
+	//bool advance(bool forward);
+	bool advanceSlide(bool forward, bool instant = true);
+	void showCanvas(bool instant);
+	void hideCanvas(bool instant);
 
 	enum SelectionLevel {
 		NARRATIVES,
@@ -57,7 +62,8 @@ public:
 	void onSlideSelection();
 
 signals:
-	void selectionChanged(); // this should happen after any edit event, 
+	//void selectionChanged(); // this should happen after any edit event, 
+	void sEditEvent();
 
 public:
 
@@ -107,8 +113,9 @@ public slots:
 
 private:
 	VSimApp * m_app;
-	int m_current_narrative;
-	int m_current_slide;
+	int m_current_narrative; // opened narrative
+	int m_current_slide; // active canvas slide
+	bool m_editing_slide;
 
 	// std::vector<Narrative*> m_narratives;
 	osg::ref_ptr<NarrativeGroup> m_narrative_group; // the osg side data structure, instead of using a vector
@@ -118,6 +125,7 @@ private:
 	NarrativeScrollBox *m_narrative_box;
 	SlideScrollBox *m_slide_box;
 	labelCanvas *m_canvas;
+	labelCanvasView *m_canvas_view;
 	
 	editButtons* editDlg;
 	

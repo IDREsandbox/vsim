@@ -104,6 +104,11 @@ void labelCanvas::setSlide(NarrativeSlide * slide)
 	connect(slide, &NarrativeSlide::sDelete, this, &labelCanvas::deleteLabel);
 }
 
+NarrativeSlide * labelCanvas::getSlide() const
+{
+	return m_slide;
+}
+
 void labelCanvas::insertNewLabel(int index)
 {
 	qDebug() << "insert new label" << index;

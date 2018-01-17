@@ -1,47 +1,27 @@
 
 New .vsim Format
+ - app data lives in the scene graph
+ - scene graph saved as is
 
-root osg::Group
-	Children {
-		"Narratives" osg::Group
-			Children {
-				Narrative1 ::Narrative (osg::Group)
-					Name
-					Author
-					Description
-					Children {
-						NarrativeNode1 ::NarrativeNode (osg::Group)
-							StayOnNode
-							PauseAtNode
-							TransitionDuration
-							CameraMatrix
-							Children {
-								Label1 ::Label
-									x
-									y
-									width
-									height
-									content?
-									background?
-									image?
-							}
-					}
-			}
+VSimRoot
+  NarrativeGroup "Narratives"
+    *Narrative
+	  *NarrativeSlide
+	    *NarrativeSlideLabel
+  EResourceGroup "Resources"
+    *EResource
+	ECategoryGroup
+	  *ECategory
+  ModelGroup "Models"
+  ModelInformation "ModelInformation"
+ 
+*indicates children of an osg::Group
 
-		"Models" osg::Group
-			Children {
-
-
-			}
-
-
-		"ModelInformation" ::ModelInformation
-
-
-		(metastuff)
-	}
 
 Old .vsim Format
+ - everything is a node under the root
+ - extract nodes on load
+ - reinsert nodes on export
 
 "vsim" osg::Node (whatever model was loaded is the root)
 	
@@ -133,5 +113,5 @@ vsim/osgb/osgt
 
 for new and old .vsim binary files to be compatible
 - inheritance cannot change
-- serializer item order cannot change
+- serializer can't change
 
