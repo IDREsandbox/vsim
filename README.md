@@ -42,9 +42,9 @@ Building (For more cmake notes see cmake.txt)
 	mkdir build
 	cd build
 	cmake -G "Visual Studio 15 2017 Win64" \
-	  -DCMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install" \
-	  -DOPENSCENEGRAPH_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/OpenSceneGraph-3.4.0-build/msvc2017_64/install/bin" \
-	  -DTHIRDPARTY_BINARY_DIR="T:/Projects/_UCLA/vsim/vsim-dependencies/3rdParty-build/msvc2017_64/3rdParty/-x64/bin" \
+	  -DCMAKE_PREFIX_PATH="C:/Qt/5.9.1/msvc2017_64;C:/Users/dstephan/Desktop/vsim/dependencies/OpenSceneGraph" \
+	  -DOPENSCENEGRAPH_BINARY_DIR="C:/Users/dstephan/Desktop/vsim/dependencies/osg-build/bin" \
+	  -DTHIRDPARTY_BINARY_DIR="C:/Users/dstephan/Desktop/vsim/dependencies/3rdParty-build/x64/bin" \
 	  -DQT_DIR="C:/Qt/5.9.1/msvc2017_64/" \
 	  -DCMAKE_INSTALL_PREFIX=install ..
 	  ```
