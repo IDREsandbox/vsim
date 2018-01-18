@@ -30,10 +30,10 @@ static bool readEResources( osgDB::InputStream& is, EResourcesList& node )
     is >> size >> is.BEGIN_BRACKET;
     for (unsigned int i = 0; i < size; i++)
     {
-        EResourcesNode* childNode = dynamic_cast<EResourcesNode*>(is.readObject().get());
-		VSLabel* childWidget = dynamic_cast<VSLabel*>(is.readObject().get());
-		node.m_list.push_back(childNode);
-		node.m_widgets.push_back(childWidget);
+		osg::ref_ptr<EResourcesNode> childNode = is.readObjectOfType<EResourcesNode>();
+		osg::ref_ptr<VSLabel> childWidget = is.readObjectOfType<VSLabel>();
+		node.m_list.push_back(childNode.get());
+		node.m_widgets.push_back(childWidget.get());
     }
     is >> is.END_BRACKET;
     return true;

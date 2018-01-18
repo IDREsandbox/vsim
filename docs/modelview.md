@@ -9,19 +9,22 @@ Qt has its own ModelView framework.
 It's organized as hierarchal tables, with columns, rows, and parents
 If you wrap data into a Qt Model you get a bunch of GUI elements for free (tree/table/list views)
 View items can be customized by using delegates.
+Proxies attach to models and allow for sorting/filtering.
 
 Used for:
-
-- Model outliner
-
+- GroupModel makes turns a Group into a QAbstractItemModel
+- CheckableListProxy adds checkboxes and a (Check All) row to any model. Used for filters.
+- The Model outliner is based on ModelGroupModel. ModelGroupModel is a tree model with node names, types, and active years
 
 ##Our Model View
 
 Narratives have a custom MVP-like structure. I played with a bunch of different designs... they all have a lot of repetition, but this is what we ended up with:
 
 Used for:
-
-- Narratives/Slides/Labels
+- Group is the base class for models
+- HorizontalScrollBox is a view
+- GroupProxy is a generic proxy for a Group. ERFilterSortProxy extends GroupProxy.
+- Narratives/Slides/Labels are based on our MVC
 - Embedded Resources
 
 ###Model
@@ -34,12 +37,11 @@ Because removing happens one element at a time, there is a lot of O(n^2) shenani
 
 ###Control
 
-The control takes all edit signals from the scroll boxes, buttons, window actions, etc. and maps them to commands and command macros.
+The controllers takes all edit signals from the scroll boxes, buttons, window actions, etc. and maps them to commands and command macros.
 
-The control also keeps track of the current narrative and current slide. It relinks the scroll boxes and canvas when the active narrative/slide change.
+The narrative control also keeps track of the current narrative and current slide. It relinks the scroll boxes and canvas when the active narrative/slide change.
 
-TODO: The control keeps track of selection
-
+Sorry these things are massive, complicated, and hard to test -__-
 
 ###Views
 

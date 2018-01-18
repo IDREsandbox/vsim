@@ -15,7 +15,7 @@ QModelIndex GroupModel::index(int row, int column, const QModelIndex & parent) c
 	if (!m_group) return QModelIndex();
 
 	if (!m_hierarchal) {
-		if (row >= m_group->getNumChildren()) return QModelIndex();
+		if (row < 0 || row >= (int)m_group->getNumChildren()) return QModelIndex();
 		return createIndex(row, column, m_group->child(row));
 	}
 

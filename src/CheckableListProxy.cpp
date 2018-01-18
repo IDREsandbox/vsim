@@ -270,12 +270,12 @@ void CheckableListProxy::setCheckAll(bool value)
 	}
 
 	if (value) {
-		m_checked_count = m_checked.size();
+		m_checked_count = (int)m_checked.size();
 		m_unchecked_count = 0;
 	}
 	else {
 		m_checked_count = 0;
-		m_unchecked_count = m_checked.size();
+		m_unchecked_count = (int)m_checked.size();
 	}
 	updateTristate();
 	// everything changed

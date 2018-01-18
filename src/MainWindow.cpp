@@ -32,7 +32,7 @@
 #include "VSimRoot.h"
 #include "ModelTableModel.h"
 
-MainWindow::MainWindow(QWidget *parent) 
+MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
@@ -182,7 +182,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionReset_Camera, &QAction::triggered, m_osg_widget, &OSGViewerWidget::reset);
 
 	// show slides or narratives
-	connect(ui->topBar->ui.open, &QPushButton::clicked, this, 
+	connect(ui->topBar->ui.open, &QPushButton::clicked, this,
 		[this]() {
 			qDebug() << "open";
 			this->ui->topBar->showSlides();
@@ -311,6 +311,16 @@ TimeSlider * MainWindow::timeSlider() const
 	return m_time_slider;
 }
 
+ERScrollBox * MainWindow::erLocal() const
+{
+	return ui->local;
+}
+
+ERScrollBox * MainWindow::erGlobal() const
+{
+	return ui->global;
+}
+
 ERDisplay * MainWindow::erDisplay() const
 {
 	return m_er_display;
@@ -319,6 +329,26 @@ ERDisplay * MainWindow::erDisplay() const
 ERFilterArea * MainWindow::erFilterArea() const
 {
 	return m_er_filter_area;
+}
+
+QAbstractButton * MainWindow::newERButton() const
+{
+	return ui->newERButton;
+}
+
+QAbstractButton * MainWindow::deleteERButton() const
+{
+	return ui->deleteERButton;
+}
+
+QAbstractButton * MainWindow::editERButton() const
+{
+	return ui->editERButton;
+}
+
+QAbstractButton * MainWindow::filterERButton() const
+{
+	return ui->filter;
 }
 
 MainWindowTopBar *MainWindow::topBar() const
@@ -358,11 +388,11 @@ void MainWindow::actionNew()
 {
 	qDebug("new");
 
-	QMessageBox::StandardButton reply = 
+	QMessageBox::StandardButton reply =
 		QMessageBox::question(
-			this, 
-			"New file", 
-			"Are you sure you want to create a new file?", 
+			this,
+			"New file",
+			"Are you sure you want to create a new file?",
 			QMessageBox::Yes | QMessageBox::No);
 
 	if (reply == QMessageBox::Yes) {
@@ -382,7 +412,7 @@ void MainWindow::actionOpen()
 		return;
 	}
 	qDebug() << "opening - " << filename;
-	
+
 	//m_vsimapp->openVSim(filename.toStdString());
 	emit sOpenFile(filename.toStdString());
 }
@@ -415,7 +445,7 @@ void MainWindow::actionSaveAs()
 		return;
 	}
 	qDebug() << "saving as - " << filename;
-	// 
+	//
 	//m_vsimapp->saveVSim(filename.toStdString());
 	emit sSaveFile(filename.toStdString());
 }

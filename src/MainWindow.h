@@ -22,6 +22,7 @@ class TimeSlider;
 class MainWindowTopBar;
 class ERDisplay;
 class ERFilterArea;
+class ERScrollBox;
 
 class MainWindow : public QMainWindow
 {
@@ -43,8 +44,16 @@ public:
 	labelCanvas *canvas() const;
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
+	
+	// er
+	ERScrollBox *erLocal() const;
+	ERScrollBox *erGlobal() const;
 	ERDisplay *erDisplay() const;
 	ERFilterArea *erFilterArea() const;
+	QAbstractButton *newERButton() const;
+	QAbstractButton *deleteERButton() const;
+	QAbstractButton *editERButton() const;
+	QAbstractButton *filterERButton() const;
 
 	// event stuff
 	void paintEvent(QPaintEvent* event);

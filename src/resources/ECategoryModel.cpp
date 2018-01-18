@@ -18,7 +18,7 @@ QVariant ECategoryModel::data(const QModelIndex & index, int role) const
 		//qDebug() << "group is null";
 		return QVariant();
 	}
-	if (index.row() >= m_group->getNumChildren()) return QVariant();
+	if (index.row() < 0 || index.row() >= (int)m_group->getNumChildren()) return QVariant();
 	if (index.column() > 0) return QVariant();
 
 	ECategory *cat = dynamic_cast<ECategory*>(m_group->child(index.row()));

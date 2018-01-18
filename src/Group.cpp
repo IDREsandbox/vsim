@@ -3,6 +3,7 @@
 
 osg::Node *Group::child(unsigned int i) const
 {
+	if (i >= getNumChildren()) return nullptr;
 	return _children[i].get();
 }
 

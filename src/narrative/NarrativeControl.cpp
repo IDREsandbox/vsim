@@ -457,7 +457,7 @@ bool NarrativeControl::advanceSlide(bool forward, bool instant)
 		else next = i - 1;
 	}
 
-	if (next < 0 || next >= getCurrentNarrative()->getNumChildren()) return false;
+	if (next < 0 || next >= (int)getCurrentNarrative()->getNumChildren()) return false;
 	return setSlide(next, instant);
 }
 

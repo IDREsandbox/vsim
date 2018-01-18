@@ -10,7 +10,6 @@
 #include "resources/ERDisplay.h"
 #include "resources/ERFilterArea.h"
 #include "MainWindow.h"
-#include "../ui_MainWindow.h"
 #include "OSGViewerWidget.h"
 #include "resources/ERFilterSortProxy.h"
 #include "CheckableListProxy.h"
@@ -29,8 +28,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	m_local_proxy(nullptr)
 {
 	m_undo_stack = m_app->getUndoStack();
-	m_global_box = m_window->ui->global;
-	m_local_box = m_window->ui->local;
+	m_global_box = m_window->erGlobal();
+	m_local_box = m_window->erLocal();
 	m_display = m_window->erDisplay();
 	m_filter_area = m_window->erFilterArea();
 
@@ -50,19 +49,18 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	m_filter_area->setCategoryModel(m_category_checkbox_model);
 	m_filter_proxy->setCategories(m_category_checkbox_model);
 
-	auto &ui = m_window->ui;
 	// new
 	connect(m_local_box, &ERScrollBox::sNew, this, &ERControl::newER);
 	connect(m_global_box, &ERScrollBox::sNew, this, &ERControl::newER);
-	connect(ui->newERButton, &QAbstractButton::clicked, this, &ERControl::newER);
+	connect(window->newERButton(), &QAbstractButton::clicked, this, &ERControl::newER);
 	// delete
 	connect(m_local_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
 	connect(m_global_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
-	connect(ui->deleteERButton, &QAbstractButton::clicked, this, &ERControl::deleteER);
+	connect(window->deleteERButton(), &QAbstractButton::clicked, this, &ERControl::deleteER);
 	// edit
 	connect(m_local_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
 	connect(m_global_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
-	connect(ui->editERButton, &QAbstractButton::clicked, this, &ERControl::editERInfo);
+	connect(window->editERButton(), &QAbstractButton::clicked, this, &ERControl::editERInfo);
 	// open
 	connect(m_local_box, &ERScrollBox::sOpen, this, &ERControl::openResource);
 	connect(m_global_box, &ERScrollBox::sOpen, this, &ERControl::openResource);
