@@ -2,7 +2,7 @@
 
 ## Windows - Visual Studio 2017, Qt5, CMake
 
-###Setup Qt
+### Setup Qt
 
 1. Download Qt Open Source https://www.qt.io/download-open-source/
 2. Install Qt 5.9.x 64bit VS2017.
@@ -10,7 +10,7 @@
 	- Install QT Visual Studio Tools (Tools > Extensions and Updates, OR https://marketplace.visualstudio.com/items?itemName=TheQtCompany.QtVisualStudioTools-19123)
 	- QT5 > QtOptions - add the Qt versions.
 
-###Setup Visual Studio 2017
+### Setup Visual Studio 2017
 
 1. `git clone https://github.com/IDREsandbox/vsim.git`, the solution is in src/windows
 2. PATH - right click vsim project in the Solution Explorer (or click Project in the top tool bar) > Properties > Debugging > Environment
@@ -22,7 +22,7 @@
 	`cmd /c mklink /D dependencies T:\Projects\_UCLA\vsim\vsim-dependencies`
 5. Qt Version - right click vsim project in the Solution Explorer > Qt Project Settings > Version > link to the corresponding version (have to do this for 32 and 64 if you have both).
 
-###CMake (optional)
+### CMake (optional)
 
 Download CMake and add it to PATH https://cmake.org/download/
 CMake is used to build releases from the command prompt.
@@ -46,7 +46,7 @@ CMake is used to build releases from the command prompt.
 
 If you add new files or make big changes `touch CMakeLists.txt` refreshes the source list
 
-##CMake inside Visual Studio 2017 (doesn't work yet, don't try this)
+## CMake inside Visual Studio 2017 (doesn't work yet, don't try this)
 
  1. VS2017 has some cmake support. Open the vsim folder through VS.
  2. Poke the CMakeLists.txt, it should try to run cmake and fail
