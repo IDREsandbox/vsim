@@ -4,13 +4,14 @@ project (VSim)
 # version number
 set (VSim_VERSION_MAJOR 2)
 set (VSim_VERSION_MINOR 0)
+set (VSim_VERSION_REVISION 0)
 
 message("source directory " ${PROJECT_SOURCE_DIR})
 
 enable_testing()
 # set(CTEST_OUTPUT_ON_FAILURE ON) # doesn't do anything
 
-# reprocessing stuff
+# preprocessing stuff
 # configure_file (
 #   "${PROJECT_SOURCE_DIR}/hello.h.in"
 #   "${PROJECT_SOURCE_DIR}/hello.h"
@@ -29,6 +30,37 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # dependencies
 # search path
+
+#
+if (WIN32)
+  set(QT_DIR "" CACHE FILEPATH "where is the Qt install directory")
+  if(NOT IS_DIRECTORY ${QT_DIR})
+    message("QT_DIR: ${QT_DIR}")
+    message(FATAL_ERROR "Must define QT_DIR")
+  endif()
+
+  set(OSG_DIR "" CACHE FILEPATH "where is the osg install directory")
+  if(NOT IS_DIRECTORY ${OSG_DIR})
+    message("OSG_DIR: ${OSG_DIR}")
+    message(FATAL_ERROR "Must define OSG_DIR")
+  endif()
+
+  set(TP_BIN "" CACHE FILEPATH "where are the osg dependency binaries (zlib and stuff)")
+  if(NOT IS_DIRECTORY ${THIRDPARTY_BINARY_DIR})
+    message("TP_BIN: ${THIRDPARTY_BINARY_DIR}")
+    message(FATAL_ERROR "Must define THIRDPARTY_BINARY_DIR")
+  endif()
+endif()
+
+# set CMAKE_PREFIX_PATH to install directories for find_package
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${OSG_DIR};${QT_DIR};)
+
+# set osg binary dir for dll copying
+message("QT_DIR:" "${QT_DIR}")
+message("OSG_DIR:" "${OSG_DIR}")
+message("TP_BIN:" "${TP_BIN}")
+set(OSG_BIN "${OSG_DIR}/bin")
+message("OSG_BIN:" "${OSG_BIN}")
 
 find_package(OpenSceneGraph 3.4.0 REQUIRED osgDB osgUtil osgGA osgViewer osgText)
 find_package(Qt5 REQUIRED Core Gui Widgets Test)
@@ -54,7 +86,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 # source
 message(${PROJECT_SOURCE_DIR})
 message("binary dir " ${PROJECT_BINARY_DIR})
-file(GLOB_RECURSE VSim_src 
+file(GLOB_RECURSE VSim_src
   src/*.h
   src/*.cpp
   )
@@ -67,11 +99,11 @@ file(GLOB_RECURSE VSim_serializers
   src/*Serializer*.cpp
   )
 
-message("SOURCES\n" "${VSim_src}")
+message("SOURCES:\n" "${VSim_src}")
 message("SERIALIZERS:\n" "${VSim_serializers}")
 
-# file(GLOB VSim_src 
-#   "src/*.h" 
+# file(GLOB VSim_src
+#   "src/*.h"
 #   "src/narratives/*.h"
 #   "src/*.cpp"
 #   "src/narratives/*.cpp"
@@ -87,15 +119,15 @@ target_link_libraries(VSim_objects Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
 target_link_libraries(VSim VSim_objects)
 
 # tests
-set(tests
-  Util_test
-  Selection_test
-  Group_test
-  GroupProxy_test
-  ERFilterSortProxy_test
-  )
-foreach(test ${tests})
-  add_executable(${test} tests/${test}.cpp)
+set(TEST_LIST "")
+file(GLOB TEST_SEARCH tests/*.cpp)
+foreach(TEST_SRC ${TEST_SEARCH})
+  get_filename_component(TEST_NAME ${TEST_SRC} NAME_WE)
+  list(APPEND TEST_LIST ${TEST_NAME})
+endforeach(TEST_SRC)
+message("TESTS:\n" "${TEST_LIST}")
+foreach(TEST_LIST ${tests})
+  add_executable(${test} EXCLUDE_FROM_ALL tests/${test}.cpp)
   add_test(NAME ${test} COMMAND ${test})
   add_dependencies(${test} VSim_objects)
   target_link_libraries(${test} VSim_objects)
@@ -109,41 +141,36 @@ install(DIRECTORY assets DESTINATION .)
 install(FILES CHANGELOG.md COPYRIGHT LICENSE README.md THIRD-PARTY-NOTICES DESTINATION .)
 
 if (WIN32)
-  # DLL copying
-  set(OPENSCENEGRAPH_BINARY_DIR "" CACHE FILEPATH "where are the osg binaries")
-  if(NOT IS_DIRECTORY ${OPENSCENEGRAPH_BINARY_DIR})
-    message(${OPENSCENEGRAPH_BINARY_DIR})
-    message(FATAL_ERROR "Must define OPENSCENEGRAPH_BINARY_DIR")
-  endif()
-
-  set(THIRDPARTY_BINARY_DIR "" CACHE FILEPATH "where are the osg dependency binaries (zlib and stuff)")
-  if(NOT IS_DIRECTORY ${THIRDPARTY_BINARY_DIR})
-    message(${THIRDPARTY_BINARY_DIR})
-    message(FATAL_ERROR "Must define THIRDPARTY_BINARY_DIR")
-  endif()
-
-  set(QT_DIR "" CACHE FILEPATH "where is the Qt root dir")
-  if(NOT IS_DIRECTORY ${QT_DIR})
-    message(${QT_DIR})
-    message(FATAL_ERROR "Must define QT_DIR")
-  endif()
-
   # visual studio path https://stackoverflow.com/questions/28533012/how-to-set-runtime-path-for-cmake-custom-command-on-windows
   # set(CMAKE_MSVCIDE_RUN_PATH "${OPENSCENEGRAPH_BINARY_DIR};${OPENSCENEGRAPH_BINARY_DIR}/osgPlugins-3.4.0/;${THIRDPARTY_BINARY_DIR};${QT_DIR}/bin/")
   # message("msvc path" ${CMAKE_MSVCIDE_RUN_PATH})
 
-  # osg dlls
-  file(GLOB DLL_SEARCH ${OPENSCENEGRAPH_BINARY_DIR}/*.dll)
+  # osg dll list
+  file(GLOB OSG_DLL_SEARCH ${OSG_BIN}/*.dll)
   # take off the path & extension -> DLL_LIST
-  list(FILTER DLL_SEARCH EXCLUDE REGEX ".*d.dll")
-  foreach(DLL ${DLL_SEARCH})
+  list(FILTER OSG_DLL_SEARCH EXCLUDE REGEX ".*d.dll")
+  set(OSG_DLL_LIST "")
+  foreach(DLL ${OSG_DLL_SEARCH})
     get_filename_component(COMP ${DLL} NAME_WE)
-	list(APPEND DLL_LIST ${COMP})
+	list(APPEND OSG_DLL_LIST ${COMP})
   endforeach(DLL)
-  message("DLL LIST:\n" "${DLL_LIST}")
+  message("OSG DLL LIST:\n" "${OSG_DLL_LIST}")
 
-  # find the plugin directory
-  file(GLOB OSG_PLUGIN_DIR ${OPENSCENEGRAPH_BINARY_DIR}/osgPlugins*)
+  # copy OSG dlls on postbuild
+  foreach(DLL ${OSG_DLL_LIST})
+    set(PREFIX ${OSG_BIN}/${DLL})
+   add_custom_command(
+     TARGET VSim
+     PRE_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+         ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
+         $<TARGET_FILE_DIR:VSim>
+   )
+    install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
+  endforeach(DLL)
+
+  # find the osg plugin directory
+  file(GLOB OSG_PLUGIN_DIR ${OSG_BIN}/osgPlugins*)
   get_filename_component(OSG_PLUGIN_PREFIX ${OSG_PLUGIN_DIR} NAME)
   message("PLUGIN PREFIX: " ${OSG_PLUGIN_PREFIX})
   # do the same thing as before -> PLUGIN_LIST
@@ -155,10 +182,7 @@ if (WIN32)
   endforeach(DLL)
   message("PLUGIN LIST:\n" "${PLUGIN_LIST}")
 
-  set(THIRDPARTYDLLS
-   libpng16
-   zlib
-   )
+  # create the plugin directory
   add_custom_command(
     TARGET VSim
     PRE_BUILD
@@ -166,35 +190,9 @@ if (WIN32)
         $<TARGET_FILE_DIR:VSim>/${OSG_PLUGIN_PREFIX}
   )
 
-  # copy thirdparty dlls on postbuild
-  foreach(DLL ${THIRDPARTYDLLS})
-    set(PREFIX ${THIRDPARTY_BINARY_DIR}/${DLL})
-    add_custom_command(
-     TARGET VSim
-     PRE_BUILD
-     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-         ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-         $<TARGET_FILE_DIR:VSim>
-    )
-    install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
-  endforeach(DLL)
-  
-  # copy OSG dlls on postbuild
-  foreach(DLL ${DLL_LIST})
-    set(PREFIX ${OPENSCENEGRAPH_BINARY_DIR}/${DLL})
-   add_custom_command(
-     TARGET VSim 
-     PRE_BUILD
-     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-         ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-         $<TARGET_FILE_DIR:VSim>
-   )
-    install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
-  endforeach(DLL)
-
   # copy OSG plugin dlls
   foreach(DLL ${PLUGIN_LIST})
-    set(PREFIX ${OPENSCENEGRAPH_BINARY_DIR}/${OSG_PLUGIN_PREFIX}/${DLL})
+    set(PREFIX ${OSG_BIN}/${OSG_PLUGIN_PREFIX}/${DLL})
    add_custom_command(
      TARGET VSim
      POST_BUILD
@@ -203,6 +201,25 @@ if (WIN32)
          $<TARGET_FILE_DIR:VSim>/${OSG_PLUGIN_PREFIX}/
    )
     install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION "${OSG_PLUGIN_PREFIX}/")
+  endforeach(DLL)
+
+  # third party dll list
+  set(THIRDPARTYDLLS
+   libpng16
+   zlib
+   )
+
+  # third party dll copying
+  foreach(DLL ${THIRDPARTYDLLS})
+    set(PREFIX ${TP_BIN}/${DLL})
+    add_custom_command(
+     TARGET VSim
+     PRE_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+         ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
+         $<TARGET_FILE_DIR:VSim>
+    )
+    install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
   endforeach(DLL)
 
   # Qt
@@ -227,7 +244,7 @@ if (WIN32)
     install(FILES $<TARGET_FILE:${dll}> DESTINATION ".")
     message("imported target: ${dll}, path: ${dll_location}")
   endforeach(dll)
-  
+
   # Qt plugins
   foreach(dll
       ${Qt5Gui_PLUGINS}
@@ -252,7 +269,7 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
 # # build a CPack driven installer package
 # include (InstallRequiredSystemLibraries)
-# set (CPACK_RESOURCE_FILE_LICENSE  
+# set (CPACK_RESOURCE_FILE_LICENSE
 #      "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
 # set (CPACK_PACKAGE_VERSION_MAJOR "${Tutorial_VERSION_MAJOR}")
 # set (CPACK_PACKAGE_VERSION_MINOR "${Tutorial_VERSION_MINOR}")
@@ -270,10 +287,10 @@ endif (APPLE)
 set(CPACK_PACKAGE_NAME "VSim")
 set(CPACK_PACKAGE_VENDOR "idre.ucla.edu")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "VSim - 3D viewer and presentation tool")
-set(CPACK_PACKAGE_VERSION "${VSim_VERSION_MAJOR}.${VSim_VERSION_MINOR}.0")
+set(CPACK_PACKAGE_VERSION "${VSim_VERSION_MAJOR}.${VSim_VERSION_MINOR}.${VSim_VERSION_REVISION}")
 set(CPACK_PACKAGE_VERSION_MAJOR ${VSim_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${VSim_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_VERSION_PATCH ${VSim_VERSION_REVISION})
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "VSim")
 
 include(CPack)
