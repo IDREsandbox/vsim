@@ -1,11 +1,9 @@
 #include <QDebug>
 #include <Util.h>
 #include "NarrativePlayer.h"
-#include "labelCanvasView.h"
 
 #include "narrative/NarrativeControl.h"
 #include "narrative/NarrativeSlide.h"
-#include "labelCanvasView.h"
 
 #include <osg/io_utils>
 

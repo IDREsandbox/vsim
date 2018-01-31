@@ -1,6 +1,6 @@
 #include "VSimRoot.h"
 #include <iostream>
-#include "narrative/NarrativeSlideLabels.h"
+#include "narrative/NarrativeSlideLabel.h"
 #include "narrative/NarrativeGroup.h"
 #include "ModelGroup.h"
 #include "resources/EResourceGroup.h"
@@ -109,8 +109,8 @@ void VSimRoot::debug()
 			qInfo() << "\tSlide" << j << "trans" << slide->getTransitionDuration() << "dur" << slide->getDuration();
 
 			for (uint k = 0; k < slide->getNumChildren(); k++) {
-				NarrativeSlideLabels *label = dynamic_cast<NarrativeSlideLabels*>(slide->getChild(k));
-				qInfo() << "\t\tLabel" << k << QString::fromStdString(label->getText());
+				NarrativeSlideLabel *label = dynamic_cast<NarrativeSlideLabel*>(slide->getChild(k));
+				qInfo() << "\t\tLabel" << k; //<< QString::fromStdString(label->getText());
 			}
 		}
 	}

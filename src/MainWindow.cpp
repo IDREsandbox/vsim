@@ -12,15 +12,11 @@
 
 #include "ui_MainWindow.h"
 
-#include "narrative/NarrativeInfoDialog.h"
-#include "resources/ERDialog.h"
-#include "dragLabelInput.h"
 #include "OSGViewerWidget.h"
-#include "labelCanvas.h"
-#include "labelCanvasView.h"
 #include "TimeSlider.h"
 #include "ModelOutliner.h"
-#include "dragLabel.h"
+
+#include "narrative/NarrativeCanvas.h"
 
 #include "resources/ERDisplay.h"
 #include "resources/ERFilterSortProxy.h"
@@ -40,9 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->setupUi(this);
 
 	// window stuff
-	setMinimumSize(800, 600);
+	//setMinimumSize(800, 600);
 	resize(1280, 720);
-	ui->statusbar->showMessage("the best status bar", 0);
 	setWindowTitle("VSim");
 	setAcceptDrops(true);
 	qDebug() << "root: " << QDir::currentPath();
@@ -51,28 +46,22 @@ MainWindow::MainWindow(QWidget *parent)
 	m_osg_widget = new OSGViewerWidget(ui->root);
 	m_osg_widget->lower(); // move this to the back
 	ui->rootLayout->addWidget(m_osg_widget, 0, 0);
+	QGridLayout *osg_layout = new QGridLayout(m_osg_widget);
+	osg_layout->setContentsMargins(QMargins()); // zero margins
 
-	// set viewer widget as parent of gui stuff, so signals can get through
+	// canvas on top of osg viewer
+	m_canvas = new NarrativeCanvas(m_osg_widget);
+	osg_layout->addWidget(m_canvas, 0, 0);
+
+	// splitter on top of osg viewer
+	// mask allows events to get to the canvas
 	ui->mainSplitter->setParent(m_osg_widget);
-	QGridLayout *dummylayout = new QGridLayout(m_osg_widget);
-	m_osg_widget->setLayout(dummylayout);
-	dummylayout->addWidget(ui->mainSplitter);
-	dummylayout->setContentsMargins(QMargins()); // zero margins
+	osg_layout->addWidget(ui->mainSplitter, 0, 0);
+	
 	ui->mainSplitter->setMouseTracking(true);
-
-	// drag widget
-	m_view = new labelCanvasView(this);
-	m_drag_area = m_view->canvas();
-	ui->rootLayout->addWidget(m_view, 0, 0);
-
-	// middle spacer
-	// - grid layout with graphics view
-	// - anchor layout in the graphics view
-	// - er_displays and er_filter_area
-	QGridLayout *middle_layout = new QGridLayout(ui->middleSpacer);
-	//QGraphicsView *middle_view = new QGraphicsView(ui->middleSpacer);
-	//middle_layout->addWidget(middle_view);
-	//QGraphicsAnchorLayout *middle_layout = new QGraphicsAnchorLayout(middle_view);
+	
+	// splitter mask
+	connect(ui->mainSplitter, &QSplitter::splitterMoved, this, &MainWindow::updatePositions);
 
 	// er display
 	m_er_display = new ERDisplay(ui->middleSpacer);
@@ -83,10 +72,9 @@ MainWindow::MainWindow(QWidget *parent)
 	// er filter widget
 	//QWidget *filter_area_padding_layout = new QGridLayout();
 	//middle_layout->addLayout(filter_area_padding_layout, 0, 0);
-	m_er_filter_area = new ERFilterArea(ui->middleSpacer);
+	m_er_filter_area = new ERFilterArea(m_osg_widget);
 	m_er_filter_area->setObjectName("erFilterArea");
 	m_er_filter_area->hide();
-	middle_layout->addWidget(m_er_filter_area, 0, 0, Qt::AlignLeft | Qt::AlignBottom);
 
 	connect(ui->filter, &QPushButton::pressed, this,
 		[this]() {
@@ -206,43 +194,6 @@ MainWindow::MainWindow(QWidget *parent)
 	});
 }
 
-//EResource* MainWindow::getResource(int index)
-//{
-//	if (index < 0 || (uint)index >= m_resource_group->getNumChildren()) {
-//		return nullptr;
-//	}
-//	osg::Node *c = m_resource_group->getChild(index);
-//	return dynamic_cast<EResource*>(c);
-//}
-
-int MainWindow::nextSelectionAfterDelete(int total, std::set<int> selection)
-{
-	// figure out the selection after deleting
-	int first_index = *selection.begin();
-	int remaining = total - selection.size();
-	int next_selection;
-	if (remaining == 0) {
-		next_selection = -1;
-	}
-	else if (remaining >= first_index + 1) {
-		next_selection = first_index; // select next non-deleted item
-	}
-	else {
-		next_selection = first_index - 1; // select the previous item
-	}
-	return next_selection;
-}
-
-void MainWindow::selectCategories(std::set<int> res)
-{
-	//fill in when UI done
-}
-
-void MainWindow::selectResources(std::set<int> res)
-{
-	ui->local->setSelection(res, *res.begin());
-}
-
 void MainWindow::setApp(VSimApp * vsim)
 {
 	m_app = vsim;
@@ -279,6 +230,7 @@ void MainWindow::setApp(VSimApp * vsim)
 void MainWindow::onReset()
 {
 	outliner()->expandAll();
+	updatePositions();
 }
 
 OSGViewerWidget * MainWindow::getViewerWidget() const
@@ -291,14 +243,9 @@ osgViewer::Viewer *MainWindow::getViewer() const
 	return m_osg_widget->getViewer();
 }
 
-labelCanvasView *MainWindow::canvasView() const
+NarrativeCanvas * MainWindow::canvas() const
 {
-	return m_view;
-}
-
-labelCanvas * MainWindow::canvas() const
-{
-	return m_drag_area;
+	return m_canvas;
 }
 
 ModelOutliner * MainWindow::outliner() const
@@ -356,12 +303,6 @@ MainWindowTopBar *MainWindow::topBar() const
 	return ui->topBar;
 }
 
-void MainWindow::paintEvent(QPaintEvent * event)
-{
-	//m_drag_area->setMask(m_drag_area->childrenRegion());
-	//m_view->setMask(m_drag_area->childrenRegion());
-}
-
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 {
 	if (event->mimeData()->hasText()) {
@@ -384,10 +325,37 @@ void MainWindow::dropEvent(QDropEvent * event)
 	}
 }
 
+void MainWindow::resizeEvent(QResizeEvent * event)
+{
+	QMainWindow::resizeEvent(event);
+	updatePositions();
+}
+
+void MainWindow::updatePositions()
+{
+	// Place the filter area
+	// filter top (200)
+	// filter height (200,290)
+	// filter bottom (290)
+	// space (290,300)
+	// bottom top (300)
+	int space = 10;
+	int bottom_top = ui->bottomBar->y();
+	int filter_top = bottom_top - m_er_filter_area->height() + space;
+	m_er_filter_area->move(space, filter_top);
+
+	// Place the ER popup areas
+
+	// Update the splitter mask
+	QSplitter *splitter = ui->mainSplitter;
+	QWidget *spacer = ui->middleSpacer;
+	QRegion full = QRegion(0, 0, splitter->width(), splitter->height());
+	QRegion center = QRegion(spacer->geometry());
+	splitter->setMask(full - center);
+}
+
 void MainWindow::actionNew()
 {
-	qDebug("new");
-
 	QMessageBox::StandardButton reply =
 		QMessageBox::question(
 			this,

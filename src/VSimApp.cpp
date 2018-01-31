@@ -16,12 +16,12 @@
 #include <QtWidgets/QAction>
 #include <QFileDialog>
 #include <QUndoStack>
+#include <QStatusBar>
 
 #include "VSimApp.h"
 #include "Util.h"
 #include "deprecated/narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
-#include "labelCanvasView.h"
 #include "OSGViewerWidget.h"
 #include "MainWindow.h"
 #include "ModelOutliner.h"

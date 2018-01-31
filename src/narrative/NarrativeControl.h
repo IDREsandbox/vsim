@@ -12,10 +12,12 @@ class MainWindow;
 class NarrativeGroup;
 class Narrative2;
 class NarrativeSlide;
-class NarrativeSlideLabels;
+class NarrativeSlideItem;
+class NarrativeSlideLabel;
 class NarrativeScrollBox;
 class SlideScrollBox;
-class labelCanvas;
+//class labelCanvas;
+class NarrativeCanvas;
 class editButtons;
 class SlideScrollItem;
 
@@ -49,7 +51,8 @@ public:
 	SelectionLevel getSelectionLevel();
 	void selectNarratives(std::set<int> narratives);
 	void selectSlides(int narrative, std::set<int> slides);
-	void selectLabel(int narrative, int slide, int label);
+	//void selectLabel(int narrative, int slide, NarrativeSlideItem *label);
+	void selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem *> &labels);
 
 	int getCurrentNarrativeIndex();
 	int getCurrentSlideIndex();
@@ -57,7 +60,7 @@ public:
 	NarrativeSlide *getCurrentSlide();
 	Narrative2 *getNarrative(int index);
 	NarrativeSlide *getSlide(int narrative, int slide);
-	NarrativeSlideLabels *getLabel(int narrative, int slide, int label);
+	NarrativeSlideLabel *getLabel(int narrative, int slide, int label);
 
 	void onSlideSelection();
 
@@ -88,27 +91,16 @@ public:
 	void setSlideCamera();
 	void moveSlides(std::set<int> from, int to);
 
-public slots:
-
+	// Labels
 	//editDlg buttons
+	void newLabel();
 	void exitEdit();
-	void deleteLabelButton();
+	void deleteItems();
+	void transformItems(const std::map<NarrativeSlideItem *, QRectF> &rects);
+	void labelEdited(NarrativeSlideLabel *label);
 
 	void editStyleSettings();
 
-	//Canvas
-	void newH1();
-	void newH2();
-	void newBod();
-	void newLab();
-	void newImg();
-
-	void newLabel(const std::string &text, const std::string &style, const std::string &widget_style, float height, float width, int margin);
-	void deleteLabel(int idx);
-	void moveLabel(float rx, float ry, int idx);
-	void resizeLabel(float rw, float rh, int idx);
-	void editLabel(int idx);
-	
 	void debug();
 
 private:
@@ -118,14 +110,13 @@ private:
 	bool m_editing_slide;
 
 	// std::vector<Narrative*> m_narratives;
-	osg::ref_ptr<NarrativeGroup> m_narrative_group; // the osg side data structure, instead of using a vector
+	osg::ref_ptr<NarrativeGroup> m_narrative_group;
 	//osg::ref_ptr<LabelStyleGroup> m_style_group;
 
 	MainWindow *m_window;
 	NarrativeScrollBox *m_narrative_box;
 	SlideScrollBox *m_slide_box;
-	labelCanvas *m_canvas;
-	labelCanvasView *m_canvas_view;
+	NarrativeCanvas *m_canvas;
 	
 	editButtons* editDlg;
 	
@@ -162,17 +153,30 @@ private:
 	std::set<int> m_slides;
 };
 
-class SelectLabelCommand : public QUndoCommand {
+//class SelectLabelCommand : public QUndoCommand {
+//public:
+//	SelectLabelCommand(NarrativeControl *control, int narrative, int slide, NarrativeSlideItem *label, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+//	void undo();
+//	void redo();
+//private:
+//	NarrativeControl *m_control;
+//	SelectionCommandWhen m_when;
+//	int m_narrative;
+//	int m_slide;
+//	int m_label;
+//};
+
+class SelectLabelsCommand : public QUndoCommand {
 public:
-	SelectLabelCommand(NarrativeControl *control, int narrative, int slide, int label, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+	SelectLabelsCommand(NarrativeControl *control, int narrative, int slide, std::set<NarrativeSlideItem *> labels, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
 	void undo();
 	void redo();
 private:
-	NarrativeControl *m_control;
+	NarrativeControl * m_control;
 	SelectionCommandWhen m_when;
 	int m_narrative;
 	int m_slide;
-	int m_label;
+	std::set<NarrativeSlideItem*> m_labels;
 };
 
 #endif

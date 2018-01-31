@@ -15,14 +15,13 @@ namespace Ui { class MainWindow; }
 
 class VSimApp;
 class OSGViewerWidget;
-class labelCanvas;
-class labelCanvasView;
 class ModelOutliner;
 class TimeSlider;
 class MainWindowTopBar;
 class ERDisplay;
 class ERFilterArea;
 class ERScrollBox;
+class NarrativeCanvas;
 
 class MainWindow : public QMainWindow
 {
@@ -40,8 +39,7 @@ public:
 	osgViewer::Viewer* getViewer() const;
 
 	MainWindowTopBar *topBar() const;
-	labelCanvasView *canvasView() const;
-	labelCanvas *canvas() const;
+	NarrativeCanvas *canvas() const;
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
 	
@@ -56,13 +54,11 @@ public:
 	QAbstractButton *filterERButton() const;
 
 	// event stuff
-	void paintEvent(QPaintEvent* event);
-	void dragEnterEvent(QDragEnterEvent *event);
-	void dropEvent(QDropEvent *event);
+	virtual void dragEnterEvent(QDragEnterEvent *event) override;
+	virtual void dropEvent(QDropEvent *event) override;
+	virtual void resizeEvent(QResizeEvent *event) override;
 
-	void selectResources(std::set<int> res);
-	void selectCategories(std::set<int> res);
-	int nextSelectionAfterDelete(int total, std::set<int> selection);
+	void updatePositions();
 
 public slots:
 	void actionNew();
@@ -102,8 +98,7 @@ public:
 	VSimApp *m_app;
 
 	OSGViewerWidget *m_osg_widget;
-	labelCanvas *m_drag_area;
-	labelCanvasView *m_view;
+	NarrativeCanvas *m_canvas;
 	ERDisplay *m_er_display;
 	ERFilterArea *m_er_filter_area;
 	ModelOutliner *m_outliner;

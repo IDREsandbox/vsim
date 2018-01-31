@@ -11,8 +11,6 @@
 #include "Command.h"
 #include "Group.h"
 
-class NarrativeSlideLabels;
-
 class NarrativeSlide : public Group
 {
 	Q_OBJECT
