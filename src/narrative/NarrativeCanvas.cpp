@@ -11,7 +11,7 @@ NarrativeCanvas::NarrativeCanvas(QWidget * parent)
 	m_slide(nullptr)
 {
 	// forward transform signals
-	connect(this, &CanvasContainer::rectsTransformed, this,
+	connect(m_scene, &CanvasScene::rectsTransformed, this,
 		[this](const std::map<RectItem*, QRectF> &rect_rects) {
 		std::map<NarrativeSlideItem*, QRectF> item_rects;
 		for (auto ritem_rect : rect_rects) {
@@ -34,12 +34,12 @@ void NarrativeCanvas::setSelection(const std::set<NarrativeSlideItem*> &items)
 		if (!rect) continue;
 		rects.insert(rect);
 	}
-	setSelectedRects(rects);
+	m_scene->setSelectedRects(rects);
 }
 
 std::set<NarrativeSlideItem*> NarrativeCanvas::getSelection() const
 {
-	const std::set<RectItem*> &rects = getSelectedRects();
+	const std::set<RectItem*> &rects = m_scene->getSelectedRects();
 	std::set<NarrativeSlideItem*> items;
 	for (auto rect : rects) {
 		// look for item in map
@@ -68,10 +68,6 @@ RectItem * NarrativeCanvas::slideToCanvas(NarrativeSlideItem * item) const
 	return it->second;
 }
 
-void NarrativeCanvas::onItemTransformed(NarrativeSlideItem * item, QRectF rect)
-{
-}
-
 NarrativeSlideItem * NarrativeCanvas::canvasToSlide(RectItem * rect) const
 {
 	auto it = m_rect_to_item.find(rect);
@@ -82,6 +78,13 @@ NarrativeSlideItem * NarrativeCanvas::canvasToSlide(RectItem * rect) const
 void NarrativeCanvas::setSlide(NarrativeSlide *slide)
 {
 	if (m_slide) disconnect(m_slide, 0, this, 0);
+	qDebug() << "Set canvas slide" << slide;
+	// disconnect all labels
+	for (auto &item_rect : m_item_to_rect) {
+		NarrativeSlideItem *item = item_rect.first;
+		disconnect(item, 0, this, 0);
+	}
+
 	m_slide = slide;
 	m_item_to_rect.clear();
 	m_rect_to_item.clear();
@@ -98,6 +101,7 @@ void NarrativeCanvas::setSlide(NarrativeSlide *slide)
 		[this](const std::set<osg::Node*> &nodes) {
 		for (auto node : nodes) {
 			NarrativeSlideItem *item = dynamic_cast<NarrativeSlideItem*>(node);
+			qDebug() << "s added p wuwu" << item;
 			if (item) addItem(item);
 		}
 	});
@@ -118,10 +122,12 @@ NarrativeSlide *NarrativeCanvas::getSlide() const
 void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 {
 	RectItem *rect;
+	TextRect *text;
+	qDebug() << "add item" << item;
 	NarrativeSlideLabel *label = dynamic_cast<NarrativeSlideLabel*>(item);
 	if (label) {
 		// make a text rect
-		TextRect *text = new TextRect();
+		text = new TextRect();
 		rect = text;
 		text->m_text->setDocument(label->getDocument());
 
@@ -136,8 +142,15 @@ void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 		rect = new RectItem();
 	}
 
+	connect(item, &NarrativeSlideItem::sTransformed, this,
+		[this, rect](QRectF r) {
+		qDebug() << "set r" << r;
+		rect->setRect(r);
+	});
+
 	rect->setRect(label->getRect());
 	rect->setBrush(label->getBackground());
+	rect->setEditable(isEditable());
 	m_scene->addItem(rect);
 
 	m_item_to_rect[item] = rect;
@@ -146,6 +159,8 @@ void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 
 void NarrativeCanvas::removeItem(NarrativeSlideItem *item)
 {
+	disconnect(item, 0, this, 0);
+
 	// item to rect iterator
 	auto it = m_item_to_rect.find(item);
 	if (it == m_item_to_rect.end()) {
@@ -154,6 +169,8 @@ void NarrativeCanvas::removeItem(NarrativeSlideItem *item)
 	}	
 	RectItem *rect = it->second;
 
-	m_item_to_rect.erase(it);
+	delete rect;
+	m_item_to_rect.erase(item);
 	m_rect_to_item.erase(rect);
 }
+

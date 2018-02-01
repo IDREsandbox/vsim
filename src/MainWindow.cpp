@@ -204,6 +204,8 @@ void MainWindow::setApp(VSimApp * vsim)
 	redo_action->setShortcuts(QKeySequence::Redo);
 	ui->menuEdit->addAction(undo_action);
 	ui->menuEdit->addAction(redo_action);
+	connect(undo_action, &QAction::triggered, this, []() {qDebug() << "main undo"; });
+	connect(redo_action, &QAction::triggered, this, []() {qDebug() << "main redo"; });
 
 	connect(this, &MainWindow::sOpenFile, m_app, &VSimApp::openVSim);
 	connect(this, &MainWindow::sSaveFile, m_app, &VSimApp::saveVSim);

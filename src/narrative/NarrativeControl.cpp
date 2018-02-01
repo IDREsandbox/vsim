@@ -486,7 +486,7 @@ void NarrativeControl::hideCanvas(bool instant)
 
 void NarrativeControl::exitEdit() {
 	editDlg->hide();
-	m_canvas->enableEditing(false);
+	m_canvas->setEditable(false);
 	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 }
 
@@ -719,7 +719,7 @@ void NarrativeControl::editSlide() {
 	//qDebug() << "EDIT SLIDE CURRENT SLDIE?" << m_current_narrative << m_current_slide << getCurrentSlide();
 	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, false);
 	editDlg->show();
-	m_canvas->enableEditing(true);
+	m_canvas->setEditable(true);
 }
 
 void NarrativeControl::setSlideDuration()
@@ -885,6 +885,8 @@ void NarrativeControl::labelEdited(NarrativeSlideLabel *label)
 	}
 	QTextDocument *doc = label->getDocument();
 
+	qDebug() << "Label edited command";
+
 	m_undo_stack->beginMacro("Edit Label");
 	m_undo_stack->push(new NarrativeSlideLabel::DocumentEditWrapperCommand(doc));
 	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, { label }));
@@ -895,7 +897,7 @@ void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> item
 {
 
 	for (auto item : items) {
-		qDebug() << "redrawing thumbnail" << item->getIndex();
+		//qDebug() << "redrawing thumbnail" << item->getIndex();
 		QImage thumbnail;
 
 		thumbnail = generateThumbnail(item->getSlide());
@@ -915,7 +917,7 @@ QImage NarrativeControl::generateThumbnail(NarrativeSlide *slide)
 	m_window->getViewerWidget()->setCameraMatrix(slide->getCameraMatrix());
 
 	NarrativeCanvas canvas(m_window->getViewerWidget());
-	canvas.setSlide(slide);
+	// canvas.setSlide(slide); TODO: FIXME
 
 	// widget dimensions
 	QRect dims = m_window->getViewerWidget()->geometry();
@@ -930,7 +932,7 @@ QImage NarrativeControl::generateThumbnail(NarrativeSlide *slide)
 
 	// render
 	m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRegion(ssdims), QWidget::DrawWindowBackground);
-	qDebug() << "render canvas size" << canvas.size();
+	//qDebug() << "render canvas size" << canvas.size();
 	canvas.QWidget::render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), canvas.size()), QWidget::DrawChildren | QWidget::IgnoreMask);
 
 	// scale down the image
@@ -941,7 +943,7 @@ QImage NarrativeControl::generateThumbnail(NarrativeSlide *slide)
 	m_window->getViewerWidget()->setCameraMatrix(old_matrix);
 
 	int ns = timer.nsecsElapsed();
-	qDebug() << "thumbnail time ms" << ns / 1.0e6;
+	//qDebug() << "thumbnail time ms" << ns / 1.0e6;
 	return smallimg;
 }
 

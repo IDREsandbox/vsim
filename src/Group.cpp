@@ -92,7 +92,7 @@ int Group::indexOf(const osg::Node * node) const
 void Group::addChildrenP(const std::set<osg::Node*> &children)
 {
 	emit sAboutToAddP(children);
-
+	qDebug() << "addchildren" << children.size();
 	for (auto node : children) {
 		addChild(node);
 	}
@@ -102,10 +102,11 @@ void Group::addChildrenP(const std::set<osg::Node*> &children)
 
 void Group::removeChildrenP(const std::set<osg::Node*> &children)
 {
-
+	qDebug() << "remove children p";
 	emit sAboutToRemoveP(children);
 
 	for (auto node : children) {
+		qDebug() << "removing child" << node;
 		removeChild(node);
 	}
 

@@ -27,8 +27,6 @@ public:
 	NarrativeSlideItem *canvasToSlide(RectItem *rect) const;
 	RectItem *slideToCanvas(NarrativeSlideItem *item) const;
 
-	void onItemTransformed(NarrativeSlideItem *item, QRectF rect);
-
 signals:
 	void sItemsTransformed(const std::map<NarrativeSlideItem*, QRectF> &new_rects);
 	void sLabelUndoCommandAdded(NarrativeSlideLabel*);
@@ -38,12 +36,13 @@ private:
 	void removeItem(NarrativeSlideItem *item);
 
 private:
-	NarrativeSlide * m_slide;
+	NarrativeSlide *m_slide;
 
 	bool m_editing;
 
 	std::map<NarrativeSlideItem*, RectItem*> m_item_to_rect;
 	std::map<RectItem*, NarrativeSlideItem*> m_rect_to_item;
 };
+
 
 #endif

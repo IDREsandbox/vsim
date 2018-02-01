@@ -77,7 +77,6 @@ void NarrativePlayer::editEvent()
 	}
 	// update camera and everything
 	NarrativeSlide *slide = m_narratives->getCurrentSlide();
-	qDebug() << "edit event - current slide" << m_narratives->getCurrentSlideIndex();
 	if (slide) {;
 		updateCamera(slide->getCameraMatrix());
 	}

@@ -25,10 +25,8 @@ class CanvasContainer : public QWidget {
 public:
 	CanvasContainer(QWidget *parent);
 
-	void enableEditing(bool enable);
-
-	std::set<RectItem*> getSelectedRects() const;
-	void setSelectedRects(const std::set<RectItem*> &items);
+	bool isEditable() const;
+	void setEditable(bool editable);
 
 	void setBaseHeight(double height);
 
@@ -36,9 +34,6 @@ public:
 	bool eventFilter(QObject *obj, QEvent *e) override;
 
 	void clear();
-
-signals:
-	void rectsTransformed(const std::map<RectItem*, QRectF> &rects);
 
 protected:
 	void resizeEvent(QResizeEvent* event) override;
@@ -48,7 +43,7 @@ protected:
 	QGraphicsView *m_view;
 	QGridLayout *m_layout;
 
-	bool m_editing;
+	bool m_editable;
 	double m_base_height;
 	double m_base_width;
 
@@ -65,7 +60,8 @@ class CanvasScene : public QGraphicsScene {
 	Q_OBJECT;
 public:
 	CanvasScene(QObject *parent);
-	QList<RectItem*> selectedRects() const;
+	std::set<RectItem*> getSelectedRects() const;
+	void setSelectedRects(const std::set<RectItem*> &items);
 
 	// call this before transforming items
 	void beginTransform();
@@ -75,18 +71,17 @@ public:
 
 	// get the original rects for items
 	// use after beginTransform()
-	typedef std::vector<std::pair<RectItem*, QRectF>> ItemRectList;
-	const ItemRectList &getTransformRects() const;
+	const std::map<RectItem*, QRectF> &getTransformRects() const;
 
 signals:
-	void sEndTransform();
+	void rectsTransformed(const std::map<RectItem*, QRectF> &rects);
 
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
 
 private:
-	ItemRectList m_saved_rects;
+	std::map<RectItem*, QRectF> m_saved_rects;
 };
 
 // A rectangle drawn around selected items with
@@ -193,12 +188,18 @@ public:
 	void resize(double w, double h);
 	void move(double x, double y);
 	//void setRotation(double deg_ccw);
+	//bool editable() const;
+	virtual void setEditable(bool enable);
+
+	CanvasScene *canvasScene() const;
+
 protected:
 	virtual void onResize(QSizeF size);
 
 private:
 	double m_w;
 	double m_h;
+	//bool m_editable;
 };
 
 // A transformable text item in a CanvasScene
@@ -208,10 +209,13 @@ public:
 
 	void setBaseHeight(double height); // ex. 600.0 for 800x600
 
-	virtual QRectF boundingRect() const override;
+	QRectF boundingRect() const override;
+
+	void setEditable(bool enable) override;
 
 protected:
-	virtual void onResize(QSizeF size) override;
+	void onResize(QSizeF size) override;
+
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
 public:
@@ -224,13 +228,14 @@ class TextItem : public QGraphicsTextItem {
 public:
 	TextItem(TextRect *parent);
 
-	virtual QRectF boundingRect() const override;
-	virtual QPainterPath shape() const override;
+	QRectF boundingRect() const override;
+	QPainterPath shape() const override;
 
-	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 protected:
-	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-	virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+	void focusOutEvent(QFocusEvent *event) override;
+	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 	TextRect *m_rect;
 };
 
