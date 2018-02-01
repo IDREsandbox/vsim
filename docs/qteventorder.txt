@@ -13,4 +13,21 @@ mouse double click <- parent (default)
 double clicks first look for a double click handler,
  if it doesn't exist then the default forwards the event to the single click handler
 
-i have no clue what accept does
+Events start at the children and propagate down. Calling ignore() or ::event returning false
+makes a widget pass on the event to children.
+ ignore and accept are opposites
+
+Typical:
+ 1. filter
+ 2. ::event()
+ 3. virtual mousePressEvent
+
+QGraphicsView is all messed up
+ 0. QAbstractScrollArea::viewportEvent
+ 1. mousePressEvent
+ 2. scene ::event()
+ 3. scene mousePressEvent
+ (quit if accept, continue if ignore)
+ 4. filter
+ 5. ::event()
+

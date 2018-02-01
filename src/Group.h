@@ -21,11 +21,19 @@ public:
 	virtual void move(const std::vector<std::pair<int, int>>& mapping);
 	virtual int indexOf(const osg::Node *node) const; // -1 if not found
 
+	virtual void addChildrenP(const std::set<osg::Node*> &children);
+	virtual void removeChildrenP(const std::set<osg::Node*> &children);
+
 signals:
 	void sNew(int index); // inserted node at index
 	void sDelete(int index); // deleted node at index
 	void sSet(int index); // changed (set) node at index
 	void sItemsMoved(std::vector<std::pair<int,int>>); // items sorted by .first
+
+	void sAboutToAddP(const std::set<osg::Node*> &);
+	void sAddedP(const std::set<osg::Node*> &);
+	void sAboutToRemoveP(const std::set<osg::Node*> &nodes);
+	void sRemovedP(const std::set<osg::Node*> &nodes);
 
 public: // COMMANDS
 	// Adds an already created node to a group
@@ -70,6 +78,34 @@ public: // COMMANDS
 		void move(std::vector<std::pair<int, int>>); // generic version handles undo and redo
 		Group *m_group;
 		std::vector<std::pair<int, int>> m_mapping;
+	};
+
+	// Doesn't care about indices
+	class AddNodesPCommand : public QUndoCommand {
+	public:
+		AddNodesPCommand(
+			Group *group,
+			const std::set<osg::Node*> &nodes,
+			QUndoCommand *parent = nullptr);
+		virtual void undo() override;
+		virtual void redo() override;
+	private:
+		Group * m_group;
+		std::set<osg::ref_ptr<osg::Node>> m_nodes;
+	};
+
+	// Doesn't care about indices
+	class RemoveNodesPCommand : public QUndoCommand {
+	public:
+		RemoveNodesPCommand(
+			Group *group,
+			const std::set<osg::Node*> &nodes,
+			QUndoCommand *parent = nullptr);
+		virtual void undo() override;
+		virtual void redo() override;
+	private:
+		Group *m_group;
+		std::set<osg::ref_ptr<osg::Node>> m_nodes;
 	};
 };
 

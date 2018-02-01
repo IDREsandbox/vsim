@@ -78,49 +78,96 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 
 	enableEditing(false);
 
-	connect(m_scene, &CanvasScene::sItemsTransformed, this,
-		[this](const CanvasScene::ItemRectList &list) {
-		qDebug() << "items transformed:";
-		for (auto pair : list) {
-			qDebug() << "i" << (void*)pair.first << "r" << pair.second;
+	connect(m_scene, &CanvasScene::sEndTransform, this,
+		[this]() {
+		std::map<RectItem*, QRectF> out_map;
+		// go through old list, do a diff
+		auto saved_rects = m_scene->getTransformRects();
+		for (auto item_rect_pair : saved_rects) {
+			RectItem *item = item_rect_pair.first;
+			QRectF rect = item_rect_pair.second;
+
+			if (item->rect() != rect) {
+				out_map[item] = rect;
+			}
 		}
-		std::set<int> indices;
-		itemsTransformed(indices);
+		if (out_map.size() > 0) emit rectsTransformed(out_map);
 	});
 	connect(m_scene, &QGraphicsScene::changed, this,
 		[this]() {
 		m_view->centerOn(0, 0);
-		m_manipulator->recalculate();
 	});
+	// these have to be directly connect to the manipulator otherwise
+	// it crashes on destruction
+	connect(m_scene, &QGraphicsScene::changed, m_manipulator, &TransformManipulator::recalculate);
 	connect(m_scene, &QGraphicsScene::selectionChanged, m_manipulator, &TransformManipulator::recalculate);
 }
 
 void CanvasContainer::enableEditing(bool enable)
 {
 	auto items = m_scene->items();
-	if (enable) {
-		m_view->setDragMode(QGraphicsView::RubberBandDrag);
 
-		QGraphicsItem::GraphicsItemFlags flags;
-		flags.setFlag(QGraphicsItem::ItemIsFocusable, true);
-		flags.setFlag(QGraphicsItem::ItemIsMovable, true);
-		flags.setFlag(QGraphicsItem::ItemIsSelectable, true);
+	for (auto item : items) {
+		RectItem *ritem = dynamic_cast<RectItem*>(item);
+		if (!ritem) continue;
 
-		for (auto item : items) {
-			// disable flag stuff
-			item->setFlags(flags);
+		// item flags
+		if (enable) {
+			item->setFlags(
+				QGraphicsItem::ItemIsFocusable
+				| QGraphicsItem::ItemIsMovable
+				| QGraphicsItem::ItemIsSelectable
+			);
 		}
-
-	}
-	else {
-		m_view->setDragMode(QGraphicsView::NoDrag);
-
-		for (auto item : items) {
-			// disable flag stuff
+		else {
 			item->setFlags(0);
 		}
 
-		//m_scene->setSelection({});
+
+		TextRect *titem = dynamic_cast<TextRect*>(ritem);
+		if (!titem) continue;
+
+		// text flags
+		if (enable) {
+			titem->m_text->setTextInteractionFlags(Qt::TextEditorInteraction);
+		}
+		else {
+			titem->m_text->setTextInteractionFlags(Qt::TextBrowserInteraction);
+		}
+	}
+
+	// drag flag
+	if (enable) {
+		m_manipulator->setEnabled(true);
+		m_view->setDragMode(QGraphicsView::RubberBandDrag);
+	}
+	else {
+		m_manipulator->setEnabled(false);
+		m_view->setDragMode(QGraphicsView::NoDrag);
+	}
+}
+
+std::set<RectItem*> CanvasContainer::getSelectedRects() const
+{
+	std::set<RectItem*> rects_out;
+	for (auto r : m_scene->selectedRects()) {
+		rects_out.insert(r);
+	}
+	return rects_out;
+}
+
+void CanvasContainer::setSelectedRects(const std::set<RectItem*>& items)
+{
+	auto selected_list = m_scene->selectedRects();
+	// deselect items
+	for (auto selected : selected_list) {
+		if (items.find(selected) == items.end()) {
+			selected->setSelected(false);
+		}
+	}
+	// select items that should be
+	for (auto item : items) {
+		item->setSelected(true);
 	}
 }
 
@@ -142,47 +189,43 @@ void CanvasContainer::setBaseHeight(double height)
 
 bool CanvasContainer::eventFilter(QObject * obj, QEvent * e)
 {
-	bool duplicate = false;
-	bool send = true;
+	//bool duplicate = false;
+	//bool send = true;
 
-	QKeyEvent *ke;
+	//QKeyEvent *ke;
 
-	QEvent::Type type = e->type();
+	//QEvent::Type type = e->type();
 
-	switch (type) {
-	case QEvent::KeyPress:
-	case QEvent::ShortcutOverride:
-		ke = static_cast<QKeyEvent*>(e);
-		if (ke->matches(QKeySequence::Redo) || ke->matches(QKeySequence::Undo)) {
-			qDebug() << "text steal undo redo event";
-			duplicate = true;
-			send = false;
-		}
-		break;
-	case QEvent::MouseButtonPress:
-	case QEvent::MouseButtonRelease:
-	case QEvent::MouseMove:
-		qDebug() << "view forward mouse event";
-		if (!m_editing) {
-			duplicate = true;
-			send = true;
-		}
-		break;
-	}
+	//switch (type) {
+	//case QEvent::KeyPress:
+	//case QEvent::ShortcutOverride:
+	//	ke = static_cast<QKeyEvent*>(e);
+	//	if (ke->matches(QKeySequence::Redo) || ke->matches(QKeySequence::Undo)) {
+	//		qDebug() << "text steal undo redo event";
+	//		duplicate = true;
+	//		send = false;
+	//	}
+	//	break;
+	//case QEvent::MouseButtonPress:
+	//case QEvent::MouseButtonRelease:
+	//case QEvent::MouseMove:
+	//	if (!m_editing) {
+	//		duplicate = true;
+	//		send = true;
+	//	}
+	//	break;
+	//}
 
-	if (duplicate) {
-		QApplication::sendEvent(this, e);
-	}
-	return !send;
+	//if (duplicate) {
+	//	QApplication::sendEvent(this, e);
+	//}
+	//return !send;
+	return false;
 }
 
 void CanvasContainer::clear()
 {
 	m_scene->clear();
-}
-
-void CanvasContainer::itemsTransformed(const std::set<int>& items)
-{
 }
 
 CanvasScene::CanvasScene(QObject * parent)
@@ -204,10 +247,6 @@ QList<RectItem*> CanvasScene::selectedRects() const
 	return out_list;
 }
 
-void CanvasScene::setSelection(const std::set<RectItem*>& items)
-{
-}
-
 void CanvasScene::beginTransform()
 {
 	QList<RectItem*> items = selectedRects();
@@ -222,17 +261,7 @@ void CanvasScene::beginTransform()
 
 void CanvasScene::endTransform()
 {
-	ItemRectList out_list;
-	// go through old list, do a diff
-	for (auto item_rect_pair : m_saved_rects) {
-		RectItem *item = item_rect_pair.first;
-		QRectF rect = item_rect_pair.second;
-
-		if (item->rect() != rect) {
-			out_list.push_back(std::make_pair(item, rect));
-		}
-	}
-	emit sItemsTransformed(out_list);
+	emit sEndTransform();
 }
 
 const CanvasScene::ItemRectList & CanvasScene::getTransformRects() const
@@ -251,7 +280,6 @@ void CanvasScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
 	endTransform();
 }
 
-
 RectItem::RectItem(QGraphicsItem * parent)
 	: QGraphicsRectItem(parent)
 {
@@ -262,7 +290,7 @@ RectItem::RectItem(QGraphicsItem * parent)
 	);
 
 	setRect(0, 0, 1, 1);
-	setBrush(QBrush(QColor(0, 0, 0, 200)));
+	setBrush(QBrush(QColor(0, 0, 0, 0)));
 	setPen(QPen(QBrush(), 0, Qt::NoPen));
 }
 
@@ -338,7 +366,7 @@ void TransformManipulator::recalculate()
 {
 	auto rects = m_scene->selectedRects();
 
-	if (rects.size() == 0) {
+	if (rects.size() == 0 || !isEnabled()) {
 		hide();
 	}
 	else {

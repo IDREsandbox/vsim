@@ -1899,6 +1899,15 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
   </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="GeneratedFiles\Debug\CanvasContainer.moc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp;$(QTDIR)\bin\moc.exe;..\..\narrative\CanvasContainer.cpp</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing CanvasContainer.cpp...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\%(Filename).moc</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "..\..\narrative\CanvasContainer.cpp" -o ".\GeneratedFiles\$(ConfigurationName)\%(Filename).moc"  -DUNICODE -DWIN32 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_OPENGL_LIB -DQT_WIDGETS_LIB "-I.\GeneratedFiles" "-I." "-I.\..\..\narrative" "-I.\..\.." "-I.\.." "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtWidgets" "-I$(DEPS)\osg-build\install\include"</Command>
+    </CustomBuild>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B12702AD-ABFB-343A-A199-8E24837244A3}</ProjectGuid>
     <Keyword>Qt4VSv1.0</Keyword>

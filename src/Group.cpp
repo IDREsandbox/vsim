@@ -89,6 +89,29 @@ int Group::indexOf(const osg::Node * node) const
 	return x;
 }
 
+void Group::addChildrenP(const std::set<osg::Node*> &children)
+{
+	emit sAboutToAddP(children);
+
+	for (auto node : children) {
+		addChild(node);
+	}
+
+	emit sAddedP(children);
+}
+
+void Group::removeChildrenP(const std::set<osg::Node*> &children)
+{
+
+	emit sAboutToRemoveP(children);
+
+	for (auto node : children) {
+		removeChild(node);
+	}
+
+	emit sRemovedP(children);
+}
+
 Group::AddNodeCommand::AddNodeCommand(
 	Group *group,
 	osg::Node *node,
@@ -156,4 +179,64 @@ void Group::MoveNodesCommand::undo()
 void Group::MoveNodesCommand::redo()
 {
 	m_group->move(m_mapping);
+}
+
+Group::AddNodesPCommand::AddNodesPCommand(
+	Group *group,
+	const std::set<osg::Node*> &nodes,
+	QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_group(group)
+{
+	// keep references
+	for (auto node : nodes) {
+		m_nodes.insert(osg::ref_ptr<osg::Node>(node));
+	}
+}
+void Group::AddNodesPCommand::undo()
+{
+	// convert from refs to ptrs
+	std::set<osg::Node*> nodes;
+	for (auto node_ref : m_nodes) {
+		nodes.insert(node_ref);
+	}
+	m_group->removeChildrenP(nodes);
+}
+void Group::AddNodesPCommand::redo()
+{
+	std::set<osg::Node*> nodes;
+	for (auto node_ref : m_nodes) {
+		nodes.insert(node_ref);
+	}
+	m_group->addChildrenP(nodes);
+}
+
+Group::RemoveNodesPCommand::RemoveNodesPCommand(
+	Group *group,
+	const std::set<osg::Node*> &nodes,
+	QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_group(group)
+{
+	// keep references
+	for (auto node : nodes) {
+		m_nodes.insert(osg::ref_ptr<osg::Node>(node));
+	}
+}
+void Group::RemoveNodesPCommand::undo()
+{
+	// convert from refs to ptrs
+	std::set<osg::Node*> nodes;
+	for (auto node_ref : m_nodes) {
+		nodes.insert(node_ref);
+	}
+	m_group->addChildrenP(nodes);
+}
+void Group::RemoveNodesPCommand::redo()
+{
+	std::set<osg::Node*> nodes;
+	for (auto node_ref : m_nodes) {
+		nodes.insert(node_ref);
+	}
+	m_group->removeChildrenP(nodes);
 }

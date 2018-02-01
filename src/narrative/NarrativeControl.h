@@ -52,7 +52,7 @@ public:
 	void selectNarratives(std::set<int> narratives);
 	void selectSlides(int narrative, std::set<int> slides);
 	//void selectLabel(int narrative, int slide, NarrativeSlideItem *label);
-	void selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem *> &labels);
+	void selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem*> &labels);
 
 	int getCurrentNarrativeIndex();
 	int getCurrentSlideIndex();
@@ -95,8 +95,8 @@ public:
 	//editDlg buttons
 	void newLabel();
 	void exitEdit();
-	void deleteItems();
-	void transformItems(const std::map<NarrativeSlideItem *, QRectF> &rects);
+	void deleteLabels();
+	void transformLabels(const std::map<NarrativeSlideItem *, QRectF> &rects);
 	void labelEdited(NarrativeSlideLabel *label);
 
 	void editStyleSettings();

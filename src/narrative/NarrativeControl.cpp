@@ -88,11 +88,11 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	// new
 	//connect(m_canvas, &labelCanvas::sNewLabel, this, &NarrativeControl::newLabel); // doesn't exist, see edit buttons
 	// move
-	connect(m_canvas, &NarrativeCanvas::sItemsTransformed, this, &NarrativeControl::transformItems);
+	connect(m_canvas, &NarrativeCanvas::sItemsTransformed, this, &NarrativeControl::transformLabels);
 
 	// text change
 	//connect(m_canvas, SIGNAL(sSuperTextSet(QString, int)), this, SLOT(textEditLabel(QString, int))); // these two are directly connected
-	connect(m_canvas, &NarrativeCanvas::sLabelEdited, this, &NarrativeControl::labelEdited);
+	connect(m_canvas, &NarrativeCanvas::sLabelUndoCommandAdded, this, &NarrativeControl::labelEdited);
 
 	// delete
 	//connect(m_canvas, &NarrativeCanvas::sDeleteLabel, this, &NarrativeControl::deleteLabel);
@@ -122,7 +122,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	//connect(editDlg->ui.body, &QPushButton::clicked, this, &NarrativeControl::newBod);
 	//connect(editDlg->ui.image, &QPushButton::clicked, this, &NarrativeControl::newImg);
 
-	connect(editDlg->ui.delete_2, &QPushButton::clicked, this, &NarrativeControl::deleteItems);
+	connect(editDlg->ui.delete_2, &QPushButton::clicked, this, &NarrativeControl::deleteLabels);
 	connect(editDlg->ui.done, &QPushButton::clicked, this, &NarrativeControl::exitEdit);
 
 	/*connect(editDlg->ui.label, &QPushButton::clicked, this, [this]() {newLabel(
@@ -484,39 +484,9 @@ void NarrativeControl::hideCanvas(bool instant)
 	m_canvas->hide();
 }
 
-//void NarrativeControl::hideCanvas()
-//{
-//}
-//
-//void NarrativeControl::fadeOutTo(int index, bool)
-//{
-//
-//	m_canvas_view->fadeOut(slide);
-//	m_narrative_box->;
-//
-//}
-//
-//void NarrativeControl::fadeIn(int index)
-//{
-//	m_canvas_view->fadeIn(slide);
-//
-//}
-
-//bool NarrativeControl::fadeToSlide(int index)
-//{
-//
-//	m_canvas_view->fadeToSlide()
-//	return false;
-//}
-
-void NarrativeControl::deleteItems() {
-	//int selection = m_canvas->getSelection();
-	//deleteLabel(selection);
-	qDebug() << "delete canvas items";
-}
-
 void NarrativeControl::exitEdit() {
 	editDlg->hide();
+	m_canvas->enableEditing(false);
 	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 }
 
@@ -563,31 +533,6 @@ void NarrativeControl::selectLabels(int narrative, int slide, const std::set<Nar
 }
 
 //const std::string &text, const std::string &style, const std::string &widget_style, float height, float width, int margin
-void NarrativeControl::newLabel() {
-	NarrativeSlide *slide = getCurrentSlide();
-	if (!slide) {
-		qWarning() << "Narrative Control - creating label without slide open";
-		return;
-	}
-
-	NarrativeSlideLabel *label = new NarrativeSlideLabel;
-
-	// initialization
-	label->setStyle(0);
-	label->setHtml("New Label");
-	label->setRect(QRectF(-.2, -.2, .4, .2));
-	label->setBackground(QColor(0, 0, 0, 100));
-
-	// push command
-	m_undo_stack->beginMacro("New Label");
-	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, {}, ON_UNDO));
-	m_undo_stack->push(new Group::AddNodeCommand(slide, label));
-	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, {label}, ON_REDO));
-	m_undo_stack->endMacro();
-
-	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
-	item->setThumbnailDirty(true);
-}
 
 //void NarrativeControl::deleteLabel(int idx)
 //{
@@ -645,30 +590,6 @@ void NarrativeControl::newLabel() {
 //	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
 //	item->setThumbnailDirty(true);
 //}
-
-void NarrativeControl::transformItems(const std::map<NarrativeSlideItem *, QRectF>& rects)
-{
-
-}
-
-void NarrativeControl::labelEdited(NarrativeSlideLabel *label)
-{
-	// This one is special
-	// Since the label and document are directly connected via QTextDocument
-	// all we need to know about is when changes happen so that we can undo them
-
-	if (!label) {
-		qWarning() << "Narrative Control - edit label with invalid index"
-			<< m_current_narrative << m_current_slide << label;
-		return;
-	}
-	QTextDocument *doc = label->getDocument();
-
-	m_undo_stack->beginMacro("Edit Label");
-	m_undo_stack->push(new NarrativeSlideLabel::DocumentEditWrapperCommand(doc));
-	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, {label}));
-	m_undo_stack->endMacro();
-}
 
 //void NarrativeControl::textEditLabel(QString str, int idx) {
 //	qDebug() << "edit text";
@@ -798,6 +719,7 @@ void NarrativeControl::editSlide() {
 	//qDebug() << "EDIT SLIDE CURRENT SLDIE?" << m_current_narrative << m_current_slide << getCurrentSlide();
 	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, false);
 	editDlg->show();
+	m_canvas->enableEditing(true);
 }
 
 void NarrativeControl::setSlideDuration()
@@ -880,6 +802,94 @@ void NarrativeControl::moveSlides(std::set<int> from, int to)
 	m_undo_stack->endMacro();
 }
 
+
+void NarrativeControl::newLabel() {
+	NarrativeSlide *slide = getCurrentSlide();
+	if (!slide) {
+		qWarning() << "Narrative Control - creating label without slide open";
+		return;
+	}
+
+	NarrativeSlideLabel *label = new NarrativeSlideLabel;
+
+	// initialization
+	label->setStyle(0);
+	label->setHtml("New Label");
+	label->setRect(QRectF(-.2, -.2, .4, .2));
+	label->setBackground(QColor(0, 0, 0, 100));
+
+	qInfo() << "Creating new canvas label";
+
+	// push command
+	m_undo_stack->beginMacro("New Label");
+	m_undo_stack->push(new Group::AddNodesPCommand(slide, { label }));
+	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, { label }, ON_REDO));
+	m_undo_stack->endMacro();
+
+	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
+	item->setThumbnailDirty(true);
+}
+
+void NarrativeControl::deleteLabels() {
+	auto items = m_canvas->getSelection();
+	// convert slide items to Node*
+	std::set<osg::Node*> nodes;
+	for (auto item : items) nodes.insert(item);
+
+	NarrativeSlide *slide = getCurrentSlide();
+	if (!slide) return;
+
+	qInfo() << "Deleting" << items.size() << "canvas items";
+
+	m_undo_stack->beginMacro("Delete Canvas Items");
+	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, items, ON_UNDO));
+	m_undo_stack->push(new Group::RemoveNodesPCommand(slide, nodes));
+	m_undo_stack->endMacro();
+
+	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
+	item->setThumbnailDirty(true);
+}
+
+void NarrativeControl::transformLabels(const std::map<NarrativeSlideItem *, QRectF>& rects)
+{
+	// build set of items, for selection
+	std::set<NarrativeSlideItem*> items;
+	for (auto item_rect : rects) {
+		items.insert(item_rect.first);
+	}
+	qDebug() << "Transforming" << items.size() << "canvas items";
+
+	m_undo_stack->beginMacro("Transform Canvas Items");
+	for (auto item_rect : rects) {
+		NarrativeSlideItem *item = item_rect.first;
+		QRectF rect = item_rect.second;
+		m_undo_stack->push(new NarrativeSlideItem::TransformCommand(item, rect));
+	}
+	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, items, ON_BOTH));
+	m_undo_stack->endMacro();
+
+	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
+	item->setThumbnailDirty(true);
+}
+
+void NarrativeControl::labelEdited(NarrativeSlideLabel *label)
+{
+	// This one is special
+	// Since the label and document are directly connected via QTextDocument
+	// all we need to know about is when changes happen so that we can undo them
+
+	if (!label) {
+		qWarning() << "Narrative Control - edit label with invalid index"
+			<< m_current_narrative << m_current_slide << label;
+		return;
+	}
+	QTextDocument *doc = label->getDocument();
+
+	m_undo_stack->beginMacro("Edit Label");
+	m_undo_stack->push(new NarrativeSlideLabel::DocumentEditWrapperCommand(doc));
+	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, { label }));
+	m_undo_stack->endMacro();
+}
 
 void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> items)
 {

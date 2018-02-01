@@ -2,6 +2,8 @@
 #define CANVASCONTAINER_H
 
 #include <set>
+#include <vector>
+#include <map>
 
 #include <QGraphicsScene>
 #include <QGraphicsView>
@@ -15,6 +17,8 @@ class RectItem;
 class TextRect;
 class TextItem;
 
+typedef std::vector<std::pair<RectItem*, QRectF>> ItemRectList;
+
 // A widget with transformable items inside
 class CanvasContainer : public QWidget {
 	Q_OBJECT;
@@ -23,6 +27,9 @@ public:
 
 	void enableEditing(bool enable);
 
+	std::set<RectItem*> getSelectedRects() const;
+	void setSelectedRects(const std::set<RectItem*> &items);
+
 	void setBaseHeight(double height);
 
 	// undo redo filter
@@ -30,7 +37,8 @@ public:
 
 	void clear();
 
-	virtual void itemsTransformed(const std::set<int> &items);
+signals:
+	void rectsTransformed(const std::map<RectItem*, QRectF> &rects);
 
 protected:
 	void resizeEvent(QResizeEvent* event) override;
@@ -58,7 +66,6 @@ class CanvasScene : public QGraphicsScene {
 public:
 	CanvasScene(QObject *parent);
 	QList<RectItem*> selectedRects() const;
-	void setSelection(const std::set<RectItem*> &items);
 
 	// call this before transforming items
 	void beginTransform();
@@ -72,7 +79,7 @@ public:
 	const ItemRectList &getTransformRects() const;
 
 signals:
-	void sItemsTransformed(const ItemRectList &);
+	void sEndTransform();
 
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;

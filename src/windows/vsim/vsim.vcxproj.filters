@@ -251,6 +251,9 @@
     <CustomBuild Include="..\..\narrative\NarrativeSlideLabel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="GeneratedFiles\Debug\CanvasContainer.moc">
+      <Filter>Generated Files\Debug</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\main.cpp">
@@ -462,12 +465,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_editButtons.cpp">
       <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_labelCanvas.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_labelCanvas.cpp">
-      <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_editButtons.cpp">
       <Filter>Generated Files\Debug</Filter>
