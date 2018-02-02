@@ -113,6 +113,18 @@ QImage Util::imageOsgToQt(const osg::Image *oimg)
 	return QImage(oimg->data(), oimg->s(), oimg->t(), QImage::Format_RGBA8888);
 }
 
+QColor Util::vecToColor(const osg::Vec4 & vec)
+{
+	QColor color;
+	color.setRgbF(vec.r(), vec.g(), vec.b(), vec.a());
+	return color;
+}
+
+osg::Vec4 Util::colorToVec(const QColor & color)
+{
+	return osg::Vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+}
+
 QString Util::setToString(std::set<int> set)
 {
 	QString str = "";

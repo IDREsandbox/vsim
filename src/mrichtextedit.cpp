@@ -39,7 +39,7 @@
 #include <QMenu>
 #include <QDialog>
 
-MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
+MRichTextEdit::MRichTextEdit(QWidget *parent) : QDialog(parent) {
     setupUi(this);
     m_lastBlockList = 0;
     f_textedit->setTabStopWidth(40);
@@ -56,6 +56,10 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QWidget(parent) {
 
     fontChanged(f_textedit->font());
     bgColorChanged(f_textedit->textColor());
+
+	// exit
+	connect(dialog_buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+	connect(dialog_buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     // paragraph formatting
 

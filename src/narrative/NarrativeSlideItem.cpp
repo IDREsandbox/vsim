@@ -1,4 +1,5 @@
 #include "narrative/NarrativeSlideItem.h"
+#include "Util.h"
 
 NarrativeSlideItem::NarrativeSlideItem()
 	: osg::Node()
@@ -40,11 +41,11 @@ void NarrativeSlideItem::setBackground(const QColor &color)
 
 const osg::Vec4 &NarrativeSlideItem::getBackgroundRGBA() const
 {
-	m_color_vec = osg::Vec4(m_rect.x(), m_rect.y(), m_rect.width(), m_rect.height());
+	m_color_vec = Util::colorToVec(m_color);
 	return m_color_vec;
 }
 
 void NarrativeSlideItem::setBackgroundRGBA(const osg::Vec4 &vec)
 {
-	m_color = QColor(vec[0], vec[1], vec[2], vec[3]);
+	m_color = Util::vecToColor(vec);
 }

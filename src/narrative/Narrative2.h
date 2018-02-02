@@ -7,7 +7,8 @@
 #include "narrative/NarrativeSlide.h"
 #include "deprecated/narrative/Narrative.h"
 #include "Group.h"
-#include "LabelStyle.h"
+
+class LabelStyleGroup;
 
 class Narrative2 : public Group {
 	Q_OBJECT
@@ -30,22 +31,9 @@ public:
 	bool getLock() const{return m_locked;}
 	void setLock(bool lock){ m_locked = lock;}
 
-	LabelStyle* getH1() { return h1; }
-	LabelStyle* getH2() { return h2; }
-	LabelStyle* getBod() { return bod; }
-	LabelStyle* getLab() { return lab; }
-	LabelStyle* getImg() { return img; }
-
-	const LabelStyle* getH1() const { return h1; }
-	void setH1(LabelStyle* H1) { h1 = H1; }
-	const LabelStyle* getH2() const { return h2; }
-	void setH2(LabelStyle* H2) { h2 = H2; }
-	const LabelStyle* getBod() const { return bod; }
-	void setBod(LabelStyle* Bod) { bod = Bod; }
-	const LabelStyle* getLab() const { return lab; }
-	void setLab(LabelStyle* Lab) { lab = Lab; }
-	const LabelStyle* getImg() const { return img; }
-	void setImg(LabelStyle* Img) { img = Img; }
+	LabelStyleGroup *labelStyles() const;
+	const LabelStyleGroup *getLabelStyles() const;
+	void setLabelStyles(LabelStyleGroup *styles);
 
 signals:
 	void sTitleChanged(const std::string&);
@@ -79,12 +67,7 @@ private:
 	std::string m_author;
 	bool m_locked;
 
-	//osg::ref_ptr<LabelStyleGroup> m_styles;
-	osg::ref_ptr<LabelStyle> h1;
-	osg::ref_ptr<LabelStyle> h2;
-	osg::ref_ptr<LabelStyle> bod;
-	osg::ref_ptr<LabelStyle> lab;
-	osg::ref_ptr<LabelStyle> img;
+	osg::ref_ptr<LabelStyleGroup> m_styles;
 };
 
 #endif /* NARRATIVE2_H */

@@ -69,11 +69,6 @@ signals:
 	void sEditEvent();
 
 public:
-
-	void redrawThumbnails(const std::vector<SlideScrollItem*> slides);
-	//QImage generateThumbnail(int option = 1);
-	QImage generateThumbnail(NarrativeSlide *slide);
-
 	// Narratives
 	void newNarrative();
 	void editNarrativeInfo();
@@ -85,7 +80,6 @@ public:
 	// Slides
 	void newSlide();
 	void deleteSlides();
-	void editSlide();
 	void setSlideDuration();
 	void setSlideTransition();
 	void setSlideCamera();
@@ -93,13 +87,22 @@ public:
 
 	// Labels
 	//editDlg buttons
-	void newLabel();
-	void exitEdit();
+	void newLabel(int style); // LabelStyle::Style
 	void deleteLabels();
 	void transformLabels(const std::map<NarrativeSlideItem *, QRectF> &rects);
 	void labelEdited(NarrativeSlideLabel *label);
+	void execEditLabel();
+
+	void editSlide();
+	void exitEdit();
 
 	void editStyleSettings();
+
+	// Thumbnails
+	void dirtyCurrentSlide();
+	void redrawThumbnails(const std::vector<SlideScrollItem*> slides);
+	//QImage generateThumbnail(int option = 1);
+	QImage generateThumbnail(NarrativeSlide *slide);
 
 	void debug();
 
@@ -117,9 +120,9 @@ private:
 	NarrativeScrollBox *m_narrative_box;
 	SlideScrollBox *m_slide_box;
 	NarrativeCanvas *m_canvas;
-	
-	editButtons* editDlg;
-	
+
+	editButtons* m_label_buttons;
+
 	QUndoStack *m_undo_stack;
 };
 

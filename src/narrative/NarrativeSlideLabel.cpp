@@ -1,5 +1,12 @@
 #include "narrative/NarrativeSlideLabel.h"
 #include <qgraphicseffect.h>
+#include <QTextCursor>
+#include <QTextFormat>
+#include <QTextFrame>
+#include <QTextFrame>
+#include <QTextFrameFormat>
+#include "LabelStyleGroup.h"
+
 
 NarrativeSlideLabel::NarrativeSlideLabel()
 	: m_style(0)
@@ -29,6 +36,17 @@ void NarrativeSlideLabel::setStyle(int style)
 int NarrativeSlideLabel::getStyle() const
 {
 	return m_style;
+}
+
+void NarrativeSlideLabel::applyStyle(LabelStyle *style)
+{
+	QTextCursor cursor = QTextCursor(m_document);
+	cursor.select(QTextCursor::Document);
+	cursor.setCharFormat(style->m_char_format);
+	cursor.setBlockFormat(style->m_block_format);
+	m_document->rootFrame()->setFrameFormat(style->m_frame_format);
+	// TODO: vertical alignment
+	setBackground(style->backgroundColor());
 }
 
 QTextDocument * NarrativeSlideLabel::getDocument() const

@@ -6,6 +6,7 @@
 
 #include "narrative/NarrativeSlideItem.h"
 
+class LabelStyle;
 class NarrativeSlideLabel : public NarrativeSlideItem
 {
 	Q_OBJECT
@@ -21,6 +22,8 @@ public:
 
 	void setStyle(int style);
 	int getStyle() const;
+
+	void applyStyle(LabelStyle *style);
 
 	QTextDocument *getDocument() const;
 

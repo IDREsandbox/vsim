@@ -23,6 +23,9 @@ namespace Util
 	// osg::Image to QImage
 	QImage imageOsgToQt(const osg::Image *oimg);
 
+	QColor vecToColor(const osg::Vec4 &vec);
+	osg::Vec4 colorToVec(const QColor &color);
+
 	QString setToString(std::set<int> set);
 
 	template <typename T>

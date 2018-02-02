@@ -14,6 +14,7 @@ public:
 	StyleSettings(Narrative2* narr, QWidget *parent = nullptr);
 	~StyleSettings();
 
+#ifdef STYLE_SETTINGS
 	public slots:
 	void pickFontColor_h1();
 	void pickFontSize_h1();
@@ -90,6 +91,8 @@ public:
 	void pickJustification_il();
 	void pickStyle_il();
 	void pickMargin_il();
+#endif // STYLE_SETTINGS
+
 
 private:
 	void setGui();

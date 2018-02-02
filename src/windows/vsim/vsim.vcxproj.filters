@@ -254,6 +254,12 @@
     <CustomBuild Include="GeneratedFiles\Debug\CanvasContainer.moc">
       <Filter>Generated Files\Debug</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\TextToolbar.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\TextToolbar.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\main.cpp">
@@ -871,6 +877,21 @@
     <ClCompile Include="GeneratedFiles\Release\moc_NarrativeSlideLabel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\TextToolbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_TextToolbar.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_TextToolbar.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\LabelStyleGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SerializerLabelStyleGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">
@@ -979,6 +1000,9 @@
       <Filter>Deprecated</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_ERFilterArea.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_TextToolbar.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

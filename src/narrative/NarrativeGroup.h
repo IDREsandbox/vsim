@@ -6,7 +6,6 @@
 #include <osg/Group>
 #include "Command.h"
 #include "Group.h"
-#include "Narrative2.h"
 
 class NarrativeGroup : public Group {
 	Q_OBJECT

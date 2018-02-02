@@ -22,6 +22,7 @@ class ERDisplay;
 class ERFilterArea;
 class ERScrollBox;
 class NarrativeCanvas;
+class editButtons;
 
 class MainWindow : public QMainWindow
 {
@@ -42,7 +43,10 @@ public:
 	NarrativeCanvas *canvas() const;
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
-	
+
+	editButtons *labelButtons() const;
+	// TextToolbar *textToolbar() const;
+
 	// er
 	ERScrollBox *erLocal() const;
 	ERScrollBox *erGlobal() const;
@@ -103,6 +107,7 @@ public:
 	ERFilterArea *m_er_filter_area;
 	ModelOutliner *m_outliner;
 	TimeSlider *m_time_slider;
+	editButtons *m_label_buttons;
 
 	QActionGroup *m_navigation_action_group;
 	QAction *m_action_first_person;

@@ -58,6 +58,7 @@ void NarrativeCanvas::setItemFocus(NarrativeSlideItem* item)
 NarrativeSlideItem* NarrativeCanvas::getItemFocus() const
 {
 	RectItem *rect = dynamic_cast<RectItem*>(m_scene->focusItem());
+	auto slide = canvasToSlide(rect);
 	return canvasToSlide(rect);
 }
 
@@ -78,7 +79,6 @@ NarrativeSlideItem * NarrativeCanvas::canvasToSlide(RectItem * rect) const
 void NarrativeCanvas::setSlide(NarrativeSlide *slide)
 {
 	if (m_slide) disconnect(m_slide, 0, this, 0);
-	qDebug() << "Set canvas slide" << slide;
 	// disconnect all labels
 	for (auto &item_rect : m_item_to_rect) {
 		NarrativeSlideItem *item = item_rect.first;
@@ -101,7 +101,6 @@ void NarrativeCanvas::setSlide(NarrativeSlide *slide)
 		[this](const std::set<osg::Node*> &nodes) {
 		for (auto node : nodes) {
 			NarrativeSlideItem *item = dynamic_cast<NarrativeSlideItem*>(node);
-			qDebug() << "s added p wuwu" << item;
 			if (item) addItem(item);
 		}
 	});
@@ -123,13 +122,14 @@ void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 {
 	RectItem *rect;
 	TextRect *text;
-	qDebug() << "add item" << item;
 	NarrativeSlideLabel *label = dynamic_cast<NarrativeSlideLabel*>(item);
 	if (label) {
 		// make a text rect
 		text = new TextRect();
 		rect = text;
 		text->m_text->setDocument(label->getDocument());
+		qDebug() << "new item set base height" << m_base_height;
+		text->setBaseHeight(m_base_height);
 
 		connect(text->m_text->document(), &QTextDocument::undoCommandAdded, this,
 			[this, text]() {
@@ -144,12 +144,17 @@ void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 
 	connect(item, &NarrativeSlideItem::sTransformed, this,
 		[this, rect](QRectF r) {
-		qDebug() << "set r" << r;
 		rect->setRect(r);
+	});
+
+	connect(item, &NarrativeSlideItem::sBackgroundChanged, this,
+		[this, rect](QColor color) {
+		rect->setBrush(color);
 	});
 
 	rect->setRect(label->getRect());
 	rect->setBrush(label->getBackground());
+	qDebug() << "adding background" << label->getBackground();
 	rect->setEditable(isEditable());
 	m_scene->addItem(rect);
 

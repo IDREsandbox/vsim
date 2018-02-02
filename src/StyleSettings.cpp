@@ -8,6 +8,7 @@ StyleSettings::StyleSettings(QWidget *parent)
 	ui.setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
+#ifdef STYLE_SETTINGS
 	QStringList fontSizes;
 	fontSizes << "8" << "9" << "10" << "11" << "12" << "14" << "16" << "18" << "20" << "22" << "24" << "26" << "28" << "36" << "48" << "72";
 	ui.h1_sizeBox->addItems(fontSizes);
@@ -107,6 +108,8 @@ StyleSettings::StyleSettings(QWidget *parent)
 	ui.bt_prev->setAutoFillBackground(true);
 	ui.lt_prev->setAutoFillBackground(true);
 	ui.il_prev->setAutoFillBackground(true);
+#endif // STYLE_SETTINGS
+
 }
 
 StyleSettings::StyleSettings(Narrative2* narr, QWidget *parent)
@@ -115,10 +118,11 @@ StyleSettings::StyleSettings(Narrative2* narr, QWidget *parent)
 	n = narr;
 
 	//header 1
+#ifdef STYLE_SETTINGS
 	LabelStyle* lb = n->getH1();
 	ui.h1_colorPicker->setStyleSheet(QString::fromStdString("background:rgb(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + ");"));
 	ui.h1_colorPicker_bod->setStyleSheet(QString::fromStdString("background:rgb(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + ");"));
-	
+
 	QStringList fontSizes;
 	fontSizes << "8" << "9" << "10" << "11" << "12" << "14" << "16" << "18" << "20" << "22" << "24" << "26" << "28" << "36" << "48" << "72";
 	ui.h1_sizeBox->setCurrentIndex(fontSizes.lastIndexOf(QString::number(lb->getSize())));
@@ -464,11 +468,14 @@ StyleSettings::StyleSettings(Narrative2* narr, QWidget *parent)
 
 	ui.il_prev->setFixedHeight(lb->getHeight());
 	ui.il_prev->setFixedWidth(lb->getWidth());
+#endif // STYLE_SETTINGS
+
 }
 
 StyleSettings::~StyleSettings()
 {
 }
+#ifdef STYLESETTINGS
 
 // HEADER 1
 void StyleSettings::pickFontOpacity_h1()
@@ -815,7 +822,7 @@ void StyleSettings::pickBGColor_h2()
 	lb->setGreen_BG(bgColor.green());
 
 	n->setH2(lb);
-	
+
 	pickBGOpacity_h2();
 }
 
@@ -983,7 +990,7 @@ void StyleSettings::pickFontSize_bt()
 	QFont temp2 = temp;
 	temp2.setPointSize(fontSizes.at(ui.bt_sizeBox->currentIndex()).toInt());
 	ui.bt_prev->setFont(temp2);
-	
+
 	n->setBod(lb);
 }
 
@@ -1199,7 +1206,7 @@ void StyleSettings::pickFontSize_lt()
 	QFont temp2 = temp;
 	temp2.setPointSize(fontSizes.at(ui.lt_sizeBox->currentIndex()).toInt());
 	ui.lt_prev->setFont(temp2);
-	
+
 	n->setLab(lb);
 }
 
@@ -1213,7 +1220,7 @@ void StyleSettings::pickFontColor_lt()
 
 	color = dlg.selectedColor();
 	ui.lt_colorPicker->setStyleSheet(QString::fromStdString("background:rgb(" + std::to_string(color.red()) + "," + std::to_string(color.green()) + "," + std::to_string(color.blue()) + ");"));
-	
+
 
 	QPalette pal = ui.lt_prev->palette();
 	pal.setColor(ui.lt_prev->foregroundRole(), qRgb(color.red(), color.green(), color.blue()));
@@ -1262,7 +1269,7 @@ void StyleSettings::pickFont_lt()
 	QFont temp2 = temp;
 	temp2.setFamily(ui.lt_fontBox->currentFont().family());
 	ui.lt_prev->setFont(temp2);
-	
+
 	n->setLab(lb);
 }
 
@@ -1346,7 +1353,7 @@ void StyleSettings::pickFontOpacity_il()
 
 	QPalette pal = ui.il_prev->palette();
 	color = pal.color(ui.il_prev->foregroundRole());
-	
+
 	color.setAlpha(ui.il_opacity->value());
 	pal.setColor(ui.il_prev->foregroundRole(), color);
 	ui.il_prev->setPalette(pal);
@@ -1556,3 +1563,4 @@ void StyleSettings::pickMargin_il()
 	ui.il_prev->setMargin(lb->getMargin());
 	n->setImg(lb);
 }
+#endif // STYLESETTINGS

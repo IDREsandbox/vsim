@@ -40,8 +40,8 @@ Old .vsim Format
 							all of the widget stuff, x/y/w/h whatever
 							Group osg::Group
 								Children {
-									widget1
-									widget2
+									widget1 ::VSWidget
+									widget2 ::VSLabel
 										Position osg::Vec2f
 										Size osg::Vec2f
 										BgGeometry

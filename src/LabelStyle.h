@@ -2,61 +2,93 @@
 #define LABELSTYLE_H
 
 #include <string>
-#include <osg/Node>
-#include <QObject>
-#include "narrative/NarrativeSlide.h"
-#include "deprecated/narrative/Narrative.h"
-#include "Group.h"
-#include "LabelStyle.h"
 
-class LabelStyle : public Group {
+#include <QColor>
+#include <osg/Vec4>
+#include <QTextCharFormat>
+#include <QTextDocument>
+#include <QFont>
+#include <QTextCursor>
+
+#include "Group.h"
+
+class LabelStyle : public QObject, public osg::Node {
 	Q_OBJECT
 
 public:
+	enum Style {
+		NONE,
+		HEADER1,
+		HEADER2,
+		BODY,
+		LABEL
+	};
+	static constexpr const char *StyleNames[] = {
+		"None",
+		"Header 1",
+		"Header 2",
+		"Body",
+		"Label"
+	};
+
 	LabelStyle();
+	//LabelStyle(Style base_style);
 	LabelStyle(const LabelStyle& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	LabelStyle(const std::string f, int s, int r, int g, int b, float o, bool sh, int rbg, 
-		int bbg, int gbg, float obg, int w, int h, const std::string we, const std::string al, int m);
+		int bbg, int gbg, float obg, int w, int h, QFont::Weight we, bool ital, Qt::Alignment al, int m);
 	virtual ~LabelStyle();
 
-	LabelStyle& operator=(const LabelStyle& other);
+	//LabelStyle& operator=(const LabelStyle& other);
 
-	META_Node(, LabelStyle)
+	META_Node(, LabelStyle);
 
-	const std::string& getFont() const;
-	void setFont(const std::string& f);
-	int getSize() const;
-	void setSize(int s);
-	int getRed() const;
-	void setRed(int r);
-	int getBlue() const;
-	void setBlue(int b);
-	int getGreen() const;
-	void setGreen(int g);
-	float getOpacity() const;
-	void setOpacity(float o);
-	bool getShadow() const;
-	void setShadow(bool s);
+	//void applyToLabel(NarrativeSlideLabel *label);
+	//void applyToDocument(QTextDocument *doc);
 
-	int getRed_BG() const;
-	void setRed_BG(int rbg);
-	int getBlue_BG() const;
-	void setBlue_BG(int bbg);
-	int getGreen_BG() const;
-	void setGreen_BG(int gbg);
-	float getOpacity_BG() const;
-	void setOpacity_BG(float obg);
-	int getWidth() const;
-	void setWidth(int w);
-	int getHeight() const;
-	void setHeight(int h);
-	int getMargin() const;
-	void setMargin(int m);
+	QColor backgroundColor() const;
 
-	const std::string& getWeight() const;
-	void setWeight(const std::string& Weight);
-	const std::string& getAlign() const;
-	void setAlign(const std::string& Align);
+	// serialized
+	int getBaseStyle() const;
+	void setBaseStyle(int style);
+	const std::string &getHtml() const;
+	void setHtml(const std::string &html);
+	const osg::Vec4 &getBackgroundColor() const;
+	void setBackgroundColor(const osg::Vec4 &color);
+
+	//const std::string& getFont() const;
+	//void setFont(const std::string& f);
+	//int getSize() const;
+	//void setSize(int s);
+	//int getRed() const;
+	//void setRed(int r);
+	//int getBlue() const;
+	//void setBlue(int b);
+	//int getGreen() const;
+	//void setGreen(int g);
+	//float getOpacity() const;
+	//void setOpacity(float o);
+	//bool getShadow() const;
+	//void setShadow(bool s);
+
+	//int getRed_BG() const;
+	//void setRed_BG(int rbg);
+	//int getBlue_BG() const;
+	//void setBlue_BG(int bbg);
+	//int getGreen_BG() const;
+	//void setGreen_BG(int gbg);
+	//float getOpacity_BG() const;
+	//void setOpacity_BG(float obg);
+	//int getWidth() const;
+	//void setWidth(int w);
+	//int getHeight() const;
+	//void setHeight(int h);
+	//int getMargin() const;
+	//void setMargin(int m);
+
+	//const std::string& getWeight() const;
+	//void setWeight(const std::string& Weight);
+	//const std::string& getAlign() const;
+	//void setAlign(const std::string& Align);
 
 //signals:
 //	void sTitleChanged(const std::string&);
@@ -81,26 +113,22 @@ public:
 //			: ModifyCommand(&getDescription, &setDescription, desc, nar, parent) {}
 //	};
 
+public:
+	Style m_base_style;
+	Style m_style;
+	QTextCharFormat m_char_format;
+	QTextBlockFormat m_block_format;
+	QTextFrameFormat m_frame_format;
+	QTextDocument *m_base_document;
+	QTextCursor m_cursor;
 
-private:
-	std::string font;
-	int	size;
-	int red;
-	int blue;
-	int green;
-	float opacity;
-	bool shadow;
+	mutable std::string m_html;
 
-	int red_bg;
-	int blue_bg;
-	int green_bg;
-	float opacity_bg;
-	int width;
-	int height;
-	int margin;
+	int m_width;
+	int m_height;
 
-	std::string weight;
-	std::string align;
+	QColor m_bg_color;
+	mutable osg::Vec4 m_bg_color_vec;
 };
 
 #endif /* LABELSTYLE_H */

@@ -1,4 +1,5 @@
-#include "NarrativeGroup.h"
+#include "narrative/NarrativeGroup.h"
+#include "narrative/Narrative2.h"
 
 NarrativeGroup::NarrativeGroup(const osg::Group *old_group) 
 {

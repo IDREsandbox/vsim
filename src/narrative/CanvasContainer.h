@@ -45,7 +45,6 @@ protected:
 
 	bool m_editable;
 	double m_base_height;
-	double m_base_width;
 
 	TransformManipulator *m_manipulator;
 

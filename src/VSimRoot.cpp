@@ -2,12 +2,17 @@
 #include <iostream>
 #include "narrative/NarrativeSlideLabel.h"
 #include "narrative/NarrativeGroup.h"
+#include "narrative/Narrative2.h"
 #include "ModelGroup.h"
 #include "resources/EResourceGroup.h"
 #include "resources/EResource.h"
 #include "resources/ECategoryGroup.h"
 #include "resources/ECategory.h"
 #include "deprecated/resources/EResourcesList.h"
+
+// debug
+#include "LabelStyleGroup.h"
+#include "LabelStyle.h"
 
 VSimRoot::VSimRoot() {
 	qDebug() << "root constructor, adding children";
@@ -112,6 +117,11 @@ void VSimRoot::debug()
 				NarrativeSlideLabel *label = dynamic_cast<NarrativeSlideLabel*>(slide->getChild(k));
 				qInfo() << "\t\tLabel" << k; //<< QString::fromStdString(label->getText());
 			}
+		}
+		LabelStyleGroup *labs = nar->labelStyles();
+		for (uint j = 0; j < labs->getNumChildren(); j++) {
+			LabelStyle *style = dynamic_cast<LabelStyle*>(labs->child(j));
+			qInfo() << "\tStyle" << j << style->m_base_document;
 		}
 	}
 

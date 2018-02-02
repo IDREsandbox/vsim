@@ -8,11 +8,13 @@
 #include <osg/Matrix>
 #include <osg/io_utils>
 #include <QUndoStack>
+#include <QTextFrame>
 
 #include <QElapsedTimer>
 
 #include "MainWindow.h"
 #include "OSGViewerWidget.h"
+
 #include "NarrativeInfoDialog.h"
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative2.h"
@@ -20,16 +22,23 @@
 #include "narrative/SlideScrollBox.h"
 #include "narrative/SlideScrollItem.h"
 #include "narrative/NarrativeSlideLabel.h"
+
+//style
+#include "StyleSettings.h"
+#include "LabelStyle.h"
+#include "LabelStyleGroup.h"
+
 //#include "dragLabel.h"
 //#include "labelCanvas.h"
 //#include "labelCanvasView.h"
 #include "narrative/NarrativeCanvas.h"
 #include "editButtons.h"
-#include "StyleSettings.h"
-#include "LabelStyle.h"
+
 #include "Selection.h"
 #include "MainWindowTopBar.h"
 #include "VSimApp.h"
+
+#include "mrichtextedit.h"
 
 NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *parent)
 	: m_app(app),
@@ -97,50 +106,25 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	// delete
 	//connect(m_canvas, &NarrativeCanvas::sDeleteLabel, this, &NarrativeControl::deleteLabel);
 
-	editDlg = new editButtons(m_window);
-	editDlg->move(10, 200);
-	editDlg->hide();
+	m_label_buttons = m_window->labelButtons();
+	m_label_buttons->move(10, 200);
+	m_label_buttons->hide();
 
-	//m_canvas_button_map = {
-	//	{ editDlg->ui.label, 1 },
-	//	{ editDlg->ui.head1, 2 },
-	//	{ editDlg->ui.head2, 3 },
-	//	{ editDlg->ui.body, 4 },
-	//	{ editDlg->ui.image, 5 }
-	//}
-	//auto newLabelFunc = [this]() {
-	//	sender();
-	//};
-	
-	connect(editDlg->ui.label, &QPushButton::clicked, this,
-		[this]() {
-		newLabel();
-	});
+	connect(m_label_buttons->ui.head1, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::HEADER1); });
+	connect(m_label_buttons->ui.head2, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::HEADER2); });
+	connect(m_label_buttons->ui.body, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::BODY); });
+	connect(m_label_buttons->ui.label, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::LABEL); });
 
-	//connect(editDlg->ui.head1, &QPushButton::clicked, this, &NarrativeControl::newH1);
-	//connect(editDlg->ui.head2, &QPushButton::clicked, this, &NarrativeControl::newH2);
-	//connect(editDlg->ui.body, &QPushButton::clicked, this, &NarrativeControl::newBod);
-	//connect(editDlg->ui.image, &QPushButton::clicked, this, &NarrativeControl::newImg);
+	// edit
+	connect(m_label_buttons->ui.edit, &QAbstractButton::pressed, this, &NarrativeControl::execEditLabel);
 
-	connect(editDlg->ui.delete_2, &QPushButton::clicked, this, &NarrativeControl::deleteLabels);
-	connect(editDlg->ui.done, &QPushButton::clicked, this, &NarrativeControl::exitEdit);
+	//connect(m_label_buttons->ui.head1, &QPushButton::clicked, this, &NarrativeControl::newH1);
+	//connect(m_label_buttons->ui.head2, &QPushButton::clicked, this, &NarrativeControl::newH2);
+	//connect(m_label_buttons->ui.body, &QPushButton::clicked, this, &NarrativeControl::newBod);
+	//connect(m_label_buttons->ui.image, &QPushButton::clicked, this, &NarrativeControl::newImg);
 
-	/*connect(editDlg->ui.label, &QPushButton::clicked, this, [this]() {newLabel(
-		"<p>New label</p>",
-		"p{color:rgb(0, 0, 0); font-size: 12pt; font-family: \"Arial\"; font-weight: bold; text-align:center;}",
-		"background-color: rgba(255, 255, 255, 178);"); });
-	connect(editDlg->ui.head1, &QPushButton::clicked, this, [this]() {newLabel(
-		"<p>Heading 1</p>",
-		"p{color:rgb(240, 240, 240); font-size: 36pt; font-family: \"Arial\"; font-weight: bold; text-align:center;}",
-		"background-color: rgba(0, 0, 0, 178);"); });
-	connect(editDlg->ui.head2, &QPushButton::clicked, this, [this]() {newLabel(
-		"<p>Heading 2</p>",
-		"p{color:rgb(224, 147, 31); font-size: 20pt; font-family: \"Arial\"; font-weight: bold; text-align:center;}",
-		"background-color: rgba(0, 0, 0, 178);"); });
-	connect(editDlg->ui.body, &QPushButton::clicked, this, [this]() {newLabel(
-		"<p>New body</p>",
-		"p{color:rgb(240, 240, 240); font-size: 12pt; font-family: \"Arial\"; font-weight: regular; text-align:left;}",
-		"background-color: rgba(0, 0, 0, 178);"); });*/
+	connect(m_label_buttons->ui.delete_2, &QPushButton::clicked, this, &NarrativeControl::deleteLabels);
+	connect(m_label_buttons->ui.done, &QPushButton::clicked, this, &NarrativeControl::exitEdit);
 
 	// dirty slide thumbnails
 	connect(m_slide_box, &SlideScrollBox::sThumbnailsDirty, this, 
@@ -165,72 +149,6 @@ void NarrativeControl::editStyleSettings()
 		return;
 	}
 }
-//
-//void NarrativeControl::newH1()
-//{
-//	int active_item = m_narrative_box->getLastSelected();
-//	Narrative2 *narrative = getNarrative(active_item);
-//
-//	LabelStyle* lb = narrative->getH1();
-//	newLabel(
-//		"<p>New Header 1</p>",
-//		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font:" + lb->getWeight() + " \"" + lb->getFont() + "\"; text-align:" + lb->getAlign() + ";}",
-//		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");", float(lb->getHeight()) / m_window->size().height(), float(lb->getWidth()) / m_window->size().width(), lb->getMargin());
-//}
-//
-//void NarrativeControl::newH2()
-//{
-//	int active_item = m_narrative_box->getLastSelected();
-//	Narrative2 *narrative = getNarrative(active_item);
-//
-//	LabelStyle* lb = narrative->getH2();
-//	newLabel(
-//		"<p>New Header 2</p>",
-//		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font:" + lb->getWeight() + " \"" + lb->getFont() + "\"; text-align:" + lb->getAlign() + ";}",
-//		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");", float(lb->getHeight()) / m_window->size().height(), float(lb->getWidth()) / m_window->size().width(), lb->getMargin());
-//}
-//
-//void NarrativeControl::newBod()
-//{
-//	int active_item = m_narrative_box->getLastSelected();
-//	Narrative2 *narrative = getNarrative(active_item);
-//
-//	LabelStyle* lb = narrative->getBod();
-//	newLabel(
-//		"<p>New Body Text</p>",
-//		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font:" +lb->getWeight() + " \"" + lb->getFont() + "\"; text-align:" + lb->getAlign() + ";}",
-//		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");", float(lb->getHeight()) / m_window->size().height(), float(lb->getWidth()) / m_window->size().width(), lb->getMargin());
-//
-//}
-//
-//void NarrativeControl::newLab()
-//{
-//	int active_item = m_narrative_box->getLastSelected();
-//	Narrative2 *narrative = getNarrative(active_item);
-//
-//	LabelStyle* lb = narrative->getLab();
-//	newLabel(
-//		"<p>New Label</p>",
-//		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font:" + lb->getWeight() + " \"" + lb->getFont() + "\"; text-align:" + lb->getAlign() + ";}",
-//		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");", float(lb->getHeight()) / m_window->size().height(), float(lb->getWidth()) / m_window->size().width(), lb->getMargin());
-//
-//}
-//
-//void NarrativeControl::newImg()
-//{
-//	int active_item = m_narrative_box->getLastSelected();
-//	Narrative2 *narrative = getNarrative(active_item);
-//
-//	LabelStyle* lb = narrative->getImg();
-//
-//	newLabel(
-//		"<p>New Image Label</p>",
-//		"p{color:rgba(" + std::to_string(lb->getRed()) + "," + std::to_string(lb->getGreen()) + "," + std::to_string(lb->getBlue()) + "," + std::to_string(lb->getOpacity()) + "); font-size: " + std::to_string(lb->getSize()) + "pt; font:" + lb->getWeight() + " \"" + lb->getFont() + "\"; text-align:" + lb->getAlign() + ";}",
-//		"background-color: rgba(" + std::to_string(lb->getRed_BG()) + "," + std::to_string(lb->getGreen_BG()) + "," + std::to_string(lb->getBlue_BG()) + "," + std::to_string(lb->getOpacity_BG()) + ");", float(lb->getHeight()) / m_window->size().height(), float(lb->getWidth()) / m_window->size().width(), lb->getMargin());
-//
-//}
-
-
 
 void NarrativeControl::newNarrative()
 {
@@ -381,6 +299,7 @@ void NarrativeControl::setNarrative(int index)
 		m_current_slide = -1;
 		this->m_window->topBar()->showNarratives();
 		m_canvas->setSlide(nullptr);
+		m_canvas->hide();
 		emit sEditEvent();
 		return;
 	}
@@ -407,6 +326,7 @@ bool NarrativeControl::setSlide(int index, bool instant)
 	}
 	NarrativeSlide *slide = getSlide(m_current_narrative, index);
 	if (!slide) {
+		m_canvas->hide();
 		m_canvas->setSlide(nullptr);
 		m_current_slide = -1;
 		return false;
@@ -477,15 +397,26 @@ bool NarrativeControl::advanceSlide(bool forward, bool instant)
 void NarrativeControl::showCanvas(bool instant)
 {
 	m_canvas->show();
+	qDebug() << "show canvas";
 }
 
 void NarrativeControl::hideCanvas(bool instant)
 {
 	m_canvas->hide();
+	exitEdit();
+	qDebug() << "hide canvas";
+}
+
+void NarrativeControl::editSlide() {
+	//qDebug() << "EDIT SLIDE CURRENT SLDIE?" << m_current_narrative << m_current_slide << getCurrentSlide();
+	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, false);
+	m_label_buttons->show();
+	m_canvas->setEditable(true);
+
 }
 
 void NarrativeControl::exitEdit() {
-	editDlg->hide();
+	m_label_buttons->hide();
 	m_canvas->setEditable(false);
 	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 }
@@ -715,13 +646,6 @@ void NarrativeControl::deleteSlides()
 	m_undo_stack->endMacro();
 }
 
-void NarrativeControl::editSlide() {
-	//qDebug() << "EDIT SLIDE CURRENT SLDIE?" << m_current_narrative << m_current_slide << getCurrentSlide();
-	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, false);
-	editDlg->show();
-	m_canvas->setEditable(true);
-}
-
 void NarrativeControl::setSlideDuration()
 {
 	qDebug() << "set slide duration";
@@ -803,7 +727,7 @@ void NarrativeControl::moveSlides(std::set<int> from, int to)
 }
 
 
-void NarrativeControl::newLabel() {
+void NarrativeControl::newLabel(int style) {
 	NarrativeSlide *slide = getCurrentSlide();
 	if (!slide) {
 		qWarning() << "Narrative Control - creating label without slide open";
@@ -813,12 +737,16 @@ void NarrativeControl::newLabel() {
 	NarrativeSlideLabel *label = new NarrativeSlideLabel;
 
 	// initialization
-	label->setStyle(0);
+	//label->setStyle(0);
 	label->setHtml("New Label");
 	label->setRect(QRectF(-.2, -.2, .4, .2));
 	label->setBackground(QColor(0, 0, 0, 100));
 
 	qInfo() << "Creating new canvas label";
+
+	Narrative2 *nar = getCurrentNarrative();
+	LabelStyle *label_style = nar->getLabelStyles()->getStyle((LabelStyle::Style)style);
+	if (label_style) label->applyStyle(label_style);
 
 	// push command
 	m_undo_stack->beginMacro("New Label");
@@ -826,8 +754,8 @@ void NarrativeControl::newLabel() {
 	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, { label }, ON_REDO));
 	m_undo_stack->endMacro();
 
-	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
-	item->setThumbnailDirty(true);
+
+	dirtyCurrentSlide();
 }
 
 void NarrativeControl::deleteLabels() {
@@ -846,8 +774,7 @@ void NarrativeControl::deleteLabels() {
 	m_undo_stack->push(new Group::RemoveNodesPCommand(slide, nodes));
 	m_undo_stack->endMacro();
 
-	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
-	item->setThumbnailDirty(true);
+	dirtyCurrentSlide();
 }
 
 void NarrativeControl::transformLabels(const std::map<NarrativeSlideItem *, QRectF>& rects)
@@ -868,8 +795,7 @@ void NarrativeControl::transformLabels(const std::map<NarrativeSlideItem *, QRec
 	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, items, ON_BOTH));
 	m_undo_stack->endMacro();
 
-	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
-	item->setThumbnailDirty(true);
+	dirtyCurrentSlide();
 }
 
 void NarrativeControl::labelEdited(NarrativeSlideLabel *label)
@@ -891,6 +817,48 @@ void NarrativeControl::labelEdited(NarrativeSlideLabel *label)
 	m_undo_stack->push(new NarrativeSlideLabel::DocumentEditWrapperCommand(doc));
 	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, { label }));
 	m_undo_stack->endMacro();
+
+	dirtyCurrentSlide();
+}
+
+void NarrativeControl::execEditLabel()
+{
+	// this button steals away focus, just use the first selected item instead
+	// NarrativeSlideItem *item = m_canvas->getItemFocus();
+	const auto & sel = m_canvas->getSelection();
+	if (sel.empty()) return;
+
+	NarrativeSlideLabel *label = dynamic_cast<NarrativeSlideLabel*>(*sel.begin());
+	if (!label) return;
+
+	MRichTextEdit dlg;
+	dlg.document()->setHtml(label->getDocument()->toHtml());
+	// explicitly set background color
+	QTextFrameFormat ff = dlg.document()->rootFrame()->frameFormat();
+	ff.setBackground(label->getBackground());
+	dlg.document()->rootFrame()->setFrameFormat(ff);
+
+	int result = dlg.exec();
+	if (result != QDialog::Accepted) {
+		return;
+	}
+
+	m_undo_stack->beginMacro("Edit Label");
+	// delete everything and insert new html
+	QTextCursor cursor(label->getDocument());
+	cursor.select(QTextCursor::SelectionType::Document);
+	cursor.deleteChar();
+	cursor.insertHtml(dlg.toHtml());
+	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, { label }));
+	m_undo_stack->endMacro();
+
+	dirtyCurrentSlide();
+}
+
+void NarrativeControl::dirtyCurrentSlide()
+{
+	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
+	item->setThumbnailDirty(true);
 }
 
 void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> items)

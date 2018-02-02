@@ -3,6 +3,7 @@
 #include "narrative/Narrative2.h"
 #include "narrative/NarrativeSlide.h"
 #include "LabelStyle.h"
+#include "LabelStyleGroup.h"
 
 REGISTER_OBJECT_WRAPPER( 
 	Narrative2,
@@ -15,9 +16,5 @@ REGISTER_OBJECT_WRAPPER(
 	ADD_STRING_SERIALIZER(Description, "");
 	ADD_BOOL_SERIALIZER(Lock, false);
 
-	ADD_OBJECT_SERIALIZER(H1, ::LabelStyle, nullptr);
-	ADD_OBJECT_SERIALIZER(H2, ::LabelStyle, nullptr);
-	ADD_OBJECT_SERIALIZER(Bod, ::LabelStyle, nullptr);
-	ADD_OBJECT_SERIALIZER(Lab, ::LabelStyle, nullptr);
-	ADD_OBJECT_SERIALIZER(Img, ::LabelStyle, nullptr);
+	ADD_OBJECT_SERIALIZER(LabelStyles, ::LabelStyleGroup, nullptr);
 }

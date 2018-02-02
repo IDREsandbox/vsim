@@ -16,6 +16,7 @@
 #include "TimeSlider.h"
 #include "ModelOutliner.h"
 
+#include "editButtons.h"
 #include "narrative/NarrativeCanvas.h"
 
 #include "resources/ERDisplay.h"
@@ -57,11 +58,14 @@ MainWindow::MainWindow(QWidget *parent)
 	// mask allows events to get to the canvas
 	ui->mainSplitter->setParent(m_osg_widget);
 	osg_layout->addWidget(ui->mainSplitter, 0, 0);
-	
+
 	ui->mainSplitter->setMouseTracking(true);
-	
+
 	// splitter mask
 	connect(ui->mainSplitter, &QSplitter::splitterMoved, this, &MainWindow::updatePositions);
+
+	// label buttons
+	m_label_buttons = new editButtons(m_osg_widget);
 
 	// er display
 	m_er_display = new ERDisplay(ui->middleSpacer);
@@ -260,6 +264,11 @@ TimeSlider * MainWindow::timeSlider() const
 	return m_time_slider;
 }
 
+editButtons * MainWindow::labelButtons() const
+{
+	return m_label_buttons;
+}
+
 ERScrollBox * MainWindow::erLocal() const
 {
 	return ui->local;
@@ -335,6 +344,12 @@ void MainWindow::resizeEvent(QResizeEvent * event)
 
 void MainWindow::updatePositions()
 {
+	// Place edit buttons
+	int top = ui->middleSpacer->y();
+	m_label_buttons->move(20, top + 30);
+
+	// Place the tool bar area
+
 	// Place the filter area
 	// filter top (200)
 	// filter height (200,290)
@@ -343,7 +358,7 @@ void MainWindow::updatePositions()
 	// bottom top (300)
 	int space = 10;
 	int bottom_top = ui->bottomBar->y();
-	int filter_top = bottom_top - m_er_filter_area->height() + space;
+	int filter_top = bottom_top - m_er_filter_area->height() - space;
 	m_er_filter_area->move(space, filter_top);
 
 	// Place the ER popup areas

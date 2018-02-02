@@ -24,13 +24,14 @@
 #ifndef _MRICHTEXTEDIT_H_
 #define _MRICHTEXTEDIT_H_
 
+#include <QDialog>
 #include <QPointer>
 #include "ui_mrichtextedit.h"
 
 /**
  * @Brief A simple rich-text editor
  */
-class MRichTextEdit : public QWidget, protected Ui::MRichTextEdit {
+class MRichTextEdit : public QDialog, protected Ui::MRichTextEdit {
     Q_OBJECT
   public:
     MRichTextEdit(QWidget *parent = 0);

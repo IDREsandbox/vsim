@@ -9,9 +9,7 @@
 #include <QTextDocument>
 
 CanvasContainer::CanvasContainer(QWidget *parent)
-	: QWidget(parent),
-	m_base_height(600),
-	m_base_width(800)
+	: QWidget(parent)
 {
 	m_view = new QGraphicsView(this);
 	m_scene = new CanvasScene(this);
@@ -57,26 +55,7 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 	flags.setFlag(QGraphicsItem::GraphicsItemFlag::ItemIsMovable, true);
 	flags.setFlag(QGraphicsItem::GraphicsItemFlag::ItemIsSelectable, true);
 
-	RectItem *label;
-
-	label = new RectItem();
-	label->setRect(-.3, -.3, .1, .1);
-	m_scene->addItem(label);
-
-	label = new RectItem();
-	label->setRect(-.1, -.3, .1, .1);
-	m_scene->addItem(label);
-
-	TextRect *edit;
-
-	edit = new TextRect();
-	edit->setRect(-.1, -.2, .4, .4);
-	m_scene->addItem(edit);
-
-	label = new RectItem();
-	label->setRect(-.4, -.4, .2, .2);
-	m_scene->addItem(label);
-
+	setBaseHeight(800);
 	setEditable(false);
 
 	connect(m_scene, &QGraphicsScene::changed, this,
@@ -158,7 +137,14 @@ void CanvasContainer::resizeEvent(QResizeEvent * event)
 
 void CanvasContainer::setBaseHeight(double height)
 {
-	qDebug() << "SET BASE HEIGHT!" << height;
+	// go through all of the text things and change their scale
+	auto items = m_scene->items();
+	for (auto item : items) {
+		TextRect *rect = dynamic_cast<TextRect*>(item);
+		if (!rect) continue;
+		rect->setBaseHeight(height);
+	}
+	m_base_height = height;
 }
 
 bool CanvasContainer::eventFilter(QObject * obj, QEvent * e)
@@ -190,7 +176,6 @@ CanvasScene::CanvasScene(QObject * parent)
 
 void CanvasScene::beginTransform()
 {
-	qDebug() << "begin transform";
 	auto items = getSelectedRects();
 	m_saved_rects.clear();
 	for (auto i : items) {
@@ -200,7 +185,6 @@ void CanvasScene::beginTransform()
 		);
 	}
 	setFocusItem(nullptr);
-	qDebug() << "removing focus";
 }
 
 void CanvasScene::endTransform()
@@ -295,7 +279,6 @@ void RectItem::onResize(QSizeF size)
 
 void RectItem::setEditable(bool enable)
 {
-	qDebug() << "setting rect edit" << enable << (void*)this;
 	// item flags
 	if (enable) {
 		setFlags(
@@ -586,20 +569,21 @@ void TransformManipulator::ResizeButton::mouseReleaseEvent(QMouseEvent *mouseEve
 }
 
 TextRect::TextRect(QGraphicsItem * parent)
-	: RectItem(parent),
-	m_base_height(600.0)
+	: RectItem(parent)
 {
 	m_text = new TextItem(this);
 	m_text->show();
-	m_text->setScale(1 / 600.0);
 	m_text->setTextInteractionFlags(Qt::TextEditorInteraction);
 
+	setBaseHeight(600);
 	setFocusProxy(m_text);
 }
 
 void TextRect::setBaseHeight(double height)
 {
+	m_base_height = height;
 	m_text->setScale(1 / height);
+	onResize(rect().size());
 }
 
 QRectF TextRect::boundingRect() const
