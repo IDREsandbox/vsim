@@ -28,20 +28,20 @@ Download CMake and add it to PATH https://cmake.org/download/
 CMake is used to build releases from the command prompt.
 
 ```
-	mkdir build
-	cd build
+mkdir build
+cd build
 
-	QTDIR="C:/Qt/5.9.2/msvc2017_64"
-	OSGDIR="C:/Program Files/OpenSceneGraph"
-	TPBIN=C:/Users/David/Desktop/vsim/dependencies/3rdParty-build/x64/bin
+QTDIR="C:/Qt/5.9.2/msvc2017_64"
+OSGDIR="C:/Program Files/OpenSceneGraph"
+TPBIN=C:/Users/David/Desktop/vsim/dependencies/3rdParty-build/x64/bin
 
-	cmake -G "Visual Studio 15 2017 Win64" \
-	  -DQT_DIR="${QTDIR}" \
-	  -DOSG_DIR="${OSGDIR}" \
-	  -DTP_BIN="${TPBIN}" \
-	  -DCMAKE_INSTALL_PREFIX=install ..
+cmake -G "Visual Studio 15 2017 Win64" \
+  -DQT_DIR="${QTDIR}" \
+  -DOSG_DIR="${OSGDIR}" \
+  -DTP_BIN="${TPBIN}" \
+  -DCMAKE_INSTALL_PREFIX=install ..
 
-	cmake --build . --target INSTALL --config Release
+cmake --build . --target INSTALL --config Release
 ```
 
 If you add new files or make big changes `touch CMakeLists.txt` refreshes the source list
