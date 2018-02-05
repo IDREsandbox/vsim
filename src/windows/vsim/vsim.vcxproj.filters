@@ -62,9 +62,6 @@
     <CustomBuild Include="..\..\narrative\NarrativeScrollItem.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\dragLabelInput.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\ScrollBoxItem.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -99,9 +96,6 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\narrative\NarrativePlayer.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\dragLabelInput.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\editButtons.h">
@@ -450,15 +444,6 @@
     </ClCompile>
     <ClCompile Include="..\..\narrative\SerializerNarrativeSlide.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dragLabelInput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_dragLabelInput.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_dragLabelInput.cpp">
-      <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="..\..\editButtons.cpp">
       <Filter>Source Files</Filter>
@@ -901,9 +886,6 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_NarrativeScrollItem.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_dragLabelInput.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_MainWindowTopBar.h">

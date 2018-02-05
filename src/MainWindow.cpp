@@ -68,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_label_buttons = new editButtons(m_osg_widget);
 
 	// er display
-	m_er_display = new ERDisplay(ui->middleSpacer);
+	m_er_display = new ERDisplay(m_osg_widget);
 	m_er_display->setGeometry(10, 10, 265, 251);
 	m_er_display->setObjectName("erDisplay");
 	m_er_display->hide();
@@ -361,7 +361,11 @@ void MainWindow::updatePositions()
 	int filter_top = bottom_top - m_er_filter_area->height() - space;
 	m_er_filter_area->move(space, filter_top);
 
-	// Place the ER popup areas
+	// Place the ER popup area
+	// vertical center
+	int mid = m_osg_widget->height() / 2;
+	int popup_top = mid - m_er_display->height() / 2;
+	m_er_display->move(10, popup_top);
 
 	// Update the splitter mask
 	QSplitter *splitter = ui->mainSplitter;
