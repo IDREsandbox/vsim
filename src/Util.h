@@ -26,6 +26,9 @@ namespace Util
 	QColor vecToColor(const osg::Vec4 &vec);
 	osg::Vec4 colorToVec(const QColor &color);
 
+	// convert QColor to "background:rgba(r, g, b, a);"
+	QString colorToStylesheet(QColor);
+
 	QString setToString(std::set<int> set);
 
 	template <typename T>

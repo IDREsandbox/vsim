@@ -24,7 +24,7 @@
 #include "narrative/NarrativeSlideLabel.h"
 
 //style
-#include "StyleSettings.h"
+#include "StyleSettingsDialog.h"
 #include "LabelStyle.h"
 #include "LabelStyleGroup.h"
 
@@ -140,10 +140,11 @@ NarrativeControl::~NarrativeControl()
 
 void NarrativeControl::editStyleSettings()
 {
-	int active_item = m_narrative_box->getLastSelected();
-	Narrative2 *narrative = getNarrative(active_item);
+	Narrative2 *narrative = getCurrentNarrative();
+	if (!narrative) return;
 
-	StyleSettings dlg(narrative);
+	StyleSettingsDialog dlg;
+	dlg.setStyles(narrative->getLabelStyles());
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		return;
