@@ -125,6 +125,16 @@ osg::Vec4 Util::colorToVec(const QColor & color)
 	return osg::Vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF());
 }
 
+QString Util::colorToStylesheet(QColor color)
+{
+	QString style = "background:rgba("
+		+ QString::number(color.red()) + ","
+		+ QString::number(color.green()) + ","
+		+ QString::number(color.blue()) + ","
+		+ QString::number(color.alpha()) + ");";
+	return style;
+}
+
 QString Util::setToString(std::set<int> set)
 {
 	QString str = "";
