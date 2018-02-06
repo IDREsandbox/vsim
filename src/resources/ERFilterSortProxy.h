@@ -65,6 +65,9 @@ protected:
 	// add/removes a resource if it is acceptable
 	void checkAndAdd(int base_index);
 
+	//
+	void checkAndAddSet(std::set<int> base_index);
+
 	// when a name changes or something
 	void onResourceChange(EResource *res);
 

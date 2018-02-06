@@ -89,6 +89,28 @@ int Group::indexOf(const osg::Node * node) const
 	return x;
 }
 
+
+void Group::insertChildrenSet(const std::map<int, osg::Node*>& children)
+{
+	emit sAboutToInsertSet(children);
+	for (auto &pair : children) {
+		int index = pair.first;
+		osg::Node *node = pair.second;
+		insertChild(index, node);
+	}
+	emit sInsertedSet(children);
+}
+
+void Group::removeChildrenSet(const std::set<int>& children)
+{
+	emit sAboutToRemoveSet(children);
+	for (auto it = children.rbegin(); it != children.rend(); ++it) {
+		int index = *it;
+		removeChild(index, 1);
+	}
+	emit sRemovedSet(children);
+}
+
 void Group::addChildrenP(const std::set<osg::Node*> &children)
 {
 	emit sAboutToAddP(children);
@@ -180,6 +202,65 @@ void Group::MoveNodesCommand::undo()
 void Group::MoveNodesCommand::redo()
 {
 	m_group->move(m_mapping);
+}
+
+Group::InsertSetCommand::InsertSetCommand(
+	Group *group,
+	const std::map<int, osg::Node*> &nodes,
+	QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_group(group)
+{
+	for (auto pair : nodes) {
+		int index = pair.first;
+		osg::Node *node = pair.second;
+		m_nodes[index] = osg::ref_ptr<osg::Node>(node);
+	}
+}
+void Group::InsertSetCommand::undo()
+{
+	std::set<int> nodes;
+	for (auto pair : m_nodes) {
+		nodes.insert(pair.first);
+	}
+	m_group->removeChildrenSet(nodes);
+}
+void Group::InsertSetCommand::redo()
+{
+	std::map<int, osg::Node*> nodes;
+	for (auto pair : m_nodes) {
+		nodes[pair.first] = pair.second;
+	}
+	m_group->insertChildrenSet(nodes);
+}
+
+Group::RemoveSetCommand::RemoveSetCommand(
+	Group *group,
+	const std::set<int> &nodes,
+	QUndoCommand *parent)
+	: QUndoCommand(parent),
+	m_group(group)
+{
+	for (auto index : nodes) {
+		osg::Node *node = m_group->child(index);
+		m_nodes[index] = osg::ref_ptr<osg::Node>(node);
+	}
+}
+void Group::RemoveSetCommand::undo()
+{
+	std::map<int, osg::Node*> nodes;
+	for (auto pair : m_nodes) {
+		nodes[pair.first] = pair.second;
+	}
+	m_group->insertChildrenSet(nodes);
+}
+void Group::RemoveSetCommand::redo()
+{
+	std::set<int> nodes;
+	for (auto pair : m_nodes) {
+		nodes.insert(pair.first);
+	}
+	m_group->removeChildrenSet(nodes);
 }
 
 Group::AddNodesPCommand::AddNodesPCommand(

@@ -28,6 +28,15 @@ namespace Util
 
 	QString setToString(std::set<int> set);
 
+	// insertions occur at vector positions then fix index pointers in fixme
+	// ex. [a, b, c, d], insertions: a[1] = e, a[3] = f
+	//     [a, e, b, f, c, d]
+	// fixme [0, 1, 2, 3] -> [0, 2, 4, 5]
+	void fixIndices(const std::set<int> &insertions, std::vector<int> *fixme);
+
+	// same thing as before, but I'm curious which is faster
+	void fixIndices2(const std::set<int> &insertions, std::vector<int> *fixme);
+
 	template <typename T>
 	T clamp(T value, T min, T max) {
 		return std::min(std::max(value, min), max);

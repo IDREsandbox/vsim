@@ -233,17 +233,64 @@ void ERFilterSortProxy::setBase(Group *base)
 	}
 
 	// listen to new
-	connect(base, &Group::sNew, this, [this](int index) {
+	//connect(base, &Group::sNew, this, [this](int index) {
+	//	// fix up indices
+	//	// everything after the new item is shifted right 1
+	//	for (int i = 0; i < m_map_to_base.size(); i++) {
+	//		if (m_map_to_base[i] >= index) {
+	//			m_map_to_base[i] += 1;
+	//		}
+	//	}
+	//	track(m_base->child(index));
+	//	checkAndAdd(index);
+	//});
+	// listen to new set
+	connect(base, &Group::sInsertedSet, this,
+		[this](const std::map<int, osg::Node*> &nodes) {
 		// fix up indices
-		// everything after the new item is shifted right 1
-		for (int i = 0; i < m_map_to_base.size(); i++) {
-			if (m_map_to_base[i] >= index) {
-				m_map_to_base[i] += 1;
-			}
+		// set of indices added O(nlogn)
+		std::set<int> new_indices;
+		for (auto &pair : nodes) {
+			new_indices.insert(pair.first);
 		}
-		track(m_base->child(index));
-		checkAndAdd(index);
+		// O(n)
+		// array of change [0, 0, 1, 2, 2, 2]
+		int old_size = m_base->getNumChildren() - nodes.size();
+		std::vector<int> shift_array(old_size, 0);
+		int shift = 0;
+		for (size_t i = 0; i < shift_array.size(); i++) {
+			if (new_indices.find(i) != new_indices.end()) {
+				shift++;
+			}
+			shift_array[i] = shift;
+		}
+		// O(n)
+		// update old indices
+		for (size_t i = 0; i < m_map_to_base.size(); i++) {
+			size_t old_index = m_map_to_base[i];
+			m_map_to_base[i] = old_index + shift_array[old_index];
+		}
+
+		// filter
+		std::vector<osg::Node*> nodes_filtered;
+		for (auto &pair : nodes) {
+		}
+
+		// sort
+		std::vector<osg::Node*> nodes_sorted;
+
+		// merge
+		// O(n), map O(nlogn)
+		std::map<int, osg::Node*> nodes_inserted = merge();
+
+		emit sInsertedSet(indexes_added);
 	});
+	// listen to delete
+	connect(base, &Group::sInsertedSet, this,
+		[this](const std::map<int, osg::Node*> &) {
+
+	});
+
 	connect(base, &Group::sDelete, this, [this](int index) {
 		for (int i = m_map_to_base.size() - 1; i >= 0; i--) {
 			if (m_map_to_base[i] == index) {

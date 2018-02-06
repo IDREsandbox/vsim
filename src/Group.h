@@ -5,6 +5,11 @@
 #include <osg/Group>
 #include <QUndoCommand>
 
+// Group is a collection of nodes which emits signals
+//  on every change
+// If dealing with single indices use insert/remove
+// Dealing with sets of indices use insertSet/removeSet
+// Dealing with sets of nodes use addP/removeP
 class Group : public QObject, public osg::Group {
 	Q_OBJECT
 public:
@@ -21,15 +26,26 @@ public:
 	virtual void move(const std::vector<std::pair<int, int>>& mapping);
 	virtual int indexOf(const osg::Node *node) const; // -1 if not found
 
-	virtual void addChildrenP(const std::set<osg::Node*> &children);
-	virtual void removeChildrenP(const std::set<osg::Node*> &children);
-
+	// index based, single
 signals:
 	void sNew(int index); // inserted node at index
 	void sDelete(int index); // deleted node at index
 	void sSet(int index); // changed (set) node at index
 	void sItemsMoved(std::vector<std::pair<int,int>>); // items sorted by .first
 
+public: // index based, multiple
+	virtual void insertChildrenSet(const std::map<int, osg::Node*> &children);
+	virtual void removeChildrenSet(const std::set<int> &children);
+signals:
+	void sAboutToInsertSet(const std::map<int, osg::Node*>&);
+	void sInsertedSet(const std::map<int, osg::Node*>&);
+	void sAboutToRemoveSet(const std::set<int>&);
+	void sRemovedSet(const std::set<int>&);
+
+public: // pointer based, multiple
+	virtual void addChildrenP(const std::set<osg::Node*> &children);
+	virtual void removeChildrenP(const std::set<osg::Node*> &children);
+signals:
 	void sAboutToAddP(const std::set<osg::Node*> &);
 	void sAddedP(const std::set<osg::Node*> &);
 	void sAboutToRemoveP(const std::set<osg::Node*> &nodes);
@@ -80,7 +96,35 @@ public: // COMMANDS
 		std::vector<std::pair<int, int>> m_mapping;
 	};
 
-	// Doesn't care about indices
+	// index based, multiple
+	class InsertSetCommand : public QUndoCommand {
+	public:
+		InsertSetCommand(
+			Group *group,
+			const std::map<int, osg::Node*> &nodes,
+			QUndoCommand *parent = nullptr);
+		virtual void undo() override;
+		virtual void redo() override;
+	private:
+		Group *m_group;
+		std::map<int, osg::ref_ptr<osg::Node>> m_nodes;
+	};
+
+	// index based, multiple
+	class RemoveSetCommand : public QUndoCommand {
+	public:
+		RemoveSetCommand(
+			Group *group,
+			const std::set<int> &nodes,
+			QUndoCommand *parent = nullptr);
+		virtual void undo() override;
+		virtual void redo() override;
+	private:
+		Group * m_group;
+		std::map<int, osg::ref_ptr<osg::Node>> m_nodes;
+	};
+
+	// pointer based, multiple
 	class AddNodesPCommand : public QUndoCommand {
 	public:
 		AddNodesPCommand(
@@ -94,7 +138,7 @@ public: // COMMANDS
 		std::set<osg::ref_ptr<osg::Node>> m_nodes;
 	};
 
-	// Doesn't care about indices
+	// pointer based, multiple
 	class RemoveNodesPCommand : public QUndoCommand {
 	public:
 		RemoveNodesPCommand(

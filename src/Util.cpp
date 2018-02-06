@@ -135,6 +135,49 @@ QString Util::setToString(std::set<int> set)
 	return str;
 }
 
+void Util::fixIndices(const std::set<int>& insertions, std::vector<int>* fixme)
+{
+	// ex: insert [1, 4, 6]
+	// -> (1: 0, 4: 1, 6: 2)
+	// < 1 gets bumped +0
+	// >= 1, < 4 gets bumped +1
+	// >= 4, < 6 gets bumped +2
+	std::map<int, int> index_to_delta;
+	int delta = 0;
+	for (int index : insertions) {
+		index_to_delta[delta] = index;
+		delta++;
+	}
+	for (size_t i = 0; i < fixme->size(); i++) {
+		int x = (*fixme)[i];
+		int index = *std::upper_bound(insertions.begin(), insertions.end(), x);
+		int d = index_to_delta[index];
+		(*fixme)[i] = x + d;
+	}
+}
+
+void Util::fixIndices2(const std::set<int>& insertions, std::vector<int>* fixme)
+{
+	size_t max_index = 0;
+	for (int x : *fixme) {
+		max_index = std::max((size_t)x, max_index);
+	}
+	std::vector<size_t> delta_array(max_index, 0);
+	size_t shift = 0;
+	auto it = insertions.begin();
+	for (size_t i = 0; i < delta_array.size(); i++) {
+		if (it != insertions.end() && i == *it) {
+			shift++;
+			it++;
+		}
+		delta_array[i] = shift;
+	}
+	for (size_t i = 0; i < fixme->size(); i++) {
+		size_t old_index = (*fixme)[i];
+		(*fixme)[i] = old_index + delta_array[old_index];
+	}
+}
+
 // credits to stackoverflow
 double Util::angleWrap(double x)
 {
