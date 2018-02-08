@@ -17,7 +17,7 @@ class CheckableListProxy;
 class ERFilterSortProxy : public Group {
 	Q_OBJECT
 public:
-	ERFilterSortProxy(Group *base);
+	ERFilterSortProxy(Group *base = nullptr);
 
 	void setBase(Group *base);
 
@@ -29,9 +29,17 @@ public:
 	//virtual bool insertChild(unsigned int index, Node *child) override;
 	//virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
 
+	typedef bool(*LessThanFunc)(osg::Node*, osg::Node*);
+	static bool lessThanNone(osg::Node *left, osg::Node *right);
+	static bool lessThanDistance(osg::Node *left, osg::Node *right);
+	static bool lessThanAlphabetical(osg::Node *left, osg::Node *right);
+	virtual bool lessThan(int left, int right);
+
 	// filter sort overrides
 	virtual bool accept(osg::Node *node);
-	virtual bool lessThan(int left, int right);
+
+	virtual LessThanFunc lessThanFunc() const;
+
 	virtual void track(osg::Node *node);
 
 	EResource *getResource(int index) const;
@@ -75,9 +83,12 @@ protected:
 	void rescan();
 	void add(int base_index);
 	void remove(int base_index);
-	void clear();
+	void clearInternal();
 	//void remap(int base_index);
 	//bool inMap(EResource *res);
+
+	// redoes everything, emits reset signals
+	void reload();
 
 private:
 	void updateCategorySet(int model_row);

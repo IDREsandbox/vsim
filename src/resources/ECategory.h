@@ -32,7 +32,6 @@ public:
 	int getBlue()const;
 	void setBlue(int blue);
 
-	// don't use these - connection/disconnection work is handled by EResource
 	void addResource(EResource *res);
 	void removeResource(EResource *res);
 	const std::set<EResource*> &resources() const;

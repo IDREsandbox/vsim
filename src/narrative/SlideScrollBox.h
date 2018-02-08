@@ -20,7 +20,7 @@ public:
 	
 	ScrollBoxItem *createItem(osg::Node *node) override;
 
-	std::vector<SlideScrollItem*> getDirtySlides(); // slides whose thumbnails need to be drawn
+	std::vector<NarrativeSlide*> getDirtySlides(); // slides whose thumbnails need to be drawn
 	
 signals:
 	void sSetTransitionDuration();

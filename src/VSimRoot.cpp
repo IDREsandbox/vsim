@@ -96,6 +96,16 @@ void VSimRoot::setResources(EResourceGroup * resources)
 	m_resources = resources;
 }
 
+void VSimRoot::postLoad()
+{
+	m_resources->postLoad();
+}
+
+void VSimRoot::preSave()
+{
+	m_resources->preSave();
+}
+
 void VSimRoot::debug()
 {
 	qInfo() << "root";
@@ -132,9 +142,14 @@ void VSimRoot::debug()
 			qInfo() << "not an EResource";
 			continue;
 		}
+		ECategory *cat = er->category();
+		QString cat_name;
+		if (cat) cat_name = cat->getCategoryName().c_str();
 		qInfo() << "Resource" << i
 			<< QString::fromStdString(er->getResourceName())
-			<< "global:" << er->getGlobal();
+			<< "global:" << er->getGlobal()
+			<< "cat:" << cat_name;
+
 	}
 	const ECategoryGroup *cats = m_resources->getCategories();
 	qInfo() << "ER Categories:" << cats->getNumChildren();

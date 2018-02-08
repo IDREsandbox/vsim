@@ -5,6 +5,7 @@
 #include <osg/Matrix>
 #include <osg/io_utils>
 #include <iostream>
+#include <chrono>
 
 // ext must be of the form "txt".
 std::string Util::addExtensionIfNotExist(const std::string& filename, const std::string& ext)
@@ -145,47 +146,81 @@ QString Util::setToString(std::set<int> set)
 	return str;
 }
 
-void Util::fixIndices(const std::set<int>& insertions, std::vector<int>* fixme)
+std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<int>& insertions)
 {
+	size_t max_index = 0;
+	for (int x : fixme) {
+		max_index = std::max((size_t)x, max_index);
+	}
+	std::vector<size_t> delta_array(max_index + 1, 0);
+	size_t shift = 0;
+	auto it = insertions.begin();
+	size_t old_index = 0;
+	size_t new_index = 0;
+	while (old_index < delta_array.size()) {
+		if (it == insertions.end() || new_index != *it) {
+			delta_array[old_index] = shift;
+			old_index++;
+			new_index++;
+		}
+		else {
+			shift++;
+			it++;
+			new_index++;
+		}
+	}
+	//for (size_t i = 0; i < delta_array.size(); i++) {
+	//	if (it != insertions.end() && i == *it) {
+	//		shift++;
+	//		it++;
+	//	}
+	//	delta_array[i] = shift;
+	//}
+	std::vector<int> result(fixme);
+	for (size_t i = 0; i < result.size(); i++) {
+		size_t old_index = result[i];
+		result[i] = old_index + delta_array[old_index];
+	}
+	return result;
+	// Set version, I was wondering which would be faster
+	// Should be O(nlogn) vs O(n), apparently this is really slow even for small n
 	// ex: insert [1, 4, 6]
 	// -> (1: 0, 4: 1, 6: 2)
 	// < 1 gets bumped +0
 	// >= 1, < 4 gets bumped +1
 	// >= 4, < 6 gets bumped +2
-	std::map<int, int> index_to_delta;
-	int delta = 0;
-	for (int index : insertions) {
-		index_to_delta[delta] = index;
-		delta++;
-	}
-	for (size_t i = 0; i < fixme->size(); i++) {
-		int x = (*fixme)[i];
-		int index = *std::upper_bound(insertions.begin(), insertions.end(), x);
-		int d = index_to_delta[index];
-		(*fixme)[i] = x + d;
-	}
+	//std::map<int, int> index_to_delta;
+	//int delta = 0;
+	//for (int index : insertions) {
+	//	index_to_delta[index] = delta;
+	//	delta++;
+	//}
+	//std::vector<int> result(fixme);
+	//for (size_t i = 0; i < result.size(); i++) {
+	//	int x = result[i];
+	//	auto it = std::upper_bound(insertions.begin(), insertions.end(), x);
+	//	int d;
+	//	if (it == insertions.end()) {
+	//		d = insertions.size();
+	//	}
+	//	else {
+	//		d = index_to_delta[*it];
+	//	}
+	//	result[i] = x + d;
+	//}
+	//return result;
 }
 
-void Util::fixIndices2(const std::set<int>& insertions, std::vector<int>* fixme)
+std::chrono::high_resolution_clock::time_point tic_time;
+void Util::tic()
 {
-	size_t max_index = 0;
-	for (int x : *fixme) {
-		max_index = std::max((size_t)x, max_index);
-	}
-	std::vector<size_t> delta_array(max_index, 0);
-	size_t shift = 0;
-	auto it = insertions.begin();
-	for (size_t i = 0; i < delta_array.size(); i++) {
-		if (it != insertions.end() && i == *it) {
-			shift++;
-			it++;
-		}
-		delta_array[i] = shift;
-	}
-	for (size_t i = 0; i < fixme->size(); i++) {
-		size_t old_index = (*fixme)[i];
-		(*fixme)[i] = old_index + delta_array[old_index];
-	}
+	tic_time = std::chrono::high_resolution_clock::now();
+}
+
+double Util::toc()
+{
+	auto now = std::chrono::high_resolution_clock::now();
+	return std::chrono::duration<double, std::milli>(now - tic_time).count();
 }
 
 // credits to stackoverflow

@@ -7,6 +7,7 @@
 #include "resources/ECategory.h"
 
 #include <QDebug>
+#include <unordered_map>
 
 EResourceGroup::EResourceGroup()
 {
@@ -76,4 +77,44 @@ EResource * EResourceGroup::getResource(int i)
 {
 	if (i >= (int)getNumChildren() || i < 0) return nullptr;
 	return dynamic_cast<EResource*>(child(i));
+}
+
+void EResourceGroup::preSave()
+{
+	// index map
+	std::unordered_map<ECategory*, size_t> cat_to_index;
+	for (size_t i = 0; i < m_categories->getNumChildren(); i++) {
+		ECategory *cat = m_categories->category(i);
+		if (!cat) continue;
+		cat_to_index[cat] = i;
+	}
+	// set the integer pointers
+	for (size_t i = 0; i < getNumChildren(); i++) {
+		EResource *res = getResource(i);
+		if (!res) continue;
+		ECategory *cat = res->category();
+		int cat_index;
+		if (cat) cat_index = (int)cat_to_index[cat];
+		else cat_index = -1;
+		res->setCategoryIndex(cat_index);
+	}
+}
+
+void EResourceGroup::postLoad()
+{
+	// set categories
+	for (size_t i = 0; i < getNumChildren(); i++) {
+		EResource *res = getResource(i);
+		if (!res) continue;
+
+		int cat_index = res->getCategoryIndex();
+		if (cat_index < 0 || cat_index >= m_categories->getNumChildren()) {
+			res->setCategory(nullptr);
+			continue;
+		}
+
+		ECategory *cat = m_categories->category(cat_index);
+		res->setCategory(cat);
+		cat->addResource(res);
+	}
 }

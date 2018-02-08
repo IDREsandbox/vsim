@@ -41,5 +41,5 @@ REGISTER_OBJECT_WRAPPER(
 
 	ADD_MATRIXD_SERIALIZER(CameraMatrix, osg::Matrixd());
 
-	ADD_OBJECT_SERIALIZER(Category, ECategory, nullptr);
+	ADD_INT_SERIALIZER(CategoryIndex, -1);
 }

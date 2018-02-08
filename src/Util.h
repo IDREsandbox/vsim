@@ -35,10 +35,13 @@ namespace Util
 	// ex. [a, b, c, d], insertions: a[1] = e, a[3] = f
 	//     [a, e, b, f, c, d]
 	// fixme [0, 1, 2, 3] -> [0, 2, 4, 5]
-	void fixIndices(const std::set<int> &insertions, std::vector<int> *fixme);
+	std::vector<int> fixIndices(const std::vector<int> &fixme, const std::set<int> &insertions);
 
-	// same thing as before, but I'm curious which is faster
-	void fixIndices2(const std::set<int> &insertions, std::vector<int> *fixme);
+	// timing functions
+	// call tic to start the clock, toc to finish
+	// toc returns msec
+	void tic();
+	double toc();
 
 	template <typename T>
 	T clamp(T value, T min, T max) {

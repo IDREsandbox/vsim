@@ -142,20 +142,18 @@ void ERControl::deleteER()
 	std::set<int> selection = getCombinedSelection();
 	if (selection.empty()) return;
 
-	for (auto i : selection) qDebug() << "delete ER" << i;
-
-	uint size = m_ers->getNumChildren();
-
 	m_undo_stack->beginMacro("Delete Resources");
-	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
-		if (*i >= (int)size) {
-			qWarning() << "Out of range selection when deleting ERs" << *i << "/" << size;
-			continue;
-		}
-		EResource *res = m_ers->getResource(*i);
-		m_undo_stack->push(new EResource::SetCategoryCommand(res, nullptr));
-		m_undo_stack->push(new Group::DeleteNodeCommand(m_ers, *i));
+	// save old categories, so that we can restore them later
+	auto cmd = new Group::EditCommand(m_ers, selection);
+	for (int i : selection) {
+		EResource *res = m_ers->getResource(i);
+		if (!res) continue;
+		qDebug() << "setting category to null command";
+		new EResource::SetCategoryCommand(res, nullptr, cmd);
 	}
+	m_undo_stack->push(cmd);
+	// remove resources
+	m_undo_stack->push(new Group::RemoveSetCommand(m_ers, selection));
 	m_undo_stack->endMacro();
 }
 

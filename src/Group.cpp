@@ -1,6 +1,6 @@
 #include "Group.h"
 #include <QDebug>
-
+#include <unordered_set>
 osg::Node *Group::child(unsigned int i) const
 {
 	if (i >= getNumChildren()) return nullptr;
@@ -9,12 +9,15 @@ osg::Node *Group::child(unsigned int i) const
 
 bool Group::addChild(osg::Node * child)
 {
+	qDebug() << "group call add child";
 	return insertChild(getNumChildren(), child);
 }
 
 bool Group::insertChild(unsigned int index, Node *child)
 {
+	qDebug() << "group call ins child";
 	bool result = osg::Group::insertChild(index, child);
+	emit sInsertedSet({ { index, child } });
 	emit sNew(index);
 	return result;
 }
@@ -26,6 +29,11 @@ bool Group::removeChildren(unsigned int index, unsigned int numChildrenToRemove)
 	for (int i = top - 1; i >= (int)index; i--) {
 		emit sDelete(i);
 	}
+	std::set<int> removed_set;
+	for (size_t i = 0; i < numChildrenToRemove; i++) {
+		removed_set.insert(index + i);
+	}
+	emit sRemovedSet(removed_set);
 	return result;
 }
 
@@ -89,25 +97,90 @@ int Group::indexOf(const osg::Node * node) const
 	return x;
 }
 
+void Group::clear()
+{
+	emit sBeginReset();
+	_children.clear();
+	emit sReset();
+}
+
 
 void Group::insertChildrenSet(const std::map<int, osg::Node*>& children)
 {
-	emit sAboutToInsertSet(children);
-	for (auto &pair : children) {
-		int index = pair.first;
-		osg::Node *node = pair.second;
-		insertChild(index, node);
+	if (children.size() == 0) return;
+	//emit sAboutToInsertSet(children);
+	// simple version
+	//for (auto &pair : children) {
+	//	int index = pair.first;
+	//	osg::Node *node = pair.second;
+	//	insertChild(index, node);
+	//}
+
+	// change range optimization - appending 1 shouldn't affect the whole thing
+	// size_t begin = children.begin()->first;
+
+	std::vector<osg::ref_ptr<osg::Node>> new_children;
+	size_t new_size = getNumChildren() + children.size();
+	new_children.reserve(new_size);
+
+	// perform merge
+	size_t old_i = 0;
+	auto it = children.begin();
+	for (size_t new_i = 0; new_i < new_size; new_i++) {
+		if (it == children.end() || it->first != new_i) {
+			new_children.push_back(child(old_i));
+			old_i++;
+		}
+		else {
+			new_children.push_back(it->second);
+			it++;
+		}
 	}
+
+	_children = new_children;
+
 	emit sInsertedSet(children);
 }
 
 void Group::removeChildrenSet(const std::set<int>& children)
 {
+	if (children.size() == 0) return;
+	std::set<int> removed;
+	// error checking
+	//for (auto i : children) {
+	//	if (i >= 0 && i < (int)getNumChildren()) {
+	//		removed.insert(i);
+	//	}
+	//	else {
+	//		qWarning() << "remove children called for nonexistent index" << i;
+	//	}
+	//}
+
 	emit sAboutToRemoveSet(children);
-	for (auto it = children.rbegin(); it != children.rend(); ++it) {
-		int index = *it;
-		removeChild(index, 1);
+
+	// fast version
+	std::vector<osg::ref_ptr<osg::Node>> nodes;
+
+	// convert to unordered set
+	std::unordered_set<int> removeme;
+	for (int i : children) {
+		removeme.insert(i);
 	}
+
+	for (size_t i = 0; i < getNumChildren(); i++) {
+		if (removeme.find(i) == removeme.end()) {
+			nodes.push_back(child(i));
+		}
+	}
+
+	_children = nodes;
+
+	// simple version
+	//for (auto it = children.rbegin(); it != children.rend(); ++it) {
+	//	int index = *it;
+	//	removeChild(index, 1);
+	//}
+
 	emit sRemovedSet(children);
 }
 
@@ -321,4 +394,21 @@ void Group::RemoveNodesPCommand::redo()
 		nodes.insert(node_ref);
 	}
 	m_group->removeChildrenP(nodes);
+}
+
+Group::EditCommand::EditCommand(Group * group, const std::set<int>& nodes, QUndoCommand * parent)
+	: QUndoCommand(parent),
+	m_group(group),
+	m_nodes(nodes)
+{
+}
+void Group::EditCommand::undo()
+{
+	QUndoCommand::undo();
+	m_group->sEdited(m_nodes);
+}
+void Group::EditCommand::redo()
+{
+	QUndoCommand::redo();
+	m_group->sEdited(m_nodes);
 }

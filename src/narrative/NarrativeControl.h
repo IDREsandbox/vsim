@@ -100,7 +100,7 @@ public:
 
 	// Thumbnails
 	void dirtyCurrentSlide();
-	void redrawThumbnails(const std::vector<SlideScrollItem*> slides);
+	void redrawThumbnails(const std::vector<NarrativeSlide*> slides);
 	//QImage generateThumbnail(int option = 1);
 	QImage generateThumbnail(NarrativeSlide *slide);
 

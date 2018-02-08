@@ -33,14 +33,19 @@ public:	// DATA
 	float getTransitionDuration() const;
 	void setTransitionDuration(float tduration);
 
-	float getFoo() const;
-	void setFoo(float);
+	// thumbnail cache
+	void dirtyThumbnail();
+	bool thumbnailDirty() const;
+	const QImage &getThumbnail() const;
+	void setThumbnail(QImage);
 
 signals:
 	void sCameraMatrixChanged(const osg::Matrixd&);
 	void sDurationChanged(float);
 	void sStayOnNodeChanged(bool);
 	void sTransitionDurationChanged(float);
+	void sThumbnailChanged(const QImage &image);
+	void sThumbnailDirty();
 
 public: // COMMANDS
 
@@ -70,6 +75,9 @@ private:
 	float m_duration;
 	bool m_stay_on_node;
 	float m_transition_duration;
+
+	QImage m_thumbnail;
+	bool m_thumbnail_dirty;
 };
 
 #endif /* NARRATIVESLIDE_H */

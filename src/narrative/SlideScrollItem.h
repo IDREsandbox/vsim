@@ -19,8 +19,8 @@ public:
 	void setDuration(bool stay, float duration); // 0 for stay, >0 for timed
 
 	// thumbnail stuff
-	bool thumbnailDirty();
-	void setThumbnailDirty(bool dirty);
+	//bool thumbnailDirty();
+	//void setThumbnailDirty(bool dirty);
 
 	// overrides 
 	virtual void setIndex(int index);

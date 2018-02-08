@@ -122,14 +122,15 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	else {
 		qDebug() << "Root is a VSimRoot";
 	}
-	
+	m_root->postLoad();
+
 	// move all of the gui stuff over to the new root
 	m_viewer->setSceneData(root->models()); // ideally this would be only models, but its easy to mess things up
 	m_model_table_model->setGroup(root->models());
 	m_narrative_control->load(root->narratives());
 	m_er_control->load(root->resources());
 	m_window->timeSlider()->setGroup(root->models());
-	
+
 	m_undo_stack->clear();
 	m_window->m_osg_widget->reset();
 
@@ -231,6 +232,7 @@ bool VSimApp::openVSim(const std::string & filename)
 
 bool VSimApp::saveVSim(const std::string& filename)
 {
+	m_root->preSave();
 	// if vsim, then use osgb
 	std::string ext = Util::getExtension(filename);
 	if (ext == "vsim") {

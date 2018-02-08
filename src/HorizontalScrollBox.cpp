@@ -115,10 +115,42 @@ void HorizontalScrollBox::clear()
 	m_items.clear();
 	m_selection->clear();
 
-	if (m_group) disconnect(m_group, 0, this, 0);
-	m_group = nullptr;
+	//if (m_group) disconnect(m_group, 0, this, 0);
+	//m_group = nullptr;
+	//refresh();
+}
+#include "Util.h"
+void HorizontalScrollBox::reload()
+{
+	qDebug() << "---- reload hsb";
+	if (!m_group) return;
+	// clear internals
+	for (auto ptr : m_items) {
+		delete ptr;
+	}
+	m_items.clear();
+	m_selection->clear();
+	Util::tic();
+	qDebug() << "begin create items";
+	// create items
+	if (m_group) {
+		for (uint i = 0; i < m_group->getNumChildren(); i++) {
+			osg::Node *node = m_group->child(i);
 
+			ScrollBoxItem *item = createItem(node); // create the item, virtual
+			item->setParent(m_scroll_area_widget);
+			item->widthFromHeight(m_height);
+			connect(item, &ScrollBoxItem::sMousePressEvent, this, &HorizontalScrollBox::itemMousePressEvent);
+			connect(item, &ScrollBoxItem::sMouseReleaseEvent, this, &HorizontalScrollBox::itemMouseReleaseEvent);
+			item->show();
+			m_items.push_back(item);
+		}
+	}
+	qDebug() << "end create items" << Util::toc();
+	qDebug() << "begin refresh";
+	Util::tic();
 	refresh();
+	qDebug() << "done refresh" << Util::toc();
 }
 
 const std::set<int>& HorizontalScrollBox::getSelection()
@@ -164,19 +196,35 @@ void HorizontalScrollBox::setGroup(Group * group)
 	// disconnect incoming signals if already connected to a narrative
 	if (m_group != nullptr) disconnect(m_group, 0, this, 0);
 
-	clear();
 	m_group = group;
-	if (group == nullptr) return;
 
 	// listen to the insert and remove signals from group
 	// so that we can add/remove from the slide box accordingly
-	connect(m_group, &Group::sNew, this, &HorizontalScrollBox::insertNewItem);
-	connect(m_group, &Group::sDelete, this, &HorizontalScrollBox::deleteItem);
-	connect(m_group, &Group::sItemsMoved, this, &HorizontalScrollBox::moveItems);
+	// replace with set operations
+	//connect(m_group, &Group::sNew, this, &HorizontalScrollBox::insertNewItem);
+	//connect(m_group, &Group::sDelete, this, &HorizontalScrollBox::deleteItem);
+	//connect(m_group, &Group::sItemsMoved, this, &HorizontalScrollBox::moveItems);
 
-	for (uint i = 0; i < group->getNumChildren(); i++) {
-		insertNewItem(i);
+	reload();
+
+	if (group) {
+		connect(m_group, &Group::sInsertedSet, this,
+			[this]() {
+			qDebug() << "reload after insertion";
+			reload();
+		});
+		connect(m_group, &Group::sRemovedSet, this,
+			[this]() {
+			qDebug() << "reload after remove";
+			reload();
+		});
+		connect(m_group, &Group::sReset, this,
+			[this]() {
+			qDebug() << "reload after reset";
+			reload();
+		});
 	}
+
 }
 
 Group * HorizontalScrollBox::getGroup() const

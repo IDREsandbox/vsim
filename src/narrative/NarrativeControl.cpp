@@ -128,8 +128,10 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 
 	// dirty slide thumbnails
 	connect(m_slide_box, &SlideScrollBox::sThumbnailsDirty, this, 
-		[this]() {redrawThumbnails(m_slide_box->getDirtySlides()); }
-		);
+		[this]() {
+		qDebug() << "received dirty thumbnails from box";
+		redrawThumbnails(m_slide_box->getDirtySlides());
+	});
 
 	connect(window, &MainWindow::sDebugControl, this, &NarrativeControl::debug);
 }
@@ -213,10 +215,7 @@ void NarrativeControl::deleteNarratives()
 	// get pointers to nodes to delete
 	m_undo_stack->beginMacro("Delete Narratives");
 	m_undo_stack->push(new SelectNarrativesCommand(this, selection, ON_UNDO));
-	// delete in reverse order
-	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
-		m_undo_stack->push(new Group::DeleteNodeCommand(m_narrative_group, *i));
-	}
+	m_undo_stack->push(new Group::RemoveSetCommand(m_narrative_group, selection));
 	m_undo_stack->push(new SelectNarrativesCommand(this, next_selection, ON_REDO));
 	m_undo_stack->endMacro();
 }
@@ -249,17 +248,13 @@ void NarrativeControl::loadNarratives(NarrativeGroup * group)
 		selection.insert(selection_begin + i);
 	}
 
-	std::set<int> next = Selection::nextSelectionAfterDelete(n, selection);
+	std::map<int, osg::Node*> new_nodes;
+	for (uint i = 0; i < n; i++) {
+		new_nodes[n + i] = group->getChild(i);
+	}
 
 	m_undo_stack->beginMacro("Import Narratives");
-	m_undo_stack->push(new SelectNarrativesCommand(this, next, ON_UNDO));
-	for (uint i = 0; i < n; i++) {
-		Narrative2 *narrative = dynamic_cast<Narrative2*>(group->getChild(i));
-		if (narrative == nullptr) {
-			qWarning() << "Non-narrative detected when loading narrative group";
-		}
-		m_undo_stack->push(new Group::AddNodeCommand(m_narrative_group, narrative));
-	}
+	m_undo_stack->push(new Group::InsertSetCommand(m_narrative_group, new_nodes));
 	m_undo_stack->push(new SelectNarrativesCommand(this, selection, ON_REDO));
 	m_undo_stack->endMacro();
 }
@@ -638,11 +633,7 @@ void NarrativeControl::deleteSlides()
 
 	m_undo_stack->beginMacro("Delete Slides");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, selection, ON_UNDO));
-	// we need to delete in reverse order to get the indices right
-	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
-		qDebug() << "pushing delete" << *i;
-		m_undo_stack->push(new Group::DeleteNodeCommand(nar, *i));
-	}
+	m_undo_stack->push(new Group::RemoveSetCommand(nar, selection));
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, next_selection, ON_REDO));
 	m_undo_stack->endMacro();
 }
@@ -858,21 +849,22 @@ void NarrativeControl::execEditLabel()
 
 void NarrativeControl::dirtyCurrentSlide()
 {
-	SlideScrollItem *item = m_slide_box->getItem(m_current_slide);
-	item->setThumbnailDirty(true);
+	qDebug() << "dirtying current slide";
+	NarrativeSlide *slide = getCurrentSlide();
+	if (slide) slide->dirtyThumbnail();
 }
 
-void NarrativeControl::redrawThumbnails(const std::vector<SlideScrollItem*> items)
+void NarrativeControl::redrawThumbnails(const std::vector<NarrativeSlide*> slides)
 {
-
-	for (auto item : items) {
-		//qDebug() << "redrawing thumbnail" << item->getIndex();
+	for (auto slide : slides) {
+		qDebug() << "redrawing thumbnail" << slide;
 		QImage thumbnail;
 
-		thumbnail = generateThumbnail(item->getSlide());
-
-		item->setImage(thumbnail);
-		item->setThumbnailDirty(false);
+		thumbnail = generateThumbnail(slide);
+		
+		slide->setThumbnail(thumbnail);
+		//item->setImage(thumbnail);
+		//item->setThumbnailDirty(false);
 	}
 }
 

@@ -48,6 +48,8 @@ public:
 	ScrollBoxItem *getItem(int position);
 	void clear();
 
+	void reload();
+
 	// selection - these set selection, lastSelected, and emit events
 	virtual void setSelection(const std::set<int>& set, int last);
 	int getLastSelected();

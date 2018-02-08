@@ -61,17 +61,19 @@ ScrollBoxItem * SlideScrollBox::createItem(osg::Node * node)
 	connect(item, &SlideScrollItem::sTransitionDoubleClick, this, &SlideScrollBox::sSetTransitionDuration);
 	connect(item, &SlideScrollItem::sThumbnailDirty, this, &SlideScrollBox::sThumbnailsDirty);
 
-	item->setThumbnailDirty(true); // hmm
+	//item->setThumbnailDirty(true); // hmm
 
 	return item;
 }
 
-std::vector<SlideScrollItem*> SlideScrollBox::getDirtySlides()
+std::vector<NarrativeSlide*> SlideScrollBox::getDirtySlides()
 {
-	std::vector<SlideScrollItem*> items;
-	for (auto item : m_items) {
-		SlideScrollItem *slide_item = dynamic_cast<SlideScrollItem*>(item);
-		if (slide_item->thumbnailDirty()) {
+	if (!m_group) return {};
+
+	std::vector<NarrativeSlide*> items;
+	for (size_t i = 0; i < m_group->getNumChildren(); i++) {
+		NarrativeSlide *slide_item = dynamic_cast<NarrativeSlide*>(m_group->child(i));
+		if (slide_item && slide_item->thumbnailDirty()) {
 			items.push_back(slide_item);
 		}
 	}

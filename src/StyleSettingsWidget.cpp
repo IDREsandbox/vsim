@@ -25,10 +25,6 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	justifications << "Left" << "Center" << "Right" << "Justify";
 	ui.justify->addItems(justifications);
 
-	QStringList styles;
-	styles << "Regular" << "Bold" << "Italic";
-	ui.styleBox->addItems(styles);
-
 	connect(ui.colorPicker, &QPushButton::clicked, this,
 		[this]() {
 		QColorDialog dlg;
@@ -39,11 +35,11 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 			return;
 		}
 		m_color = dlg.selectedColor();
-		qDebug() << "color to stylesheet" << Util::colorToStylesheet(color);
-		ui.colorPicker->setStyleSheet(Util::colorToStylesheet(color));
+		qDebug() << "color to stylesheet" << Util::colorToStylesheet(m_color);
+		ui.colorPicker->setStyleSheet(Util::colorToStylesheet(m_color));
 		
 		// update the preview
-		ui.prev->setStyleSheet(Util::colorToStylesheet(color));
+		ui.prev->setStyleSheet(Util::colorToStylesheet(m_color));
 	});
 	connect(ui.fontBox, &QFontComboBox::currentFontChanged, this,
 		[this](const QFont &f) {

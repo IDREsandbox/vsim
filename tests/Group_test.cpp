@@ -139,6 +139,49 @@ private slots:
 		group->addChild(node0);
 		QCOMPARE(spy.size(), 1);
 	}
+	void insertChildrenSet() {
+		Group g;
+		std::vector<osg::Node*> n;
+		for (size_t i = 0; i < 6; i++) {
+			osg::Node *node = new osg::Node;
+			node->setName(std::to_string(i));
+			n.push_back(node);
+		}
+
+		g.insertChildrenSet({
+			{ 0, n[0] },
+			{ 1, n[1] },
+			{ 2, n[2] }});
+		GROUPCOMPARE(&g, { n[0], n[1], n[2] });
+
+		g.insertChildrenSet({
+			{ 0, n[3] },
+			{ 1, n[4] },
+			{ 4, n[5] }});
+		for (size_t i = 0; i < g.getNumChildren(); i++) {
+			//qDebug() << g.child(i) << g.child(i)->getName().c_str();
+		}
+		GROUPCOMPARE(&g, { n[3], n[4], n[0], n[1], n[5], n[2] });
+	}
+	void removeChildrenSet() {
+		Group g;
+		std::vector<osg::Node*> n;
+		for (size_t i = 0; i < 6; i++) {
+			osg::Node *node = new osg::Node;
+			node->setName(std::to_string(i));
+			n.push_back(node);
+			g.addChild(node);
+		}
+
+		g.removeChildrenSet({0});
+		GROUPCOMPARE(&g, { n[1], n[2], n[3], n[4], n[5]});
+
+		g.removeChildrenSet({ 4 });
+		GROUPCOMPARE(&g, { n[1], n[2], n[3], n[4]});
+
+		g.removeChildrenSet({ 1, 2 });
+		GROUPCOMPARE(&g, { n[1], n[4] });
+	}
 };
 
 QTEST_MAIN(Group_test)
