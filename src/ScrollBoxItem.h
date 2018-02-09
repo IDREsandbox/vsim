@@ -10,7 +10,7 @@
 class ScrollBoxItem : public QFrame {
 	Q_OBJECT
 public:
-	ScrollBoxItem(QWidget *parent);
+	ScrollBoxItem(QWidget *parent = nullptr);
 	
 	// interface for controller is in derived classes
 	
@@ -33,10 +33,6 @@ public:
 signals:
 	void sMousePressEvent(QMouseEvent *event, int index);
 	void sMouseReleaseEvent(QMouseEvent *event, int index);
-
-protected:
-	virtual void mousePressEvent(QMouseEvent *event);
-	virtual void mouseReleaseEvent(QMouseEvent *event);
 
 private:
 	int m_index = -1;

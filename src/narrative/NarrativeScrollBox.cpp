@@ -1,7 +1,8 @@
 ﻿#include "NarrativeScrollBox.h"
+#include "NarrativeScrollItem.h"
 
 NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
-	: HorizontalScrollBox(parent)
+	: GroupScrollBox(parent)
 {
 	// initialize menus
 	QMenu *m_menu = new QMenu(tr("Narrative menu"), this);
@@ -28,10 +29,6 @@ NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
 	setItemMenu(m_item_menu);
 
 	setMIMEType("application/x-narrative");
-}
-
-NarrativeScrollBox::~NarrativeScrollBox() {
-	
 }
 
 ScrollBoxItem * NarrativeScrollBox::createItem(osg::Node * node)

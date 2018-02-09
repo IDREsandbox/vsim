@@ -5,12 +5,10 @@
 #include <QDialog>
 #include <QInputDialog>
 
-#include "HorizontalScrollBox.h"
-#include "SlideScrollItem.h"
+#include "GroupScrollBox.h"
 #include "NarrativeSlideDurationDialog.h"
-#include "Narrative2.h"
 
-class SlideScrollBox : public HorizontalScrollBox {
+class SlideScrollBox : public GroupScrollBox {
 	Q_OBJECT
 
 public:

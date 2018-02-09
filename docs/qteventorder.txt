@@ -24,10 +24,10 @@ Typical:
 
 QGraphicsView is all messed up
  0. QAbstractScrollArea::viewportEvent
- 1. mousePressEvent
- 2. scene ::event()
- 3. scene mousePressEvent
- (quit if accept, continue if ignore)
+ 1. view mousePressEvent
+  2. scene ::event()
+   3. scene mousePressEvent
+ (quit if view accept, continue if ignore)
  4. filter
  5. ::event()
 

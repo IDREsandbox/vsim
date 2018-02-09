@@ -37,6 +37,85 @@ namespace Util
 	// fixme [0, 1, 2, 3] -> [0, 2, 4, 5]
 	std::vector<int> fixIndices(const std::vector<int> &fixme, const std::set<int> &insertions);
 
+	//template <typename T>
+	//using InsertionList = std::vector<std::pair<size_t, T>>;
+
+	template <typename T>
+	void multiInsert(std::vector<T> *old,
+		const std::vector<std::pair<size_t, T>> &insertions)
+	{
+		std::vector<T> new_items;
+		size_t new_size = old->size() + insertions.size();
+		new_items.reserve(new_size);
+
+		// perform merge
+		size_t old_i = 0;
+		auto it = insertions.begin();
+		while (new_items.size() < new_size) {
+			bool add_new;
+			if (it == insertions.end()) {
+				add_new = false;
+			}
+			else if (old_i >= old->size()) {
+				add_new = true;
+			}
+			else if (it->first == new_items.size()) {
+				add_new = true;
+			}
+			else {
+				add_new = false;
+			}
+			if (add_new) {
+				new_items.push_back(it->second);
+				it++;
+			}
+			else {
+				new_items.push_back((*old)[old_i]);
+				old_i++;
+			}
+		}
+		*old = new_items;
+	}
+
+	template <typename T>
+	void multiRemove(std::vector<T> *old, const std::vector<size_t> &indices)
+	{
+		std::vector<T> new_list;
+		auto it = indices.begin();
+		for (size_t i = 0; i < old->size(); i++) {
+			if (it == indices.end() || *it < i) {
+				new_list.push_back((*old)[i]);
+			}
+			// *it == i
+			else {
+				// dont push anything
+				it++;
+			}
+		}
+		*old = new_list;
+	}
+
+	template <typename T>
+	void multiMove(std::vector<T> *vec, const std::vector<std::pair<size_t, size_t>> &mapping)
+	{
+		// build removals and insertions
+		std::vector<size_t> removals;
+		std::vector<std::pair<size_t, T>> insertions;
+		for (auto &pair : mapping) {
+			size_t src = pair.first;
+			size_t dest = pair.second;
+			T item = (*vec)[pair.first];
+			removals.push_back(src);
+			insertions.push_back({ dest, item });
+		}
+		// sort both
+		std::sort(removals.begin(), removals.end());
+		std::sort(insertions.begin(), insertions.end(),
+			[](auto &left, auto &right) { return left.first < right.first; });
+
+		multiRemove(vec, removals);
+		multiInsert(vec, insertions);
+	}
 	// timing functions
 	// call tic to start the clock, toc to finish
 	// toc returns msec

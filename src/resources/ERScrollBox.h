@@ -1,20 +1,17 @@
 ﻿#ifndef ERSCROLLBOX_H
 #define ERSCROLLBOX_H
 
-#include "HorizontalScrollBox.h"
-#include "resources/ERScrollItem.h"
-#include "resources/EResourceGroup.h"
+#include "GroupScrollBox.h"
 
 class ERFilterSortProxy;
 
-class ERScrollBox : public HorizontalScrollBox {
+class ERScrollBox : public GroupScrollBox {
 	Q_OBJECT
 
 public:
 	ERScrollBox(QWidget * parent = nullptr);
-	~ERScrollBox();
 
-	virtual ScrollBoxItem *createItem(osg::Node *node) override;
+	ScrollBoxItem *createItem(osg::Node *node) override;
 
 signals:
 	void sEdit(); // only support single edit

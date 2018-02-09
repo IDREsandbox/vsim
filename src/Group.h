@@ -33,7 +33,7 @@ signals:
 	void sNew(int index); // inserted node at index
 	void sDelete(int index); // deleted node at index
 	void sSet(int index); // changed (set) node at index
-	void sItemsMoved(std::vector<std::pair<int,int>>); // items sorted by .first
+	void sItemsMoved(const std::vector<std::pair<size_t, size_t>>&); // items sorted by .first
 
 	void sEdited(const std::set<int> &edited); // for proxy/big listeners
 
@@ -41,13 +41,13 @@ signals:
 	void sReset();
 
 public: // index based, multiple
-	virtual void insertChildrenSet(const std::map<int, osg::Node*> &children);
-	virtual void removeChildrenSet(const std::set<int> &children);
+	virtual void insertChildrenSet(const std::vector<std::pair<size_t, osg::Node*>> &children);
+	virtual void removeChildrenSet(const std::vector<size_t> &indices);
 signals:
-	void sAboutToInsertSet(const std::map<int, osg::Node*>&);
-	void sInsertedSet(const std::map<int, osg::Node*>&);
-	void sAboutToRemoveSet(const std::set<int>&);
-	void sRemovedSet(const std::set<int>&);
+	void sAboutToInsertSet(const std::vector<std::pair<size_t, osg::Node*>> &);
+	void sInsertedSet(const std::vector<std::pair<size_t, osg::Node*>> &);
+	void sAboutToRemoveSet(const std::vector<size_t> &);
+	void sRemovedSet(const std::vector<size_t> &);
 
 public: // pointer based, multiple
 	virtual void addChildrenP(const std::set<osg::Node*> &children);

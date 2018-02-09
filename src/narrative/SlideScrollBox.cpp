@@ -1,10 +1,9 @@
-﻿
-#include "SlideScrollBox.h"
+﻿#include "SlideScrollBox.h"
+#include "SlideScrollItem.h"
 
 SlideScrollBox::SlideScrollBox(QWidget * parent) 
-	: HorizontalScrollBox(parent)
+	: GroupScrollBox(parent)
 {
-	
 	// slide menu
 	m_bar_menu = new QMenu("Slide context menu", this);
 	m_slide_menu = new QMenu("Slide context menu 2", this);

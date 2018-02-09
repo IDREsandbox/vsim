@@ -1,6 +1,8 @@
 #include "Group.h"
 #include <QDebug>
 #include <unordered_set>
+#include "Util.h"
+
 osg::Node *Group::child(unsigned int i) const
 {
 	if (i >= getNumChildren()) return nullptr;
@@ -105,107 +107,62 @@ void Group::clear()
 }
 
 
-void Group::insertChildrenSet(const std::map<int, osg::Node*>& children)
+void Group::insertChildrenSet(const std::vector<std::pair<size_t, osg::Node*>> &insertions)
 {
-	if (children.size() == 0) return;
-	//emit sAboutToInsertSet(children);
-	// simple version
-	//for (auto &pair : children) {
-	//	int index = pair.first;
-	//	osg::Node *node = pair.second;
-	//	insertChild(index, node);
-	//}
+	if (insertions.size() == 0) return;
 
-	// change range optimization - appending 1 shouldn't affect the whole thing
-	// size_t begin = children.begin()->first;
+	std::vector<osg::Node*> new_list(_children.begin(), _children.end());
+	Util::multiInsert(&new_list, insertions);
+	_children.assign(new_list.begin(), new_list.end());
 
-	std::vector<osg::ref_ptr<osg::Node>> new_children;
-	size_t new_size = getNumChildren() + children.size();
-	new_children.reserve(new_size);
-
-	// perform merge
-	size_t old_i = 0;
-	auto it = children.begin();
-	for (size_t new_i = 0; new_i < new_size; new_i++) {
-		if (it == children.end() || it->first != new_i) {
-			new_children.push_back(child(old_i));
-			old_i++;
-		}
-		else {
-			new_children.push_back(it->second);
-			it++;
-		}
-	}
-
-	_children = new_children;
-
-	emit sInsertedSet(children);
+	emit sInsertedSet(insertions);
 }
 
-void Group::removeChildrenSet(const std::set<int>& children)
+void Group::removeChildrenSet(const std::vector<size_t> &indices)
 {
-	if (children.size() == 0) return;
-	std::set<int> removed;
-	// error checking
-	//for (auto i : children) {
-	//	if (i >= 0 && i < (int)getNumChildren()) {
-	//		removed.insert(i);
-	//	}
-	//	else {
-	//		qWarning() << "remove children called for nonexistent index" << i;
-	//	}
-	//}
+	if (indices.size() == 0) return;
 
-	emit sAboutToRemoveSet(children);
-
-	// fast version
-	std::vector<osg::ref_ptr<osg::Node>> nodes;
-
-	// convert to unordered set
-	std::unordered_set<int> removeme;
-	for (int i : children) {
-		removeme.insert(i);
+	// pointers
+	std::set<osg::Node*> set;
+	for (size_t i : indices) {
+		set.insert(child(i));
 	}
 
-	for (size_t i = 0; i < getNumChildren(); i++) {
-		if (removeme.find(i) == removeme.end()) {
-			nodes.push_back(child(i));
-		}
-	}
+	emit sAboutToRemoveSet(indices);
+	emit sAboutToRemoveP(set);
 
-	_children = nodes;
+	std::vector<osg::Node*> new_list(_children.begin(), _children.end());
+	Util::multiRemove(&new_list, indices);
+	_children.assign(new_list.begin(), new_list.end());
 
-	// simple version
-	//for (auto it = children.rbegin(); it != children.rend(); ++it) {
-	//	int index = *it;
-	//	removeChild(index, 1);
-	//}
-
-	emit sRemovedSet(children);
+	emit sRemovedSet(indices);
+	emit sRemovedP(set);
 }
 
 void Group::addChildrenP(const std::set<osg::Node*> &children)
 {
-	emit sAboutToAddP(children);
-	qDebug() << "addchildren" << children.size();
+	// convert pointers to indices
+	std::vector<std::pair<size_t, osg::Node*>> nodes;
+	size_t i = getNumChildren();
 	for (auto node : children) {
-		addChild(node);
+		nodes.push_back(std::make_pair(i, node));
 	}
-
-	emit sAddedP(children);
+	insertChildrenSet(nodes);
 }
 
 void Group::removeChildrenP(const std::set<osg::Node*> &children)
 {
-	qDebug() << "remove children p";
-	emit sAboutToRemoveP(children);
-
-	for (auto node : children) {
-		qDebug() << "removing child" << node;
-		removeChild(node);
+	std::vector<size_t> removals;
+	// convert pointers to indices
+	for (size_t i = 0; i < getNumChildren(); i++) {
+		if (children.find(child(i)) != children.end()) {
+			// found, add
+			removals.push_back[i];
+		}
 	}
-
-	emit sRemovedP(children);
+	// sort and send
+	std::sort(removals.begin(), removals.end());
+	removeChildrenSet(removals);
 }
 
 Group::AddNodeCommand::AddNodeCommand(

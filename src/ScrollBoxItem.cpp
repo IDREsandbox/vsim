@@ -32,19 +32,7 @@ void ScrollBoxItem::select(bool s)
 
 int ScrollBoxItem::widthFromHeight(int height)
 {
-	return (16.0f / 9.0f) * height;
-}
-
-void ScrollBoxItem::mousePressEvent(QMouseEvent *event)
-{
-	//qDebug() << "ScrollBoxItem mouse press event " << event->type() << m_index; // << this->text();
-	emit sMousePressEvent(event, m_index);
-}
-
-void ScrollBoxItem::mouseReleaseEvent(QMouseEvent * event)
-{
-	//qDebug() << "ScrollBoxItem mouse release event ScrollBoxItem" << event->type() << m_index; // << this->text();
-	emit sMouseReleaseEvent(event, m_index);
+	return height;
 }
 
 void ScrollBoxItem::setDeselectStyle(QString style)

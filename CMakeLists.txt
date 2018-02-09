@@ -125,7 +125,7 @@ add_dependencies(VSim CopyDLLs)
 target_link_libraries(VSim_objects Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
 target_link_libraries(VSim VSim_objects)
 
-# gui tests (experiments)
+# gui tests (experiments) ##################
 # add_subdirectory("experiments")
 
 set(NumberSlider_src
@@ -136,7 +136,22 @@ message("exp sources ----:\n" "${NumberSlider_src}")
 add_executable(NumberSlider_experiment ${NumberSlider_src})
 target_link_libraries(NumberSlider_experiment Qt5::Widgets)
 
-# tests
+set(HorizontalScrollBox_src
+  src/HorizontalScrollBox.h
+  src/HorizontalScrollBox.cpp
+  src/ScrollBoxItem.h
+  src/ScrollBoxItem.cpp
+  src/Selection.h
+  src/Selection.cpp
+  src/Util.h
+  src/Util.cpp
+  experiments/HorizontalScrollBox_experiment/HorizontalScrollBox_experiment.cpp
+)
+add_executable(HorizontalScrollBox_experiment ${HorizontalScrollBox_src})
+target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets)
+target_link_libraries(HorizontalScrollBox_experiment ${OPENSCENEGRAPH_LIBRARIES})
+
+# tests ####################################
 
 # util test & dependencies
 set(Util_src

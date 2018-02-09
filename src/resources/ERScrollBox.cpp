@@ -1,8 +1,9 @@
 ﻿#include "resources/ERScrollBox.h"
 #include "ERFilterSortProxy.h"
+#include "resources/ERScrollItem.h"
 
 ERScrollBox::ERScrollBox(QWidget * parent)
-	: HorizontalScrollBox(parent)
+	: GroupScrollBox(parent)
 {
 	// initialize menus
 	QMenu *m_menu = new QMenu(tr("ER menu"), this);

@@ -3,34 +3,43 @@
 #include <QMouseEvent>
 #include <QMimeData>
 #include <vector>
+#include <QDebug>
 #include <algorithm>
 
 #include "HorizontalScrollBox.h"
 #include "ScrollBoxItem.h"
 #include "Selection.h"
+#include "Util.h"
 
 HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
-	: QScrollArea(parent),
+	: QWidget(parent),
 	m_menu(nullptr),
 	m_item_menu(nullptr),
-	m_group(nullptr),
-	m_dragging(false),
+	m_drag(nullptr),
 	m_mouse_down(false),
-	m_minimum_drag_dist(10)
+	m_minimum_drag_dist(10),
+	m_spacing(10)
 {
-	setObjectName("scrollArea");
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-	setWidgetResizable(true);
+	QGridLayout *layout = new QGridLayout(this);
+	m_scroll = new QScrollArea(this);
+	layout->addWidget(m_scroll, 0, 0);
 
-	m_scroll_area_widget = new QWidget(this);
+	m_scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+	m_scroll->setWidgetResizable(true);
+	m_scroll->viewport()->installEventFilter(this);
+	m_scroll->setObjectName("scrollArea");
+	m_scroll->setStyleSheet("#scrollArea { background:rgba(0, 0, 0, 0);}");
+
+	m_scroll_area_widget = new QWidget();
+	m_scroll->setWidget(m_scroll_area_widget);
+	m_scroll_area_widget->show();
 	m_scroll_area_widget->setStyleSheet(
 		"background-color: rgb(0,0,0,0);"
 		//"QMenu {"
 		//"	background-color: rgb(255,255,255);"
 		//"}"
 	);
-	setWidget(m_scroll_area_widget);
 
 	m_drop_highlight = new QWidget(m_scroll_area_widget);
 	m_drop_highlight->setObjectName("dropHighlight");
@@ -46,6 +55,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_height = this->height();
 
 	setAcceptDrops(true);
+	setMIMEType("application/x-scrollitem");
 
 	m_selection = new Selection(this);
 	connect(m_selection, &Selection::sAdded, this, [this](int i) {
@@ -57,45 +67,8 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 		m_items[i]->select(false);
 	});
 	connect(m_selection, &Selection::sChanged, this, &HorizontalScrollBox::sSelectionChange);
-}
 
-void HorizontalScrollBox::addItem(ScrollBoxItem *item)
-{
-	insertItem(m_items.size(), item);
-	horizontalScrollBar()->setValue(horizontalScrollBar()->maximum());
-}
-
-void HorizontalScrollBox::insertItem(int index, ScrollBoxItem *item)
-{
-	item->setParent(m_scroll_area_widget);
-	// approximate geometry, will be fixed later on in refresh()
-	item->setGeometry(0, 0, m_height, 2.5*m_height);
-	item->widthFromHeight(m_height);
-	m_items.insert(index, item);
-	// steal all mouse events on items, alternatively we could use a filter
-	connect(item, &ScrollBoxItem::sMousePressEvent, this, &HorizontalScrollBox::itemMousePressEvent);
-	connect(item, &ScrollBoxItem::sMouseReleaseEvent, this, &HorizontalScrollBox::itemMouseReleaseEvent);
-
-	item->show();
 	refresh();
-}
-
-void HorizontalScrollBox::addNewItem()
-{
-	insertNewItem(m_items.size());
-}
-
-void HorizontalScrollBox::insertNewItem(uint index)
-{
-	m_selection->clear();
-	osg::Node *node = nullptr;
-	if (m_group != nullptr && index <= m_group->getNumChildren()) {
-		node = m_group->child(index);
-	}
-
-	ScrollBoxItem *item = createItem(node); // create the item, virtual
-	if (item == nullptr) return;
-	HorizontalScrollBox::insertItem(index, item);
 }
 
 ScrollBoxItem *HorizontalScrollBox::getItem(int position)
@@ -106,7 +79,6 @@ ScrollBoxItem *HorizontalScrollBox::getItem(int position)
 	return nullptr;
 }
 
-
 void HorizontalScrollBox::clear()
 {
 	for (auto ptr : m_items) {
@@ -114,43 +86,6 @@ void HorizontalScrollBox::clear()
 	}
 	m_items.clear();
 	m_selection->clear();
-
-	//if (m_group) disconnect(m_group, 0, this, 0);
-	//m_group = nullptr;
-	//refresh();
-}
-#include "Util.h"
-void HorizontalScrollBox::reload()
-{
-	qDebug() << "---- reload hsb";
-	if (!m_group) return;
-	// clear internals
-	for (auto ptr : m_items) {
-		delete ptr;
-	}
-	m_items.clear();
-	m_selection->clear();
-	Util::tic();
-	qDebug() << "begin create items";
-	// create items
-	if (m_group) {
-		for (uint i = 0; i < m_group->getNumChildren(); i++) {
-			osg::Node *node = m_group->child(i);
-
-			ScrollBoxItem *item = createItem(node); // create the item, virtual
-			item->setParent(m_scroll_area_widget);
-			item->widthFromHeight(m_height);
-			connect(item, &ScrollBoxItem::sMousePressEvent, this, &HorizontalScrollBox::itemMousePressEvent);
-			connect(item, &ScrollBoxItem::sMouseReleaseEvent, this, &HorizontalScrollBox::itemMouseReleaseEvent);
-			item->show();
-			m_items.push_back(item);
-		}
-	}
-	qDebug() << "end create items" << Util::toc();
-	qDebug() << "begin refresh";
-	Util::tic();
-	refresh();
-	qDebug() << "done refresh" << Util::toc();
 }
 
 const std::set<int>& HorizontalScrollBox::getSelection()
@@ -168,14 +103,6 @@ int HorizontalScrollBox::getLastSelected()
 	return m_selection->getLastSelected();
 }
 
-void HorizontalScrollBox::deleteItem(int position)
-{
-	m_selection->clear();
-	ScrollBoxItem* item = m_items.takeAt(position);
-	delete item;
-	refresh();
-}
-
 void HorizontalScrollBox::setMenu(QMenu * menu)
 {
 	m_menu = menu;
@@ -186,50 +113,44 @@ void HorizontalScrollBox::setItemMenu(QMenu * menu)
 	m_item_menu = menu;
 }
 
+void HorizontalScrollBox::enableDragging(bool enable)
+{
+	if (m_drag && !enable) QDrag::cancel();
+	m_dragging_enabled = enable;
+}
+
 void HorizontalScrollBox::setMIMEType(const std::string & type)
 {
 	m_mime_type = QString::fromStdString(type);
 }
 
-void HorizontalScrollBox::setGroup(Group * group)
+bool HorizontalScrollBox::eventFilter(QObject * o, QEvent * e)
 {
-	// disconnect incoming signals if already connected to a narrative
-	if (m_group != nullptr) disconnect(m_group, 0, this, 0);
-
-	m_group = group;
-
-	// listen to the insert and remove signals from group
-	// so that we can add/remove from the slide box accordingly
-	// replace with set operations
-	//connect(m_group, &Group::sNew, this, &HorizontalScrollBox::insertNewItem);
-	//connect(m_group, &Group::sDelete, this, &HorizontalScrollBox::deleteItem);
-	//connect(m_group, &Group::sItemsMoved, this, &HorizontalScrollBox::moveItems);
-
-	reload();
-
-	if (group) {
-		connect(m_group, &Group::sInsertedSet, this,
-			[this]() {
-			qDebug() << "reload after insertion";
-			reload();
-		});
-		connect(m_group, &Group::sRemovedSet, this,
-			[this]() {
-			qDebug() << "reload after remove";
-			reload();
-		});
-		connect(m_group, &Group::sReset, this,
-			[this]() {
-			qDebug() << "reload after reset";
-			reload();
-		});
+	QEvent::Type type = e->type();
+	// steal resize event from viewport
+	if (o == m_scroll->viewport() && type == QEvent::Resize) {
+		refresh();
 	}
 
-}
+	// steal mouse events from children
+	ScrollBoxItem *item = dynamic_cast<ScrollBoxItem*>(o);
+	if (item) {
+		QMouseEvent *me = static_cast<QMouseEvent*>(e);
+		if (type == QEvent::MouseButtonPress) {
+			itemMousePressEvent(me, item->getIndex());
+			return true;
+		}
+		else if (type == QEvent::MouseButtonDblClick) {
+			itemMouseDoubleClickEvent(me, item->getIndex());
+			return true;
+		}
+		else if (type == QEvent::MouseButtonRelease) {
+			itemMouseReleaseEvent(me, item->getIndex());
+			return true;
+		}
+	}
 
-Group * HorizontalScrollBox::getGroup() const
-{
-	return m_group;
+	return false;
 }
 
 void HorizontalScrollBox::setSpacing(int space)
@@ -263,11 +184,13 @@ std::pair<int, float> HorizontalScrollBox::posToIndex(int px)
 		xpos += m_spacing;
 	}
 	// at the end, return spacer at the end
-	return std::make_pair(m_items.size(), -.1f);
+	return std::make_pair((int)m_items.size(), -.1f);
 }
 
 void HorizontalScrollBox::refresh()
 {
+	m_height = m_scroll->viewport()->height();
+
 	for (int i = 0; i < m_items.size(); i++) {
 		m_items[i]->setIndex(i);
 	}
@@ -279,10 +202,9 @@ void HorizontalScrollBox::refresh()
 
 	// do we draw a drag-n-drop box?
 	int spacer_index = -1; // spacer 0 is before item 0
-	if (m_dragging) {
+	if (m_drag) {
 		m_drop_highlight->show();
 		QPoint scrollspace = m_scroll_area_widget->mapFromGlobal(this->mapToGlobal(m_dragpos));
-		//qDebug() << "local coords" << scrollspace << posToIndex(scrollspace.x());
 		std::pair<int, float> pair = posToIndex(scrollspace.x());
 		if (pair.second < .5) { // draw in this spacer
 			spacer_index = pair.first;
@@ -308,14 +230,13 @@ void HorizontalScrollBox::refresh()
 		//QRect geom(xpos, margins.top(), bwidth, bheight);
 		QRect geom(xpos, 0, bwidth, bheight);
 		o->setGeometry(geom);
-
-		if (m_dragging && spacer_index == i) {
+		if (m_drag && spacer_index == i) {
 			m_drop_highlight->setGeometry(xpos - m_spacing, 0, m_spacing, m_height);
 		}
 		xpos += bwidth;
 		xpos += m_spacing;
 	}
-	if (m_dragging && spacer_index >= m_items.size()) {
+	if (m_drag && spacer_index >= m_items.size()) {
 		m_drop_highlight->setGeometry(xpos - m_spacing, 0, m_spacing, m_height);
 	}
 
@@ -329,51 +250,57 @@ void HorizontalScrollBox::refresh()
 //	blockSignals(false);
 //}
 
-ScrollBoxItem * HorizontalScrollBox::createItem(osg::Node *)
+void HorizontalScrollBox::insertItems(const std::vector<std::pair<size_t, ScrollBoxItem*>>& insertions)
 {
-	return nullptr;
-}
-
-void HorizontalScrollBox::moveItems(std::vector<std::pair<int, int>> mapping)
-{
-	std::vector<std::pair<ScrollBoxItem*,int>> removed;
-	for (int i = mapping.size() - 1; i >= 0; i--) {
-		removed.push_back(
-			std::make_pair(m_items.takeAt(mapping[i].first), mapping[i].second));
+	for (auto &pair : insertions) {
+		ScrollBoxItem *item = pair.second;
+		item->setParent(m_scroll_area_widget);
+		item->show();
+		item->installEventFilter(this);
 	}
-	// sort by destination
-	std::sort(removed.begin(), removed.end(),
-		[](auto &left, auto &right) { return left.second < right.second; });
-	// now re-enter them in forward order
-	for (auto i : removed) {
-		m_items.insert(i.second, i.first);
-	}
+	Util::multiInsert(&m_items, insertions);
 	refresh();
 }
 
-void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
+void HorizontalScrollBox::removeItems(const std::vector<size_t> indices, bool delete_items)
 {
-	// snapshot of current position and all that
-	//int oldValue = horizontalScrollBar()->value();
-	//QScrollBar *bar = horizontalScrollBar();
-	//qDebug() << "resize event" << event->size().height();
-	//qDebug() << "resize event before" << m_scroll_area_widget->height();
-	m_height = event->size().height();
-	refresh();
-
-	// deal with other stuff
-	QScrollArea::resizeEvent(event);
-
-	//qDebug() << "resize event after" << m_scroll_area_widget->height();
-	for (auto item : m_items) {
-		item->widthFromHeight(m_scroll_area_widget->height());
+	for (size_t i : indices) {
+		ScrollBoxItem *item = m_items[i];
+		if (delete_items) {
+			delete item;
+		}
 	}
+	Util::multiRemove(&m_items, indices);
+	refresh();
 }
 
-void HorizontalScrollBox::wheelEvent(QWheelEvent* event)
+void HorizontalScrollBox::moveItems(const std::vector<std::pair<size_t, size_t>> &mapping)
 {
-	horizontalScrollBar()->setValue(horizontalScrollBar()->value() - event->delta());
+	Util::multiMove(&m_items, mapping);
 }
+
+//void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
+//{
+//	// snapshot of current position and all that
+//	//int oldValue = horizontalScrollBar()->value();
+//	//QScrollBar *bar = horizontalScrollBar();
+//	//qDebug() << "resize event" << event->size().height();
+//	//qDebug() << "resize event before" << m_scroll_area_widget->height();
+//
+//	//m_height = event->size().height();
+//	//refresh();
+//
+//	// deal with other stuff
+//	QWidget::resizeEvent(event);
+//
+//	//refresh();
+//}
+//
+//void HorizontalScrollBox::wheelEvent(QWheelEvent* event)
+//{
+//	m_scroll->horizontalScrollBar()->setValue(
+//		m_scroll->horizontalScrollBar()->value() - event->delta());
+//}
 
 void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 {
@@ -382,31 +309,28 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 	QPoint diff = event->globalPos() - m_mouse_down_pos;
 	if (m_mime_type != ""
 		&& diff.manhattanLength() > m_minimum_drag_dist
-		&& m_dragging == false
+		&& m_drag == nullptr
 		&& m_selection->getLastSelected() >= 0
 		&& m_mouse_down
+		&& m_dragging_enabled
 		) {
 
 		// Begin drag
-		QDrag *drag = new QDrag(this);
+		m_drag = new QDrag(this);
 		ScrollBoxItem *item = getItem(getLastSelected());
 		QPixmap pixmap(item->width(), item->height());
 		item->render(&pixmap, QPoint(), QRegion(0, 0, item->width(), item->height()));
-		drag->setPixmap(pixmap);
+		m_drag->setPixmap(pixmap);
 
 		QMimeData *data = new QMimeData;
 		data->setData(m_mime_type, "");
-		drag->setMimeData(data);
-		drag->setHotSpot(event->globalPos() - item->mapToGlobal(QPoint(0, 0)));
-		qDebug() << "drag start";
+		m_drag->setMimeData(data);
+		m_drag->setHotSpot(event->globalPos() - item->mapToGlobal(QPoint(0, 0)));
 
-		// set dragging flag
-		m_dragging = true;
 		m_dragpos = event->pos();
 
-		Qt::DropAction result = drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::MoveAction);
-		qDebug() << "drop result" << result;
-		m_dragging = false;
+		Qt::DropAction result = m_drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::MoveAction);
+		m_drag = nullptr;
 	}
 	//m_mouse_down_pos = event->globalPos();
 	//m_mouse_down = true;
@@ -414,6 +338,7 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 
 void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 {
+	qDebug() << "background press";
 	m_selection->clear();
 	emit sSelectionCleared();
 	if (event->button() == Qt::RightButton) {
@@ -430,6 +355,8 @@ void HorizontalScrollBox::mouseReleaseEvent(QMouseEvent * event)
 
 void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 {
+	qDebug() << "item mouse press" << index;
+
 	if (event->button() == Qt::LeftButton) {
 		int prev = m_selection->getLastSelected();
 		if (event->type() == QEvent::MouseButtonDblClick) {
@@ -456,7 +383,6 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 			//if (isSelected(index)) {
 			bool cleared = m_selection->selectIfNot(index);
 			if (cleared) emit sSelectionCleared();
-
 			m_mouse_down_pos = event->globalPos();
 			m_mouse_down = true;
 		}
@@ -477,6 +403,11 @@ void HorizontalScrollBox::itemMouseReleaseEvent(QMouseEvent * event, int index)
 			m_selection->select(index);
 		}
 	}
+}
+
+void HorizontalScrollBox::itemMouseDoubleClickEvent(QMouseEvent * event, int index)
+{
+	itemMousePressEvent(event, index);
 }
 
 void HorizontalScrollBox::dragEnterEvent(QDragEnterEvent * event)
@@ -508,36 +439,33 @@ void HorizontalScrollBox::dragMoveEvent(QDragMoveEvent * event)
 
 void HorizontalScrollBox::dropEvent(QDropEvent * event)
 {
-	if (event->mimeData()->hasFormat(m_mime_type)) {
+	if (event->mimeData()->hasFormat(m_mime_type) && m_dragging) {
 		event->accept();
 		std::set<int> selection = getSelection();
+		std::vector<size_t> sources(selection.begin(), selection.end());
+		std::vector<size_t> destinations;
 		// calculate the destination position
 		// m_drag_index is the spacer index
 		// new position is (spacer index) - (number of items removed before it)
-		int dest_index = m_drag_index;
-		for (auto i : selection) {
-			if (i < m_drag_index) {
+		size_t dest_index = m_drag_index;
+		for (auto i : sources) {
+			if ((int)i < m_drag_index) {
 				dest_index--;
 			}
 		}
 
-		// calculate the new order
-		std::vector<int> new_order;
-		for (int i = 0; i < m_items.size(); i++) {
-			// if not in selection
-			if (selection.find(i) == selection.end()) {
-				new_order.push_back(i);
-			}
+		for (size_t i = 0; i < sources.size(); i++) {
+			destinations.push_back(dest_index + i);
 		}
-		new_order.insert(new_order.begin() + dest_index, selection.begin(), selection.end());
 
 		// if the order hasn't changed, then don't emit a move signal
-		if (!std::is_sorted(new_order.begin(), new_order.end())) {
-			emit sMove(getSelection(), dest_index);
+		if (sources != destinations) {
+			std::vector<std::pair<size_t, size_t>> changes;
+			for (size_t i = 0; i < sources.size(); i++) {
+				changes.push_back(std::make_pair(sources[i], destinations[i]));
+			}
+			emit sMove(changes);
 		}
-
-		//qDebug() << "new order";
-		//for (auto i : new_order) qDebug() << i;
 	}
 	m_dragging = false;
 	m_drop_highlight->hide();
@@ -548,7 +476,7 @@ void HorizontalScrollBox::moveTimer()
 		int mx = m_dragpos.x();
 		int my = m_dragpos.y();
 		if (my > -20 && my < height() + 20) {
-			QAbstractSlider *bar = horizontalScrollBar();
+			QAbstractSlider *bar = m_scroll->horizontalScrollBar();
 			if (mx < 40) {
 				// scroll left
 				// rate is linear with position

@@ -1,16 +1,14 @@
 #ifndef HORIZONTALSCROLLBOX_H
 #define HORIZONTALSCROLLBOX_H
 
-#include <QtWidgets/QScrollArea>
-#include <QtWidgets/QLabel>
-#include <QDebug>
+#include <QGridLayout>
+#include <QScrollArea>
 #include <QtWidgets/QMenu>
 #include <QContextMenuEvent>
 #include <QDrag>
-#include <set>
 #include <QTimer>
-
-#include "Group.h"
+#include <vector>
+#include <set>
 
 class Selection;
 class ScrollBoxItem;
@@ -25,30 +23,24 @@ class ScrollBoxItem;
 // configuration
 // size, item width/height
 
-class HorizontalScrollBox : public QScrollArea {
+class HorizontalScrollBox : public QWidget {
 	Q_OBJECT
 public:
 	HorizontalScrollBox(QWidget* parent);
 
-// public interface, controller should wire signals back to these
 	// Items
 
 	// this scroll box takes ownership, so just construct with nullptr
-	void addItem(ScrollBoxItem*);
-	void insertItem(int position, ScrollBoxItem*);
-	void deleteItem(int position);
+	//void addItem(ScrollBoxItem*);
+	//void insertItem(int position, ScrollBoxItem*);
+	void insertItems(const std::vector<std::pair<size_t, ScrollBoxItem*>>& insertions);
+	//void removeItem(int position);
+	void removeItems(const std::vector<size_t> indices, bool delete_items);
+	void moveItems(const std::vector<std::pair<size_t, size_t>> &mapping);
 
-	// override this to make different kinds of scroll box items
-	virtual ScrollBoxItem *createItem(osg::Node*);
-
-	// these are used to link new/delete signals from groups to creation of new items
-	void addNewItem();
-	void insertNewItem(uint position);
-	void moveItems(std::vector<std::pair<int,int>> mapping); // assumes sorted
 	ScrollBoxItem *getItem(int position);
+	
 	void clear();
-
-	void reload();
 
 	// selection - these set selection, lastSelected, and emit events
 	virtual void setSelection(const std::set<int>& set, int last);
@@ -61,37 +53,36 @@ public:
 	// returns the item index under the cursor where point is based on the scroll area widget
 	// the float is the position from [-x, 1] where 0 is the left side, 1 is the right side, - is in the space before the widget
 	std::pair<int, float> posToIndex(int px);
+
 	void refresh(); // redraw items (after deletion or something)
 
 	// menus
 	void setMenu(QMenu *menu);
 	void setItemMenu(QMenu *menu);
 
+	// dragging
+	void enableDragging(bool enable);
 	void setMIMEType(const std::string &type);
 
-	// Data tracking
-	virtual void setGroup(Group *group);
-	Group *getGroup() const;
+	// viewport resize event filter
+	bool eventFilter(QObject *o, QEvent *e);
 
 signals:
 	void sSelectionChange();
-	// to is the new index of the first item if the drop were to occur
-	void sMove(std::set<int> from, int to);
-	void sDelete();
-	void sNew();
+	void sMove(const std::vector<std::pair<size_t, size_t>> &);
 
 	void sSelectionCleared(); // hack for joining these boxes together
 
 protected:
 	// qt overrides
-	virtual void resizeEvent(QResizeEvent* event);
-	virtual void wheelEvent(QWheelEvent* event);
+	//virtual void wheelEvent(QWheelEvent* event);
 
 	void mouseMoveEvent(QMouseEvent *event);
 	void mousePressEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
 	void itemMousePressEvent(QMouseEvent *event, int index);
 	void itemMouseReleaseEvent(QMouseEvent *event, int index);
+	void itemMouseDoubleClickEvent(QMouseEvent *event, int index);
 
 	void dragEnterEvent(QDragEnterEvent *event);
 	void dragLeaveEvent(QDragLeaveEvent *event);
@@ -105,18 +96,18 @@ protected:
 	//void positionChildren();
 	//void refreshGeometry();
 
+	QGridLayout *m_layout;
+	QScrollArea *m_scroll;
 	QWidget* m_scroll_area_widget;
-	QList<ScrollBoxItem*> m_items;
+	std::vector<ScrollBoxItem*> m_items;
 	QWidget *m_drop_highlight;
 
 	Selection *m_selection;
-	//int m_last_selected;
-	//std::set<int> m_selection;
 
 	//int boxHeight() const;
 	//int boxWidth() const;
 	int m_height;
-	int m_spacing = 10;
+	int m_spacing;
 	//float m_ratio; // width to height ratio for items
 	//float m_space_ratio; // TODO: width to height ratio for spaces
 
@@ -125,7 +116,8 @@ protected:
 	QPoint m_mouse_down_pos; // press position
 	float m_minimum_drag_dist; // minimum mouse move before drag starts
 
-	bool m_dragging; // is dragging?
+	QDrag *m_drag; // bool m_dragging; // is dragging?
+	bool m_dragging_enabled;
 	QPoint m_dragpos; // last known drag point
 	int m_drag_index; // last known spacer index for dropping
 
@@ -135,8 +127,6 @@ protected:
 	QMenu *m_item_menu;
 
 	QString m_mime_type;
-
-	Group *m_group;
 
 };
 
