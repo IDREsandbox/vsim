@@ -91,7 +91,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	// back
 	connect(m_window->topBar()->ui.left_2, &QPushButton::clicked, this, [this]() {setNarrative(-1); });
 	//change
-	connect(m_slide_box, &SlideScrollBox::sSelectionChange, this, &NarrativeControl::onSlideSelection);
+	connect(m_slide_box, &HorizontalScrollBox::sSelectionChange, this, &NarrativeControl::onSlideSelection);
 	
 	//CANVAS CONTROL
 	// new
@@ -220,21 +220,19 @@ void NarrativeControl::deleteNarratives()
 	m_undo_stack->endMacro();
 }
 
-void NarrativeControl::moveNarratives(std::set<int> from, int to)
+void NarrativeControl::moveNarratives(const std::vector<std::pair<size_t, size_t>> &mapping)
 {
-	std::vector<std::pair<int, int>> mapping;
-	std::set<int> to_set;
-	auto it = from.begin();
-	for (int i = 0; i < from.size(); i++) {
-		mapping.push_back(std::make_pair(*it, to + i));
-		to_set.insert(to + i);
-		++it;
+	std::set<int> from;
+	std::set<int> to;
+	for (auto &pair : mapping) {
+		from.insert(pair.first);
+		to.insert(pair.second);
 	}
 
 	m_undo_stack->beginMacro("Move Narratives");
 	m_undo_stack->push(new SelectNarrativesCommand(this, from, ON_UNDO));
 	m_undo_stack->push(new Group::MoveNodesCommand(m_narrative_group, mapping));
-	m_undo_stack->push(new SelectNarrativesCommand(this, to_set, ON_REDO));
+	m_undo_stack->push(new SelectNarrativesCommand(this, to, ON_REDO));
 	m_undo_stack->endMacro();
 }
 
@@ -699,22 +697,20 @@ void NarrativeControl::setSlideCamera()
 	m_undo_stack->endMacro();
 }
 
-void NarrativeControl::moveSlides(std::set<int> from, int to)
+void NarrativeControl::moveSlides(const std::vector<std::pair<size_t, size_t>> &mapping)
 {
-	// map this to single move commands
-	std::vector<std::pair<int, int>> mapping;
-	std::set<int> to_set;
-	auto it = from.begin();
-	for (int i = 0; i < from.size(); i++) {
-		mapping.push_back(std::make_pair(*it, to + i));
-		to_set.insert(to + i);
-		++it;
+	std::set<int> from;
+	std::set<int> to;
+	for (auto &pair : mapping) {
+		from.insert(pair.first);
+		to.insert(pair.second);
 	}
 
+	Narrative2 *narrative = getCurrentNarrative();
 	m_undo_stack->beginMacro("Move Slides");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, from, ON_UNDO));
-	m_undo_stack->push(new Group::MoveNodesCommand(getNarrative(m_current_narrative), mapping));
-	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, to_set, ON_REDO));
+	m_undo_stack->push(new Group::MoveNodesCommand(narrative, mapping));
+	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, to, ON_REDO));
 	m_undo_stack->endMacro();
 }
 

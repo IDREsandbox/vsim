@@ -77,17 +77,17 @@ protected:
 	// qt overrides
 	//virtual void wheelEvent(QWheelEvent* event);
 
-	void mouseMoveEvent(QMouseEvent *event);
-	void mousePressEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
-	void itemMousePressEvent(QMouseEvent *event, int index);
-	void itemMouseReleaseEvent(QMouseEvent *event, int index);
-	void itemMouseDoubleClickEvent(QMouseEvent *event, int index);
+	void mouseMoveEvent(QMouseEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
+	virtual void itemMousePressEvent(QMouseEvent *event, int index);
+	virtual void itemMouseReleaseEvent(QMouseEvent *event, int index);
+	virtual void itemMouseDoubleClickEvent(QMouseEvent *event, int index);
 
-	void dragEnterEvent(QDragEnterEvent *event);
-	void dragLeaveEvent(QDragLeaveEvent *event);
-	void dragMoveEvent(QDragMoveEvent *event);
-	void dropEvent(QDropEvent *event);
+	void dragEnterEvent(QDragEnterEvent *event) override;
+	void dragLeaveEvent(QDragLeaveEvent *event) override;
+	void dragMoveEvent(QDragMoveEvent *event) override;
+	void dropEvent(QDropEvent *event) override;
 
 protected:
 	// The auto-sliding effect when you're dragging a widget needs a loop

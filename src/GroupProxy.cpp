@@ -54,11 +54,11 @@ void GroupProxy::setBase(Group *base)
 	});
 
 	connect(base, &Group::sItemsMoved, this, [this](
-		std::vector<std::pair<int, int>> map_list) {
+		const std::vector<std::pair<size_t, size_t>> &map_list) {
 		// don't move anything here, but fix up the indices
 		// build a map
-		std::map<int, int> mapping;
-		for (auto pair : map_list) {
+		std::map<size_t, size_t> mapping;
+		for (auto &pair : map_list) {
 			mapping.insert(pair);
 		}
 		// convert any of the changes

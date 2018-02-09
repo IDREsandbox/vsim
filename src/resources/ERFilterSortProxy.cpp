@@ -37,14 +37,16 @@ void ERFilterSortProxy::setBase(Group *base)
 
 	// listen to new set
 	connect(base, &Group::sInsertedSet, this,
-		[this](const std::map<int, osg::Node*> &nodes) {
+		[this](const std::vector<std::pair<size_t, osg::Node*>> &nodes) {
 		// dumb version - just redo everything, honestly this might be fast enough
 		qDebug() << "proxy s reload";
 		reload();
+
+
 	});
 	// listen to delete
 	connect(base, &Group::sRemovedSet, this,
-		[this](const std::set<int> &) {
+		[this](const std::vector<size_t> &) {
 		qDebug() << "proxy s removed";
 		reload();
 	});
@@ -54,7 +56,7 @@ void ERFilterSortProxy::setBase(Group *base)
 		reload();
 	});
 	connect(base, &Group::sEdited, this,
-		[this]() {
+		[this](const std::set<int> &indices) {
 		qDebug() << "proxy s edited";
 		reload();
 	});

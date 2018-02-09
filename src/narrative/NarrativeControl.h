@@ -73,7 +73,7 @@ public:
 	void newNarrative();
 	void editNarrativeInfo();
 	void deleteNarratives();
-	void moveNarratives(std::set<int> from, int to);
+	void moveNarratives(const std::vector<std::pair<size_t, size_t>> &mapping);
 	// for importing narratives
 	void loadNarratives(NarrativeGroup *group);
 
@@ -83,7 +83,7 @@ public:
 	void setSlideDuration();
 	void setSlideTransition();
 	void setSlideCamera();
-	void moveSlides(std::set<int> from, int to);
+	void moveSlides(const std::vector<std::pair<size_t, size_t>> &);
 
 	// Labels
 	//editDlg buttons

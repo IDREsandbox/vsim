@@ -277,6 +277,7 @@ void HorizontalScrollBox::removeItems(const std::vector<size_t> indices, bool de
 void HorizontalScrollBox::moveItems(const std::vector<std::pair<size_t, size_t>> &mapping)
 {
 	Util::multiMove(&m_items, mapping);
+	refresh();
 }
 
 //void HorizontalScrollBox::resizeEvent(QResizeEvent* event)
@@ -413,6 +414,7 @@ void HorizontalScrollBox::itemMouseDoubleClickEvent(QMouseEvent * event, int ind
 void HorizontalScrollBox::dragEnterEvent(QDragEnterEvent * event)
 {
 	if (event->mimeData()->hasFormat(m_mime_type)) {
+		qDebug() << "drag enter event";
 		event->accept();
 		//m_dragging = true;
 		//m_dragpos = event->pos();
@@ -422,8 +424,9 @@ void HorizontalScrollBox::dragEnterEvent(QDragEnterEvent * event)
 
 void HorizontalScrollBox::dragLeaveEvent(QDragLeaveEvent * event)
 {
-	if (m_dragging) {
-		m_dragging = false;
+	if (m_drag) {
+		qDebug() << "drag leave event";
+		//m_dragging = false;
 		refresh();
 	}
 }
@@ -431,7 +434,6 @@ void HorizontalScrollBox::dragLeaveEvent(QDragLeaveEvent * event)
 void HorizontalScrollBox::dragMoveEvent(QDragMoveEvent * event)
 {
 	if (event->mimeData()->hasFormat(m_mime_type)) {
-		m_dragging = true;
 		m_dragpos = event->pos();
 		refresh();
 	}
@@ -439,7 +441,7 @@ void HorizontalScrollBox::dragMoveEvent(QDragMoveEvent * event)
 
 void HorizontalScrollBox::dropEvent(QDropEvent * event)
 {
-	if (event->mimeData()->hasFormat(m_mime_type) && m_dragging) {
+	if (event->mimeData()->hasFormat(m_mime_type) && m_drag) {
 		event->accept();
 		std::set<int> selection = getSelection();
 		std::vector<size_t> sources(selection.begin(), selection.end());
@@ -467,12 +469,12 @@ void HorizontalScrollBox::dropEvent(QDropEvent * event)
 			emit sMove(changes);
 		}
 	}
-	m_dragging = false;
+	m_drag = nullptr;
 	m_drop_highlight->hide();
 }
 void HorizontalScrollBox::moveTimer()
 {
-	if (m_dragging) {
+	if (m_drag) {
 		int mx = m_dragpos.x();
 		int my = m_dragpos.y();
 		if (my > -20 && my < height() + 20) {

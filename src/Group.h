@@ -23,7 +23,9 @@ public:
 	virtual bool insertChild(unsigned int index, osg::Node *child) override;
 	virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
 	virtual bool setChild(unsigned int index, Node *child) override;
-	virtual void move(const std::vector<std::pair<int, int>>& mapping);
+
+	virtual void move(const std::vector<std::pair<size_t, size_t>>& mapping);
+
 	virtual int indexOf(const osg::Node *node) const; // -1 if not found
 
 	virtual void clear();
@@ -33,7 +35,7 @@ signals:
 	void sNew(int index); // inserted node at index
 	void sDelete(int index); // deleted node at index
 	void sSet(int index); // changed (set) node at index
-	void sItemsMoved(const std::vector<std::pair<size_t, size_t>>&); // items sorted by .first
+	void sItemsMoved(std::vector<std::pair<size_t, size_t>>); // items sorted by .first
 
 	void sEdited(const std::set<int> &edited); // for proxy/big listeners
 
@@ -42,7 +44,7 @@ signals:
 
 public: // index based, multiple
 	virtual void insertChildrenSet(const std::vector<std::pair<size_t, osg::Node*>> &children);
-	virtual void removeChildrenSet(const std::vector<size_t> &indices);
+	virtual void removeChildrenSet(const std::vector<size_t> &children);
 signals:
 	void sAboutToInsertSet(const std::vector<std::pair<size_t, osg::Node*>> &);
 	void sInsertedSet(const std::vector<std::pair<size_t, osg::Node*>> &);
@@ -94,13 +96,12 @@ public: // COMMANDS
 	class MoveNodesCommand : public QUndoCommand {
 	public:
 		// mapping .first is from, .second is to
-		MoveNodesCommand(Group *group, std::vector<std::pair<int, int>> mapping, QUndoCommand *parent = nullptr);
+		MoveNodesCommand(Group *group, const std::vector<std::pair<size_t, size_t>> &mapping, QUndoCommand *parent = nullptr);
 		void undo();
 		void redo();
 	private:
-		void move(std::vector<std::pair<int, int>>); // generic version handles undo and redo
 		Group *m_group;
-		std::vector<std::pair<int, int>> m_mapping;
+		std::vector<std::pair<size_t, size_t>> m_mapping;
 	};
 
 	// index based, multiple

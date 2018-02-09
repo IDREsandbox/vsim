@@ -3,10 +3,12 @@
 #include "Group.h"
 #include <vector>
 #include <QDebug>
+#include "Util.h"
 
 GroupModel::GroupModel(QObject *parent)
 	: QAbstractItemModel(parent),
-	m_group(nullptr)
+	m_group(nullptr),
+	m_hierarchal(false)
 {
 }
 
@@ -19,17 +21,29 @@ QModelIndex GroupModel::index(int row, int column, const QModelIndex & parent) c
 		return createIndex(row, column, m_group->child(row));
 	}
 
-	osg::Node *pnode = getNode(parent);
-	osg::Group *pgroup = pnode->asGroup();
-	// parent is not a group
+	osg::Group *pgroup = nullptr;
+	if (!parent.isValid()) {
+		// root is parent
+		pgroup = m_group;
+	}
+	else {
+		osg::Node *pnode = getNode(parent);
+		pgroup = pnode->asGroup();
+	}
+
+	// parent is not a group?
 	if (!pgroup) {
+		return QModelIndex();
+	}
+
+	// sometimes it would crash trying to make out of range index
+	if (row >= pgroup->getNumChildren()) {
 		return QModelIndex();
 	}
 
 	// get the nth child
 	osg::Node *child = pgroup->getChild(row);
 
-	//qDebug() << "CREATE INDEX" << row << column << child;
 	return createIndex(row, column, child);
 }
 
@@ -44,7 +58,7 @@ QModelIndex GroupModel::parent(const QModelIndex & index) const
 
 	// no parents?
 	int npar = node->getNumParents();
-	if (npar < 0) return QModelIndex();
+	if (npar == 0) return QModelIndex();
 	osg::Node *parent = node->getParent(0);
 
 	return indexOf(parent);
@@ -113,21 +127,40 @@ void GroupModel::setGroup(Group * group)
 	m_group = group;
 
 	if (group != nullptr) {
-		connect(group, &Group::sNew,
-			[this](int index) {
-			beginInsertRows(QModelIndex(), index, index);
-			endInsertRows();
+		connect(group, &Group::sInsertedSet,
+			[this](const std::vector<std::pair<size_t, osg::Node*>> &insertions) {
+			// convert to vector
+			std::vector<size_t> indices;
+			for (auto &pair : insertions) {
+				indices.push_back(pair.first);
+			}
+			// convert to clumps
+			std::vector<std::pair<size_t, size_t>> clumps = Util::clumpify(indices);
+			// emit signals
+			for (auto &clump : clumps) {
+				beginInsertRows(QModelIndex(), clump.first, clump.second);
+				endInsertRows();
+			}
 		});
-		connect(group, &Group::sDelete,
-			[this](int index) {
-			beginRemoveRows(QModelIndex(), index, index);
-			endRemoveRows();
+		connect(group, &Group::sRemovedSet,
+			[this](const std::vector<size_t> &indices) {
+			// convert to clumps
+			std::vector<std::pair<size_t, size_t>> clumps = Util::clumpify(indices);
+			// emit signals
+			for (auto &clump : clumps) {
+				beginRemoveRows(QModelIndex(), clump.first, clump.second);
+				endRemoveRows();
+			}
 		});
-		connect(group, &Group::sSet,
-			[this](int i) {
-			if (columnCount() <= 0) return;
-			emit dataChanged(index(i, 0), index(i, columnCount() - 1));
-		});
+		connect(group, &Group::sBeginReset, this,
+			[this]() { beginResetModel(); });
+		connect(group, &Group::sReset, this,
+			[this]() { endResetModel(); });
+		//connect(group, &Group::sSet,
+		//	[this](int i) {
+		//	if (columnCount() <= 0) return;
+		//	emit dataChanged(index(i, 0), index(i, columnCount() - 1));
+		//});
 		//connect(group, &Group::sMove,
 		//	[this](std::vector<std::pair<int, int> mapping) {
 		//	qDebug() << "GroupModel - move signal not supported yet";

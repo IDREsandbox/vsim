@@ -21,7 +21,6 @@ class GroupScrollBox : public HorizontalScrollBox {
 public:
 	GroupScrollBox(QWidget* parent);
 
-	void clear();
 	void reload();
 
 	// Data tracking

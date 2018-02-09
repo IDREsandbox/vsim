@@ -43,3 +43,8 @@ ScrollBoxItem * NarrativeScrollBox::createItem(osg::Node * node)
 	connect(item, &NarrativeScrollItem::sDoubleClick, this, &NarrativeScrollBox::sOpen);
 	return item;
 }
+
+void NarrativeScrollBox::itemMouseDoubleClickEvent(QMouseEvent * event, int index)
+{
+	emit sOpen();
+}

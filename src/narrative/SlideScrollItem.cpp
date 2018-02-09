@@ -64,7 +64,7 @@ void SlideScrollItem::setIndex(int index)
 	}
 }
 
-int SlideScrollItem::widthFromHeight(int height)
+int SlideScrollItem::widthFromHeight(int height) const
 {
 	// Force a 16x9 after subtracting out the label sizes
 	QMargins slide_margin = ui.slide_layout->contentsMargins();

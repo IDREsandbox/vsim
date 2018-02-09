@@ -22,6 +22,7 @@
 #include "Util.h"
 #include "deprecated/narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
+#include "narrative/Narrative2.h"
 #include "OSGViewerWidget.h"
 #include "MainWindow.h"
 #include "ModelOutliner.h"

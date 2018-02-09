@@ -24,7 +24,7 @@ public:
 
 	// overrides 
 	virtual void setIndex(int index);
-	virtual int widthFromHeight(int height);
+	virtual int widthFromHeight(int height) const;
 	virtual void colorFocus(bool color);
 	virtual void colorSelect(bool color);
 

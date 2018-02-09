@@ -68,12 +68,45 @@ private slots:
 		Util::multiRemove(&strings, { 0, 1 });
 		std::vector<std::string> expected = { "sup" };
 		QCOMPARE(strings, expected);
+
+		strings = { "hey", "man", "sup" };
+		Util::multiRemove(&strings, { 2 });
+		expected = { "hey", "man" };
+		QCOMPARE(strings, expected);
 	}
 	void multiMove() {
 		std::vector<std::string> strings = { "a", "b", "c", "d" };
 		std::vector<std::string> expected = { "b", "c", "a", "d" };
 		Util::multiMove(&strings, { {0, 2}, {1, 0}, {2, 1} });
+
+		strings = { "a", "b", "c", "d" };
+		expected = { "d", "a", "b", "c" };
+		Util::multiMove(&strings, { { 3, 0 } });
+		for (auto s : strings) {
+			qDebug() << "r" << s.c_str();
+		}
 		QCOMPARE(strings, expected);
+	}
+	void clumpify() {
+		std::vector<size_t> indices = {1,2,3,5,6,7,8,9};
+		std::vector<std::pair<size_t, size_t>> expected = {{1,3}, {5,9}};
+		std::vector<std::pair<size_t, size_t>> result = Util::clumpify(indices);
+		QCOMPARE(result, expected);
+
+		indices = {};
+		expected = {};
+		result = Util::clumpify(indices);
+		QCOMPARE(result, expected);
+
+		indices = {1};
+		expected = {{1,1}};
+		result = Util::clumpify(indices);
+		QCOMPARE(result, expected);
+
+		indices = {1,700};
+		expected = {{1,1}, {700,700}};
+		result = Util::clumpify(indices);
+		QCOMPARE(result, expected);
 	}
 };
 

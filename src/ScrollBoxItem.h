@@ -17,7 +17,7 @@ public:
 	// interface for gui
 	// index is used for pretty numbering and selection signaling
 	virtual void setIndex(int index);
-	virtual int getIndex();
+	virtual int getIndex() const;
 
 	void select(bool s);
 
@@ -28,7 +28,7 @@ public:
 	//void setColor(QColor c);
 	//void setSelectColor(QColor c);
 
-	virtual int widthFromHeight(int height);
+	virtual int widthFromHeight(int height) const;
 
 signals:
 	void sMousePressEvent(QMouseEvent *event, int index);

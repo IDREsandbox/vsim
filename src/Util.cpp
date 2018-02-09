@@ -211,6 +211,32 @@ std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<
 	//return result;
 }
 
+std::vector<std::pair<size_t, size_t>> Util::clumpify(const std::vector<size_t>& indices)
+{
+	if (indices.size() == 0) return {};
+	size_t start = indices[0];
+	size_t prev = indices[0];
+	std::vector<std::pair<size_t, size_t>> output;
+
+	for (size_t x : indices) {
+		// continue case
+		if (x == prev + 1) {
+		}
+		// make range
+		else if (x > prev + 1) {
+			output.push_back({start, prev});
+			start = x;
+		}
+		// first item, or a bug if unsorted
+		else {
+		}
+		prev = x;
+	}
+	// always make range at end
+	output.push_back({ start, prev });
+	return output;
+}
+
 std::chrono::high_resolution_clock::time_point tic_time;
 void Util::tic()
 {

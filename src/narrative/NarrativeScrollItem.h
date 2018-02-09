@@ -12,9 +12,7 @@ public:
 	NarrativeScrollItem(QWidget *parent);
 	void setNarrative(Narrative2 *narrative);
 
-protected:
-	void mousePressEvent(QMouseEvent *event);
-	void mouseDoubleClickEvent(QMouseEvent *event);
+	virtual int widthFromHeight(int height) const;
 
 signals:
 	void sDoubleClick();

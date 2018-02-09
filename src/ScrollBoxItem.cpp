@@ -13,7 +13,7 @@ void ScrollBoxItem::setIndex(int index)
 	m_index = index;
 }
 
-int ScrollBoxItem::getIndex()
+int ScrollBoxItem::getIndex() const
 {
 	return m_index;
 }
@@ -30,7 +30,7 @@ void ScrollBoxItem::select(bool s)
 	}
 }
 
-int ScrollBoxItem::widthFromHeight(int height)
+int ScrollBoxItem::widthFromHeight(int height) const
 {
 	return height;
 }

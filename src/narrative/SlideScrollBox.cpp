@@ -1,5 +1,6 @@
 ﻿#include "SlideScrollBox.h"
 #include "SlideScrollItem.h"
+#include "narrative/NarrativeSlide.h"
 
 SlideScrollBox::SlideScrollBox(QWidget * parent) 
 	: GroupScrollBox(parent)
@@ -42,11 +43,6 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	setMIMEType("application/x-narrative");
 }
 
-SlideScrollItem *SlideScrollBox::getItem(int index)
-{
-	return dynamic_cast<SlideScrollItem*>(HorizontalScrollBox::getItem(index));
-}
-
 ScrollBoxItem * SlideScrollBox::createItem(osg::Node * node)
 {
 	NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(node);
@@ -71,9 +67,9 @@ std::vector<NarrativeSlide*> SlideScrollBox::getDirtySlides()
 
 	std::vector<NarrativeSlide*> items;
 	for (size_t i = 0; i < m_group->getNumChildren(); i++) {
-		NarrativeSlide *slide_item = dynamic_cast<NarrativeSlide*>(m_group->child(i));
-		if (slide_item && slide_item->thumbnailDirty()) {
-			items.push_back(slide_item);
+		NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(m_group->child(i));
+		if (slide && slide->thumbnailDirty()) {
+			items.push_back(slide);
 		}
 	}
 	return items;

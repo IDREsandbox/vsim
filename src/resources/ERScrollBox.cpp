@@ -34,10 +34,7 @@ ERScrollBox::ERScrollBox(QWidget * parent)
 
 	setMenu(m_menu);
 	setItemMenu(m_item_menu);
-}
-
-ERScrollBox::~ERScrollBox() {
-	
+	enableDragging(false);
 }
 
 ScrollBoxItem * ERScrollBox::createItem(osg::Node * node)

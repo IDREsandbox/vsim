@@ -11,32 +11,33 @@ osg::Node *Group::child(unsigned int i) const
 
 bool Group::addChild(osg::Node * child)
 {
-	qDebug() << "group call add child";
 	return insertChild(getNumChildren(), child);
 }
 
 bool Group::insertChild(unsigned int index, Node *child)
 {
-	qDebug() << "group call ins child";
-	bool result = osg::Group::insertChild(index, child);
-	emit sInsertedSet({ { index, child } });
-	emit sNew(index);
-	return result;
+	insertChildrenSet({ { index, child } });
+	return true;
 }
 
 bool Group::removeChildren(unsigned int index, unsigned int numChildrenToRemove)
 {
-	int top = std::min(index + numChildrenToRemove, getNumChildren());
-	bool result = osg::Group::removeChildren(index, numChildrenToRemove);
-	for (int i = top - 1; i >= (int)index; i--) {
-		emit sDelete(i);
-	}
-	std::set<int> removed_set;
-	for (size_t i = 0; i < numChildrenToRemove; i++) {
-		removed_set.insert(index + i);
-	}
-	emit sRemovedSet(removed_set);
-	return result;
+	//int top = std::min(index + numChildrenToRemove, getNumChildren());
+	//bool result = osg::Group::removeChildren(index, numChildrenToRemove);
+	//for (int i = top - 1; i >= (int)index; i--) {
+	//	emit sDelete(i);
+	//}
+	//std::set<int> removed_set;
+	//for (size_t i = 0; i < numChildrenToRemove; i++) {
+	//	removed_set.insert(index + i);
+	//}
+	//emit sRemovedSet(removed_set);
+
+	std::vector<size_t> removals(numChildrenToRemove);
+	std::iota(removals.begin(), removals.end(), index);
+	removeChildrenSet(removals);
+
+	return true;
 }
 
 bool Group::setChild(unsigned int index, Node *child)
@@ -46,49 +47,9 @@ bool Group::setChild(unsigned int index, Node *child)
 	return result;
 }
 
-void Group::move(const std::vector<std::pair<int, int>>& mapping)
+void Group::move(const std::vector<std::pair<size_t, size_t>>& mapping)
 {
-	unsigned int size = getNumChildren();
-
-	std::vector<osg::ref_ptr<osg::Node>> buffer(size, nullptr);
-	std::vector<bool> moved(size, false);
-
-	// perform movements in buffer
-	for (auto pair : mapping) {
-		if (buffer[pair.second] != nullptr) {
-			qWarning() << "Move failed - two elements move to the same index";
-			return;
-		}
-		buffer[pair.second] = child(pair.first);
-		moved[pair.first] = true;
-	}
-
-	// fill in the holes with the rest
-	unsigned int out = 0;
-	unsigned int in = 0;
-	while (out < size && in < size) {
-		// output already taken
-		if (buffer[out] != nullptr) {
-			out++;
-		}
-		// input already moved
-		else if (moved[in] == true) {
-			in++;
-		}
-		else {
-			buffer[out] = child(in);
-			out++;
-			in++;
-		}
-	}
-
-	// write back the differences
-	for (unsigned int i = 0; i < size; i++) {
-		if (child(i) != buffer[i].get()) {
-			setChild(i, buffer[i].get());
-		}
-	}
-
+	Util::multiMove(&_children, mapping);
 	emit sItemsMoved(mapping);
 }
 
@@ -106,14 +67,15 @@ void Group::clear()
 	emit sReset();
 }
 
-
 void Group::insertChildrenSet(const std::vector<std::pair<size_t, osg::Node*>> &insertions)
 {
 	if (insertions.size() == 0) return;
 
 	std::vector<osg::Node*> new_list(_children.begin(), _children.end());
 	Util::multiInsert(&new_list, insertions);
-	_children.assign(new_list.begin(), new_list.end());
+	// convert to refs, a direct _children.assign() causes refs crash and burn
+	std::vector<osg::ref_ptr<Node>> refs(new_list.begin(), new_list.end());
+	_children = refs;
 
 	emit sInsertedSet(insertions);
 }
@@ -133,7 +95,8 @@ void Group::removeChildrenSet(const std::vector<size_t> &indices)
 
 	std::vector<osg::Node*> new_list(_children.begin(), _children.end());
 	Util::multiRemove(&new_list, indices);
-	_children.assign(new_list.begin(), new_list.end());
+	std::vector<osg::ref_ptr<Node>> refs(new_list.begin(), new_list.end());
+	_children = refs;
 
 	emit sRemovedSet(indices);
 	emit sRemovedP(set);
@@ -157,7 +120,7 @@ void Group::removeChildrenP(const std::set<osg::Node*> &children)
 	for (size_t i = 0; i < getNumChildren(); i++) {
 		if (children.find(child(i)) != children.end()) {
 			// found, add
-			removals.push_back[i];
+			removals.push_back(i);
 		}
 	}
 	// sort and send
@@ -211,24 +174,22 @@ void Group::DeleteNodeCommand::redo() {
 
 Group::MoveNodesCommand::MoveNodesCommand(
 	Group * group,
-	std::vector<std::pair<int, int>> mapping,
+	const std::vector<std::pair<size_t, size_t>> &mapping,
 	QUndoCommand * parent)
 	: QUndoCommand(parent),
 	m_group(group),
 	m_mapping(mapping)
 {
 }
-
 void Group::MoveNodesCommand::undo()
 {
 	// flip the from and to
-	std::vector<std::pair<int, int>> reverse_mapping;
+	std::vector<std::pair<size_t, size_t>> reverse_mapping;
 	for (auto i : m_mapping) {
 		reverse_mapping.push_back(std::make_pair(i.second, i.first));
 	}
 	m_group->move(reverse_mapping);
 }
-
 void Group::MoveNodesCommand::redo()
 {
 	m_group->move(m_mapping);
@@ -249,19 +210,19 @@ Group::InsertSetCommand::InsertSetCommand(
 }
 void Group::InsertSetCommand::undo()
 {
-	std::set<int> nodes;
-	for (auto pair : m_nodes) {
-		nodes.insert(pair.first);
+	// convert set to vector
+	std::vector<size_t> nodes;
+	for (auto &pair : m_nodes) {
+		nodes.push_back(pair.first);
 	}
 	m_group->removeChildrenSet(nodes);
 }
 void Group::InsertSetCommand::redo()
 {
-	std::map<int, osg::Node*> nodes;
-	for (auto pair : m_nodes) {
-		nodes[pair.first] = pair.second;
-	}
-	m_group->insertChildrenSet(nodes);
+	// convert map to vector of pairs
+	std::vector<std::pair<size_t, osg::Node*>> list;
+	list.assign(m_nodes.begin(), m_nodes.end());
+	m_group->insertChildrenSet(list);
 }
 
 Group::RemoveSetCommand::RemoveSetCommand(
@@ -278,17 +239,15 @@ Group::RemoveSetCommand::RemoveSetCommand(
 }
 void Group::RemoveSetCommand::undo()
 {
-	std::map<int, osg::Node*> nodes;
-	for (auto pair : m_nodes) {
-		nodes[pair.first] = pair.second;
-	}
-	m_group->insertChildrenSet(nodes);
+	std::vector<std::pair<size_t, osg::Node*>> list;
+	list.assign(m_nodes.begin(), m_nodes.end());
+	m_group->insertChildrenSet(list);
 }
 void Group::RemoveSetCommand::redo()
 {
-	std::set<int> nodes;
-	for (auto pair : m_nodes) {
-		nodes.insert(pair.first);
+	std::vector<size_t> nodes;
+	for (auto &pair : m_nodes) {
+		nodes.push_back(pair.first);
 	}
 	m_group->removeChildrenSet(nodes);
 }

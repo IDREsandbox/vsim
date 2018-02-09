@@ -37,9 +37,9 @@ namespace Util
 	// fixme [0, 1, 2, 3] -> [0, 2, 4, 5]
 	std::vector<int> fixIndices(const std::vector<int> &fixme, const std::set<int> &insertions);
 
-	//template <typename T>
-	//using InsertionList = std::vector<std::pair<size_t, T>>;
-
+	// inserts multiple items into a vector
+	// expects the insertions to be sorted
+	// O(n)
 	template <typename T>
 	void multiInsert(std::vector<T> *old,
 		const std::vector<std::pair<size_t, T>> &insertions)
@@ -77,24 +77,33 @@ namespace Util
 		*old = new_items;
 	}
 
+	// removes items from a vector
+	// expects the indices to be sorted
+	// O(n)
 	template <typename T>
 	void multiRemove(std::vector<T> *old, const std::vector<size_t> &indices)
 	{
 		std::vector<T> new_list;
 		auto it = indices.begin();
 		for (size_t i = 0; i < old->size(); i++) {
-			if (it == indices.end() || *it < i) {
+			// push old
+			if (it == indices.end() || *it > i) {
 				new_list.push_back((*old)[i]);
 			}
-			// *it == i
-			else {
+			// removed - push nothing
+			else if (*it == i) {
 				// dont push anything
 				it++;
+			}
+			// out of order?
+			else {
 			}
 		}
 		*old = new_list;
 	}
 
+	// moves items of a vector
+	// O(n)
 	template <typename T>
 	void multiMove(std::vector<T> *vec, const std::vector<std::pair<size_t, size_t>> &mapping)
 	{
@@ -112,10 +121,15 @@ namespace Util
 		std::sort(removals.begin(), removals.end());
 		std::sort(insertions.begin(), insertions.end(),
 			[](auto &left, auto &right) { return left.first < right.first; });
-
 		multiRemove(vec, removals);
 		multiInsert(vec, insertions);
 	}
+
+	// clumps a vector of indices into a vector of range pairs
+	// expects a sorted vector
+	// ex. {1,2,3,5,6,7,8,9} => {{1,3}, {5,9}}
+	std::vector<std::pair<size_t, size_t>> clumpify(const std::vector<size_t> &indices);
+
 	// timing functions
 	// call tic to start the clock, toc to finish
 	// toc returns msec

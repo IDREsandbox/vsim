@@ -8,7 +8,8 @@
 #include "GroupScrollBox.h"
 
 GroupScrollBox::GroupScrollBox(QWidget* parent)
-	: HorizontalScrollBox(parent)
+	: HorizontalScrollBox(parent),
+	m_group(nullptr)
 {
 }
 
@@ -47,6 +48,11 @@ void GroupScrollBox::setGroup(Group * group)
 	reload();
 
 	if (group) {
+		connect(m_group, &Group::destroyed, this,
+			[this]() {
+			m_group = nullptr;
+			setGroup(nullptr); // clear stuff
+		});
 		connect(m_group, &Group::sInsertedSet, this,
 			[this]() {
 			qDebug() << "reload after insertion";
