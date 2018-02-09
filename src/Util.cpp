@@ -152,6 +152,7 @@ std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<
 	for (int x : fixme) {
 		max_index = std::max((size_t)x, max_index);
 	}
+	// build delta_array, [+0, +0, +1, +1, +2, +2, +2]
 	std::vector<size_t> delta_array(max_index + 1, 0);
 	size_t shift = 0;
 	auto it = insertions.begin();
@@ -209,6 +210,28 @@ std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<
 	//	result[i] = x + d;
 	//}
 	//return result;
+}
+
+std::vector<int> Util::fixIndicesRemove(const std::vector<int>& fixme, const std::set<int>& changes)
+{
+	if (fixme.size() == 0) return {};
+	int max = *std::max_element(fixme.begin(), fixme.end());
+	std::vector<int> delta_array(max + 1, 0);
+	int shift = 0;
+	for (size_t i = 0; i < delta_array.size(); i++) {
+		if (changes.find(i) != changes.end()) {
+			shift--;
+		}
+		delta_array[i] = shift;
+	}
+
+	std::vector<int> result(fixme);
+	for (size_t i = 0; i < result.size(); i++) {
+		size_t old_index = result[i];
+		result[i] = old_index + delta_array[old_index];
+	}
+
+	return result;
 }
 
 std::vector<std::pair<size_t, size_t>> Util::clumpify(const std::vector<size_t>& indices)

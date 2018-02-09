@@ -11,7 +11,6 @@
 
 EResourceGroup::EResourceGroup()
 {
-	qDebug() << "Creating EResourceGroup";
 	m_categories = new ECategoryGroup;
 	m_categories->setName("Categories");
 }
@@ -108,7 +107,7 @@ void EResourceGroup::postLoad()
 		if (!res) continue;
 
 		int cat_index = res->getCategoryIndex();
-		if (cat_index < 0 || cat_index >= m_categories->getNumChildren()) {
+		if (cat_index < 0 || cat_index >= (int)m_categories->getNumChildren()) {
 			res->setCategory(nullptr);
 			continue;
 		}

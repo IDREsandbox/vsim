@@ -37,7 +37,7 @@ QModelIndex GroupModel::index(int row, int column, const QModelIndex & parent) c
 	}
 
 	// sometimes it would crash trying to make out of range index
-	if (row >= pgroup->getNumChildren()) {
+	if (row >= (int)pgroup->getNumChildren()) {
 		return QModelIndex();
 	}
 

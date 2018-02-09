@@ -71,12 +71,21 @@ void Group::insertChildrenSet(const std::vector<std::pair<size_t, osg::Node*>> &
 {
 	if (insertions.size() == 0) return;
 
+	std::set<osg::Node*> set;
+	for (auto &pair : insertions) {
+		set.insert(pair.second);
+	}
+
+	emit sAboutToAddP(set);
+	emit sAboutToInsertSet(insertions);
+
 	std::vector<osg::Node*> new_list(_children.begin(), _children.end());
 	Util::multiInsert(&new_list, insertions);
 	// convert to refs, a direct _children.assign() causes refs crash and burn
 	std::vector<osg::ref_ptr<Node>> refs(new_list.begin(), new_list.end());
 	_children = refs;
 
+	emit sAddedP(set);
 	emit sInsertedSet(insertions);
 }
 

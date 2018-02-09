@@ -9,19 +9,30 @@ class Util_test : public QObject {
 	Q_OBJECT
 private slots:
 	void fixIndicesTest() {
-		std::vector<int> mini = { 0, 1, 2, 3 };
-		std::set<int> mini_ins = { 0, 2 };
-		std::vector<int> mini_ans = { 1, 3, 4, 5 };
-		std::vector<int> mini_result = Util::fixIndices(mini, mini_ins);
+		std::vector<int> mini, mini_ans, mini_result;
+		std::set<int> mini_ins, mini_rem;
+		mini = { 0, 1, 2, 3 };
+		mini_ins = { 0, 2 };
+		mini_ans = { 1, 3, 4, 5 };
+		mini_result = Util::fixIndices(mini, mini_ins);
 		QCOMPARE(mini_result, mini_ans);
 
-		std::vector<int> mini2 = { 0, 1 };
-		std::set<int> mini_ins2 = { 0, 1 };
-		std::vector<int> mini_ans2 = { 2, 3 };
-		std::vector<int> mini_result2 = Util::fixIndices(mini2, mini_ins2);
-		QCOMPARE(mini_result2, mini_ans2);
+		mini = { 0, 1 };
+		mini_ins = { 0, 1 };
+		mini_ans = { 2, 3 };
+		mini_result = Util::fixIndices(mini, mini_ins);
+		QCOMPARE(mini_result, mini_ans);
 
-
+		// removals
+		mini = { 1, 3, 4, 5 };
+		mini_rem = { 0, 2 };
+		mini_ans = { 0, 1, 2, 3 };
+		mini_result = Util::fixIndicesRemove(mini, mini_rem);
+		//qDebug() << "after remove";
+		//for (int i : mini_result) {
+		//	qDebug() << i;
+		//}
+		QCOMPARE(mini_result, mini_ans);
 		//// speed tests for fun
 		//// big, 1/10 insert
 		//std::vector<int> big;

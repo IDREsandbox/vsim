@@ -20,12 +20,11 @@ void GroupScrollBox::reload()
 
 	// create items
 	if (m_group) {
-		std::vector<std::pair<size_t, ScrollBoxItem*>> items;
+		std::vector<std::pair<size_t, osg::Node*>> items;
 		for (uint i = 0; i < m_group->getNumChildren(); i++) {
-			ScrollBoxItem *item = createItem(m_group->child(i));
-			items.push_back({ i, item });
+			items.push_back({ i, m_group->child(i) });
 		}
-		insertItems(items);
+		insertItemsForIndices(items);
 	}
 
 	refresh();
@@ -54,23 +53,22 @@ void GroupScrollBox::setGroup(Group * group)
 			setGroup(nullptr); // clear stuff
 		});
 		connect(m_group, &Group::sInsertedSet, this,
-			[this]() {
-			qDebug() << "reload after insertion";
-			reload();
+			[this](auto insertions) {
+			qDebug() << "gsb insert";
+			insertItemsForIndices(insertions);
 		});
 		connect(m_group, &Group::sRemovedSet, this,
-			[this]() {
-			qDebug() << "reload after remove";
-			reload();
+			[this](const std::vector<size_t> &removals) {
+			qDebug() << "gsb remove";
+			removeItems(removals);
 		});
 		connect(m_group, &Group::sReset, this,
 			[this]() {
-			qDebug() << "reload after reset";
+			qDebug() << "gsb reset";
 			reload();
 		});
 		connect(m_group, &Group::sItemsMoved, this,
 			[this](auto stuff) {
-			qDebug() << "moving items";
 			moveItems(stuff);
 		});
 	}
@@ -84,4 +82,17 @@ Group * GroupScrollBox::getGroup() const
 ScrollBoxItem *GroupScrollBox::createItem(osg::Node *)
 {
 	return nullptr;
+}
+
+void GroupScrollBox::insertItemsForIndices(const std::vector<std::pair<size_t, osg::Node*>>& insertions)
+{
+	// create items
+	if (m_group) {
+		std::vector<std::pair<size_t, ScrollBoxItem*>> items;
+		for (auto &pair : insertions) {
+			ScrollBoxItem *item = createItem(pair.second);
+			items.push_back({ pair.first, item });
+		}
+		insertItems(items);
+	}
 }

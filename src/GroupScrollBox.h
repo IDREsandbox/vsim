@@ -36,6 +36,9 @@ signals:
 	void sDelete();
 	void sNew();
 
+protected:
+	void insertItemsForIndices(const std::vector<std::pair<size_t, osg::Node*>> &insertions);
+
 	// void sSelectionCleared(); // in HorizontalScrollBox
 
 protected:

@@ -35,7 +35,7 @@ public:
 	//void insertItem(int position, ScrollBoxItem*);
 	void insertItems(const std::vector<std::pair<size_t, ScrollBoxItem*>>& insertions);
 	//void removeItem(int position);
-	void removeItems(const std::vector<size_t> indices, bool delete_items);
+	void removeItems(const std::vector<size_t> indices, bool delete_items = true);
 	void moveItems(const std::vector<std::pair<size_t, size_t>> &mapping);
 
 	ScrollBoxItem *getItem(int position);

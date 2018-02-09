@@ -1,6 +1,7 @@
 #include "resources/ERFilterSortProxy.h"
 #include <QDebug>
 #include <set>
+#include <unordered_set>
 
 #include "resources/ECategory.h"
 #include "resources/EResource.h"
@@ -28,7 +29,6 @@ ERFilterSortProxy::ERFilterSortProxy(Group *base)
 void ERFilterSortProxy::setBase(Group *base)
 {
 	if (m_base != nullptr) disconnect(m_base, 0, this, 0);
-	qInfo() << "Setting proxy <<" << this << "base to" << base;
 
 	m_base = base;
 	if (base == nullptr) return;
@@ -38,17 +38,94 @@ void ERFilterSortProxy::setBase(Group *base)
 	// listen to new set
 	connect(base, &Group::sInsertedSet, this,
 		[this](const std::vector<std::pair<size_t, osg::Node*>> &nodes) {
-		// dumb version - just redo everything, honestly this might be fast enough
-		qDebug() << "proxy s reload";
-		reload();
+		qDebug() << "proxy insert set" << this << m_show_global << m_show_local;
+		
+		// fix indices
+		std::set<int> insertions_set;
+		for (auto &pair : nodes) insertions_set.insert(pair.first);
+		m_map_to_base = Util::fixIndices(m_map_to_base, insertions_set);
 
+		// filter new guys
+		std::vector<int> nodes_filtered;
+		for (auto &pair : nodes) {
+			int index = pair.first;
+			osg::Node *node = pair.second;
+			if (accept(node)) {
+				nodes_filtered.push_back(index);
+			}
+		}
+		if (nodes_filtered.size() == 0) {
+			return;
+		}
 
+		// sort new guys
+		std::function<bool(int, int)> lt = [this](int l, int r) { return lessThan(l, r); };
+		std::sort(nodes_filtered.begin(), nodes_filtered.end(), lt);
+
+		// base before
+		//qDebug() << "map before";
+		//for (int i : m_map_to_base) {
+		//	EResource *res = dynamic_cast<EResource*>(m_base->child(i));
+		//	qDebug() << i << ":" << res->getResourceName().c_str();
+		//}
+
+		// merge
+		std::vector<int> result;
+		std::merge(m_map_to_base.begin(), m_map_to_base.end(),
+			nodes_filtered.begin(), nodes_filtered.end(),
+			std::back_inserter(result), lt);
+
+		//qDebug() << "map after";
+		//for (int i : result) {
+		//	EResource *res = dynamic_cast<EResource*>(m_base->child(i));
+		//	qDebug() << i << ":" << res->getResourceName().c_str();
+		//}
+
+		// where were nodes inserted?
+		std::vector<std::pair<size_t, osg::Node*>> insertions;
+		size_t old_i = 0;
+		for (size_t i = 0; i < result.size(); i++) {
+			if (old_i >= m_map_to_base.size() || m_map_to_base[old_i] != result[i]) {
+				osg::Node *new_node = m_base->child(result[i]);
+				insertions.push_back({ i, new_node });
+			}
+			else {
+				old_i++;
+			}
+		}
+
+		//qDebug() << "insertions at";
+		//for (auto &p: insertions) {
+		//	EResource *res = dynamic_cast<EResource*>(p.second);
+		//	qDebug() << p.first << ":" << res->getResourceName().c_str();
+		//}
+
+		m_map_to_base = result;
+		emit sInsertedSet(insertions);
 	});
+
 	// listen to delete
 	connect(base, &Group::sRemovedSet, this,
-		[this](const std::vector<size_t> &) {
+		[this](const std::vector<size_t> &removals) {
 		qDebug() << "proxy s removed";
-		reload();
+
+		std::unordered_set<size_t> removed(removals.begin(), removals.end());
+
+		std::vector<size_t> map_removals;
+		// remove stuff from our map
+		for (size_t i = 0; i < m_map_to_base.size(); i++) {
+			if (removed.find(m_map_to_base[i]) != removed.end()) {
+				map_removals.push_back(i);
+			}
+		}
+		Util::multiRemove(&m_map_to_base, map_removals);
+
+		// fix up indices
+		std::set<int> removals_set;
+		for (size_t i : removals) removals_set.insert(i);
+		m_map_to_base = Util::fixIndicesRemove(m_map_to_base, removals_set);
+
+		emit sRemovedSet(map_removals);
 	});
 	connect(base, &Group::sReset, this,
 		[this]() {
@@ -58,7 +135,7 @@ void ERFilterSortProxy::setBase(Group *base)
 	connect(base, &Group::sEdited, this,
 		[this](const std::set<int> &indices) {
 		qDebug() << "proxy s edited";
-		reload();
+		//reload();
 	});
 }
 
@@ -89,6 +166,7 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 	// add -> do nothing
 	connect(cats, &QAbstractItemModel::rowsInserted, this,
 		[this](const QModelIndex &parent, int first, int last) {
+		qDebug() << "proxy on category insert";
 		for (int i = first; i <= last; i++) {
 			updateCategorySet(i);
 		}
@@ -97,7 +175,7 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 	// remove -> remove from set
 	connect(cats, &QAbstractItemModel::rowsAboutToBeRemoved, this,
 		[this, cats](const QModelIndex &parent, int first, int last) {
-
+		qDebug() << "proxy on category remove";
 		for (int i = first; i <= last; i++) {
 			ECategory *cat = GroupModel::get<ECategory*>(cats, i);
 			if (!cat) continue;
@@ -389,6 +467,7 @@ void ERFilterSortProxy::reload()
 {
 	if (!m_base) return;
 	emit sBeginReset();
+	qDebug() << "proxy reloading";
 	clearInternal();
 
 	std::vector<int> nodes_filtered;

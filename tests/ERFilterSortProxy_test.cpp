@@ -137,6 +137,25 @@ private slots:
 		proxy->showLocal(true);
 		GROUPCOMPARE(proxy, { foo, bar, cat });
 	}
+	void removeTest() {
+		osg::ref_ptr<Group> group = new EResourceGroup;
+		osg::ref_ptr<EResource> foo = new EResource;
+		foo->setResourceName("foo");
+		osg::ref_ptr<EResource> bar = new EResource;
+		bar->setResourceName("bar");
+		osg::ref_ptr<EResource> cat = new EResource;
+		cat->setResourceName("cat");
+
+		osg::ref_ptr<ERFilterSortProxy> p1 = new ERFilterSortProxy(group);
+		p1->sortBy(ERFilterSortProxy::ALPHABETICAL);
+
+		group->addChild(foo);
+		group->addChild(bar);
+		group->addChild(cat);
+
+		group->removeChildrenSet({ 0, 1 });
+		GROUPCOMPARE(p1, { cat });
+	}
 	void chainedProxy() {
 		osg::ref_ptr<Group> group = new EResourceGroup;
 		osg::ref_ptr<EResource> foo = new EResource;
@@ -173,7 +192,7 @@ private slots:
 		osg::ref_ptr<ERFilterSortProxy> p3 = new ERFilterSortProxy(group);
 		p3->sortBy(ERFilterSortProxy::ALPHABETICAL);
 		Util::tic();
-		int x = 250;
+		int x = 1;
 		for (int i = 0; i < x; i++) {
 			EResource *res = new EResource;
 			res->setResourceName(std::to_string(i));
@@ -191,11 +210,11 @@ private slots:
 		qDebug() << "removeChildren" << Util::toc();
 
 		Util::tic();
-		std::map<int, osg::Node*> insertions;
+		std::vector<std::pair<size_t, osg::Node*>> insertions;
 		for (int i = 0; i < x; i++) {
 			EResource *res = new EResource;
 			res->setResourceName(std::to_string(i));
-			insertions[i] = res;
+			insertions.push_back({ i, res });
 		}
 		group->insertChildrenSet(insertions);
 		qDebug() << "group construction" << Util::toc();
