@@ -20,7 +20,6 @@
 #include "narrative/NarrativeCanvas.h"
 
 #include "resources/ERDisplay.h"
-#include "resources/ERFilterSortProxy.h"
 #include "resources/ERScrollBox.h"
 #include "resources/ERControl.h"
 #include "resources/ERFilterArea.h"

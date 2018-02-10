@@ -180,34 +180,37 @@ void ERControl::editERInfo()
 	m_undo_stack->beginMacro("Set Resource Info");
 	//m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
 
+	auto cmd = new Group::EditCommand(m_ers, { active_item });
+
 	if (resource->getResourceName() != dlg.getTitle())
-		m_undo_stack->push(new EResource::SetResourceNameCommand(resource, dlg.getTitle()));
+		new EResource::SetResourceNameCommand(resource, dlg.getTitle(), cmd);
 	if (resource->getAuthor() != dlg.getAuthor())
-		m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor()));
+		new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor(), cmd);
 	if (resource->getResourceDescription() != dlg.getDescription())
-		m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription()));
+		new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription(), cmd);
 	if (resource->getResourcePath() != dlg.getPath())
-		m_undo_stack->push(new EResource::SetResourcePathCommand(resource, dlg.getPath()));
+		new EResource::SetResourcePathCommand(resource, dlg.getPath(), cmd);
 	if (resource->getGlobal() != dlg.getGlobal())
-		m_undo_stack->push(new EResource::SetGlobalCommand(resource, dlg.getGlobal()));
+		new EResource::SetGlobalCommand(resource, dlg.getGlobal(), cmd);
 	if (resource->getCopyright() != dlg.getCopyright())
-		m_undo_stack->push(new EResource::SetCopyrightCommand(resource, dlg.getCopyright()));
+		new EResource::SetCopyrightCommand(resource, dlg.getCopyright(), cmd);
 	if (resource->getMinYear() != dlg.getMinYear())
-		m_undo_stack->push(new EResource::SetMinYearCommand(resource, dlg.getMinYear()));
+		new EResource::SetMinYearCommand(resource, dlg.getMinYear(), cmd);
 	if (resource->getMaxYear() != dlg.getMaxYear())
-		m_undo_stack->push(new EResource::SetMaxYearCommand(resource, dlg.getMaxYear()));
+		new EResource::SetMaxYearCommand(resource, dlg.getMaxYear(), cmd);
 	if (resource->getReposition() != dlg.getReposition())
-		m_undo_stack->push(new EResource::SetRepositionCommand(resource, dlg.getReposition()));
+		new EResource::SetRepositionCommand(resource, dlg.getReposition(), cmd);
 	if (resource->getAutoLaunch() != dlg.getAutoLaunch())
-		m_undo_stack->push(new EResource::SetAutoLaunchCommand(resource, dlg.getAutoLaunch()));
+		new EResource::SetAutoLaunchCommand(resource, dlg.getAutoLaunch(), cmd);
 	if (resource->getLocalRange() != dlg.getLocalRange())
-		m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange()));
+		new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange(), cmd);
 	if (resource->getERType() != dlg.getERType())
-		m_undo_stack->push(new EResource::SetErTypeCommand(resource, dlg.getERType()));
+		new EResource::SetErTypeCommand(resource, dlg.getERType(), cmd);
 	if (resource->getCategory() != dlg.getCategory())
-		m_undo_stack->push(new EResource::SetCategoryCommand(resource, dlg.getCategory()));
+		new EResource::SetCategoryCommand(resource, dlg.getCategory(), cmd);
 
 	//m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
+	m_undo_stack->push(cmd);
 
 	m_undo_stack->endMacro();
 }

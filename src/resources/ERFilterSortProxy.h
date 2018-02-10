@@ -71,18 +71,24 @@ public:
 
 protected:
 	// add/removes a resource if it is acceptable
-	void checkAndAdd(int base_index);
+	//void checkAndAdd(int base_index);
 
 	//
-	void checkAndAddSet(std::set<int> base_index);
+	//void checkAndAddSet(std::set<int> base_index);
+	std::set<int> baseToLocal(const std::set<int> base_indices) const;
+
+	void recheck(const std::set<int> &base_indices);
+	void checkAndInsertSet(const std::set<int> &insertions);
+	void checkAndRemoveSet(const std::set<int> &base_indices);
 
 	// when a name changes or something
 	void onResourceChange(EResource *res);
 
 	// rechecks all resources
-	void rescan();
-	void add(int base_index);
-	void remove(int base_index);
+	//void rescan();
+	//void add(int base_index);
+	//void remove(int base_index);
+
 	void clearInternal();
 	//void remap(int base_index);
 	//bool inMap(EResource *res);
