@@ -14,6 +14,7 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QUndoStack>
+#include <vector>
 
 #include "VSimRoot.h"
 
@@ -23,6 +24,7 @@ class ERControl;
 class MainWindow;
 class VSimRoot;
 class ModelTableModel;
+class Narrative2;
 
 class VSimApp : public QObject
 {

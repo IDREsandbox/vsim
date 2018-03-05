@@ -143,6 +143,8 @@ set(HorizontalScrollBox_src
   src/ScrollBoxItem.cpp
   src/Selection.h
   src/Selection.cpp
+  src/SelectionStack.h
+  src/SelectionStack.cpp
   src/Util.h
   src/Util.cpp
   experiments/HorizontalScrollBox_experiment/HorizontalScrollBox_experiment.cpp

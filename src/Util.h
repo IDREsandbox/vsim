@@ -31,6 +31,16 @@ namespace Util
 
 	QString setToString(std::set<int> set);
 
+	template<class T>
+	QString iterToString(T start, T end) {
+		QString str = "";
+		for (T it = start; it != end; ++it) {
+			str += QString::number(*it);
+			str += " ";
+		}
+		return str;
+	}
+
 	// insertions occur at vector positions then fix index pointers in fixme
 	// ex. [a, b, c, d], insertions: a[1] = e, a[3] = f
 	//     [a, e, b, f, c, d]

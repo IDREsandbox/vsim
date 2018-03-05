@@ -180,7 +180,7 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 		root = new VSimRoot(new_node->asGroup());
 	}
 	else {
-		qDebug() << "Root is a VSimRoot";
+		qInfo() << "Root is a VSimRoot";
 	}
 	root->postLoad();
 
@@ -238,7 +238,7 @@ bool VSimApp::openVSim(const std::string & filename)
 	// if .vsim, use osgb, TODO: our own readerwriter?
 	std::string ext = Util::getExtension(filename);
 	if (ext == "vsim") {
-		qDebug() << "loading vsim";
+		qInfo() << "loading vsim";
 		std::ifstream ifs;
 		ifs.open(filename.c_str(), std::ios::binary);
 		if (!ifs.good()) {
@@ -262,7 +262,7 @@ bool VSimApp::openVSim(const std::string & filename)
 		init_success = initWithVSim(loadedModel);
 	}
 	else if (ext == "osgb" || ext == "osgt") { // osgb or osgt
-		qDebug() << "loading osgt/osgb";
+		qInfo() << "loading osgt/osgb";
 		loadedModel = osgDB::readNodeFile(filename);
 		if (!loadedModel) {
 			QMessageBox::warning(m_window, "Load Error", "Error opening file " + QString::fromStdString(filename));
@@ -271,7 +271,7 @@ bool VSimApp::openVSim(const std::string & filename)
 		init_success = initWithVSim(loadedModel);
 	}
 	else {
-		qDebug() << "loading a non osg model";
+		qInfo() << "loading a non osg model";
 		loadedModel = osgDB::readNodeFile(filename);
 		if (!loadedModel) {
 			QMessageBox::warning(m_window, "Load Error", "Failed to load model " + QString::fromStdString(filename));
@@ -296,7 +296,7 @@ bool VSimApp::saveVSim(const std::string& filename)
 	// if vsim, then use osgb
 	std::string ext = Util::getExtension(filename);
 	if (ext == "vsim") {
-		qDebug() << "saving vsim";
+		qInfo() << "saving vsim";
 		std::ofstream ofs;
 		ofs.open(filename.c_str(), std::ios::binary);
 		if (!ofs.good()) {
@@ -334,7 +334,7 @@ bool VSimApp::saveVSim(const std::string& filename)
 
 bool VSimApp::saveCurrentVSim()
 {
-	qDebug() << "save current";
+	qInfo() << "saving current file";
 	return saveVSim(m_filename);
 }
 
@@ -342,37 +342,29 @@ bool VSimApp::exportNarratives()
 {
 	// figure out the selected narratives, if none are selected then error
 	osg::ref_ptr<osg::Group> export_group = new NarrativeGroup;
-	NarrativeControl::SelectionLevel level = m_narrative_control->getSelectionLevel();
-	std::set<int> selection;
-	if (level == NarrativeControl::NARRATIVES) {
-		// export the entire selection
-		selection = m_window->topBar()->ui.narratives->getSelection();
-		if (selection.empty()) {
-			QMessageBox::warning(m_window, "Export Narratives Error", "No narratives selected");
-			return false;
-		}
+	//NarrativeControl::SelectionLevel level = m_narrative_control->getSelectionLevel();
+
+	auto narratives = m_narrative_control->getSelectedNarratives();
+	if (narratives.empty()) {
+		QMessageBox::warning(m_window, "Export Narratives Error", "No narratives selected");
+		return false;
 	}
-	else {
-		int nar = m_narrative_control->getCurrentNarrativeIndex();
-		if (nar == -1) return false;
-		selection.insert(nar);
-	}
-	// add all children to the export group
-	for (auto index : selection) {
-		export_group->addChild(m_root->narratives()->getChild(index));
+
+	for (auto nar : narratives) {
+		export_group->addChild(nar);
 	}
 
 	// Open up the save dialog
-	qDebug() << "Export narratives";
+	qInfo() << "Export narratives";
 	QString filename = QFileDialog::getSaveFileName(m_window, "Export Narratives",
 		getCurrentDirectory(), "Narrative file (*.nar)");
 	if (filename == "") {
-		qDebug() << "Export narratives cancel";
+		qInfo() << "Export narratives cancel";
 		return false;
 	}
 
 	// Open the file, create the osg reader/writer
-	qDebug() << "Exporting narratives" << filename;
+	qInfo() << "Exporting narratives" << filename;
 	std::ofstream ofs;
 	ofs.open(filename.toStdString(), std::ios::binary);
 	if (!ofs.good()) {
@@ -386,7 +378,7 @@ bool VSimApp::exportNarratives()
 		return false;
 	}
 
-	qDebug() << "Exporting narratives" << Util::setToString(selection);
+	qInfo() << "Exporting narratives";
 	osgDB::Options* options = new osgDB::Options;
 	//options->setPluginStringData("fileType", "Ascii");
 	options->setPluginStringData("WriteImageHint", "IncludeData");
@@ -404,11 +396,11 @@ bool VSimApp::exportNarratives()
 bool VSimApp::importNarratives()
 {
 	// Open dialog
-	qDebug("Importing narratives");
+	qInfo("Importing narratives");
 	QString filename = QFileDialog::getOpenFileName(m_window, "Import Narratives",
 		getCurrentDirectory(), "Narrative files (*.nar);;All types (*.*)");
 	if (filename == "") {
-		qDebug() << "import cancel";
+		qInfo() << "import cancel";
 		return false;
 	}
 
@@ -451,7 +443,7 @@ bool VSimApp::importNarratives()
 		group = new NarrativeGroup(cast_old);
 	}
 	else if (nar) {
-		qDebug() << "file is an old narrative";
+		qInfo() << "file is an old narrative";
 		group = new NarrativeGroup;
 		group->addChild(new Narrative2(nar));
 	}
@@ -539,7 +531,7 @@ void VSimApp::debugCamera()
 		0, 0, 0, 1);
 	double yaw, pitch, roll;
 	Util::quatToYPR(base.getRotate(), &yaw, &pitch, &roll);
-	qDebug() << yaw * M_PI/180 << pitch * M_PI / 180 << roll * M_PI / 180;
+	qInfo() << yaw * M_PI/180 << pitch * M_PI / 180 << roll * M_PI / 180;
 
 }
 

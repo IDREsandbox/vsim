@@ -17,6 +17,7 @@ class ECategoryControl;
 class ERFilterSortProxy;
 class ERFilterArea;
 class CheckableListProxy;
+class SelectionStack;
 
 // manages which ER is active
 // slots for creating a new ER, editing, etc
@@ -57,6 +58,8 @@ private:
 
 	ERScrollBox *m_global_box;
 	ERScrollBox *m_local_box;
+	SelectionStack *m_global_selection;
+	SelectionStack *m_local_selection;
 
 	QUndoStack *m_undo_stack;
 

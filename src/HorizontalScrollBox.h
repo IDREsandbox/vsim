@@ -11,6 +11,7 @@
 #include <set>
 
 class Selection;
+class SelectionStack;
 class ScrollBoxItem;
 
 //#include "narrative/NarrativeScrollItem.h"
@@ -43,11 +44,12 @@ public:
 	void clear();
 
 	// selection - these set selection, lastSelected, and emit events
-	void setSelection(const std::set<int>& set, int last);
-	void setLastSelected(int last);
-	int getLastSelected();
-	const std::set<int>& getSelection();
-	Selection *selection() const;
+	//void setSelection(const std::set<int>& set, int last);
+	//void setLastSelected(int last);
+	//int getLastSelected();
+	//const std::set<int>& getSelection();
+	//Selection *selection() const;
+	SelectionStack *selectionStack() const;
 
 	// positioning
 	void setSpacing(int);
@@ -70,12 +72,12 @@ public:
 	bool eventFilter(QObject *o, QEvent *e);
 
 signals:
-	void sSelectionChange();
-	void sLastSelectedChange();
+	//void sSelectionChange();
+	//void sLastSelectedChange();
 	void sMove(const std::vector<std::pair<size_t, size_t>> &);
 
-	void sSingleSelect(int index);
-	void sSelectionCleared(); // hack for joining these boxes together
+	// hack for joining these boxes together
+	void sSelectionCleared();
 
 protected:
 	// qt overrides
@@ -107,6 +109,7 @@ protected:
 	QWidget *m_drop_highlight;
 
 	Selection *m_selection;
+	SelectionStack *m_selection_stack;
 
 	//int boxHeight() const;
 	//int boxWidth() const;
@@ -124,6 +127,7 @@ protected:
 	bool m_dragging_enabled;
 	QPoint m_dragpos; // last known drag point
 	int m_drag_index; // last known spacer index for dropping
+	int m_drag_press_index; // last pressed item
 
 	QTimer *m_move_timer;
 

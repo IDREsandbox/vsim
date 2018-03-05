@@ -25,12 +25,7 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 	//m_view->setDragMode(QGraphicsView::RubberBandDrag);
 	//m_view->setDragMode(QGraphicsView::DragMode::NoDrag);
 	m_view->setObjectName("canvasView");
-	m_view->setStyleSheet(
-		"#canvasView {"
-		"	border-style: none;"
-		"	background: rgba(0, 0, 0, 0);"
-		"}"
-	);
+s
 	m_view->installEventFilter(this);
 
 	m_manipulator = new TransformManipulator(m_scene, m_view, m_view);

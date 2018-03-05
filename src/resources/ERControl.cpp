@@ -14,6 +14,7 @@
 #include "resources/ERFilterSortProxy.h"
 #include "CheckableListProxy.h"
 #include "VSimApp.h"
+#include "SelectionStack.h"
 
 #include <QDesktopServices>
 
@@ -30,6 +31,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	m_undo_stack = m_app->getUndoStack();
 	m_global_box = m_window->erGlobal();
 	m_local_box = m_window->erLocal();
+	m_global_selection = m_global_box->selectionStack();
+	m_local_selection = m_local_box->selectionStack();
 	m_display = m_window->erDisplay();
 	m_filter_area = m_window->erFilterArea();
 
@@ -75,17 +78,11 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 
 	// mash the two selections together
 	// if one clears everything, then clear the other one too
-	connect(m_local_box, &HorizontalScrollBox::sSingleSelect, this, [this]() {
-		m_global_box->setSelection({}, -1);
-	});
 	connect(m_local_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
-		m_global_box->setSelection({}, -1);
-	});
-	connect(m_global_box, &HorizontalScrollBox::sSingleSelect, this, [this]() {
-		m_local_box->setSelection({}, -1);
+		m_global_selection->clear();
 	});
 	connect(m_global_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
-		m_local_box->setSelection({}, -1);
+		m_local_selection->clear();
 	});
 	load(ers);
 }
@@ -178,7 +175,7 @@ void ERControl::editERInfo()
 	dlg.init(resource);
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
-		qDebug() << "resource list - cancelled edit on" << active_item;
+		qInfo() << "resource list - cancelled edit on" << active_item;
 		return;
 	}
 
@@ -317,11 +314,11 @@ std::set<int> ERControl::getCombinedSelection()
 {
 	// remap selection to nodes
 	std::set<osg::Node*> nodes;
-	std::set<int> local_selection = m_local_box->getSelection();
+	std::set<int> local_selection = m_local_selection->toSet();
 	for (auto i : local_selection) {
 		nodes.insert(m_local_proxy->child(i));
 	}
-	std::set<int> global_selection = m_global_box->getSelection();
+	std::set<int> global_selection = m_global_selection->toSet();
 	for (auto i : global_selection) {
 		nodes.insert(m_global_proxy->child(i));
 	}
@@ -339,23 +336,25 @@ int ERControl::getCombinedLastSelected()
 	QObject *sender = QObject::sender();
 	ERFilterSortProxy *proxy;
 	int last;
+	int local_last = m_local_selection->last();
+	int global_last = m_global_selection->last();
 	// use the sender to determine the last selected
-	if (sender == m_local_box && m_local_box->getLastSelected() != -1) {
-		last = m_local_box->getLastSelected();
+	if (sender == m_local_box && local_last != -1) {
+		last = local_last;
 		proxy = m_local_proxy;
 	}
-	else if (sender == m_global_box && m_global_box->getLastSelected() != -1) {
-		last = m_global_box->getLastSelected();
+	else if (sender == m_global_box && global_last != -1) {
+		last = global_last;
 		proxy = m_global_proxy;
 	}
 	else {
 		// just take whatever is selected
-		if (m_local_box->getLastSelected() != -1) {
-			last = m_local_box->getLastSelected();
+		if (local_last != -1) {
+			last = local_last;
 			proxy = m_local_proxy;
 		}
 		else {
-			last = m_global_box->getLastSelected();
+			last = global_last;
 			proxy = m_global_proxy;
 		}
 	}
