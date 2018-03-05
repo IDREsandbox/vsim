@@ -67,6 +67,10 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 		m_items[i]->select(false);
 	});
 	connect(m_selection, &Selection::sChanged, this, &HorizontalScrollBox::sSelectionChange);
+	connect(m_selection, &Selection::sSingleSelect, this, [this](int index) {
+		qDebug() << "single select";
+		emit sSingleSelect(index);
+	});
 
 	refresh();
 }
@@ -93,9 +97,18 @@ const std::set<int>& HorizontalScrollBox::getSelection()
 	return m_selection->getSelection();
 }
 
+Selection * HorizontalScrollBox::selection() const
+{
+	return m_selection;
+}
+
 void HorizontalScrollBox::setSelection(const std::set<int>& set, int last)
 {
 	m_selection->set(set, last);
+}
+
+void HorizontalScrollBox::setLastSelected(int last)
+{
 }
 
 int HorizontalScrollBox::getLastSelected()
@@ -264,6 +277,7 @@ void HorizontalScrollBox::insertItems(const std::vector<std::pair<size_t, Scroll
 
 void HorizontalScrollBox::removeItems(const std::vector<size_t> indices, bool delete_items)
 {
+	m_selection->clear();
 	for (size_t i : indices) {
 		ScrollBoxItem *item = m_items[i];
 		if (delete_items) {
@@ -339,7 +353,6 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 
 void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 {
-	qDebug() << "background press";
 	m_selection->clear();
 	emit sSelectionCleared();
 	if (event->button() == Qt::RightButton) {
@@ -356,15 +369,13 @@ void HorizontalScrollBox::mouseReleaseEvent(QMouseEvent * event)
 
 void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 {
-	qDebug() << "item mouse press" << index;
-
 	if (event->button() == Qt::LeftButton) {
 		int prev = m_selection->getLastSelected();
-		if (event->type() == QEvent::MouseButtonDblClick) {
-			//emit sDoubleClick();
-			m_selection->add(index);
-			return;
-		}
+		//if (event->type() == QEvent::MouseButtonDblClick) {
+		//	//emit sDoubleClick();
+		//	m_selection->add(index);
+		//	return;
+		//}
 
 		if (event->modifiers() & Qt::ControlModifier) {
 			// ctrl - add/remove from selection
@@ -381,9 +392,7 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 		}
 		else {
 			// left click a selected item -> begin dragging
-			//if (isSelected(index)) {
-			bool cleared = m_selection->selectIfNot(index);
-			if (cleared) emit sSelectionCleared();
+			m_selection->selectIfNot(index);
 			m_mouse_down_pos = event->globalPos();
 			m_mouse_down = true;
 		}
@@ -404,6 +413,7 @@ void HorizontalScrollBox::itemMouseReleaseEvent(QMouseEvent * event, int index)
 			m_selection->select(index);
 		}
 	}
+	m_mouse_down = false;
 }
 
 void HorizontalScrollBox::itemMouseDoubleClickEvent(QMouseEvent * event, int index)

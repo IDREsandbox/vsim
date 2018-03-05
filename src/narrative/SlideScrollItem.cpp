@@ -112,6 +112,12 @@ bool SlideScrollItem::eventFilter(QObject * obj, QEvent * event)
 			return false;
 		}
 	}
+	//if (obj == ui.transition_widget) {
+	//	if (event->type() == QEvent::MouseButtonPress) {
+	//		emit sTransitionClick();
+	//		return false;
+	//	}	
+	//}
 	return false;
 }
 
@@ -139,7 +145,11 @@ void SlideScrollItem::setSlide(NarrativeSlide *slide)
 	//});
 
 	connect(slide, &NarrativeSlide::sThumbnailChanged, this, &SlideScrollItem::setImage);
-	connect(slide, &NarrativeSlide::sThumbnailDirty, this, &SlideScrollItem::sThumbnailDirty);
+	//connect(slide, &NarrativeSlide::sThumbnailDirty, this, &SlideScrollItem::sThumbnailDirty);
+	connect(slide, &NarrativeSlide::sThumbnailDirty, this, [this]() {
+		qDebug() << "thumbnail dirty" << getIndex();
+		emit sThumbnailDirty();
+	});
 
 }
 

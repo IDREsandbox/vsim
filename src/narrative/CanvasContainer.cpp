@@ -9,7 +9,7 @@
 #include <QTextDocument>
 
 CanvasContainer::CanvasContainer(QWidget *parent)
-	: QWidget(parent)
+	: QFrame(parent)
 {
 	m_view = new QGraphicsView(this);
 	m_scene = new CanvasScene(this);

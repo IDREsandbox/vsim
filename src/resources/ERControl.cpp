@@ -74,8 +74,15 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	connect(m_global_box, &ERScrollBox::sSelectionChange, this, &ERControl::onSelectionChange);
 
 	// mash the two selections together
+	// if one clears everything, then clear the other one too
+	connect(m_local_box, &HorizontalScrollBox::sSingleSelect, this, [this]() {
+		m_global_box->setSelection({}, -1);
+	});
 	connect(m_local_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
 		m_global_box->setSelection({}, -1);
+	});
+	connect(m_global_box, &HorizontalScrollBox::sSingleSelect, this, [this]() {
+		m_local_box->setSelection({}, -1);
 	});
 	connect(m_global_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
 		m_local_box->setSelection({}, -1);
@@ -268,14 +275,8 @@ void ERControl::gotoPosition()
 	m_app->setCameraMatrix(resource->getCameraMatrix());
 }
 
-int i;
 void ERControl::onSelectionChange()
 {
-	QString whodunnit;
-	if (QObject::sender() == m_local_box) whodunnit = "local";
-	else whodunnit = "global";
-	i++;
-
 	int new_active = getCombinedLastSelected();
 	if (new_active != m_active_item) {
 		// go to and set

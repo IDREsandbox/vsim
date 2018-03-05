@@ -37,7 +37,6 @@ void ERFilterSortProxy::setBase(Group *base)
 	// listen to new set
 	connect(base, &Group::sInsertedSet, this,
 		[this](const std::vector<std::pair<size_t, osg::Node*>> &nodes) {
-		qDebug() << "proxy insert set" << this << m_show_global << m_show_local;
 		
 		// fix indices
 		std::set<int> insertions_set;
@@ -50,7 +49,6 @@ void ERFilterSortProxy::setBase(Group *base)
 	// listen to delete
 	connect(base, &Group::sRemovedSet, this,
 		[this](const std::vector<size_t> &removals) {
-		qDebug() << "proxy s removed";
 
 		std::unordered_set<size_t> removed(removals.begin(), removals.end());
 
@@ -72,12 +70,10 @@ void ERFilterSortProxy::setBase(Group *base)
 	});
 	connect(base, &Group::sReset, this,
 		[this]() {
-		qDebug() << "proxy s reset";
 		reload();
 	});
 	connect(base, &Group::sEdited, this,
 		[this](const std::set<int> &indices) {
-		qDebug() << "proxy s edited" << "g" << m_show_global;
 
 		// decompose into items to remove and items to insert
 		recheck(indices);
@@ -114,7 +110,6 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 	// add -> do nothing
 	connect(cats, &QAbstractItemModel::rowsInserted, this,
 		[this](const QModelIndex &parent, int first, int last) {
-		qDebug() << "proxy on category insert";
 		for (int i = first; i <= last; i++) {
 			updateCategorySet(i);
 		}
@@ -123,7 +118,6 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 	// remove -> remove from set
 	connect(cats, &QAbstractItemModel::rowsAboutToBeRemoved, this,
 		[this, cats](const QModelIndex &parent, int first, int last) {
-		qDebug() << "proxy on category remove";
 		for (int i = first; i <= last; i++) {
 			ECategory *cat = GroupModel::get<ECategory*>(cats, i);
 			if (!cat) continue;
@@ -524,7 +518,6 @@ void ERFilterSortProxy::reload()
 {
 	if (!m_base) return;
 	emit sBeginReset();
-	qDebug() << "proxy reloading";
 	clearInternal();
 
 	std::vector<int> nodes_filtered;

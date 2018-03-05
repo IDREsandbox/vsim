@@ -34,6 +34,7 @@
 #include "narrative/NarrativeCanvas.h"
 #include "editButtons.h"
 
+#include "SelectionStack.h"
 #include "Selection.h"
 #include "MainWindowTopBar.h"
 #include "VSimApp.h"
@@ -44,12 +45,25 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	: m_app(app),
 	m_window(window), 
 	m_current_narrative(-1),
-	m_narrative_group(nullptr)
+	m_narrative_group(nullptr),
+	m_canvas_enabled(true),
+	m_editing_enabled(false)
 {
 	m_narrative_box = window->topBar()->ui.narratives;
 	m_slide_box = window->topBar()->ui.slides;
 	m_canvas = window->canvas();
+	m_fade_canvas = window->fadeCanvas();
 	m_undo_stack = m_app->getUndoStack();
+
+	m_fade_in = new QGraphicsOpacityEffect(m_canvas);
+	m_fade_out = new QGraphicsOpacityEffect(m_fade_canvas);
+	m_canvas->setGraphicsEffect(m_fade_in);
+	m_fade_canvas->setGraphicsEffect(m_fade_out);
+	m_fade_in_anim = new QPropertyAnimation(m_fade_in, "opacity");
+	m_fade_out_anim = new QPropertyAnimation(m_fade_out, "opacity");
+	m_fade_in_anim->setDuration(250);
+	m_fade_out_anim->setDuration(250);
+	showCanvas(false);
 
 	connect(m_window, &MainWindow::sEditStyleSettings, this, &NarrativeControl::editStyleSettings);
 
@@ -87,6 +101,21 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	connect(m_slide_box, &SlideScrollBox::sSetCamera, this, &NarrativeControl::setSlideCamera);
 	// move
 	connect(m_slide_box, &SlideScrollBox::sMove, this, &NarrativeControl::moveSlides);
+	// goto
+	connect(m_slide_box, &SlideScrollBox::sGoto, this, [this](int index) {
+		qDebug() << "goto slide" << index;
+		openSlide(index);
+	});
+	// clear
+	connect(m_slide_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
+		qDebug() << "selection cleared";
+		openSlide(-1);
+	});
+	// transition to
+	//connect(m_slide_box, &SlideScrollBox::sTransitionTo, this, 
+	//	[this](int index) {
+	//	m_app->transitionTo(index);
+	//});
 
 	// back
 	connect(m_window->topBar()->ui.left_2, &QPushButton::clicked, this, [this]() {setNarrative(-1); });
@@ -134,10 +163,6 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	});
 
 	connect(window, &MainWindow::sDebugControl, this, &NarrativeControl::debug);
-}
-
-NarrativeControl::~NarrativeControl()
-{
 }
 
 void NarrativeControl::editStyleSettings()
@@ -310,21 +335,24 @@ void NarrativeControl::setNarrative(int index)
 	emit sEditEvent();
 }
 
-bool NarrativeControl::setSlide(int index, bool instant)
+bool NarrativeControl::openSlide(int index, bool go, bool fade)
 {
-	if (m_current_slide == index) return true;
 	qDebug() << "Narrative Control - set slide" << index;
-	if (m_current_narrative < 0) {
-		m_current_slide = -1;
-		return false;
-	}
+
 	NarrativeSlide *slide = getSlide(m_current_narrative, index);
+
+	// failed to set slide
 	if (!slide) {
-		m_canvas->hide();
-		m_canvas->setSlide(nullptr);
 		m_current_slide = -1;
+		showCanvas(false, fade);
+		m_canvas->setSlide(nullptr);
+		exitEdit();
 		return false;
 	}
+
+	m_current_slide = index;
+	m_canvas->setSlide(slide);
+	showCanvas(true, fade);
 
 	// is this index selected? force selection
 	std::set<int> sel = m_slide_box->getSelection();
@@ -332,8 +360,13 @@ bool NarrativeControl::setSlide(int index, bool instant)
 		m_slide_box->setSelection({index}, index);
 	}
 
-	m_current_slide = index;
-	m_canvas->setSlide(slide);
+	if (go) {
+		m_app->setCameraMatrix(slide->getCameraMatrix());
+	}
+
+	if (m_editing_slide) {
+		showCanvasEditor(true);
+	}
 
 	//emit sEditEvent();
 	return true;
@@ -385,33 +418,84 @@ bool NarrativeControl::advanceSlide(bool forward, bool instant)
 	}
 
 	if (next < 0 || next >= (int)getCurrentNarrative()->getNumChildren()) return false;
-	return setSlide(next, instant);
+	return openSlide(next, instant);
 }
 
-void NarrativeControl::showCanvas(bool instant)
+void NarrativeControl::showCanvas(bool show, bool fade)
 {
-	m_canvas->show();
-	qDebug() << "show canvas";
+	m_canvas->setVisible(show);
+	m_canvas->setAttribute(Qt::WA_TransparentForMouseEvents, !show);
+	if (show) {
+		if (fade) {
+			m_fade_in_anim->start();
+		}
+		else {
+			m_fade_in_anim->setCurrentTime(m_fade_in_anim->duration());
+		}
+	}
+	else {
+		if (fade) {
+			m_fade_canvas->show();
+			m_fade_canvas->setSlide(m_canvas->getSlide());
+			m_fade_out_anim->start();
+		}
+	}
 }
 
-void NarrativeControl::hideCanvas(bool instant)
+void NarrativeControl::showCanvasEditor(bool show)
 {
-	m_canvas->hide();
-	exitEdit();
-	qDebug() << "hide canvas";
+	m_label_buttons->setVisible(show);
 }
+
+//void NarrativeControl::hideCanvas(bool instant)
+//{
+//	m_canvas->hide();
+//	exitEdit();
+//	qDebug() << "hide canvas";
+//}
 
 void NarrativeControl::editSlide() {
 	//qDebug() << "EDIT SLIDE CURRENT SLDIE?" << m_current_narrative << m_current_slide << getCurrentSlide();
 	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, false);
-	m_label_buttons->show();
-	m_canvas->setEditable(true);
 
+	Narrative2 *nar = getCurrentNarrative();
+	if (!nar) {
+		qWarning() << "failed to edit slide - no narrative";
+		return;
+	}
+
+	// is a slide open?
+	if (m_current_slide < 0) {
+		int last = m_slide_box->getLastSelected();
+		auto sel = m_slide_box->getSelection();
+		Narrative2 *nar = getCurrentNarrative();
+		// open last selected
+		if (last >= 0) {
+			openSlide(last);
+		}
+		// open last slide in selection
+		else if (sel.size() > 0) {
+			openSlide(*sel.rbegin());
+		}
+		// open last slide
+		else if (nar->getNumChildren() > 0) {
+			openSlide(nar->getNumChildren() - 1);
+		}
+	}
+	if (m_current_slide < 0) {
+		qWarning() << "failed to open slide for editing";
+		return;
+	}
+
+	showCanvasEditor(true);
+	m_canvas->setEditable(true);
+	m_editing_slide = true;
 }
 
 void NarrativeControl::exitEdit() {
 	m_label_buttons->hide();
 	m_canvas->setEditable(false);
+	m_editing_slide = false;
 	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 }
 
@@ -451,7 +535,7 @@ void NarrativeControl::selectLabels(int narrative, int slide, const std::set<Nar
 {
 	setNarrative(narrative);
 	m_narrative_box->setSelection({ narrative }, narrative);
-	setSlide(slide);
+	openSlide(slide);
 	m_narrative_box->setSelection({ slide }, slide);
 	
 	m_canvas->setSelection(labels);
@@ -572,17 +656,37 @@ NarrativeSlideLabel * NarrativeControl::getLabel(int narrative, int slide, int l
 
 void NarrativeControl::onSlideSelection()
 {
-	if (m_current_narrative < 0) {
-		qWarning() << "Narrative Control - slide selection while current narrative null";
-		return;
+	// if (edit mode)
+	openSlide(m_slide_selection->top());
+
+	// detect deselection of current slide
+	//if (m_current_slide >= 0) {
+	//	// deselected
+	//	if (s.find(m_current_slide) == s.end()) {
+	//		qDebug() << "slide deselect" << "current" << m_current_slide;
+	//		if (s.size() > 0) qDebug() << "selection:" << *s.begin();
+	//		openSlide(-1);
+	//	}
+	//}
+
+	//if (m_current_narrative < 0) {
+	//	qWarning() << "Narrative Control - slide selection while current narrative null";
+	//	return;
+	//}
+	//int s = m_slide_box->getLastSelected();
+
+	//if (s == m_current_slide) return;
+
+	//emit sEditEvent();
+}
+
+void NarrativeControl::onSlideFocusChange()
+{
+	if (m_force_select) return;
+	int last = m_slide_box->getLastSelected();
+	if (last != m_current_slide) {
+		openSlide(last);
 	}
-	int s = m_slide_box->getLastSelected();
-
-	if (s == m_current_slide) return;
-
-	setSlide(m_slide_box->getLastSelected());
-
-	emit sEditEvent();
 }
 
 void NarrativeControl::newSlide()
@@ -618,7 +722,7 @@ void NarrativeControl::newSlide()
 
 	//std::cout << m_window->getViewer()->getCameraManipulator()->getMatrix();
 
-	setSlide(index);
+	openSlide(index);
 }
 
 void NarrativeControl::deleteSlides()
@@ -803,7 +907,7 @@ void NarrativeControl::labelEdited(NarrativeSlideLabel *label)
 
 	m_undo_stack->beginMacro("Edit Label");
 	m_undo_stack->push(new NarrativeSlideLabel::DocumentEditWrapperCommand(doc));
-	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, { label }));
+	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, { label }, ON_BOTH));
 	m_undo_stack->endMacro();
 
 	dirtyCurrentSlide();

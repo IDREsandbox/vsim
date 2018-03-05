@@ -72,6 +72,7 @@ void Selection::clear()
 void Selection::select(int x)
 {
 	set({x}, x);
+	emit sSingleSelect(x);
 }
 
 bool Selection::selectIfNot(int index)

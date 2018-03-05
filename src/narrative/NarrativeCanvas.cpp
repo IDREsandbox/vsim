@@ -128,7 +128,6 @@ void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 		text = new TextRect();
 		rect = text;
 		text->m_text->setDocument(label->getDocument());
-		qDebug() << "new item set base height" << m_base_height;
 		text->setBaseHeight(m_base_height);
 
 		connect(text->m_text->document(), &QTextDocument::undoCommandAdded, this,
@@ -154,7 +153,6 @@ void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 
 	rect->setRect(label->getRect());
 	rect->setBrush(label->getBackground());
-	qDebug() << "adding background" << label->getBackground();
 	rect->setEditable(isEditable());
 	m_scene->addItem(rect);
 

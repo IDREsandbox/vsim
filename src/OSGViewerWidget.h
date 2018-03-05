@@ -19,6 +19,13 @@
 #include "ObjectManipulator.h"
 #include "KeyTracker.h"
 
+enum NavigationMode : int {
+	NAVIGATION_SIMPLE, // does nothing
+	NAVIGATION_FIRST_PERSON,
+	NAVIGATION_FLIGHT,
+	NAVIGATION_OBJECT
+};
+
 class OSGViewerWidget : public QOpenGLWidget
 {
 	Q_OBJECT
@@ -31,13 +38,6 @@ public:
 
 	osg::Matrixd getCameraMatrix();
 	void setCameraMatrix(osg::Matrixd);
-
-	enum NavigationMode {
-		NAVIGATION_SIMPLE, // does nothing
-		NAVIGATION_FIRST_PERSON,
-		NAVIGATION_FLIGHT,
-		NAVIGATION_OBJECT
-	};
 
 	void setNavigationMode(NavigationMode);
 	void setNavigationModeInternal(NavigationMode);

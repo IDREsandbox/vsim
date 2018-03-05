@@ -114,6 +114,5 @@ void EResourceGroup::postLoad()
 
 		ECategory *cat = m_categories->category(cat_index);
 		res->setCategory(cat);
-		cat->addResource(res);
 	}
 }

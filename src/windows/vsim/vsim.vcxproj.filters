@@ -239,9 +239,6 @@
     <CustomBuild Include="..\..\narrative\NarrativeSlideLabel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="GeneratedFiles\Debug\CanvasContainer.moc">
-      <Filter>Generated Files\Debug</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\TextToolbar.h">
       <Filter>Header Files</Filter>
     </CustomBuild>

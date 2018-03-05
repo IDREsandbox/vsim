@@ -124,6 +124,7 @@ void NarrativeSlide::setCameraMatrix(const osg::Matrixd & matrix)
 {
 	m_camera_matrix = matrix;
 	emit sCameraMatrixChanged(matrix);
+	dirtyThumbnail();
 }
 
 float NarrativeSlide::getDuration() const

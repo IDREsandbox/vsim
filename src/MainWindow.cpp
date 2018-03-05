@@ -52,6 +52,12 @@ MainWindow::MainWindow(QWidget *parent)
 	// canvas on top of osg viewer
 	m_canvas = new NarrativeCanvas(m_osg_widget);
 	osg_layout->addWidget(m_canvas, 0, 0);
+	m_fade_canvas = new NarrativeCanvas(m_osg_widget);
+	osg_layout->addWidget(m_fade_canvas, 0, 0);
+	m_fade_canvas->lower();
+	m_fade_canvas->setAttribute(Qt::WA_TransparentForMouseEvents);
+	m_canvas->setStyleSheet("background:rgba(255, 0, 0, 100);");
+	m_fade_canvas->setStyleSheet("background:rgba(0, 0, 255, 100);");
 
 	// splitter on top of osg viewer
 	// mask allows events to get to the canvas
@@ -107,13 +113,25 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// camera manipulator
 	connect(ui->actionFirst_Person_Navigation, &QAction::triggered, m_osg_widget,
-		[this]() { m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FIRST_PERSON); });
+		[this]() {
+		m_app->startFlying();
+		m_osg_widget->setNavigationMode(NAVIGATION_FIRST_PERSON);
+	});
 	connect(ui->actionFlight_Navigation, &QAction::triggered, m_osg_widget,
-		[this]() { m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FLIGHT); });
+		[this]() {
+		m_app->startFlying();
+		m_osg_widget->setNavigationMode(NAVIGATION_FLIGHT);
+	});
 	connect(ui->actionObject_Navigation, &QAction::triggered, m_osg_widget,
-		[this]() { m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_OBJECT); });
+		[this]() {
+		m_app->startFlying();
+		m_osg_widget->setNavigationMode(NAVIGATION_OBJECT);
+	});
 	connect(ui->actionFreeze_Camera, &QAction::toggled, m_osg_widget,
-		[this](bool freeze) { m_osg_widget->setCameraFrozen(freeze); });
+		[this](bool freeze) {
+		m_app->startFlying();
+		m_osg_widget->setCameraFrozen(freeze);
+	});
 
 	// navigation actions
 	m_navigation_action_group = new QActionGroup(this);
@@ -140,30 +158,30 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_navigation_action_group, &QActionGroup::triggered, this,
 		[this](QAction *which) {
 		if (which == m_action_first_person) {
-			m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FIRST_PERSON);
+			m_osg_widget->setNavigationMode(NAVIGATION_FIRST_PERSON);
 		}
 		else if (which == m_action_flight) {
-			m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_FLIGHT);
+			m_osg_widget->setNavigationMode(NAVIGATION_FLIGHT);
 		}
 		else if (which == m_action_object) {
-			m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_OBJECT);
+			m_osg_widget->setNavigationMode(NAVIGATION_OBJECT);
 		}
 	});
 	//in
 	connect(m_osg_widget, &OSGViewerWidget::sCameraFrozen, ui->actionFreeze_Camera, &QAction::setChecked);
 	connect(m_osg_widget, &OSGViewerWidget::sNavigationModeChanged,
-		[this](OSGViewerWidget::NavigationMode mode) {
-		if (mode == OSGViewerWidget::NAVIGATION_FIRST_PERSON) {
+		[this](NavigationMode mode) {
+		if (mode == NAVIGATION_FIRST_PERSON) {
 			m_action_first_person->setChecked(true);
 			//m_action_flight->setChecked(false);
 			//m_action_object->setChecked(false);
 		}
-		else if (mode == OSGViewerWidget::NAVIGATION_FLIGHT) {
+		else if (mode == NAVIGATION_FLIGHT) {
 			//actionFirst_Person_Navigation->setChecked(false);
 			m_action_flight->setChecked(true);
 			//actionObject_Navigation->setChecked(false);
 		}
-		else if (mode == OSGViewerWidget::NAVIGATION_OBJECT) {
+		else if (mode == NAVIGATION_OBJECT) {
 			//actionFirst_Person_Navigation->setChecked(false);
 			//actionFlight_Navigation->setChecked(false);
 			m_action_object->setChecked(true);
@@ -213,7 +231,7 @@ void MainWindow::setApp(VSimApp * vsim)
 	connect(this, &MainWindow::sOpenFile, m_app, &VSimApp::openVSim);
 	connect(this, &MainWindow::sSaveFile, m_app, &VSimApp::saveVSim);
 	connect(this, &MainWindow::sImportModel, m_app, &VSimApp::importModel);
-	connect(this, &MainWindow::sNew, m_app, &VSimApp::init);
+	connect(this, &MainWindow::sNew, m_app, [vsim]() { vsim->initWithVSim(); });
 	connect(this, &MainWindow::sSaveCurrent, m_app, &VSimApp::saveCurrentVSim);
 	connect(this, &MainWindow::sImportNarratives, m_app, &VSimApp::importNarratives);
 	connect(this, &MainWindow::sExportNarratives, m_app, &VSimApp::exportNarratives);
@@ -251,6 +269,11 @@ osgViewer::Viewer *MainWindow::getViewer() const
 NarrativeCanvas * MainWindow::canvas() const
 {
 	return m_canvas;
+}
+
+NarrativeCanvas * MainWindow::fadeCanvas() const
+{
+	return m_fade_canvas;
 }
 
 ModelOutliner * MainWindow::outliner() const

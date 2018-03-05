@@ -26,12 +26,15 @@ signals:
 	void sNewSlide(int);
 	void sEditSlide();
 	void sSetCamera();
+	void sGoto(int);
+	//void sTransitionTo(int);
 
 	void sThumbnailsDirty();
 
 protected:
-
 	void paintEvent(QPaintEvent *event);
+
+	void itemMousePressEvent(QMouseEvent *event, int index) override;
 
 private:
 	// slide menu

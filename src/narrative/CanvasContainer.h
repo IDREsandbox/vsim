@@ -20,7 +20,7 @@ class TextItem;
 typedef std::vector<std::pair<RectItem*, QRectF>> ItemRectList;
 
 // A widget with transformable items inside
-class CanvasContainer : public QWidget {
+class CanvasContainer : public QFrame {
 	Q_OBJECT;
 public:
 	CanvasContainer(QWidget *parent);

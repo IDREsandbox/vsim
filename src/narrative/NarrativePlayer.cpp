@@ -161,12 +161,12 @@ bool NarrativePlayer::advanceSlide(bool forward)
 
 void NarrativePlayer::hideCanvas()
 {
-	m_narratives->hideCanvas(true);
+	//m_narratives->hideCanvas(true);
 }
 
 void NarrativePlayer::showCanvas()
 {
-	m_narratives->showCanvas(false);
+	//m_narratives->showCanvas(false);
 }
 void NarrativePlayer::setCameraInTransition(double t)
 {

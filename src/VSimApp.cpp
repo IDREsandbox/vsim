@@ -23,12 +23,13 @@
 #include "deprecated/narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative2.h"
+#include "narrative/NarrativeSlide.h"
 #include "OSGViewerWidget.h"
 #include "MainWindow.h"
 #include "ModelOutliner.h"
 #include "TimeSlider.h"
 #include "narrative/NarrativeControl.h"
-#include "narrative/NarrativePlayer.h"
+//#include "narrative/NarrativePlayer.h"
 #include "resources/ERControl.h"
 #include "VSimRoot.h"
 #include "ModelTableModel.h"
@@ -64,29 +65,92 @@ VSimApp::VSimApp(MainWindow* window)
 	m_er_control = new ERControl(this, m_window, m_root->resources(), this);
 
 	// Narrative player
-	m_narrative_player = new NarrativePlayer(this, m_narrative_control);
+	//m_narrative_player = new NarrativePlayer(this, m_narrative_control);
 
-	connect(window->topBar()->ui.play_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::play);
-	connect(window->topBar()->ui.pause_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::stop);
-	connect(m_narrative_player, &NarrativePlayer::updateCamera, m_window->getViewerWidget(), &OSGViewerWidget::setCameraMatrix);
-	connect(this, &VSimApp::tick, m_narrative_player, &NarrativePlayer::update);
-	//connect(this, &VSimApp::foo, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
+	//connect(window->topBar()->ui.play_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::play);
+	//connect(window->topBar()->ui.pause_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::stop);
+	//connect(m_narrative_player, &NarrativePlayer::updateCamera, m_window->getViewerWidget(), &OSGViewerWidget::setCameraMatrix);
+	//connect(this, &VSimApp::tick, m_narrative_player, &NarrativePlayer::update);
+	//connect(m_narrative_player, &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
 	connect(this, &VSimApp::tick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
-	connect(m_narrative_player, &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
 
 	m_camera_timer = new QTimer(this);
-	connect(m_camera_timer, &QTimer::timeout, this, [this]() {
-		setCameraMatrix(m_camera_target);
-	});
+	connect(m_camera_timer, &QTimer::timeout, this, &VSimApp::moveTimerExpire);
 
 	initWithVSim(m_root);
 }
 
-bool VSimApp::init()
+void VSimApp::setWindow(MainWindow *)
 {
-	setFileName("");
-	initWithVSim(new VSimRoot);
-	return true;
+
+}
+
+//VSimApp::State VSimApp::state() const
+//{
+//	return State();
+//}
+
+void VSimApp::play()
+{
+	//m_narrative_control->enableCanvas(true);
+	m_playing = true;
+}
+
+void VSimApp::stop()
+{
+	m_playing = false;
+}
+
+void VSimApp::moveTimerExpire()
+{
+	if (m_transitioning) {
+		m_transitioning = false;
+		m_narrative_control->showCanvas(true, false);
+	}
+	setCameraMatrix(m_camera_target);
+}
+
+void VSimApp::transitionTo(int index)
+{
+	// get slide at index
+	Narrative2 *nar = m_narrative_control->getCurrentNarrative();
+	NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(nar->child(index));
+	if (!slide) {
+		qWarning() << "Can't transition to slide index" << index;
+		return;
+	}
+	m_transitioning = true;
+	m_narrative_control->showCanvas(false, false);
+
+	osg::Matrixd target = slide->getCameraMatrix();
+	double t = slide->getTransitionDuration();
+	setCameraMatrixSmooth(target, t);
+
+	m_narrative_control->showCanvas(false, false); // fade out
+	m_narrative_control->openSlide(index, true); // advance slide
+	//m_er_control->enableResources(false);
+}
+
+void VSimApp::startFlying()
+{
+	m_narrative_control->showCanvas(false, false);
+	//m_er_control->enableResources(true);
+	m_flying = true;
+}
+
+void VSimApp::editNarratives()
+{
+	//m_narrative_control->showC(true);
+	/*m_er_control->enableResources(false);*/
+	m_editing_narrative = true;
+}
+
+void VSimApp::next()
+{
+}
+
+void VSimApp::prev()
+{
 }
 
 void VSimApp::update(float dt_sec)
@@ -100,11 +164,6 @@ void VSimApp::update(float dt_sec)
 		//setCameraMatrix(Util::cameraMatrixInterp(m_camera_start, m_camera_target, t));
 
 	}
-}
-
-void VSimApp::setWindow(MainWindow *)
-{
-
 }
 
 osgViewer::Viewer * VSimApp::getViewer()
@@ -123,7 +182,7 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	else {
 		qDebug() << "Root is a VSimRoot";
 	}
-	m_root->postLoad();
+	root->postLoad();
 
 	// move all of the gui stuff over to the new root
 	m_viewer->setSceneData(root->models()); // ideally this would be only models, but its easy to mess things up
@@ -218,7 +277,7 @@ bool VSimApp::openVSim(const std::string & filename)
 			QMessageBox::warning(m_window, "Load Error", "Failed to load model " + QString::fromStdString(filename));
 			return false;
 		}
-		init();
+		initWithVSim();
 		addModel(loadedModel, Util::getFilename(filename));
 		init_success = true;
 	}

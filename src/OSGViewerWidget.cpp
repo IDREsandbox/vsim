@@ -180,12 +180,12 @@ void OSGViewerWidget::setNavigationModeInternal(NavigationMode mode)
 	setCameraMatrix(old_matrix);
 }
 
-OSGViewerWidget::NavigationMode OSGViewerWidget::getNavigationMode() const
+NavigationMode OSGViewerWidget::getNavigationMode() const
 {
 	return m_navigation_mode;
 }
 
-OSGViewerWidget::NavigationMode OSGViewerWidget::getActualNavigationMode() const
+NavigationMode OSGViewerWidget::getActualNavigationMode() const
 {
 	return (m_camera_frozen || m_navigation_disabled) ? NAVIGATION_SIMPLE : m_navigation_mode;
 }

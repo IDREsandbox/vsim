@@ -248,6 +248,9 @@ const ECategory *EResource::getCategory() const
 void EResource::setCategory(ECategory *category) 
 {
 	ECategory *old_cat = m_category.get();
+	if (old_cat) {
+		old_cat->removeResource(this);
+	}
 
 	m_category = category;
 

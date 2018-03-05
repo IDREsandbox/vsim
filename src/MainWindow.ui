@@ -272,6 +272,7 @@
     <addaction name="actionCamera_Debug"/>
     <addaction name="actionControl_Debug"/>
     <addaction name="actionReload_Style"/>
+    <addaction name="actionEditor_Debug"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -292,7 +293,6 @@
      <string>Window</string>
     </property>
     <addaction name="actionModel_Outliner"/>
-    <addaction name="actionEmbedded_Resources"/>
     <addaction name="actionTime_Slider"/>
     <addaction name="actionFont_Color_Styles"/>
     <addaction name="separator"/>
@@ -525,6 +525,14 @@
   <action name="actionReload_Style">
    <property name="text">
     <string>Reload Style</string>
+   </property>
+  </action>
+  <action name="actionEditor_Debug">
+   <property name="text">
+    <string>Editor Debug</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F11</string>
    </property>
   </action>
  </widget>

@@ -5,7 +5,8 @@
 #include <osg/Node>
 #include <QWidget>
 #include <QUndoStack>
-#include "MainWindow.h"
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
 
 class VSimApp;
 class MainWindow;
@@ -20,6 +21,7 @@ class SlideScrollBox;
 class NarrativeCanvas;
 class editButtons;
 class SlideScrollItem;
+class SelectionStack;
 
 // Bridges osg and gui for narratives
 class NarrativeControl : public QObject
@@ -27,7 +29,6 @@ class NarrativeControl : public QObject
 	Q_OBJECT
 public:
 	NarrativeControl(VSimApp *app, MainWindow *window, QObject *parent = nullptr);
-	~NarrativeControl();
 
 	// initializes gui from osg data
 	void load(NarrativeGroup *narratives);
@@ -36,12 +37,17 @@ public:
 	void openNarrative(); // if index <0 then it uses the the narrative box selection
 	void setNarrative(int index);
 
-	bool setSlide(int index, bool instant = true);
+	// select slide, show canvas
+	// hides if index out of range or narrative not open
+	// returns true if open, false if failed
+	bool openSlide(int index, bool go = true, bool fade = false);
 
 	//bool advance(bool forward);
 	bool advanceSlide(bool forward, bool instant = true);
-	void showCanvas(bool instant);
-	void hideCanvas(bool instant);
+	void showCanvas(bool show, bool fade = false);
+	void enableCanvas(bool enable);
+	void enableEditing(bool enable);
+	void showCanvasEditor(bool show);
 
 	enum SelectionLevel {
 		NARRATIVES,
@@ -63,6 +69,7 @@ public:
 	NarrativeSlideLabel *getLabel(int narrative, int slide, int label);
 
 	void onSlideSelection();
+	void onSlideFocusChange();
 
 signals:
 	//void selectionChanged(); // this should happen after any edit event, 
@@ -111,15 +118,24 @@ private:
 	int m_current_narrative; // opened narrative
 	int m_current_slide; // active canvas slide
 	bool m_editing_slide;
+	bool m_force_select;
+	bool m_editing_enabled;
+	bool m_canvas_enabled;
 
-	// std::vector<Narrative*> m_narratives;
+	QGraphicsOpacityEffect *m_fade_out;
+	QGraphicsOpacityEffect *m_fade_in;
+	QPropertyAnimation *m_fade_out_anim;
+	QPropertyAnimation *m_fade_in_anim;
+
 	osg::ref_ptr<NarrativeGroup> m_narrative_group;
-	//osg::ref_ptr<LabelStyleGroup> m_style_group;
 
 	MainWindow *m_window;
 	NarrativeScrollBox *m_narrative_box;
+	SelectionStack *m_narrative_selection;
 	SlideScrollBox *m_slide_box;
+	SelectionStack *m_slide_selection;
 	NarrativeCanvas *m_canvas;
+	NarrativeCanvas *m_fade_canvas;
 
 	editButtons* m_label_buttons;
 

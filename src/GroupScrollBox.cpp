@@ -54,17 +54,14 @@ void GroupScrollBox::setGroup(Group * group)
 		});
 		connect(m_group, &Group::sInsertedSet, this,
 			[this](auto insertions) {
-			qDebug() << "gsb insert";
 			insertItemsForIndices(insertions);
 		});
 		connect(m_group, &Group::sRemovedSet, this,
 			[this](const std::vector<size_t> &removals) {
-			qDebug() << "gsb remove";
 			removeItems(removals);
 		});
 		connect(m_group, &Group::sReset, this,
 			[this]() {
-			qDebug() << "gsb reset";
 			reload();
 		});
 		connect(m_group, &Group::sItemsMoved, this,

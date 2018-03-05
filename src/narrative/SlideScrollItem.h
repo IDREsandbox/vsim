@@ -34,6 +34,7 @@ public:
 signals:
 	void sTransitionDoubleClick();
 	void sDurationDoubleClick();
+	//void sTransitionClick();
 
 	void sThumbnailDirty();
 

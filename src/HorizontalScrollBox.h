@@ -43,9 +43,11 @@ public:
 	void clear();
 
 	// selection - these set selection, lastSelected, and emit events
-	virtual void setSelection(const std::set<int>& set, int last);
+	void setSelection(const std::set<int>& set, int last);
+	void setLastSelected(int last);
 	int getLastSelected();
 	const std::set<int>& getSelection();
+	Selection *selection() const;
 
 	// positioning
 	void setSpacing(int);
@@ -69,8 +71,10 @@ public:
 
 signals:
 	void sSelectionChange();
+	void sLastSelectedChange();
 	void sMove(const std::vector<std::pair<size_t, size_t>> &);
 
+	void sSingleSelect(int index);
 	void sSelectionCleared(); // hack for joining these boxes together
 
 protected:
