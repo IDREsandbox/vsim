@@ -59,19 +59,6 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	setMIMEType("application/x-scrollitem");
 
 	m_selection = new Selection(this);
-	//connect(m_selection, &Selection::sAdded, this, [this](int i) {
-	//	if (i >= m_items.size()) return;
-	//	m_items[i]->select(true);
-	//});
-	//connect(m_selection, &Selection::sRemoved, this, [this](int i) {
-	//	if (i >= m_items.size()) return;
-	//	m_items[i]->select(false);
-	//});
-	//connect(m_selection, &Selection::sChanged, this, &HorizontalScrollBox::sSelectionChange);
-	//connect(m_selection, &Selection::sSingleSelect, this, [this](int index) {
-	//	qDebug() << "single select";
-	//	emit sSingleSelect(index);
-	//});
 
 	m_selection_stack = new SelectionStack(this);
 	connect(m_selection_stack, &SelectionStack::sAdded, this, [this](int i) {
@@ -294,7 +281,7 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 		&& diff.manhattanLength() > m_minimum_drag_dist
 		&& m_drag == nullptr
 		&& m_drag_press_index >= 0
-		&& m_selection_stack->data().size() > 0
+		&& m_selection_stack->size() >= 0
 		&& m_mouse_down
 		&& m_dragging_enabled
 		) {
@@ -385,6 +372,7 @@ void HorizontalScrollBox::itemMouseReleaseEvent(QMouseEvent * event, int index)
 		}
 	}
 	m_mouse_down = false;
+	m_drag_press_index = -1;
 }
 
 void HorizontalScrollBox::itemMouseDoubleClickEvent(QMouseEvent * event, int index)

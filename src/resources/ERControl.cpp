@@ -10,7 +10,7 @@
 #include "resources/ERDisplay.h"
 #include "resources/ERFilterArea.h"
 #include "MainWindow.h"
-#include "OSGViewerWidget.h"
+#include "ERBar.h"
 #include "resources/ERFilterSortProxy.h"
 #include "CheckableListProxy.h"
 #include "VSimApp.h"
@@ -29,8 +29,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	m_local_proxy(nullptr)
 {
 	m_undo_stack = m_app->getUndoStack();
-	m_global_box = m_window->erGlobal();
-	m_local_box = m_window->erLocal();
+	m_global_box = m_window->erBar()->ui.global;
+	m_local_box = m_window->erBar()->ui.local;
 	m_global_selection = m_global_box->selectionStack();
 	m_local_selection = m_local_box->selectionStack();
 	m_display = m_window->erDisplay();
@@ -55,15 +55,15 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	// new
 	connect(m_local_box, &ERScrollBox::sNew, this, &ERControl::newER);
 	connect(m_global_box, &ERScrollBox::sNew, this, &ERControl::newER);
-	connect(window->newERButton(), &QAbstractButton::clicked, this, &ERControl::newER);
+	connect(m_window->erBar()->ui.newERButton, &QAbstractButton::clicked, this, &ERControl::newER);
 	// delete
 	connect(m_local_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
 	connect(m_global_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
-	connect(window->deleteERButton(), &QAbstractButton::clicked, this, &ERControl::deleteER);
+	connect(m_window->erBar()->ui.deleteERButton, &QAbstractButton::clicked, this, &ERControl::deleteER);
 	// edit
 	connect(m_local_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
 	connect(m_global_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
-	connect(window->editERButton(), &QAbstractButton::clicked, this, &ERControl::editERInfo);
+	connect(m_window->erBar()->ui.editERButton, &QAbstractButton::clicked, this, &ERControl::editERInfo);
 	// open
 	connect(m_local_box, &ERScrollBox::sOpen, this, &ERControl::openResource);
 	connect(m_global_box, &ERScrollBox::sOpen, this, &ERControl::openResource);
@@ -83,6 +83,13 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	});
 	connect(m_global_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
 		m_local_selection->clear();
+	});
+
+	// hide/show filter area
+	connect(m_window->erBar()->ui.filter, &QPushButton::pressed, this,
+		[this]() {
+		ERFilterArea *area = m_window->erFilterArea();
+		area->setVisible(!area->isVisible());
 	});
 	load(ers);
 }

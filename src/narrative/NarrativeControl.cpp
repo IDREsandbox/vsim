@@ -339,12 +339,9 @@ void NarrativeControl::setNarrative(int index)
 
 bool NarrativeControl::openSlide(int index, bool go, bool fade)
 {
-	qDebug() << "Narrative Control - set slide" << index;
-
 	NarrativeSlide *slide = getSlide(m_current_narrative, index);
 
 	if (m_current_slide == index) {
-		qDebug() << "slide already open";
 		return true;
 	}
 

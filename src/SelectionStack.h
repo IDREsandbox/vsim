@@ -23,6 +23,7 @@ public:
 	void rangeSelect(int to);
 
 	// info
+	size_t size() const;
 	bool has(int index) const;
 	bool empty() const;
 	int last() const;

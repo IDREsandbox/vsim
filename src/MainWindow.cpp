@@ -85,11 +85,6 @@ MainWindow::MainWindow(QWidget *parent)
 	m_er_filter_area->setObjectName("erFilterArea");
 	m_er_filter_area->hide();
 
-	connect(ui->filter, &QPushButton::pressed, this,
-		[this]() {
-		m_er_filter_area->setVisible(!m_er_filter_area->isVisible());
-	});
-
 	// vsimapp file stuff
 	connect(ui->actionNew, &QAction::triggered, this, &MainWindow::actionNew);
 	connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::actionOpen);
@@ -108,6 +103,11 @@ MainWindow::MainWindow(QWidget *parent)
 		File.open(QFile::ReadOnly);
 		QString style = QLatin1String(File.readAll());
 		setStyleSheet(style);
+	});
+	connect(ui->actionEditor_Debug, &QAction::triggered, this, [this]() {
+		qInfo() << "Editor debug";
+		qInfo() << "focus object" << QApplication::focusObject();
+		qInfo() << "focus widget" << QApplication::focusWidget();
 	});
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
 
@@ -193,12 +193,10 @@ MainWindow::MainWindow(QWidget *parent)
 	// show slides or narratives
 	connect(ui->topBar->ui.open, &QPushButton::clicked, this,
 		[this]() {
-			qDebug() << "open";
 			this->ui->topBar->showSlides();
 		});
 	connect(ui->topBar->ui.left_2, &QPushButton::clicked, this,
 		[this]() {
-			qDebug() << "goback";
 			this->ui->topBar->showNarratives();
 		});
 
@@ -225,8 +223,8 @@ void MainWindow::setApp(VSimApp * vsim)
 	redo_action->setShortcuts(QKeySequence::Redo);
 	ui->menuEdit->addAction(undo_action);
 	ui->menuEdit->addAction(redo_action);
-	connect(undo_action, &QAction::triggered, this, []() {qDebug() << "main undo"; });
-	connect(redo_action, &QAction::triggered, this, []() {qDebug() << "main redo"; });
+	connect(undo_action, &QAction::triggered, this, []() {qInfo() << "undo"; });
+	connect(redo_action, &QAction::triggered, this, []() {qInfo() << "redo"; });
 
 	connect(this, &MainWindow::sOpenFile, m_app, &VSimApp::openVSim);
 	connect(this, &MainWindow::sSaveFile, m_app, &VSimApp::saveVSim);
@@ -276,6 +274,11 @@ NarrativeCanvas * MainWindow::fadeCanvas() const
 	return m_fade_canvas;
 }
 
+ERBar * MainWindow::erBar() const
+{
+	return ui->bottomBar;
+}
+
 ModelOutliner * MainWindow::outliner() const
 {
 	return m_outliner;
@@ -291,16 +294,6 @@ editButtons * MainWindow::labelButtons() const
 	return m_label_buttons;
 }
 
-ERScrollBox * MainWindow::erLocal() const
-{
-	return ui->local;
-}
-
-ERScrollBox * MainWindow::erGlobal() const
-{
-	return ui->global;
-}
-
 ERDisplay * MainWindow::erDisplay() const
 {
 	return m_er_display;
@@ -311,26 +304,6 @@ ERFilterArea * MainWindow::erFilterArea() const
 	return m_er_filter_area;
 }
 
-QAbstractButton * MainWindow::newERButton() const
-{
-	return ui->newERButton;
-}
-
-QAbstractButton * MainWindow::deleteERButton() const
-{
-	return ui->deleteERButton;
-}
-
-QAbstractButton * MainWindow::editERButton() const
-{
-	return ui->editERButton;
-}
-
-QAbstractButton * MainWindow::filterERButton() const
-{
-	return ui->filter;
-}
-
 MainWindowTopBar *MainWindow::topBar() const
 {
 	return ui->topBar;
@@ -339,7 +312,7 @@ MainWindowTopBar *MainWindow::topBar() const
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 {
 	if (event->mimeData()->hasText()) {
-		qDebug() << "drag enter " << event->mimeData()->text();
+		qInfo() << "drag enter " << event->mimeData()->text();
 		event->acceptProposedAction();
 	}
 }
@@ -348,7 +321,7 @@ void MainWindow::dropEvent(QDropEvent * event)
 {
 	if (event->mimeData()->hasText()) {
 		QString text = event->mimeData()->text();
-		qDebug() << "drop file: " << text;
+		qInfo() << "drop file: " << text;
 
 		if (text.startsWith("file:///")) {
 			text.remove(0, 8); // remove the prefix
@@ -412,17 +385,15 @@ void MainWindow::actionNew()
 }
 void MainWindow::actionOpen()
 {
-	qDebug("open action");
 	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim",
 		m_app->getCurrentDirectory(),
 		"VSim files (*.vsim;*.osg;*.osgt;*.osgb; );;"
 		"Model files (*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
 	if (filename == "") {
-		qDebug() << "open cancel";
 		return;
 	}
-	qDebug() << "opening - " << filename;
+	qInfo() << "opening - " << filename;
 
 	//m_vsimapp->openVSim(filename.toStdString());
 	emit sOpenFile(filename.toStdString());
@@ -438,7 +409,6 @@ void MainWindow::actionSave()
 
 	QString ext = info.suffix();
 	if (ext != "vsim" && ext != "osgt" && ext != "osgb") {
-		qDebug() << "save something funny";
 		actionSaveAs();
 		return;
 	}
@@ -447,32 +417,28 @@ void MainWindow::actionSave()
 
 void MainWindow::actionSaveAs()
 {
-	qDebug("saveas");
 	QString filename = QFileDialog::getSaveFileName(this, "Save VSim",
 		m_app->getFileName().c_str(),
 		"VSim file (*.vsim;*.osgt;*.osgb);;");
 	if (filename == "") {
-		qDebug() << "saveas cancel";
 		return;
 	}
-	qDebug() << "saving as - " << filename;
-	//
+	qInfo() << "saving as - " << filename;
+
 	//m_vsimapp->saveVSim(filename.toStdString());
 	emit sSaveFile(filename.toStdString());
 }
 
 void MainWindow::actionImportModel()
 {
-	qDebug("import");
 	QString filename = QFileDialog::getOpenFileName(this, "Import Model",
 		m_app->getCurrentDirectory(),
 		"Model files (*.vsim;*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
 	if (filename == "") {
-		qDebug() << "import cancel";
 		return;
 	}
-	qDebug() << "importing - " << filename;
+	qInfo() << "importing - " << filename;
 	//m_vsimapp->importModel(filename.toStdString());
 	emit sImportModel(filename.toStdString());
 }

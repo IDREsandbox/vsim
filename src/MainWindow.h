@@ -23,6 +23,7 @@ class ERFilterArea;
 class ERScrollBox;
 class NarrativeCanvas;
 class editButtons;
+class ERBar;
 
 class MainWindow : public QMainWindow
 {
@@ -44,19 +45,13 @@ public:
 	NarrativeCanvas *fadeCanvas() const;
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
-
 	editButtons *labelButtons() const;
 	// TextToolbar *textToolbar() const;
 
 	// er
-	ERScrollBox *erLocal() const;
-	ERScrollBox *erGlobal() const;
+	ERBar *erBar() const;
 	ERDisplay *erDisplay() const;
 	ERFilterArea *erFilterArea() const;
-	QAbstractButton *newERButton() const;
-	QAbstractButton *deleteERButton() const;
-	QAbstractButton *editERButton() const;
-	QAbstractButton *filterERButton() const;
 
 	// event stuff
 	virtual void dragEnterEvent(QDragEnterEvent *event) override;

@@ -80,6 +80,11 @@ void SelectionStack::rangeSelect(int to)
 	emit sChanged();
 }
 
+size_t SelectionStack::size() const
+{
+	return m_stack.size();
+}
+
 bool SelectionStack::has(int index) const
 {
 	return m_selection.find(index) != m_selection.end();
