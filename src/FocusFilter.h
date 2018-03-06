@@ -8,6 +8,9 @@ public:
 	FocusFilter(QObject *parent = nullptr);
 
 	bool eventFilter(QObject * o, QEvent * e) override;
+
+signals:
+	void sFocusIn(QObject *o, QEvent *e);
 };
 
 #endif

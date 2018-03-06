@@ -90,6 +90,13 @@ void VSimApp::setWindow(MainWindow *)
 //	return State();
 //}
 
+void VSimApp::setState(State s)
+{
+	// hide/show er stuff
+
+	//if (s == EDIT_CANVAS)
+}
+
 void VSimApp::play()
 {
 	//m_narrative_control->enableCanvas(true);

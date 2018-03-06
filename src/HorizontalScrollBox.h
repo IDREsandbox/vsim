@@ -30,7 +30,6 @@ public:
 	HorizontalScrollBox(QWidget* parent);
 
 	// Items
-
 	// this scroll box takes ownership, so just construct with nullptr
 	//void addItem(ScrollBoxItem*);
 	//void insertItem(int position, ScrollBoxItem*);
@@ -70,6 +69,8 @@ public:
 
 	// viewport resize event filter
 	bool eventFilter(QObject *o, QEvent *e);
+
+	QScrollArea *scrollArea();
 
 signals:
 	//void sSelectionChange();

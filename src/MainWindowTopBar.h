@@ -1,7 +1,7 @@
 ﻿#ifndef MAINWINDOWTOPBAR_H
 #define MAINWINDOWTOPBAR_H
 #include <QFrame>
-#include "ui_mainwindowtopbar.h"
+#include "ui_MainWindowTopBar.h"
 
 class MainWindowTopBar : public QFrame {
 	Q_OBJECT
@@ -17,6 +17,9 @@ public:
 
 	// TODO
 	//void enableEdting(bool);
+signals:
+	void sNarrativesPoked();
+	void sSlidesPoked();
 
 public:
 	Ui::MainWindowTopBar ui;

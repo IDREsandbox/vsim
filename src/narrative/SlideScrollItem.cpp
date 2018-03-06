@@ -147,7 +147,6 @@ void SlideScrollItem::setSlide(NarrativeSlide *slide)
 	connect(slide, &NarrativeSlide::sThumbnailChanged, this, &SlideScrollItem::setImage);
 	//connect(slide, &NarrativeSlide::sThumbnailDirty, this, &SlideScrollItem::sThumbnailDirty);
 	connect(slide, &NarrativeSlide::sThumbnailDirty, this, [this]() {
-		qDebug() << "thumbnail dirty" << getIndex();
 		emit sThumbnailDirty();
 	});
 

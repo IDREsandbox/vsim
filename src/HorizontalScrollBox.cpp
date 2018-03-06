@@ -151,6 +151,11 @@ bool HorizontalScrollBox::eventFilter(QObject * o, QEvent * e)
 	return false;
 }
 
+QScrollArea * HorizontalScrollBox::scrollArea()
+{
+	return m_scroll;
+}
+
 void HorizontalScrollBox::setSpacing(int space)
 {
 	m_spacing = space;

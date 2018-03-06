@@ -37,6 +37,9 @@ public:
 
 	QGraphicsScene *scene() const;
 
+signals:
+	void sPoked();
+
 protected:
 	void resizeEvent(QResizeEvent* event) override;
 

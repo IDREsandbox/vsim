@@ -33,13 +33,27 @@ public:
 	VSimApp(MainWindow*);
 	void setWindow(MainWindow*);
 
+	enum State {
+		EDIT_NARS,
+		EDIT_SLIDES,
+		EDIT_CANVAS,
+		EDIT_ERS,
+		EDIT_FLYING,
+		PLAY_WAIT_CLICK,
+		PLAY_WAIT_TIME,
+		PLAY_TRANSITION,
+		PLAY_END,
+		PLAY_FLYING
+	};
 	enum PlayState {
 		FLYING,
 		WAIT_TIME,
 		WAIT_CLICK,
 		END
 	};
-	//State state() const;
+	State state() const;
+
+	void setState(State s);
 
 	void play();
 	void stop();
@@ -118,6 +132,7 @@ private:
 
 	QTimer *m_slide_timer;
 
+	State m_state;
 	bool m_play_state;
 	bool m_playing;
 	bool m_editing_narrative;

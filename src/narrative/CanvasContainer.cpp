@@ -7,6 +7,7 @@
 #include <QTextCursor>
 #include <QApplication>
 #include <QTextDocument>
+#include "FocusFilter.h"
 
 CanvasContainer::CanvasContainer(QWidget *parent)
 	: QFrame(parent)
@@ -27,6 +28,10 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 	m_view->setObjectName("canvasView");
 
 	m_view->installEventFilter(this);
+
+	FocusFilter *ff = new FocusFilter(this);
+	connect(ff, &FocusFilter::sFocusIn, this, &CanvasContainer::sPoked);
+	m_view->installEventFilter(ff);
 
 	m_manipulator = new TransformManipulator(m_scene, m_view, m_view);
 	m_manipulator->hide();
@@ -299,7 +304,6 @@ TransformManipulator::TransformManipulator(CanvasScene * scene, QGraphicsView *v
 	m_resizing(false)
 {
 	setGeometry(0, 0, 10, 10);
-	//setStyleSheet("background-color:rgba(0, 0, 255, 100);");
 	setCursor(Qt::CursorShape::SizeAllCursor);
 
 	// buttons
@@ -607,7 +611,7 @@ void TextRect::setEditable(bool enable)
 		m_text->setTextInteractionFlags(Qt::TextEditorInteraction);
 	}
 	else {
-		m_text->setTextInteractionFlags(Qt::TextBrowserInteraction);
+		m_text->setTextInteractionFlags(Qt::LinksAccessibleByMouse);
 	}
 }
 
@@ -685,6 +689,8 @@ void TextItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option
 void TextItem::focusOutEvent(QFocusEvent * event)
 {
 	QGraphicsTextItem::focusOutEvent(event);
+
+	// setModified causes a new undo/redo to occur when resuming editing
 	document()->setModified(false);
 }
 

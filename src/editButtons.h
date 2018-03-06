@@ -14,6 +14,7 @@ signals:
 	//void sNewLabel(std::string);
 	//void sDeleteLabel(int);
 	//void sEditExit();
+	void sPoked();
 
 public:
 	Ui::editButtons ui;

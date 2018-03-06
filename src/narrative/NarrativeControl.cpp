@@ -878,7 +878,6 @@ void NarrativeControl::execEditLabel()
 
 void NarrativeControl::dirtyCurrentSlide()
 {
-	qDebug() << "dirtying current slide";
 	NarrativeSlide *slide = getCurrentSlide();
 	if (slide) slide->dirtyThumbnail();
 }
