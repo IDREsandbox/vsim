@@ -248,19 +248,25 @@ const ECategory *EResource::getCategory() const
 void EResource::setCategory(ECategory *category) 
 {
 	ECategory *old_cat = m_category.get();
-	if (old_cat) disconnect(old_cat, 0, this, 0);
+	if (old_cat) {
+		old_cat->removeResource(this);
+	}
 
 	m_category = category;
 
 	if (m_category.get()) {
 		m_category->addResource(this);
-		// deletion consistency
-		connect(this, &QObject::destroyed, m_category.get(),
-			[this]() {
-			m_category->removeResource(this);
-		});
 	}
-
 	emit sCategoryChanged(old_cat, category);
+}
+
+int EResource::getCategoryIndex() const
+{
+	return m_category_index;
+}
+
+void EResource::setCategoryIndex(int index)
+{
+	m_category_index = index;
 }
 

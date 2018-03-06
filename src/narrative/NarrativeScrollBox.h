@@ -1,18 +1,18 @@
 ﻿#ifndef NARRATIVESCROLLBOX_H
 #define NARRATIVESCROLLBOX_H
 
-#include "HorizontalScrollBox.h"
-#include "NarrativeScrollItem.h"
-#include "narrative/NarrativeGroup.h"
+#include "GroupScrollBox.h"
 
-class NarrativeScrollBox : public HorizontalScrollBox {
+class NarrativeScrollBox : public GroupScrollBox {
 	Q_OBJECT
 
 public:
 	NarrativeScrollBox(QWidget * parent = nullptr);
-	~NarrativeScrollBox();
 
 	ScrollBoxItem *createItem(osg::Node *node) override;
+
+protected:
+	void itemMouseDoubleClickEvent(QMouseEvent *event, int index) override;
 
 signals:
 	void sInfo();

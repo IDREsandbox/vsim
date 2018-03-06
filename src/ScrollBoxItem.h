@@ -10,14 +10,14 @@
 class ScrollBoxItem : public QFrame {
 	Q_OBJECT
 public:
-	ScrollBoxItem(QWidget *parent);
+	ScrollBoxItem(QWidget *parent = nullptr);
 	
 	// interface for controller is in derived classes
 	
 	// interface for gui
 	// index is used for pretty numbering and selection signaling
 	virtual void setIndex(int index);
-	virtual int getIndex();
+	virtual int getIndex() const;
 
 	void select(bool s);
 
@@ -28,15 +28,11 @@ public:
 	//void setColor(QColor c);
 	//void setSelectColor(QColor c);
 
-	virtual int widthFromHeight(int height);
+	virtual int widthFromHeight(int height) const;
 
 signals:
 	void sMousePressEvent(QMouseEvent *event, int index);
 	void sMouseReleaseEvent(QMouseEvent *event, int index);
-
-protected:
-	virtual void mousePressEvent(QMouseEvent *event);
-	virtual void mouseReleaseEvent(QMouseEvent *event);
 
 private:
 	int m_index = -1;

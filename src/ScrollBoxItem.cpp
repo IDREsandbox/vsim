@@ -13,7 +13,7 @@ void ScrollBoxItem::setIndex(int index)
 	m_index = index;
 }
 
-int ScrollBoxItem::getIndex()
+int ScrollBoxItem::getIndex() const
 {
 	return m_index;
 }
@@ -30,21 +30,9 @@ void ScrollBoxItem::select(bool s)
 	}
 }
 
-int ScrollBoxItem::widthFromHeight(int height)
+int ScrollBoxItem::widthFromHeight(int height) const
 {
-	return (16.0f / 9.0f) * height;
-}
-
-void ScrollBoxItem::mousePressEvent(QMouseEvent *event)
-{
-	//qDebug() << "ScrollBoxItem mouse press event " << event->type() << m_index; // << this->text();
-	emit sMousePressEvent(event, m_index);
-}
-
-void ScrollBoxItem::mouseReleaseEvent(QMouseEvent * event)
-{
-	//qDebug() << "ScrollBoxItem mouse release event ScrollBoxItem" << event->type() << m_index; // << this->text();
-	emit sMouseReleaseEvent(event, m_index);
+	return height;
 }
 
 void ScrollBoxItem::setDeselectStyle(QString style)

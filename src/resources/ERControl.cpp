@@ -14,6 +14,7 @@
 #include "resources/ERFilterSortProxy.h"
 #include "CheckableListProxy.h"
 #include "VSimApp.h"
+#include "SelectionStack.h"
 
 #include <QDesktopServices>
 
@@ -30,6 +31,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	m_undo_stack = m_app->getUndoStack();
 	m_global_box = m_window->erGlobal();
 	m_local_box = m_window->erLocal();
+	m_global_selection = m_global_box->selectionStack();
+	m_local_selection = m_local_box->selectionStack();
 	m_display = m_window->erDisplay();
 	m_filter_area = m_window->erFilterArea();
 
@@ -74,11 +77,12 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	connect(m_global_box, &ERScrollBox::sSelectionChange, this, &ERControl::onSelectionChange);
 
 	// mash the two selections together
+	// if one clears everything, then clear the other one too
 	connect(m_local_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
-		m_global_box->setSelection({}, -1);
+		m_global_selection->clear();
 	});
 	connect(m_global_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
-		m_local_box->setSelection({}, -1);
+		m_local_selection->clear();
 	});
 	load(ers);
 }
@@ -142,20 +146,18 @@ void ERControl::deleteER()
 	std::set<int> selection = getCombinedSelection();
 	if (selection.empty()) return;
 
-	for (auto i : selection) qDebug() << "delete ER" << i;
-
-	uint size = m_ers->getNumChildren();
-
 	m_undo_stack->beginMacro("Delete Resources");
-	for (auto i = selection.rbegin(); i != selection.rend(); ++i) {
-		if (*i >= (int)size) {
-			qWarning() << "Out of range selection when deleting ERs" << *i << "/" << size;
-			continue;
-		}
-		EResource *res = m_ers->getResource(*i);
-		m_undo_stack->push(new EResource::SetCategoryCommand(res, nullptr));
-		m_undo_stack->push(new Group::DeleteNodeCommand(m_ers, *i));
+	// save old categories, so that we can restore them later
+	auto cmd = new Group::EditCommand(m_ers, selection);
+	for (int i : selection) {
+		EResource *res = m_ers->getResource(i);
+		if (!res) continue;
+		qDebug() << "setting category to null command";
+		new EResource::SetCategoryCommand(res, nullptr, cmd);
 	}
+	m_undo_stack->push(cmd);
+	// remove resources
+	m_undo_stack->push(new Group::RemoveSetCommand(m_ers, selection));
 	m_undo_stack->endMacro();
 }
 
@@ -173,7 +175,7 @@ void ERControl::editERInfo()
 	dlg.init(resource);
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
-		qDebug() << "resource list - cancelled edit on" << active_item;
+		qInfo() << "resource list - cancelled edit on" << active_item;
 		return;
 	}
 
@@ -182,34 +184,37 @@ void ERControl::editERInfo()
 	m_undo_stack->beginMacro("Set Resource Info");
 	//m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
 
+	auto cmd = new Group::EditCommand(m_ers, { active_item });
+
 	if (resource->getResourceName() != dlg.getTitle())
-		m_undo_stack->push(new EResource::SetResourceNameCommand(resource, dlg.getTitle()));
+		new EResource::SetResourceNameCommand(resource, dlg.getTitle(), cmd);
 	if (resource->getAuthor() != dlg.getAuthor())
-		m_undo_stack->push(new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor()));
+		new EResource::SetResourceAuthorCommand(resource, dlg.getAuthor(), cmd);
 	if (resource->getResourceDescription() != dlg.getDescription())
-		m_undo_stack->push(new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription()));
+		new EResource::SetResourceDescriptionCommand(resource, dlg.getDescription(), cmd);
 	if (resource->getResourcePath() != dlg.getPath())
-		m_undo_stack->push(new EResource::SetResourcePathCommand(resource, dlg.getPath()));
+		new EResource::SetResourcePathCommand(resource, dlg.getPath(), cmd);
 	if (resource->getGlobal() != dlg.getGlobal())
-		m_undo_stack->push(new EResource::SetGlobalCommand(resource, dlg.getGlobal()));
+		new EResource::SetGlobalCommand(resource, dlg.getGlobal(), cmd);
 	if (resource->getCopyright() != dlg.getCopyright())
-		m_undo_stack->push(new EResource::SetCopyrightCommand(resource, dlg.getCopyright()));
+		new EResource::SetCopyrightCommand(resource, dlg.getCopyright(), cmd);
 	if (resource->getMinYear() != dlg.getMinYear())
-		m_undo_stack->push(new EResource::SetMinYearCommand(resource, dlg.getMinYear()));
+		new EResource::SetMinYearCommand(resource, dlg.getMinYear(), cmd);
 	if (resource->getMaxYear() != dlg.getMaxYear())
-		m_undo_stack->push(new EResource::SetMaxYearCommand(resource, dlg.getMaxYear()));
+		new EResource::SetMaxYearCommand(resource, dlg.getMaxYear(), cmd);
 	if (resource->getReposition() != dlg.getReposition())
-		m_undo_stack->push(new EResource::SetRepositionCommand(resource, dlg.getReposition()));
+		new EResource::SetRepositionCommand(resource, dlg.getReposition(), cmd);
 	if (resource->getAutoLaunch() != dlg.getAutoLaunch())
-		m_undo_stack->push(new EResource::SetAutoLaunchCommand(resource, dlg.getAutoLaunch()));
+		new EResource::SetAutoLaunchCommand(resource, dlg.getAutoLaunch(), cmd);
 	if (resource->getLocalRange() != dlg.getLocalRange())
-		m_undo_stack->push(new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange()));
+		new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange(), cmd);
 	if (resource->getERType() != dlg.getERType())
-		m_undo_stack->push(new EResource::SetErTypeCommand(resource, dlg.getERType()));
+		new EResource::SetErTypeCommand(resource, dlg.getERType(), cmd);
 	if (resource->getCategory() != dlg.getCategory())
-		m_undo_stack->push(new EResource::SetCategoryCommand(resource, dlg.getCategory()));
+		new EResource::SetCategoryCommand(resource, dlg.getCategory(), cmd);
 
 	//m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
+	m_undo_stack->push(cmd);
 
 	m_undo_stack->endMacro();
 }
@@ -267,14 +272,8 @@ void ERControl::gotoPosition()
 	m_app->setCameraMatrix(resource->getCameraMatrix());
 }
 
-int i;
 void ERControl::onSelectionChange()
 {
-	QString whodunnit;
-	if (QObject::sender() == m_local_box) whodunnit = "local";
-	else whodunnit = "global";
-	i++;
-
 	int new_active = getCombinedLastSelected();
 	if (new_active != m_active_item) {
 		// go to and set
@@ -315,11 +314,11 @@ std::set<int> ERControl::getCombinedSelection()
 {
 	// remap selection to nodes
 	std::set<osg::Node*> nodes;
-	std::set<int> local_selection = m_local_box->getSelection();
+	std::set<int> local_selection = m_local_selection->toSet();
 	for (auto i : local_selection) {
 		nodes.insert(m_local_proxy->child(i));
 	}
-	std::set<int> global_selection = m_global_box->getSelection();
+	std::set<int> global_selection = m_global_selection->toSet();
 	for (auto i : global_selection) {
 		nodes.insert(m_global_proxy->child(i));
 	}
@@ -337,23 +336,25 @@ int ERControl::getCombinedLastSelected()
 	QObject *sender = QObject::sender();
 	ERFilterSortProxy *proxy;
 	int last;
+	int local_last = m_local_selection->last();
+	int global_last = m_global_selection->last();
 	// use the sender to determine the last selected
-	if (sender == m_local_box && m_local_box->getLastSelected() != -1) {
-		last = m_local_box->getLastSelected();
+	if (sender == m_local_box && local_last != -1) {
+		last = local_last;
 		proxy = m_local_proxy;
 	}
-	else if (sender == m_global_box && m_global_box->getLastSelected() != -1) {
-		last = m_global_box->getLastSelected();
+	else if (sender == m_global_box && global_last != -1) {
+		last = global_last;
 		proxy = m_global_proxy;
 	}
 	else {
 		// just take whatever is selected
-		if (m_local_box->getLastSelected() != -1) {
-			last = m_local_box->getLastSelected();
+		if (local_last != -1) {
+			last = local_last;
 			proxy = m_local_proxy;
 		}
 		else {
-			last = m_global_box->getLastSelected();
+			last = global_last;
 			proxy = m_global_proxy;
 		}
 	}

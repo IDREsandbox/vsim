@@ -86,6 +86,9 @@ public:
 	const ECategory *getCategory() const;
 	void setCategory(ECategory *category);
 
+	int getCategoryIndex() const;
+	void setCategoryIndex(int index);
+
 signals:
 	void sResourceNameChanged(const std::string&);
 	void sResourceAuthorChanged(const std::string&);
@@ -198,6 +201,7 @@ private:
 
 	//bool m_inview; // what is this?
 
+	int m_category_index;
 	osg::observer_ptr<ECategory> m_category;
 
 	int m_index;

@@ -5,23 +5,20 @@
 #include <QDialog>
 #include <QInputDialog>
 
-#include "HorizontalScrollBox.h"
-#include "SlideScrollItem.h"
+#include "GroupScrollBox.h"
 #include "NarrativeSlideDurationDialog.h"
-#include "Narrative2.h"
 
-class SlideScrollBox : public HorizontalScrollBox {
+class NarrativeSlide;
+class SlideScrollBox : public GroupScrollBox {
 	Q_OBJECT
 
 public:
 	SlideScrollBox(QWidget * parent = nullptr);
 
-	SlideScrollItem *getItem(int index);
-	
 	ScrollBoxItem *createItem(osg::Node *node) override;
 
-	std::vector<SlideScrollItem*> getDirtySlides(); // slides whose thumbnails need to be drawn
-	
+	std::vector<NarrativeSlide*> getDirtySlides(); // slides whose thumbnails need to be drawn
+
 signals:
 	void sSetTransitionDuration();
 	void sSetDuration(); // 0 if pause at node
@@ -29,12 +26,15 @@ signals:
 	void sNewSlide(int);
 	void sEditSlide();
 	void sSetCamera();
+	void sGoto(int);
+	//void sTransitionTo(int);
 
 	void sThumbnailsDirty();
 
 protected:
-
 	void paintEvent(QPaintEvent *event);
+
+	void itemMousePressEvent(QMouseEvent *event, int index) override;
 
 private:
 	// slide menu

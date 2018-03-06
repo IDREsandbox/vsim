@@ -22,7 +22,7 @@ void ERScrollItem::setER(EResource *er)
 
 		setCat(er->category());
 		connect(er, &EResource::sCategoryChanged, this,
-			[this](ECategory *cat) {
+			[this](ECategory *old_cat, ECategory *cat) {
 			setCat(cat);
 		});
 	}
@@ -70,9 +70,6 @@ void ERScrollItem::setColor(QColor color)
 	}
 
 	QString s = "background:rgb(%1, %2, %3);";
-	//qDebug() << "STYLESHEET - \n" << "ERScrollItem { "
-	//	+ s.arg(color.red()).arg(color.green()).arg(color.blue())
-	//	+ "}";
 	setDeselectStyle(QString()
 		+ "background:" + colorString(color) + ";"
 		+ "color:" + colorString(text_color) + ";"

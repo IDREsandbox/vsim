@@ -1,4 +1,4 @@
-#include "./CanvasContainer.h"
+#include "narrative/CanvasContainer.h"
 #include <QDebug>
 #include <QStyleOptionGraphicsItem>
 #include <QMouseEvent>
@@ -9,7 +9,7 @@
 #include <QTextDocument>
 
 CanvasContainer::CanvasContainer(QWidget *parent)
-	: QWidget(parent)
+	: QFrame(parent)
 {
 	m_view = new QGraphicsView(this);
 	m_scene = new CanvasScene(this);
@@ -22,33 +22,14 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 	m_view->horizontalScrollBar()->setEnabled(false);
 	m_view->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
 	m_view->verticalScrollBar()->setEnabled(false);
-	//m_view->setDragMode(QGraphicsView::RubberBandDrag);
-	//m_view->setDragMode(QGraphicsView::DragMode::NoDrag);
+	m_view->setDragMode(QGraphicsView::RubberBandDrag);
+	m_view->setDragMode(QGraphicsView::DragMode::NoDrag);
 	m_view->setObjectName("canvasView");
-	m_view->setStyleSheet(
-		"#canvasView {"
-		"	border-style: none;"
-		"	background: rgba(0, 0, 0, 0);"
-		"}"
-	);
+
 	m_view->installEventFilter(this);
 
 	m_manipulator = new TransformManipulator(m_scene, m_view, m_view);
 	m_manipulator->hide();
-
-	// giant rect
-	m_giant_rect = new QGraphicsRectItem();
-	m_giant_rect->setRect(-10, -10, 20, 20);
-	m_giant_rect->setBrush(QBrush(QColor(0, 255, 0, 0)));
-	m_giant_rect->setPen(QPen(QColor(0, 0, 0), 0));
-	m_scene->addItem(m_giant_rect);
-
-	// quarters rectangle
-	m_center_rect = new QGraphicsRectItem();
-	m_center_rect->setRect(-.5, -.5, 1, 1);
-	m_center_rect->setBrush(QBrush(QColor(255, 0, 0, 0)));
-	m_center_rect->setPen(QPen(QBrush(), 0, Qt::PenStyle::NoPen));
-	m_scene->addItem(m_center_rect);
 
 	QGraphicsItem::GraphicsItemFlags flags;
 	flags.setFlag(QGraphicsItem::GraphicsItemFlag::ItemIsFocusable, true);
@@ -57,6 +38,8 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 
 	setBaseHeight(800);
 	setEditable(false);
+
+	clear();
 
 	connect(m_scene, &QGraphicsScene::changed, this,
 		[this]() {
@@ -167,6 +150,17 @@ bool CanvasContainer::eventFilter(QObject * obj, QEvent * e)
 void CanvasContainer::clear()
 {
 	m_scene->clear();
+	// giant rect
+	m_giant_rect = new QGraphicsRectItem();
+	m_giant_rect->setRect(-10, -10, 20, 20);
+	m_giant_rect->setBrush(QBrush(QColor(0, 255, 0, 0)));
+	m_giant_rect->setPen(QPen(QColor(0, 0, 0), 0));
+	m_scene->addItem(m_giant_rect);
+}
+
+QGraphicsScene * CanvasContainer::scene() const
+{
+	return m_scene;
 }
 
 CanvasScene::CanvasScene(QObject * parent)
@@ -421,6 +415,7 @@ void TransformManipulator::previewMove(QPoint current_point)
 		item->setRect(r.x() + diff.x(), r.y() + diff.y(),
 			r.width(), r.height());
 	}
+	auto rect = m_view->sceneRect();
 }
 
 void TransformManipulator::endMove()

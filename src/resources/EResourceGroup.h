@@ -9,6 +9,7 @@
 
 class ECategoryGroup;
 class EResource;
+class ECategory;
 
 class EResourceGroup : public Group {
 	Q_OBJECT
@@ -24,6 +25,9 @@ public:
 	void setCategories(ECategoryGroup *categories);
 
 	EResource *getResource(int);
+
+	void preSave();
+	void postLoad();
 
 private:
 	osg::ref_ptr<ECategoryGroup> m_categories;

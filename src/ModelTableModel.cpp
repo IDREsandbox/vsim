@@ -7,6 +7,7 @@ ModelTableModel::ModelTableModel(QObject *parent)
 	: GroupModel(parent),
 	m_model_group(nullptr)
 {
+	setHierarchal(true);
 }
 
 void ModelTableModel::setGroup(Group * group)

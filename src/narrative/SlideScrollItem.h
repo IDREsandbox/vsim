@@ -19,12 +19,12 @@ public:
 	void setDuration(bool stay, float duration); // 0 for stay, >0 for timed
 
 	// thumbnail stuff
-	bool thumbnailDirty();
-	void setThumbnailDirty(bool dirty);
+	//bool thumbnailDirty();
+	//void setThumbnailDirty(bool dirty);
 
 	// overrides 
 	virtual void setIndex(int index);
-	virtual int widthFromHeight(int height);
+	virtual int widthFromHeight(int height) const;
 	virtual void colorFocus(bool color);
 	virtual void colorSelect(bool color);
 
@@ -34,6 +34,7 @@ public:
 signals:
 	void sTransitionDoubleClick();
 	void sDurationDoubleClick();
+	//void sTransitionClick();
 
 	void sThumbnailDirty();
 

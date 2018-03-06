@@ -1,10 +1,11 @@
-﻿
-#include "SlideScrollBox.h"
+﻿#include "SlideScrollBox.h"
+#include "SlideScrollItem.h"
+#include "narrative/NarrativeSlide.h"
+#include "Selection.h"
 
 SlideScrollBox::SlideScrollBox(QWidget * parent) 
-	: HorizontalScrollBox(parent)
+	: GroupScrollBox(parent)
 {
-	
 	// slide menu
 	m_bar_menu = new QMenu("Slide context menu", this);
 	m_slide_menu = new QMenu("Slide context menu 2", this);
@@ -43,11 +44,6 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	setMIMEType("application/x-narrative");
 }
 
-SlideScrollItem *SlideScrollBox::getItem(int index)
-{
-	return dynamic_cast<SlideScrollItem*>(HorizontalScrollBox::getItem(index));
-}
-
 ScrollBoxItem * SlideScrollBox::createItem(osg::Node * node)
 {
 	NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(node);
@@ -60,19 +56,25 @@ ScrollBoxItem * SlideScrollBox::createItem(osg::Node * node)
 	connect(item, &SlideScrollItem::sDurationDoubleClick, this, &SlideScrollBox::sSetDuration);
 	connect(item, &SlideScrollItem::sTransitionDoubleClick, this, &SlideScrollBox::sSetTransitionDuration);
 	connect(item, &SlideScrollItem::sThumbnailDirty, this, &SlideScrollBox::sThumbnailsDirty);
+	//connect(item, &SlideScrollItem::sTransitionClick, this, [this]() {
+	//	auto item = dynamic_cast<SlideScrollItem*>(QObject::sender());
+	//	emit sTransitionTo(item->getIndex());
+	//});
 
-	item->setThumbnailDirty(true); // hmm
+	//item->setThumbnailDirty(true); // hmm
 
 	return item;
 }
 
-std::vector<SlideScrollItem*> SlideScrollBox::getDirtySlides()
+std::vector<NarrativeSlide*> SlideScrollBox::getDirtySlides()
 {
-	std::vector<SlideScrollItem*> items;
-	for (auto item : m_items) {
-		SlideScrollItem *slide_item = dynamic_cast<SlideScrollItem*>(item);
-		if (slide_item->thumbnailDirty()) {
-			items.push_back(slide_item);
+	if (!m_group) return {};
+
+	std::vector<NarrativeSlide*> items;
+	for (size_t i = 0; i < m_group->getNumChildren(); i++) {
+		NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(m_group->child(i));
+		if (slide && slide->thumbnailDirty()) {
+			items.push_back(slide);
 		}
 	}
 	return items;
@@ -85,6 +87,14 @@ void SlideScrollBox::paintEvent(QPaintEvent * event)
 		emit sThumbnailsDirty();
 	}
 	HorizontalScrollBox::paintEvent(event);
+}
+
+void SlideScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
+{
+	HorizontalScrollBox::itemMousePressEvent(event, index);
+	if (event->button() == Qt::LeftButton && m_selection->contains(index)) {
+		emit sGoto(index);
+	}
 }
 
 

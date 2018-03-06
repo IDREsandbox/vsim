@@ -46,9 +46,9 @@ if (WIN32)
   endif()
 
   set(TP_BIN "" CACHE FILEPATH "where are the osg dependency binaries (zlib and stuff)")
-  if(NOT IS_DIRECTORY ${THIRDPARTY_BINARY_DIR})
-    message("TP_BIN: ${THIRDPARTY_BINARY_DIR}")
-    message(FATAL_ERROR "Must define THIRDPARTY_BINARY_DIR")
+  if(NOT IS_DIRECTORY ${TP_BIN})
+    message("TP_BIN: ${TP_BIN}")
+    message(FATAL_ERROR "Must define TP_BIN")
   endif()
 endif()
 
@@ -83,6 +83,9 @@ add_definitions(${Qt5Test_DEFINITIONS})
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
+# dll copy stuff
+add_custom_target(CopyDLLs)
+
 # source
 message(${PROJECT_SOURCE_DIR})
 message("binary dir " ${PROJECT_BINARY_DIR})
@@ -90,7 +93,7 @@ file(GLOB_RECURSE VSim_src
   src/*.h
   src/*.cpp
   )
-list(FILTER VSim_src EXCLUDE REGEX ".*src/windows.*")
+list(FILTER VSim_src EXCLUDE REGEX ".*src/windows/*")
 list(FILTER VSim_src EXCLUDE REGEX ".*src/main.cpp")
 file(GLOB_RECURSE VSim_headers
   src/*.h
@@ -109,8 +112,12 @@ message("SERIALIZERS:\n" "${VSim_serializers}")
 #   "src/narratives/*.cpp"
 #   )
 
+# add_custom_target(Meme)
+
 add_library(VSim_objects ${VSim_src})
 add_executable(VSim src/main.cpp ${VSim_serializers})
+add_dependencies(VSim CopyDLLs)
+# add_dependencies(VSim Meme);
 
 # final add executable
 
@@ -118,18 +125,107 @@ add_executable(VSim src/main.cpp ${VSim_serializers})
 target_link_libraries(VSim_objects Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
 target_link_libraries(VSim VSim_objects)
 
-# tests
-set(TEST_LIST "")
-file(GLOB TEST_SEARCH tests/*.cpp)
-foreach(TEST_SRC ${TEST_SEARCH})
-  get_filename_component(TEST_NAME ${TEST_SRC} NAME_WE)
-  list(APPEND TEST_LIST ${TEST_NAME})
-endforeach(TEST_SRC)
-message("TESTS:\n" "${TEST_LIST}")
-foreach(TEST_LIST ${tests})
-  add_executable(${test} EXCLUDE_FROM_ALL tests/${test}.cpp)
+# gui tests (experiments) ##################
+# add_subdirectory("experiments")
+
+set(NumberSlider_src
+  src/NumberSlider.cpp
+  experiments/NumberSlider_experiment/NumberSlider_experiment.cpp
+)
+message("exp sources ----:\n" "${NumberSlider_src}")
+add_executable(NumberSlider_experiment ${NumberSlider_src})
+target_link_libraries(NumberSlider_experiment Qt5::Widgets)
+
+set(HorizontalScrollBox_src
+  src/HorizontalScrollBox.h
+  src/HorizontalScrollBox.cpp
+  src/ScrollBoxItem.h
+  src/ScrollBoxItem.cpp
+  src/Selection.h
+  src/Selection.cpp
+  src/SelectionStack.h
+  src/SelectionStack.cpp
+  src/Util.h
+  src/Util.cpp
+  experiments/HorizontalScrollBox_experiment/HorizontalScrollBox_experiment.cpp
+)
+add_executable(HorizontalScrollBox_experiment ${HorizontalScrollBox_src})
+target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets)
+target_link_libraries(HorizontalScrollBox_experiment ${OPENSCENEGRAPH_LIBRARIES})
+
+set(Canvas_src
+  src/narrative/CanvasContainer.h
+  src/narrative/CanvasContainer.cpp
+  experiments/Canvas_experiment/Canvas_experiment.cpp
+)
+add_executable(Canvas_experiment ${Canvas_src})
+target_link_libraries(Canvas_experiment Qt5::Widgets)
+target_link_libraries(Canvas_experiment ${OPENSCENEGRAPH_LIBRARIES})
+
+# tests ####################################
+
+# util test & dependencies
+set(Util_src
+  tests/Util_test.cpp
+  src/Util.cpp
+  src/Util.h)
+add_executable(Util_test ${Util_src})
+add_test(NAME Util_test COMMAND Util_test)
+target_link_libraries(Util_test Qt5::Widgets Qt5::Test)
+target_link_libraries(Util_test ${OPENSCENEGRAPH_LIBRARIES})
+
+# group test
+set(Group_src
+  tests/Group_test.cpp
+  src/Group.cpp
+  src/Group.h)
+add_executable(Group_test ${Group_src})
+add_test(NAME Group_test COMMAND Group_test)
+target_link_libraries(Group_test Qt5::Widgets Qt5::Test)
+target_link_libraries(Group_test ${OPENSCENEGRAPH_LIBRARIES})
+
+# er filter proxy test
+set(ERFilterSortProxy_src
+  tests/ERFilterSortProxy_test.cpp
+  src/Group.cpp
+  src/Group.h
+  src/resources/ERFilterSortProxy.h
+  src/resources/ERFilterSortProxy.cpp
+  src/resources/ECategory.h
+  src/resources/ECategory.cpp
+  src/resources/ECategoryGroup.h
+  src/resources/ECategoryGroup.cpp
+  src/resources/EResource.h
+  src/resources/EResource.cpp
+  src/resources/EResourceGroup.h
+  src/resources/EResourceGroup.cpp
+  src/CheckableListProxy.h
+  src/CheckableListProxy.cpp
+  src/GroupModel.h
+  src/GroupModel.cpp
+  src/Util.h
+  src/Util.cpp
+  src/Command.h
+  )
+add_executable(ERFilterSortProxy_test ${ERFilterSortProxy_src})
+add_test(NAME ERFilterSortProxy_test COMMAND ERFilterSortProxy_test)
+target_link_libraries(ERFilterSortProxy_test Qt5::Widgets Qt5::Test)
+target_link_libraries(ERFilterSortProxy_test ${OPENSCENEGRAPH_LIBRARIES})
+
+set(TEST_LIST
+  Selection_test
+  )
+# file(GLOB TEST_SEARCH tests/*.cpp)
+# foreach(TEST_SRC ${TEST_SEARCH})
+#   get_filename_component(TEST_NAME ${TEST_SRC} NAME_WE)
+#   list(APPEND TEST_LIST ${TEST_NAME})
+# endforeach(TEST_SRC)
+
+foreach(test ${TEST_LIST})
+  message("add test: " ${test})
+  # EXCLUDE_FROM_ALL
+  add_executable(${test} tests/${test}.cpp)
   add_test(NAME ${test} COMMAND ${test})
-  add_dependencies(${test} VSim_objects)
   target_link_libraries(${test} VSim_objects)
   target_link_libraries(${test} Qt5::Widgets Qt5::Test)
   target_link_libraries(${test} ${OPENSCENEGRAPH_LIBRARIES})
@@ -160,11 +256,11 @@ if (WIN32)
   foreach(DLL ${OSG_DLL_LIST})
     set(PREFIX ${OSG_BIN}/${DLL})
    add_custom_command(
-     TARGET VSim
+     TARGET CopyDLLs
      PRE_BUILD
      COMMAND ${CMAKE_COMMAND} -E copy_if_different
          ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-         $<TARGET_FILE_DIR:VSim>
+         $<CONFIG>
    )
     install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
   endforeach(DLL)
@@ -184,21 +280,21 @@ if (WIN32)
 
   # create the plugin directory
   add_custom_command(
-    TARGET VSim
+    TARGET CopyDLLs
     PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory
-        $<TARGET_FILE_DIR:VSim>/${OSG_PLUGIN_PREFIX}
+        $<CONFIG>/${OSG_PLUGIN_PREFIX}
   )
 
   # copy OSG plugin dlls
   foreach(DLL ${PLUGIN_LIST})
     set(PREFIX ${OSG_BIN}/${OSG_PLUGIN_PREFIX}/${DLL})
    add_custom_command(
-     TARGET VSim
+     TARGET CopyDLLs
      POST_BUILD
      COMMAND ${CMAKE_COMMAND} -E copy_if_different
          ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-         $<TARGET_FILE_DIR:VSim>/${OSG_PLUGIN_PREFIX}/
+         $<CONFIG>/${OSG_PLUGIN_PREFIX}/
    )
     install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION "${OSG_PLUGIN_PREFIX}/")
   endforeach(DLL)
@@ -213,11 +309,11 @@ if (WIN32)
   foreach(DLL ${THIRDPARTYDLLS})
     set(PREFIX ${TP_BIN}/${DLL})
     add_custom_command(
-     TARGET VSim
+     TARGET CopyDLLs
      PRE_BUILD
      COMMAND ${CMAKE_COMMAND} -E copy_if_different
          ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-         $<TARGET_FILE_DIR:VSim>
+         $<CONFIG>
     )
     install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
   endforeach(DLL)
@@ -227,15 +323,15 @@ if (WIN32)
       Qt5::Core
       Qt5::Gui
       Qt5::Widgets
-	  Qt5::Test
+	    Qt5::Test
       )
     # copy to the Release directory
     add_custom_command(
-      TARGET VSim
+      TARGET CopyDLLs
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		$<TARGET_FILE:${dll}>
-        $<TARGET_FILE_DIR:VSim>
+        $<TARGET_FILE:${dll}>
+        $<CONFIG>
     )
 	# if you want the debug dll location
 	#get_target_property(debug_path ${dll} IMPORTED_LOCATION_DEBUG)
@@ -256,7 +352,7 @@ if (WIN32)
     get_filename_component(directory ${rel} DIRECTORY)
     # finally add it to the install
     install(FILES $<TARGET_FILE:${dll}> DESTINATION ${directory})
-    message("imported target: ${dll}, path: ${dll_location}")
+    #message("imported target: ${dll}, path: ${dll_location}")
   endforeach(dll)
 
   # windows platform

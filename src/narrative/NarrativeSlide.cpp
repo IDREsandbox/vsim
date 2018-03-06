@@ -8,26 +8,23 @@ NarrativeSlide::NarrativeSlide()
 	m_camera_matrix(),
 	m_duration(4.0f),
 	m_stay_on_node(false),
-	m_transition_duration(4.0f)
+	m_transition_duration(4.0f),
+	m_thumbnail_dirty(true)
 {
 }
 
 NarrativeSlide::NarrativeSlide(const NarrativeSlide & n, const osg::CopyOp & copyop)
-	: Group(n, copyop),
-	m_camera_matrix(n.m_camera_matrix),
-	m_duration(n.m_duration),
-	m_stay_on_node(n.m_stay_on_node),
-	m_transition_duration(n.m_transition_duration)
 {
 }
 
 NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransition * old_transition)
-	: Group(),
-	m_camera_matrix(old->getViewMatrix()),
-	m_duration(old->getPauseAtNode()),
-	m_stay_on_node(old->getStayOnNode()),
-	m_transition_duration(old_transition->getDuration())
+	: NarrativeSlide()
 {
+	m_camera_matrix = old->getViewMatrix();
+	m_duration = old->getPauseAtNode();
+	m_stay_on_node = old->getStayOnNode();
+	m_transition_duration = old_transition->getDuration();
+
 	// convert old labels into new ones
 	qDebug() << "converting old slide" << old->getNumChildren();
 	for (uint i = 0; i < old->getNumChildren(); i++) {
@@ -127,6 +124,7 @@ void NarrativeSlide::setCameraMatrix(const osg::Matrixd & matrix)
 {
 	m_camera_matrix = matrix;
 	emit sCameraMatrixChanged(matrix);
+	dirtyThumbnail();
 }
 
 float NarrativeSlide::getDuration() const
@@ -169,11 +167,26 @@ void NarrativeSlide::setTransitionDuration(float tduration)
 	emit sTransitionDurationChanged(tduration);
 }
 
-float NarrativeSlide::getFoo() const
+void NarrativeSlide::dirtyThumbnail()
 {
-	return 0.0f;
+	m_thumbnail_dirty = true;
+	emit sThumbnailDirty();
 }
 
-void NarrativeSlide::setFoo(float)
+bool NarrativeSlide::thumbnailDirty() const
 {
+	return m_thumbnail_dirty;
+}
+
+const QImage & NarrativeSlide::getThumbnail() const
+{
+	// TODO: insert return statement here
+	return m_thumbnail;
+}
+
+void NarrativeSlide::setThumbnail(QImage thumbnail)
+{
+	m_thumbnail = thumbnail;
+	m_thumbnail_dirty = false;
+	emit sThumbnailChanged(m_thumbnail);
 }

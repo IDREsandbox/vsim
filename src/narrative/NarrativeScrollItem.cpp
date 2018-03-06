@@ -27,17 +27,8 @@ void NarrativeScrollItem::setNarrative(Narrative2 *narrative)
 		[this](const std::string &text) {ui.author->setText(QString::fromStdString(text)); });
 }
 
-void NarrativeScrollItem::mousePressEvent(QMouseEvent * event)
+int NarrativeScrollItem::widthFromHeight(int height) const
 {
-	//if (event->type() == QEvent::MouseButtonDblClick) {
-	//	qDebug() << "nsi double click";
-	//	emit sDoubleClick();
-	//}
-	ScrollBoxItem::mousePressEvent(event);
-}
-
-void NarrativeScrollItem::mouseDoubleClickEvent(QMouseEvent * event)
-{
-	emit sDoubleClick();
+	return 16.0/9.0 * height;
 }
 

@@ -1,12 +1,14 @@
 #include "resources/ERFilterSortProxy.h"
 #include <QDebug>
 #include <set>
+#include <unordered_set>
 
 #include "resources/ECategory.h"
 #include "resources/EResource.h"
 #include "resources/ECategoryGroup.h"
 #include "CheckableListProxy.h"
 #include "GroupModel.h"
+#include "Util.h"
 
 ERFilterSortProxy::ERFilterSortProxy(Group *base)
 	: m_base(nullptr),
@@ -23,19 +25,79 @@ ERFilterSortProxy::ERFilterSortProxy(Group *base)
 	sortBy(NONE);
 }
 
+void ERFilterSortProxy::setBase(Group *base)
+{
+	if (m_base != nullptr) disconnect(m_base, 0, this, 0);
+
+	m_base = base;
+	if (base == nullptr) return;
+
+	reload();
+
+	// listen to new set
+	connect(base, &Group::sInsertedSet, this,
+		[this](const std::vector<std::pair<size_t, osg::Node*>> &nodes) {
+		
+		// fix indices
+		std::set<int> insertions_set;
+		for (auto &pair : nodes) insertions_set.insert(pair.first);
+		m_map_to_base = Util::fixIndices(m_map_to_base, insertions_set);
+
+		checkAndInsertSet(insertions_set);
+	});
+
+	// listen to delete
+	connect(base, &Group::sRemovedSet, this,
+		[this](const std::vector<size_t> &removals) {
+
+		std::unordered_set<size_t> removed(removals.begin(), removals.end());
+
+		std::vector<size_t> map_removals;
+		// remove stuff from our map
+		for (size_t i = 0; i < m_map_to_base.size(); i++) {
+			if (removed.find(m_map_to_base[i]) != removed.end()) {
+				map_removals.push_back(i);
+			}
+		}
+		Util::multiRemove(&m_map_to_base, map_removals);
+
+		// fix up indices
+		std::set<int> removals_set;
+		for (size_t i : removals) removals_set.insert(i);
+		m_map_to_base = Util::fixIndicesRemove(m_map_to_base, removals_set);
+
+		emit sRemovedSet(map_removals);
+	});
+	connect(base, &Group::sReset, this,
+		[this]() {
+		reload();
+	});
+	connect(base, &Group::sEdited, this,
+		[this](const std::set<int> &indices) {
+
+		// decompose into items to remove and items to insert
+		recheck(indices);
+
+		auto new_edited = baseToLocal(indices);
+		if (new_edited.size() > 0) emit sEdited(new_edited);
+	});
+}
+
 void ERFilterSortProxy::sortBy(SortBy method)
 {
 	if (m_sort_by == method) return;
 	m_sort_by = method;
-	if (method == NONE) {
-		rescan();
-	}
-	else if (method == ALPHABETICAL) {
-		rescan();
-	}
-	else if (method == DISTANCE) {
 
-	}
+	reload();
+	//if (method == NONE) {
+	//	rescan();
+	//}
+	//else if (method == ALPHABETICAL) {
+	//	rescan();
+	//}
+	//else if (method == DISTANCE) {
+
+	//}
 }
 
 void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
@@ -56,13 +118,12 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 	// remove -> remove from set
 	connect(cats, &QAbstractItemModel::rowsAboutToBeRemoved, this,
 		[this, cats](const QModelIndex &parent, int first, int last) {
-
 		for (int i = first; i <= last; i++) {
 			ECategory *cat = GroupModel::get<ECategory*>(cats, i);
 			if (!cat) continue;
 			m_categories_enabled.erase(cat);
 		}
-		rescan();
+		reload();
 	});
 
 	// change -> add/remove accordingly
@@ -83,7 +144,7 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 		for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
 			updateCategorySet(i);
 		}
-		rescan();
+		reload();
 	});
 
 	// reset
@@ -92,24 +153,28 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 		for (int i = 1; i < cats->rowCount(); i++) {
 			updateCategorySet(i);
 		}
-		rescan();
+		reload();
 	});
+
 }
 
 void ERFilterSortProxy::setFiletypes(CheckableListProxy * types)
 {
 	if (m_type_filters != nullptr) disconnect(m_type_filters, 0, this, 0);
 	m_type_filters = types;
+	reload();
 }
 
 void ERFilterSortProxy::showLocal(bool local)
 {
 	m_show_local = local;
+	reload();
 }
 
 void ERFilterSortProxy::showGlobal(bool global)
 {
 	m_show_global = global;
+	reload();
 }
 
 //ERFilterSortProxy::SortBy ERFilterSortProxy::getSortMethod() const
@@ -117,16 +182,16 @@ void ERFilterSortProxy::showGlobal(bool global)
 //	return m_sort_by;
 //}
 
-void ERFilterSortProxy::rescan()
-{
-	clear();
-
-	if (!m_base) return;
-
-	for (int i = 0; i < (int)m_base->getNumChildren(); i++) {
-		checkAndAdd(i);
-	}
-}
+//void ERFilterSortProxy::rescan()
+//{
+//	clear();
+//
+//	if (!m_base) return;
+//
+//	for (int i = 0; i < (int)m_base->getNumChildren(); i++) {
+//		checkAndAdd(i);
+//	}
+//}
 
 bool ERFilterSortProxy::accept(osg::Node *node)
 {
@@ -165,39 +230,166 @@ bool ERFilterSortProxy::accept(osg::Node *node)
 
 bool ERFilterSortProxy::lessThan(int left, int right)
 {
-	if (m_sort_by == NONE) {
-		return left < right;
-	}
-	else if (m_sort_by == ALPHABETICAL) {
+	if (m_sort_by == ALPHABETICAL) {
 		EResource *lres = dynamic_cast<EResource*>(m_base->child(left));
 		EResource *rres = dynamic_cast<EResource*>(m_base->child(right));
 		if (!lres || !rres) return false;
 		return lres->getResourceName() < rres->getResourceName();
 	}
+	return left < right;
+}
+
+ERFilterSortProxy::LessThanFunc ERFilterSortProxy::lessThanFunc() const
+{
+	if (m_sort_by == ALPHABETICAL) {
+		return ERFilterSortProxy::lessThanAlphabetical;
+	}
+	return nullptr;
+}
+
+bool ERFilterSortProxy::lessThanDistance(osg::Node * left, osg::Node * right)
+{
 	return false;
 }
 
-void ERFilterSortProxy::checkAndAdd(int base_index)
+bool ERFilterSortProxy::lessThanAlphabetical(osg::Node * left, osg::Node * right)
 {
-	EResource *res = dynamic_cast<EResource*>(m_base->child(base_index));
-	if (!res) return;
-	bool ok = accept(res);
-	if (ok) {
-		add(base_index);
-	}
-	else {
-		remove(base_index);
-	}
+	EResource *lres = dynamic_cast<EResource*>(left);
+	EResource *rres = dynamic_cast<EResource*>(right);
+	if (!lres || !rres) return false;
+	return lres->getResourceName() < rres->getResourceName();
 }
 
+//void ERFilterSortProxy::checkAndAdd(int base_index)
+//{
+//	EResource *res = dynamic_cast<EResource*>(m_base->child(base_index));
+//	if (!res) return;
+//	bool ok = accept(res);
+//	if (ok) {
+//		add(base_index);
+//	}
+//	else {
+//		remove(base_index);
+//	}
+//}
+
+std::set<int> ERFilterSortProxy::baseToLocal(const std::set<int> base_indices) const
+{
+	// now forward the edited signals
+	// map from base indices to our indices
+	std::unordered_map<int, int> map;
+	for (size_t i = 0; i < m_map_to_base.size(); i++) {
+		size_t base_index = m_map_to_base[i];
+		map[base_index] = i;
+	}
+	// set of edited indices (ours)
+	std::set<int> local;
+	for (int base : base_indices) {
+		auto it = map.find(base);
+		if (it != map.end()) {
+			local.insert(it->second);
+		}
+	}
+	return local;
+}
+
+void ERFilterSortProxy::recheck(const std::set<int>& base_indices)
+{
+	checkAndRemoveSet(base_indices);
+	checkAndInsertSet(base_indices);
+}
+
+void ERFilterSortProxy::checkAndInsertSet(const std::set<int> &base_indices)
+{
+	std::unordered_set<size_t> already_mapped(m_map_to_base.begin(), m_map_to_base.end());
+
+	// check if nodes are already in this proxy
+	// check if node passes the filter
+	std::vector<int> nodes_filtered;
+	for (int index : base_indices) {
+		osg::Node *node = m_base->child(index);
+		if (already_mapped.find(index) == already_mapped.end()
+			&& accept(node)) {
+			nodes_filtered.push_back(index);
+		}
+	}
+
+	if (nodes_filtered.size() == 0) {
+		return;
+	}
+
+	// sort new guys
+	std::function<bool(int, int)> lt = [this](int l, int r) { return lessThan(l, r); };
+	std::sort(nodes_filtered.begin(), nodes_filtered.end(), lt);
+
+	// base before
+	//qDebug() << "map before";
+	//for (int i : m_map_to_base) {
+	//	EResource *res = dynamic_cast<EResource*>(m_base->child(i));
+	//	qDebug() << i << ":" << res->getResourceName().c_str();
+	//}
+
+	// merge
+	std::vector<int> result;
+	std::merge(m_map_to_base.begin(), m_map_to_base.end(),
+		nodes_filtered.begin(), nodes_filtered.end(),
+		std::back_inserter(result), lt);
+
+	//qDebug() << "map after";
+	//for (int i : result) {
+	//	EResource *res = dynamic_cast<EResource*>(m_base->child(i));
+	//	qDebug() << i << ":" << res->getResourceName().c_str();
+	//}
+
+	// where were nodes inserted?
+	std::vector<std::pair<size_t, osg::Node*>> insertions;
+	size_t old_i = 0;
+	for (size_t i = 0; i < result.size(); i++) {
+		if (old_i >= m_map_to_base.size() || m_map_to_base[old_i] != result[i]) {
+			osg::Node *new_node = m_base->child(result[i]);
+			insertions.push_back({ i, new_node });
+		}
+		else {
+			old_i++;
+		}
+	}
+
+	//qDebug() << "insertions at";
+	//for (auto &p: insertions) {
+	//	EResource *res = dynamic_cast<EResource*>(p.second);
+	//	qDebug() << p.first << ":" << res->getResourceName().c_str();
+	//}
+
+	m_map_to_base = result;
+	emit sInsertedSet(insertions);
+}
+void ERFilterSortProxy::checkAndRemoveSet(const std::set<int> &base_indices)
+{
+	// check if node passes the filter
+	std::set<int> nodes_to_remove_base;
+	for (int index : base_indices) {
+		osg::Node *node = m_base->child(index);
+		if (!accept(node)) {
+			nodes_to_remove_base.insert(index);
+		}
+	}
+	if (nodes_to_remove_base.size() == 0) return;
+
+	// convert to local, check if nodes are already in this proxy
+	std::set<int> nodes_to_remove = baseToLocal(nodes_to_remove_base);
+	std::vector<size_t> removals(nodes_to_remove.begin(), nodes_to_remove.end());
+
+	Util::multiRemove(&m_map_to_base, removals);
+	emit sRemovedSet(removals);
+}
 void ERFilterSortProxy::onResourceChange(EResource * res)
 {
-	// find the base index
-	int base_index = m_base->indexOf(res);
+	//// find the base index
+	//int base_index = m_base->indexOf(res);
 
-	// readd it
-	remove(base_index);
-	checkAndAdd(base_index);
+	//// readd it
+	//remove(base_index);
+	//checkAndAdd(base_index);
 }
 
 void ERFilterSortProxy::enableRange(bool enable)
@@ -215,48 +407,6 @@ void ERFilterSortProxy::setTitleSearch(const std::string & title)
 	m_title_search = title;
 }
 
-void ERFilterSortProxy::setBase(Group *base)
-{
-	if (m_base != nullptr) disconnect(m_base, 0, this, 0);
-	qInfo() << "Setting proxy <<" << this << "base to" << base;
-
-	m_base = base;
-	if (base == nullptr) return;
-
-	// remove everything signal
-	clear();
-
-	// track all of the existing items
-	for (unsigned int i = 0; i < base->getNumChildren(); i++) {
-		track(m_base->child(i));
-		checkAndAdd(i);
-	}
-
-	// listen to new
-	connect(base, &Group::sNew, this, [this](int index) {
-		// fix up indices
-		// everything after the new item is shifted right 1
-		for (int i = 0; i < m_map_to_base.size(); i++) {
-			if (m_map_to_base[i] >= index) {
-				m_map_to_base[i] += 1;
-			}
-		}
-		track(m_base->child(index));
-		checkAndAdd(index);
-	});
-	connect(base, &Group::sDelete, this, [this](int index) {
-		for (int i = m_map_to_base.size() - 1; i >= 0; i--) {
-			if (m_map_to_base[i] == index) {
-				// this item got deleted
-				m_map_to_base.erase(m_map_to_base.begin() + i);
-				emit sDelete(i);
-			}
-			else if (m_map_to_base[i] > index) {
-				m_map_to_base[i] -= 1;
-			}
-		}
-	});
-}
 //
 //void ERFilterSortProxy::setCategories(ECategoryGroup * categories)
 //{
@@ -327,35 +477,64 @@ void ERFilterSortProxy::debug()
 	}
 }
 
-void ERFilterSortProxy::add(int base_index)
-{
-	std::function<bool(int, int)> m_func = [this](int l, int r) { return lessThan(l, r); };
-	auto it = std::lower_bound(m_map_to_base.begin(), m_map_to_base.end(), base_index, m_func);
-	if (it != m_map_to_base.end() && *it == base_index) {
-		qWarning() << "base index" << *it << "already added to sorted proxy";
-		return;
-	}
-	int new_index = it - m_map_to_base.begin();
-	m_map_to_base.insert(it, base_index);
+//void ERFilterSortProxy::add(int base_index)
+//{
+//	std::function<bool(int, int)> m_func = [this](int l, int r) { return lessThan(l, r); };
+//	auto it = std::lower_bound(m_map_to_base.begin(), m_map_to_base.end(), base_index, m_func);
+//	if (it != m_map_to_base.end() && *it == base_index) {
+//		qWarning() << "base index" << *it << "already added to sorted proxy";
+//		return;
+//	}
+//	int new_index = it - m_map_to_base.begin();
+//	m_map_to_base.insert(it, base_index);
+//
+//	emit sNew(new_index);
+//}
+//
+//void ERFilterSortProxy::remove(int base_index)
+//{
+//	auto it = std::find(m_map_to_base.begin(), m_map_to_base.end(), base_index);
+//	if (it == m_map_to_base.end()) return;
+//	int index = it - m_map_to_base.begin();
+//	m_map_to_base.erase(it);
+//	emit sDelete(index);
+//}
 
-	emit sNew(new_index);
+void ERFilterSortProxy::clearInternal()
+{
+	if (!m_base) return;
+	//emit sBeginReset();
+	// disconnect everything
+	for (size_t i = 0; i < m_base->getNumChildren(); i++) {
+		osg::Node *node = m_base->child(i);
+		EResource *res = dynamic_cast<EResource*>(node);
+		disconnect(this, 0, res, 0);
+	}
+	m_map_to_base.clear();
+	//emit sReset();
 }
 
-void ERFilterSortProxy::remove(int base_index)
+void ERFilterSortProxy::reload()
 {
-	auto it = std::find(m_map_to_base.begin(), m_map_to_base.end(), base_index);
-	if (it == m_map_to_base.end()) return;
-	int index = it - m_map_to_base.begin();
-	m_map_to_base.erase(it);
-	emit sDelete(index);
-}
+	if (!m_base) return;
+	emit sBeginReset();
+	clearInternal();
 
-void ERFilterSortProxy::clear()
-{
-	for (int i = m_map_to_base.size() - 1; i >= 0; i--) {
-		m_map_to_base.pop_back();
-		emit sDelete(i);
+	std::vector<int> nodes_filtered;
+	for (size_t i = 0; i < m_base->getNumChildren(); i++) {
+		osg::Node *node = m_base->child(i);
+		// track(node);
+		if (accept(node)) {
+			nodes_filtered.push_back(i);
+		}
 	}
+
+	std::function<bool(int, int)> lt = [this](int l, int r) { return lessThan(l, r); };
+	std::sort(nodes_filtered.begin(), nodes_filtered.end(), lt);
+
+	m_map_to_base = nodes_filtered;
+
+	emit sReset();
 }
 
 void ERFilterSortProxy::updateCategorySet(int model_row)
@@ -402,7 +581,7 @@ void ERFilterSortProxy::track(osg::Node *node)
 	if (!res) return;
 
 	// listen to the new item
-	connect(res, &EResource::sResourceNameChanged, this, [this, res]() { onResourceChange(res); });
-	connect(res, &EResource::sCategoryChanged, this, [this, res]() { onResourceChange(res); });
-	connect(res, &EResource::sGlobalChanged, this, [this, res]() { onResourceChange(res); });
+	//connect(res, &EResource::sResourceNameChanged, this, [this, res]() { onResourceChange(res); });
+	//connect(res, &EResource::sCategoryChanged, this, [this, res]() { onResourceChange(res); });
+	//connect(res, &EResource::sGlobalChanged, this, [this, res]() { onResourceChange(res); });
 }

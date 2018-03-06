@@ -34,15 +34,15 @@ public:
 	const EResourceGroup *getResources() const;
 	void setResources(EResourceGroup *resources);
 
+	void postLoad();
+	void preSave();
+
 	void debug();
 
 private:
 	osg::ref_ptr<NarrativeGroup> m_narratives;
 	osg::ref_ptr<ModelGroup> m_models;
 	osg::ref_ptr<EResourceGroup> m_resources;
-	
-
-	int foox;
 };
 
 class DebugVisitor : public osg::NodeVisitor {

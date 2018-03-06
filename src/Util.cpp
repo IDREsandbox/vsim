@@ -5,6 +5,7 @@
 #include <osg/Matrix>
 #include <osg/io_utils>
 #include <iostream>
+#include <chrono>
 
 // ext must be of the form "txt".
 std::string Util::addExtensionIfNotExist(const std::string& filename, const std::string& ext)
@@ -125,6 +126,16 @@ osg::Vec4 Util::colorToVec(const QColor & color)
 	return osg::Vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF());
 }
 
+QString Util::colorToStylesheet(QColor color)
+{
+	QString style = "background:rgba("
+		+ QString::number(color.red()) + ","
+		+ QString::number(color.green()) + ","
+		+ QString::number(color.blue()) + ","
+		+ QString::number(color.alpha()) + ");";
+	return style;
+}
+
 QString Util::setToString(std::set<int> set)
 {
 	QString str = "";
@@ -133,6 +144,132 @@ QString Util::setToString(std::set<int> set)
 		str += " ";
 	}
 	return str;
+}
+
+std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<int>& insertions)
+{
+	size_t max_index = 0;
+	for (int x : fixme) {
+		max_index = std::max((size_t)x, max_index);
+	}
+	// build delta_array, [+0, +0, +1, +1, +2, +2, +2]
+	std::vector<size_t> delta_array(max_index + 1, 0);
+	size_t shift = 0;
+	auto it = insertions.begin();
+	size_t old_index = 0;
+	size_t new_index = 0;
+	while (old_index < delta_array.size()) {
+		if (it == insertions.end() || new_index != *it) {
+			delta_array[old_index] = shift;
+			old_index++;
+			new_index++;
+		}
+		else {
+			shift++;
+			it++;
+			new_index++;
+		}
+	}
+	//for (size_t i = 0; i < delta_array.size(); i++) {
+	//	if (it != insertions.end() && i == *it) {
+	//		shift++;
+	//		it++;
+	//	}
+	//	delta_array[i] = shift;
+	//}
+	std::vector<int> result(fixme);
+	for (size_t i = 0; i < result.size(); i++) {
+		size_t old_index = result[i];
+		result[i] = old_index + delta_array[old_index];
+	}
+	return result;
+	// Set version, I was wondering which would be faster
+	// Should be O(nlogn) vs O(n), apparently this is really slow even for small n
+	// ex: insert [1, 4, 6]
+	// -> (1: 0, 4: 1, 6: 2)
+	// < 1 gets bumped +0
+	// >= 1, < 4 gets bumped +1
+	// >= 4, < 6 gets bumped +2
+	//std::map<int, int> index_to_delta;
+	//int delta = 0;
+	//for (int index : insertions) {
+	//	index_to_delta[index] = delta;
+	//	delta++;
+	//}
+	//std::vector<int> result(fixme);
+	//for (size_t i = 0; i < result.size(); i++) {
+	//	int x = result[i];
+	//	auto it = std::upper_bound(insertions.begin(), insertions.end(), x);
+	//	int d;
+	//	if (it == insertions.end()) {
+	//		d = insertions.size();
+	//	}
+	//	else {
+	//		d = index_to_delta[*it];
+	//	}
+	//	result[i] = x + d;
+	//}
+	//return result;
+}
+
+std::vector<int> Util::fixIndicesRemove(const std::vector<int>& fixme, const std::set<int>& changes)
+{
+	if (fixme.size() == 0) return {};
+	int max = *std::max_element(fixme.begin(), fixme.end());
+	std::vector<int> delta_array(max + 1, 0);
+	int shift = 0;
+	for (size_t i = 0; i < delta_array.size(); i++) {
+		if (changes.find(i) != changes.end()) {
+			shift--;
+		}
+		delta_array[i] = shift;
+	}
+
+	std::vector<int> result(fixme);
+	for (size_t i = 0; i < result.size(); i++) {
+		size_t old_index = result[i];
+		result[i] = old_index + delta_array[old_index];
+	}
+
+	return result;
+}
+
+std::vector<std::pair<size_t, size_t>> Util::clumpify(const std::vector<size_t>& indices)
+{
+	if (indices.size() == 0) return {};
+	size_t start = indices[0];
+	size_t prev = indices[0];
+	std::vector<std::pair<size_t, size_t>> output;
+
+	for (size_t x : indices) {
+		// continue case
+		if (x == prev + 1) {
+		}
+		// make range
+		else if (x > prev + 1) {
+			output.push_back({start, prev});
+			start = x;
+		}
+		// first item, or a bug if unsorted
+		else {
+		}
+		prev = x;
+	}
+	// always make range at end
+	output.push_back({ start, prev });
+	return output;
+}
+
+std::chrono::high_resolution_clock::time_point tic_time;
+void Util::tic()
+{
+	tic_time = std::chrono::high_resolution_clock::now();
+}
+
+double Util::toc()
+{
+	auto now = std::chrono::high_resolution_clock::now();
+	return std::chrono::duration<double, std::milli>(now - tic_time).count();
 }
 
 // credits to stackoverflow

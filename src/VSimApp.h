@@ -14,6 +14,7 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QUndoStack>
+#include <vector>
 
 #include "VSimRoot.h"
 
@@ -23,6 +24,7 @@ class ERControl;
 class MainWindow;
 class VSimRoot;
 class ModelTableModel;
+class Narrative2;
 
 class VSimApp : public QObject
 {
@@ -31,14 +33,32 @@ public:
 	VSimApp(MainWindow*);
 	void setWindow(MainWindow*);
 
-	osgViewer::Viewer* getViewer();
+	enum PlayState {
+		FLYING,
+		WAIT_TIME,
+		WAIT_CLICK,
+		END
+	};
+	//State state() const;
 
-	// this is called on every new, reset, etc
-	bool initWithVSim(osg::Node *root);
-	bool init();
+	void play();
+	void stop();
+	void timerExpire();
+	void moveTimerExpire();
+	void transitionTo(int index);
+	void startFlying();
+	void editNarratives();
+	void next();
+	void prev();
 
 	void update(float dt_sec);
 
+	osgViewer::Viewer* getViewer();
+
+	// this is called on every new, reset, etc
+	bool initWithVSim(osg::Node *root = nullptr);
+
+	// file stuff
 	void addModel(osg::Node *node, const std::string &name);
 	bool importModel(const std::string& filename); // TODO: more complicated logic with vsim
 	bool openVSim(const std::string& filename);
@@ -46,6 +66,8 @@ public:
 	bool saveCurrentVSim();
 	bool exportNarratives();
 	bool importNarratives();
+	bool exportResources();
+	bool importResources();
 
 	VSimRoot *getRoot() const;
 
@@ -93,6 +115,15 @@ private:
 	osg::Matrixd m_camera_start;
 	osg::Matrixd m_camera_target;
 	QTimer *m_camera_timer;
+
+	QTimer *m_slide_timer;
+
+	bool m_play_state;
+	bool m_playing;
+	bool m_editing_narrative;
+	bool m_flying;
+	bool m_transitioning;
+	int m_transition_to;
 };
 
 //extern VSimApp* g_vsimapp;

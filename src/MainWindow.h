@@ -41,6 +41,7 @@ public:
 
 	MainWindowTopBar *topBar() const;
 	NarrativeCanvas *canvas() const;
+	NarrativeCanvas *fadeCanvas() const;
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
 
@@ -103,6 +104,7 @@ public:
 
 	OSGViewerWidget *m_osg_widget;
 	NarrativeCanvas *m_canvas;
+	NarrativeCanvas *m_fade_canvas;
 	ERDisplay *m_er_display;
 	ERFilterArea *m_er_filter_area;
 	ModelOutliner *m_outliner;

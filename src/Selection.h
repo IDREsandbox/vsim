@@ -31,6 +31,7 @@ signals:
 	void sAdded(int); // an index was added
 	void sRemoved(int); // an index was removed
 	void sChanged(); // anything changes
+	void sSingleSelect(int);
 
 public:
 	// If sel items are deleted from total, then this returns the item after

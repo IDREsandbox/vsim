@@ -17,7 +17,7 @@ class CheckableListProxy;
 class ERFilterSortProxy : public Group {
 	Q_OBJECT
 public:
-	ERFilterSortProxy(Group *base);
+	ERFilterSortProxy(Group *base = nullptr);
 
 	void setBase(Group *base);
 
@@ -29,9 +29,17 @@ public:
 	//virtual bool insertChild(unsigned int index, Node *child) override;
 	//virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
 
+	typedef bool(*LessThanFunc)(osg::Node*, osg::Node*);
+	static bool lessThanNone(osg::Node *left, osg::Node *right);
+	static bool lessThanDistance(osg::Node *left, osg::Node *right);
+	static bool lessThanAlphabetical(osg::Node *left, osg::Node *right);
+	virtual bool lessThan(int left, int right);
+
 	// filter sort overrides
 	virtual bool accept(osg::Node *node);
-	virtual bool lessThan(int left, int right);
+
+	virtual LessThanFunc lessThanFunc() const;
+
 	virtual void track(osg::Node *node);
 
 	EResource *getResource(int index) const;
@@ -63,18 +71,30 @@ public:
 
 protected:
 	// add/removes a resource if it is acceptable
-	void checkAndAdd(int base_index);
+	//void checkAndAdd(int base_index);
+
+	//
+	//void checkAndAddSet(std::set<int> base_index);
+	std::set<int> baseToLocal(const std::set<int> base_indices) const;
+
+	void recheck(const std::set<int> &base_indices);
+	void checkAndInsertSet(const std::set<int> &insertions);
+	void checkAndRemoveSet(const std::set<int> &base_indices);
 
 	// when a name changes or something
 	void onResourceChange(EResource *res);
 
 	// rechecks all resources
-	void rescan();
-	void add(int base_index);
-	void remove(int base_index);
-	void clear();
+	//void rescan();
+	//void add(int base_index);
+	//void remove(int base_index);
+
+	void clearInternal();
 	//void remap(int base_index);
 	//bool inMap(EResource *res);
+
+	// redoes everything, emits reset signals
+	void reload();
 
 private:
 	void updateCategorySet(int model_row);

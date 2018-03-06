@@ -1,7 +1,8 @@
 ﻿#include "NarrativeScrollBox.h"
+#include "NarrativeScrollItem.h"
 
 NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
-	: HorizontalScrollBox(parent)
+	: GroupScrollBox(parent)
 {
 	// initialize menus
 	QMenu *m_menu = new QMenu(tr("Narrative menu"), this);
@@ -30,10 +31,6 @@ NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
 	setMIMEType("application/x-narrative");
 }
 
-NarrativeScrollBox::~NarrativeScrollBox() {
-	
-}
-
 ScrollBoxItem * NarrativeScrollBox::createItem(osg::Node * node)
 {
 	Narrative2 *narrative = dynamic_cast<Narrative2*>(node);
@@ -45,4 +42,9 @@ ScrollBoxItem * NarrativeScrollBox::createItem(osg::Node * node)
 	item->setNarrative(narrative);
 	connect(item, &NarrativeScrollItem::sDoubleClick, this, &NarrativeScrollBox::sOpen);
 	return item;
+}
+
+void NarrativeScrollBox::itemMouseDoubleClickEvent(QMouseEvent * event, int index)
+{
+	emit sOpen();
 }

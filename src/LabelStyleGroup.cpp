@@ -3,22 +3,13 @@
 
 LabelStyleGroup::LabelStyleGroup()
 {
-
-
-	//addChild(m_h1);
-	//addChild(m_h2);
-	//addChild(m_bod);
-	//addChild(m_lab);
-
-	//m_img = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
-	//	255, 255, 255, 455, 325, "Italic", "Center", 10);
 }
 
 void LabelStyleGroup::init()
 {
 	qDebug() << "initializing style group";
 	if (getNumChildren() >= 4) {
-		qDebug() << "- group already has children";
+		qDebug() << "- label styles already exist";
 		// TODO: error checking here?
 		m_h1 = dynamic_cast<LabelStyle*>(child(0));
 		m_h2 = dynamic_cast<LabelStyle*>(child(1));

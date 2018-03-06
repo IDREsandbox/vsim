@@ -41,16 +41,16 @@ void SlideScrollItem::setDuration(bool stay, float duration)
 	}
 }
 
-bool SlideScrollItem::thumbnailDirty()
-{
-	return m_thumbnail_dirty;
-}
-
-void SlideScrollItem::setThumbnailDirty(bool dirty)
-{
-	m_thumbnail_dirty = dirty;
-	if (dirty) emit sThumbnailDirty();
-}
+//bool SlideScrollItem::thumbnailDirty()
+//{
+//	return m_thumbnail_dirty;
+//}
+//
+//void SlideScrollItem::setThumbnailDirty(bool dirty)
+//{
+//	m_thumbnail_dirty = dirty;
+//	if (dirty) emit sThumbnailDirty();
+//}
 
 void SlideScrollItem::setIndex(int index)
 {
@@ -64,7 +64,7 @@ void SlideScrollItem::setIndex(int index)
 	}
 }
 
-int SlideScrollItem::widthFromHeight(int height)
+int SlideScrollItem::widthFromHeight(int height) const
 {
 	// Force a 16x9 after subtracting out the label sizes
 	QMargins slide_margin = ui.slide_layout->contentsMargins();
@@ -102,18 +102,22 @@ bool SlideScrollItem::eventFilter(QObject * obj, QEvent * event)
 {	
 	if (obj == ui.transition_label) {
 		if (event->type() == QEvent::MouseButtonDblClick) {
-			qDebug() << "slide item transition - double click";
 			emit sTransitionDoubleClick();
 			return false;
 		}
 	}
 	if (obj == ui.duration_label) {
 		if (event->type() == QEvent::MouseButtonDblClick) {
-			qDebug() << "slide item duration - double click";
 			emit sDurationDoubleClick();
 			return false;
 		}
 	}
+	//if (obj == ui.transition_widget) {
+	//	if (event->type() == QEvent::MouseButtonPress) {
+	//		emit sTransitionClick();
+	//		return false;
+	//	}	
+	//}
 	return false;
 }
 
@@ -129,14 +133,22 @@ void SlideScrollItem::setSlide(NarrativeSlide *slide)
 
 	setDuration(slide->getStayOnNode(), slide->getDuration());
 	setTransition(slide->getTransitionDuration());
+	setImage(slide->getThumbnail());
 
 	connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, [this](bool stay) {setDuration(m_slide->getStayOnNode(), m_slide->getDuration());});
 	connect(slide, &NarrativeSlide::sDurationChanged, this, [this](float duration) {setDuration(m_slide->getStayOnNode(), m_slide->getDuration());});
 	connect(slide, &NarrativeSlide::sTransitionDurationChanged, this, &SlideScrollItem::setTransition);
 
 	// TODO: how should this thumbnail stuff work?
-	connect(slide, &NarrativeSlide::sCameraMatrixChanged, this, [this]() {
-		setThumbnailDirty(true);
+	//connect(slide, &NarrativeSlide::sCameraMatrixChanged, this, [this]() {
+	//	setThumbnailDirty(true);
+	//});
+
+	connect(slide, &NarrativeSlide::sThumbnailChanged, this, &SlideScrollItem::setImage);
+	//connect(slide, &NarrativeSlide::sThumbnailDirty, this, &SlideScrollItem::sThumbnailDirty);
+	connect(slide, &NarrativeSlide::sThumbnailDirty, this, [this]() {
+		qDebug() << "thumbnail dirty" << getIndex();
+		emit sThumbnailDirty();
 	});
 
 }
