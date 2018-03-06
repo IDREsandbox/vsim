@@ -160,7 +160,6 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	// dirty slide thumbnails
 	connect(m_slide_box, &SlideScrollBox::sThumbnailsDirty, this, 
 		[this]() {
-		qDebug() << "received dirty thumbnails from box";
 		redrawThumbnails(m_slide_box->getDirtySlides());
 	});
 
@@ -344,6 +343,11 @@ bool NarrativeControl::openSlide(int index, bool go, bool fade)
 
 	NarrativeSlide *slide = getSlide(m_current_narrative, index);
 
+	if (m_current_slide == index) {
+		qDebug() << "slide already open";
+		return true;
+	}
+
 	// failed to set slide
 	if (!slide) {
 		m_current_slide = -1;
@@ -517,6 +521,7 @@ void NarrativeControl::selectNarratives(const SelectionData &narratives)
 
 void NarrativeControl::selectSlides(int narrative, const SelectionData &slides)
 {
+	qDebug() << "select slides";
 	setNarrative(narrative);
 	m_narrative_selection->set({narrative});
 	m_slide_selection->set(slides);
@@ -764,8 +769,8 @@ void NarrativeControl::newLabel(int style) {
 	qInfo() << "Creating new canvas label";
 
 	Narrative2 *nar = getCurrentNarrative();
-	LabelStyle *label_style = nar->getLabelStyles()->getStyle((LabelStyle::Style)style);
-	if (label_style) label->applyStyle(label_style);
+	//LabelStyle *label_style = nar->getLabelStyles()->getStyle((LabelStyle::Style)style);
+	//if (label_style) label->applyStyle(label_style);
 
 	// push command
 	m_undo_stack->beginMacro("New Label");
@@ -883,20 +888,22 @@ void NarrativeControl::dirtyCurrentSlide()
 
 void NarrativeControl::redrawThumbnails(const std::vector<NarrativeSlide*> slides)
 {
-	for (auto slide : slides) {
-		qDebug() << "redrawing thumbnail" << slide;
-		QImage thumbnail;
+	//qDebug() << "redraw thumbnails";
+	//for (auto slide : slides) {
+	//	qDebug() << "redrawing thumbnail" << slide;
+	//	QImage thumbnail;
 
-		thumbnail = generateThumbnail(slide);
-		
-		slide->setThumbnail(thumbnail);
-		//item->setImage(thumbnail);
-		//item->setThumbnailDirty(false);
-	}
+	//	thumbnail = generateThumbnail(slide);
+	//	
+	//	slide->setThumbnail(thumbnail);
+	//	//item->setImage(thumbnail);
+	//	//item->setThumbnailDirty(false);
+	//}
 }
 
 QImage NarrativeControl::generateThumbnail(NarrativeSlide *slide)
 {
+	//qDebug() << "generate thumbnail" << slide;
 	QElapsedTimer timer;
 	timer.start();
 

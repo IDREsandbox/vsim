@@ -346,7 +346,7 @@
          <string>Decrease indentation (CTRL+,)</string>
         </property>
         <property name="text">
-         <string>&gt;&gt;</string>
+         <string>&lt;&lt;</string>
         </property>
         <property name="iconSize">
          <size>
@@ -365,7 +365,7 @@
          <string>Increase indentation (CTRL+.)</string>
         </property>
         <property name="text">
-         <string>&lt;&lt;</string>
+         <string>&gt;&gt;</string>
         </property>
         <property name="iconSize">
          <size>

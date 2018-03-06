@@ -153,6 +153,15 @@ add_executable(HorizontalScrollBox_experiment ${HorizontalScrollBox_src})
 target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets)
 target_link_libraries(HorizontalScrollBox_experiment ${OPENSCENEGRAPH_LIBRARIES})
 
+set(Canvas_src
+  src/narrative/CanvasContainer.h
+  src/narrative/CanvasContainer.cpp
+  experiments/Canvas_experiment/Canvas_experiment.cpp
+)
+add_executable(Canvas_experiment ${Canvas_src})
+target_link_libraries(Canvas_experiment Qt5::Widgets)
+target_link_libraries(Canvas_experiment ${OPENSCENEGRAPH_LIBRARIES})
+
 # tests ####################################
 
 # util test & dependencies

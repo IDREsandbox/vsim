@@ -35,6 +35,8 @@ public:
 
 	void clear();
 
+	QGraphicsScene *scene() const;
+
 protected:
 	void resizeEvent(QResizeEvent* event) override;
 
