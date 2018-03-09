@@ -77,6 +77,9 @@ signals:
 	//void sLastSelectedChange();
 	void sMove(const std::vector<std::pair<size_t, size_t>> &);
 
+	// the selection has actively changed (clicked on something)
+	void sTouch();
+
 	// hack for joining these boxes together
 	void sSelectionCleared();
 

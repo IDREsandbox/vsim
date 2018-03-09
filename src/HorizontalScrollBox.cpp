@@ -24,6 +24,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	QGridLayout *layout = new QGridLayout(this);
 	m_scroll = new QScrollArea(this);
 	layout->addWidget(m_scroll, 0, 0);
+	layout->setMargin(0);
 
 	m_scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -321,6 +322,7 @@ void HorizontalScrollBox::mousePressEvent(QMouseEvent * event)
 			m_menu->exec(event->globalPos());
 		}
 	}
+	emit sTouch();
 }
 
 void HorizontalScrollBox::mouseReleaseEvent(QMouseEvent * event)
@@ -364,8 +366,11 @@ void HorizontalScrollBox::itemMousePressEvent(QMouseEvent * event, int index)
 		if (cleared) emit sSelectionCleared();
 
 		// open menu
-		if (m_item_menu) m_item_menu->exec(event->globalPos());
+		if (m_item_menu) {
+			m_item_menu->exec(event->globalPos());
+		}
 	}
+	emit sTouch();
 }
 void HorizontalScrollBox::itemMouseReleaseEvent(QMouseEvent * event, int index)
 {
@@ -443,6 +448,7 @@ void HorizontalScrollBox::dropEvent(QDropEvent * event)
 	}
 	m_drag = nullptr;
 	m_drop_highlight->hide();
+	emit sTouch();
 }
 void HorizontalScrollBox::moveTimer()
 {

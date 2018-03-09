@@ -73,8 +73,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	connect(m_local_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
 	connect(m_global_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
 
-	connect(m_local_box, &ERScrollBox::sSelectionChange, this, &ERControl::onSelectionChange);
-	connect(m_global_box, &ERScrollBox::sSelectionChange, this, &ERControl::onSelectionChange);
+	connect(m_local_box->selectionStack(), &SelectionStack::sChanged, this, &ERControl::onSelectionChange);
+	connect(m_global_box->selectionStack(), &SelectionStack::sChanged, this, &ERControl::onSelectionChange);
 
 	// mash the two selections together
 	// if one clears everything, then clear the other one too
@@ -346,11 +346,15 @@ int ERControl::getCombinedLastSelected()
 	int local_last = m_local_selection->last();
 	int global_last = m_global_selection->last();
 	// use the sender to determine the last selected
-	if (sender == m_local_box && local_last != -1) {
+	if ((sender == m_local_box 
+		|| sender == m_local_box->selectionStack())
+		&& local_last != -1) {
 		last = local_last;
 		proxy = m_local_proxy;
 	}
-	else if (sender == m_global_box && global_last != -1) {
+	else if ((sender == m_global_box
+		|| sender == m_global_box->selectionStack())
+		&& global_last != -1) {
 		last = global_last;
 		proxy = m_global_proxy;
 	}

@@ -25,6 +25,7 @@ class MainWindow;
 class VSimRoot;
 class ModelTableModel;
 class Narrative2;
+class NavigationControl;
 
 class VSimApp : public QObject
 {
@@ -45,15 +46,11 @@ public:
 		PLAY_END,
 		PLAY_FLYING
 	};
-	enum PlayState {
-		FLYING,
-		WAIT_TIME,
-		WAIT_CLICK,
-		END
-	};
 	State state() const;
+	void setState(State state);
 
-	void setState(State s);
+	bool isPlaying() const;
+	bool isFlying() const;
 
 	void play();
 	void stop();
@@ -125,6 +122,7 @@ private:
 	NarrativeControl *m_narrative_control;
 	ERControl *m_er_control;
 	NarrativePlayer *m_narrative_player;
+	NavigationControl *m_navigation_control;
 
 	osg::Matrixd m_camera_start;
 	osg::Matrixd m_camera_target;

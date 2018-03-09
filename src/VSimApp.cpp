@@ -34,7 +34,9 @@
 #include "VSimRoot.h"
 #include "ModelTableModel.h"
 #include "MainWindowTopBar.h"
+#include "NavigationControl.h"
 
+#include <QMenuBar>
 
 VSimApp::VSimApp(MainWindow* window)
 	: m_window(window),
@@ -61,8 +63,10 @@ VSimApp::VSimApp(MainWindow* window)
 		update(dt);
 	});
 
-	m_narrative_control = new NarrativeControl(this, m_window);
+	m_narrative_control = new NarrativeControl(this, m_window, this);
 	m_er_control = new ERControl(this, m_window, m_root->resources(), this);
+	m_navigation_control = new NavigationControl(this, m_window->getViewerWidget(), this);
+	m_navigation_control->initMenu(m_window->navigationMenu());
 
 	// Narrative player
 	//m_narrative_player = new NarrativePlayer(this, m_narrative_control);
@@ -95,6 +99,21 @@ void VSimApp::setState(State s)
 	// hide/show er stuff
 
 	//if (s == EDIT_CANVAS)
+}
+
+bool VSimApp::isPlaying() const
+{
+	return m_state == PLAY_WAIT_CLICK
+		|| m_state == PLAY_WAIT_TIME
+		|| m_state == PLAY_TRANSITION
+		|| m_state == PLAY_END
+		|| m_state == PLAY_FLYING;
+}
+
+bool VSimApp::isFlying() const
+{
+	return m_state == EDIT_FLYING
+		|| m_state == PLAY_FLYING;
 }
 
 void VSimApp::play()

@@ -60,7 +60,6 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	camera->setGraphicsContext(graphicsWindow_); // set the context
 	camera->setCullingMode(osg::Camera::NO_CULLING);
 
-
 	// Stats Handler
 	osgViewer::StatsHandler *stats_handler = new osgViewer::StatsHandler;
 	stats_handler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_U);
@@ -93,7 +92,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_flight_manipulator = new FlightManipulator;
 	m_object_manipulator = new ObjectManipulator;
 	viewer_->setCameraManipulator(m_object_manipulator);
-	m_navigation_mode = NAVIGATION_OBJECT;
+	m_manipulator = MANIPULATOR_OBJECT;
 	m_navigation_disabled = false;
 
 	m_collisions_on = false;
@@ -101,7 +100,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	m_first_person_manipulator->setSpeedTick(m_speed_tick);
 	m_flight_manipulator->setSpeedTick(m_speed_tick);
-	//setNavigationMode(NAVIGATION_OBJECT);
+	//setNavigationMode(MANIPULATOR_OBJECT);
 	
 	// This ensures that the widget will receive keyboard events. This focus
 	// policy is not set by default. The default, Qt::NoFocus, will result in
@@ -135,41 +134,82 @@ void OSGViewerWidget::setCameraMatrix(osg::Matrixd m)
 	return viewer_->getCameraManipulator()->setByMatrix(m);
 }
 
-void OSGViewerWidget::setNavigationMode(NavigationMode mode)
+void OSGViewerWidget::setNavigationMode(Navigation::Mode mode)
 {
 	if (m_navigation_disabled) return;
 
 	m_camera_frozen = false;
 	m_navigation_mode = mode;
-	setNavigationModeInternal(mode);
+
+	setManipulator(navigationToManipulator(mode));
+
 	emit sCameraFrozen(false);
 	emit sNavigationModeChanged(mode);
 }
 
-void OSGViewerWidget::setNavigationModeInternal(NavigationMode mode)
+Navigation::Mode OSGViewerWidget::getNavigationMode() const
+{
+	return m_navigation_mode;
+}
+
+Manipulator OSGViewerWidget::getManipulator() const
+{
+	return m_manipulator;
+}
+
+Navigation::Mode OSGViewerWidget::manipulatorToNavigation(Manipulator man)
+{
+	switch (man) {
+	case MANIPULATOR_FIRST_PERSON:
+		return Navigation::FIRST_PERSON;
+	case MANIPULATOR_FLIGHT:
+		return Navigation::FLIGHT;
+	case MANIPULATOR_OBJECT:
+		return Navigation::OBJECT;
+	}
+	return Navigation::FIRST_PERSON;
+}
+Manipulator OSGViewerWidget::navigationToManipulator(Navigation::Mode mode)
+{
+	switch (mode) {
+	case Navigation::FIRST_PERSON:
+		return MANIPULATOR_FIRST_PERSON;
+	case Navigation::FLIGHT:
+		return MANIPULATOR_FLIGHT;
+	case Navigation::OBJECT:
+		return MANIPULATOR_OBJECT;
+	}
+	return MANIPULATOR_SIMPLE;
+}
+
+void OSGViewerWidget::setManipulator(Manipulator manipulator)
 {
 	osg::Matrixd old_matrix = getCameraMatrix();
 
 	osgGA::CameraManipulator *new_manipulator;
-	switch (mode) {
-	case NAVIGATION_SIMPLE:
+	m_manipulator = manipulator;
+
+	switch (manipulator) {
+	case MANIPULATOR_SIMPLE:
 		new_manipulator = m_simple_manipulator;
 		break;
-	case NAVIGATION_FIRST_PERSON:
+	case MANIPULATOR_FIRST_PERSON:
 		new_manipulator = m_first_person_manipulator;
 		m_first_person_manipulator->stop();
 		break;
-	case NAVIGATION_FLIGHT:
+	case MANIPULATOR_FLIGHT:
 		new_manipulator = m_flight_manipulator;
 		m_flight_manipulator->stop();
+		flightStopStrafe();
 		break;
-	case NAVIGATION_OBJECT:
+	case MANIPULATOR_OBJECT:
 	default:
 		new_manipulator = m_object_manipulator;
 		m_object_manipulator->finishAnimation(); // same as stop
 		break;
 	}
-	if (mode == NAVIGATION_FIRST_PERSON) {
+
+	if (manipulator == MANIPULATOR_FIRST_PERSON) {
 		takeCursor();
 	}
 	else {
@@ -178,16 +218,6 @@ void OSGViewerWidget::setNavigationModeInternal(NavigationMode mode)
 
 	viewer_->setCameraManipulator(new_manipulator, false);
 	setCameraMatrix(old_matrix);
-}
-
-NavigationMode OSGViewerWidget::getNavigationMode() const
-{
-	return m_navigation_mode;
-}
-
-NavigationMode OSGViewerWidget::getActualNavigationMode() const
-{
-	return (m_camera_frozen || m_navigation_disabled) ? NAVIGATION_SIMPLE : m_navigation_mode;
 }
 
 void OSGViewerWidget::adjustSpeed(int tick)
@@ -202,17 +232,15 @@ void OSGViewerWidget::adjustSpeed(int tick)
 void OSGViewerWidget::setCameraFrozen(bool freeze)
 {
 	if (m_navigation_disabled) return;
-	qDebug() << "set freeze:" << freeze << "current:" << m_camera_frozen;
-	m_camera_frozen = freeze;
-	setFocus();
+
 	if (freeze) {
-		setNavigationModeInternal(NAVIGATION_SIMPLE);
-		emit sCameraFrozen(true);
+		setManipulator(MANIPULATOR_SIMPLE);
 	}
 	else {
-		setNavigationModeInternal(m_navigation_mode);
-		emit sCameraFrozen(false);
+		setManipulator(navigationToManipulator(m_navigation_mode));
 	}
+	m_camera_frozen = freeze;
+	emit sCameraFrozen(freeze);
 }
 
 bool OSGViewerWidget::getCameraFrozen() const
@@ -222,15 +250,19 @@ bool OSGViewerWidget::getCameraFrozen() const
 
 void OSGViewerWidget::enableNavigation(bool enable)
 {
-	qDebug() << "ENABLE NAVIGATION" << enable;
+	qInfo() << "ENABLE NAVIGATION" << enable;
 	m_navigation_disabled = !enable;
-	setNavigationModeInternal(NAVIGATION_SIMPLE);
+	if (!enable) {
+		setManipulator(MANIPULATOR_SIMPLE);
+	}
+	else {
+	}
 }
 
 void OSGViewerWidget::stopNavigation()
 {
 	qInfo() << "Camera stop";
-	setNavigationModeInternal(NAVIGATION_SIMPLE);
+	//setNavigationModeInternal(MANIPULATOR_SIMPLE);
 
 	// stop all manipulator momentum
 	m_first_person_manipulator->stop();
@@ -250,10 +282,26 @@ void OSGViewerWidget::flightStopStrafe()
 	centerCursor();
 }
 
+void OSGViewerWidget::enableGravity(bool enable)
+{
+	qInfo() << "Gravity" << enable;
+	m_gravity_on = enable;
+	m_flight_manipulator->enableGravity(enable);
+	m_first_person_manipulator->enableGravity(enable);
+}
+
+void OSGViewerWidget::enableCollisions(bool enable)
+{
+	qInfo() << "Collision" << enable;
+	m_collisions_on = enable;
+	m_flight_manipulator->enableCollisions(enable);
+	m_first_person_manipulator->enableCollisions(enable);
+}
+
 void OSGViewerWidget::reset()
 {
 	// pretty much copied from osgGA::CameraManipulator::computeHomePosition
-	qDebug() << "Home";
+	qInfo() << "Home";
 	osg::BoundingSphere bound = viewer_->getSceneData()->getBound();
 
 	double left, right, bottom, top, zNear, zFar, dist;
@@ -271,16 +319,17 @@ void OSGViewerWidget::reset()
 
 bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)
 {
-	if (e->type() == QEvent::ShortcutOverride) {
-		if (getActualNavigationMode() == NAVIGATION_FIRST_PERSON) {
-			QKeyEvent *keyEvent = static_cast<QKeyEvent*>(e);
-			int key = keyEvent->key();
-			if (key == 'W' || key == 'A' || key == 'S' || key == 'D') {
-				e->accept();
-				return true;
-			}
-		}
-	}
+	//if (e->type() == QEvent::ShortcutOverride) {
+	//	if (getActualNavigationMode() == MANIPULATOR_FIRST_PERSON) {
+	//		qDebug() << "shortcut override wasd";
+	//		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(e);
+	//		int key = keyEvent->key();
+	//		if (key == 'W' || key == 'A' || key == 'S' || key == 'D') {
+	//			e->accept();
+	//			return true;
+	//		}
+	//	}
+	//}
 	return false;
 }
 
@@ -292,11 +341,10 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 
 	emit frame(dt_sec);
 
-	NavigationMode mode = getActualNavigationMode();
-	if (mode == NAVIGATION_FIRST_PERSON) {
+	if (m_manipulator == MANIPULATOR_FIRST_PERSON) {
 		m_first_person_manipulator->update(dt_sec, &m_key_tracker, viewer_->getSceneData());
 	}
-	else if (mode == NAVIGATION_FLIGHT) {
+	else if (m_manipulator == MANIPULATOR_FLIGHT) {
 		QPoint mouse = mapFromGlobal(cursor().pos());
 		int dx = mouse.x() - width() / 2;
 		int dy = mouse.y() - height() / 2;
@@ -327,25 +375,10 @@ void OSGViewerWidget::resizeGL(int width, int height)
 
 void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 {
-	NavigationMode mode = getActualNavigationMode();
-	if (mode == NAVIGATION_FLIGHT) {
+	if (m_manipulator == MANIPULATOR_FLIGHT) {
 		if (event->key() == Qt::Key_Alt) {
 			flightStartStrafe();
 		}
-	}
-	if (event->key() == Qt::Key_G) {
-		qInfo() << "Gravity on";
-		// Toggle gravity
-		m_gravity_on = !m_gravity_on;
-		m_flight_manipulator->enableGravity(m_gravity_on);
-		m_first_person_manipulator->enableGravity(m_gravity_on);
-	}
-	if (event->key() == Qt::Key_C) {
-		// Toggle collisions
-		m_collisions_on = !m_collisions_on;
-		qInfo() << "Collision" << m_collisions_on;
-		m_flight_manipulator->enableCollisions(m_collisions_on);
-		m_first_person_manipulator->enableCollisions(m_collisions_on);
 	}
 
 	// This guy's code is a little wonky, notice that toLocal8Bit() returns a temporary array, but data
@@ -360,8 +393,7 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 
 void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 {
-	NavigationMode mode = getActualNavigationMode();
-	if (mode == NAVIGATION_FLIGHT) {
+	if (m_manipulator == MANIPULATOR_FLIGHT) {
 		if (event->key() == Qt::Key_Alt) {
 			flightStopStrafe();
 		}
@@ -374,17 +406,16 @@ void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 
 void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	NavigationMode mode = getActualNavigationMode();
 	int dx = event->x() - width() / 2;
 	int dy = event->y() - height() / 2;
-	if (mode == NAVIGATION_FIRST_PERSON) {
+	if (m_manipulator == MANIPULATOR_FIRST_PERSON) {
 		// if the mouse is centered then don't do anything
 		if (dx != 0 || dy != 0) {
 			m_first_person_manipulator->mouseMove(dx, dy);
 			centerCursor();
 		}
 	}
-	if (mode == NAVIGATION_FLIGHT) {
+	if (m_manipulator == MANIPULATOR_FLIGHT) {
 		m_flight_manipulator->setMousePosition(dx, dy);
 		// use absolute mouse position instead
 		//if (m_key_tracker.mouseButton(Qt::MiddleButton) || m_key_tracker.keyPressed(Qt::Key_Alt)) {
@@ -404,8 +435,7 @@ void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 
 void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
 {
-	NavigationMode mode = getActualNavigationMode();
-	if (mode == NAVIGATION_FLIGHT) {
+	if (m_manipulator == MANIPULATOR_FLIGHT) {
 		if (event->button() == Qt::MiddleButton) {
 			flightStartStrafe();
 		}
@@ -440,8 +470,7 @@ void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
 
 void OSGViewerWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-	NavigationMode mode = getActualNavigationMode();
-	if (mode == NAVIGATION_FLIGHT) {
+	if (m_manipulator == MANIPULATOR_FLIGHT) {
 		if (event->button() == Qt::MiddleButton) {
 			flightStopStrafe();
 		}
@@ -480,8 +509,8 @@ void OSGViewerWidget::wheelEvent(QWheelEvent* event) {
 	event->accept();
 	int delta = event->delta();
 
-	if (m_navigation_mode == NAVIGATION_FIRST_PERSON
-		|| m_navigation_mode == NAVIGATION_FLIGHT)
+	if (m_manipulator == MANIPULATOR_FIRST_PERSON
+		|| m_manipulator == MANIPULATOR_FLIGHT)
 	{
 		adjustSpeed((delta > 0) ? 1 : -1);
 	}

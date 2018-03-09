@@ -111,85 +111,6 @@ MainWindow::MainWindow(QWidget *parent)
 	});
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
 
-	// camera manipulator
-	connect(ui->actionFirst_Person_Navigation, &QAction::triggered, m_osg_widget,
-		[this]() {
-		m_app->startFlying();
-		m_osg_widget->setNavigationMode(NAVIGATION_FIRST_PERSON);
-	});
-	connect(ui->actionFlight_Navigation, &QAction::triggered, m_osg_widget,
-		[this]() {
-		m_app->startFlying();
-		m_osg_widget->setNavigationMode(NAVIGATION_FLIGHT);
-	});
-	connect(ui->actionObject_Navigation, &QAction::triggered, m_osg_widget,
-		[this]() {
-		m_app->startFlying();
-		m_osg_widget->setNavigationMode(NAVIGATION_OBJECT);
-	});
-	connect(ui->actionFreeze_Camera, &QAction::toggled, m_osg_widget,
-		[this](bool freeze) {
-		m_app->startFlying();
-		m_osg_widget->setCameraFrozen(freeze);
-	});
-
-	// navigation actions
-	m_navigation_action_group = new QActionGroup(this);
-	m_navigation_action_group->setExclusive(true);
-	m_action_first_person = new QAction(m_navigation_action_group);
-	m_action_flight = new QAction(m_navigation_action_group);
-	m_action_object = new QAction(m_navigation_action_group);
-	m_action_first_person->setCheckable(true);
-	m_action_flight->setCheckable(true);
-	m_action_object->setCheckable(true);
-	m_action_first_person->setText("First Person");
-	m_action_flight->setText("Flight");
-	m_action_object->setText("Object");
-	m_action_first_person->setShortcut(QApplication::translate("MainWindow", "1", nullptr));
-	m_action_flight->setShortcut(QApplication::translate("MainWindow", "2", nullptr));
-	m_action_object->setShortcut(QApplication::translate("MainWindow", "3", nullptr));
-	ui->menuView->addSeparator()->setText("Navigation Mode");
-	ui->menuView->addAction(m_action_first_person);
-	ui->menuView->addAction(m_action_flight);
-	ui->menuView->addAction(m_action_object);
-	m_action_first_person->setChecked(true);
-
-	//out
-	connect(m_navigation_action_group, &QActionGroup::triggered, this,
-		[this](QAction *which) {
-		if (which == m_action_first_person) {
-			m_osg_widget->setNavigationMode(NAVIGATION_FIRST_PERSON);
-		}
-		else if (which == m_action_flight) {
-			m_osg_widget->setNavigationMode(NAVIGATION_FLIGHT);
-		}
-		else if (which == m_action_object) {
-			m_osg_widget->setNavigationMode(NAVIGATION_OBJECT);
-		}
-	});
-	//in
-	connect(m_osg_widget, &OSGViewerWidget::sCameraFrozen, ui->actionFreeze_Camera, &QAction::setChecked);
-	connect(m_osg_widget, &OSGViewerWidget::sNavigationModeChanged,
-		[this](NavigationMode mode) {
-		if (mode == NAVIGATION_FIRST_PERSON) {
-			m_action_first_person->setChecked(true);
-			//m_action_flight->setChecked(false);
-			//m_action_object->setChecked(false);
-		}
-		else if (mode == NAVIGATION_FLIGHT) {
-			//actionFirst_Person_Navigation->setChecked(false);
-			m_action_flight->setChecked(true);
-			//actionObject_Navigation->setChecked(false);
-		}
-		else if (mode == NAVIGATION_OBJECT) {
-			//actionFirst_Person_Navigation->setChecked(false);
-			//actionFlight_Navigation->setChecked(false);
-			m_action_object->setChecked(true);
-		}
-	});
-
-	connect(ui->actionReset_Camera, &QAction::triggered, m_osg_widget, &OSGViewerWidget::reset);
-
 	// show slides or narratives
 	connect(ui->topBar->ui.open, &QPushButton::clicked, this,
 		[this]() {
@@ -292,6 +213,11 @@ TimeSlider * MainWindow::timeSlider() const
 editButtons * MainWindow::labelButtons() const
 {
 	return m_label_buttons;
+}
+
+QMenu * MainWindow::navigationMenu() const
+{
+	return ui->menuNavigation;
 }
 
 ERDisplay * MainWindow::erDisplay() const

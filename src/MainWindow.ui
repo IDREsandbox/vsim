@@ -68,6 +68,7 @@
     </item>
    </layout>
   </widget>
+  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -101,15 +102,6 @@
     <addaction name="actionReload_Style"/>
     <addaction name="actionEditor_Debug"/>
    </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>Navigation</string>
-    </property>
-    <addaction name="separator"/>
-    <addaction name="actionFreeze_Camera"/>
-    <addaction name="actionReset_Camera"/>
-    <addaction name="separator"/>
-   </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
@@ -125,13 +117,17 @@
     <addaction name="separator"/>
     <addaction name="actionHistory"/>
    </widget>
+   <widget class="QMenu" name="menuNavigation">
+    <property name="title">
+     <string>Navigation</string>
+    </property>
+   </widget>
    <addaction name="menuhello_to_the_world"/>
    <addaction name="menuEdit"/>
-   <addaction name="menuView"/>
+   <addaction name="menuNavigation"/>
    <addaction name="menuWindows"/>
    <addaction name="menuTest"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNew">
    <property name="text">
     <string>New...</string>
@@ -360,6 +356,75 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F11</string>
+   </property>
+  </action>
+  <action name="actionGravity">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Gravity</string>
+   </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
+  </action>
+  <action name="actionCollisions">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Collisions</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
+   </property>
+  </action>
+  <action name="actionFirst_Person">
+   <property name="text">
+    <string>First Person</string>
+   </property>
+  </action>
+  <action name="actionFlight">
+   <property name="text">
+    <string>Flight</string>
+   </property>
+  </action>
+  <action name="actionObject">
+   <property name="text">
+    <string>Object</string>
+   </property>
+  </action>
+  <action name="actionFreeze">
+   <property name="text">
+    <string>Freeze</string>
+   </property>
+   <property name="shortcut">
+    <string>Space</string>
+   </property>
+  </action>
+  <action name="actionHome">
+   <property name="text">
+    <string>Home</string>
+   </property>
+   <property name="shortcut">
+    <string>H</string>
+   </property>
+  </action>
+  <action name="actionGravity_2">
+   <property name="text">
+    <string>Gravity</string>
+   </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
+  </action>
+  <action name="actionCollisions_2">
+   <property name="text">
+    <string>Collisions</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
    </property>
   </action>
  </widget>

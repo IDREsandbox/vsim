@@ -48,6 +48,8 @@ public:
 	editButtons *labelButtons() const;
 	// TextToolbar *textToolbar() const;
 
+	QMenu *navigationMenu() const;
+
 	// er
 	ERBar *erBar() const;
 	ERDisplay *erDisplay() const;

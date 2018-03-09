@@ -18,12 +18,13 @@
 #include "FlightManipulator.h"
 #include "ObjectManipulator.h"
 #include "KeyTracker.h"
+#include "Navigation.h"
 
-enum NavigationMode : int {
-	NAVIGATION_SIMPLE, // does nothing
-	NAVIGATION_FIRST_PERSON,
-	NAVIGATION_FLIGHT,
-	NAVIGATION_OBJECT
+enum Manipulator {
+	MANIPULATOR_SIMPLE, // does nothing
+	MANIPULATOR_FIRST_PERSON,
+	MANIPULATOR_FLIGHT,
+	MANIPULATOR_OBJECT
 };
 
 class OSGViewerWidget : public QOpenGLWidget
@@ -39,10 +40,15 @@ public:
 	osg::Matrixd getCameraMatrix();
 	void setCameraMatrix(osg::Matrixd);
 
-	void setNavigationMode(NavigationMode);
-	void setNavigationModeInternal(NavigationMode);
-	NavigationMode getNavigationMode() const;
-	NavigationMode getActualNavigationMode() const; // if frozen returns NAVIGATION_SIMPLE
+	// sets navigation mode and unfreezes
+	void setNavigationMode(Navigation::Mode);
+	Navigation::Mode getNavigationMode() const;
+
+	void setManipulator(Manipulator manipulator);
+	Manipulator getManipulator() const; // if frozen returns MANIPULATOR_SIMPLE
+
+	static Navigation::Mode manipulatorToNavigation(Manipulator);
+	static Manipulator navigationToManipulator(Navigation::Mode);
 
 	void adjustSpeed(int tick);
 
@@ -55,6 +61,9 @@ public:
 	void flightStartStrafe();
 	void flightStopStrafe();
 
+	void enableGravity(bool enable);
+	void enableCollisions(bool enable);
+
 	void reset();
 
 	// TODO? Just use QWidget::Render
@@ -66,7 +75,7 @@ public:
 signals:
 	void frame(double dt_sec);
 
-	void sNavigationModeChanged(NavigationMode);
+	void sNavigationModeChanged(Navigation::Mode);
 	void sCameraFrozen(bool);
 
 protected:
@@ -100,7 +109,9 @@ private:
 
 	// camera and viewer stuff
 	// camera manipulators
-	NavigationMode m_navigation_mode;
+	Manipulator m_manipulator;
+	Navigation::Mode m_navigation_mode;
+	// NavigationMode m_navigation_mode;
 	osg::ref_ptr<SimpleCameraManipulator> m_simple_manipulator; // this one has no controls	
 	osg::ref_ptr<FirstPersonManipulator> m_first_person_manipulator;
 	osg::ref_ptr<FlightManipulator> m_flight_manipulator;
