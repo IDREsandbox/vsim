@@ -52,7 +52,7 @@ VSimApp::VSimApp(MainWindow* window)
 
 	// timers
 	m_timer = new QTimer(this);
-	m_timer->setInterval(15);
+	m_timer->setInterval(0);
 	m_timer->setSingleShot(false);
 	m_dt_timer = new QElapsedTimer;
 	m_timer->start();
@@ -76,7 +76,7 @@ VSimApp::VSimApp(MainWindow* window)
 	//connect(m_narrative_player, &NarrativePlayer::updateCamera, m_window->getViewerWidget(), &OSGViewerWidget::setCameraMatrix);
 	//connect(this, &VSimApp::tick, m_narrative_player, &NarrativePlayer::update);
 	//connect(m_narrative_player, &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
-	connect(this, &VSimApp::tick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
+	connect(this, &VSimApp::sTick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 
 	m_camera_timer = new QTimer(this);
 	connect(m_camera_timer, &QTimer::timeout, this, &VSimApp::moveTimerExpire);
@@ -89,16 +89,18 @@ void VSimApp::setWindow(MainWindow *)
 
 }
 
-//VSimApp::State VSimApp::state() const
-//{
-//	return State();
-//}
+VSimApp::State VSimApp::state() const
+{
+	return m_state;
+}
 
 void VSimApp::setState(State s)
 {
-	// hide/show er stuff
+	qDebug() << "VS SET STATE:" << StateStrings[s];
+	State old = s;
+	m_state = s;
+	emit sStateChanged(old, s);
 
-	//if (s == EDIT_CANVAS)
 }
 
 bool VSimApp::isPlaying() const
@@ -181,7 +183,8 @@ void VSimApp::prev()
 
 void VSimApp::update(float dt_sec)
 {
-	emit tick(dt_sec);
+	qDebug() << "tick" << dt_sec * 1000;
+	emit sTick(dt_sec);
 
 	// Smooth camera updates
 	if (m_camera_timer->isActive()) {
@@ -189,6 +192,12 @@ void VSimApp::update(float dt_sec)
 		setCameraMatrix(Util::cameraMatrixInterp(m_camera_start, m_camera_target, Util::simpleCubic(0, 1, t)));
 		//setCameraMatrix(Util::cameraMatrixInterp(m_camera_start, m_camera_target, t));
 
+	}
+
+	if (isFlying() ||
+		m_state == VSimApp::PLAY_TRANSITION) {
+
+		//m_navigation_control->update(dt_sec);
 	}
 }
 

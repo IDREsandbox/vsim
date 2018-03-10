@@ -26,6 +26,7 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 	m_view->setDragMode(QGraphicsView::RubberBandDrag);
 	m_view->setDragMode(QGraphicsView::DragMode::NoDrag);
 	m_view->setObjectName("canvasView");
+	m_view->setStyleSheet("#canvasView{background:rgba(0, 0, 0, 0);}");
 
 	m_view->installEventFilter(this);
 

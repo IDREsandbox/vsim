@@ -77,8 +77,6 @@ public:
 	NarrativeSlide *getSlide(int narrative, int slide);
 	NarrativeSlideLabel *getLabel(int narrative, int slide, int label);
 
-	void onSlideSelectionChange();
-
 signals:
 	//void selectionChanged(); // this should happen after any edit event, 
 	void sEditEvent();

@@ -58,16 +58,36 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_undo_stack = m_app->getUndoStack();
 
 	m_fade_in = new QGraphicsOpacityEffect(m_canvas);
-	m_fade_out = new QGraphicsOpacityEffect(m_fade_canvas);
 	m_canvas->setGraphicsEffect(m_fade_in);
-	m_fade_canvas->setGraphicsEffect(m_fade_out);
 	m_fade_in_anim = new QPropertyAnimation(m_fade_in, "opacity");
-	m_fade_out_anim = new QPropertyAnimation(m_fade_out, "opacity");
 	m_fade_in_anim->setDuration(250);
-	m_fade_out_anim->setDuration(250);
+	m_fade_in_anim->setStartValue(0.0);
+	m_fade_in_anim->setEndValue(1.0);
+
+	m_fade_out = new QGraphicsOpacityEffect(m_fade_canvas);
+	m_fade_canvas->setGraphicsEffect(m_fade_out);
+	m_fade_out_anim = new QPropertyAnimation(m_fade_out, "opacity");
+	m_fade_out_anim->setDuration(2000);
+	m_fade_out_anim->setStartValue(1.0);
+	m_fade_out_anim->setEndValue(0.0);
+
 	showCanvas(false);
 
+	m_label_buttons = m_window->labelButtons();
+	m_label_buttons->move(10, 200);
+	m_label_buttons->hide();
+
 	connect(m_window, &MainWindow::sEditStyleSettings, this, &NarrativeControl::editStyleSettings);
+
+	// app state
+	connect(m_app, &VSimApp::sStateChanged, this, [this](auto old, auto current) {
+		if (m_app->isFlying()) {
+			// fade out
+			qDebug() << "flying -> fade out";
+			//showCanvas(false, true);
+			openSlide(-1, false, true);
+		}
+	});
 
 	// NARRATIVE CONTROL
 	// new
@@ -82,8 +102,18 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	// open
 	connect(m_narrative_box, &NarrativeScrollBox::sOpen, this, &NarrativeControl::openNarrative);
 	connect(m_window->topBar()->ui.open, &QPushButton::clicked, this, &NarrativeControl::openNarrative);
-
+	// move
 	connect(m_narrative_box, &NarrativeScrollBox::sMove, this, &NarrativeControl::moveNarratives);
+	// touch
+	connect(m_narrative_box, &HorizontalScrollBox::sTouch, this, [this]() {
+		int last = m_slide_selection->last();
+		if (last < 0) {
+			m_app->setState(VSimApp::EDIT_FLYING);
+		}
+		else {
+			m_app->setState(VSimApp::EDIT_NARS);
+		}
+	});
 
 	// SLIDE CONTROL
 	// new
@@ -108,54 +138,41 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 		qDebug() << "goto slide" << index;
 		openSlide(index);
 	});
-	// clear
-	//connect(m_slide_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
-	//	qDebug() << "selection cleared";
-	//	openSlide(-1);
-	//});
-	// transition to
-	//connect(m_slide_box, &SlideScrollBox::sTransitionTo, this, 
-	//	[this](int index) {
-	//	m_app->transitionTo(index);
-	//});
-
 	// back
 	connect(m_window->topBar()->ui.left_2, &QPushButton::clicked, this, [this]() {setNarrative(-1); });
 	//change
-	connect(m_slide_selection, &SelectionStack::sChanged, this, &NarrativeControl::onSlideSelectionChange);
+	connect(m_slide_box, &HorizontalScrollBox::sTouch, this, [this]() {
+		int last = m_slide_selection->last();
+		if (last < 0) {
+			m_app->setState(VSimApp::EDIT_FLYING);
+		}
+		else {
+			m_app->setState(VSimApp::EDIT_SLIDES);
+			qDebug() << "should open no?";
+			openSlide(m_slide_selection->last());
+			showCanvas(true);
+		}
+	});
 	
 	//CANVAS CONTROL
 	// new
-	//connect(m_canvas, &labelCanvas::sNewLabel, this, &NarrativeControl::newLabel); // doesn't exist, see edit buttons
-	// move
-	connect(m_canvas, &NarrativeCanvas::sItemsTransformed, this, &NarrativeControl::transformLabels);
-
-	// text change
-	//connect(m_canvas, SIGNAL(sSuperTextSet(QString, int)), this, SLOT(textEditLabel(QString, int))); // these two are directly connected
-	connect(m_canvas, &NarrativeCanvas::sLabelUndoCommandAdded, this, &NarrativeControl::labelEdited);
-
-	// delete
-	//connect(m_canvas, &NarrativeCanvas::sDeleteLabel, this, &NarrativeControl::deleteLabel);
-
-	m_label_buttons = m_window->labelButtons();
-	m_label_buttons->move(10, 200);
-	m_label_buttons->hide();
-
 	connect(m_label_buttons->ui.head1, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::HEADER1); });
 	connect(m_label_buttons->ui.head2, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::HEADER2); });
 	connect(m_label_buttons->ui.body, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::BODY); });
 	connect(m_label_buttons->ui.label, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::LABEL); });
-
+	// move
+	connect(m_canvas, &NarrativeCanvas::sItemsTransformed, this, &NarrativeControl::transformLabels);
+	// text change
+	connect(m_canvas, &NarrativeCanvas::sLabelUndoCommandAdded, this, &NarrativeControl::labelEdited);
+	// delete
+	connect(m_label_buttons->ui.delete_2, &QPushButton::clicked, this, &NarrativeControl::deleteLabels);
 	// edit
 	connect(m_label_buttons->ui.edit, &QAbstractButton::pressed, this, &NarrativeControl::execEditLabel);
-
-	//connect(m_label_buttons->ui.head1, &QPushButton::clicked, this, &NarrativeControl::newH1);
-	//connect(m_label_buttons->ui.head2, &QPushButton::clicked, this, &NarrativeControl::newH2);
-	//connect(m_label_buttons->ui.body, &QPushButton::clicked, this, &NarrativeControl::newBod);
-	//connect(m_label_buttons->ui.image, &QPushButton::clicked, this, &NarrativeControl::newImg);
-
-	connect(m_label_buttons->ui.delete_2, &QPushButton::clicked, this, &NarrativeControl::deleteLabels);
 	connect(m_label_buttons->ui.done, &QPushButton::clicked, this, &NarrativeControl::exitEdit);
+	// touch
+	connect(m_canvas, &CanvasContainer::sPoked, this, [this]() {
+		m_app->setState(VSimApp::EDIT_CANVAS);
+	});
 
 	// dirty slide thumbnails
 	connect(m_slide_box, &SlideScrollBox::sThumbnailsDirty, this, 
@@ -426,6 +443,7 @@ bool NarrativeControl::advanceSlide(bool forward, bool instant)
 
 void NarrativeControl::showCanvas(bool show, bool fade)
 {
+	bool old_visible = m_canvas->isVisible();
 	m_canvas->setVisible(show);
 	m_canvas->setAttribute(Qt::WA_TransparentForMouseEvents, !show);
 	if (show) {
@@ -433,11 +451,12 @@ void NarrativeControl::showCanvas(bool show, bool fade)
 			m_fade_in_anim->start();
 		}
 		else {
-			m_fade_in_anim->setCurrentTime(m_fade_in_anim->duration());
+			m_fade_in_anim->stop();
+			m_fade_in->setOpacity(1.0);
 		}
 	}
 	else {
-		if (fade) {
+		if (fade && old_visible) {
 			m_fade_canvas->show();
 			m_fade_canvas->setSlide(m_canvas->getSlide());
 			m_fade_out_anim->start();
@@ -602,12 +621,6 @@ NarrativeSlideLabel * NarrativeControl::getLabel(int narrative, int slide, int l
 	return dynamic_cast<NarrativeSlideLabel*>(s->getChild(label));
 }
 
-void NarrativeControl::onSlideSelectionChange()
-{
-	// if (edit mode)
-	openSlide(m_slide_selection->last());
-}
-
 void NarrativeControl::newSlide()
 {
 	Narrative2 *nar = getNarrative(m_current_narrative);
@@ -761,7 +774,7 @@ void NarrativeControl::newLabel(int style) {
 	//label->setStyle(0);
 	label->setHtml("New Label");
 	label->setRect(QRectF(-.2, -.2, .4, .2));
-	label->setBackground(QColor(0, 0, 0, 100));
+	label->setBackground(QColor(0, 0, 0, 255));
 
 	qInfo() << "Creating new canvas label";
 

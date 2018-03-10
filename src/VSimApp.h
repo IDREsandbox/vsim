@@ -46,6 +46,18 @@ public:
 		PLAY_END,
 		PLAY_FLYING
 	};
+	static constexpr const char *StateStrings[] = {
+		"Edit Narratives",
+		"Edit Slides",
+		"Edit Canvas",
+		"Edit ERs",
+		"Edit Flying",
+		"Play Wait Click",
+		"Play Wait Time",
+		"Play Transition",
+		"Play End",
+		"Play Flying",
+	};
 	State state() const;
 	void setState(State state);
 
@@ -100,9 +112,9 @@ public:
 	ERControl *erControl() const;
 
 signals:
-	void tick(double sec);
-	void foo();
+	void sTick(double sec);
 	void sReset();
+	void sStateChanged(VSimApp::State old, VSimApp::State current);
 
 private:
 	MainWindow *m_window;

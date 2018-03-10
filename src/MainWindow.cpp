@@ -51,13 +51,16 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// canvas on top of osg viewer
 	m_canvas = new NarrativeCanvas(m_osg_widget);
+	m_canvas->setObjectName("canvas");
 	osg_layout->addWidget(m_canvas, 0, 0);
+	m_canvas->setStyleSheet("#canvas{background:rgba(0, 0, 0, 0);}");
+
 	m_fade_canvas = new NarrativeCanvas(m_osg_widget);
+	m_canvas->setObjectName("fadeCanvas");
 	osg_layout->addWidget(m_fade_canvas, 0, 0);
 	m_fade_canvas->lower();
 	m_fade_canvas->setAttribute(Qt::WA_TransparentForMouseEvents);
-	m_canvas->setStyleSheet("background:rgba(255, 0, 0, 0);");
-	m_fade_canvas->setStyleSheet("background:rgba(0, 0, 255, 0);");
+	m_fade_canvas->setStyleSheet("#canvas{background:rgba(0, 0, 0, 0);}");
 
 	// splitter on top of osg viewer
 	// mask allows events to get to the canvas

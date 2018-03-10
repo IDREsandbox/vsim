@@ -46,6 +46,15 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	// initialize
 	onModeChange(m_viewer->getNavigationMode());
 
+	// app -> this
+	connect(m_app, &VSimApp::sStateChanged, this,
+		[this](VSimApp::State old, VSimApp::State current) {
+		if (!m_app->isFlying()) {
+			m_viewer->setCameraFrozen(true);
+		}
+	});
+
+	// gui -> osg
 	connect(m_navigation_action_group, &QActionGroup::triggered, this,
 		[this](QAction *which) {
 		if (which == m_action_first_person) {
@@ -59,18 +68,28 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 		}
 		m_viewer->setCameraFrozen(false);
 		m_action_freeze->setChecked(false);
+		activate();
 	});
 	connect(m_action_freeze, &QAction::triggered, this,
 		[this]() {
 		m_viewer->setCameraFrozen(m_action_freeze->isChecked());
+		activate();
 	});
 	connect(m_action_home, &QAction::triggered, this,
 		[this]() {
 		m_viewer->reset();
+		activate();
 	});
-
-	connect(m_action_gravity, &QAction::toggled, m_viewer, &OSGViewerWidget::enableGravity);
-	connect(m_action_collisions, &QAction::toggled, m_viewer, &OSGViewerWidget::enableCollisions);
+	connect(m_action_gravity, &QAction::triggered, this,
+		[this]() {
+		m_viewer->enableGravity(m_action_gravity->isChecked());
+		activate();
+	});
+	connect(m_action_collisions, &QAction::triggered, this,
+		[this]() {
+		m_viewer->enableCollisions(m_action_collisions->isChecked());
+		activate();
+	});
 
 	// osg -> gui
 	connect(m_viewer, &OSGViewerWidget::sCameraFrozen, m_action_freeze, &QAction::setChecked);
