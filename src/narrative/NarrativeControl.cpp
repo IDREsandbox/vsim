@@ -89,6 +89,42 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 			//showCanvas(false, true);
 			openSlide(-1, false, true);
 		}
+		VSimApp::State state = m_app->state();
+		if (state == VSimApp::EDIT_ERS) {
+			// hide?
+			openSlide(-1, false, true);
+		}
+
+		if (state != VSimApp::EDIT_CANVAS
+			&& state != VSimApp::EDIT_SLIDES) {
+			exitEdit();
+		}
+
+		if (state == VSimApp::EDIT_CANVAS) {
+			// open if possible
+			int last = m_slide_selection->last();
+			if (last >= 0) {
+				openSlide(last);
+				// single select slides
+				m_slide_selection->set({ last });
+			}
+		}
+		else {
+			// deselect canvas
+			m_canvas->setSelection({});
+		}
+
+	});
+
+	// TOP BAR
+	// show slides or narratives
+	connect(m_window->topBar()->ui.open, &QPushButton::clicked, this,
+		[this]() {
+		m_window->topBar()->showSlides();
+	});
+	connect(m_window->topBar()->ui.back, &QPushButton::clicked, this,
+		[this]() {
+		m_window->topBar()->showNarratives();
 	});
 
 	// NARRATIVE CONTROL
@@ -136,12 +172,13 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	// move
 	connect(m_slide_box, &SlideScrollBox::sMove, this, &NarrativeControl::moveSlides);
 	// goto
-	connect(m_slide_box, &SlideScrollBox::sGoto, this, [this](int index) {
-		qDebug() << "goto slide" << index;
-		openSlide(index);
-	});
+	//connect(m_slide_box, &SlideScrollBox::sGoto, this, [this](int index) {
+	//	openSlide(index);
+	//});
 	// back
-	connect(m_window->topBar()->ui.left_2, &QPushButton::clicked, this, [this]() {setNarrative(-1); });
+	connect(m_window->topBar()->ui.back, &QPushButton::clicked, this, [this]() {
+		selectNarratives({m_current_narrative});
+	});
 	//change
 	connect(m_slide_box, &HorizontalScrollBox::sTouch, this, [this]() {
 		int last = m_slide_selection->last();
@@ -533,6 +570,7 @@ void NarrativeControl::selectNarratives(const SelectionData &narratives)
 {
 	setNarrative(-1);
 	m_narrative_selection->set(narratives);
+	m_app->setState(VSimApp::EDIT_NARS);
 	emit sEditEvent();
 }
 
@@ -542,6 +580,7 @@ void NarrativeControl::selectSlides(int narrative, const SelectionData &slides)
 	setNarrative(narrative);
 	m_narrative_selection->set({narrative});
 	m_slide_selection->set(slides);
+	m_app->setState(VSimApp::EDIT_SLIDES);
 	emit sEditEvent();
 }
 
@@ -559,9 +598,10 @@ void NarrativeControl::selectLabels(int narrative, int slide, const std::set<Nar
 {
 	setNarrative(narrative);
 	m_narrative_selection->set({ narrative });
-	//m_slide_selection->set({ slide });
-	openSlide(slide);
+	m_slide_selection->set({ slide });
 	m_canvas->setSelection(labels);
+	m_app->setState(VSimApp::EDIT_CANVAS);
+	openSlide(slide);
 }
 
 int NarrativeControl::getCurrentNarrativeIndex()

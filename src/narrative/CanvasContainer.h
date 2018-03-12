@@ -195,10 +195,14 @@ public:
 	//bool editable() const;
 	virtual void setEditable(bool enable);
 
+	void mouseEventSelection(QGraphicsSceneMouseEvent *event);
+
 	CanvasScene *canvasScene() const;
 
 protected:
 	virtual void onResize(QSizeF size);
+
+	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
 
 private:
 	double m_w;

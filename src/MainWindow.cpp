@@ -119,16 +119,6 @@ MainWindow::MainWindow(QWidget *parent)
 	});
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
 
-	// show slides or narratives
-	connect(ui->topBar->ui.open, &QPushButton::clicked, this,
-		[this]() {
-			this->ui->topBar->showSlides();
-		});
-	connect(ui->topBar->ui.left_2, &QPushButton::clicked, this,
-		[this]() {
-			this->ui->topBar->showNarratives();
-		});
-
 	// model outliner
 	m_outliner = new ModelOutliner(this);
 	connect(ui->actionModel_Outliner, &QAction::triggered, this, [this]() {

@@ -214,7 +214,10 @@ const std::map<RectItem*, QRectF> &CanvasScene::getTransformRects() const
 
 void CanvasScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
 	QGraphicsScene::mousePressEvent(mouseEvent);
-	//beginTransform();
+	if (!mouseEvent->isAccepted()) {
+		// clear selection
+		setSelectedRects({});
+	}
 }
 
 void CanvasScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
@@ -270,6 +273,13 @@ void RectItem::move(double x, double y)
 
 void RectItem::onResize(QSizeF size)
 {
+}
+
+void RectItem::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
+{
+	QGraphicsRectItem::mousePressEvent(mouseEvent);
+	mouseEventSelection(mouseEvent);
+	mouseEvent->accept();
 }
 
 //bool RectItem::editable() const
@@ -616,6 +626,30 @@ void TextRect::setEditable(bool enable)
 	}
 }
 
+void RectItem::mouseEventSelection(QGraphicsSceneMouseEvent * event)
+{
+	bool left = event->button() & Qt::LeftButton;
+	bool right = event->button() & Qt::RightButton;
+	bool ctrl = event->modifiers() & Qt::Modifier::CTRL;
+	bool selected = isSelected();
+
+	// add to selection if
+	// - ctrl
+	if ((left || right) && ctrl) {
+		setSelected(!selected);
+		return; // dont pass this to the text doc
+	}
+	// single selection if
+	// - left
+	// - right and not already select
+	else if (left || right && !selected) {
+		// scene select one item
+		canvasScene()->setSelectedRects({ this });
+		// refocus
+		focusItem();
+	}
+}
+
 void TextRect::onResize(QSizeF size)
 {
 	m_text->setTextWidth(size.width() * m_base_height);
@@ -697,34 +731,9 @@ void TextItem::focusOutEvent(QFocusEvent * event)
 
 void TextItem::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
-	// Implement selection/deselection involving text items because we
-	// steal all of the mouse events for the text editor.
-	// Alternative:
-	//  call TextRect::mousePressEvent first with transformed coordinates
-	//  then call QGraphicsTextItem::mousePressEvent
-
-	bool left = event->button() & Qt::LeftButton;
-	bool right = event->button() & Qt::RightButton;
-	bool ctrl = event->modifiers() & Qt::Modifier::CTRL;
-	bool selected = m_rect->isSelected();
-
-	// add to selection if
-	// - ctrl
-	if ((left || right) && ctrl) {
-		m_rect->setSelected(!selected);
-		return; // dont pass this to the text doc
-	}
-	// single selection if
-	// - left
-	// - right and not already select
-	else if (left || right && !selected) {
-		// scene select one item
-		m_rect->canvasScene()->setSelectedRects({m_rect});
-		// refocus
-		m_rect->focusItem();
-	}
-
+	m_rect->mouseEventSelection(event);
 	QGraphicsTextItem::mousePressEvent(event);
+	event->accept();
 }
 
 void TextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event)
