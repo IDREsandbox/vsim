@@ -5,6 +5,7 @@
 #include <vector>
 #include <QDebug>
 #include <algorithm>
+#include <QElapsedTimer>
 
 #include "HorizontalScrollBox.h"
 #include "ScrollBoxItem.h"

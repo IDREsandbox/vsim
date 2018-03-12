@@ -52,6 +52,9 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 		if (!m_app->isFlying()) {
 			m_viewer->setCameraFrozen(true);
 		}
+		else {
+			m_viewer->setFocus();
+		}
 	});
 
 	// gui -> osg

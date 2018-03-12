@@ -53,7 +53,6 @@ VSimApp::VSimApp(MainWindow* window)
 	// timers
 	m_timer = new QTimer(this);
 	m_timer->setInterval(0);
-	m_timer->setSingleShot(false);
 	m_dt_timer = new QElapsedTimer;
 	m_timer->start();
 	m_dt_timer->start();
@@ -183,8 +182,7 @@ void VSimApp::prev()
 
 void VSimApp::update(float dt_sec)
 {
-	qDebug() << "tick" << dt_sec * 1000;
-	emit sTick(dt_sec);
+	//emit sTick(dt_sec);
 
 	// Smooth camera updates
 	if (m_camera_timer->isActive()) {

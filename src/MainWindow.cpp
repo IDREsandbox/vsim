@@ -40,32 +40,27 @@ MainWindow::MainWindow(QWidget *parent)
 	resize(1280, 720);
 	setWindowTitle("VSim");
 	setAcceptDrops(true);
-	qDebug() << "root: " << QDir::currentPath();
 
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui->root);
-	m_osg_widget->lower(); // move this to the back
 	ui->rootLayout->addWidget(m_osg_widget, 0, 0);
-	QGridLayout *osg_layout = new QGridLayout(m_osg_widget);
-	osg_layout->setContentsMargins(QMargins()); // zero margins
 
-	// canvas on top of osg viewer
-	m_canvas = new NarrativeCanvas(m_osg_widget);
+	m_canvas = new NarrativeCanvas(ui->root);
 	m_canvas->setObjectName("canvas");
-	osg_layout->addWidget(m_canvas, 0, 0);
+	ui->rootLayout->addWidget(m_canvas, 0, 0);
 	m_canvas->setStyleSheet("#canvas{background:rgba(0, 0, 0, 0);}");
 
-	m_fade_canvas = new NarrativeCanvas(m_osg_widget);
+	m_fade_canvas = new NarrativeCanvas(ui->root);
 	m_canvas->setObjectName("fadeCanvas");
-	osg_layout->addWidget(m_fade_canvas, 0, 0);
+	ui->rootLayout->addWidget(m_fade_canvas, 0, 0);
 	m_fade_canvas->lower();
 	m_fade_canvas->setAttribute(Qt::WA_TransparentForMouseEvents);
 	m_fade_canvas->setStyleSheet("#canvas{background:rgba(0, 0, 0, 0);}");
 
 	// splitter on top of osg viewer
 	// mask allows events to get to the canvas
-	ui->mainSplitter->setParent(m_osg_widget);
-	osg_layout->addWidget(ui->mainSplitter, 0, 0);
+	ui->mainSplitter->setParent(ui->root);
+	ui->rootLayout->addWidget(ui->mainSplitter, 0, 0);
 
 	ui->mainSplitter->setMouseTracking(true);
 
@@ -73,10 +68,10 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->mainSplitter, &QSplitter::splitterMoved, this, &MainWindow::updatePositions);
 
 	// label buttons
-	m_label_buttons = new editButtons(m_osg_widget);
+	m_label_buttons = new editButtons(ui->root);
 
 	// er display
-	m_er_display = new ERDisplay(m_osg_widget);
+	m_er_display = new ERDisplay(ui->root);
 	m_er_display->setGeometry(10, 10, 265, 251);
 	m_er_display->setObjectName("erDisplay");
 	m_er_display->hide();
@@ -84,9 +79,14 @@ MainWindow::MainWindow(QWidget *parent)
 	// er filter widget
 	//QWidget *filter_area_padding_layout = new QGridLayout();
 	//middle_layout->addLayout(filter_area_padding_layout, 0, 0);
-	m_er_filter_area = new ERFilterArea(m_osg_widget);
+	m_er_filter_area = new ERFilterArea(ui->root);
 	m_er_filter_area->setObjectName("erFilterArea");
 	m_er_filter_area->hide();
+
+	// layering
+	m_canvas->lower();
+	m_fade_canvas->lower();
+	m_osg_widget->lower();
 
 	// vsimapp file stuff
 	connect(ui->actionNew, &QAction::triggered, this, &MainWindow::actionNew);
@@ -111,6 +111,11 @@ MainWindow::MainWindow(QWidget *parent)
 		qInfo() << "Editor debug";
 		qInfo() << "focus object" << QApplication::focusObject();
 		qInfo() << "focus widget" << QApplication::focusWidget();
+		qInfo() << "updating osg viewer";
+		m_osg_widget->update();
+		qInfo() << "nav" << m_osg_widget->getNavigationMode();
+		qInfo() << "freeze" << m_osg_widget->getCameraFrozen();
+		qInfo() << "app state" << VSimApp::StateStrings[m_app->state()];
 	});
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
 

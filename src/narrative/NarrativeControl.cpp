@@ -58,6 +58,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_undo_stack = m_app->getUndoStack();
 
 	m_fade_in = new QGraphicsOpacityEffect(m_canvas);
+	m_fade_in->setOpacity(1.0);
 	m_canvas->setGraphicsEffect(m_fade_in);
 	m_fade_in_anim = new QPropertyAnimation(m_fade_in, "opacity");
 	m_fade_in_anim->setDuration(250);
@@ -65,9 +66,10 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_fade_in_anim->setEndValue(1.0);
 
 	m_fade_out = new QGraphicsOpacityEffect(m_fade_canvas);
+	m_fade_out->setOpacity(1.0);
 	m_fade_canvas->setGraphicsEffect(m_fade_out);
 	m_fade_out_anim = new QPropertyAnimation(m_fade_out, "opacity");
-	m_fade_out_anim->setDuration(2000);
+	m_fade_out_anim->setDuration(250);
 	m_fade_out_anim->setStartValue(1.0);
 	m_fade_out_anim->setEndValue(0.0);
 
@@ -148,7 +150,6 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 		}
 		else {
 			m_app->setState(VSimApp::EDIT_SLIDES);
-			qDebug() << "should open no?";
 			openSlide(m_slide_selection->last());
 			showCanvas(true);
 		}

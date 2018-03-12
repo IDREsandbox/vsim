@@ -27,6 +27,7 @@
 #include <QPainter>
 #include <QWheelEvent>
 #include <QSurfaceFormat>
+#include <QTimer>
 
 OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	: QOpenGLWidget(parent,	f),
@@ -117,6 +118,12 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	// frame timer
 	m_frame_timer.start();
+
+	// always render timer
+	QTimer *t = new QTimer(this);
+	t->setInterval(0);
+	t->start();
+	connect(t, &QTimer::timeout, this, [this]() {update();});
 }
 
 osgViewer::Viewer* OSGViewerWidget::getViewer() const
@@ -262,7 +269,6 @@ void OSGViewerWidget::enableNavigation(bool enable)
 void OSGViewerWidget::stopNavigation()
 {
 	qInfo() << "Camera stop";
-	//setNavigationModeInternal(MANIPULATOR_SIMPLE);
 
 	// stop all manipulator momentum
 	m_first_person_manipulator->stop();
@@ -339,12 +345,14 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 	m_frame_timer.restart();
 	double dt_sec = (double)dt / 1.0e9;
 
-	emit frame(dt_sec);
+	//emit frame(dt_sec);
 
 	if (m_manipulator == MANIPULATOR_FIRST_PERSON) {
 		m_first_person_manipulator->update(dt_sec, &m_key_tracker, viewer_->getSceneData());
 	}
 	else if (m_manipulator == MANIPULATOR_FLIGHT) {
+		// shouldn't be in mousemove because entering flight mode doesn't necessarily
+		// mean moving the mouse
 		QPoint mouse = mapFromGlobal(cursor().pos());
 		int dx = mouse.x() - width() / 2;
 		int dy = mouse.y() - height() / 2;
@@ -354,7 +362,6 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 
 		m_flight_manipulator->update(dt_sec, &m_key_tracker, viewer_->getSceneData());
 	}
-
 
 	// let qt do setup stuff and call paintGL
 	QOpenGLWidget::paintEvent(e);
