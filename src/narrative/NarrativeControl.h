@@ -12,6 +12,7 @@
 
 class VSimApp;
 class MainWindow;
+class MainWindowTopBar;
 class NarrativeGroup;
 class Narrative2;
 class NarrativeSlide;
@@ -35,14 +36,20 @@ public:
 	void load(NarrativeGroup *narratives);
 	void loadNarratives(NarrativeGroup *group);
 
-	// Selection
-	void openNarrative(); // if index <0 then it uses the the narrative box selection
-	void setNarrative(int index);
+	// Opens narrative in slide box
+	// - closes slide if not already open
+	// - hide on -1
+	void openNarrative(int index); // opens narrative in slide box
 
-	// select slide, show canvas
-	// hides if index out of range or narrative not open
-	// returns true if open, false if failed
+	// Opens slide in canvas
+	// - requires an open narrative
+	// - forces selection, shows canvas
+	// - hides on -1 or no narrative
+	// - returns true if open, false if failed
 	bool openSlide(int index, bool go = true, bool fade = false);
+
+	void showNarrativeBox();
+	void showSlideBox();
 
 	void editSlide();
 	void exitEdit();
@@ -118,9 +125,8 @@ private:
 	int m_current_narrative; // opened narrative
 	int m_current_slide; // active canvas slide
 	bool m_editing_slide;
-	bool m_force_select;
-	bool m_editing_enabled;
 	bool m_canvas_enabled;
+	bool m_show_slides; // show narratives or slides
 
 	QGraphicsOpacityEffect *m_fade_out;
 	QGraphicsOpacityEffect *m_fade_in;
@@ -130,6 +136,7 @@ private:
 	osg::ref_ptr<NarrativeGroup> m_narrative_group;
 
 	MainWindow *m_window;
+	MainWindowTopBar *m_bar;
 	NarrativeScrollBox *m_narrative_box;
 	SelectionStack *m_narrative_selection;
 	SlideScrollBox *m_slide_box;

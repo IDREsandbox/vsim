@@ -46,9 +46,9 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_window(window), 
 	m_current_narrative(-1),
 	m_narrative_group(nullptr),
-	m_canvas_enabled(true),
-	m_editing_enabled(false)
+	m_canvas_enabled(true)
 {
+	m_bar = window->topBar();
 	m_narrative_box = window->topBar()->ui.narratives;
 	m_slide_box = window->topBar()->ui.slides;
 	m_narrative_selection = m_narrative_box->selectionStack();
@@ -114,30 +114,19 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 
 	});
 
-	// TOP BAR
-	// show slides or narratives
-	connect(m_window->topBar()->ui.open, &QPushButton::clicked, this,
-		[this]() {
-		m_window->topBar()->showSlides();
-	});
-	connect(m_window->topBar()->ui.back, &QPushButton::clicked, this,
-		[this]() {
-		m_window->topBar()->showNarratives();
-	});
-
 	// NARRATIVE CONTROL
 	// new
 	connect(m_narrative_box, &NarrativeScrollBox::sNew, this, &NarrativeControl::newNarrative);
-	connect(m_window->topBar()->ui.plus, &QPushButton::clicked, this, &NarrativeControl::newNarrative);
+	connect(m_bar->ui.plus, &QPushButton::clicked, this, &NarrativeControl::newNarrative);
 	// delete
 	connect(m_narrative_box, &NarrativeScrollBox::sDelete, this, &NarrativeControl::deleteNarratives);
-	connect(m_window->topBar()->ui.minus, &QPushButton::clicked, this, &NarrativeControl::deleteNarratives);
+	connect(m_bar->ui.minus, &QPushButton::clicked, this, &NarrativeControl::deleteNarratives);
 	// info
 	connect(m_narrative_box, &NarrativeScrollBox::sInfo, this, &NarrativeControl::editNarrativeInfo);
-	connect(m_window->topBar()->ui.info, &QPushButton::clicked, this, &NarrativeControl::editNarrativeInfo);
+	connect(m_bar->ui.info, &QPushButton::clicked, this, &NarrativeControl::editNarrativeInfo);
 	// open
-	connect(m_narrative_box, &NarrativeScrollBox::sOpen, this, &NarrativeControl::openNarrative);
-	connect(m_window->topBar()->ui.open, &QPushButton::clicked, this, &NarrativeControl::openNarrative);
+	connect(m_narrative_box, &NarrativeScrollBox::sOpen, this, &NarrativeControl::showSlideBox);
+	connect(m_bar->ui.open, &QPushButton::clicked, this, &NarrativeControl::showSlideBox);
 	// move
 	connect(m_narrative_box, &NarrativeScrollBox::sMove, this, &NarrativeControl::moveNarratives);
 	// touch
@@ -145,22 +134,25 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 		int last = m_narrative_selection->last();
 		if (last < 0) {
 			m_app->setState(VSimApp::EDIT_FLYING);
+			openNarrative(-1);
 		}
 		else {
 			m_app->setState(VSimApp::EDIT_NARS);
+			openNarrative(last);
+			openSlide(0);
 		}
 	});
 
 	// SLIDE CONTROL
 	// new
 	connect(m_slide_box, &SlideScrollBox::sNewSlide, this, &NarrativeControl::newSlide);
-	connect(m_window->topBar()->ui.plus_2, &QPushButton::clicked, this, &NarrativeControl::newSlide);
+	connect(m_bar->ui.plus_2, &QPushButton::clicked, this, &NarrativeControl::newSlide);
 	// delete
 	connect(m_slide_box, &SlideScrollBox::sDeleteSlides, this, &NarrativeControl::deleteSlides);
-	connect(m_window->topBar()->ui.minus_2, &QPushButton::clicked, this, &NarrativeControl::deleteSlides);
+	connect(m_bar->ui.minus_2, &QPushButton::clicked, this, &NarrativeControl::deleteSlides);
 	// edit
 	connect(m_slide_box, &SlideScrollBox::sEditSlide, this, &NarrativeControl::editSlide);
-	connect(m_window->topBar()->ui.open_2, &QPushButton::clicked, this, &NarrativeControl::editSlide);
+	connect(m_bar->ui.open_2, &QPushButton::clicked, this, &NarrativeControl::editSlide);
 	// duration
 	connect(m_slide_box, &SlideScrollBox::sSetDuration, this, &NarrativeControl::setSlideDuration);
 	// transition
@@ -174,9 +166,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	//	openSlide(index);
 	//});
 	// back
-	connect(m_window->topBar()->ui.back, &QPushButton::clicked, this, [this]() {
-		selectNarratives({m_current_narrative});
-	});
+	connect(m_bar->ui.back, &QPushButton::clicked, this, &NarrativeControl::showNarrativeBox);
 	//change
 	connect(m_slide_box, &HorizontalScrollBox::sTouch, this, [this]() {
 		int last = m_slide_selection->last();
@@ -358,59 +348,73 @@ void NarrativeControl::load(NarrativeGroup *narratives)
 	m_narrative_box->clear();
 	m_slide_box->clear(); 
 	m_narrative_group = narratives;
-	setNarrative(-1);
+	showNarrativeBox();
 
 	m_narrative_box->setGroup(narratives);
 }
 
-void NarrativeControl::openNarrative()
+void NarrativeControl::openNarrative(int index)
 {
-	int index = m_narrative_selection->last();
-	if (index < 0) return;
-
-	setNarrative(index);
-}
-
-void NarrativeControl::setNarrative(int index)
-{
+	qInfo() << "open narrative at" << index;
 	if (index == m_current_narrative) return;
-	if (index < 0) {
+	Narrative2 *nar = getNarrative(index);
+	if (!nar || index < 0) {
 		m_current_narrative = -1;
-		m_current_slide = -1;
-		this->m_window->topBar()->showNarratives();
-		m_canvas->setSlide(nullptr);
-		m_canvas->hide();
-		emit sEditEvent();
+		m_slide_box->setGroup(nullptr);
+		openSlide(-1);
 		return;
 	}
 
-	qInfo() << "open narrative at" << index;
-	this->m_window->topBar()->showSlides();
+	// force selection
+	if (!m_narrative_selection->has(index)) {
+		m_narrative_selection->select(index);
+	}
+
+	openSlide(-1);
 	m_current_narrative = index;
-
-	Narrative2 *nar = getNarrative(index);
-	m_window->topBar()->setSlidesHeader(nar->getTitle());
+	m_bar->setSlidesHeader(nar->getTitle());
 	m_slide_box->setGroup(nar);
-	enableEditing(false);
-
-	emit sEditEvent();
 }
+
+//void NarrativeControl::setNarrative(int index)
+//{
+//	if (index == m_current_narrative) return;
+//
+//	Narrative2 *nar = getNarrative(index);
+//	if (!nar || index < 0) {
+//		m_current_narrative = -1;
+//		// m_current_slide = -1;
+//		// m_window->topBar()->showNarratives();
+//		// openSlide(-1);
+//		// m_canvas->setSlide(nullptr);
+//		// m_canvas->hide();
+//		m_slide_box->setGroup(nullptr);
+//		return;
+//	}
+//	qInfo() << "open narrative at" << index;
+//	m_current_narrative = index;
+//	m_bar->setSlidesHeader(nar->getTitle());
+//	m_slide_box->setGroup(nar);
+//
+//	emit sEditEvent();
+//}
 
 bool NarrativeControl::openSlide(int index, bool go, bool fade)
 {
 	NarrativeSlide *slide = getSlide(m_current_narrative, index);
-
-	if (m_current_slide == index) {
-		return true;
-	}
 
 	// failed to set slide
 	if (!slide) {
 		m_current_slide = -1;
 		showCanvas(false, fade);
 		m_canvas->setSlide(nullptr);
-		exitEdit();
+		enableEditing(false);
 		return false;
+	}
+
+	if (m_current_slide == index) {
+		qDebug() << "slide already open";
+		return true;
 	}
 
 	m_current_slide = index;
@@ -511,6 +515,16 @@ void NarrativeControl::showCanvasEditor(bool show)
 	m_label_buttons->setVisible(show);
 }
 
+void NarrativeControl::showNarrativeBox()
+{
+	m_bar->showNarratives();
+}
+
+void NarrativeControl::showSlideBox()
+{
+	m_bar->showSlides();
+}
+
 void NarrativeControl::editSlide()
 {
 	if (m_editing_slide) {
@@ -561,23 +575,27 @@ NarrativeControl::SelectionLevel NarrativeControl::getSelectionLevel()
 void NarrativeControl::selectNarratives(const SelectionData &narratives)
 {
 	// if single selection and already open then don't do anything
-	if (narratives.size() == 1 && m_current_narrative == *narratives.rbegin()) {
-		m_app->setState(VSimApp::EDIT_NARS);
-		return;
-	}
+	//if (narratives.size() == 1 && m_current_narrative == *narratives.rbegin()) {
+	//	m_app->setState(VSimApp::EDIT_NARS);
+	//	return;
+	//}
 
-	setNarrative(-1);
 	m_narrative_selection->set(narratives);
+	openNarrative(m_narrative_selection->last());
+	openSlide(0);
+
 	m_app->setState(VSimApp::EDIT_NARS);
+	m_bar->showNarratives();
 	emit sEditEvent();
 }
 
 void NarrativeControl::selectSlides(int narrative, const SelectionData &slides)
 {
-	setNarrative(narrative);
+	openNarrative(narrative);
 	m_narrative_selection->set({narrative});
 	m_slide_selection->set(slides);
 	m_app->setState(VSimApp::EDIT_SLIDES);
+	m_bar->showSlides();
 	emit sEditEvent();
 }
 
@@ -593,7 +611,7 @@ void NarrativeControl::selectSlides(int narrative, const SelectionData &slides)
 
 void NarrativeControl::selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem *> &labels)
 {
-	setNarrative(narrative);
+	openNarrative(narrative);
 	m_narrative_selection->set({ narrative });
 	m_slide_selection->set({ slide });
 	openSlide(slide);
