@@ -85,8 +85,6 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	connect(m_app, &VSimApp::sStateChanged, this, [this](auto old, auto current) {
 		if (m_app->isFlying()) {
 			// fade out
-			qDebug() << "flying -> fade out";
-			//showCanvas(false, true);
 			openSlide(-1, false, true);
 		}
 		VSimApp::State state = m_app->state();
@@ -97,7 +95,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 
 		if (state != VSimApp::EDIT_CANVAS
 			&& state != VSimApp::EDIT_SLIDES) {
-			exitEdit();
+			enableEditing(false);
 		}
 
 		if (state == VSimApp::EDIT_CANVAS) {
@@ -144,7 +142,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	connect(m_narrative_box, &NarrativeScrollBox::sMove, this, &NarrativeControl::moveNarratives);
 	// touch
 	connect(m_narrative_box, &HorizontalScrollBox::sTouch, this, [this]() {
-		int last = m_slide_selection->last();
+		int last = m_narrative_selection->last();
 		if (last < 0) {
 			m_app->setState(VSimApp::EDIT_FLYING);
 		}
@@ -348,6 +346,13 @@ void NarrativeControl::debug()
 	qInfo() << "slide box" << Util::iterToString(ss.begin(), ss.end());
 }
 
+void NarrativeControl::enableEditing(bool enable)
+{
+	showCanvasEditor(enable);
+	m_canvas->setEditable(enable);
+	m_editing_slide = enable;
+}
+
 void NarrativeControl::load(NarrativeGroup *narratives)
 {
 	m_narrative_box->clear();
@@ -384,9 +389,9 @@ void NarrativeControl::setNarrative(int index)
 	m_current_narrative = index;
 
 	Narrative2 *nar = getNarrative(index);
-	this->m_window->topBar()->setSlidesHeader(nar->getTitle());
+	m_window->topBar()->setSlidesHeader(nar->getTitle());
 	m_slide_box->setGroup(nar);
-	this->exitEdit();
+	enableEditing(false);
 
 	emit sEditEvent();
 }
@@ -508,6 +513,11 @@ void NarrativeControl::showCanvasEditor(bool show)
 
 void NarrativeControl::editSlide()
 {
+	if (m_editing_slide) {
+		exitEdit();
+		return;
+	}
+
 	Narrative2 *nar = getCurrentNarrative();
 	if (!nar) {
 		qWarning() << "failed to edit slide - no narrative";
@@ -515,38 +525,30 @@ void NarrativeControl::editSlide()
 	}
 
 	// is a slide open?
-	if (m_current_slide < 0) {
-		int last = m_slide_selection->last();
-		auto sel = m_slide_selection->data();
-		Narrative2 *nar = getCurrentNarrative();
-		// open last selected
-		if (last >= 0) {
-			openSlide(last);
-		}
-		// open last slide in selection
-		else if (sel.size() > 0) {
-			openSlide(*sel.rbegin());
-		}
-		// open last slide
-		else if (nar->getNumChildren() > 0) {
-			openSlide(nar->getNumChildren() - 1);
-		}
+	int slide = -1;
+	int last = m_slide_selection->last();
+	// open last selected
+	if (last >= 0) {
+		slide = last;
 	}
-	if (m_current_slide < 0) {
-		qWarning() << "failed to open slide for editing";
+	// open last slide
+	else if (nar->getNumChildren() > 0) {
+		slide = nar->getNumChildren() - 1;
+	}
+
+	if (slide < 0) {
+		qWarning() << "failed to open slide for editing" << slide;
 		return;
 	}
 
-	showCanvasEditor(true);
-	m_canvas->setEditable(true);
-	m_editing_slide = true;
+	openSlide(slide);
+	enableEditing(true);
+	m_app->setState(VSimApp::EDIT_CANVAS);
 }
 
 void NarrativeControl::exitEdit() {
-	m_label_buttons->hide();
-	m_canvas->setEditable(false);
-	m_editing_slide = false;
-	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+	enableEditing(false);
+	m_app->setState(VSimApp::EDIT_SLIDES);
 }
 
 NarrativeControl::SelectionLevel NarrativeControl::getSelectionLevel()
@@ -558,6 +560,12 @@ NarrativeControl::SelectionLevel NarrativeControl::getSelectionLevel()
 
 void NarrativeControl::selectNarratives(const SelectionData &narratives)
 {
+	// if single selection and already open then don't do anything
+	if (narratives.size() == 1 && m_current_narrative == *narratives.rbegin()) {
+		m_app->setState(VSimApp::EDIT_NARS);
+		return;
+	}
+
 	setNarrative(-1);
 	m_narrative_selection->set(narratives);
 	m_app->setState(VSimApp::EDIT_NARS);
@@ -588,9 +596,9 @@ void NarrativeControl::selectLabels(int narrative, int slide, const std::set<Nar
 	setNarrative(narrative);
 	m_narrative_selection->set({ narrative });
 	m_slide_selection->set({ slide });
+	openSlide(slide);
 	m_canvas->setSelection(labels);
 	m_app->setState(VSimApp::EDIT_CANVAS);
-	openSlide(slide);
 }
 
 int NarrativeControl::getCurrentNarrativeIndex()

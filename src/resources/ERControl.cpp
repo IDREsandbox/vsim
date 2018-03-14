@@ -152,7 +152,7 @@ void ERControl::newER()
 	resource->setCategory(dlg.getCategory());
 
 	m_undo_stack->push(new Group::AddNodeCommand(m_ers, resource));
-
+	m_undo_stack->push(new SelectERCommand(this, { resource }, Command::ON_REDO));
 	m_undo_stack->endMacro();
 }
 
@@ -162,6 +162,7 @@ void ERControl::deleteER()
 	if (selection.empty()) return;
 
 	m_undo_stack->beginMacro("Delete Resources");
+	m_undo_stack->push(new SelectERCommand(this, getCombinedSelectionP(), Command::ON_UNDO));
 	// save old categories, so that we can restore them later
 	auto cmd = new Group::EditCommand(m_ers, selection);
 	for (int i : selection) {
@@ -228,6 +229,7 @@ void ERControl::editERInfo()
 		new EResource::SetCategoryCommand(resource, dlg.getCategory(), cmd);
 
 	//m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
+	m_undo_stack->push(new SelectERCommand(this, { resource }));
 	m_undo_stack->push(cmd);
 
 	m_undo_stack->endMacro();
@@ -268,12 +270,10 @@ void ERControl::setPosition()
 		return;
 	}
 
-	std::vector<EResource*> resources = getCombinedSelectionP();
-
 	EResource *resource = m_ers->getResource(active_item);
 	m_undo_stack->beginMacro("Set Resource Info");
 	m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_app->getCameraMatrix()));
-	m_undo_stack->push(new SelectERCommand(this, resources));
+	m_undo_stack->push(new SelectERCommand(this, { resource }));
 	m_undo_stack->endMacro();
 }
 
@@ -325,13 +325,14 @@ void ERControl::onSelectionChange()
 
 void ERControl::selectERs(const std::vector<EResource*> &res)
 {
-	std::vector<int> globals = m_global_proxy->indicesOf(res);
+	std::vector<int> globals = m_global_proxy->indicesOf(res, false);
 	m_global_box->selectionStack()->set(globals);
 
-	std::vector<int> locals = m_local_proxy->indicesOf(res);
+	std::vector<int> locals = m_local_proxy->indicesOf(res, false);
 	m_local_box->selectionStack()->set(locals);
 
 	m_app->setState(VSimApp::EDIT_ERS);
+	setDisplay(getCombinedLastSelected());
 }
 
 void ERControl::debug()
@@ -378,17 +379,23 @@ std::vector<EResource*> ERControl::getCombinedSelectionP()
 
 	// tape global on top of local
 	SelectionData local = m_local_selection->data();
-	SelectionData global = m_local_selection->data();
-	SelectionData index_stack = local;
-	index_stack.insert(index_stack.end(), global.begin(), global.end());
-
-	for (int index : index_stack) {
-		EResource *res = m_ers->getResource(index);
+	for (int index : local) {
+		EResource *res = m_local_proxy->getResource(index);
 		if (has.find(res) == has.end() && res) {
 			has.insert(res);
 			out.push_back(res);
 		}
 	}
+
+	SelectionData global = m_global_selection->data();
+	for (int index : global) {
+		EResource *res = m_global_proxy->getResource(index);
+		if (has.find(res) == has.end() && res) {
+			has.insert(res);
+			out.push_back(res);
+		}
+	}
+
 	return out;
 }
 

@@ -51,8 +51,6 @@ public:
 	//bool advance(bool forward);
 	bool advanceSlide(bool forward, bool instant = true);
 	void showCanvas(bool show, bool fade = false);
-	void enableCanvas(bool enable);
-	void enableEditing(bool enable);
 	void showCanvasEditor(bool show);
 
 	enum SelectionLevel {
@@ -111,6 +109,9 @@ public: // Actions
 	QImage generateThumbnail(NarrativeSlide *slide);
 
 	void debug();
+
+private:
+	void enableEditing(bool enable);
 
 private:
 	VSimApp * m_app;
