@@ -95,7 +95,6 @@ VSimApp::State VSimApp::state() const
 
 void VSimApp::setState(State s)
 {
-	qDebug() << "VS SET STATE:" << StateStrings[s];
 	State old = s;
 	m_state = s;
 	emit sStateChanged(old, s);

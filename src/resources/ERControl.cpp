@@ -73,8 +73,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	connect(m_local_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
 	connect(m_global_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
 
-	connect(m_local_box->selectionStack(), &SelectionStack::sChanged, this, &ERControl::onSelectionChange);
-	connect(m_global_box->selectionStack(), &SelectionStack::sChanged, this, &ERControl::onSelectionChange);
+	connect(m_local_box, &HorizontalScrollBox::sTouch, this, &ERControl::onSelectionChange);
+	connect(m_global_box, &HorizontalScrollBox::sTouch, this, &ERControl::onSelectionChange);
 
 	// mash the two selections together
 	// if one clears everything, then clear the other one too
@@ -91,6 +91,14 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 		ERFilterArea *area = m_window->erFilterArea();
 		area->setVisible(!area->isVisible());
 	});
+
+	connect(m_app, &VSimApp::sStateChanged, this, [this]() {
+		VSimApp::State state = m_app->state();
+		if (!m_app->isFlying() && state != VSimApp::EDIT_ERS) {
+			setDisplay(-1);
+		}
+	});
+
 	load(ers);
 }
 
@@ -124,7 +132,7 @@ void ERControl::newER()
 	if (result == QDialog::Rejected) {
 		return;
 	}
-	qDebug() << "Command - New Embedded Resource";
+	qInfo() << "Command - New Embedded Resource";
 	m_undo_stack->beginMacro("New Resource");
 
 	EResource *resource = new EResource;
@@ -159,7 +167,6 @@ void ERControl::deleteER()
 	for (int i : selection) {
 		EResource *res = m_ers->getResource(i);
 		if (!res) continue;
-		qDebug() << "setting category to null command";
 		new EResource::SetCategoryCommand(res, nullptr, cmd);
 	}
 	m_undo_stack->push(cmd);
@@ -261,9 +268,12 @@ void ERControl::setPosition()
 		return;
 	}
 
+	std::vector<EResource*> resources = getCombinedSelectionP();
+
 	EResource *resource = m_ers->getResource(active_item);
 	m_undo_stack->beginMacro("Set Resource Info");
 	m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_app->getCameraMatrix()));
+	m_undo_stack->push(new SelectERCommand(this, resources));
 	m_undo_stack->endMacro();
 }
 
@@ -279,26 +289,49 @@ void ERControl::gotoPosition()
 	m_app->setCameraMatrix(resource->getCameraMatrix());
 }
 
+void ERControl::setDisplay(int index, bool go)
+{
+	m_active_item = index;
+
+	EResource *res = m_ers->getResource(m_active_item);
+	if (!res) {
+		m_display->setInfo(nullptr);
+		m_display->hide();
+		return;
+	}
+
+	m_display->setInfo(res);
+	m_display->show();
+
+	if (go) {
+		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .3);
+	}
+}
+
 void ERControl::onSelectionChange()
 {
 	int new_active = getCombinedLastSelected();
-	if (new_active != m_active_item) {
-		// go to and set
-		m_active_item = new_active;
-	
-		EResource *res = m_ers->getResource(m_active_item);
-		if (!res) {
-			qInfo() << "Hide ER display";
-			m_display->setInfo(nullptr);
-			m_display->hide();
-			return;
-		}
 
-		qInfo() << "Set ER display to :" << m_active_item;
-		m_display->setInfo(res);
-		m_display->show();
-		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .3);
+	if (new_active >= 0) {
+		// set state
+		m_app->setState(VSimApp::EDIT_ERS);
+		setDisplay(new_active);
 	}
+	else {
+		setDisplay(-1);
+		m_app->setState(VSimApp::EDIT_FLYING);
+	}
+}
+
+void ERControl::selectERs(const std::vector<EResource*> &res)
+{
+	std::vector<int> globals = m_global_proxy->indicesOf(res);
+	m_global_box->selectionStack()->set(globals);
+
+	std::vector<int> locals = m_local_proxy->indicesOf(res);
+	m_local_box->selectionStack()->set(locals);
+
+	m_app->setState(VSimApp::EDIT_ERS);
 }
 
 void ERControl::debug()
@@ -336,6 +369,27 @@ std::set<int> ERControl::getCombinedSelection()
 		selection.insert(m_ers->indexOf(node));
 	}
 	return selection;
+}
+
+std::vector<EResource*> ERControl::getCombinedSelectionP()
+{
+	std::set<EResource*> has;
+	std::vector<EResource*> out;
+
+	// tape global on top of local
+	SelectionData local = m_local_selection->data();
+	SelectionData global = m_local_selection->data();
+	SelectionData index_stack = local;
+	index_stack.insert(index_stack.end(), global.begin(), global.end());
+
+	for (int index : index_stack) {
+		EResource *res = m_ers->getResource(index);
+		if (has.find(res) == has.end() && res) {
+			has.insert(res);
+			out.push_back(res);
+		}
+	}
+	return out;
 }
 
 int ERControl::getCombinedLastSelected()
@@ -377,4 +431,30 @@ int ERControl::getCombinedLastSelected()
 
 	if (last_base >= m_ers->getNumChildren()) return -1;
 	return last_base;
+}
+
+void ERControl::clearSelection()
+{
+	m_global_box->selectionStack()->clear();
+	m_local_box->selectionStack()->clear();
+}
+
+SelectERCommand::SelectERCommand(ERControl *control,
+	const std::vector<EResource*> &resources,
+	Command::When when,
+	QUndoCommand *parent)
+	: m_control(control),
+	m_resources(resources),
+	m_when(when)
+{
+}
+void SelectERCommand::undo()
+{
+	if (!(m_when & Command::ON_UNDO)) return;
+	m_control->selectERs(m_resources);
+}
+void SelectERCommand::redo()
+{
+	if (!(m_when & Command::ON_REDO)) return;
+	m_control->selectERs(m_resources);
 }

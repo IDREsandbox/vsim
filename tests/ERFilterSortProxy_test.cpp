@@ -46,6 +46,20 @@ private slots:
 		group->addChild(res4);
 		GROUPCOMPARE(proxy, { res3, res2, res4, res1, res0 });
 
+		// test indicesOf
+		std::vector<int> indices;
+		std::vector<int> ans;
+		indices = proxy->indicesOf({res0, res1, res3});
+		ans = {4, 3, 0};
+		QVERIFY(indices == ans);
+
+		indices = proxy->indicesOf({nullptr, res4, res2});
+		ans = {-1, 2, 1};
+		QVERIFY(indices == ans);
+
+		indices = proxy->indicesOf({nullptr, res0, nullptr, res3}, false);
+		ans = {4, 0};
+		QVERIFY(indices == ans);
 	}
 	//void insertSignalTests() {
 	//	reset();
@@ -192,7 +206,7 @@ private slots:
 		osg::ref_ptr<ERFilterSortProxy> p3 = new ERFilterSortProxy(group);
 		p3->sortBy(ERFilterSortProxy::ALPHABETICAL);
 		Util::tic();
-		int x = 1;
+		int x = 10;
 		for (int i = 0; i < x; i++) {
 			EResource *res = new EResource;
 			res->setResourceName(std::to_string(i));

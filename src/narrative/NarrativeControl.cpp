@@ -339,18 +339,17 @@ void NarrativeControl::loadNarratives(NarrativeGroup * group)
 
 void NarrativeControl::debug()
 {
-	qDebug() << "Narrative Control Debug";
-	qDebug() << "current narrative" << m_current_narrative;
-	qDebug() << "current slide" << m_current_slide;
+	qInfo() << "Narrative Control Debug";
+	qInfo() << "current narrative" << m_current_narrative;
+	qInfo() << "current slide" << m_current_slide;
 	auto ns = m_slide_selection->data();
-	qDebug() << "nar box" << Util::iterToString(ns.begin(), ns.end());
+	qInfo() << "nar box" << Util::iterToString(ns.begin(), ns.end());
 	auto ss = m_slide_selection->data();
-	qDebug() << "slide box" << Util::iterToString(ss.begin(), ss.end());
+	qInfo() << "slide box" << Util::iterToString(ss.begin(), ss.end());
 }
 
 void NarrativeControl::load(NarrativeGroup *narratives)
 {
-	qDebug() << "Clearing narrative control";
 	m_narrative_box->clear();
 	m_slide_box->clear(); 
 	m_narrative_group = narratives;
@@ -380,7 +379,7 @@ void NarrativeControl::setNarrative(int index)
 		return;
 	}
 
-	qDebug() << "open narrative at" << index;
+	qInfo() << "open narrative at" << index;
 	this->m_window->topBar()->showSlides();
 	m_current_narrative = index;
 
@@ -507,17 +506,8 @@ void NarrativeControl::showCanvasEditor(bool show)
 	m_label_buttons->setVisible(show);
 }
 
-//void NarrativeControl::hideCanvas(bool instant)
-//{
-//	m_canvas->hide();
-//	exitEdit();
-//	qDebug() << "hide canvas";
-//}
-
-void NarrativeControl::editSlide() {
-	//qDebug() << "EDIT SLIDE CURRENT SLDIE?" << m_current_narrative << m_current_slide << getCurrentSlide();
-	//m_window->canvasView()->setAttribute(Qt::WA_TransparentForMouseEvents, false);
-
+void NarrativeControl::editSlide()
+{
 	Narrative2 *nar = getCurrentNarrative();
 	if (!nar) {
 		qWarning() << "failed to edit slide - no narrative";
@@ -576,7 +566,6 @@ void NarrativeControl::selectNarratives(const SelectionData &narratives)
 
 void NarrativeControl::selectSlides(int narrative, const SelectionData &slides)
 {
-	qDebug() << "select slides";
 	setNarrative(narrative);
 	m_narrative_selection->set({narrative});
 	m_slide_selection->set(slides);
@@ -768,7 +757,6 @@ void NarrativeControl::setSlideCamera()
 
 void NarrativeControl::moveSlides(const std::vector<std::pair<size_t, size_t>> &mapping)
 {
-	qDebug() << "move slides";
 	std::unordered_map<int, int> umap;
 
 	std::set<int> from;
@@ -859,7 +847,7 @@ void NarrativeControl::transformLabels(const std::map<NarrativeSlideItem *, QRec
 	for (auto item_rect : rects) {
 		items.insert(item_rect.first);
 	}
-	qDebug() << "Transforming" << items.size() << "canvas items";
+	qInfo() << "Transforming" << items.size() << "canvas items";
 
 	m_undo_stack->beginMacro("Transform Canvas Items");
 	for (auto item_rect : rects) {

@@ -35,6 +35,12 @@ public:
 	static bool lessThanAlphabetical(osg::Node *left, osg::Node *right);
 	virtual bool lessThan(int left, int right);
 
+	// information
+
+	// get list of indices for resources
+	// if blanks is true then missing resources have index -1
+	std::vector<int> indicesOf(const std::vector<EResource*> &res, bool blanks = true);
+
 	// filter sort overrides
 	virtual bool accept(osg::Node *node);
 

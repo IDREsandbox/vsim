@@ -3,6 +3,15 @@
 
 #include <QUndoStack>
 
+namespace Command {
+	// you can use these like flags
+	enum When {
+		ON_UNDO = 1,
+		ON_REDO = 2,
+		ON_BOTH = ON_UNDO | ON_REDO
+	};
+}
+
 // Generic undoable commands utilizing getters, setters, signals
 
 // ModifyCommand is for changing a single value.

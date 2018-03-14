@@ -5,9 +5,13 @@
 #include <osg/Node>
 #include <QUndoStack>
 #include <QSortFilterProxyModel>
+#include <vector>
+
+#include "Command.h"
 
 class VSimApp;
 class MainWindow;
+class EResource;
 class EResourceGroup;
 class ECategoryGroup;
 class ERDialog;
@@ -36,14 +40,21 @@ public:
 	void setPosition();
 	void gotoPosition();
 
+	// -1 to hide
+	void setDisplay(int index, bool go = true);
+
 	// show and goto resource
 	void onSelectionChange();
+
+	void selectERs(const std::vector<EResource*> &res);
 
 	void debug();
 
 private:
 	std::set<int> getCombinedSelection();
+	std::vector<EResource*> getCombinedSelectionP();
 	int getCombinedLastSelected();
+	void clearSelection();
 
 private:
 	VSimApp *m_app;
@@ -71,8 +82,20 @@ private:
 	CheckableListProxy *m_category_checkbox_model;
 
 	ECategoryControl *m_category_control;
-
 };
 
+class SelectERCommand : public QUndoCommand {
+public:
+	SelectERCommand(ERControl *control,
+		const std::vector<EResource*> &resources,
+		Command::When when = Command::ON_BOTH,
+		QUndoCommand *parent = nullptr);
+	void undo() override;
+	void redo() override;
+private:
+	ERControl *m_control;
+	std::vector<EResource*> m_resources;
+	Command::When m_when;
+};
 
 #endif /* ERCONTROL_H */

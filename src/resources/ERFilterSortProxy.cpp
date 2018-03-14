@@ -239,6 +239,30 @@ bool ERFilterSortProxy::lessThan(int left, int right)
 	return left < right;
 }
 
+std::vector<int> ERFilterSortProxy::indicesOf(const std::vector<EResource*>& resources, bool blanks)
+{
+	std::vector<int> out;
+	std::unordered_map<EResource*, int> res_to_index;
+	for (size_t i = 0; i < getNumChildren(); i++) {
+		osg::Node *node = child(i);
+		EResource *res = dynamic_cast<EResource*>(node);
+		if (res) {
+			res_to_index[res] = i;
+		}
+	}
+
+	for (EResource *res : resources) {
+		auto it = res_to_index.find(res);
+		if (it != res_to_index.end()) {
+			out.push_back(it->second);
+		}
+		else if (blanks) {
+			out.push_back(-1);
+		}
+	}
+	return out;
+}
+
 ERFilterSortProxy::LessThanFunc ERFilterSortProxy::lessThanFunc() const
 {
 	if (m_sort_by == ALPHABETICAL) {

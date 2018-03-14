@@ -27,7 +27,8 @@ QGraphicsView is all messed up
  1. view mousePressEvent
   2. scene ::event()
    3. scene mousePressEvent
+    4. item event
  (quit if view accept, continue if ignore)
- 4. filter
- 5. ::event()
+ 5. view filter
+ 6. view ::event()
 
