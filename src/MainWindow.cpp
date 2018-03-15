@@ -178,11 +178,6 @@ OSGViewerWidget * MainWindow::getViewerWidget() const
 	return m_osg_widget;
 }
 
-osgViewer::Viewer *MainWindow::getViewer() const
-{
-	return m_osg_widget->getViewer();
-}
-
 NarrativeCanvas * MainWindow::canvas() const
 {
 	return m_canvas;

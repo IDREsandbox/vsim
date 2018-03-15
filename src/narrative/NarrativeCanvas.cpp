@@ -95,7 +95,6 @@ void NarrativeCanvas::setSlide(NarrativeSlide *slide)
 		NarrativeSlideItem *item = dynamic_cast<NarrativeSlideItem*>(m_slide->child(i));
 		if (item) addItem(item);
 	}
-	show();
 
 	connect(slide, &NarrativeSlide::sAddedP, this,
 		[this](const std::set<osg::Node*> &nodes) {

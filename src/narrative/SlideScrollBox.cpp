@@ -44,6 +44,17 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	setMIMEType("application/x-narrative");
 }
 
+void SlideScrollBox::setGroup(Group * group)
+{
+	GroupScrollBox::setGroup(group);
+	for (size_t i = 0; i < group->getNumChildren(); i++) {
+		NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(group->child(i));
+		if (slide) {
+			slide->dirtyThumbnail();
+		}
+	}
+}
+
 ScrollBoxItem * SlideScrollBox::createItem(osg::Node * node)
 {
 	NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(node);

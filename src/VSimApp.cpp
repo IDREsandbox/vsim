@@ -44,8 +44,6 @@ VSimApp::VSimApp(MainWindow* window)
 	m_root(new VSimRoot),
 	m_model_table_model(new ModelTableModel(this))
 {
-	m_viewer = window->getViewer();
-
 	// undo stack
 	m_undo_stack = new QUndoStack(this);
 	m_undo_stack->setUndoLimit(50);
@@ -198,12 +196,6 @@ void VSimApp::update(float dt_sec)
 	}
 }
 
-osgViewer::Viewer * VSimApp::getViewer()
-{
-	return m_viewer;
-}
-
-
 bool VSimApp::initWithVSim(osg::Node *new_node)
 {
 	VSimRoot *root = dynamic_cast<VSimRoot*>(new_node);
@@ -217,7 +209,7 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	root->postLoad();
 
 	// move all of the gui stuff over to the new root
-	m_viewer->setSceneData(root->models()); // ideally this would be only models, but its easy to mess things up
+	m_window->getViewerWidget()->mainView()->setSceneData(root->models()); // ideally this would be only models, but its easy to mess things up
 	m_model_table_model->setGroup(root->models());
 	m_narrative_control->load(root->narratives());
 	m_er_control->load(root->resources());
@@ -542,7 +534,7 @@ QUndoStack *VSimApp::getUndoStack() const
 
 void VSimApp::debugCamera()
 {
-	osg::Matrixd matrix = m_window->getViewer()->getCameraManipulator()->getMatrix();
+	osg::Matrixd matrix = getCameraMatrix();
 	osg::Vec3 trans, scale;
 	osg::Quat rot, so;
 	matrix.decompose(trans, rot, scale, so);

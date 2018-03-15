@@ -15,6 +15,7 @@ class SlideScrollBox : public GroupScrollBox {
 public:
 	SlideScrollBox(QWidget * parent = nullptr);
 
+	void setGroup(Group *group) override;
 	ScrollBoxItem *createItem(osg::Node *node) override;
 
 	std::vector<NarrativeSlide*> getDirtySlides(); // slides whose thumbnails need to be drawn

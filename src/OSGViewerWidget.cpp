@@ -14,6 +14,7 @@
 #include <osgUtil/PolytopeIntersector>
 
 #include <osgViewer/View>
+#include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/StateSetManipulator>
 
@@ -33,12 +34,19 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	: QOpenGLWidget(parent,	f),
 	m_speed_tick(0)
 {
+	if (!g_viewer) {
+		g_viewer = new osgViewer::CompositeViewer();
+	}
+
 	// Create viewer, graphics context, and link them together
-	viewer_ = new osgViewer::Viewer;
-	//viewer_->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
+	m_viewer = g_viewer;
+
+	m_main_view = new osgViewer::View();
+	//m_viewer->addView(m_main_view);
+	//m_viewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 	//osg::ref_ptr<osg::DisplaySettings> display_settings = new osg::DisplaySettings;
 	//display_settings->setNumMultiSamples(8);
-	//viewer_->setDisplaySettings(display_settings);
+	//m_viewer->setDisplaySettings(display_settings);
 
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits(osg::DisplaySettings::instance());
 	traits->x = x();
@@ -51,33 +59,33 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	
 	// Create an empty scene
 	osg::Group* group = new osg::Group();
-	viewer_->setSceneData(group);
+	m_main_view->setSceneData(group);
 
 	// Use default camera
-	osg::Camera* camera = viewer_->getCamera();
+	osg::Camera* camera = m_main_view->getCamera();
 	camera->setViewport(0, 0, this->width(), this->height());
 	camera->setClearColor(osg::Vec4(51/255.f, 51/255.f, 102/255.f, 1.f));
 	camera->setProjectionMatrixAsPerspective(55.f, aspectRatio, 1.f, 7500.f);
-	camera->setGraphicsContext(graphicsWindow_); // set the context
-	camera->setCullingMode(osg::Camera::NO_CULLING);
+	camera->setGraphicsContext(graphicsWindow_); // set the context, connects the viewer and graphics context
+	//camera->setCullingMode(osg::Camera::NO_CULLING);
 
 	// Stats Handler
 	osgViewer::StatsHandler *stats_handler = new osgViewer::StatsHandler;
 	stats_handler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_U);
 	stats_handler->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_Y);
-	viewer_->addEventHandler(stats_handler);
-	
+	m_main_view->addEventHandler(stats_handler);
+
 	// Camera State Handler
-	osgGA::StateSetManipulator* ssm = new osgGA::StateSetManipulator(viewer_->getCamera()->getOrCreateStateSet());
+	osgGA::StateSetManipulator* ssm = new osgGA::StateSetManipulator(m_main_view->getCamera()->getOrCreateStateSet());
 	ssm->setKeyEventToggleBackfaceCulling('B');
 	ssm->setKeyEventToggleLighting('L');
 	ssm->setKeyEventToggleTexturing('X');
 	ssm->setKeyEventCyclePolygonMode('M');
 	ssm->setLightingEnabled(false);
-	viewer_->addEventHandler(ssm);
+	m_main_view->addEventHandler(ssm);
 
 	// Lighting
-	viewer_->setLightingMode(osg::View::SKY_LIGHT);
+	m_main_view->setLightingMode(osg::View::SKY_LIGHT);
 	
 	// Anti aliasing (QOpenGLWidget)
 	QSurfaceFormat fmt = this->format();
@@ -92,7 +100,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_first_person_manipulator = new FirstPersonManipulator;
 	m_flight_manipulator = new FlightManipulator;
 	m_object_manipulator = new ObjectManipulator;
-	viewer_->setCameraManipulator(m_object_manipulator);
+	m_main_view->setCameraManipulator(m_object_manipulator);
 	m_manipulator = MANIPULATOR_OBJECT;
 	m_navigation_disabled = false;
 
@@ -107,7 +115,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	// policy is not set by default. The default, Qt::NoFocus, will result in
 	// keyboard events that are ignored.
 	this->setFocusPolicy(Qt::StrongFocus);
-	this->setMinimumSize(100, 100);
+	//this->setMinimumSize(100, 100);
 
 	// Key tracking
 	this->installEventFilter(&m_key_tracker);
@@ -126,19 +134,24 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	connect(t, &QTimer::timeout, this, [this]() {update();});
 }
 
-osgViewer::Viewer* OSGViewerWidget::getViewer() const
+osgViewer::ViewerBase* OSGViewerWidget::getViewer() const
 {
-	return viewer_;
+	return m_viewer;
+}
+
+osgViewer::View * OSGViewerWidget::mainView() const
+{
+	return m_main_view;
 }
 
 osg::Matrixd OSGViewerWidget::getCameraMatrix()
 {
-	return viewer_->getCameraManipulator()->getMatrix();
+	return m_main_view->getCameraManipulator()->getMatrix();
 }
 
 void OSGViewerWidget::setCameraMatrix(osg::Matrixd m)
 {
-	return viewer_->getCameraManipulator()->setByMatrix(m);
+	return m_main_view->getCameraManipulator()->setByMatrix(m);
 }
 
 void OSGViewerWidget::setNavigationMode(Navigation::Mode mode)
@@ -223,7 +236,7 @@ void OSGViewerWidget::setManipulator(Manipulator manipulator)
 		releaseCursor();
 	}
 
-	viewer_->setCameraManipulator(new_manipulator, false);
+	m_main_view->setCameraManipulator(new_manipulator, false);
 	setCameraMatrix(old_matrix);
 }
 
@@ -308,10 +321,10 @@ void OSGViewerWidget::reset()
 {
 	// pretty much copied from osgGA::CameraManipulator::computeHomePosition
 	qInfo() << "Home";
-	osg::BoundingSphere bound = viewer_->getSceneData()->getBound();
+	osg::BoundingSphere bound = m_main_view->getSceneData()->getBound();
 
 	double left, right, bottom, top, zNear, zFar, dist;
-	viewer_->getCamera()->getProjectionMatrixAsFrustum(left, right, bottom, top, zNear, zFar);
+	m_main_view->getCamera()->getProjectionMatrixAsFrustum(left, right, bottom, top, zNear, zFar);
 	double vertical2 = fabs(right - left) / zNear / 2.;
 	double horizontal2 = fabs(top - bottom) / zNear / 2.;
 	double dim = horizontal2 < vertical2 ? horizontal2 : vertical2;
@@ -339,6 +352,27 @@ bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)
 	return false;
 }
 
+QImage OSGViewerWidget::renderView(QSize size, const osg::Matrixd & matrix)
+{
+	// copy main view
+	osg::ref_ptr<osgViewer::View> view(m_main_view);
+	m_main_view->setCameraManipulator(nullptr);
+
+	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits(osg::DisplaySettings::instance());
+	traits->x = 0;
+	traits->y = 0;
+	traits->width = 300;
+	traits->height = 300;
+	graphicsWindow_ = new osgViewer::GraphicsWindowEmbedded(traits);
+
+	osg::Camera* camera = m_main_view->getCamera();
+	camera->setGraphicsContext(graphicsWindow_);
+
+	m_viewer->addView(view);
+
+	return QImage();
+}
+
 void OSGViewerWidget::paintEvent(QPaintEvent *e)
 {
 	qint64 dt = m_frame_timer.nsecsElapsed();
@@ -348,7 +382,7 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 	//emit frame(dt_sec);
 
 	if (m_manipulator == MANIPULATOR_FIRST_PERSON) {
-		m_first_person_manipulator->update(dt_sec, &m_key_tracker, viewer_->getSceneData());
+		m_first_person_manipulator->update(dt_sec, &m_key_tracker, m_main_view->getSceneData());
 	}
 	else if (m_manipulator == MANIPULATOR_FLIGHT) {
 		// shouldn't be in mousemove because entering flight mode doesn't necessarily
@@ -360,7 +394,7 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 		double ny = 2 * dy / (double)height();
 		m_flight_manipulator->setMousePosition(nx, ny);
 
-		m_flight_manipulator->update(dt_sec, &m_key_tracker, viewer_->getSceneData());
+		m_flight_manipulator->update(dt_sec, &m_key_tracker, m_main_view->getSceneData());
 	}
 
 	// let qt do setup stuff and call paintGL
@@ -369,7 +403,20 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 
 void OSGViewerWidget::paintGL()
 {
-	viewer_->frame();
+	//QElapsedTimer atimer;
+	//atimer.start();
+	m_viewer->addView(m_main_view);
+	//qDebug() << "atimer" << atimer.nsecsElapsed() / 1.0e6;
+
+	//QElapsedTimer ftimer;
+	//ftimer.start();
+	m_viewer->frame();
+	//qDebug() << "ftimer" << ftimer.nsecsElapsed() / 1.0e6;
+
+	//QElapsedTimer ktimer;
+	//ktimer.start();
+	m_viewer->removeView(m_main_view);
+	//qDebug() << "ktimer" << ktimer.nsecsElapsed() / 1.0e6;
 }
 
 void OSGViewerWidget::resizeGL(int width, int height)
@@ -530,6 +577,7 @@ void OSGViewerWidget::wheelEvent(QWheelEvent* event) {
 
 bool OSGViewerWidget::event(QEvent* event)
 {
+	qDebug() << "event" << this << event;
 	bool handled = QOpenGLWidget::event(event);
 
 	// This ensures that the OSG widget is always going to be repainted after the
@@ -557,7 +605,7 @@ bool OSGViewerWidget::event(QEvent* event)
 void OSGViewerWidget::onHome()
 {
 	osgViewer::ViewerBase::Views views;
-	viewer_->getViews(views);
+	m_viewer->getViews(views);
 
 	for (std::size_t i = 0; i < views.size(); i++)
 	{
@@ -569,7 +617,7 @@ void OSGViewerWidget::onHome()
 void OSGViewerWidget::onResize(int width, int height)
 {
 	std::vector<osg::Camera*> cameras;
-	viewer_->getCameras(cameras);
+	m_viewer->getCameras(cameras);
 
 	if (cameras.size() > 0) {
 		cameras[0]->setViewport(0, 0, width, height);

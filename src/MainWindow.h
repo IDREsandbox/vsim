@@ -38,7 +38,6 @@ public:
 
 	// linking
 	OSGViewerWidget *getViewerWidget() const;
-	osgViewer::Viewer* getViewer() const;
 
 	MainWindowTopBar *topBar() const;
 	NarrativeCanvas *canvas() const;

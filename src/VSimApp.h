@@ -76,8 +76,6 @@ public:
 
 	void update(float dt_sec);
 
-	osgViewer::Viewer* getViewer();
-
 	// this is called on every new, reset, etc
 	bool initWithVSim(osg::Node *root = nullptr);
 
@@ -118,7 +116,6 @@ signals:
 
 private:
 	MainWindow *m_window;
-	osgViewer::Viewer *m_viewer;
 
 	QUndoStack *m_undo_stack;
 

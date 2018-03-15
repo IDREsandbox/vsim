@@ -11,6 +11,7 @@
 #include <osg/ref_ptr>
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
+#include <osgViewer/CompositeViewer>
 #include <osg/Camera>
 #include <QElapsedTimer>
 #include "SimpleCameraManipulator.h"
@@ -27,6 +28,8 @@ enum Manipulator {
 	MANIPULATOR_OBJECT
 };
 
+static osgViewer::CompositeViewer *g_viewer;
+
 class OSGViewerWidget : public QOpenGLWidget
 {
 	Q_OBJECT
@@ -35,7 +38,8 @@ public:
 	OSGViewerWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
 
 	// osgViewer::Viewer* setViewer(osgViewer::Viewer*); // can't change the viewer
-	osgViewer::Viewer* getViewer() const;
+	osgViewer::ViewerBase *getViewer() const;
+	osgViewer::View *mainView() const;
 
 	osg::Matrixd getCameraMatrix();
 	void setCameraMatrix(osg::Matrixd);
@@ -72,6 +76,8 @@ public:
 	// filter out ctrl-s when in wasd
 	bool eventFilter(QObject *obj, QEvent *e);
 
+	QImage renderView(QSize size, const osg::Matrixd &matrix);
+
 signals:
 	void frame(double dt_sec);
 
@@ -79,19 +85,19 @@ signals:
 	void sCameraFrozen(bool);
 
 protected:
-	virtual void paintEvent(QPaintEvent* paintEvent);
-	virtual void paintGL();
-	virtual void resizeGL(int width, int height);
+	virtual void paintEvent(QPaintEvent* paintEvent) override;
+	virtual void paintGL() override;
+	virtual void resizeGL(int width, int height) override;
 
-	virtual void keyPressEvent(QKeyEvent* event);
-	virtual void keyReleaseEvent(QKeyEvent* event);
+	virtual void keyPressEvent(QKeyEvent* event) override;
+	virtual void keyReleaseEvent(QKeyEvent* event) override;
 
-	virtual void mouseMoveEvent(QMouseEvent* event);
-	virtual void mousePressEvent(QMouseEvent* event);
-	virtual void mouseReleaseEvent(QMouseEvent* event);
-	virtual void wheelEvent(QWheelEvent* event);
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void mouseReleaseEvent(QMouseEvent* event) override;
+	virtual void wheelEvent(QWheelEvent* event) override;
 
-	virtual bool event(QEvent* event);
+	virtual bool event(QEvent* event) override;
 
 private:
 	virtual void onHome();
@@ -105,7 +111,9 @@ private:
 	osgGA::EventQueue* getEventQueue() const;
 
 	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> graphicsWindow_;
-	osg::ref_ptr<osgViewer::Viewer> viewer_;
+	osg::ref_ptr<osgViewer::CompositeViewer> m_viewer;
+
+	osg::ref_ptr<osgViewer::View> m_main_view;
 
 	// camera and viewer stuff
 	// camera manipulators
