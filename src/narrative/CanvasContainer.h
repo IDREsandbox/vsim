@@ -43,7 +43,7 @@ signals:
 protected:
 	void resizeEvent(QResizeEvent* event) override;
 
-protected:
+public:
 	CanvasScene *m_scene;
 	QGraphicsView *m_view;
 	QGridLayout *m_layout;

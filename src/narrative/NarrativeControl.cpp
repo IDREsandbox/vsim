@@ -112,7 +112,6 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 			// deselect canvas
 			m_canvas->setSelection({});
 		}
-
 	});
 
 	// NARRATIVE CONTROL
@@ -958,139 +957,13 @@ void NarrativeControl::redrawThumbnails(const std::vector<NarrativeSlide*> slide
 		qDebug() << "redrawing thumbnail" << slide;
 		QImage thumbnail;
 
-		thumbnail = generateThumbnail(slide);
+		thumbnail = m_app->generateThumbnail(slide);
 		
 		slide->setThumbnail(thumbnail);
 		//item->setImage(thumbnail);
 		//item->setThumbnailDirty(false);
 	}
 }
-
-QImage NarrativeControl::generateThumbnail(NarrativeSlide *slide)
-{
-	QElapsedTimer timer;
-	timer.start();
-	qDebug() << "generate thumbnail" << slide;
-
-	//QSize size(288, 162);
-	QElapsedTimer stimer;
-	stimer.start();
-
-	QSize size(600, 600);
-	OSGViewerWidget viewer;
-	viewer.mainView()->setSceneData(m_app->getRoot()->models());
-	viewer.setCameraMatrix(slide->getCameraMatrix());
-	viewer.resize(size);
-	viewer.setCameraFrozen(true);
-
-	QImage img(size, QImage::Format_ARGB32);
-	QPainter painter(&img);
-
-	qDebug() << "stime" << stimer.elapsed();
-
-	QElapsedTimer ctime;
-	ctime.start();
-	NarrativeCanvas canvas;
-	canvas.resize(size);
-	canvas.setSlide(slide);
-	canvas.setVisible(false);
-	qDebug() << "ctime" << ctime.elapsed();
-
-	//QElapsedTimer rtimer;
-	//rtimer.start();
-	//viewer.render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), size), 0);
-	//qDebug() << "rtime" << rtimer.nsecsElapsed() / 1.0e6;
-
-	QElapsedTimer mrtime;
-	mrtime.start();
-	m_window->getViewerWidget()->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), size));
-
-	qDebug() << "mrtime" << mrtime.elapsed();
-	QElapsedTimer crtime;
-	crtime.start();
-	canvas.QWidget::render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), size), QWidget::DrawChildren); // | ignore mask
-	qDebug() << "crtime" << crtime.elapsed();
-
-	//QImage img = m_window->m_osg_widget->renderView(size, slide->getCameraMatrix());
-	//QLabel *popup = new QLabel();
-	//popup->setPixmap(QPixmap::fromImage(img));
-	//popup->show();
-
-	//viewer->getViewer()->setSceneData(m_app->getRoot()->models());
-	//viewer->setCameraMatrix(slide->getCameraMatrix());
-	//viewer->resize(size);
-	//viewer->show();
-	//viewer->setAttribute(Qt::WA_DeleteOnClose);
-	//qDebug() << "viewer something" << viewer << viewer->getViewer();
-	//connect(viewer, &QObject::destroyed, this, [this, viewer]() {
-	//	qDebug() << "destroying viewer" << viewer;
-	//	qDebug() << viewer->getViewer();
-	//	//viewer->getViewer()->setSceneData(nullptr);
-	//	osgViewer::Viewer *v = this->m_window->getViewerWidget()->getViewer();
-	//	qDebug() << "main view" << v << v->getSceneData();
-	//});
-	//delete viewer;
-	int ns = timer.nsecsElapsed();
-	qDebug() << "thumbnail time ms" << ns / 1.0e6;
-
-	return img;
-	//QElapsedTimer timer;
-	//timer.start();
-
-	//// set the camera, create a dummy canvas
-	////osg::Matrixd old_matrix = m_window->getViewerWidget()->getCameraMatrix();
-	////m_window->getViewerWidget()->setCameraMatrix(slide->getCameraMatrix());
-
-	//QSize size(288, 162);
-
-	//OSGViewerWidget viewer;
-	//viewer.getViewer()->setSceneData(m_app->getRoot()->models());
-	//viewer.setCameraMatrix(slide->getCameraMatrix());
-	//viewer.resize(100, 100);
-	////NarrativeCanvas canvas(m_window->getViewerWidget());
-	//NarrativeCanvas canvas;
-	//canvas.resize(size);
-	//canvas.setSlide(slide);
-
-	//// widget dimensions
-	//QRect dims = m_window->getViewerWidget()->geometry();
-
-	//// screenshot dimensions
-	//QRect ssdims = Util::rectFit(dims, 16.0 / 9.0);
-	////QRect ssdims = Util::rectFit(QRect(0, 0, 300, 300), 16.0 / 9.0);
-	////ssdims.setY(ssdims.y() + 50);
-
-	//QImage img(ssdims.width(), ssdims.height(), QImage::Format_ARGB32);
-	//QPainter painter(&img);
-
-	//// render
-	////m_window->m_osg_widget->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), size), QWidget::DrawWindowBackground);
-
-	////viewer.render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), size), QWidget::DrawWindowBackground);
-
-	//// show image
-	//QLabel *popup = new QLabel();
-	//QPixmap pm;
-	//pm.convertFromImage(img);
-	//popup->setPixmap(pm);
-	//popup->show();
-
-	////qDebug() << "render canvas size" << canvas.size();
-	////canvas.QWidget::render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), size), QWidget::DrawChildren | QWidget::IgnoreMask);
-
-	//// scale down the image
-	////QImage smallimg;
-	////smallimg = img.scaled(size, Qt::IgnoreAspectRatio);
-	//QImage smallimg = img;
-
-	//// revert the camera
-	////m_window->getViewerWidget()->setCameraMatrix(old_matrix);
-
-	//int ns = timer.nsecsElapsed();
-	//qDebug() << "thumbnail time ms" << ns / 1.0e6;
-	//return smallimg;
-}
-
 
 SelectNarrativesCommand::SelectNarrativesCommand(NarrativeControl *control, const SelectionData &narratives, SelectionCommandWhen when, QUndoCommand *parent)
 	: QUndoCommand(parent),

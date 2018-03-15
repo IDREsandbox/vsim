@@ -24,6 +24,7 @@ class NarrativeCanvas;
 class editButtons;
 class SlideScrollItem;
 class SelectionStack;
+class OSGViewerWidget;
 
 // Bridges osg and gui for narratives
 class NarrativeControl : public QObject
@@ -112,8 +113,6 @@ public: // Actions
 	// Thumbnails
 	void dirtyCurrentSlide();
 	void redrawThumbnails(const std::vector<NarrativeSlide*> slides);
-	//QImage generateThumbnail(int option = 1);
-	QImage generateThumbnail(NarrativeSlide *slide);
 
 	void debug();
 
@@ -143,7 +142,6 @@ private:
 	SelectionStack *m_slide_selection;
 	NarrativeCanvas *m_canvas;
 	NarrativeCanvas *m_fade_canvas;
-
 	editButtons* m_label_buttons;
 
 	QUndoStack *m_undo_stack;

@@ -27,6 +27,7 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 	m_view->setDragMode(QGraphicsView::DragMode::NoDrag);
 	m_view->setObjectName("canvasView");
 	m_view->setStyleSheet("#canvasView{background:rgba(0, 0, 0, 0);}");
+	m_view->setFrameShape(QFrame::NoFrame);
 
 	m_view->installEventFilter(this);
 
@@ -115,8 +116,18 @@ void CanvasScene::setSelectedRects(const std::set<RectItem*>& items)
 
 void CanvasContainer::resizeEvent(QResizeEvent * event)
 {
-	double factor = this->size().height();
 
+	QFrame::resizeEvent(event);
+
+	// There was a bug where the first thumbnail drawn was off.
+	// For thumbnails everything needs to be ready in 1 render.
+	// Qt doesn't adjust viewport size until during the render
+	// then our view matrix is out of date (not centered 0,0)
+	m_view->viewport()->setGeometry(m_view->rect());
+
+	QSize new_size = event->size();
+
+	double factor = new_size.height();
 	m_view->resetMatrix();
 	m_view->scale(factor, factor);
 
@@ -354,6 +365,8 @@ void TransformManipulator::recalculate()
 
 void TransformManipulator::reposition()
 {
+	if (!isEnabled()) return;
+
 	// top-left and bottom-right in view space
 	QPoint tl = m_view->mapFromScene(anchorScenePos(m_rect, TOP_LEFT));
 	QPoint br = m_view->mapFromScene(anchorScenePos(m_rect, BOTTOM_RIGHT));

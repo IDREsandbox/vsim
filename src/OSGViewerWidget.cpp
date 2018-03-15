@@ -54,9 +54,9 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	traits->width = width();
 	traits->height = height();
 	graphicsWindow_ = new osgViewer::GraphicsWindowEmbedded(traits);
-	
+
 	float aspectRatio = this->width() / (float)this->height();
-	
+
 	// Create an empty scene
 	osg::Group* group = new osg::Group();
 	m_main_view->setSceneData(group);
@@ -101,7 +101,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_flight_manipulator = new FlightManipulator;
 	m_object_manipulator = new ObjectManipulator;
 	m_main_view->setCameraManipulator(m_object_manipulator);
-	m_manipulator = MANIPULATOR_OBJECT;
+	m_manipulator = MANIPULATOR_SIMPLE;
 	m_navigation_disabled = false;
 
 	m_collisions_on = false;
@@ -253,6 +253,9 @@ void OSGViewerWidget::setCameraFrozen(bool freeze)
 {
 	if (m_navigation_disabled) return;
 
+	// already frozen
+	if (freeze && m_camera_frozen && m_manipulator == MANIPULATOR_SIMPLE) return;
+
 	if (freeze) {
 		setManipulator(MANIPULATOR_SIMPLE);
 	}
@@ -368,7 +371,7 @@ QImage OSGViewerWidget::renderView(QSize size, const osg::Matrixd & matrix)
 	osg::Camera* camera = m_main_view->getCamera();
 	camera->setGraphicsContext(graphicsWindow_);
 
-	m_viewer->addView(view);
+	//m_viewer->addView(view);
 
 	return QImage();
 }
@@ -403,20 +406,10 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 
 void OSGViewerWidget::paintGL()
 {
-	//QElapsedTimer atimer;
-	//atimer.start();
+	// hacky way that lets us have multiple OSGViewerWidgets sharing one CompositeViewer
 	m_viewer->addView(m_main_view);
-	//qDebug() << "atimer" << atimer.nsecsElapsed() / 1.0e6;
-
-	//QElapsedTimer ftimer;
-	//ftimer.start();
 	m_viewer->frame();
-	//qDebug() << "ftimer" << ftimer.nsecsElapsed() / 1.0e6;
-
-	//QElapsedTimer ktimer;
-	//ktimer.start();
 	m_viewer->removeView(m_main_view);
-	//qDebug() << "ktimer" << ktimer.nsecsElapsed() / 1.0e6;
 }
 
 void OSGViewerWidget::resizeGL(int width, int height)
@@ -424,7 +417,12 @@ void OSGViewerWidget::resizeGL(int width, int height)
 	this->getEventQueue()->windowResize(this->x(), this->y(), width, height);
 	graphicsWindow_->resized(this->x(), this->y(), width, height);
 
-	this->onResize(width, height);
+	std::vector<osg::Camera*> cameras;
+	m_viewer->getCameras(cameras);
+
+	if (cameras.size() > 0) {
+		cameras[0]->setViewport(0, 0, width, height);
+	}
 }
 
 void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
@@ -577,7 +575,6 @@ void OSGViewerWidget::wheelEvent(QWheelEvent* event) {
 
 bool OSGViewerWidget::event(QEvent* event)
 {
-	qDebug() << "event" << this << event;
 	bool handled = QOpenGLWidget::event(event);
 
 	// This ensures that the OSG widget is always going to be repainted after the
@@ -611,16 +608,6 @@ void OSGViewerWidget::onHome()
 	{
 		osgViewer::View* view = views.at(i);
 		view->home();
-	}
-}
-
-void OSGViewerWidget::onResize(int width, int height)
-{
-	std::vector<osg::Camera*> cameras;
-	m_viewer->getCameras(cameras);
-
-	if (cameras.size() > 0) {
-		cameras[0]->setViewport(0, 0, width, height);
 	}
 }
 

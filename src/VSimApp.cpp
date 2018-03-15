@@ -24,6 +24,7 @@
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative2.h"
 #include "narrative/NarrativeSlide.h"
+#include "narrative/NarrativeCanvas.h"
 #include "OSGViewerWidget.h"
 #include "MainWindow.h"
 #include "ModelOutliner.h"
@@ -64,6 +65,19 @@ VSimApp::VSimApp(MainWindow* window)
 	m_er_control = new ERControl(this, m_window, m_root->resources(), this);
 	m_navigation_control = new NavigationControl(this, m_window->getViewerWidget(), this);
 	m_navigation_control->initMenu(m_window->navigationMenu());
+
+	// thumbnails
+	m_thumbnail_size = QSize(288, 162);
+	m_render_canvas = new NarrativeCanvas;
+	m_render_canvas->resize(m_thumbnail_size);
+	m_render_canvas->move(0, 0);
+	m_render_canvas->setSlide(nullptr);
+	m_render_canvas->setEditable(false);
+
+	m_render_view = new OSGViewerWidget;
+	m_render_view->resize(m_thumbnail_size);
+	m_render_view->move(0, 0);
+	m_render_view->setCameraFrozen(true);
 
 	// Narrative player
 	//m_narrative_player = new NarrativePlayer(this, m_narrative_control);
@@ -208,12 +222,16 @@ bool VSimApp::initWithVSim(osg::Node *new_node)
 	}
 	root->postLoad();
 
+	emit sAboutToReset();
+
 	// move all of the gui stuff over to the new root
 	m_window->getViewerWidget()->mainView()->setSceneData(root->models()); // ideally this would be only models, but its easy to mess things up
 	m_model_table_model->setGroup(root->models());
 	m_narrative_control->load(root->narratives());
 	m_er_control->load(root->resources());
 	m_window->timeSlider()->setGroup(root->models());
+	m_render_view->mainView()->setSceneData(root->models());
+	m_render_canvas->setSlide(nullptr);
 
 	m_undo_stack->clear();
 	m_window->m_osg_widget->reset();
@@ -525,6 +543,22 @@ void VSimApp::setCameraMatrixSmooth(const osg::Matrixd & matrix, float time)
 	m_camera_timer->setInterval(time*1000);
 	m_camera_timer->setSingleShot(true);
 	m_camera_timer->start();
+}
+
+QImage VSimApp::generateThumbnail(NarrativeSlide * slide)
+{
+	QImage img(m_thumbnail_size, QImage::Format_ARGB32);
+	QPainter painter(&img);
+
+	// render osg
+	m_render_view->setCameraMatrix(slide->getCameraMatrix());
+	m_render_view->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), m_thumbnail_size), 0);
+
+	// render canvas
+	m_render_canvas->setSlide(slide);
+	m_render_canvas->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), m_thumbnail_size), QWidget::DrawChildren); // | ignore mask
+
+	return img;
 }
 
 QUndoStack *VSimApp::getUndoStack() const

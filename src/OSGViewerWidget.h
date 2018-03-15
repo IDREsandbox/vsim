@@ -101,7 +101,7 @@ protected:
 
 private:
 	virtual void onHome();
-	virtual void onResize(int width, int height);
+	//virtual void onResize(int width, int height);
 	
 	// used for first person mode
 	void takeCursor();
