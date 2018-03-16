@@ -70,17 +70,8 @@ public:
 	void setState(State state);
 
 	bool isPlaying() const;
+	static bool isPlaying(VSimApp::State state);
 	bool isFlying() const;
-
-	void play();
-	void stop();
-	void timerExpire();
-	void moveTimerExpire();
-	void transitionTo(int index);
-	void startFlying();
-	void editNarratives();
-	void next();
-	void prev();
 
 	void update(float dt_sec);
 
@@ -91,6 +82,8 @@ public:
 	osg::Matrixd getCameraMatrix() const;
 	void setCameraMatrix(const osg::Matrixd &matrix);
 	void setCameraMatrixSmooth(const osg::Matrixd &matrix, float time);
+	bool cameraMoving() const;
+	void stopCameraMoving();
 	QImage generateThumbnail(NarrativeSlide *slide);
 
 	// undo/redo

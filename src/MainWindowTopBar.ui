@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>724</width>
-    <height>124</height>
+    <height>121</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -85,7 +85,7 @@
           <item row="0" column="0" colspan="3">
            <widget class="QLabel" name="label">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>1</verstretch>
              </sizepolicy>
@@ -96,6 +96,9 @@
             <property name="text">
              <string>Narratives</string>
             </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
             <property name="indent">
              <number>8</number>
             </property>
@@ -104,14 +107,14 @@
           <item row="2" column="0">
            <widget class="QToolButton" name="play">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -123,14 +126,14 @@
           <item row="2" column="1">
            <widget class="QToolButton" name="stop">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -142,14 +145,14 @@
           <item row="2" column="2">
            <widget class="QToolButton" name="open">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -161,14 +164,14 @@
           <item row="1" column="2">
            <widget class="QToolButton" name="info">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -180,14 +183,14 @@
           <item row="1" column="1">
            <widget class="QToolButton" name="remove">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -199,14 +202,14 @@
           <item row="1" column="0">
            <widget class="QToolButton" name="add">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -252,8 +255,17 @@
           </item>
           <item row="0" column="0" colspan="3">
            <widget class="QLabel" name="label_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>1</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>Narrative Title Here</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
             </property>
             <property name="margin">
              <number>0</number>
@@ -266,14 +278,14 @@
           <item row="2" column="0">
            <widget class="QToolButton" name="play_2">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -285,14 +297,14 @@
           <item row="2" column="2">
            <widget class="QToolButton" name="back">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -304,14 +316,14 @@
           <item row="2" column="1">
            <widget class="QToolButton" name="stop_2">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -323,14 +335,14 @@
           <item row="1" column="1">
            <widget class="QToolButton" name="remove_2">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -342,14 +354,14 @@
           <item row="1" column="2">
            <widget class="QToolButton" name="edit">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>
@@ -361,14 +373,14 @@
           <item row="1" column="0">
            <widget class="QToolButton" name="add_2">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>40</width>
               <height>25</height>
              </size>
             </property>

@@ -56,6 +56,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QMen
 		}
 		else {
 			m_viewer->setFocus();
+			m_app->stopCameraMoving();
 		}
 	});
 

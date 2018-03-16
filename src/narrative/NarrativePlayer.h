@@ -25,11 +25,12 @@ public: // actions
 	QAction *a_play;
 	QAction *a_stop;
 	QAction *a_next;
-	//QAction a_prev;
+	QAction *a_prev;
 
 public:
 	// advances the slide or transition, immediately pauses on failure or PauseOnNode
 	void next();
+	void prev();
 	void stop();
 	void play();
 

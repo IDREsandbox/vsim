@@ -14,7 +14,6 @@ float NarrativeSlideDurationDialog::create(bool init_stay, float init_duration) 
 	else {
 		duration = dialog->getDuration();
 	}
-	qDebug() << "Set duration dialog result -" << duration;
 	delete dialog;
 	return duration;
 }
@@ -24,14 +23,20 @@ NarrativeSlideDurationDialog::NarrativeSlideDurationDialog(QWidget * parent)
 {
 	ui.setupUi(this);
 
-	connect(ui.onclick_checkbox, &QCheckBox::stateChanged, this, &NarrativeSlideDurationDialog::enableDisableDuration);
+	connect(ui.onclick_checkbox, &QAbstractButton::toggled, this,
+		[this] (bool stay) {
+		enableDuration(!stay);
+	});
 }
 
-void NarrativeSlideDurationDialog::setDuration(bool checked, float duration)
+void NarrativeSlideDurationDialog::setDuration(bool stay, float duration)
 {
 	ui.duration_spinbox->setValue(duration);
-	ui.onclick_checkbox->setChecked(checked);
-	enableDisableDuration(ui.onclick_checkbox->checkState());
+	ui.onclick_checkbox->setChecked(stay);
+	enableDuration(!stay);
+	if (!stay) {
+		ui.duration_spinbox->setFocus();
+	}
 }
 
 float NarrativeSlideDurationDialog::getDuration()
@@ -44,14 +49,8 @@ float NarrativeSlideDurationDialog::getDuration()
 	}
 }
 
-void NarrativeSlideDurationDialog::enableDisableDuration(int checkbox_state)
+void NarrativeSlideDurationDialog::enableDuration(bool enable)
 {
-	if (checkbox_state == Qt::Checked) {
-		ui.duration_spinbox->setEnabled(false);
-		ui.duration_label->setEnabled(false);
-	}
-	else {
-		ui.duration_spinbox->setEnabled(true);
-		ui.duration_label->setEnabled(true);
-	}
+	ui.duration_spinbox->setEnabled(enable);
+	ui.duration_label->setEnabled(enable);
 }

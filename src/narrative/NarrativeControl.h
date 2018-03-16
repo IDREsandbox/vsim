@@ -51,6 +51,9 @@ public:
 
 	void showNarrativeBox();
 	void showSlideBox();
+	void showCanvas(bool show, bool fade = false);
+	bool canvasVisible() const;
+	void showCanvasEditor(bool show);
 
 	void editSlide();
 	void exitEdit();
@@ -58,8 +61,6 @@ public:
 
 	//bool advance(bool forward);
 	bool advanceSlide(bool forward, bool instant = true);
-	void showCanvas(bool show, bool fade = false);
-	void showCanvasEditor(bool show);
 
 	enum SelectionLevel {
 		NARRATIVES,

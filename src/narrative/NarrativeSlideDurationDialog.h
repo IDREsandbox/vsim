@@ -7,21 +7,21 @@ class NarrativeSlideDurationDialog : public QDialog {
 	Q_OBJECT
 
 public:
-	// Recommended use
+	// Creates and execs a dialog
+	// returns 0 if wait for click
+	// returns >0 for duration
 	static float create(bool stay, float duration);
 
 	NarrativeSlideDurationDialog(QWidget * parent = nullptr);
 
-	// 0 for transition-on-click
-	// >0 for duration value
-	void setDuration(bool checked, float duration);
+	void setDuration(bool stay, float duration);
 
 	// returns >0 for the timer
 	// returns 0 if transition-on-click is checked
 	float getDuration();
 
 private:
-	void enableDisableDuration(int checkbox_state);
+	void enableDuration(bool enable);
 	Ui::NarrativeSlideDurationDialog ui;
 };
 

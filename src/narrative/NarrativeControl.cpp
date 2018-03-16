@@ -114,9 +114,13 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 
 	// NARRATIVE CONTROL
 	a_new_narrative = new QAction("New Narrative", this);
+	a_new_narrative->setIconText("+");
 	a_delete_narratives = new QAction("Delete Narrative", this);
+	a_delete_narratives->setIconText("-");
 	a_narrative_info = new QAction("Edit Narrative Info", this);
+	a_narrative_info->setIconText("Info");
 	a_open_narrative = new QAction("Open Narrative", this);
+	a_open_narrative->setIconText("Open");
 
 	// menus
 	QMenu *nar_menu = new QMenu("Narrative menu", m_narrative_box);
@@ -142,7 +146,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_bar->ui.info->setDefaultAction(a_narrative_info);
 	// open
 	connect(a_open_narrative, &QAction::triggered, this, &NarrativeControl::showSlideBox);
-	m_bar->ui.open->setDefaultAction(a_narrative_info);
+	m_bar->ui.open->setDefaultAction(a_open_narrative);
 	connect(m_narrative_box, &NarrativeScrollBox::sOpen, a_open_narrative, &QAction::trigger);
 	// move
 	connect(m_narrative_box, &NarrativeScrollBox::sMove, this, &NarrativeControl::moveNarratives);
@@ -161,13 +165,15 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	});
 
 	// SLIDE CONTROL
-
 	a_new_slide = new QAction("New Slide", this);
-	a_delete_slides = new QAction("Delete Narrative", this);
+	a_new_slide->setIconText("+");
+	a_delete_slides = new QAction("Delete Slide", this);
+	a_delete_slides->setIconText("-");
 	a_slide_duration = new QAction("Set Duration", this);
 	a_slide_transition = new QAction("Set Transition", this);
 	a_slide_camera = new QAction("Set Camera", this);
 	a_edit_slide = new QAction("Edit Slide", this);
+	a_edit_slide->setIconText("Edit");
 
 	// menus
 	QMenu *slide_menu = new QMenu("Narrative menu", m_narrative_box);
@@ -195,9 +201,13 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	// move
 	connect(m_slide_box, &SlideScrollBox::sMove, this, &NarrativeControl::moveSlides);
 	// duration
+	connect(a_slide_duration, &QAction::triggered, this, &NarrativeControl::setSlideDuration);
 	connect(m_slide_box, &SlideScrollBox::sSetDuration, a_slide_duration, &QAction::trigger);
 	// transition
+	connect(a_slide_transition, &QAction::triggered, this, &NarrativeControl::setSlideTransition);
 	connect(m_slide_box, &SlideScrollBox::sSetTransitionDuration, a_slide_transition, &QAction::trigger);
+	// camera
+	connect(a_slide_camera, &QAction::triggered, this, &NarrativeControl::setSlideCamera);
 	// goto
 	//connect(m_slide_box, &SlideScrollBox::sGoto, this, [this](int index) {
 	//	openSlide(index);
@@ -216,7 +226,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 			showCanvas(true);
 		}
 	});
-	
+
 	//CANVAS CONTROL
 	// new
 	connect(m_label_buttons->ui.head1, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::HEADER1); });
@@ -551,6 +561,11 @@ void NarrativeControl::showCanvas(bool show, bool fade)
 	}
 }
 
+bool NarrativeControl::canvasVisible() const
+{
+	return m_canvas->isVisible();
+}
+
 void NarrativeControl::showCanvasEditor(bool show)
 {
 	m_label_buttons->setVisible(show);
@@ -564,6 +579,8 @@ void NarrativeControl::showNarrativeBox()
 void NarrativeControl::showSlideBox()
 {
 	m_bar->showSlides();
+	Narrative2 *nar = getCurrentNarrative();
+	if (nar) m_bar->setSlidesHeader(nar->getTitle());
 }
 
 void NarrativeControl::editSlide()
@@ -695,19 +712,15 @@ NarrativeSlide * NarrativeControl::getCurrentSlide()
 
 Narrative2 *NarrativeControl::getNarrative(int index)
 {
-	if (index < 0 || (uint)index >= m_narrative_group->getNumChildren()) {
-		return nullptr;
-	}
-	osg::Node *c = m_narrative_group->getChild(index);
-	return dynamic_cast<Narrative2*>(c);
+	if (index < 0) return nullptr;
+	return dynamic_cast<Narrative2*>(m_narrative_group->child(index));
 }
 
 NarrativeSlide * NarrativeControl::getSlide(int narrative, int slide)
 {
 	Narrative2 *nar = getNarrative(narrative);
 	if (!nar) return nullptr;
-	if (slide < 0 || (uint)slide >= nar->getNumChildren()) return nullptr;
-	return dynamic_cast<NarrativeSlide*>(nar->getChild(slide));
+	return dynamic_cast<NarrativeSlide*>(nar->child(slide));
 }
 
 NarrativeSlideLabel * NarrativeControl::getLabel(int narrative, int slide, int label)

@@ -33,21 +33,36 @@ NarrativePlayer::NarrativePlayer(VSimApp *app,
 	a_next->setShortcut(Qt::Key_Right);
 	connect(a_next, &QAction::triggered, this, &NarrativePlayer::next);
 
-	// ui connections
+	a_prev = new QAction(this);
+	a_prev->setText("Prev");
+	a_prev->setShortcut(Qt::Key_Left);
+	connect(a_prev, &QAction::triggered, this, &NarrativePlayer::prev);
 
-	connect(m_app, &VSimApp::sStateChanged, this, [this]() {
+	// ui connections
+	top_bar->ui.play->setDefaultAction(a_play);
+	top_bar->ui.play_2->setDefaultAction(a_play);
+	top_bar->ui.stop->setDefaultAction(a_stop);
+	top_bar->ui.stop_2->setDefaultAction(a_stop);
+	top_bar->addAction(a_next);
+	top_bar->addAction(a_prev);
+
+	// state
+	connect(m_app, &VSimApp::sStateChanged, this, [this](VSimApp::State old, VSimApp::State state) {
 		// clean up timer
-		VSimApp::State state = m_app->state();
 		if (state != VSimApp::PLAY_TRANSITION
 			&& state != VSimApp::PLAY_WAIT_TIME) {
 			m_timer.stop();
 		}
 
 		// stop events
-		if (!m_app->isPlaying()) {
+		if (VSimApp::isPlaying(old) && !VSimApp::isPlaying(state)) {
 			stop();
 		}
+
+		a_stop->setEnabled(m_app->isPlaying());
 	});
+
+	// internal
 	connect(&m_timer, &QTimer::timeout, this, &NarrativePlayer::next);
 }
 
@@ -69,18 +84,16 @@ void NarrativePlayer::play()
 
 void NarrativePlayer::stop()
 {
-	qDebug() << "stop";
 	toStopped();
 }
 
 void NarrativePlayer::next()
 {
-	qInfo() << "Narrative Player - next";
-
 	VSimApp::State state = m_app->state();
 
 	if (state == VSimApp::PLAY_WAIT_CLICK
-		|| state == VSimApp::PLAY_WAIT_TIME) {
+		|| state == VSimApp::PLAY_WAIT_TIME
+		|| state == VSimApp::PLAY_FLYING) {
 		toTransitioning();
 	}
 	else if (state == VSimApp::PLAY_TRANSITION) {
@@ -88,12 +101,28 @@ void NarrativePlayer::next()
 	}
 }
 
+void NarrativePlayer::prev()
+{
+	VSimApp::State state = m_app->state();
+	if (!m_app->isPlaying()) return;
+
+	// try to set the slie back one
+	int prev_index = m_narratives->getCurrentSlideIndex() - 1;
+	NarrativeSlide *next = m_narratives->getSlide(m_narratives->getCurrentNarrativeIndex(),
+		prev_index);
+
+	if (!next) return;
+
+	m_narratives->openSlide(prev_index, true);
+	toAtNode();
+}
+
 void NarrativePlayer::toTransitioning()
 {
 	// get the next slide matrix & transition
 	int next_index = m_narratives->getCurrentSlideIndex() + 1;
 	NarrativeSlide *next = m_narratives->getSlide(m_narratives->getCurrentNarrativeIndex(),
-		next_index + 1);
+		next_index);
 
 	// end if fail
 	if (!next) {
@@ -114,13 +143,18 @@ void NarrativePlayer::toTransitioning()
 void NarrativePlayer::toAtNode()
 {
 	// fade in
-	m_narratives->showCanvas(true, true);
+	if (!m_narratives->canvasVisible()) m_narratives->showCanvas(true, true);
 
 	NarrativeSlide *slide = m_narratives->getCurrentSlide();
 	if (!slide) {
 		m_app->setState(VSimApp::PLAY_END);
 		return;
 	}
+
+	// force camera
+	m_app->stopCameraMoving();
+	m_app->setCameraMatrix(slide->getCameraMatrix());
+
 	if (slide->getStayOnNode()) {
 		m_app->setState(VSimApp::PLAY_WAIT_CLICK);
 	}

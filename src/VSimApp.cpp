@@ -89,7 +89,9 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(this, &VSimApp::sTick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 
 	m_camera_timer = new QTimer(this);
-	connect(m_camera_timer, &QTimer::timeout, this, &VSimApp::moveTimerExpire);
+	connect(m_camera_timer, &QTimer::timeout, this, [this]() {
+		setCameraMatrix(m_camera_target);
+	});
 
 	initWithVSim(m_root);
 }
@@ -114,11 +116,16 @@ void VSimApp::setState(State s)
 
 bool VSimApp::isPlaying() const
 {
-	return m_state == PLAY_WAIT_CLICK
-		|| m_state == PLAY_WAIT_TIME
-		|| m_state == PLAY_TRANSITION
-		|| m_state == PLAY_END
-		|| m_state == PLAY_FLYING;
+	return isPlaying(m_state);
+}
+
+bool VSimApp::isPlaying(VSimApp::State state)
+{
+	return state == PLAY_WAIT_CLICK
+		|| state == PLAY_WAIT_TIME
+		|| state == PLAY_TRANSITION
+		|| state == PLAY_END
+		|| state == PLAY_FLYING;
 }
 
 bool VSimApp::isFlying() const
@@ -127,75 +134,12 @@ bool VSimApp::isFlying() const
 		|| m_state == PLAY_FLYING;
 }
 
-void VSimApp::play()
-{
-	//m_narrative_control->enableCanvas(true);
-	m_playing = true;
-}
-
-void VSimApp::stop()
-{
-	m_playing = false;
-}
-
-void VSimApp::moveTimerExpire()
-{
-	if (m_transitioning) {
-		m_transitioning = false;
-		m_narrative_control->showCanvas(true, false);
-	}
-	setCameraMatrix(m_camera_target);
-}
-
-void VSimApp::transitionTo(int index)
-{
-	// get slide at index
-	Narrative2 *nar = m_narrative_control->getCurrentNarrative();
-	NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(nar->child(index));
-	if (!slide) {
-		qWarning() << "Can't transition to slide index" << index;
-		return;
-	}
-	m_transitioning = true;
-	m_narrative_control->showCanvas(false, false);
-
-	osg::Matrixd target = slide->getCameraMatrix();
-	double t = slide->getTransitionDuration();
-	setCameraMatrixSmooth(target, t);
-
-	m_narrative_control->showCanvas(false, false); // fade out
-	m_narrative_control->openSlide(index, true); // advance slide
-	//m_er_control->enableResources(false);
-}
-
-void VSimApp::startFlying()
-{
-	m_narrative_control->showCanvas(false, false);
-	//m_er_control->enableResources(true);
-	m_flying = true;
-}
-
-void VSimApp::editNarratives()
-{
-	//m_narrative_control->showC(true);
-	/*m_er_control->enableResources(false);*/
-	m_editing_narrative = true;
-}
-
-void VSimApp::next()
-{
-}
-
-void VSimApp::prev()
-{
-}
-
 void VSimApp::update(float dt_sec)
 {
 	//emit sTick(dt_sec);
 
 	// Smooth camera updates
-	if (m_camera_timer->isActive()) {
+	if (cameraMoving()) {
 		float t = (1 - m_camera_timer->remainingTime() / (float)m_camera_timer->interval());
 		setCameraMatrix(Util::cameraMatrixInterp(m_camera_start, m_camera_target, Util::simpleCubic(0, 1, t)));
 		//setCameraMatrix(Util::cameraMatrixInterp(m_camera_start, m_camera_target, t));
@@ -541,6 +485,16 @@ void VSimApp::setCameraMatrixSmooth(const osg::Matrixd & matrix, float time)
 	m_camera_timer->setInterval(time*1000);
 	m_camera_timer->setSingleShot(true);
 	m_camera_timer->start();
+}
+
+bool VSimApp::cameraMoving() const
+{
+	return m_camera_timer->isActive();
+}
+
+void VSimApp::stopCameraMoving()
+{
+	m_camera_timer->stop();
 }
 
 QImage VSimApp::generateThumbnail(NarrativeSlide * slide)
