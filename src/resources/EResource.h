@@ -86,6 +86,7 @@ public:
 	const ECategory *getCategory() const;
 	void setCategory(ECategory *category);
 
+	// serializer only
 	int getCategoryIndex() const;
 	void setCategoryIndex(int index);
 

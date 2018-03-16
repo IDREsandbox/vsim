@@ -32,6 +32,7 @@ public:
 	int getBlue()const;
 	void setBlue(int blue);
 
+	// internal, use EResource::setCategory()
 	void addResource(EResource *res);
 	void removeResource(EResource *res);
 	const std::set<EResource*> &resources() const;

@@ -131,15 +131,11 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 		[this, cats](const QModelIndex &topLeft,
 			const QModelIndex &bottomRight,
 			const QVector<int> &roles = QVector<int>()) {
-		bool ok = false;
+
 		// look for the checkbox role
-		for (auto role : roles) {
-			if (role == Qt::ItemDataRole::CheckStateRole) {
-				ok = true;
-				break;
-			}
+		if (std::find(roles.begin(), roles.end(), Qt::CheckStateRole) == roles.end()) {
+			return;
 		}
-		if (!ok) return;
 
 		for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
 			updateCategorySet(i);

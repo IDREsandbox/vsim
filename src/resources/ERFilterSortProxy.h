@@ -103,6 +103,7 @@ protected:
 	void reload();
 
 private:
+	// adds/remove from m_categories_enabled based on model
 	void updateCategorySet(int model_row);
 	bool checkTitle(const std::string &s) const;
 
