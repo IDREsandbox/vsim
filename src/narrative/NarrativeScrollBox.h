@@ -15,7 +15,6 @@ protected:
 	void itemMouseDoubleClickEvent(QMouseEvent *event, int index) override;
 
 signals:
-	void sInfo();
 	void sOpen();
 };
 

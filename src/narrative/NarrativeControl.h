@@ -47,7 +47,7 @@ public:
 	// - forces selection, shows canvas
 	// - hides on -1 or no narrative
 	// - returns true if open, false if failed
-	bool openSlide(int index, bool go = true, bool fade = false);
+	bool openSlide(int index, bool go = true);
 
 	void showNarrativeBox();
 	void showSlideBox();
@@ -89,12 +89,22 @@ signals:
 
 public: // Actions
 	// Narratives
+	QAction *a_new_narrative;
+	QAction *a_narrative_info;
+	QAction *a_delete_narratives;
+	QAction *a_open_narrative;
 	void newNarrative();
 	void editNarrativeInfo();
 	void deleteNarratives();
 	void moveNarratives(const std::vector<std::pair<size_t, size_t>> &mapping);
 
 	// Slides
+	QAction *a_new_slide;
+	QAction *a_delete_slides;
+	QAction *a_slide_duration;
+	QAction *a_slide_transition;
+	QAction *a_slide_camera;
+	QAction *a_edit_slide;
 	void newSlide();
 	void deleteSlides();
 	void setSlideDuration();

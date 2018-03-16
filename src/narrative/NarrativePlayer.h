@@ -3,66 +3,46 @@
 
 #include <QObject>
 #include <osg/Matrix>
+#include <QAction>
+#include <QTimer>
 
 class NarrativeControl;
 class NarrativeSlide;
+class MainWindowTopBar;
+class VSimApp;
 
 // State machine ish
 class NarrativePlayer : public QObject
 {
 	Q_OBJECT
 public:
-	NarrativePlayer(QObject *parent, NarrativeControl *narratives);
-	enum State {
-		STOPPED,
-		ATNODE,
-		TRANSITIONING
-	};
+	NarrativePlayer(VSimApp *app,
+		NarrativeControl *narratives,
+		MainWindowTopBar *top_bar,
+		QObject *parent = nullptr);
 
-	// slots
-	void play();
-	void stop();
-	void update(double dt_sec);
-	void rightArrow();
-	void leftArrow();
-	void leftClick();
-	void timerExpire(); // our own timers
-	void editEvent(); // selection changes
+public: // actions
+	QAction *a_play;
+	QAction *a_stop;
+	QAction *a_next;
+	//QAction a_prev;
 
+public:
 	// advances the slide or transition, immediately pauses on failure or PauseOnNode
 	void next();
+	void stop();
+	void play();
 
 	// state transitions
 	void toTransitioning();
 	void toAtNode();
 	void toStopped();
 
-	// signals out, if you want to remove dependency then replace with signals
-	bool advanceSlide(bool forward);
-	void hideCanvas();
-	void showCanvas();
-	void setCameraInTransition(double t);
-
-signals: // more signals out, removes the viewer widget dependency
-	void updateCamera(osg::Matrixd camera_matrix);
-	void enableNavigation(bool enable); // TODO
-
 private:
-	// pointers
+	VSimApp *m_app;
 	NarrativeControl *m_narratives;
 
-	State m_state;
-	double m_slide_time_sec;
-
-	// This is so that calling setSelection doesn't cause us to stop
-	bool m_expect_selection_change;
-
-	//QGraphicsOpacityEffect* effect;
-
-	//void figureOutFrozenCamera(); // locks the camera if playing or frozen
-	// remembers the previous navigation mode to switch back to after finishing playing
-	//OSGViewerWidget::NavigationMode m_old_navigation_mode;
-	//labelCanvas* m_canvas;
+	QTimer m_timer;
 };
 
 #endif /* NARRATIVEPLAYER_H */

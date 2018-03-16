@@ -30,7 +30,7 @@
 #include "ModelOutliner.h"
 #include "TimeSlider.h"
 #include "narrative/NarrativeControl.h"
-//#include "narrative/NarrativePlayer.h"
+#include "narrative/NarrativePlayer.h"
 #include "resources/ERControl.h"
 #include "VSimRoot.h"
 #include "ModelTableModel.h"
@@ -63,8 +63,7 @@ VSimApp::VSimApp(MainWindow* window)
 
 	m_narrative_control = new NarrativeControl(this, m_window, this);
 	m_er_control = new ERControl(this, m_window, m_root->resources(), this);
-	m_navigation_control = new NavigationControl(this, m_window->getViewerWidget(), this);
-	m_navigation_control->initMenu(m_window->navigationMenu());
+	m_navigation_control = new NavigationControl(this, m_window->getViewerWidget(), m_window->navigationMenu(), this);
 
 	// thumbnails
 	m_thumbnail_size = QSize(288, 162);
@@ -80,7 +79,7 @@ VSimApp::VSimApp(MainWindow* window)
 	m_render_view->setCameraFrozen(true);
 
 	// Narrative player
-	//m_narrative_player = new NarrativePlayer(this, m_narrative_control);
+	m_narrative_player = new NarrativePlayer(this, m_narrative_control, m_window->topBar(), this);
 
 	//connect(window->topBar()->ui.play_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::play);
 	//connect(window->topBar()->ui.pause_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::stop);
@@ -205,7 +204,6 @@ void VSimApp::update(float dt_sec)
 
 	if (isFlying() ||
 		m_state == VSimApp::PLAY_TRANSITION) {
-
 		//m_navigation_control->update(dt_sec);
 	}
 }

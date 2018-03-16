@@ -3,47 +3,49 @@
 #include "VSimApp.h"
 #include "OSGViewerWidget.h"
 
-NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObject *parent)
+NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QMenu *menu, QObject *parent)
 	: QObject(parent),
 	m_app(app),
-	m_viewer(viewer)
+	m_viewer(viewer),
+	m_menu(menu)
 {
 	// navigation actions	
 	m_navigation_action_group = new QActionGroup(this);
 	m_navigation_action_group->setExclusive(true);
-	m_action_first_person = new QAction(m_navigation_action_group);
-	m_action_flight = new QAction(m_navigation_action_group);
-	m_action_object = new QAction(m_navigation_action_group);
-	m_action_first_person->setCheckable(true);
-	m_action_flight->setCheckable(true);
-	m_action_object->setCheckable(true);
-	m_action_first_person->setText("First Person");
-	m_action_flight->setText("Flight");
-	m_action_object->setText("Object");
-	m_action_first_person->setShortcut(Qt::Key_1);
-	m_action_flight->setShortcut(Qt::Key_2);
-	m_action_object->setShortcut(Qt::Key_3);
+	a_first_person = new QAction(m_navigation_action_group);
+	a_flight = new QAction(m_navigation_action_group);
+	a_object = new QAction(m_navigation_action_group);
+	a_first_person->setCheckable(true);
+	a_flight->setCheckable(true);
+	a_object->setCheckable(true);
+	a_first_person->setText("First Person");
+	a_flight->setText("Flight");
+	a_object->setText("Object");
+	a_first_person->setShortcut(Qt::Key_1);
+	a_flight->setShortcut(Qt::Key_2);
+	a_object->setShortcut(Qt::Key_3);
 
-	m_action_freeze = new QAction(this);
-	m_action_freeze->setCheckable(true);
-	m_action_freeze->setText("Freeze");
-	m_action_freeze->setShortcut(Qt::Key_Space);
+	a_freeze = new QAction(this);
+	a_freeze->setCheckable(true);
+	a_freeze->setText("Freeze");
+	a_freeze->setShortcut(Qt::Key_Space);
 
-	m_action_home = new QAction(this);
-	m_action_home->setText("Reset");
-	m_action_home->setShortcut(Qt::Key_H);
+	a_home = new QAction(this);
+	a_home->setText("Reset");
+	a_home->setShortcut(Qt::Key_H);
 
-	m_action_gravity = new QAction(this);
-	m_action_gravity->setCheckable(true);
-	m_action_gravity->setText("Gravity");
-	m_action_gravity->setShortcut(Qt::Key_G);
+	a_gravity = new QAction(this);
+	a_gravity->setCheckable(true);
+	a_gravity->setText("Gravity");
+	a_gravity->setShortcut(Qt::Key_G);
 
-	m_action_collisions = new QAction(this);
-	m_action_collisions->setCheckable(true);
-	m_action_collisions->setText("Collisions");
-	m_action_collisions->setShortcut(Qt::Key_C);
+	a_collisions = new QAction(this);
+	a_collisions->setCheckable(true);
+	a_collisions->setText("Collisions");
+	a_collisions->setShortcut(Qt::Key_C);
 
 	// initialize
+	initMenu(menu);
 	onModeChange(m_viewer->getNavigationMode());
 
 	// app -> this
@@ -60,59 +62,58 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	// gui -> osg
 	connect(m_navigation_action_group, &QActionGroup::triggered, this,
 		[this](QAction *which) {
-		if (which == m_action_first_person) {
+		if (which == a_first_person) {
 			m_viewer->setNavigationMode(Navigation::FIRST_PERSON);
 		}
-		else if (which == m_action_flight) {
+		else if (which == a_flight) {
 			m_viewer->setNavigationMode(Navigation::FLIGHT);
 		}
-		else if (which == m_action_object) {
+		else if (which == a_object) {
 			m_viewer->setNavigationMode(Navigation::OBJECT);
 		}
 		m_viewer->setCameraFrozen(false);
-		m_action_freeze->setChecked(false);
+		a_freeze->setChecked(false);
 		activate();
 	});
-	connect(m_action_freeze, &QAction::triggered, this,
+	connect(a_freeze, &QAction::triggered, this,
 		[this]() {
-		m_viewer->setCameraFrozen(m_action_freeze->isChecked());
+		m_viewer->setCameraFrozen(a_freeze->isChecked());
 		activate();
 	});
-	connect(m_action_home, &QAction::triggered, this,
+	connect(a_home, &QAction::triggered, this,
 		[this]() {
 		m_viewer->reset();
 		activate();
 	});
-	connect(m_action_gravity, &QAction::triggered, this,
+	connect(a_gravity, &QAction::triggered, this,
 		[this]() {
-		m_viewer->enableGravity(m_action_gravity->isChecked());
+		m_viewer->enableGravity(a_gravity->isChecked());
 		activate();
 	});
-	connect(m_action_collisions, &QAction::triggered, this,
+	connect(a_collisions, &QAction::triggered, this,
 		[this]() {
-		m_viewer->enableCollisions(m_action_collisions->isChecked());
+		m_viewer->enableCollisions(a_collisions->isChecked());
 		activate();
 	});
 
 	// osg -> gui
-	connect(m_viewer, &OSGViewerWidget::sCameraFrozen, m_action_freeze, &QAction::setChecked);
+	connect(m_viewer, &OSGViewerWidget::sCameraFrozen, a_freeze, &QAction::setChecked);
 	connect(m_viewer, &OSGViewerWidget::sNavigationModeChanged, this, &NavigationControl::onModeChange);
 }
 
 void NavigationControl::initMenu(QMenu * menu)
 {
-	m_menu = menu;
-	m_menu->setTitle("Navigation");
-	m_menu->addSeparator()->setText("Navigation Mode");
-	m_menu->addAction(m_action_first_person);
-	m_menu->addAction(m_action_flight);
-	m_menu->addAction(m_action_object);
-	m_menu->addSeparator();
-	m_menu->addAction(m_action_freeze);
-	m_menu->addAction(m_action_home);
-	m_menu->addSeparator();
-	m_menu->addAction(m_action_gravity);
-	m_menu->addAction(m_action_collisions);
+	menu->setTitle("Navigation");
+	menu->addSeparator()->setText("Navigation Mode");
+	menu->addAction(a_first_person);
+	menu->addAction(a_flight);
+	menu->addAction(a_object);
+	menu->addSeparator();
+	menu->addAction(a_freeze);
+	menu->addAction(a_home);
+	menu->addSeparator();
+	menu->addAction(a_gravity);
+	menu->addAction(a_collisions);
 }
 
 void NavigationControl::activate()
@@ -128,12 +129,12 @@ void NavigationControl::activate()
 void NavigationControl::onModeChange(Navigation::Mode mode)
 {
 	if (mode == Navigation::FIRST_PERSON) {
-		m_action_first_person->setChecked(true);
+		a_first_person->setChecked(true);
 	}
 	else if (mode == Navigation::FLIGHT) {
-		m_action_flight->setChecked(true);
+		a_flight->setChecked(true);
 	}
 	else if (mode == Navigation::OBJECT) {
-		m_action_object->setChecked(true);
+		a_object->setChecked(true);
 	}
 }

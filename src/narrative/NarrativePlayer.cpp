@@ -4,96 +4,65 @@
 
 #include "narrative/NarrativeControl.h"
 #include "narrative/NarrativeSlide.h"
+#include "VSimApp.h"
+#include "MainWindowTopBar.h"
 
 #include <osg/io_utils>
 
-NarrativePlayer::NarrativePlayer(QObject *parent, NarrativeControl *narratives)
+NarrativePlayer::NarrativePlayer(VSimApp *app,
+	NarrativeControl *narratives,
+	MainWindowTopBar *top_bar,
+	QObject *parent)
 	: QObject(parent),
-	m_narratives(narratives),
-	m_state(STOPPED),
-	m_slide_time_sec(0),
-	m_expect_selection_change(false)
+	m_app(app),
+	m_narratives(narratives)
 {
-	connect(m_narratives, &NarrativeControl::sEditEvent, this, &NarrativePlayer::editEvent);
-}
-void NarrativePlayer::update(double dt_sec)
-{
-	if (m_state == STOPPED) return;
-	if (m_state == ATNODE && m_narratives->getCurrentSlide()->getStayOnNode()) return;
+	// actions
+	a_play = new QAction(this);
+	a_play->setText("Play");
+	a_play->setShortcut(Qt::Key_P);
+	connect(a_play, &QAction::triggered, this, &NarrativePlayer::play);
 
-	NarrativeSlide *slide = m_narratives->getCurrentSlide();
-	if (slide == nullptr) {
-		qDebug() << "Narrative Player - update, current slide is null";
-		toStopped();
-		return;
-	}
+	a_stop = new QAction(this);
+	a_stop->setText("Stop");
+	a_stop->setShortcut(Qt::Key_Escape);
+	connect(a_stop, &QAction::triggered, this, &NarrativePlayer::stop);
 
-	if (m_state == ATNODE) {
-		//qDebug() << "atnode" << m_slide_time_sec / slide->getDuration();
-		m_slide_time_sec += dt_sec;
-		if (m_slide_time_sec >= slide->getDuration()) {
-			timerExpire();
+	a_next = new QAction(this);
+	a_next->setText("Next");
+	a_next->setShortcut(Qt::Key_Right);
+	connect(a_next, &QAction::triggered, this, &NarrativePlayer::next);
+
+	// ui connections
+
+	connect(m_app, &VSimApp::sStateChanged, this, [this]() {
+		// clean up timer
+		VSimApp::State state = m_app->state();
+		if (state != VSimApp::PLAY_TRANSITION
+			&& state != VSimApp::PLAY_WAIT_TIME) {
+			m_timer.stop();
 		}
-	}
-	else { // TRANSITIONING
-		m_slide_time_sec += dt_sec;
-		double t = m_slide_time_sec / slide->getTransitionDuration();
-		//qDebug() << "transition" << t;
-		//effect->setOpacity(1 - t - .5);
-		//m_window->canvasView()->setGraphicsEffect(effect);
-		setCameraInTransition(t);
 
-		if (t >= 1.0) {
-			timerExpire();
+		// stop events
+		if (!m_app->isPlaying()) {
+			stop();
 		}
-	}
-}
-
-void NarrativePlayer::rightArrow()
-{
-	next();
-}
-
-void NarrativePlayer::leftArrow()
-{
-	//next(false);
-}
-
-void NarrativePlayer::leftClick()
-{
-	next();
-}
-
-void NarrativePlayer::timerExpire()
-{
-	next();
-}
-
-void NarrativePlayer::editEvent()
-{
-	// if we caused the selection change then don't do anything
-	if (m_expect_selection_change) {
-		return;
-	}
-	// update camera and everything
-	NarrativeSlide *slide = m_narratives->getCurrentSlide();
-	if (slide) {;
-		updateCamera(slide->getCameraMatrix());
-	}
-
-	toStopped();
+	});
+	connect(&m_timer, &QTimer::timeout, this, &NarrativePlayer::next);
 }
 
 void NarrativePlayer::play()
 {
-	if (m_state == ATNODE && m_narratives->getCurrentSlide()->getStayOnNode()) {
-		qDebug() << "play - continue";
+	if (m_app->isPlaying()) {
 		next();
 		return;
 	}
-	if (m_state == STOPPED) {
-		qDebug() << "play";
-		emit enableNavigation(false);
+	else {
+		//try to select something
+		NarrativeSlide *slide = m_narratives->getCurrentSlide();
+		if (!slide) {
+			m_narratives->openSlide(0);
+		}
 		toAtNode();
 	}
 }
@@ -108,95 +77,61 @@ void NarrativePlayer::next()
 {
 	qInfo() << "Narrative Player - next";
 
-	if (m_state == ATNODE) {
+	VSimApp::State state = m_app->state();
+
+	if (state == VSimApp::PLAY_WAIT_CLICK
+		|| state == VSimApp::PLAY_WAIT_TIME) {
 		toTransitioning();
 	}
-	else if (m_state == TRANSITIONING) {
+	else if (state == VSimApp::PLAY_TRANSITION) {
 		toAtNode();
 	}
 }
 
 void NarrativePlayer::toTransitioning()
 {
-	bool ok = advanceSlide(true);
+	// get the next slide matrix & transition
+	int next_index = m_narratives->getCurrentSlideIndex() + 1;
+	NarrativeSlide *next = m_narratives->getSlide(m_narratives->getCurrentNarrativeIndex(),
+		next_index + 1);
 
-	if (!ok) {
-		// couldn't advance
-		qDebug() << "failed to change slide, stopping";
-		toStopped();
+	// end if fail
+	if (!next) {
+		m_app->setState(VSimApp::PLAY_END);
 		return;
 	}
+	m_app->setState(VSimApp::PLAY_TRANSITION);
 
-	hideCanvas();
-	m_slide_time_sec = 0;
-	m_state = TRANSITIONING;
+	m_narratives->showCanvas(false, true); // fade out this slide
+	m_narratives->openSlide(next_index, false); // open next slide
+	m_narratives->showCanvas(false, false); // hide it
+	m_app->setCameraMatrixSmooth(next->getCameraMatrix(), next->getTransitionDuration());
+
+	m_timer.setInterval(next->getTransitionDuration() * 1000);
+	m_timer.start();
 }
 
 void NarrativePlayer::toAtNode()
 {
-	showCanvas();
-	emit updateCamera(m_narratives->getCurrentSlide()->getCameraMatrix());
-	m_slide_time_sec = 0;
-	m_state = ATNODE;
+	// fade in
+	m_narratives->showCanvas(true, true);
+
+	NarrativeSlide *slide = m_narratives->getCurrentSlide();
+	if (!slide) {
+		m_app->setState(VSimApp::PLAY_END);
+		return;
+	}
+	if (slide->getStayOnNode()) {
+		m_app->setState(VSimApp::PLAY_WAIT_CLICK);
+	}
+	else {
+		m_app->setState(VSimApp::PLAY_WAIT_TIME);
+		m_timer.setInterval(slide->getDuration() * 1000);
+		m_timer.start();
+	}
 }
 
 void NarrativePlayer::toStopped()
 {
-	if (m_state == STOPPED) return;
-	qDebug() << "to stopped";
-	m_state = STOPPED;
-	showCanvas();
-	emit enableNavigation(true);
+	if (m_app->isPlaying()) m_app->setState(VSimApp::EDIT_FLYING);
 }
-
-bool NarrativePlayer::advanceSlide(bool forward)
-{
-	// try to advance the narrative control
-	m_expect_selection_change = true;
-	bool ok = m_narratives->advanceSlide(forward);
-	m_expect_selection_change = false;
-	if (!ok) return false;
-	return true;
-}
-
-void NarrativePlayer::hideCanvas()
-{
-	//m_narratives->hideCanvas(true);
-}
-
-void NarrativePlayer::showCanvas()
-{
-	//m_narratives->showCanvas(false);
-}
-void NarrativePlayer::setCameraInTransition(double t)
-{
-	int m_current_slide = m_narratives->getCurrentSlideIndex();
-	if (m_current_slide == 0) {
-		updateCamera(m_narratives->getCurrentSlide()->getCameraMatrix());
-		return;
-	}
-
-	NarrativeSlide *to = m_narratives->getCurrentSlide();
-	int nar_index = m_narratives->getCurrentNarrativeIndex();
-	int prev_index = m_narratives->getCurrentSlideIndex() - 1;
-	NarrativeSlide *from = m_narratives->getSlide(nar_index, prev_index);
-
-	osg::Matrixd new_matrix;
-	if (t >= 1) new_matrix = to->getCameraMatrix();
-
-	else new_matrix = Util::cameraMatrixInterp(from->getCameraMatrix(), to->getCameraMatrix(), Util::simpleCubic(0, 1, t));
-	//std::cout << Util::camMatHerm(t, source_node->getCameraMatrix(), dest_node->getCameraMatrix()) << endl;
-
-	emit updateCamera(new_matrix);
-}
-//
-//void NarrativePlayer::enableNavigation(bool enable)
-//{
-//	//if (!enable) {
-//	//	// remember the navigation mode
-//	//	m_old_navigation_mode = m_window->m_osg_widget->getNavigationMode();
-//	//	m_window->m_osg_widget->setNavigationMode(OSGViewerWidget::NAVIGATION_SIMPLE);
-//	//}
-//}
-
-

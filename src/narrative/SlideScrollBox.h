@@ -23,10 +23,6 @@ public:
 signals:
 	void sSetTransitionDuration();
 	void sSetDuration(); // 0 if pause at node
-	void sDeleteSlides();
-	void sNewSlide(int);
-	void sEditSlide();
-	void sSetCamera();
 	void sGoto(int);
 	//void sTransitionTo(int);
 

@@ -18,6 +18,7 @@
 
 #include "editButtons.h"
 #include "narrative/NarrativeCanvas.h"
+#include "narrative/NarrativePlayer.h"
 
 #include "resources/ERDisplay.h"
 #include "resources/ERScrollBox.h"
@@ -118,6 +119,9 @@ MainWindow::MainWindow(QWidget *parent)
 		qInfo() << "app state" << VSimApp::StateStrings[m_app->state()];
 	});
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
+
+	// player
+
 
 	// model outliner
 	m_outliner = new ModelOutliner(this);

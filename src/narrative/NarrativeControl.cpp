@@ -84,14 +84,12 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 
 	// app state
 	connect(m_app, &VSimApp::sStateChanged, this, [this](auto old, auto current) {
-		if (m_app->isFlying()) {
-			// fade out
-			openSlide(-1, false, true);
-		}
 		VSimApp::State state = m_app->state();
-		if (state == VSimApp::EDIT_ERS) {
-			// hide?
-			openSlide(-1, false, true);
+		if (m_app->isFlying()
+			|| state == VSimApp::EDIT_ERS) {
+			// fade out
+			showCanvas(false, true);
+			openSlide(-1);
 		}
 
 		if (state != VSimApp::EDIT_CANVAS
@@ -115,18 +113,37 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	});
 
 	// NARRATIVE CONTROL
+	a_new_narrative = new QAction("New Narrative", this);
+	a_delete_narratives = new QAction("Delete Narrative", this);
+	a_narrative_info = new QAction("Edit Narrative Info", this);
+	a_open_narrative = new QAction("Open Narrative", this);
+
+	// menus
+	QMenu *nar_menu = new QMenu("Narrative menu", m_narrative_box);
+	QMenu *nar_item_menu = new QMenu("Narrative item menu", m_narrative_box);
+
+	nar_menu->addAction(a_new_narrative);
+	nar_item_menu->addAction(a_new_narrative);
+	nar_item_menu->addAction(a_delete_narratives);
+	nar_item_menu->addAction(a_narrative_info);
+	nar_item_menu->addAction(a_open_narrative);
+
+	m_narrative_box->setMenu(nar_menu);
+	m_narrative_box->setItemMenu(nar_item_menu);
+
 	// new
-	connect(m_narrative_box, &NarrativeScrollBox::sNew, this, &NarrativeControl::newNarrative);
-	connect(m_bar->ui.plus, &QPushButton::clicked, this, &NarrativeControl::newNarrative);
+	connect(a_new_narrative, &QAction::triggered, this, &NarrativeControl::newNarrative);
+	m_bar->ui.add->setDefaultAction(a_new_narrative);
 	// delete
-	connect(m_narrative_box, &NarrativeScrollBox::sDelete, this, &NarrativeControl::deleteNarratives);
-	connect(m_bar->ui.minus, &QPushButton::clicked, this, &NarrativeControl::deleteNarratives);
+	connect(a_delete_narratives, &QAction::triggered, this, &NarrativeControl::deleteNarratives);
+	m_bar->ui.remove->setDefaultAction(a_delete_narratives);
 	// info
-	connect(m_narrative_box, &NarrativeScrollBox::sInfo, this, &NarrativeControl::editNarrativeInfo);
-	connect(m_bar->ui.info, &QPushButton::clicked, this, &NarrativeControl::editNarrativeInfo);
+	connect(a_narrative_info, &QAction::triggered, this, &NarrativeControl::editNarrativeInfo);
+	m_bar->ui.info->setDefaultAction(a_narrative_info);
 	// open
-	connect(m_narrative_box, &NarrativeScrollBox::sOpen, this, &NarrativeControl::showSlideBox);
-	connect(m_bar->ui.open, &QPushButton::clicked, this, &NarrativeControl::showSlideBox);
+	connect(a_open_narrative, &QAction::triggered, this, &NarrativeControl::showSlideBox);
+	m_bar->ui.open->setDefaultAction(a_narrative_info);
+	connect(m_narrative_box, &NarrativeScrollBox::sOpen, a_open_narrative, &QAction::trigger);
 	// move
 	connect(m_narrative_box, &NarrativeScrollBox::sMove, this, &NarrativeControl::moveNarratives);
 	// touch
@@ -144,23 +161,43 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	});
 
 	// SLIDE CONTROL
+
+	a_new_slide = new QAction("New Slide", this);
+	a_delete_slides = new QAction("Delete Narrative", this);
+	a_slide_duration = new QAction("Set Duration", this);
+	a_slide_transition = new QAction("Set Transition", this);
+	a_slide_camera = new QAction("Set Camera", this);
+	a_edit_slide = new QAction("Edit Slide", this);
+
+	// menus
+	QMenu *slide_menu = new QMenu("Narrative menu", m_narrative_box);
+	slide_menu->addAction(a_new_slide);
+
+	QMenu *slide_item_menu = new QMenu("Narrative item menu", m_narrative_box);
+	slide_item_menu->addAction(a_new_slide);
+	slide_item_menu->addAction(a_delete_slides);
+	slide_item_menu->addAction(a_slide_duration);
+	slide_item_menu->addAction(a_slide_transition);
+	slide_item_menu->addAction(a_slide_camera);
+
+	m_slide_box->setMenu(slide_menu);
+	m_slide_box->setItemMenu(slide_item_menu);
+
 	// new
-	connect(m_slide_box, &SlideScrollBox::sNewSlide, this, &NarrativeControl::newSlide);
-	connect(m_bar->ui.plus_2, &QPushButton::clicked, this, &NarrativeControl::newSlide);
+	connect(a_new_slide, &QAction::triggered, this, &NarrativeControl::newSlide);
+	m_bar->ui.add_2->setDefaultAction(a_new_slide);
 	// delete
-	connect(m_slide_box, &SlideScrollBox::sDeleteSlides, this, &NarrativeControl::deleteSlides);
-	connect(m_bar->ui.minus_2, &QPushButton::clicked, this, &NarrativeControl::deleteSlides);
+	connect(a_delete_slides, &QAction::triggered, this, &NarrativeControl::deleteSlides);
+	m_bar->ui.remove_2->setDefaultAction(a_delete_slides);
 	// edit
-	connect(m_slide_box, &SlideScrollBox::sEditSlide, this, &NarrativeControl::editSlide);
-	connect(m_bar->ui.open_2, &QPushButton::clicked, this, &NarrativeControl::editSlide);
-	// duration
-	connect(m_slide_box, &SlideScrollBox::sSetDuration, this, &NarrativeControl::setSlideDuration);
-	// transition
-	connect(m_slide_box, &SlideScrollBox::sSetTransitionDuration, this, &NarrativeControl::setSlideTransition);
-	// camera
-	connect(m_slide_box, &SlideScrollBox::sSetCamera, this, &NarrativeControl::setSlideCamera);
+	connect(a_edit_slide, &QAction::triggered, this, &NarrativeControl::editSlide);
+	m_bar->ui.edit->setDefaultAction(a_edit_slide);
 	// move
 	connect(m_slide_box, &SlideScrollBox::sMove, this, &NarrativeControl::moveSlides);
+	// duration
+	connect(m_slide_box, &SlideScrollBox::sSetDuration, a_slide_duration, &QAction::trigger);
+	// transition
+	connect(m_slide_box, &SlideScrollBox::sSetTransitionDuration, a_slide_transition, &QAction::trigger);
 	// goto
 	//connect(m_slide_box, &SlideScrollBox::sGoto, this, [this](int index) {
 	//	openSlide(index);
@@ -346,10 +383,12 @@ void NarrativeControl::enableEditing(bool enable)
 void NarrativeControl::load(NarrativeGroup *narratives)
 {
 	m_narrative_box->clear();
-	m_slide_box->clear(); 
+	openNarrative(-1);
+	openSlide(-1);
+	m_fade_canvas->setSlide(nullptr);
+
 	m_narrative_group = narratives;
 	showNarrativeBox();
-
 	m_narrative_box->setGroup(narratives);
 }
 
@@ -399,14 +438,14 @@ void NarrativeControl::openNarrative(int index)
 //	emit sEditEvent();
 //}
 
-bool NarrativeControl::openSlide(int index, bool go, bool fade)
+bool NarrativeControl::openSlide(int index, bool go)
 {
 	NarrativeSlide *slide = getSlide(m_current_narrative, index);
 
 	// failed to set slide
 	if (!slide) {
 		m_current_slide = -1;
-		showCanvas(false, fade);
+		showCanvas(false);
 		m_canvas->setSlide(nullptr);
 		enableEditing(false);
 		return false;
@@ -414,12 +453,14 @@ bool NarrativeControl::openSlide(int index, bool go, bool fade)
 
 	if (m_current_slide == index) {
 		qDebug() << "slide already open";
-		return true;
+	}
+	else {
+		// setting slide
+		m_current_slide = index;
+		m_canvas->setSlide(slide);
 	}
 
-	m_current_slide = index;
-	m_canvas->setSlide(slide);
-	showCanvas(true, fade);
+	showCanvas(true, false);
 
 	// is this index selected? force selection
 	if (!m_slide_selection->has(index)) {
