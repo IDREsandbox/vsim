@@ -89,7 +89,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 			|| state == VSimApp::EDIT_ERS) {
 			// fade out
 			showCanvas(false, true);
-			openSlide(-1);
+			//openSlide(-1);
 		}
 
 		if (state != VSimApp::EDIT_CANVAS
@@ -642,6 +642,7 @@ void NarrativeControl::selectNarratives(const SelectionData &narratives)
 	//	return;
 	//}
 
+	openNarrative(-1); // force re-open on things like new/remove narrative
 	m_narrative_selection->set(narratives);
 	openNarrative(m_narrative_selection->last());
 	openSlide(0);
@@ -656,26 +657,18 @@ void NarrativeControl::selectSlides(int narrative, const SelectionData &slides)
 	openNarrative(narrative);
 	m_narrative_selection->set({narrative});
 	m_slide_selection->set(slides);
+	openSlide(m_slide_selection->last());
 	m_app->setState(VSimApp::EDIT_SLIDES);
 	m_bar->showSlides();
 	emit sEditEvent();
 }
-
-//void NarrativeControl::selectLabel(int narrative, int slide, int label)
-//{
-//	setNarrative(narrative);
-//	m_narrative_box->setSelection({ narrative }, narrative);
-//	setSlide(slide);
-//	m_narrative_box->setSelection({ slide }, slide);
-//
-//	m_canvas->setItemFocus();
-//}
 
 void NarrativeControl::selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem *> &labels)
 {
 	openNarrative(narrative);
 	m_narrative_selection->set({ narrative });
 	m_slide_selection->set({ slide });
+	enableEditing(true);
 	openSlide(slide);
 	m_canvas->setSelection(labels);
 	m_app->setState(VSimApp::EDIT_CANVAS);
