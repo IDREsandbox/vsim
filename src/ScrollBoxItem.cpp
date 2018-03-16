@@ -35,6 +35,21 @@ int ScrollBoxItem::widthFromHeight(int height) const
 	return height;
 }
 
+void ScrollBoxItem::mousePressEvent(QMouseEvent * event)
+{
+	emit sMousePressEvent(event, m_index);
+}
+
+void ScrollBoxItem::mouseDoubleClickEvent(QMouseEvent * event)
+{
+	emit sMouseDoubleClickEvent(event, m_index);
+}
+
+void ScrollBoxItem::mouseReleaseEvent(QMouseEvent * event)
+{
+	emit sMouseReleaseEvent(event, m_index);
+}
+
 void ScrollBoxItem::setDeselectStyle(QString style)
 {
 	m_style = style;

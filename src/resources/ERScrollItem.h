@@ -20,12 +20,6 @@ public:
 
 	static QString colorString(QColor color);
 
-protected:
-	void mouseDoubleClickEvent(QMouseEvent *event);
-
-signals:
-	void sDoubleClick();
-
 private:
 	Ui::ERScrollItem ui;
 	EResource *m_er;

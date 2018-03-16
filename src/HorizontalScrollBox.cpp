@@ -132,24 +132,6 @@ bool HorizontalScrollBox::eventFilter(QObject * o, QEvent * e)
 		refresh();
 	}
 
-	// steal mouse events from children
-	ScrollBoxItem *item = dynamic_cast<ScrollBoxItem*>(o);
-	if (item) {
-		QMouseEvent *me = static_cast<QMouseEvent*>(e);
-		if (type == QEvent::MouseButtonPress) {
-			itemMousePressEvent(me, item->getIndex());
-			return true;
-		}
-		else if (type == QEvent::MouseButtonDblClick) {
-			itemMouseDoubleClickEvent(me, item->getIndex());
-			return true;
-		}
-		else if (type == QEvent::MouseButtonRelease) {
-			itemMouseReleaseEvent(me, item->getIndex());
-			return true;
-		}
-	}
-
 	return false;
 }
 
@@ -254,7 +236,9 @@ void HorizontalScrollBox::insertItems(const std::vector<std::pair<size_t, Scroll
 		ScrollBoxItem *item = pair.second;
 		item->setParent(m_scroll_area_widget);
 		item->show();
-		item->installEventFilter(this);
+		connect(item, &ScrollBoxItem::sMousePressEvent, this, &HorizontalScrollBox::itemMousePressEvent);
+		connect(item, &ScrollBoxItem::sMouseDoubleClickEvent, this, &HorizontalScrollBox::itemMouseDoubleClickEvent);
+		connect(item, &ScrollBoxItem::sMouseReleaseEvent, this, &HorizontalScrollBox::itemMouseReleaseEvent);
 	}
 	Util::multiInsert(&m_items, insertions);
 	refresh();

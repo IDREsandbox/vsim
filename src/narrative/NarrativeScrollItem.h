@@ -14,9 +14,6 @@ public:
 
 	virtual int widthFromHeight(int height) const;
 
-signals:
-	void sDoubleClick();
-
 private:
 	Ui::NarrativeScrollItem ui;
 	Narrative2 *m_narrative;

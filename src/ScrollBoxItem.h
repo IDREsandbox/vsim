@@ -32,7 +32,13 @@ public:
 
 signals:
 	void sMousePressEvent(QMouseEvent *event, int index);
+	void sMouseDoubleClickEvent(QMouseEvent *event, int index);
 	void sMouseReleaseEvent(QMouseEvent *event, int index);
+
+protected:
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseDoubleClickEvent(QMouseEvent *event) override;
+	void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
 	int m_index = -1;

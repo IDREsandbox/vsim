@@ -108,6 +108,7 @@ VSimApp::State VSimApp::state() const
 
 void VSimApp::setState(State s)
 {
+	if (s == m_state) return;
 	State old = s;
 	m_state = s;
 	qDebug() << "state change" << StateStrings[s];

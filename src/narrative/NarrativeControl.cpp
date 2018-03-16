@@ -115,12 +115,19 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	// NARRATIVE CONTROL
 	a_new_narrative = new QAction("New Narrative", this);
 	a_new_narrative->setIconText("+");
+	connect(a_new_narrative, &QAction::triggered, this, &NarrativeControl::newNarrative);
+
 	a_delete_narratives = new QAction("Delete Narrative", this);
 	a_delete_narratives->setIconText("-");
+	connect(a_delete_narratives, &QAction::triggered, this, &NarrativeControl::deleteNarratives);
+
 	a_narrative_info = new QAction("Edit Narrative Info", this);
 	a_narrative_info->setIconText("Info");
+	connect(a_narrative_info, &QAction::triggered, this, &NarrativeControl::editNarrativeInfo);
+
 	a_open_narrative = new QAction("Open Narrative", this);
 	a_open_narrative->setIconText("Open");
+	connect(a_open_narrative, &QAction::triggered, this, &NarrativeControl::showSlideBox);
 
 	// menus
 	QMenu *nar_menu = new QMenu("Narrative menu", m_narrative_box);
@@ -136,16 +143,12 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_narrative_box->setItemMenu(nar_item_menu);
 
 	// new
-	connect(a_new_narrative, &QAction::triggered, this, &NarrativeControl::newNarrative);
 	m_bar->ui.add->setDefaultAction(a_new_narrative);
 	// delete
-	connect(a_delete_narratives, &QAction::triggered, this, &NarrativeControl::deleteNarratives);
 	m_bar->ui.remove->setDefaultAction(a_delete_narratives);
 	// info
-	connect(a_narrative_info, &QAction::triggered, this, &NarrativeControl::editNarrativeInfo);
 	m_bar->ui.info->setDefaultAction(a_narrative_info);
 	// open
-	connect(a_open_narrative, &QAction::triggered, this, &NarrativeControl::showSlideBox);
 	m_bar->ui.open->setDefaultAction(a_open_narrative);
 	connect(m_narrative_box, &NarrativeScrollBox::sOpen, a_open_narrative, &QAction::trigger);
 	// move
@@ -578,6 +581,7 @@ void NarrativeControl::showNarrativeBox()
 
 void NarrativeControl::showSlideBox()
 {
+	if (m_current_narrative < 0) return;
 	m_bar->showSlides();
 	Narrative2 *nar = getCurrentNarrative();
 	if (nar) m_bar->setSlidesHeader(nar->getTitle());

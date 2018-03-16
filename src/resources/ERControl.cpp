@@ -52,26 +52,58 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	m_filter_area->setCategoryModel(m_category_checkbox_model);
 	m_filter_proxy->setCategories(m_category_checkbox_model);
 
-	// new
-	connect(m_local_box, &ERScrollBox::sNew, this, &ERControl::newER);
-	connect(m_global_box, &ERScrollBox::sNew, this, &ERControl::newER);
-	connect(m_window->erBar()->ui.newERButton, &QAbstractButton::clicked, this, &ERControl::newER);
-	// delete
-	connect(m_local_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
-	connect(m_global_box, &ERScrollBox::sDelete, this, &ERControl::deleteER);
-	connect(m_window->erBar()->ui.deleteERButton, &QAbstractButton::clicked, this, &ERControl::deleteER);
-	// edit
-	connect(m_local_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
-	connect(m_global_box, &ERScrollBox::sEdit, this, &ERControl::editERInfo);
-	connect(m_window->erBar()->ui.editERButton, &QAbstractButton::clicked, this, &ERControl::editERInfo);
-	// open
-	connect(m_local_box, &ERScrollBox::sOpen, this, &ERControl::openResource);
-	connect(m_global_box, &ERScrollBox::sOpen, this, &ERControl::openResource);
+	QAction *a_new_er = new QAction("New Resource", this);
+	a_new_er->setIconText("+");
+	connect(a_new_er, &QAction::triggered, this, &ERControl::newER);
 
-	connect(m_local_box, &ERScrollBox::sSetPosition, this, &ERControl::setPosition);
-	connect(m_global_box, &ERScrollBox::sSetPosition, this, &ERControl::setPosition);
-	connect(m_local_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
-	connect(m_global_box, &ERScrollBox::sGotoPosition, this, &ERControl::gotoPosition);
+	QAction *a_delete_er = new QAction("Delete Resources", this);
+	a_delete_er->setIconText("-");
+	connect(a_delete_er, &QAction::triggered, this, &ERControl::deleteER);
+
+	QAction *a_edit_er = new QAction("Edit Resource", this);
+	a_edit_er->setIconText("Edit");
+	connect(a_edit_er, &QAction::triggered, this, &ERControl::editERInfo);
+
+	QAction *a_open_er = new QAction("Open Resource", this);
+	a_open_er->setIconText("Open");
+	connect(a_open_er, &QAction::triggered, this, &ERControl::openResource);
+
+	QAction *a_position_er = new QAction("Set Resource Position", this);
+	a_position_er->setIconText("Set Position");
+	connect(a_position_er, &QAction::triggered, this, &ERControl::setPosition);
+
+	QAction *a_goto_er = new QAction("Goto Resource", this);
+	connect(a_goto_er, &QAction::triggered, this, &ERControl::gotoPosition);
+
+	// box menus
+	QList<QAction*> actions = {
+		a_new_er,
+		a_delete_er,
+		a_edit_er,
+		a_open_er,
+		a_position_er,
+		a_goto_er
+	};
+	QMenu *local_menu = new QMenu(m_local_box);
+	local_menu->addActions(actions);
+	m_local_box->setMenu(local_menu);
+	m_local_box->setItemMenu(local_menu);
+	QMenu *global_menu = new QMenu(m_global_box);
+	global_menu->addActions(actions);
+	m_global_box->setMenu(global_menu);
+	m_global_box->setItemMenu(global_menu);
+
+	// ui connect
+	ERBar *bar = m_window->erBar();
+	// new
+	bar->ui.newERButton->setDefaultAction(a_new_er);
+	// delete
+	bar->ui.deleteERButton->setDefaultAction(a_delete_er);
+	// edit
+	bar->ui.editERButton->setDefaultAction(a_edit_er);
+	// open
+	connect(m_local_box, &ERScrollBox::sOpen, a_open_er, &QAction::trigger);
+	connect(m_global_box, &ERScrollBox::sOpen, a_open_er, &QAction::trigger);
 
 	connect(m_local_box, &HorizontalScrollBox::sTouch, this, &ERControl::onSelectionChange);
 	connect(m_global_box, &HorizontalScrollBox::sTouch, this, &ERControl::onSelectionChange);

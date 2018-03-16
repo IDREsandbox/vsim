@@ -50,6 +50,14 @@ public:
 
 	void debug();
 
+public: // actions
+	QAction *a_new_er;
+	QAction *a_delete_er;
+	QAction *a_edit_er;
+	QAction *a_open_er;
+	QAction *a_position_er;
+	QAction *a_goto_er;
+
 private:
 	std::set<int> getCombinedSelection();
 	std::vector<EResource*> getCombinedSelectionP();

@@ -85,9 +85,3 @@ QString ERScrollItem::colorString(QColor color)
 	QString s = "rgb(%1, %2, %3)";
 	return s.arg(color.red()).arg(color.green()).arg(color.blue());
 }
-
-void ERScrollItem::mouseDoubleClickEvent(QMouseEvent * event)
-{
-	emit sDoubleClick();
-}
-

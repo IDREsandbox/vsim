@@ -13,11 +13,11 @@ public:
 
 	ScrollBoxItem *createItem(osg::Node *node) override;
 
+protected:
+	void itemMouseDoubleClickEvent(QMouseEvent * event, int index) override;
+
 signals:
-	void sEdit(); // only support single edit
 	void sOpen();
-	void sSetPosition();
-	void sGotoPosition();
 };
 
 #endif // ERSCROLLBOX_H

@@ -16,7 +16,6 @@ ScrollBoxItem * NarrativeScrollBox::createItem(osg::Node * node)
 	}
 	NarrativeScrollItem *item = new NarrativeScrollItem(this);
 	item->setNarrative(narrative);
-	connect(item, &NarrativeScrollItem::sDoubleClick, this, &NarrativeScrollBox::sOpen);
 	return item;
 }
 
