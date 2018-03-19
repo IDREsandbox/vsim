@@ -20,6 +20,23 @@ private:
 			QCOMPARE(group->child(i), target[i]);
 		}
 	}
+	
+	std::vector<osg::Node*> makeNodes(size_t count) {
+		std::vector<osg::Node*> n;
+		for (size_t i = 0; i < count; i++) {
+			osg::Node* node = new osg::Node;
+			node->setName(std::to_string(i));
+			n.push_back(node);
+		}
+		return n;
+	}
+	std::vector<osg::ref_ptr<osg::Node>> makeRefs(const std::vector<osg::Node*> &nodes) {
+		std::vector<osg::ref_ptr<osg::Node>> n;
+		for(auto node : nodes) {
+			n.push_back(osg::ref_ptr<osg::Node>(node));
+		}
+		return n;
+	}
 private slots:
 	//void dumbCommand() {
 	//	reset();
@@ -139,6 +156,20 @@ private slots:
 	//	group->addChild(node0);
 	//	QCOMPARE(spy.size(), 1);
 	//}
+	void insert() {
+		osg::ref_ptr<Group> g = new Group;
+		auto n = makeNodes(6);
+		auto ref = makeRefs(n);
+
+		g->insert(0, {n[0], n[1]});
+		GROUPCOMPARE(g, { n[0], n[1] });
+
+		g->insert(0, {n[2], n[3]});
+		GROUPCOMPARE(g, { n[2], n[3], n[0], n[1] });
+	}
+	void remove() {
+
+	}
 	void insertChildrenSet() {
 		osg::ref_ptr<Group> g = new Group;
 		std::vector<osg::Node*> n;

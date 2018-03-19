@@ -178,7 +178,9 @@ target_link_libraries(Util_test ${OPENSCENEGRAPH_LIBRARIES})
 set(Group_src
   tests/Group_test.cpp
   src/Group.cpp
-  src/Group.h)
+  src/Group.h
+  src/Util.cpp
+  src/Util.h)
 add_executable(Group_test ${Group_src})
 add_test(NAME Group_test COMMAND Group_test)
 target_link_libraries(Group_test Qt5::Widgets Qt5::Test)

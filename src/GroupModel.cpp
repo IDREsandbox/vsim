@@ -127,30 +127,21 @@ void GroupModel::setGroup(Group * group)
 	m_group = group;
 
 	if (group != nullptr) {
-		connect(group, &Group::sInsertedSet,
-			[this](const std::vector<std::pair<size_t, osg::Node*>> &insertions) {
-			// convert to vector
-			std::vector<size_t> indices;
-			for (auto &pair : insertions) {
-				indices.push_back(pair.first);
-			}
-			// convert to clumps
-			std::vector<std::pair<size_t, size_t>> clumps = Util::clumpify(indices);
-			// emit signals
-			for (auto &clump : clumps) {
-				beginInsertRows(QModelIndex(), clump.first, clump.second);
-				endInsertRows();
-			}
+		connect(group, &Group::sAboutToInsert, this,
+			[this](size_t index, const std::vector<osg::Node*> &nodes) {
+			beginInsertRows(QModelIndex(), index, index + nodes.size() - 1);
 		});
-		connect(group, &Group::sRemovedSet,
-			[this](const std::vector<size_t> &indices) {
-			// convert to clumps
-			std::vector<std::pair<size_t, size_t>> clumps = Util::clumpify(indices);
-			// emit signals
-			for (auto &clump : clumps) {
-				beginRemoveRows(QModelIndex(), clump.first, clump.second);
-				endRemoveRows();
-			}
+		connect(group, &Group::sInserted, this,
+			[this](size_t index, const std::vector<osg::Node*> &nodes) {
+			endInsertRows();
+		});
+		connect(group, &Group::sAboutToRemove, this,
+			[this](size_t index, size_t count) {
+			beginRemoveRows(QModelIndex(), index, index + count - 1);
+		});
+		connect(group, &Group::sRemoved, this,
+			[this](size_t index, size_t count) {
+			endRemoveRows();
 		});
 		connect(group, &Group::sBeginReset, this,
 			[this]() { beginResetModel(); });

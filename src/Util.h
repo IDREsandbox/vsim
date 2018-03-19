@@ -142,6 +142,52 @@ namespace Util
 	// ex. {1,2,3,5,6,7,8,9} => {{1,3}, {5,9}}
 	std::vector<std::pair<size_t, size_t>> clumpify(const std::vector<size_t> &indices);
 
+	// clumps a vector of index/T pairs into {index, vec<T>} pairs
+	// expects a sorted input, output is sorted
+	// ex. {1a, 2b, 4x, 5w} => {{1, ab}, {4, xw}}
+	template <typename T>
+	std::vector<std::pair<size_t, std::vector<T>>>
+	clumpify2(const std::vector<std::pair<size_t, T>> &list)
+	{
+		if (list.size() == 0) return {};
+		std::vector<std::pair<size_t, std::vector<T>>> output;
+
+		size_t start = 0;
+		size_t prev = 0;
+		std::vector<T> clump;
+		for (const auto &it : list) {
+			// start case
+			if (clump.size() == 0) {
+				start = it.first;
+				prev = start;
+				clump.push_back(it.second);
+			}
+			// continue case
+			else if (it.first == prev + 1) {
+				clump.push_back(it.second);
+				prev++;
+			}
+			// end clump
+			else if (it.first > prev + 1) {
+				output.push_back({ start, clump });
+				clump.clear();
+
+				start = it.first;
+				prev = start;
+				clump.push_back(it.second);
+			}
+			else {
+				// invalid input
+				return {};
+			}
+		}
+		// always make range at end
+		if (clump.size() > 0) {
+			output.push_back({ start, clump });
+		}
+		return output;
+	}
+
 	// timing functions
 	// call tic to start the clock, toc to finish
 	// toc returns msec

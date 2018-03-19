@@ -119,6 +119,26 @@ private slots:
 		result = Util::clumpify(indices);
 		QCOMPARE(result, expected);
 	}
+	void clumpify2() {
+		std::vector<std::pair<size_t, char>> list;
+		std::vector<std::pair<size_t, std::vector<char>>> expected;
+		std::vector<std::pair<size_t, std::vector<char>>> result;
+
+		list = {};
+		expected = {};
+		result = Util::clumpify2(list);
+		QCOMPARE(result, expected);
+
+		list = {{9, 'a'}};
+		expected = {{9, {'a'}}};
+		result = Util::clumpify2(list);
+		QCOMPARE(result, expected);
+
+		list = {{0, 'a'}, {2, 'b'}, {3, 'c'}, {4, 'e'}, {6, 'o'}};
+		expected = {{0, {'a'}}, {2, {'b', 'c', 'e'}}, {6, {'o'}}};
+		result = Util::clumpify2(list);
+		QCOMPARE(result, expected);
+	}
 };
 
 QTEST_MAIN(Util_test)

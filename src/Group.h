@@ -42,6 +42,15 @@ signals:
 	void sBeginReset();
 	void sReset();
 
+public: // continuous *
+	virtual bool insert(size_t index, const std::vector<osg::Node*> &nodes);
+	virtual bool remove(size_t index, size_t count);
+signals:
+	void sAboutToInsert(size_t index, const std::vector<osg::Node*> &nodes);
+	void sInserted(size_t index, const std::vector<osg::Node*> &nodes);
+	void sAboutToRemove(size_t index, size_t count);
+	void sRemoved(size_t index, size_t count);
+
 public: // index based, multiple
 	virtual void insertChildrenSet(const std::vector<std::pair<size_t, osg::Node*>> &children);
 	virtual void removeChildrenSet(const std::vector<size_t> &children);

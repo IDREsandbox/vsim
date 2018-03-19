@@ -16,28 +16,13 @@ bool Group::addChild(osg::Node * child)
 
 bool Group::insertChild(unsigned int index, Node *child)
 {
-	insertChildrenSet({ { index, child } });
+	insert(index, { child });
 	return true;
 }
 
 bool Group::removeChildren(unsigned int index, unsigned int numChildrenToRemove)
 {
-	//int top = std::min(index + numChildrenToRemove, getNumChildren());
-	//bool result = osg::Group::removeChildren(index, numChildrenToRemove);
-	//for (int i = top - 1; i >= (int)index; i--) {
-	//	emit sDelete(i);
-	//}
-	//std::set<int> removed_set;
-	//for (size_t i = 0; i < numChildrenToRemove; i++) {
-	//	removed_set.insert(index + i);
-	//}
-	//emit sRemovedSet(removed_set);
-
-	std::vector<size_t> removals(numChildrenToRemove);
-	std::iota(removals.begin(), removals.end(), index);
-	removeChildrenSet(removals);
-
-	return true;
+	return remove(index, numChildrenToRemove);
 }
 
 bool Group::setChild(unsigned int index, Node *child)
@@ -67,57 +52,100 @@ void Group::clear()
 	emit sReset();
 }
 
+bool Group::insert(size_t index, const std::vector<osg::Node*>& nodes)
+{
+	if (index > _children.size()) return false;
+
+	// other signal structures
+	std::set<osg::Node*> pointers(nodes.begin(), nodes.end());
+	std::vector<std::pair<size_t, osg::Node*>> list(nodes.size());
+	for (size_t i = 0; i < nodes.size(); i++) {
+		list[i] = { i + index, nodes[i] };
+	}
+	emit sAboutToAddP(pointers);
+	emit sAboutToInsertSet(list);
+	emit sAboutToInsert(index, nodes);
+
+	auto it = _children.begin() + index;
+	_children.insert(it, nodes.begin(), nodes.end());
+
+	emit sInserted(index, nodes);
+	emit sInsertedSet(list);
+	emit sAddedP(pointers);
+	return true;
+}
+
+bool Group::remove(size_t index, size_t count)
+{
+	if (index + count > _children.size()) return false;
+
+	// other signal structures
+	std::set<osg::Node*> pointers;
+	std::vector<size_t> list;
+	for (size_t i = 0; i < count; i++) {
+		pointers.insert(child(index + i));
+		list.push_back(index + i);
+	}
+	emit sAboutToRemoveP(pointers);
+	emit sAboutToRemoveSet(list);
+	emit sAboutToRemove(index, count);
+
+	auto begin = _children.begin() + index;
+	auto end = _children.begin() + (index + count);
+	_children.erase(begin, end);
+
+	emit sRemoved(index, count);
+	emit sRemovedSet(list);
+	emit sRemovedP(pointers);
+	return true;
+}
+
 void Group::insertChildrenSet(const std::vector<std::pair<size_t, osg::Node*>> &insertions)
 {
 	if (insertions.size() == 0) return;
 
-	std::set<osg::Node*> set;
-	for (auto &pair : insertions) {
-		set.insert(pair.second);
+	// convert to (index, vec<Node*>) list
+	std::vector<std::pair<size_t, std::vector<osg::Node*>>> clumps;
+	clumps = Util::clumpify2(insertions);
+
+	// insert in forward order
+	for (const auto &i_clump : clumps) {
+		insert(i_clump.first, i_clump.second);
 	}
-
-	emit sAboutToAddP(set);
-	emit sAboutToInsertSet(insertions);
-
-	std::vector<osg::Node*> new_list(_children.begin(), _children.end());
-	Util::multiInsert(&new_list, insertions);
-	// convert to refs, a direct _children.assign() causes refs crash and burn
-	std::vector<osg::ref_ptr<Node>> refs(new_list.begin(), new_list.end());
-	_children = refs;
-
-	emit sAddedP(set);
-	emit sInsertedSet(insertions);
 }
 
 void Group::removeChildrenSet(const std::vector<size_t> &indices)
 {
 	if (indices.size() == 0) return;
 
-	// pointers
-	std::set<osg::Node*> set;
-	for (size_t i : indices) {
-		set.insert(child(i));
+	// (begin, end) pairs
+	std::vector<std::pair<size_t, size_t>> begin_end_pairs;
+	begin_end_pairs = Util::clumpify(indices);
+
+	// (index, count) pairs
+	std::vector<std::pair<size_t, size_t>> index_count_pairs;
+
+	for (const auto &begin_end : begin_end_pairs) {
+		size_t begin = begin_end.first;
+		size_t end = begin_end.second;
+		index_count_pairs.push_back({begin, end - begin + 1});
 	}
 
-	emit sAboutToRemoveSet(indices);
-	emit sAboutToRemoveP(set);
-
-	std::vector<osg::Node*> new_list(_children.begin(), _children.end());
-	Util::multiRemove(&new_list, indices);
-	std::vector<osg::ref_ptr<Node>> refs(new_list.begin(), new_list.end());
-	_children = refs;
-
-	emit sRemovedSet(indices);
-	emit sRemovedP(set);
+	// remove clumps in reverse order
+	for (auto i_c = index_count_pairs.rbegin(); i_c != index_count_pairs.rend(); ++i_c) {
+		remove(i_c->first, i_c->second);
+	}
 }
 
 void Group::addChildrenP(const std::set<osg::Node*> &children)
 {
 	// convert pointers to indices
 	std::vector<std::pair<size_t, osg::Node*>> nodes;
-	size_t i = getNumChildren();
+	size_t n = getNumChildren();
+	size_t i = 0;
 	for (auto node : children) {
-		nodes.push_back(std::make_pair(i, node));
+		nodes.push_back(std::make_pair(n + i, node));
+		i++;
 	}
 	insertChildrenSet(nodes);
 }
