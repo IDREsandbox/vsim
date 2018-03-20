@@ -6,7 +6,9 @@
 #include <osg/Group>
 #include "Command.h"
 #include "Group.h"
-#include "LabelStyle.h"
+#include "LabelType.h"
+
+class LabelStyle;
 
 class LabelStyleGroup : public Group {
 	Q_OBJECT;
@@ -16,13 +18,13 @@ public:
 	META_Node(, LabelStyleGroup);
 
 	void init();
-	LabelStyle *getStyle(LabelStyle::Style style) const;
+	LabelStyle *getStyle(LabelType style) const;
 
 private:
-	osg::ref_ptr<LabelStyle> m_h1;
-	osg::ref_ptr<LabelStyle> m_h2;
-	osg::ref_ptr<LabelStyle> m_bod;
-	osg::ref_ptr<LabelStyle> m_lab;
+	LabelStyle *m_h1;
+	LabelStyle *m_h2;
+	LabelStyle *m_bod;
+	LabelStyle *m_lab;
 	//osg::ref_ptr<LabelStyle> m_img;
 };
 

@@ -28,6 +28,7 @@ public:
 	RectItem *slideToCanvas(NarrativeSlideItem *item) const;
 
 signals:
+	void sPoked();
 	void sItemsTransformed(const std::map<NarrativeSlideItem*, QRectF> &new_rects);
 	void sLabelUndoCommandAdded(NarrativeSlideLabel*);
 

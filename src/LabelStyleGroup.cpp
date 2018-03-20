@@ -1,15 +1,15 @@
 #include "LabelStyleGroup.h"
 #include <QDebug>
 
+#include "LabelStyle.h"
+
 LabelStyleGroup::LabelStyleGroup()
 {
 }
 
 void LabelStyleGroup::init()
 {
-	qDebug() << "initializing style group";
 	if (getNumChildren() >= 4) {
-		qDebug() << "- label styles already exist";
 		// TODO: error checking here?
 		m_h1 = dynamic_cast<LabelStyle*>(child(0));
 		m_h2 = dynamic_cast<LabelStyle*>(child(1));
@@ -17,16 +17,23 @@ void LabelStyleGroup::init()
 		m_lab = dynamic_cast<LabelStyle*>(child(3));
 	}
 	else {
-		qDebug() << "- creating new styles";
 		removeChildren(0, getNumChildren());
-		m_h1 = new LabelStyle("\"Arial\"", 36, 255, 255, 255, 255, false, 0,
-			0, 0, 178, 650, 80, QFont::Bold, false, Qt::AlignHCenter, 13);
-		m_h2 = new LabelStyle("\"Arial\"", 20, 244, 147, 31, 255, false, 0,
-			0, 0, 229, 250, 35, QFont::Bold, false, Qt::AlignHCenter, 2);
-		m_bod = new LabelStyle("\"Arial\"", 12, 255, 255, 255, 255, false, 0,
-			0, 0, 178, 250, 255, QFont::Weight::Normal, false, Qt::AlignLeft, 10);
-		m_lab = new LabelStyle("\"Arial\"", 12, 0, 0, 0, 255, false, 255,
-			255, 255, 255, 175, 25, QFont::Bold, false, Qt::AlignHCenter, 4);
+		m_h1 = new LabelStyle();
+
+		// w/h defaults
+		//650, 80
+		//250, 35
+		//250, 255
+		//175, 25
+		m_h1 = new LabelStyle(LabelType::HEADER1, "Arial", 36, QColor(255, 255, 255, 255), QColor(0, 0, 0, 178),
+			QFont::Bold, false, Qt::AlignCenter, 13);
+		m_h2 = new LabelStyle(LabelType::HEADER2, "Arial", 20, QColor(244, 147, 31, 255), QColor(0, 229, 250, 35),
+			QFont::Bold, false, Qt::AlignCenter, 2);
+		m_bod = new LabelStyle(LabelType::BODY, "Arial", 12, QColor(255, 255, 255, 255), QColor(0, 0, 0, 178),
+			QFont::Normal, false, Qt::AlignLeft | Qt::AlignTop, 10);
+		m_lab = new LabelStyle(LabelType::LABEL, "Arial", 12, QColor(0, 0, 0, 255), QColor(255, 255, 255, 255),
+			QFont::Bold, false, Qt::AlignCenter, 4);
+
 		addChild(m_h1);
 		addChild(m_h2);
 		addChild(m_bod);
@@ -34,20 +41,20 @@ void LabelStyleGroup::init()
 	}
 }
 
-LabelStyle * LabelStyleGroup::getStyle(LabelStyle::Style style) const
+LabelStyle * LabelStyleGroup::getStyle(LabelType style) const
 {
 	// set style
 	switch (style) {
-	case LabelStyle::HEADER1:
+	case LabelType::HEADER1:
 		return m_h1;
 		break;
-	case LabelStyle::HEADER2:
+	case LabelType::HEADER2:
 		return m_h2;
 		break;
-	case LabelStyle::BODY:
+	case LabelType::BODY:
 		return m_bod;
 		break;
-	case LabelStyle::LABEL:
+	case LabelType::LABEL:
 		return m_lab;
 		break;
 	}

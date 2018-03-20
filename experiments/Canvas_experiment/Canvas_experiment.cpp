@@ -31,10 +31,12 @@ int main(int argc, char *argv[])
 
 	text = new TextRect();
 	text->setBaseHeight(600);
+	text->setVAlign(Qt::AlignCenter);
 	QObject::connect(text->m_text->document(), &QTextDocument::undoCommandAdded,
 		[text]() {
 		qDebug() << "undo command added";
 	});
+	text->m_text->setPlainText("helloooo\nWORLd");
 
 	rect = text;
 	rect->setRect(QRectF(0, 0, .2, .2));

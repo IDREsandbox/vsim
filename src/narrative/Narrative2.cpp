@@ -70,7 +70,6 @@ const LabelStyleGroup * Narrative2::getLabelStyles() const
 }
 void Narrative2::setLabelStyles(LabelStyleGroup *styles)
 {
-	qDebug() << "set label styles" << styles;
 	if (styles == nullptr) styles = new LabelStyleGroup();
 	m_styles = styles;
 	m_styles->init();

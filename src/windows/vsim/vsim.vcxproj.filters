@@ -286,8 +286,6 @@
     <ClCompile Include="..\..\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\OSGViewerWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -300,65 +298,39 @@
     <ClCompile Include="..\..\Util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="..\..\HorizontalScrollBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\narrative\NarrativeInfoDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\narrative\NarrativeScrollItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\ScrollBoxItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\MainWindowTopBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\narrative\SlideScrollBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\narrative\SlideScrollItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\narrative\NarrativeSlideDurationDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\narrative\NarrativeScrollBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="..\..\narrative\NarrativeControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\narrative\NarrativePlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\SerializerModelInformation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -419,10 +391,6 @@
     <ClCompile Include="..\..\editButtons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="..\..\SimpleCameraManipulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -444,19 +412,9 @@
     <ClCompile Include="..\..\mrichtextedit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\mtextedit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
-    
-    
-    
-    
     <ClCompile Include="..\..\VSimRoot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -469,12 +427,6 @@
     <ClCompile Include="..\..\narrative\SerializerNarrativeGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
-    
-    
     <ClCompile Include="..\..\SerializerGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -490,65 +442,39 @@
     <ClCompile Include="..\..\TimeSlider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\TickSlider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\ModelTableModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\ModelOutliner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\ECategory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="..\..\resources\ERDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\ERDisplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\EResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\EResourceGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\ERScrollBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\ERScrollItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\NewCatDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\SerializerEResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -564,8 +490,6 @@
     <ClCompile Include="..\..\resources\SerializerECategoryGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\SerializerLabelStyle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -575,15 +499,9 @@
     <ClCompile Include="..\..\Selection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="..\..\resources\ERControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\deprecated\narrative\SerializerNarrativeTransition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -605,48 +523,30 @@
     <ClCompile Include="..\..\GroupProxy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\ERFilterSortProxy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\GroupModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\ECategoryModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\CheckableListProxy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\EditDeleteDelegate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\ECategoryControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\resources\ERFilterArea.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\narrative\CanvasContainer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\narrative\NarrativeSlideLabel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -659,20 +559,12 @@
     <ClCompile Include="..\..\narrative\SerializerNarrativeSlideItem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\narrative\NarrativeCanvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="..\..\TextToolbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\LabelStyleGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -688,48 +580,26 @@
     <ClCompile Include="..\..\NumberSlider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
-    
-    
-    
-    
     <ClCompile Include="..\..\GroupScrollBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\SelectionStack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
     <ClCompile Include="..\..\ERBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\FocusFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
-    
-    
     <ClCompile Include="..\..\NavigationControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    
-    
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
-    
-    
-    
-    
-    
     <ClInclude Include="..\..\ModelInformation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -751,7 +621,6 @@
     <ClInclude Include="..\..\deprecated\narrative\NarrativeNode.h">
       <Filter>Deprecated</Filter>
     </ClInclude>
-    
     <ClInclude Include="..\..\SimpleCameraManipulator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -770,19 +639,12 @@
     <ClInclude Include="..\..\FlightManipulator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
     <ClInclude Include="..\..\Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
-    
-    
-    
-    
     <ClInclude Include="..\..\resources\ResourceSplitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    
     <ClInclude Include="..\..\deprecated\resources\EResourcesList.h">
       <Filter>Deprecated</Filter>
     </ClInclude>
@@ -792,13 +654,10 @@
     <ClInclude Include="..\..\deprecated\resources\EResourcesCategory.h">
       <Filter>Deprecated</Filter>
     </ClInclude>
-    
-    
-    
-    
-    
-    
     <ClInclude Include="..\..\Navigation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\LabelType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

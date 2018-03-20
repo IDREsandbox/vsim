@@ -5,6 +5,7 @@
 #include <string>
 
 #include "narrative/NarrativeSlideItem.h"
+#include "LabelType.h"
 
 class LabelStyle;
 class NarrativeSlideLabel : public NarrativeSlideItem
@@ -17,12 +18,21 @@ public:
 	virtual ~NarrativeSlideLabel() {}
 	META_Node(, NarrativeSlideLabel);
 
+	// serialization
 	const std::string &getHtml() const;
 	void setHtml(const std::string &html);
 
-	void setStyle(int style);
-	int getStyle() const;
+	void setType(LabelType);
+	LabelType getType() const;
+	void setTypeInt(int t);
+	int getTypeInt() const;
+	void setStyleTypeInt(int type); // int version for serializer
+	int getStyleTypeInt() const;
 
+	void setVAlign(int al);
+	int getVAlign() const;
+
+	// 
 	void applyStyle(LabelStyle *style);
 
 	QTextDocument *getDocument() const;
@@ -30,6 +40,7 @@ public:
 signals:
 	//void sEdited();
 	void sStyleChanged();
+	void sVAlignChanged(Qt::Alignment);
 
 public: // COMMANDS
 	class DocumentEditWrapperCommand : public QUndoCommand {
@@ -43,11 +54,13 @@ public: // COMMANDS
 
 private:
 	QTextDocument *m_document;
-	int m_style;
+	LabelType m_style_type;
 
 	// This is a temporaries for the serializer, the actual data is stored in the document
 	// the issue is that const std::string& are references to strings that dont exists
 	mutable std::string m_text;
+
+	Qt::Alignment m_v_align;
 };
 
 #endif

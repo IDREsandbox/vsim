@@ -6,19 +6,28 @@
 #include "ui_StyleSettingsDialog.h"
 
 class LabelStyleGroup;
+class StyleSettingsWidget;
 
 class StyleSettingsDialog : public QDialog {
 	Q_OBJECT
 public:
 	StyleSettingsDialog(QWidget *parent = nullptr);
-	//StyleSettingsDialog(LabelStyleGroup *styles, QWidget *parent = nullptr);
 
-	void setStyles(const LabelStyleGroup *styles);
+	void setStyles(LabelStyleGroup *styles); // group -> widget, applies styles to StyleSettingWidgets
+
+	// widget -> group, takes styles from this dialog and applies them to group
+	// uses the last set m_styles if null
+	void takeStyles(LabelStyleGroup *group = nullptr);
 
 private:
-	QColor color;
-	QColor bgColor;
 	Ui::StyleSettingsDialog ui;
+
+	StyleSettingsWidget *m_header1_widget;
+	StyleSettingsWidget *m_header2_widget;
+	StyleSettingsWidget *m_body_widget;
+	StyleSettingsWidget *m_label_widget;
+	
+	LabelStyleGroup *m_styles;
 };
 
 #endif

@@ -9,6 +9,7 @@
 #include <QPropertyAnimation>
 
 #include "SelectionStack.h"
+#include "LabelStyle.h" // for enums
 
 class VSimApp;
 class MainWindow;
@@ -115,7 +116,7 @@ public: // Actions
 
 	// Labels
 	//editDlg buttons
-	void newLabel(int style); // LabelStyle::Style
+	void newLabel(LabelType style);
 	void deleteLabels();
 	void transformLabels(const std::map<NarrativeSlideItem *, QRectF> &rects);
 	void labelEdited(NarrativeSlideLabel *label);

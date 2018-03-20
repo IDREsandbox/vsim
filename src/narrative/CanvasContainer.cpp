@@ -31,10 +31,6 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 
 	m_view->installEventFilter(this);
 
-	FocusFilter *ff = new FocusFilter(this);
-	connect(ff, &FocusFilter::sFocusIn, this, &CanvasContainer::sPoked);
-	m_view->installEventFilter(ff);
-
 	m_manipulator = new TransformManipulator(m_scene, m_view, m_view);
 	m_manipulator->hide();
 
@@ -600,6 +596,8 @@ TextRect::TextRect(QGraphicsItem * parent)
 
 	setBaseHeight(600);
 	setFocusProxy(m_text);
+
+	setDocument(m_text->document());
 }
 
 void TextRect::setBaseHeight(double height)
@@ -607,6 +605,12 @@ void TextRect::setBaseHeight(double height)
 	m_base_height = height;
 	m_text->setScale(1 / height);
 	onResize(rect().size());
+}
+
+QSizeF TextRect::scaledSize() const
+{
+	QSizeF s = size();
+	return QSizeF(s.width() * m_base_height, s.height() * m_base_height);
 }
 
 QRectF TextRect::boundingRect() const
@@ -620,11 +624,13 @@ QRectF TextRect::boundingRect() const
 	// text bound
 	// our scale is [-1,1], text scale is [-300,300]
 	// so we have to scale it down
-	QRectF cr = m_text->boundingRect();
-	double w = cr.width() / m_base_height;
-	double h = cr.height() / m_base_height;
+	//QRectF cr = m_text->boundingRect();
+	//double w = cr.width() / m_base_height;
+	//double h = cr.height() / m_base_height;
 
-	return r.united(QRectF(0, 0, w, h));
+	QRectF tr = mapRectFromItem(m_text, m_text->boundingRect());
+
+	return r.united(tr);
 }
 
 void TextRect::setEditable(bool enable)
@@ -637,6 +643,40 @@ void TextRect::setEditable(bool enable)
 	else {
 		m_text->setTextInteractionFlags(Qt::LinksAccessibleByMouse);
 	}
+}
+
+void TextRect::realign()
+{
+	// text's internal bounding rect
+	QRectF r = m_text->QGraphicsTextItem::boundingRect();
+	QSizeF box = scaledSize();
+	double new_top = 0; // in text coordinates
+	if (this->m_valign & Qt::AlignBottom) {
+		new_top = box.height() - r.height();
+	}
+	else if (this->m_valign & Qt::AlignCenter) {
+		double diff = box.height() - r.height();
+		new_top = diff / 2;
+	}
+	else {
+		new_top = 0;
+	}
+	QPointF new_pos(m_text->pos().x(), new_top / m_base_height);
+	m_text->setPos(new_pos); // in [-1,1] coordinates
+}
+
+void TextRect::setVAlign(Qt::Alignment al)
+{
+	m_valign = al;
+	realign();
+}
+
+void TextRect::setDocument(QTextDocument * doc)
+{
+	m_text->setDocument(doc);
+	QObject::connect(doc, &QTextDocument::contentsChanged, m_text, [this]() {
+		this->realign();
+	});
 }
 
 void RectItem::mouseEventSelection(QGraphicsSceneMouseEvent * event)
@@ -666,6 +706,7 @@ void RectItem::mouseEventSelection(QGraphicsSceneMouseEvent * event)
 void TextRect::onResize(QSizeF size)
 {
 	m_text->setTextWidth(size.width() * m_base_height);
+	realign();
 }
 
 QVariant TextRect::itemChange(GraphicsItemChange change, const QVariant & value)
@@ -691,6 +732,7 @@ TextItem::TextItem(TextRect * parent)
 	: QGraphicsTextItem(parent),
 	m_rect(parent)
 {
+	setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
 }
 
 QRectF TextItem::boundingRect() const
@@ -703,25 +745,19 @@ QRectF TextItem::boundingRect() const
 	QRectF tr = QGraphicsTextItem::boundingRect();
 
 	// base rect
-	QRectF br = m_rect->rect();
-	QRectF brs(0, 0, br.width() / scale(), br.height() / scale());
+	//QRectF br = m_rect->rect();
+	//QRectF brs(50, 50, br.width() / scale(), br.height() / scale());
 
-	return tr.united(brs);
+	QRectF br = mapRectFromItem(m_rect, QRectF(QPointF(0, 0), m_rect->size()));
+
+	return tr.united(br);
 }
 
 QPainterPath TextItem::shape() const
 {
-	// Extends the shape to include the rectangle.
-
-	// get the text shape
-	QPainterPath p1 = QGraphicsTextItem::shape();
-
-	QPainterPath p2r;
-	QRectF r = m_rect->rect();
-	p2r.addRect(0, 0, r.width() / scale(), r.height() / scale());
-
-	// tape them together
-	return p1.united(p2r);
+	QPainterPath p;
+	p.addRect(boundingRect());
+	return p;
 }
 
 void TextItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)

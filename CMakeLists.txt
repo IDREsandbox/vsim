@@ -156,6 +156,8 @@ target_link_libraries(HorizontalScrollBox_experiment ${OPENSCENEGRAPH_LIBRARIES}
 set(Canvas_src
   src/narrative/CanvasContainer.h
   src/narrative/CanvasContainer.cpp
+  src/narrative/CanvasContainer.h
+  src/narrative/CanvasContainer.cpp
   experiments/Canvas_experiment/Canvas_experiment.cpp
 )
 add_executable(Canvas_experiment ${Canvas_src})

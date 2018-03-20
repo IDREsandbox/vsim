@@ -5,11 +5,16 @@
 
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeSlideLabel.h"
+#include "FocusFilter.h"
 
 NarrativeCanvas::NarrativeCanvas(QWidget * parent)
 	: CanvasContainer(parent),
 	m_slide(nullptr)
 {
+	FocusFilter *ff = new FocusFilter(this);
+	connect(ff, &FocusFilter::sFocusIn, this, &NarrativeCanvas::sPoked);
+	m_view->installEventFilter(ff);
+
 	// forward transform signals
 	connect(m_scene, &CanvasScene::rectsTransformed, this,
 		[this](const std::map<RectItem*, QRectF> &rect_rects) {
@@ -128,6 +133,7 @@ void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 		rect = text;
 		text->m_text->setDocument(label->getDocument());
 		text->setBaseHeight(m_base_height);
+		text->setVAlign(static_cast<Qt::Alignment>(label->getVAlign()));
 
 		connect(text->m_text->document(), &QTextDocument::undoCommandAdded, this,
 			[this, text]() {
@@ -135,11 +141,19 @@ void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 			if (!item) return;
 			emit sLabelUndoCommandAdded(item);
 		});
+
+		connect(label, &NarrativeSlideLabel::sVAlignChanged, this,
+			[this, text](Qt::Alignment al) {
+			text->setVAlign(al);
+		});
 	}
 	else {
 		rect = new RectItem();
 	}
 
+	rect->setRect(label->getRect());
+	rect->setBrush(label->getBackground());
+	rect->setEditable(isEditable());
 	connect(item, &NarrativeSlideItem::sTransformed, this,
 		[this, rect](QRectF r) {
 		rect->setRect(r);
@@ -149,10 +163,7 @@ void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 		[this, rect](QColor color) {
 		rect->setBrush(color);
 	});
-
-	rect->setRect(label->getRect());
-	rect->setBrush(label->getBackground());
-	rect->setEditable(isEditable());
+	
 	m_scene->addItem(rect);
 
 	m_item_to_rect[item] = rect;

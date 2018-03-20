@@ -8,6 +8,7 @@ REGISTER_OBJECT_WRAPPER(
 	::NarrativeSlideLabel,
 	"osg::Object osg::Node ::NarrativeSlideItem ::NarrativeSlideLabel")
 {
-	ADD_INT_SERIALIZER(Style, 0);
 	ADD_STRING_SERIALIZER(Html, "New Label");
+	ADD_INT_SERIALIZER(StyleTypeInt, 0);
+	ADD_INT_SERIALIZER(VAlign, 0);
 }

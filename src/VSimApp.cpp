@@ -155,6 +155,9 @@ void VSimApp::update(float dt_sec)
 
 bool VSimApp::initWithVSim(osg::Node *new_node)
 {
+	if (!new_node) {
+		new_node = new VSimRoot();
+	}
 	VSimRoot *root = dynamic_cast<VSimRoot*>(new_node);
 	if (root == nullptr) {
 		// create a new VSimRoot, convert from old format

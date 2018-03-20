@@ -26,6 +26,7 @@
 
 //style
 #include "StyleSettingsDialog.h"
+#include "LabelType.h"
 #include "LabelStyle.h"
 #include "LabelStyleGroup.h"
 
@@ -232,10 +233,10 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 
 	//CANVAS CONTROL
 	// new
-	connect(m_label_buttons->ui.head1, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::HEADER1); });
-	connect(m_label_buttons->ui.head2, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::HEADER2); });
-	connect(m_label_buttons->ui.body, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::BODY); });
-	connect(m_label_buttons->ui.label, &QPushButton::clicked, this, [this]() { newLabel(LabelStyle::LABEL); });
+	connect(m_label_buttons->ui.head1, &QPushButton::clicked, this, [this]() { newLabel(LabelType::HEADER1); });
+	connect(m_label_buttons->ui.head2, &QPushButton::clicked, this, [this]() { newLabel(LabelType::HEADER2); });
+	connect(m_label_buttons->ui.body, &QPushButton::clicked, this, [this]() { newLabel(LabelType::BODY); });
+	connect(m_label_buttons->ui.label, &QPushButton::clicked, this, [this]() { newLabel(LabelType::LABEL); });
 	// move
 	connect(m_canvas, &NarrativeCanvas::sItemsTransformed, this, &NarrativeControl::transformLabels);
 	// text change
@@ -246,7 +247,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	connect(m_label_buttons->ui.edit, &QAbstractButton::pressed, this, &NarrativeControl::execEditLabel);
 	connect(m_label_buttons->ui.done, &QPushButton::clicked, this, &NarrativeControl::exitEdit);
 	// touch
-	connect(m_canvas, &CanvasContainer::sPoked, this, [this]() {
+	connect(m_canvas, &NarrativeCanvas::sPoked, this, [this]() {
 		m_app->setState(VSimApp::EDIT_CANVAS);
 	});
 
@@ -265,7 +266,7 @@ void NarrativeControl::editStyleSettings()
 	if (!narrative) return;
 
 	StyleSettingsDialog dlg;
-	dlg.setStyles(narrative->getLabelStyles());
+	dlg.setStyles(narrative->labelStyles());
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		return;
@@ -867,7 +868,7 @@ void NarrativeControl::moveSlides(const std::vector<std::pair<size_t, size_t>> &
 	m_undo_stack->endMacro();
 }
 
-void NarrativeControl::newLabel(int style) {
+void NarrativeControl::newLabel(LabelType style) {
 	NarrativeSlide *slide = getCurrentSlide();
 	if (!slide) {
 		qWarning() << "Narrative Control - creating label without slide open";
@@ -885,15 +886,14 @@ void NarrativeControl::newLabel(int style) {
 	qInfo() << "Creating new canvas label";
 
 	Narrative2 *nar = getCurrentNarrative();
-	//LabelStyle *label_style = nar->getLabelStyles()->getStyle((LabelStyle::Style)style);
-	//if (label_style) label->applyStyle(label_style);
+	LabelStyle *label_style = nar->getLabelStyles()->getStyle((LabelType)style);
+	if (label_style) label->applyStyle(label_style);
 
 	// push command
 	m_undo_stack->beginMacro("New Label");
 	m_undo_stack->push(new Group::AddNodesPCommand(slide, { label }));
 	m_undo_stack->push(new SelectLabelsCommand(this, m_current_narrative, m_current_slide, { label }, ON_REDO));
 	m_undo_stack->endMacro();
-
 
 	dirtyCurrentSlide();
 }

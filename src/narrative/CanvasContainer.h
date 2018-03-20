@@ -37,9 +37,6 @@ public:
 
 	QGraphicsScene *scene() const;
 
-signals:
-	void sPoked();
-
 protected:
 	void resizeEvent(QResizeEvent* event) override;
 
@@ -183,9 +180,13 @@ public:
 	RectItem(QGraphicsItem *parent = nullptr);
 
 	// Use these over the QGraphicsItem functions
-	// Scene-relative units
+
+	// QGraphicsRectItem has a pos from QGraphicsItem, plus another
+	// pos from rect and a size.
+	// Having two positions is confusing. Use these for postions/sizes
+	// scene units [-1, 1]
 	QSizeF size() const;
-	//QPointF pos();
+	//QPointF pos(); // <- uses the default
 	QRectF rect() const;
 	void setRect(QRectF r);
 	void setRect(double x, double y, double w, double h);
@@ -217,18 +218,26 @@ public:
 
 	void setBaseHeight(double height); // ex. 600.0 for 800x600
 
+	QSizeF scaledSize() const; // returns size in terms of 800x600
+
 	QRectF boundingRect() const override;
 
 	void setEditable(bool enable) override;
 
+	void realign();
+	void setVAlign(Qt::Alignment al);
+
+	void setDocument(QTextDocument *doc);
+
 protected:
 	void onResize(QSizeF size) override;
 
-	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+	QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
 public:
 	TextItem * m_text;
 	double m_base_height;
+	Qt::Alignment m_valign;
 };
 
 // The internal text item for TextRect
@@ -240,10 +249,12 @@ public:
 	QPainterPath shape() const override;
 
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
 protected:
 	void focusOutEvent(QFocusEvent *event) override;
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+
 	TextRect *m_rect;
 };
 
