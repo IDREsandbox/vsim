@@ -105,21 +105,9 @@ file(GLOB_RECURSE VSim_serializers
 message("SOURCES:\n" "${VSim_src}")
 message("SERIALIZERS:\n" "${VSim_serializers}")
 
-# file(GLOB VSim_src
-#   "src/*.h"
-#   "src/narratives/*.h"
-#   "src/*.cpp"
-#   "src/narratives/*.cpp"
-#   )
-
-# add_custom_target(Meme)
-
 add_library(VSim_objects ${VSim_src})
 add_executable(VSim src/main.cpp ${VSim_serializers})
 add_dependencies(VSim CopyDLLs)
-# add_dependencies(VSim Meme);
-
-# final add executable
 
 # linking
 target_link_libraries(VSim_objects Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
