@@ -31,9 +31,9 @@ CMake is used to build releases from the command prompt.
 mkdir build
 cd build
 
-QTDIR="C:/Qt/5.9.2/msvc2017_64"
-OSGDIR="C:/Program Files/OpenSceneGraph"
-TPBIN=C:/Users/David/Desktop/vsim/dependencies/3rdParty-build/x64/bin
+QT_DIR="C:/Qt/5.9.2/msvc2017_64"
+OSG_DIR="C:/Program Files/OpenSceneGraph"
+TP_BIN=C:/Users/David/Desktop/vsim/dependencies/3rdParty-build/x64/bin
 
 cmake -G "Visual Studio 15 2017 Win64" \
   -DQT_DIR="${QTDIR}" \
