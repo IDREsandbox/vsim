@@ -21,7 +21,6 @@
 #include "narrative/NarrativePlayer.h"
 
 #include "resources/ERDisplay.h"
-#include "resources/ERScrollBox.h"
 #include "resources/ERControl.h"
 #include "resources/ERFilterArea.h"
 

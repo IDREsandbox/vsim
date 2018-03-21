@@ -20,7 +20,6 @@ class TimeSlider;
 class MainWindowTopBar;
 class ERDisplay;
 class ERFilterArea;
-class ERScrollBox;
 class NarrativeCanvas;
 class editButtons;
 class ERBar;

@@ -63,6 +63,10 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_selection = new Selection(this);
 
 	m_selection_stack = new SelectionStack(this);
+	connect(m_selection_stack, &SelectionStack::sChanged, this, [this]() {
+		int last = m_selection_stack->last();
+		if (last >= 0) m_scroll->ensureWidgetVisible(m_items[last]);
+	});
 	connect(m_selection_stack, &SelectionStack::sAdded, this, [this](int i) {
 		if (i >= m_items.size()) return;
 		m_items[i]->select(true);
@@ -96,6 +100,7 @@ void HorizontalScrollBox::clear()
 	m_items.clear();
 	m_selection->clear();
 	m_selection_stack->clear();
+	refresh();
 }
 
 SelectionStack * HorizontalScrollBox::selectionStack() const
@@ -228,6 +233,7 @@ void HorizontalScrollBox::refresh()
 	}
 
 	m_scroll_area_widget->setMinimumWidth(xpos);
+	m_scroll_area_widget->adjustSize();
 }
 
 void HorizontalScrollBox::insertItems(const std::vector<std::pair<size_t, ScrollBoxItem*>>& insertions)

@@ -109,6 +109,7 @@ void SelectionStack::set(const SelectionData &d)
 		push(i);
 		emit sAdded(i);
 	}
+	emit sChanged();
 }
 
 SelectionData SelectionStack::data() const

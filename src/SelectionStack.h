@@ -15,6 +15,7 @@ public:
 	SelectionStack(QObject *parent = nullptr);
 
 	// manipulation
+	// emits one sChanged signal each
 	void add(int index);
 	void remove(int index);
 	void clear();
@@ -29,6 +30,7 @@ public:
 	int last() const;
 
 	// assignment/conversion
+	// kind of lazy on this one, emits a bunch of signals
 	void set(const SelectionData &d);
 	SelectionData data() const;
 	std::set<int> toSet() const;

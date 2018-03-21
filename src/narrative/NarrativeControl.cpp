@@ -633,7 +633,7 @@ void NarrativeControl::selectNarratives(const SelectionData &narratives)
 void NarrativeControl::selectSlides(int narrative, const SelectionData &slides)
 {
 	openNarrative(narrative);
-	m_narrative_selection->set({narrative});
+	m_narrative_selection->select(narrative);
 	m_slide_selection->set(slides);
 	openSlide(m_slide_selection->last());
 	m_app->setState(VSimApp::EDIT_SLIDES);
@@ -644,8 +644,8 @@ void NarrativeControl::selectSlides(int narrative, const SelectionData &slides)
 void NarrativeControl::selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem *> &labels)
 {
 	openNarrative(narrative);
-	m_narrative_selection->set({ narrative });
-	m_slide_selection->set({ slide });
+	m_narrative_selection->select(narrative);
+	m_slide_selection->select(slide);
 	enableEditing(true);
 	openSlide(slide);
 	m_canvas->setSelection(labels);
