@@ -75,7 +75,7 @@ public:
 	const std::map<RectItem*, QRectF> &getTransformRects() const;
 
 signals:
-	void rectsTransformed(const std::map<RectItem*, QRectF> &rects);
+	void sRectsTransformed(const std::map<RectItem*, QRectF> &rects);
 
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
@@ -228,6 +228,7 @@ public:
 	void setVAlign(Qt::Alignment al);
 
 	void setDocument(QTextDocument *doc);
+	QTextDocument *document();
 
 protected:
 	void onResize(QSizeF size) override;

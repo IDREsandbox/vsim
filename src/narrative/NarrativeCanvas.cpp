@@ -16,7 +16,7 @@ NarrativeCanvas::NarrativeCanvas(QWidget * parent)
 	m_view->installEventFilter(ff);
 
 	// forward transform signals
-	connect(m_scene, &CanvasScene::rectsTransformed, this,
+	connect(m_scene, &CanvasScene::sRectsTransformed, this,
 		[this](const std::map<RectItem*, QRectF> &rect_rects) {
 		std::map<NarrativeSlideItem*, QRectF> item_rects;
 		for (auto ritem_rect : rect_rects) {
@@ -131,11 +131,11 @@ void NarrativeCanvas::addItem(NarrativeSlideItem *item)
 		// make a text rect
 		text = new TextRect();
 		rect = text;
-		text->m_text->setDocument(label->getDocument());
+		text->setDocument(label->getDocument());
 		text->setBaseHeight(m_base_height);
 		text->setVAlign(static_cast<Qt::Alignment>(label->getVAlign()));
 
-		connect(text->m_text->document(), &QTextDocument::undoCommandAdded, this,
+		connect(text->document(), &QTextDocument::undoCommandAdded, this,
 			[this, text]() {
 			NarrativeSlideLabel *item = dynamic_cast<NarrativeSlideLabel*>(canvasToSlide(text));
 			if (!item) return;

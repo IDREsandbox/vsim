@@ -210,7 +210,7 @@ void CanvasScene::endTransform()
 	}
 	if (out_map.size() > 0) {
 
-		emit rectsTransformed(out_map);
+		emit sRectsTransformed(out_map);
 	}
 }
 
@@ -677,6 +677,11 @@ void TextRect::setDocument(QTextDocument * doc)
 	QObject::connect(doc, &QTextDocument::contentsChanged, m_text, [this]() {
 		this->realign();
 	});
+}
+
+QTextDocument * TextRect::document()
+{
+	return m_text->document();
 }
 
 void RectItem::mouseEventSelection(QGraphicsSceneMouseEvent * event)
