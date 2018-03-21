@@ -429,29 +429,6 @@ void NarrativeControl::openNarrative(int index)
 	m_slide_box->setGroup(nar);
 }
 
-//void NarrativeControl::setNarrative(int index)
-//{
-//	if (index == m_current_narrative) return;
-//
-//	Narrative2 *nar = getNarrative(index);
-//	if (!nar || index < 0) {
-//		m_current_narrative = -1;
-//		// m_current_slide = -1;
-//		// m_window->topBar()->showNarratives();
-//		// openSlide(-1);
-//		// m_canvas->setSlide(nullptr);
-//		// m_canvas->hide();
-//		m_slide_box->setGroup(nullptr);
-//		return;
-//	}
-//	qInfo() << "open narrative at" << index;
-//	m_current_narrative = index;
-//	m_bar->setSlidesHeader(nar->getTitle());
-//	m_slide_box->setGroup(nar);
-//
-//	emit sEditEvent();
-//}
-
 bool NarrativeControl::openSlide(int index, bool go)
 {
 	NarrativeSlide *slide = getSlide(m_current_narrative, index);

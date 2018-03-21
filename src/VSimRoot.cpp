@@ -131,7 +131,7 @@ void VSimRoot::debug()
 		LabelStyleGroup *labs = nar->labelStyles();
 		for (uint j = 0; j < labs->getNumChildren(); j++) {
 			LabelStyle *style = dynamic_cast<LabelStyle*>(labs->child(j));
-			qInfo() << "\tStyle" << j << style->m_base_document;
+			qInfo() << "\tStyle" << j << style->m_font_family.c_str() << style->m_point_size;
 		}
 	}
 

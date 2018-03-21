@@ -1,5 +1,41 @@
 # Changelog
 
+## 2018-3-20
+### Added
+
+#### Narratives
+- narrative styles added
+- 'p' to play
+- right arrow or 'p' to advance slide
+- left arrow to go back a slide
+- 'esc' to stop
+- slides fade in
+- thumbnails sped up a bit, fixed with new canvas
+- selections stored as a stack so deselection gives predictable behavior
+- can play narratives without opening the slides
+
+#### Slide/Canvas Overhaul
+- easily move and resize slide items
+- multi-editing with undo/redo
+- fixed disappearing labels issue with old canvas
+
+#### App State Reform
+- app state cleaned up a lot, allowing for more clear behavior
+- fade out canvas when navigating and messing with ERs
+- selecting canvas deselects irrelevant slides
+- selecting narrative things deselects ERs
+- ER and canvas can't appear at the same time
+- navigation stops on er/nar/edit events
+
+#### Embedded Resources
+- sped up a bit
+- fixed some issues with category deletion
+
+#### Other
+- added use of QActions
+- use Qt 5.10.0, 5.9 doesn't have off-screen rendering, 5.10.1 has a QGraphicsOpacityEffect bugs
+- saving an EResource saves an index the ECategory rather than the objects, the two are reconnected after loading
+
 ## 2018-1-16
 ### Added
 #### Embedded Resources
