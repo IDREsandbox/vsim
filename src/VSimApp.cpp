@@ -112,6 +112,7 @@ void VSimApp::setState(State s)
 	State old = s;
 	m_state = s;
 	qDebug() << "state change" << StateStrings[s];
+	stopCameraMoving();
 	emit sStateChanged(old, s);
 }
 
