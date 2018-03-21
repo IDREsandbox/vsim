@@ -36,9 +36,9 @@ OSGDIR="C:/Program Files/OpenSceneGraph"
 TPBIN=C:/Users/David/Desktop/vsim/dependencies/3rdParty-build/x64/bin
 
 cmake -G "Visual Studio 15 2017 Win64" \
-  -DQT\_DIR="${QTDIR}" \
-  -DOSG\_DIR="${OSGDIR}" \
-  -DTP\_BIN="${TPBIN}" \
+  -DQT_DIR="${QTDIR}" \
+  -DOSG_DIR="${OSGDIR}" \
+  -DTP_BIN="${TPBIN}" \
   -DCMAKE_INSTALL_PREFIX=install ..
 
 cmake --build . --target INSTALL --config Release
