@@ -106,6 +106,12 @@ void EResourceGroup::postLoad()
 		EResource *res = getResource(i);
 		if (!res) continue;
 
+		// old resources already have these assigned
+		ECategory *old_cat = res->category();
+		if (old_cat) {
+			continue;
+		}
+
 		int cat_index = res->getCategoryIndex();
 		if (cat_index < 0 || cat_index >= (int)m_categories->getNumChildren()) {
 			res->setCategory(nullptr);
