@@ -120,9 +120,18 @@ set(NumberSlider_src
   src/NumberSlider.cpp
   experiments/NumberSlider_experiment/NumberSlider_experiment.cpp
 )
-message("exp sources ----:\n" "${NumberSlider_src}")
 add_executable(NumberSlider_experiment ${NumberSlider_src})
 target_link_libraries(NumberSlider_experiment Qt5::Widgets)
+
+set(TextEdit_src
+  src/mtextedit.h
+  src/mtextedit.cpp
+  src/mrichtextedit.h
+  src/mrichtextedit.cpp
+  experiments/TextEdit_experiment.cpp
+)
+add_executable(TextEdit_experiment ${TextEdit_src})
+target_link_libraries(TextEdit_experiment Qt5::Widgets)
 
 set(HorizontalScrollBox_src
   src/HorizontalScrollBox.h

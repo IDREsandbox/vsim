@@ -174,6 +174,15 @@ MRichTextEdit::MRichTextEdit(QWidget *parent) : QDialog(parent) {
             this, SLOT(textSize(QString)));
     f_fontsize->setCurrentIndex(f_fontsize->findText(QString::number(QApplication::font()
                                                                    .pointSize())));
+	// font change
+
+	connect(f_font, QOverload<int>::of(&QComboBox::activated), this,
+		[this](int index) {
+		QTextCharFormat fmt;
+		fmt.setFontFamily(f_font->currentFont().family());
+		f_textedit->mergeCurrentCharFormat(fmt);
+		f_textedit->setFocus();
+	});
 
     // text foreground color
 
@@ -534,6 +543,9 @@ void MRichTextEdit::slotCurrentCharFormatChanged(const QTextCharFormat &format) 
     bgColorChanged((format.background().isOpaque()) ? format.background().color() : QColor());
     fgColorChanged((format.foreground().isOpaque()) ? format.foreground().color() : QColor());
     f_link->setChecked(format.isAnchor());
+	QFont font = format.font();
+	font.setPointSize(8); // keep constant point size in the font box
+	f_font->setCurrentFont(font);
 }
 
 void MRichTextEdit::slotClipboardDataChanged() {
