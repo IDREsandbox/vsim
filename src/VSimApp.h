@@ -79,6 +79,7 @@ public:
 	void setStatusMessage(const QString &message, int timeout = 0);
 
 	// camera
+	osg::Vec3d getPosition() const;
 	osg::Matrixd getCameraMatrix() const;
 	void setCameraMatrix(const osg::Matrixd &matrix);
 	void setCameraMatrixSmooth(const osg::Matrixd &matrix, float time);
@@ -141,15 +142,11 @@ private:
 	osg::Matrixd m_camera_target;
 	QTimer *m_camera_timer;
 
+	osg::Vec3d m_position;
+
 	QTimer *m_slide_timer;
 
 	State m_state;
-	bool m_play_state;
-	bool m_playing;
-	bool m_editing_narrative;
-	bool m_flying;
-	bool m_transitioning;
-	int m_transition_to;
 
 	// thumbnails
 	NarrativeCanvas *m_render_canvas;

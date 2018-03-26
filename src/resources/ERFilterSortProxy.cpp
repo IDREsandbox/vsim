@@ -472,9 +472,11 @@ unsigned int ERFilterSortProxy::getNumChildren() const
 	return m_map_to_base.size();
 }
 
-void ERFilterSortProxy::setPosition(osg::Vec3f pos)
+void ERFilterSortProxy::setPosition(osg::Vec3 pos)
 {
-	m_position = pos;
+	if (m_position == pos) return;
+
+
 }
 
 EResource * ERFilterSortProxy::getResource(int i) const

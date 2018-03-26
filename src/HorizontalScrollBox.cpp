@@ -6,12 +6,22 @@
 #include <QDebug>
 #include <algorithm>
 #include <QElapsedTimer>
+#include <QPaintEvent>
 
 #include "HorizontalScrollBox.h"
 #include "ScrollBoxItem.h"
 #include "Selection.h"
 #include "SelectionStack.h"
 #include "Util.h"
+
+HSBScrollArea::HSBScrollArea(QWidget *parent)
+	: QWidget(parent)
+{
+}
+void HSBScrollArea::paintEvent(QPaintEvent *e) {
+	qDebug() << "area paint event?" << e;
+	e->accept();
+}
 
 HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	: QWidget(parent),
@@ -34,7 +44,8 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_scroll->setObjectName("scrollArea");
 	m_scroll->setStyleSheet("#scrollArea { background:rgba(0, 0, 0, 0);}");
 
-	m_scroll_area_widget = new QWidget();
+	qDebug() << "Scroll area widget before??" << m_scroll->widget();
+	m_scroll_area_widget = new HSBScrollArea();
 	m_scroll->setWidget(m_scroll_area_widget);
 	m_scroll_area_widget->show();
 	m_scroll_area_widget->setStyleSheet(
@@ -222,6 +233,7 @@ void HorizontalScrollBox::refresh()
 		//QRect geom(xpos, margins.top(), bwidth, bheight);
 		QRect geom(xpos, 0, bwidth, bheight);
 		o->setGeometry(geom);
+		o->setFixedSize(bwidth, bheight);
 		if (m_drag && spacer_index == i) {
 			m_drop_highlight->setGeometry(xpos - m_spacing, 0, m_spacing, m_height);
 		}

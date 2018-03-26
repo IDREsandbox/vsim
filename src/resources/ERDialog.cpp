@@ -94,6 +94,7 @@ void ERDialog::init(const EResource * er)
 	else ui.local->setChecked(true);
 
 	ui.autolaunch->setChecked(er->getAutoLaunch());
+	ui.autoreposition->setChecked(er->getReposition());
 
 	switch (er->getERType()) {
 	case EResource::FILE:
@@ -156,12 +157,13 @@ bool ERDialog::getGlobal() const
 
 bool ERDialog::getReposition() const
 {
-	return ui.on->isChecked();
+	return ui.autoreposition->isChecked();
 }
 
 bool ERDialog::getAutoLaunch() const
 {
-	return ui.on_2->isChecked() && getERType() != EResource::ANNOTATION;
+	return ui.autolaunch->isChecked();
+	//return ui.autolaunch->isChecked() && getERType() != EResource::ANNOTATION;
 }
 
 float ERDialog::getLocalRange() const

@@ -131,6 +131,12 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 		}
 	});
 
+	connect(m_app, &VSimApp::sAboutToReset, this, [this]() {
+		m_display->setInfo(nullptr);
+		m_display->hide();
+		m_filter_area->reset();
+	});
+
 	load(ers);
 }
 
@@ -154,6 +160,23 @@ void ERControl::load(EResourceGroup *ers)
 	m_category_control->load(m_categories);
 
 	m_filter_area->reset();
+}
+
+void ERControl::update(double dt_sec)
+{
+	// update all positions
+	osg::Vec3 pos = m_app->getPosition();
+	for (size_t i = 0; i < m_ers->getNumChildren(); i++) {
+		EResource *res = m_ers->getResource(i);
+		if (!res) continue;
+		// update resource distance
+		osg::Vec3 res_pos = res->getCameraMatrix().getTrans();
+		res->setDistanceTo((pos - res_pos).length());
+	}
+
+	m_filter_proxy->setPosition(m_app->getPosition());
+
+	//m_prev_position = pos;
 }
 
 void ERControl::newER()
@@ -335,7 +358,7 @@ void ERControl::setDisplay(int index, bool go)
 	m_display->setInfo(res);
 	m_display->show();
 
-	if (go) {
+	if (go && res->getReposition()) {
 		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .3);
 	}
 }

@@ -192,6 +192,7 @@ bool EResource::getReposition() const
 }
 void EResource::setReposition(bool reposition)
 { 
+	qDebug() << "setting reposition";
 	m_reposition = reposition;
 	emit sRepositionChanged(reposition);
 }
@@ -201,6 +202,7 @@ bool EResource::getAutoLaunch() const
 }
 void EResource::setAutoLaunch(bool launch) 
 { 
+	qDebug() << "setting auto launch";
 	m_launch = launch; 
 	emit sAutoLaunchChanged(launch);
 }
@@ -236,6 +238,17 @@ void EResource::setCameraMatrix(const osg::Matrixd& matrix)
     m_camera_matrix = matrix;
     m_camera_position = m_camera_matrix.getTrans();
 	emit sViewMatrixChanged(matrix);
+}
+
+double EResource::getDistanceTo() const
+{
+	return m_distance_to;
+}
+
+void EResource::setDistanceTo(double dist)
+{
+	m_distance_to = dist;
+	emit sDistanceToChanged(dist);
 }
 
 ECategory * EResource::category() const

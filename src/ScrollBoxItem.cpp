@@ -35,6 +35,16 @@ int ScrollBoxItem::widthFromHeight(int height) const
 	return height;
 }
 
+bool ScrollBoxItem::event(QEvent * e)
+{
+	//qDebug() << "e" << m_index << e;
+	return QWidget::event(e);
+}
+void ScrollBoxItem::paintEvent(QPaintEvent * e)
+{
+	//qDebug() << "pe" << m_index << e;
+}
+
 void ScrollBoxItem::mousePressEvent(QMouseEvent * event)
 {
 	emit sMousePressEvent(event, m_index);

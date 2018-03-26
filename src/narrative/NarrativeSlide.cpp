@@ -29,21 +29,17 @@ NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransit
 	qDebug() << "converting old slide" << old->getNumChildren();
 	for (uint i = 0; i < old->getNumChildren(); i++) {
 		const osg::Node *child = old->getChild(i);
-		qDebug() << "child" << i << child->className();
 		const VSCanvas *canvas = dynamic_cast<const VSCanvas*>(child);
 		// get the children
 		if (!canvas) continue;
-		qDebug() << "FOUND CANVAS";
 		qDebug() << canvas->getNumChildren();
 
 		for (uint j = 0; j < canvas->getNumChildren(); j++) {
-			const osg::Node *canchild = canvas->getChild(j);		
-			qDebug() << "cavnas child:" << canchild->className();
+			const osg::Node *canchild = canvas->getChild(j);
 		}
 		const osg::Group *cg = canvas->getGroup();
 		for (uint j = 0; j < cg->getNumChildren(); j++) {
 			const osg::Node *canvas_child = cg->getChild(j);
-			qDebug() << "cavnas child:" << canvas_child->className();
 
 			// assume the old dimensions...
 			QSizeF old_dim(1280, 800);
@@ -66,17 +62,13 @@ NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransit
 				bgcolor.setRgbF(bgcolor_old.r(), bgcolor_old.g(), bgcolor_old.b(), bgcolor_old.a());
 				fontcolor.setRgbF(fontcolor_old.r(), fontcolor_old.g(), fontcolor_old.b(), fontcolor_old.a());
 
-				qDebug() << "bgcolor" << bgcolor;
-				qDebug() << "fontcolor" << fontcolor;
-
 				float height = old_label->getText()->getCharacterHeight();
-				qDebug() << "charheight" << height;
+
+				// TODO: how to convert old font?
 				const osgText::Font *f = old_label->getText()->getFont();
 				if (!f) {
-					qDebug() << "no font found";
 				}
 				else {
-					qDebug() << "found font" << f->getName().c_str();
 				}
 
 				// old coordinates were +x right, +y up, so we have to flip
@@ -105,7 +97,7 @@ NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransit
 				addChild(new_label);
 			}
 			// finally we can make a new label
-			
+
 			// TODO: cast to widget and convert images
 
 		}

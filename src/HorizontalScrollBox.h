@@ -24,6 +24,15 @@ class ScrollBoxItem;
 // configuration
 // size, item width/height
 
+class HSBScrollArea : public QWidget {
+	Q_OBJECT
+public:
+	HSBScrollArea(QWidget *parent = nullptr);
+
+protected:
+	void paintEvent(QPaintEvent *e) override;
+};
+
 class HorizontalScrollBox : public QWidget {
 	Q_OBJECT
 public:

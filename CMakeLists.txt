@@ -144,11 +144,16 @@ set(HorizontalScrollBox_src
   src/SelectionStack.cpp
   src/Util.h
   src/Util.cpp
-  experiments/HorizontalScrollBox_experiment/HorizontalScrollBox_experiment.cpp
 )
-add_executable(HorizontalScrollBox_experiment ${HorizontalScrollBox_src})
+add_executable(HorizontalScrollBox_experiment ${HorizontalScrollBox_src}
+  experiments/HorizontalScrollBox_experiment/HorizontalScrollBox_experiment.cpp)
 target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets)
 target_link_libraries(HorizontalScrollBox_experiment ${OPENSCENEGRAPH_LIBRARIES})
+
+add_executable(HSBSpeed_experiment ${HorizontalScrollBox_src}
+  experiments/HSBSpeed/HSBSpeed.cpp)
+target_link_libraries(HSBSpeed_experiment Qt5::Widgets)
+target_link_libraries(HSBSpeed_experiment ${OPENSCENEGRAPH_LIBRARIES})
 
 set(Canvas_src
   src/narrative/CanvasContainer.h

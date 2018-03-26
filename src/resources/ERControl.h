@@ -33,6 +33,9 @@ public:
 
 	void load(EResourceGroup *ers);
 
+	// used for er distance checking
+	void update(double dt_sec);
+
 	void newER();
 	void deleteER();
 	void editERInfo();
@@ -90,6 +93,9 @@ private:
 	CheckableListProxy *m_category_checkbox_model;
 
 	ECategoryControl *m_category_control;
+
+	//osg::Vec3 m_prev_position;
+	//bool m_pos_dirty;
 };
 
 class SelectERCommand : public QUndoCommand {

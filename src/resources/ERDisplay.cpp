@@ -1,4 +1,5 @@
 #include "resources/ERDisplay.h"
+#include <QDebug>
 
 ERDisplay::ERDisplay(QWidget *parent)
 	: QFrame(parent), m_er(nullptr)

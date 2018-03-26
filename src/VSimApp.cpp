@@ -148,10 +148,9 @@ void VSimApp::update(float dt_sec)
 
 	}
 
-	if (isFlying() ||
-		m_state == VSimApp::PLAY_TRANSITION) {
-		//m_navigation_control->update(dt_sec);
-	}
+	auto mat = getCameraMatrix();
+	m_position = mat.getTrans();
+	m_er_control->update(dt_sec);
 }
 
 bool VSimApp::initWithVSim(osg::Node *new_node)
@@ -471,6 +470,11 @@ void VSimApp::setFileName(const std::string &str)
 void VSimApp::setStatusMessage(const QString & message, int timeout)
 {
 	m_window->statusBar()->showMessage(message, timeout);
+}
+
+osg::Vec3d VSimApp::getPosition() const
+{
+	return m_position;
 }
 
 osg::Matrixd VSimApp::getCameraMatrix() const

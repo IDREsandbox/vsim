@@ -88,6 +88,31 @@ Suppose a gui thing is listening to changes in Joe*. The model removes Joe* and 
 1. aboutToRemove/removed
 2. removed(*)
 
+A lot of gui items have a setPtr(ptr*) at the beginning with disconnect shenanigans. It works but has a problem. Since we're not keeping a shared pointer, if the tracked object is destroyed without us knowing, then the next disconnect call breaks. Someone like control has to clear this gui thing beforehand... which is no fun.
+
+    ```
+	if (m_er) disconnect(m_er, 0, this, 0);
+	m_er = er;
+	if (er == nullptr) return;
+    ```
+
+external nulling:
+    `app->sAboutToReset => er_display->setInfo(nullptr)`
+
+option - keep a ref_ptr, i don't really like this, keeping an old thing alive when it shouldn't be:
+    `osg::ref_ptr<NarrativeGroup> m_narrative_group;`
+
+option - explicit null on destroyed, I'm considering adding this all over:
+    `connect(m_er, &QObject::destroyed, this, [this](){setInfo(nullptr);};`
+
+another option - explicitly store connections and delete later:
+    `m_conn1 = connect(...)`
+
+something cool to consider, can't be nulled, but consider using later:
+    `connect(..., Qt::UniqueConnection)`
+
+the problem is nulling does nothing
+
 ## Efficient removal/insertion
 
 Suppose you have a scroll box with 1000 items. Select 500 and delete them. If the box refreshes it's layout on every deletion its a O(n^2) problem. Making it an O(n) or O(logn) requires grouping the operations together. I kept changing my mind about how to handle this, first leaving it at n^2, then trying sets, then trying vectors, then going to range removal... so the code is really messy and uses different methods depending on the situation.

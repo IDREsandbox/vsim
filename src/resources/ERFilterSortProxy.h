@@ -72,7 +72,7 @@ public:
 
 	void setTitleSearch(const std::string &title);
 
-	void setPosition(osg::Vec3f pos);
+	void setPosition(osg::Vec3 pos);
 
 
 protected:
@@ -129,7 +129,7 @@ private:
 	
 	bool m_show_all;
 
-	osg::Vec3f m_position;
+	osg::Vec3 m_position;
 };
 
 #endif

@@ -81,6 +81,10 @@ public:
 	const osg::Matrixd& getCameraMatrix() const;
 	osg::Matrixd& getCameraMatrix();
 	void setCameraMatrix(const osg::Matrixd& matrix);
+	bool getPositional() const;
+	void setPositional(bool p) const;
+	double getDistanceTo() const;
+	void setDistanceTo(double dist);
 
 	ECategory *category() const;
 	const ECategory *getCategory() const;
@@ -105,6 +109,7 @@ signals:
 	void sLocalRangeChanged(float);
 	void sErTypeChanged(ERType);
 	void sViewMatrixChanged(const osg::Matrixd&);
+	void sDistanceToChanged(double dist);
 
 	void sCategoryChanged(ECategory *old_category, ECategory *new_category);
 
@@ -200,7 +205,8 @@ private:
 	osg::Vec3f m_camera_position;
 	osg::Matrixd m_camera_matrix;
 
-	//bool m_inview; // what is this?
+	bool m_positional;
+	double m_distance_to;
 
 	int m_category_index;
 	osg::observer_ptr<ECategory> m_category;

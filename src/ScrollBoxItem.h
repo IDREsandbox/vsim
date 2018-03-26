@@ -36,6 +36,8 @@ signals:
 	void sMouseReleaseEvent(QMouseEvent *event, int index);
 
 protected:
+	bool event(QEvent * e) override;
+	void paintEvent(QPaintEvent *e) override;
 	void mousePressEvent(QMouseEvent *event) override;
 	void mouseDoubleClickEvent(QMouseEvent *event) override;
 	void mouseReleaseEvent(QMouseEvent *event) override;
