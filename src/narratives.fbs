@@ -1,0 +1,105 @@
+include "types.fbs";
+
+namespace VSim.FlatBuffers;
+
+table NarrativeTable {
+  narratives:[Narrative];
+}
+
+table Narrative {
+  title:string;
+  author:string;
+  description:string;
+  locked:bool;
+  styles:[NarrativeLabelStyle];
+  image_style:NarrativeImageStyle;
+  slides:[Slide];
+}
+
+union CanvasItem {
+  CanvasLabel,
+  CanvasImage
+}
+
+table Slide {
+  camera:CameraPosLook;
+  duration:float;
+  wait_for_click:bool;
+  transition_duration:float;
+  items:[CanvasItem];
+}
+
+enum LabelType : byte {
+  None,
+  Header1,
+  Header2,
+  Body,
+  Label
+}
+
+enum VAlign : byte {
+  Top,
+  VCenter,
+  Bottom
+}
+
+enum HAlign : byte {
+  Left,
+  HCenter,
+  Right,
+  Justify
+}
+
+table LineStyle {
+  // border color
+  // border width
+  // border style
+}
+
+table FillStyle {
+  color:Color;
+  // 
+}
+
+table TextStyle {
+  foreground:Color;
+  halign:HAlign;
+  valign:VAlign;
+  margin:int;
+  font_family:string;
+  point_size:int;
+  weight:int; // bold
+  italicized:bool;
+  underlined:bool;
+}
+
+table NarrativeLabelStyle {
+  type:LabelType;
+  fill_style:FillStyle;
+  line_style:LineStyle;
+  text_style:TextStyle;
+}
+
+table NarrativeImageStyle {
+  line_style:LineStyle;
+}
+
+struct Rect {
+  pos:Vec2;
+  size:Vec2;
+}
+
+table CanvasLabel {
+  rect:Rect;
+  type:LabelType;
+  html:string;
+  fill_style:FillStyle;
+  line_style:LineStyle;
+  //text_style:TextStyle; // the other text stuff is kept in the html
+  valign:VAlign; 
+}
+
+table CanvasImage {
+  rect:Rect;
+  line_style:LineStyle;
+}

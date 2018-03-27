@@ -36,6 +36,9 @@
     <Filter Include="Deprecated">
       <UniqueIdentifier>{28d94e53-8d81-42fa-bcbc-0ce0dbabf026}</UniqueIdentifier>
     </Filter>
+    <Filter Include="FlatBuffers">
+      <UniqueIdentifier>{11e65b2a-83ce-4688-871f-ff3c2b706a88}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\OSGViewerWidget.h">
@@ -595,6 +598,9 @@
     <ClCompile Include="..\..\NavigationControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\ERSerializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">
@@ -660,5 +666,61 @@
     <ClInclude Include="..\..\LabelType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\eresources_generated.h">
+      <Filter>FlatBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\narratives_generated.h">
+      <Filter>FlatBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\types_generated.h">
+      <Filter>FlatBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\vsim_generated.h">
+      <Filter>FlatBuffers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\ERSerializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\narratives.fbs" />
+    <CustomBuild Include="..\..\types.fbs" />
+    <CustomBuild Include="..\..\vsim.fbs" />
+    <CustomBuild Include="..\..\narratives.fbs" />
+    <CustomBuild Include="..\..\types.fbs" />
+    <CustomBuild Include="..\..\vsim.fbs" />
+    <CustomBuild Include="..\..\narratives.fbs" />
+    <CustomBuild Include="..\..\types.fbs" />
+    <CustomBuild Include="..\..\vsim.fbs" />
+    <CustomBuild Include="../../*.fbs">
+      <Filter>FlatBuffers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="../../*.fbs">
+      <Filter>FlatBuffers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="../../*.fbs">
+      <Filter>FlatBuffers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="../../*.fbs">
+      <Filter>FlatBuffers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\narratives.fbs" />
+    <CustomBuild Include="..\..\types.fbs" />
+    <CustomBuild Include="..\..\vsim.fbs" />
+    <CustomBuild Include="..\..\narratives.fbs" />
+    <CustomBuild Include="..\..\types.fbs" />
+    <CustomBuild Include="..\..\vsim.fbs" />
+    <CustomBuild Include="..\..\narratives.fbs" />
+    <CustomBuild Include="..\..\types.fbs" />
+    <CustomBuild Include="..\..\vsim.fbs" />
+    <CustomBuild Include="../../*.fbs">
+      <Filter>FlatBuffers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="../../*.fbs">
+      <Filter>FlatBuffers</Filter>
+    </CustomBuild>
+    <CustomBuild Include="../../*.fbs">
+      <Filter>FlatBuffers</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

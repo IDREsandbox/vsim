@@ -1,0 +1,26 @@
+include "types.fbs";
+include "eresources.fbs";
+include "narratives.fbs";
+
+namespace VSim.FlatBuffers;
+
+file_extension "vsim";
+file_identifier "VSIM";
+
+table Root {
+  version:string;
+  narratives:NarrativeTable;
+  eresources:ERTable;
+  hair:int32;
+  cat:float;
+  // model_information
+  // lighting options
+}
+
+table CameraOptions {
+  fov:float = 60;
+  nearClip:float = 1;
+  farClip:float = 1000;
+}
+
+root_type Root;

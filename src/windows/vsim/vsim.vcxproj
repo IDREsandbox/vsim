@@ -19,6 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="../../*.fbs">
+      <Message>Generating headers from flatbuffers %(Identity)</Message>
+      <Command>flatc -c -o ./GeneratedFiles %(Identity)</Command>
+      <Outputs>./GeneratedFiles/%(Filename)_generated.h</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <PropertyGroup>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <ItemGroup>
     <ClCompile Include="..\..\BaseFirstPersonManipulator.cpp" />
     <ClCompile Include="..\..\CheckableListProxy.cpp" />
     <ClCompile Include="..\..\deprecated\narrative\Narrative.cpp" />
@@ -44,6 +54,7 @@
     <ClCompile Include="..\..\editButtons.cpp" />
     <ClCompile Include="..\..\EditDeleteDelegate.cpp" />
     <ClCompile Include="..\..\ERBar.cpp" />
+    <ClCompile Include="..\..\ERSerializer.cpp" />
     <ClCompile Include="..\..\FirstPersonManipulator.cpp" />
     <ClCompile Include="..\..\FlightManipulator.cpp" />
     <ClCompile Include="..\..\FocusFilter.cpp" />
@@ -140,6 +151,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\BaseFirstPersonManipulator.h" />
+    <ClInclude Include="..\..\ERSerializer.h" />
+    <ClInclude Include="GeneratedFiles\eresources_generated.h" />
+    <ClInclude Include="GeneratedFiles\narratives_generated.h" />
+    <ClInclude Include="GeneratedFiles\types_generated.h" />
+    <ClInclude Include="GeneratedFiles\vsim_generated.h" />
     <QtMoc Include="..\..\CheckableListProxy.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\narrative;.\..\..;.\..;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\..\..\narrative;.\..\..;.\..;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include</IncludePath>
