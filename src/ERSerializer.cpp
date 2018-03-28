@@ -1,7 +1,5 @@
 #include "ERSerializer.h"
 
-#include "types_generated.h"
-#include "eresources_generated.h"
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"
 #include "resources/ECategoryGroup.h"
@@ -9,9 +7,8 @@
 #include <unordered_map>
 
 namespace fb = VSim::FlatBuffers;
-void readERTable(const fb::ERTable *buffer, EResourceGroup *group)
+void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 {
-	qDebug() << "DEBUGGIN! read ER buffer";
 	group->clear();
 	ECategoryGroup * cats = group->categories();
 	cats->clear();
@@ -19,10 +16,11 @@ void readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 	auto categories = buffer->categories();
 	for (auto o_cat : *categories) {
 		ECategory * cat = new ECategory();
-		cat->setName(o_cat->name()->str());
+		cat->setCategoryName(o_cat->name()->str());
 		
 		const fb::Color *c = o_cat->color();
 		cat->setColor(QColor(c->r(), c->g(), c->b(), c->a()));
+		cats->addChild(cat);
 	}
 
 	auto resources = buffer->resources();
@@ -30,13 +28,13 @@ void readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 	for (auto o_res : *resources) {
 		EResource *res = new EResource();
 
+		res->setERType(static_cast<EResource::ERType>(o_res->type()));
 		res->setResourceName(o_res->name()->str());
-		res->setERType(static_cast<EResource::ERType>(res->getERType()));
+		res->setAuthor(o_res->author()->str());
 		res->setResourceDescription(o_res->description()->str());
 		res->setResourcePath(o_res->path()->str());
 		res->setGlobal(o_res->global());
-
-		res->setCopyright(static_cast<EResource::Copyright>(res->getCopyright()));
+		res->setCopyright(static_cast<EResource::Copyright>(o_res->copyright()));
 		res->setMinYear(o_res->year_min());
 		res->setMaxYear(o_res->year_max());
 		res->setReposition(o_res->reposition());
@@ -54,13 +52,13 @@ void readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 			ECategory *cat = cats->category(cat_index);
 			res->setCategory(cat);
 		}
+
+		group->addChild(res);
 	}
 }
 
-flatbuffers::Offset<fb::ERTable> createERTable(const EResourceGroup *group, flatbuffers::FlatBufferBuilder *builder)
+flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(const EResourceGroup *group, flatbuffers::FlatBufferBuilder *builder)
 {
-	qDebug() << "WRITE ER BUFFer! write ER buffer";
-
 	const ECategoryGroup *cats = group->getCategories();
 
 	std::unordered_map<ECategory*, size_t> cat_to_index;
@@ -123,7 +121,7 @@ flatbuffers::Offset<fb::ERTable> createERTable(const EResourceGroup *group, flat
 		// lookup category in index table
 		ECategory *cat = res->category();
 		auto it = cat_to_index.find(cat);
-		if (it != cat_to_index.end()) {
+		if (it == cat_to_index.end()) {
 			b_res.add_category_index(-1);
 		}
 		else {

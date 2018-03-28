@@ -31,7 +31,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # dependencies
 # search path
 
-#
+# required bin folders for dll copying and find_package search
 if (WIN32)
   set(QT_DIR "" CACHE FILEPATH "where is the Qt install directory")
   if(NOT IS_DIRECTORY ${QT_DIR})
@@ -63,23 +63,60 @@ set(OSG_BIN "${OSG_DIR}/bin")
 message("OSG_BIN:" "${OSG_BIN}")
 
 find_package(OpenSceneGraph 3.4.0 REQUIRED osgDB osgUtil osgGA osgViewer osgText)
-find_package(Qt5 REQUIRED Core Gui Widgets Test)
-
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
-# get_target_property(QtWidgets Qt5::Core LOCATION)
-# get_property(GENFOLDER GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER)
-# message("autogen folder" ${AUTOGEN_TARGETS_FOLDER} "prop?" ${GENFOLDER})
-# message("automoc folder" ${AUTOMOC_TARGETS_FOLDER})
-# message("cmake binary" ${CMAKE_BINARY_DIR})
-
+find_package(Qt5 REQUIRED Core Gui Widgets Test)
 # for some reason find_package doesn't work for libraries
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
 include_directories(${PROJECT_BINARY_DIR}/VSim_objects_autogen/include_Release)
 add_definitions(${Qt5Widgets_DEFINITIONS})
 add_definitions(${Qt5Test_DEFINITIONS})
+# get_target_property(QtWidgets Qt5::Core LOCATION)
+# get_property(GENFOLDER GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER)
+# message("autogen folder" ${AUTOGEN_TARGETS_FOLDER} "prop?" ${GENFOLDER})
+# message("automoc folder" ${AUTOMOC_TARGETS_FOLDER})
+# message("cmake binary" ${CMAKE_BINARY_DIR})
+
+# flatbuffers stuff
+# sources in src/*
+# generated in build/generated/*
+find_package(flatbuffers REQUIRED)
+find_path(flatbuffers_include "flatbuffers")
+include_directories(${flatbuffers_include})
+find_program(FLATC_EXEC "flatc")
+if (NOT FLATC_EXEC)
+    message(FATAL_ERROR "flatbuffer compiler flatc not found")
+endif()
+message("flatc found: ${FLATC_EXEC}")
+
+set(fbs_src
+  eresources.fbs
+  narratives.fbs
+  types.fbs
+  vsim.fbs
+  )
+set(fbs_header_list "")
+foreach(fbs ${fbs_src})
+  set(fbs_full ${CMAKE_CURRENT_SOURCE_DIR}/src/${fbs})
+  string(REGEX REPLACE "\\.fbs$" "_generated.h" fbs_header ${fbs})
+  set(fbs_header_full ${CMAKE_BINARY_DIR}/generated/${fbs_header})
+  list(APPEND fbs_header_list ${fbs_header_full})
+  # some annoying qt stuff
+  set_property(SOURCE ${fbs_header_full} PROPERTY SKIP_AUTOGEN ON)
+  add_custom_command(
+    OUTPUT ${fbs_header_full}
+    COMMAND echo "Compiling flatbuffer - ${fbs}"
+    COMMAND ${FLATC_EXEC} -c --no-includes
+            -o ${CMAKE_BINARY_DIR}/generated
+            -I ${CMAKE_CURRENT_SOURCE_DIR}/src
+            ${fbs_full}
+    DEPENDS flatc ${fbs_full})
+endforeach()
+message("fbs header list: " "${fbs_header_list}")
+include_directories (${CMAKE_BINARY_DIR}/generated)
+add_custom_target(fbs_headers ALL DEPENDS ${fbs_header_list})
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
@@ -105,7 +142,7 @@ file(GLOB_RECURSE VSim_serializers
 message("SOURCES:\n" "${VSim_src}")
 message("SERIALIZERS:\n" "${VSim_serializers}")
 
-add_library(VSim_objects ${VSim_src})
+add_library(VSim_objects ${VSim_src} ${fbs_header_list})
 add_executable(VSim src/main.cpp ${VSim_serializers})
 add_dependencies(VSim CopyDLLs)
 
@@ -212,6 +249,34 @@ add_executable(ERFilterSortProxy_test ${ERFilterSortProxy_src})
 add_test(NAME ERFilterSortProxy_test COMMAND ERFilterSortProxy_test)
 target_link_libraries(ERFilterSortProxy_test Qt5::Widgets Qt5::Test)
 target_link_libraries(ERFilterSortProxy_test ${OPENSCENEGRAPH_LIBRARIES})
+
+set(ERSerializer_src
+  tests/ERSerializer_test.cpp
+  src/Group.cpp
+  src/Group.h
+  src/ERSerializer.cpp
+  src/ERSerializer.h
+  ${CMAKE_BINARY_DIR}/generated/types_generated.h
+  generated/eresources_generated.h
+  src/resources/ERFilterSortProxy.h
+  src/resources/ERFilterSortProxy.cpp
+  src/resources/ECategory.h
+  src/resources/ECategory.cpp
+  src/resources/ECategoryGroup.h
+  src/resources/ECategoryGroup.cpp
+  src/resources/EResource.h
+  src/resources/EResource.cpp
+  src/resources/EResourceGroup.h
+  src/resources/EResourceGroup.cpp
+  src/CheckableListProxy.h
+  src/CheckableListProxy.cpp
+  src/Util.h
+  src/Util.cpp
+)
+add_executable(ERSerializer_test ${ERSerializer_src})
+add_test(NAME ERSerializer_test COMMAND ERSerializer_test)
+target_link_libraries(ERSerializer_test Qt5::Widgets Qt5::Test)
+target_link_libraries(ERSerializer_test ${OPENSCENEGRAPH_LIBRARIES})
 
 set(TEST_LIST
   Selection_test

@@ -23,7 +23,7 @@ public:
 	const std::string& getCategoryName() const;
 	void setCategoryName(const std::string& name);
 	QColor getColor() const;
-	void setColor(QColor color);
+	void setColor(QColor color); // rgb, no alpha
 	// these are for the serializer
 	int getRed() const;
 	void setRed(int red);

@@ -1,3 +1,13 @@
+# new! vcpkg
+
+Download vcpkg https://github.com/Microsoft/vcpkg
+
+```
+./bootstrap-vcpkg.bat
+./vcpkg integrate install
+./vcpkg install osg:x64-windows flatbuffers:x64-windows
+```
+
 # Building OpenSceneGraph
 
 ```

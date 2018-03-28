@@ -682,45 +682,4 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\narratives.fbs" />
-    <CustomBuild Include="..\..\types.fbs" />
-    <CustomBuild Include="..\..\vsim.fbs" />
-    <CustomBuild Include="..\..\narratives.fbs" />
-    <CustomBuild Include="..\..\types.fbs" />
-    <CustomBuild Include="..\..\vsim.fbs" />
-    <CustomBuild Include="..\..\narratives.fbs" />
-    <CustomBuild Include="..\..\types.fbs" />
-    <CustomBuild Include="..\..\vsim.fbs" />
-    <CustomBuild Include="../../*.fbs">
-      <Filter>FlatBuffers</Filter>
-    </CustomBuild>
-    <CustomBuild Include="../../*.fbs">
-      <Filter>FlatBuffers</Filter>
-    </CustomBuild>
-    <CustomBuild Include="../../*.fbs">
-      <Filter>FlatBuffers</Filter>
-    </CustomBuild>
-    <CustomBuild Include="../../*.fbs">
-      <Filter>FlatBuffers</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\narratives.fbs" />
-    <CustomBuild Include="..\..\types.fbs" />
-    <CustomBuild Include="..\..\vsim.fbs" />
-    <CustomBuild Include="..\..\narratives.fbs" />
-    <CustomBuild Include="..\..\types.fbs" />
-    <CustomBuild Include="..\..\vsim.fbs" />
-    <CustomBuild Include="..\..\narratives.fbs" />
-    <CustomBuild Include="..\..\types.fbs" />
-    <CustomBuild Include="..\..\vsim.fbs" />
-    <CustomBuild Include="../../*.fbs">
-      <Filter>FlatBuffers</Filter>
-    </CustomBuild>
-    <CustomBuild Include="../../*.fbs">
-      <Filter>FlatBuffers</Filter>
-    </CustomBuild>
-    <CustomBuild Include="../../*.fbs">
-      <Filter>FlatBuffers</Filter>
-    </CustomBuild>
-  </ItemGroup>
 </Project>
