@@ -7,13 +7,20 @@ table NarrativeTable {
 }
 
 table Narrative {
+  slides:[Slide];
+  styles:StyleTable;
   title:string;
   author:string;
   description:string;
-  locked:bool;
-  styles:[NarrativeLabelStyle];
-  image_style:NarrativeImageStyle;
-  slides:[Slide];
+  //locked:bool = false;
+}
+
+table StyleTable {
+  header1:LabelStyle;
+  header2:LabelStyle;
+  body:LabelStyle;
+  label:LabelStyle;
+  image:ImageStyle;
 }
 
 union CanvasItem {
@@ -22,11 +29,11 @@ union CanvasItem {
 }
 
 table Slide {
-  camera:CameraPosLook;
+  items:[CanvasItem];
+  camera:CameraPosDirUp;
   duration:float;
   wait_for_click:bool;
   transition_duration:float;
-  items:[CanvasItem];
 }
 
 enum LabelType : byte {
@@ -37,17 +44,17 @@ enum LabelType : byte {
   Label
 }
 
-enum VAlign : byte {
-  Top,
-  VCenter,
-  Bottom
+enum VAlign : int32 {
+  Top = 0x20,
+  VCenter = 0x40,
+  Bottom = 0x80
 }
 
-enum HAlign : byte {
-  Left,
-  HCenter,
-  Right,
-  Justify
+enum HAlign : int32 {
+  Left = 0x1,
+  Right = 0x2,
+  HCenter = 0x4,
+  Justify = 0x8
 }
 
 table LineStyle {
@@ -73,14 +80,14 @@ table TextStyle {
   underlined:bool;
 }
 
-table NarrativeLabelStyle {
+table LabelStyle {
   type:LabelType;
   fill_style:FillStyle;
-  line_style:LineStyle;
   text_style:TextStyle;
+  line_style:LineStyle;
 }
 
-table NarrativeImageStyle {
+table ImageStyle {
   line_style:LineStyle;
 }
 

@@ -29,8 +29,9 @@ public:
 	void setStyleTypeInt(int type); // int version for serializer
 	int getStyleTypeInt() const;
 
-	void setVAlign(int al);
-	int getVAlign() const;
+	void setVAlignInt(int al);
+	int getVAlignInt() const;
+	Qt::Alignment getVAlign() const;
 
 	// 
 	void applyStyle(LabelStyle *style);

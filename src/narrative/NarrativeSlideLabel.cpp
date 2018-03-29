@@ -58,13 +58,18 @@ int NarrativeSlideLabel::getStyleTypeInt() const
 	return m_style_type;
 }
 
-void NarrativeSlideLabel::setVAlign(int al)
+void NarrativeSlideLabel::setVAlignInt(int al)
 {
 	m_v_align = static_cast<Qt::Alignment>(al) & Qt::AlignVertical_Mask;
 	emit sVAlignChanged(m_v_align);
 }
 
-int NarrativeSlideLabel::getVAlign() const
+int NarrativeSlideLabel::getVAlignInt() const
+{
+	return m_v_align;
+}
+
+Qt::Alignment NarrativeSlideLabel::getVAlign() const
 {
 	return m_v_align;
 }
@@ -73,7 +78,7 @@ void NarrativeSlideLabel::applyStyle(LabelStyle *style)
 {
 	QColor m_bg_color;
 	setBackground(style->backgroundColor());
-	setVAlign(style->getAlign());
+	setVAlignInt(style->getAlign());
 
 	QTextFrameFormat tff;
 	tff.setMargin(style->getMargin());
