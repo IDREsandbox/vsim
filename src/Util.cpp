@@ -362,6 +362,17 @@ osg::Vec4d Util::mult_vec(osg::Matrixd M, osg::Vec4d v)
 	return v_new;
 }
 
+bool Util::osgMatrixEq(const osg::Matrix m1, const osg::Matrix m2, double epsilon)
+{
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			bool different = std::fabs(m1(i, j) - m2(i, j)) > epsilon;
+			if (different) return false;
+		}
+	}
+	return true;
+}
+
 //4x4 transpose
 osg::Matrixd Util::transpose(osg::Matrixd m)
 {
@@ -487,7 +498,7 @@ QString Util::osgMatrixToQString(osg::Matrix m)
 		for (int j = 0; j < 4; j++) {
 			s.append(QString::number(m(i, j)) + " ");
 		}
-		s.append("| ");
+		if (i < 3) s.append("| ");
 	}
 	return s;
 }

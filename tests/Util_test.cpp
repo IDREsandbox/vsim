@@ -139,6 +139,32 @@ private slots:
 		result = Util::clumpify2(list);
 		QCOMPARE(result, expected);
 	}
+	void matrixEqTest(){
+		double d1[16] = {
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		};
+		osg::Matrix m1(d1);
+		double d2[16] = {
+			0, 0, 0, 6.8,
+			1.2, 0, 0, 0,
+			0, 0, 4.5, 0,
+			0, 0, 0, 0
+		};
+		osg::Matrix m2(d2);
+		double d3[16] = {
+			0, 0, 0, .0001,
+			.0008, 0, 0, 0,
+			0, -.0001, 0, 0,
+			0, 0, 0, 0
+		};
+		osg::Matrix m3(d3);
+		QVERIFY(Util::osgMatrixEq(m1, m1) == true);
+		QVERIFY(Util::osgMatrixEq(m1, m2) == false);
+		QVERIFY(Util::osgMatrixEq(m1, m3, .001) == true);
+	}
 };
 
 QTEST_MAIN(Util_test)

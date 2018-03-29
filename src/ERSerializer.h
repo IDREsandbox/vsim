@@ -15,7 +15,7 @@ namespace FlatBuffers {
 
 namespace ERSerializer {
 	void readERTable(const VSim::FlatBuffers::ERTable *buffer, EResourceGroup *group);
-	flatbuffers::Offset<VSim::FlatBuffers::ERTable> createERTable(const EResourceGroup *group, flatbuffers::FlatBufferBuilder *builder);
+	flatbuffers::Offset<VSim::FlatBuffers::ERTable> createERTable(flatbuffers::FlatBufferBuilder *builder, const EResourceGroup *group);
 }
 
 //void readEResource();

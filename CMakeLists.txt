@@ -256,8 +256,10 @@ set(ERSerializer_src
   src/Group.h
   src/ERSerializer.cpp
   src/ERSerializer.h
+  src/TypesSerializer.cpp
+  src/TypesSerializer.h
   ${CMAKE_BINARY_DIR}/generated/types_generated.h
-  generated/eresources_generated.h
+  ${CMAKE_BINARY_DIR}/generated/eresources_generated.h
   src/resources/ERFilterSortProxy.h
   src/resources/ERFilterSortProxy.cpp
   src/resources/ECategory.h

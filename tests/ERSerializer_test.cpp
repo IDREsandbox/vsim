@@ -1,6 +1,7 @@
 #include <QTest>
 #include <QDebug>
 #include <QSignalSpy>
+#include <osg/Matrix>
 
 #include "ERSerializer.h"
 #include "resources/EResourceGroup.h"
@@ -8,6 +9,7 @@
 #include "resources/ECategoryGroup.h"
 #include "resources/ECategory.h"
 #include "Util.h"
+#include <QMatrix4x4>
 
 namespace fb = VSim::FlatBuffers;
 class ERSerializer_test : public QObject {
@@ -44,6 +46,15 @@ void writeReadTest() {
 	res->setAutoLaunch(false);
 	res->setLocalRange(15.0f);
 	res->setCategory(cat1);
+
+	osg::Matrix view_matrix;
+	osg::Vec3 eye(12.0f, 12.0f, 12.0f);
+	osg::Vec3 target(11.9f, 3.14f, -8.0f);
+	osg::Vec3 up(0.0f, 0.0f, 1.0f);
+	view_matrix = osg::Matrix::lookAt(eye, target, up);
+	osg::Matrix camera_matrix = osg::Matrix::inverse(view_matrix);
+	res->setCameraMatrix(camera_matrix);
+
 	resources->addChild(res);
 
 	res = new EResource;
@@ -55,7 +66,7 @@ void writeReadTest() {
 	// save to buffer
 	flatbuffers::FlatBufferBuilder builder;
 	flatbuffers::Offset<fb::ERTable> o_ers =
-		ERSerializer::createERTable(resources.get(), &builder);
+		ERSerializer::createERTable(&builder, resources.get());
 	builder.Finish(o_ers);
 
 	// read from buffer
@@ -92,6 +103,10 @@ void writeReadTest() {
 	QCOMPARE(nres->getAutoLaunch(), false);
 	QCOMPARE(nres->getLocalRange(), 15.0f);
 	QCOMPARE(nres->getCategory(), ncat1);
+
+	auto cm = nres->getCameraMatrix();
+	QVERIFY(Util::osgMatrixEq(nres->getCameraMatrix(), camera_matrix, .00001));
+
 	nres = nresources->getResource(1);
 	QCOMPARE(nres->getResourceName(), "res2");
 	QCOMPARE(nres->getERType(), EResource::FILE);

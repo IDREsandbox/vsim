@@ -37,7 +37,7 @@ table EResource {
   reposition:bool;
   autolaunch:bool;
   range:float32;
-  camera:CameraPosLook;
+  camera:CameraPosDirUp;
 
   category_index:int32;
 }

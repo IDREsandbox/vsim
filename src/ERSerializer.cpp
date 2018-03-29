@@ -1,9 +1,9 @@
 #include "ERSerializer.h"
+#include "TypesSerializer.h"
 
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"
 #include "resources/ECategoryGroup.h"
-#include <QDebug>
 #include <unordered_map>
 
 namespace fb = VSim::FlatBuffers;
@@ -16,10 +16,8 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 	auto categories = buffer->categories();
 	for (auto o_cat : *categories) {
 		ECategory * cat = new ECategory();
-		cat->setCategoryName(o_cat->name()->str());
-		
-		const fb::Color *c = o_cat->color();
-		cat->setColor(QColor(c->r(), c->g(), c->b(), c->a()));
+		if (o_cat->name()) cat->setCategoryName(o_cat->name()->str());
+		if (o_cat->color()) cat->setColor(Serializer::fb2qtColor(*o_cat->color()));
 		cats->addChild(cat);
 	}
 
@@ -29,10 +27,10 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 		EResource *res = new EResource();
 
 		res->setERType(static_cast<EResource::ERType>(o_res->type()));
-		res->setResourceName(o_res->name()->str());
-		res->setAuthor(o_res->author()->str());
-		res->setResourceDescription(o_res->description()->str());
-		res->setResourcePath(o_res->path()->str());
+		if (o_res->name()) res->setResourceName(o_res->name()->str());
+		if (o_res->author()) res->setAuthor(o_res->author()->str());
+		if (o_res->description()) res->setResourceDescription(o_res->description()->str());
+		if (o_res->path()) res->setResourcePath(o_res->path()->str());
 		res->setGlobal(o_res->global());
 		res->setCopyright(static_cast<EResource::Copyright>(o_res->copyright()));
 		res->setMinYear(o_res->year_min());
@@ -40,11 +38,7 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 		res->setReposition(o_res->reposition());
 		res->setAutoLaunch(o_res->autolaunch());
 		res->setLocalRange(o_res->range());
-
-		// TODO
-		const fb::CameraPosLook *s_camera = o_res->camera();
-		osg::Matrix camera_matrix;
-		res->setCameraMatrix(camera_matrix);
+		if (o_res->camera()) res->setCameraMatrix(Serializer::fb2osgCameraMatrix(*o_res->camera()));
 
 		// set category pointer
 		int cat_index = o_res->category_index();
@@ -57,7 +51,7 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 	}
 }
 
-flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(const EResourceGroup *group, flatbuffers::FlatBufferBuilder *builder)
+flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(flatbuffers::FlatBufferBuilder *builder, const EResourceGroup *group)
 {
 	const ECategoryGroup *cats = group->getCategories();
 
@@ -78,8 +72,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(const EResourceGrou
 		auto o_name = builder->CreateString(cat->getCategoryName());
 
 		// color
-		QColor qcolor = cat->getColor();
-		fb::Color s_color = fb::Color(qcolor.red(), qcolor.green(), qcolor.blue(), qcolor.alpha());
+		fb::Color s_color = Serializer::qt2fbColor(cat->getColor());
 
 		auto o_cat = fb::CreateECategory(*builder, o_name, &s_color);
 		categories.push_back(o_cat);
@@ -113,9 +106,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(const EResourceGrou
 		b_res.add_reposition(res->getReposition());
 		b_res.add_autolaunch(res->getAutoLaunch());
 		b_res.add_range(res->getLocalRange());
-
-		// TODO
-		fb::CameraPosLook s_camera;
+		fb::CameraPosDirUp s_camera = Serializer::osg2fbCameraMatrix(res->getCameraMatrix());
 		b_res.add_camera(&s_camera);
 
 		// lookup category in index table

@@ -12,9 +12,10 @@ struct Vec3 {
   z:float;
 }
 
-struct CameraPosLook {
+struct CameraPosDirUp {
   pos:Vec3;
-  look_dir:Vec3;
+  dir:Vec3;
+  up:Vec3;
 }
 
 struct Color {

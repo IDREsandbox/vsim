@@ -242,6 +242,7 @@ namespace Util
 	// 
 	QString osgMatrixToQString(osg::Matrix);
 	osg::Vec4d mult_vec(osg::Matrixd M, osg::Vec4d v);
+	bool osgMatrixEq(const osg::Matrix m1, const osg::Matrix m2, double epsilon = .001);
 
 	//4x4 transpose
 	osg::Matrixd transpose(osg::Matrixd m);
