@@ -7,20 +7,27 @@ namespace VSim.FlatBuffers;
 file_extension "vsim";
 file_identifier "VSIM";
 
+table Model {
+  data:[byte];
+  format:string;
+  ascii:bool;
+}
+
 table Root {
   version:string;
   narratives:NarrativeTable;
   eresources:ERTable;
-  hair:int32;
-  cat:float;
-  // model_information
-  // lighting options
+  model:Model;
+  // model information
+  // lighting settings
+  // camera settings
+  // start year
 }
 
-table CameraOptions {
-  fov:float = 60;
-  nearClip:float = 1;
-  farClip:float = 1000;
-}
+// table CameraOptions {
+//   fov:float = 60;
+//   nearClip:float = 1;
+//   farClip:float = 1000;
+// }
 
 root_type Root;

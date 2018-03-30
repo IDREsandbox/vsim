@@ -97,18 +97,21 @@ The old vsim used built in osg serializers. This had several downsides
         - GroupModel means we can make QAbstractItemModels for everything w/o too much work
     - no need for additional libraries
     - just one list, no separate read/write functions
+    - moving away from Group means a ton of work
 - cons
     - everything has to be an osg::Node of osg::Group
         - leads to tons of dynamic_cast in the code, and null checking (ugly, slow, error prone)
         - code and format is inherently tied to osg
-    - other annoying code stuff
+    - annoying code stuff with osg::Node
         - copyop, destructor, META_Node
-        - enums have to be
+        - enums have to be inside the class that uses them, restricted to one class
         - have to write getters/setters for everything
         - have to write duplicate getters/setters if member is based on a qt thing or enum
         - writing out the inheritance list as strings, typo -> incompatible forever
         - fixed class names (kind of?), led to Narrative2 rename
         - cmake has to compile serializers in separate step for some reason
+        - all of the osg::Node stuff that fills intellisense
+        - osg ref ptrs
     - hard to test? never really tried
     - no version number, no forward/backward binary compatibility
         - every serializer change -> all files are now incompatible

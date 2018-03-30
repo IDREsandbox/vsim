@@ -90,7 +90,7 @@ public:
 	int m_point_size;
 	bool m_ital;
 	bool m_underline;
-	bool m_strikethrough;
+	//bool m_strikethrough;
 };
 
 #endif /* LABELSTYLE_H */

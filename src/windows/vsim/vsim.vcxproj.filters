@@ -601,6 +601,9 @@
     <ClCompile Include="..\..\ERSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\NarrativeSerializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Util.h">
@@ -681,5 +684,14 @@
     <ClInclude Include="..\..\ERSerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\NarrativeSerializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="../../*.fbs" />
+    <CustomBuild Include="../../*.fbs" />
+    <CustomBuild Include="../../*.fbs" />
+    <CustomBuild Include="../../*.fbs" />
   </ItemGroup>
 </Project>

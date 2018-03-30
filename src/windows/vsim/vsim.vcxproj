@@ -74,6 +74,7 @@
     <ClCompile Include="..\..\ModelTableModel.cpp" />
     <ClCompile Include="..\..\mrichtextedit.cpp" />
     <ClCompile Include="..\..\mtextedit.cpp" />
+    <ClCompile Include="..\..\NarrativeSerializer.cpp" />
     <ClCompile Include="..\..\narrative\CanvasContainer.cpp" />
     <ClCompile Include="..\..\narrative\Narrative2.cpp" />
     <ClCompile Include="..\..\narrative\NarrativeCanvas.cpp" />
@@ -152,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\BaseFirstPersonManipulator.h" />
     <ClInclude Include="..\..\ERSerializer.h" />
+    <ClInclude Include="..\..\NarrativeSerializer.h" />
     <ClInclude Include="GeneratedFiles\eresources_generated.h" />
     <ClInclude Include="GeneratedFiles\narratives_generated.h" />
     <ClInclude Include="GeneratedFiles\types_generated.h" />

@@ -17,7 +17,7 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 	for (auto o_cat : *categories) {
 		ECategory * cat = new ECategory();
 		if (o_cat->name()) cat->setCategoryName(o_cat->name()->str());
-		if (o_cat->color()) cat->setColor(Serializer::fb2qtColor(*o_cat->color()));
+		if (o_cat->color()) cat->setColor(TypesSerializer::fb2qtColor(*o_cat->color()));
 		cats->addChild(cat);
 	}
 
@@ -38,7 +38,7 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 		res->setReposition(o_res->reposition());
 		res->setAutoLaunch(o_res->autolaunch());
 		res->setLocalRange(o_res->range());
-		if (o_res->camera()) res->setCameraMatrix(Serializer::fb2osgCameraMatrix(*o_res->camera()));
+		if (o_res->camera()) res->setCameraMatrix(TypesSerializer::fb2osgCameraMatrix(*o_res->camera()));
 
 		// set category pointer
 		int cat_index = o_res->category_index();
@@ -72,7 +72,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(flatbuffers::FlatBu
 		auto o_name = builder->CreateString(cat->getCategoryName());
 
 		// color
-		fb::Color s_color = Serializer::qt2fbColor(cat->getColor());
+		fb::Color s_color = TypesSerializer::qt2fbColor(cat->getColor());
 
 		auto o_cat = fb::CreateECategory(*builder, o_name, &s_color);
 		categories.push_back(o_cat);
@@ -106,7 +106,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(flatbuffers::FlatBu
 		b_res.add_reposition(res->getReposition());
 		b_res.add_autolaunch(res->getAutoLaunch());
 		b_res.add_range(res->getLocalRange());
-		fb::CameraPosDirUp s_camera = Serializer::osg2fbCameraMatrix(res->getCameraMatrix());
+		fb::CameraPosDirUp s_camera = TypesSerializer::osg2fbCameraMatrix(res->getCameraMatrix());
 		b_res.add_camera(&s_camera);
 
 		// lookup category in index table

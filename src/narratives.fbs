@@ -2,6 +2,9 @@ include "types.fbs";
 
 namespace VSim.FlatBuffers;
 
+file_extension "nar";
+file_identifier "VSNR";
+
 table NarrativeTable {
   narratives:[Narrative];
 }
@@ -92,8 +95,10 @@ table ImageStyle {
 }
 
 struct Rect {
-  pos:Vec2;
-  size:Vec2;
+  x:float;
+  y:float;
+  w:float;
+  h:float;
 }
 
 table CanvasLabel {
@@ -110,3 +115,5 @@ table CanvasImage {
   rect:Rect;
   line_style:LineStyle;
 }
+
+root_type NarrativeTable;

@@ -73,11 +73,6 @@ include_directories(${Qt5Test_INCLUDE_DIRS})
 include_directories(${PROJECT_BINARY_DIR}/VSim_objects_autogen/include_Release)
 add_definitions(${Qt5Widgets_DEFINITIONS})
 add_definitions(${Qt5Test_DEFINITIONS})
-# get_target_property(QtWidgets Qt5::Core LOCATION)
-# get_property(GENFOLDER GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER)
-# message("autogen folder" ${AUTOGEN_TARGETS_FOLDER} "prop?" ${GENFOLDER})
-# message("automoc folder" ${AUTOMOC_TARGETS_FOLDER})
-# message("cmake binary" ${CMAKE_BINARY_DIR})
 
 # flatbuffers stuff
 # sources in src/*
@@ -280,8 +275,46 @@ add_test(NAME ERSerializer_test COMMAND ERSerializer_test)
 target_link_libraries(ERSerializer_test Qt5::Widgets Qt5::Test)
 target_link_libraries(ERSerializer_test ${OPENSCENEGRAPH_LIBRARIES})
 
+set(NarrativeSerializer_src
+  tests/NarrativeSerializer_test.cpp
+  src/Group.cpp
+  src/Group.h
+  src/NarrativeSerializer.cpp
+  src/NarrativeSerializer.h
+  src/TypesSerializer.cpp
+  src/TypesSerializer.h
+  ${CMAKE_BINARY_DIR}/generated/types_generated.h
+  ${CMAKE_BINARY_DIR}/generated/narratives_generated.h
+  src/narrative/Narrative2.cpp
+  src/narrative/Narrative2.h
+  src/narrative/NarrativeSlide.cpp
+  src/narrative/NarrativeSlide.h
+  src/narrative/NarrativeSlideLabel.cpp
+  src/narrative/NarrativeSlideLabel.h
+  src/narrative/NarrativeSlideItem.cpp
+  src/narrative/NarrativeSlideItem.h
+  src/narrative/NarrativeGroup.cpp
+  src/narrative/NarrativeGroup.h
+  src/deprecated/osgNewWidget/Widget.cpp
+  src/deprecated/osgNewWidget/Widget.h
+  src/deprecated/osgNewWidget/Label.cpp
+  src/deprecated/osgNewWidget/Label.h
+  src/LabelStyle.cpp
+  src/LabelStyle.h
+  src/LabelStyleGroup.cpp
+  src/LabelStyleGroup.h
+  src/Util.h
+  src/Util.cpp
+)
+add_executable(NarrativeSerializer_test ${NarrativeSerializer_src})
+add_test(NAME NarrativeSerializer_test COMMAND NarrativeSerializer_test)
+target_link_libraries(NarrativeSerializer_test Qt5::Widgets Qt5::Test)
+target_link_libraries(NarrativeSerializer_test ${OPENSCENEGRAPH_LIBRARIES})
+
+# tests that involve everything
 set(TEST_LIST
   Selection_test
+  VSimSerializer_test
   )
 # file(GLOB TEST_SEARCH tests/*.cpp)
 # foreach(TEST_SRC ${TEST_SEARCH})

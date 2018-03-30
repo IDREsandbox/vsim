@@ -2,6 +2,9 @@ include "types.fbs";
 
 namespace VSim.FlatBuffers;
 
+file_extension "er";
+file_identifier "VSER";
+
 table ERTable {
   resources:[EResource];
   categories:[ECategory];
@@ -46,3 +49,5 @@ table ECategory {
   name:string;
   color:Color;
 }
+
+root_type ERTable;

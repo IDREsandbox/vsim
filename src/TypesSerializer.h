@@ -17,7 +17,7 @@ namespace FlatBuffers {
 }
 }
 
-namespace Serializer {
+namespace TypesSerializer {
 	QColor fb2qtColor(const VSim::FlatBuffers::Color &fcolor);
 	VSim::FlatBuffers::Color qt2fbColor(const QColor &qcolor);
 

@@ -3,27 +3,27 @@
 
 namespace fb = VSim::FlatBuffers;
 
-QColor Serializer::fb2qtColor(const fb::Color &fcolor)
+QColor TypesSerializer::fb2qtColor(const fb::Color &fcolor)
 {
 	return QColor(fcolor.r(), fcolor.g(), fcolor.b(), fcolor.a());
 }
 
-fb::Color Serializer::qt2fbColor(const QColor &qcolor)
+fb::Color TypesSerializer::qt2fbColor(const QColor &qcolor)
 {
 	return fb::Color(qcolor.red(), qcolor.green(), qcolor.blue(), qcolor.alpha());
 }
 
-osg::Vec3f Serializer::fb2osgVec(const fb::Vec3 &fvec)
+osg::Vec3f TypesSerializer::fb2osgVec(const fb::Vec3 &fvec)
 {
 	return osg::Vec3f(fvec.x(), fvec.y(), fvec.z());
 }
 
-fb::Vec3 Serializer::osg2fbVec(const osg::Vec3f &ovec)
+fb::Vec3 TypesSerializer::osg2fbVec(const osg::Vec3f &ovec)
 {
 	return fb::Vec3(ovec.x(), ovec.y(), ovec.z());
 }
 
-osg::Matrix Serializer::fb2osgCameraMatrix(
+osg::Matrix TypesSerializer::fb2osgCameraMatrix(
 	const fb::CameraPosDirUp &buffer)
 {
 	osg::Vec3f dir = fb2osgVec(buffer.dir());
@@ -36,7 +36,7 @@ osg::Matrix Serializer::fb2osgCameraMatrix(
 	return mat;
 }
 
-fb::CameraPosDirUp Serializer::osg2fbCameraMatrix(const osg::Matrix &mat)
+fb::CameraPosDirUp TypesSerializer::osg2fbCameraMatrix(const osg::Matrix &mat)
 {
 	osg::Vec3f eye;
 	osg::Vec3f target;

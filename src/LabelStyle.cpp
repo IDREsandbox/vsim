@@ -11,8 +11,7 @@ LabelStyle::LabelStyle()
 	m_point_size(12),
 	m_weight(QFont::Weight::Normal),
 	m_ital(false),
-	m_underline(false),
-	m_strikethrough(false)
+	m_underline(false)
 {
 }
 
@@ -96,7 +95,6 @@ void LabelStyle::copy(const LabelStyle *other)
 	m_point_size = other->m_point_size;
 	m_ital = other->m_ital;
 	m_underline = other->m_underline;
-	m_strikethrough = other->m_strikethrough;
 }
 
 QColor LabelStyle::backgroundColor() const
