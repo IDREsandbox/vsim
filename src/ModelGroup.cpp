@@ -11,12 +11,6 @@ ModelGroup::ModelGroup()
 	//qDebug() << "new model table" << m_data_table.get();
 }
 
-ModelGroup::ModelGroup(const ModelGroup & n, const osg::CopyOp & copyop)
-	: m_year(n.m_year)
-{
-	qDebug() << "Model Group copy constructor?";
-}
-
 void ModelGroup::merge(ModelGroup *other)
 {
 	for (uint i = 0; i < other->getNumChildren(); i++) {

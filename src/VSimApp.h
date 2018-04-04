@@ -18,8 +18,6 @@
 #include <QSize>
 #include <memory>
 
-#include "VSimRoot.h"
-
 class NarrativeControl;
 class NarrativePlayer;
 class ERControl;

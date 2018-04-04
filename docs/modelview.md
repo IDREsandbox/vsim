@@ -81,17 +81,6 @@ TODO: explain this
 - Narratives/Slides/Labels
 - Embedded Resources
 
-
-## Disconnecting
-
-Maintaining consistency between gui and data is hard.
-
-Suppose a gui thing is listening to changes in Joe*. The model removes Joe* and emits removed index 3. The gui has to somehow disconnect Joe*, so it would have to maintain a map index->ptr to cleanup. Alternatively you can easily disconnect on aboutToRemove(3).
-
-1. aboutToRemove/removed
-2. removed(*)
-3. keep smart pointer reference
-
 ## Efficient removal/insertion
 
 Suppose you have a scroll box with 1000 items. Select 500 and delete them. If the box refreshes it's layout on every deletion its a O(n^2) problem. Making it an O(n) or O(logn) requires grouping the operations together. I kept changing my mind about how to handle this, first leaving it at n^2, then trying sets, then trying vectors, then going to range removal... so the code is really messy and uses different methods depending on the situation.

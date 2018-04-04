@@ -45,10 +45,8 @@ ECategoryControl::ECategoryControl(VSimApp *app, QObject * parent)
 
 void ECategoryControl::load(ECategoryGroup * cats)
 {
-	//if (m_categories.get()) disconnect(m_categories.get(), 0, this, 0);
-	// TODO: something with null?
-	m_categories = cats;
 	m_category_model->setGroup(cats);
+	m_categories = cats;
 }
 
 void ECategoryControl::execDeleteCategory(QAbstractItemModel * model, const QModelIndex & index)

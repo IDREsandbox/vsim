@@ -18,7 +18,7 @@
 
 #include <QDesktopServices>
 
-ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObject *parent)
+ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	: QObject(parent),
 	m_app(app),
 	m_window(window),
@@ -45,7 +45,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 	m_local_proxy->showGlobal(false);
 	m_local_proxy->showLocal(true);
 
-	m_category_control = new ECategoryControl(app, nullptr);
+	m_category_control = new ECategoryControl(app, this);
 
 	m_category_checkbox_model = new CheckableListProxy(this);
 	m_category_checkbox_model->setSourceModel(m_category_control->categoryModel());
@@ -131,15 +131,12 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 		}
 	});
 
-	connect(m_app, &VSimApp::sAboutToReset, this, [this]() {
-		setDisplay(-1);
-	});
-
-	load(ers);
+	load(nullptr);
 }
 
 void ERControl::load(EResourceGroup *ers)
 {
+	setDisplay(-1);
 	if (ers == nullptr) {
 		m_ers = nullptr;
 		m_categories = nullptr;
@@ -329,7 +326,8 @@ void ERControl::setDisplay(int index, bool go)
 {
 	m_active_item = index;
 
-	EResource *res = m_ers->getResource(m_active_item);
+	EResource *res = nullptr;
+	if (m_ers) res = m_ers->getResource(m_active_item);
 	if (!res) {
 		m_display->setInfo(nullptr);
 		m_display->hide();

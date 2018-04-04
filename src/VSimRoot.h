@@ -1,7 +1,6 @@
 #ifndef NARRATIVEROOT_H
 #define NARRATIVEROOT_H
 
-#include <QObject>
 #include <osg/Group>
 #include <memory>
 
@@ -13,8 +12,7 @@ namespace VSim { namespace FlatBuffers {
 	struct SettingsT;
 }}
 
-class VSimRoot : public QObject {
-	Q_OBJECT
+class VSimRoot {
 public:
 	VSimRoot();
 	~VSimRoot();
@@ -41,9 +39,9 @@ public:
 	void debug();
 
 private:
-	NarrativeGroup *m_narratives; // qt ownership
-	ModelGroup *m_models;
-	EResourceGroup *m_resources;
+	osg::ref_ptr<NarrativeGroup> m_narratives; // qt ownership
+	osg::ref_ptr<ModelGroup> m_models;
+	osg::ref_ptr<EResourceGroup> m_resources;
 	std::unique_ptr<VSim::FlatBuffers::SettingsT> m_settings;
 };
 

@@ -19,7 +19,6 @@
 #include "settings_generated.h" // SettingsT
 
 VSimRoot::VSimRoot() {
-	qDebug() << "root constructor, adding children";
 	m_narratives = new NarrativeGroup;
 	m_narratives->setName("Narratives");
 

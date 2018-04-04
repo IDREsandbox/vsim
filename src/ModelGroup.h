@@ -12,8 +12,6 @@ class ModelGroup : public Group {
 	Q_OBJECT
 public:
 	ModelGroup();
-	ModelGroup(const ModelGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
-	META_Node(, ModelGroup);
 
 	// merge another model group
 	void merge(ModelGroup *other);

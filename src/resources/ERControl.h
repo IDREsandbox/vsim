@@ -29,7 +29,7 @@ class ERControl : public QObject
 {
 	Q_OBJECT;
 public:
-	ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObject *parent = nullptr);
+	ERControl(VSimApp *app, MainWindow *window, QObject *parent = nullptr);
 
 	void load(EResourceGroup *ers);
 

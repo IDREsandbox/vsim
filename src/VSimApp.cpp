@@ -42,7 +42,6 @@
 VSimApp::VSimApp(MainWindow* window)
 	: m_window(window),
 	m_filename(""),
-	m_root(new VSimRoot),
 	m_model_table_model(new ModelTableModel(this))
 {
 	// undo stack
@@ -62,7 +61,7 @@ VSimApp::VSimApp(MainWindow* window)
 	});
 
 	m_narrative_control = new NarrativeControl(this, m_window, this);
-	m_er_control = new ERControl(this, m_window, m_root->resources(), this);
+	m_er_control = new ERControl(this, m_window, this);
 	m_navigation_control = new NavigationControl(this, m_window->getViewerWidget(), m_window->navigationMenu(), this);
 
 	// thumbnails
@@ -93,7 +92,7 @@ VSimApp::VSimApp(MainWindow* window)
 		setCameraMatrix(m_camera_target);
 	});
 
-	initWithVSim(m_root.get());
+	initWithVSim(new VSimRoot);
 }
 
 VSimApp::~VSimApp() {
@@ -115,7 +114,6 @@ void VSimApp::setState(State s)
 	if (s == m_state) return;
 	State old = s;
 	m_state = s;
-	qDebug() << "state change" << StateStrings[s];
 	stopCameraMoving();
 	emit sStateChanged(old, s);
 }
