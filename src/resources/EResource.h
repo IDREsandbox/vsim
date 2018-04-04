@@ -18,11 +18,7 @@ class EResource : public QObject, public osg::Node {
 
 public:
 	EResource();
-	EResource(const EResource& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	EResource(const EResourcesNode *old, const std::map<std::string, ECategory*> &cats); // converts old resource to a new one
-	virtual ~EResource();
-
-	META_Node(, EResource)
 
 	const std::string& getResourceName() const;
 	void setResourceName(const std::string& name);

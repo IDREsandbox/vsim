@@ -27,6 +27,9 @@ Used for:
 - Narratives/Slides/Labels are based on our MVC
 - Embedded Resources
 
+TODO:
+- I recently removed osg serializers -> our stuff doesn't need to inherit Group or osg::Node, sooo... there are many options to explore now
+
 ### Model
 
 The model is the osg tree. Data nodes like NarrativeSlide emit signals when data changes. Commands operate on the data and allow for undo/redo of changes. There are generic template commands in Commands.h.

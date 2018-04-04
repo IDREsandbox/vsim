@@ -1,25 +1,21 @@
-#ifndef NARRATIVE2_H
-#define NARRATIVE2_H
+#ifndef NARRATIVE_H
+#define NARRATIVE_H
 
 #include <string>
 #include <osg/Node>
 #include <QObject>
-#include "narrative/NarrativeSlide.h"
-#include "deprecated/narrative/Narrative.h"
 #include "Group.h"
+#include "Command.h"
 
 class LabelStyleGroup;
+class NarrativeOld;
 
-class Narrative2 : public Group {
+class Narrative : public Group {
 	Q_OBJECT
 
 public:
-	Narrative2();
-	Narrative2(const Narrative2& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
-	Narrative2(const Narrative *old); // converts old narrative to a new one
-	virtual ~Narrative2();
-
-	META_Node(, Narrative2)
+	Narrative();
+	Narrative(const NarrativeOld *old); // converts old narrative to a new one
 
 	const std::string& getTitle() const;
 	void setTitle(const std::string& name);
@@ -45,19 +41,19 @@ signals:
 
 public: // COMMANDS
 
-	class SetTitleCommand : public ModifyCommand<Narrative2, const std::string&> {
+	class SetTitleCommand : public ModifyCommand<Narrative, const std::string&> {
 	public:
-		SetTitleCommand(Narrative2 *nar, const std::string &title, QUndoCommand *parent = nullptr)
+		SetTitleCommand(Narrative *nar, const std::string &title, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getTitle, &setTitle, title, nar, parent) {}
 	};
-	class SetAuthorCommand : public ModifyCommand<Narrative2, const std::string&> {
+	class SetAuthorCommand : public ModifyCommand<Narrative, const std::string&> {
 	public:
-		SetAuthorCommand(Narrative2 *nar, const std::string &author, QUndoCommand *parent = nullptr)
+		SetAuthorCommand(Narrative *nar, const std::string &author, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getAuthor, &setAuthor, author, nar, parent) {}
 	};
-	class SetDescriptionCommand : public ModifyCommand<Narrative2, const std::string&> {
+	class SetDescriptionCommand : public ModifyCommand<Narrative, const std::string&> {
 	public:
-		SetDescriptionCommand(Narrative2 *nar, const std::string &desc, QUndoCommand *parent = nullptr)
+		SetDescriptionCommand(Narrative *nar, const std::string &desc, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getDescription, &setDescription, desc, nar, parent) {}
 	};
 
@@ -70,4 +66,4 @@ private:
 	osg::ref_ptr<LabelStyleGroup> m_styles;
 };
 
-#endif /* NARRATIVE2_H */
+#endif /* NARRATIVE_H */

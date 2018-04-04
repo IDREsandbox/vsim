@@ -13,10 +13,6 @@ NarrativeSlide::NarrativeSlide()
 {
 }
 
-NarrativeSlide::NarrativeSlide(const NarrativeSlide & n, const osg::CopyOp & copyop)
-{
-}
-
 NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransition * old_transition)
 	: NarrativeSlide()
 {
@@ -110,10 +106,6 @@ NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransit
 
 		}
 	}
-}
-
-NarrativeSlide::~NarrativeSlide()
-{
 }
 
 const osg::Matrixd & NarrativeSlide::getCameraMatrix() const

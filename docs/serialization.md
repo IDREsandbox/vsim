@@ -19,6 +19,7 @@ flatbuffer definitions
 - types.fbs
 - eresources.fbs
 - narratives.fbs
+- settings.fbs
 - vsim.fbs
 
 serialization code

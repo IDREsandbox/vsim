@@ -287,8 +287,8 @@ set(NarrativeSerializer_src
   src/TypesSerializer.h
   ${CMAKE_BINARY_DIR}/generated/types_generated.h
   ${CMAKE_BINARY_DIR}/generated/narratives_generated.h
-  src/narrative/Narrative2.cpp
-  src/narrative/Narrative2.h
+  src/narrative/Narrative.cpp
+  src/narrative/Narrative.h
   src/narrative/NarrativeSlide.cpp
   src/narrative/NarrativeSlide.h
   src/narrative/NarrativeSlideLabel.cpp

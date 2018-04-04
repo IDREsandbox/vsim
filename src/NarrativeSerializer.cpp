@@ -1,7 +1,7 @@
 #include "NarrativeSerializer.h"
 
 #include "narrative/NarrativeGroup.h"
-#include "narrative/Narrative2.h"
+#include "narrative/Narrative.h"
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeSlideItem.h"
 #include "narrative/NarrativeSlideLabel.h"
@@ -42,7 +42,7 @@ void NarrativeSerializer::readNarrativeTable(
 		for (auto fb_nar : *fb_nars) {
 			if (!fb_nar) continue;
 
-			Narrative2 *nar = new Narrative2;
+			Narrative *nar = new Narrative;
 
 			if (fb_nar->styles()) readStyleTable(fb_nar->styles(), nar->labelStyles());
 			if (fb_nar->title()) nar->setTitle(fb_nar->title()->str());
@@ -77,7 +77,7 @@ flatbuffers::Offset<fb::NarrativeTable>
 	// build narratives
 	std::vector<flatbuffers::Offset<fb::Narrative>> v_nars;
 	for (uint i = 0; i < group->getNumChildren(); i++) {
-		Narrative2 *nar = dynamic_cast<Narrative2*>(group->child(i));
+		Narrative *nar = dynamic_cast<Narrative*>(group->child(i));
 		if (!nar) continue;
 
 		// build styles

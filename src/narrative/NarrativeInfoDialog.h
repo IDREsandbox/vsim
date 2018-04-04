@@ -4,13 +4,13 @@
 #include <QDialogButtonBox>
 
 #include "ui_NarrativeInfoDialog.h"
-#include "narrative/Narrative2.h"
+#include "narrative/Narrative.h"
 
 class NarrativeInfoDialog : public QDialog {
 	Q_OBJECT
 public:
 	NarrativeInfoDialog(QWidget *parent = nullptr);
-	NarrativeInfoDialog(const Narrative2 *, QWidget *parent = nullptr);
+	NarrativeInfoDialog(const Narrative *, QWidget *parent = nullptr);
 	~NarrativeInfoDialog();
 
 	std::string getTitle() const;

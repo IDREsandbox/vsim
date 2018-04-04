@@ -1,14 +1,14 @@
 /*
- * Narrative.cpp
+ * NarrativeOld.cpp
  *
  *  Created on: Feb 4, 2011
  *	Author: eduardo
  */
 
-#include "deprecated/narrative/Narrative.h"
+#include "deprecated/narrative/NarrativeOld.h"
 #include "deprecated/narrative/NarrativeNode.h"
 
-Narrative::Narrative():
+NarrativeOld::NarrativeOld():
 		osg::Node(),
 		m_name("Unknown"),
 		m_description("Unknown"),
@@ -18,17 +18,17 @@ Narrative::Narrative():
 {
 }
 
-Narrative::~Narrative()
+NarrativeOld::~NarrativeOld()
 {
 }
 
-void Narrative::setSelection(int nodeIndex, bool isTransitionSelected)
+void NarrativeOld::setSelection(int nodeIndex, bool isTransitionSelected)
 {
 	assert(nodeIndex >= -1 && nodeIndex < (int)m_nodes.size());
 	m_selection = NarrativeSelectionInfo(nodeIndex, isTransitionSelected);
 }
 
-void Narrative::addNode(int nodeIndex, NarrativeNode* node, NarrativeTransition* tran)
+void NarrativeOld::addNode(int nodeIndex, NarrativeNode* node, NarrativeTransition* tran)
 {
 	assert(nodeIndex < (int)m_nodes.size());
 	assert(m_nodes.size() == m_transitions.size());
@@ -44,7 +44,7 @@ void Narrative::addNode(int nodeIndex, NarrativeNode* node, NarrativeTransition*
 	setSelection(actualNodeIndex, false);
 }
 
-void Narrative::removeNode(int nodeIndex)
+void NarrativeOld::removeNode(int nodeIndex)
 {
 	assert(nodeIndex >= 0 && nodeIndex < (int)m_nodes.size());
 	assert(m_nodes.size() == m_transitions.size());

@@ -6,7 +6,7 @@
 #include <osgDB/WriteFile>
 #include "Util.h"
 #include "VSimRoot.h"
-#include "narrative/Narrative2.h"
+#include "narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"
@@ -20,21 +20,22 @@ private:
 private slots:
 
 void robustStreamTest() {
-	VSimRoot *root = new VSimRoot;
+	VSimRoot root;
 	std::ifstream in("assets/test/cow_old.vsim", std::ios::binary);
 	QVERIFY(in.good());
-	bool ok = VSimSerializer::readStreamRobust(in, root);
+	bool ok = VSimSerializer::readStreamRobust(in, &root);
 	QVERIFY(ok);
 
 	// debug root
 	// root->debug();
 
-	QCOMPARE(root->narratives()->getNumChildren(), 2);
-	QCOMPARE(dynamic_cast<Narrative2*>(root->narratives()->child(0))->getTitle(), "nar2");
-	QCOMPARE(dynamic_cast<Narrative2*>(root->narratives()->child(0))->getTitle(), "nar1");
-	QCOMPARE(root->resources()->getNumChildren(), 1);
-	QCOMPARE(root->resources()->getResource(0)->getResourceName(), "er1");
-	//QCOMPARE(nroot->models()->child(0)->getName(), "cow.osg");
+	QCOMPARE(root.narratives()->getNumChildren(), 2);
+	// narrative titles
+	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(0))->getTitle(), "nar2");
+	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(1))->getTitle(), "nar1");
+	QCOMPARE(root.resources()->getNumChildren(), 1);
+	QCOMPARE(root.resources()->getResource(0)->getResourceName(), "er1");
+	//QCOMPARE(nroot.models()->child(0)->getName(), "cow.osg");
 }
 
 void osgStreamTest() {
@@ -161,23 +162,23 @@ void osgStreamTest() {
 }
 
 void writeReadFlatbuffer() {
-	osg::ref_ptr<VSimRoot> root = new VSimRoot;
+	VSimRoot root;
 	std::stringstream model_data;
 
 	// add some narratives
-	Narrative2 *nar = new Narrative2();
+	Narrative *nar = new Narrative();
 	nar->setTitle("nar1");
-	root->narratives()->addChild(nar);
-	root->narratives()->addChild(new Narrative2);
+	root.narratives()->addChild(nar);
+	root.narratives()->addChild(new Narrative);
 	// add some ers
 	EResource *er = new EResource;
 	er->setResourceName("er1");
-	root->resources()->addChild(er);
-	root->resources()->addChild(new EResource);
+	root.resources()->addChild(er);
+	root.resources()->addChild(new EResource);
 
 	// write to flatbuffer
 	flatbuffers::FlatBufferBuilder builder;
-	auto o_root = VSimSerializer::createRoot(&builder, root, model_data);
+	auto o_root = VSimSerializer::createRoot(&builder, &root, model_data);
 	fb::FinishRootBuffer(builder, o_root);
 	// read from flatbuffer
 	auto fb_root = fb::GetRoot(builder.GetBufferPointer());
@@ -185,48 +186,48 @@ void writeReadFlatbuffer() {
 	bool ok = fb::VerifyRootBuffer(flatbuffers::Verifier(builder.GetBufferPointer(), builder.GetSize()));
 	QVERIFY(ok);
 
-	osg::ref_ptr<VSimRoot> nroot = new VSimRoot;
-	VSimSerializer::readRoot(fb_root, nroot);
+	VSimRoot nroot;
+	VSimSerializer::readRoot(fb_root, &nroot);
 
 	// check
-	QCOMPARE(nroot->narratives()->getNumChildren(), 2);
-	QCOMPARE(dynamic_cast<Narrative2*>(nroot->narratives()->child(0))->getTitle(), "nar1");
-	QCOMPARE(nroot->resources()->getNumChildren(), 2);
-	QCOMPARE(nroot->resources()->getResource(0)->getResourceName(), "er1");
+	QCOMPARE(nroot.narratives()->getNumChildren(), 2);
+	QCOMPARE(dynamic_cast<Narrative*>(nroot.narratives()->child(0))->getTitle(), "nar1");
+	QCOMPARE(nroot.resources()->getNumChildren(), 2);
+	QCOMPARE(nroot.resources()->getResource(0)->getResourceName(), "er1");
 }
 void writeReadStream() {
-	osg::ref_ptr<VSimRoot> root = new VSimRoot;
+	VSimRoot root;
 
 	// add some narratives
-	Narrative2 *nar = new Narrative2();
+	Narrative *nar = new Narrative();
 	nar->setTitle("nar1");
-	root->narratives()->addChild(nar);
-	root->narratives()->addChild(new Narrative2);
+	root.narratives()->addChild(nar);
+	root.narratives()->addChild(new Narrative);
 	// add some ers
 	EResource *er = new EResource;
 	er->setResourceName("er1");
-	root->resources()->addChild(er);
-	root->resources()->addChild(new EResource);
+	root.resources()->addChild(er);
+	root.resources()->addChild(new EResource);
 	// add some models
 	osg::ref_ptr<osg::Node> cow;
 	cow = osgDB::readNodeFile("assets/test/cow.osgt");
-	root->models()->addChild(cow);
+	root.models()->addChild(cow);
 
 	// write to stream
 	std::stringstream stream;
-	VSimSerializer::writeStream(stream, root);
+	VSimSerializer::writeStream(stream, &root);
 
 	// read from stream
-	osg::ref_ptr<VSimRoot> nroot = new VSimRoot;
-	bool ok = VSimSerializer::readStream(stream, nroot);
+	VSimRoot nroot;
+	bool ok = VSimSerializer::readStream(stream, &nroot);
 
 	// check models
 	QCOMPARE(ok, true);
-	QCOMPARE(nroot->narratives()->getNumChildren(), 2);
-	QCOMPARE(dynamic_cast<Narrative2*>(nroot->narratives()->child(0))->getTitle(), "nar1");
-	QCOMPARE(nroot->resources()->getNumChildren(), 2);
-	QCOMPARE(nroot->resources()->getResource(0)->getResourceName(), "er1");
-	QCOMPARE(nroot->models()->child(0)->getName(), "cow.osg");
+	QCOMPARE(nroot.narratives()->getNumChildren(), 2);
+	QCOMPARE(dynamic_cast<Narrative*>(nroot.narratives()->child(0))->getTitle(), "nar1");
+	QCOMPARE(nroot.resources()->getNumChildren(), 2);
+	QCOMPARE(nroot.resources()->getResource(0)->getResourceName(), "er1");
+	QCOMPARE(nroot.models()->child(0)->getName(), "cow.osg");
 }
 
 void writeReadTestFull() {

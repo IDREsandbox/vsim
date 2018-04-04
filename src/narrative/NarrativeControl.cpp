@@ -17,7 +17,7 @@
 
 #include "NarrativeInfoDialog.h"
 #include "narrative/NarrativeGroup.h"
-#include "narrative/Narrative2.h"
+#include "narrative/Narrative.h"
 #include "narrative/NarrativeScrollBox.h"
 #include "narrative/SlideScrollBox.h"
 #include "narrative/SlideScrollItem.h"
@@ -262,7 +262,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 
 void NarrativeControl::editStyleSettings()
 {
-	Narrative2 *narrative = getCurrentNarrative();
+	Narrative *narrative = getCurrentNarrative();
 	if (!narrative) return;
 
 	StyleSettingsDialog dlg;
@@ -282,7 +282,7 @@ void NarrativeControl::newNarrative()
 		return;
 	}
 
-	Narrative2 *nar = new Narrative2;
+	Narrative *nar = new Narrative;
 
 	m_undo_stack->beginMacro("New Narrative");
 	int num_children = m_narrative_group->getNumChildren();
@@ -291,7 +291,7 @@ void NarrativeControl::newNarrative()
 	m_undo_stack->push(new SelectNarrativesCommand(this, { num_children }, ON_REDO));
 	m_undo_stack->endMacro();
 
-	Narrative2 *narrative = getNarrative(m_narrative_group->getNumChildren() - 1);
+	Narrative *narrative = getNarrative(m_narrative_group->getNumChildren() - 1);
 	narrative->setTitle(dlg.getTitle());
 	narrative->setAuthor(dlg.getAuthor());
 	narrative->setDescription(dlg.getDescription());
@@ -306,7 +306,7 @@ void NarrativeControl::editNarrativeInfo()
 		return;
 	}
 
-	Narrative2 *narrative = getNarrative(active_item);
+	Narrative *narrative = getNarrative(active_item);
 
 	NarrativeInfoDialog dlg(narrative);
 	int result = dlg.exec();
@@ -317,9 +317,9 @@ void NarrativeControl::editNarrativeInfo()
 
 	m_undo_stack->beginMacro("Set Narrative Info");
 	m_undo_stack->push(new SelectNarrativesCommand(this, { active_item }));
-	m_undo_stack->push(new Narrative2::SetTitleCommand(narrative, dlg.getTitle()));
-	m_undo_stack->push(new Narrative2::SetAuthorCommand(narrative, dlg.getAuthor()));
-	m_undo_stack->push(new Narrative2::SetDescriptionCommand(narrative, dlg.getDescription()));
+	m_undo_stack->push(new Narrative::SetTitleCommand(narrative, dlg.getTitle()));
+	m_undo_stack->push(new Narrative::SetAuthorCommand(narrative, dlg.getAuthor()));
+	m_undo_stack->push(new Narrative::SetDescriptionCommand(narrative, dlg.getDescription()));
 	m_undo_stack->endMacro();
 }
 
@@ -410,7 +410,7 @@ void NarrativeControl::openNarrative(int index)
 {
 	qInfo() << "open narrative at" << index;
 	if (index == m_current_narrative) return;
-	Narrative2 *nar = getNarrative(index);
+	Narrative *nar = getNarrative(index);
 	if (!nar || index < 0) {
 		m_current_narrative = -1;
 		m_slide_box->setGroup(nullptr);
@@ -561,7 +561,7 @@ void NarrativeControl::showSlideBox()
 {
 	if (m_current_narrative < 0) return;
 	m_bar->showSlides();
-	Narrative2 *nar = getCurrentNarrative();
+	Narrative *nar = getCurrentNarrative();
 	if (nar) m_bar->setSlidesHeader(nar->getTitle());
 }
 
@@ -572,7 +572,7 @@ void NarrativeControl::editSlide()
 		return;
 	}
 
-	Narrative2 *nar = getCurrentNarrative();
+	Narrative *nar = getCurrentNarrative();
 	if (!nar) {
 		qWarning() << "failed to edit slide - no narrative";
 		return;
@@ -657,12 +657,12 @@ int NarrativeControl::getCurrentNarrativeIndex()
 	return m_current_narrative;
 }
 
-std::vector<Narrative2*> NarrativeControl::getSelectedNarratives() const
+std::vector<Narrative*> NarrativeControl::getSelectedNarratives() const
 {
-	std::vector<Narrative2*> nars;
+	std::vector<Narrative*> nars;
 	auto sel = m_narrative_selection->toSet();
 	for (auto i : sel) {
-		Narrative2 *nar = dynamic_cast<Narrative2*>(m_narrative_group->child(i));
+		Narrative *nar = dynamic_cast<Narrative*>(m_narrative_group->child(i));
 		nars.push_back(nar);
 	}
 	return nars;
@@ -673,7 +673,7 @@ int NarrativeControl::getCurrentSlideIndex()
 	return m_current_slide;
 }
 
-Narrative2 * NarrativeControl::getCurrentNarrative()
+Narrative * NarrativeControl::getCurrentNarrative()
 {
 	if (m_current_narrative < 0) return nullptr;
 	return getNarrative(m_current_narrative);
@@ -685,15 +685,15 @@ NarrativeSlide * NarrativeControl::getCurrentSlide()
 	return getSlide(m_current_narrative, m_current_slide);
 }
 
-Narrative2 *NarrativeControl::getNarrative(int index)
+Narrative *NarrativeControl::getNarrative(int index)
 {
 	if (index < 0) return nullptr;
-	return dynamic_cast<Narrative2*>(m_narrative_group->child(index));
+	return dynamic_cast<Narrative*>(m_narrative_group->child(index));
 }
 
 NarrativeSlide * NarrativeControl::getSlide(int narrative, int slide)
 {
-	Narrative2 *nar = getNarrative(narrative);
+	Narrative *nar = getNarrative(narrative);
 	if (!nar) return nullptr;
 	return dynamic_cast<NarrativeSlide*>(nar->child(slide));
 }
@@ -708,7 +708,7 @@ NarrativeSlideLabel * NarrativeControl::getLabel(int narrative, int slide, int l
 
 void NarrativeControl::newSlide()
 {
-	Narrative2 *nar = getNarrative(m_current_narrative);
+	Narrative *nar = getNarrative(m_current_narrative);
 	auto matrix = m_window->m_osg_widget->getCameraMatrix();
 
 	// figure out where to insert
@@ -741,7 +741,7 @@ void NarrativeControl::deleteSlides()
 	if (m_narrative_selection->empty()) {
 		return;
 	}
-	Narrative2 *nar = getNarrative(m_current_narrative);
+	Narrative *nar = getNarrative(m_current_narrative);
 
 	m_undo_stack->beginMacro("Delete Slides");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, m_slide_selection->data(), ON_UNDO));
@@ -837,7 +837,7 @@ void NarrativeControl::moveSlides(const std::vector<std::pair<size_t, size_t>> &
 		return;
 	}
 
-	Narrative2 *narrative = getCurrentNarrative();
+	Narrative *narrative = getCurrentNarrative();
 	m_undo_stack->beginMacro("Move Slides");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, sfrom, ON_UNDO));
 	m_undo_stack->push(new Group::MoveNodesCommand(narrative, mapping));
@@ -862,7 +862,7 @@ void NarrativeControl::newLabel(LabelType style) {
 
 	qInfo() << "Creating new canvas label";
 
-	Narrative2 *nar = getCurrentNarrative();
+	Narrative *nar = getCurrentNarrative();
 	LabelStyle *label_style = nar->getLabelStyles()->getStyle((LabelType)style);
 	if (label_style) label->applyStyle(label_style);
 

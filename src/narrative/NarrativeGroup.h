@@ -11,9 +11,7 @@ class NarrativeGroup : public Group {
 	Q_OBJECT
 public:
 	NarrativeGroup() {}
-	NarrativeGroup(const NarrativeGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
 	NarrativeGroup(const osg::Group *old_group);
-	META_Node(, NarrativeGroup)
 };
 
 #endif

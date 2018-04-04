@@ -16,10 +16,9 @@ NarrativeSlideLabel::NarrativeSlideLabel()
 	setHtml("New Label");
 }
 
-const std::string &NarrativeSlideLabel::getHtml() const
+std::string NarrativeSlideLabel::getHtml() const
 {
-	m_text = m_document->toHtml().toStdString();
-	return m_text;
+	return m_document->toHtml().toStdString();
 }
 
 void NarrativeSlideLabel::setHtml(const std::string &html)

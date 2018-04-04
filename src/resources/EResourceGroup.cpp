@@ -15,10 +15,6 @@ EResourceGroup::EResourceGroup()
 	m_categories->setName("Categories");
 }
 
-EResourceGroup::EResourceGroup(const EResourceGroup & n, const osg::CopyOp & copyop)
-{
-}
-
 EResourceGroup::EResourceGroup(const osg::Group *old_root)
 	: EResourceGroup()
 {
@@ -41,9 +37,7 @@ EResourceGroup::EResourceGroup(const osg::Group *old_root)
 				}
 				ECategory *cat = new ECategory;
 				cat->setCategoryName(old->getCategoryName());
-				cat->setRed(old->getRed());
-				cat->setGreen(old->getGreen());
-				cat->setBlue(old->getBlue());
+				cat->setColor(QColor(old->getRed(), old->getGreen(), old->getBlue()));
 
 				name_map.insert(std::make_pair(old->getCategoryName(), cat));
 				m_categories->addChild(cat);

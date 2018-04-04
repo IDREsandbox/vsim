@@ -9,7 +9,7 @@ NarrativeScrollBox::NarrativeScrollBox(QWidget * parent)
 
 ScrollBoxItem * NarrativeScrollBox::createItem(osg::Node * node)
 {
-	Narrative2 *narrative = dynamic_cast<Narrative2*>(node);
+	Narrative *narrative = dynamic_cast<Narrative*>(node);
 	if (narrative == nullptr) {
 		qWarning() << "Narrative scroll box insert new narrative. Node" << node << "is not a NarrativeSlide, creating a null item anyway";
 		//return nullptr;

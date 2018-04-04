@@ -17,11 +17,7 @@ class NarrativeSlide : public Group
 
 public:	// DATA
 	NarrativeSlide();
-	NarrativeSlide(const NarrativeSlide& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	NarrativeSlide(const NarrativeNode *old, const NarrativeTransition *old_transition);
-	virtual ~NarrativeSlide();
-	
-	META_Node(, NarrativeSlide);
 	
 	const osg::Matrixd& getCameraMatrix() const;
 	void setCameraMatrix(const osg::Matrixd& matrix);

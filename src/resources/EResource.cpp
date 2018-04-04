@@ -24,26 +24,6 @@ EResource::EResource()
 {
 }
 
-EResource::EResource(const EResource& er, const osg::CopyOp& copyop)
-	: m_name(er.m_name),
-	m_filepath(er.m_filepath),
-	m_description(er.m_description),
-	m_authors(er.m_authors),
-	m_global(er.m_global),
-	m_reposition(er.m_reposition),
-	m_launch(er.m_launch),
-	m_copyright(er.m_copyright),
-	m_min_year(er.m_min_year),
-	m_max_year(er.m_max_year),
-	m_local_range(er.m_local_range),
-	m_ertype(er.m_ertype),
-	m_camera_position(er.m_camera_position),
-	m_camera_matrix(er.m_camera_matrix),
-	m_category(er.m_category),
-	m_index(er.m_index)
-{
-}
-
 EResource::EResource(const EResourcesNode *er, const std::map<std::string, ECategory*> &cats)
 	: m_name(er->getResourceName()),
 	m_filepath(er->getResourcePath()),
@@ -72,37 +52,6 @@ EResource::EResource(const EResourcesNode *er, const std::map<std::string, ECate
 	}
 
 	setCategory(cat);
-}
-
-
-//EResource::EResource(const EResourcesNode *er) 
-//	: Group(),
-//	m_name(er->getResourceName()),
-//	m_filetype(er->getResourceType()),
-//	m_filepath(er->getResourcePath()),
-//	m_description(er->getResourceDiscription()),
-//	m_authors(er->getAuthor()),
-//	m_global(er->getGlobal()),
-//	m_reposition(er->getReposition()),
-//	m_launch(er->getAutoLaunch()),
-//	m_copyright(er->getCopyRight()),
-//	m_min_year(er->getMinYear()),
-//	m_max_year(er->getMaxYear()),
-//	m_local_range(er->getLocalRange()),
-//	m_ertype(er->getErType()),
-//	m_filter(0),
-//	m_view_matrix(er->getViewMatrix()),
-//	m_camera_position(m_view_matrix.getTrans()),
-//	m_inview(0),
-//	m_cat_name(er->getCategoryName()),
-//	m_blue(er->getBlue()),
-//	m_green(er->getGreen()),
-//	m_red(er->getRed())
-//{
-//}
-
-EResource::~EResource()
-{
 }
 
 const std::string& EResource::getResourceName() const 

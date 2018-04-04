@@ -4,7 +4,7 @@
 
 #include "NarrativeSerializer.h"
 #include "narrative/NarrativeGroup.h"
-#include "narrative/Narrative2.h"
+#include "narrative/Narrative.h"
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeSlideItem.h"
 #include "narrative/NarrativeSlideLabel.h"
@@ -93,7 +93,7 @@ void narrativeGroupWriteRead() {
 	osg::ref_ptr<NarrativeGroup> nars = new NarrativeGroup;
 
 	// make some narratives
-	Narrative2 *nar1 = new Narrative2;
+	Narrative *nar1 = new Narrative;
 	nar1->setTitle("nar1");
 	nar1->setAuthor("auth1");
 	nar1->setDescription("desc1");
@@ -120,7 +120,7 @@ void narrativeGroupWriteRead() {
 	slide2->setTransitionDuration(99.6f);
 	nar1->addChild(slide2);
 
-	Narrative2 *nar2 = new Narrative2;
+	Narrative *nar2 = new Narrative;
 	nar2->setTitle("nar2");
 	nars->addChild(nar2);
 
@@ -137,12 +137,12 @@ void narrativeGroupWriteRead() {
 	// verify
 	QCOMPARE(nnars.getNumChildren(), 2);
 
-	Narrative2 *nnar1 = dynamic_cast<Narrative2*>(nnars.child(0));
+	Narrative *nnar1 = dynamic_cast<Narrative*>(nnars.child(0));
 	QCOMPARE(nnar1->getTitle(), nar1->getTitle());
 	QCOMPARE(nnar1->getAuthor(), nar1->getAuthor());
 	QCOMPARE(nnar1->getDescription(), nar1->getDescription());
 
-	Narrative2 *nnar2 = dynamic_cast<Narrative2*>(nnars.child(1));
+	Narrative *nnar2 = dynamic_cast<Narrative*>(nnars.child(1));
 	QCOMPARE(nnar2->getTitle(), "nar2");
 
 	// style

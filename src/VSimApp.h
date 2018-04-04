@@ -16,6 +16,7 @@
 #include <QUndoStack>
 #include <vector>
 #include <QSize>
+#include <memory>
 
 #include "VSimRoot.h"
 
@@ -25,7 +26,7 @@ class ERControl;
 class MainWindow;
 class VSimRoot;
 class ModelTableModel;
-class Narrative2;
+class Narrative;
 class NavigationControl;
 class NarrativeSlide;
 class NarrativeCanvas;
@@ -36,6 +37,7 @@ class VSimApp : public QObject
 	Q_OBJECT
 public:
 	VSimApp(MainWindow*);
+	~VSimApp();
 	void setWindow(MainWindow*);
 
 	// this is called on every new, reset, etc
@@ -129,7 +131,7 @@ private:
 	QTimer *m_timer;
 	QElapsedTimer *m_dt_timer;
 
-	osg::ref_ptr<VSimRoot> m_root;
+	std::unique_ptr<VSimRoot> m_root;
 	ModelTableModel *m_model_table_model;
 
 	NarrativeControl *m_narrative_control;

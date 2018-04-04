@@ -14,23 +14,11 @@ class ECategory : public Group {
 
 public:
 	ECategory();
-	ECategory(const ECategory& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
-
-	virtual ~ECategory();
-
-	META_Node(, ECategory)
 
 	const std::string& getCategoryName() const;
 	void setCategoryName(const std::string& name);
 	QColor getColor() const;
 	void setColor(QColor color); // rgb, no alpha
-	// these are for the serializer
-	int getRed() const;
-	void setRed(int red);
-	int getGreen()const;
-	void setGreen(int green);
-	int getBlue()const;
-	void setBlue(int blue);
 
 	// internal, use EResource::setCategory()
 	void addResource(EResource *res);
@@ -56,9 +44,7 @@ public:
 
 private:
 	std::string m_cat_name;
-	int m_blue;
-	int m_red;
-	int m_green;
+	QColor m_color;
 
 	std::set<EResource*> m_resources;
 };

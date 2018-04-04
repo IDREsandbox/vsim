@@ -9,8 +9,6 @@ class GroupProxy : public Group {
 public:
 	GroupProxy();
 	GroupProxy(Group *base);
-	GroupProxy(const Group& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {};
-	META_Node(, GroupProxy);
 
 	Group *getBase() const;
 	virtual void setBase(Group *base);

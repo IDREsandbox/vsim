@@ -8,15 +8,15 @@
 #include <osgDB/ObjectWrapper>
 #include <osgDB/InputStream>
 #include <osgDB/OutputStream>
-#include "deprecated/narrative/Narrative.h"
+#include "deprecated/narrative/NarrativeOld.h"
 #include "deprecated/narrative/NarrativeNode.h"
 
-static bool checkNarrativeNodes( const Narrative& node )
+static bool checkNarrativeNodes( const NarrativeOld& node )
 {
     return node.getNumNodes() > 0;
 }
 
-static bool readNarrativeNodes( osgDB::InputStream& is, Narrative& node )
+static bool readNarrativeNodes( osgDB::InputStream& is, NarrativeOld& node )
 {
     unsigned int size = 0;
 	is >> size >> is.BEGIN_BRACKET;
@@ -41,7 +41,7 @@ static bool readNarrativeNodes( osgDB::InputStream& is, Narrative& node )
     return true;
 }
 
-static bool writeNarrativeNodes( osgDB::OutputStream& os, const Narrative& node )
+static bool writeNarrativeNodes( osgDB::OutputStream& os, const NarrativeOld& node )
 {
     unsigned int size = node.getNumNodes();
     os << size << os.BEGIN_BRACKET << std::endl;
@@ -57,12 +57,12 @@ static bool writeNarrativeNodes( osgDB::OutputStream& os, const Narrative& node 
     return true;
 }
 
-static bool checkSelection( const Narrative& node )
+static bool checkSelection( const NarrativeOld& node )
 {
     return node.getSelection().node >= 0;
 }
 
-static bool readSelection( osgDB::InputStream& is, Narrative& node )
+static bool readSelection( osgDB::InputStream& is, NarrativeOld& node )
 {
     int nodeIndex;
     bool isTransitionSelected;
@@ -71,16 +71,17 @@ static bool readSelection( osgDB::InputStream& is, Narrative& node )
     return true;
 }
 
-static bool writeSelection( osgDB::OutputStream& os, const Narrative& node )
+static bool writeSelection( osgDB::OutputStream& os, const NarrativeOld& node )
 {
     NarrativeSelectionInfo nsi = node.getSelection();
     os << nsi.node << nsi.isTransitionSelected;
     return true;
 }
 
-REGISTER_OBJECT_WRAPPER( Narrative,
-                         new ::Narrative,
-                         ::Narrative,
+REGISTER_OBJECT_WRAPPER2(Narrative,
+                         new ::NarrativeOld,
+                         ::NarrativeOld,
+	                     "::Narrative",
                          "osg::Object osg::Node ::Narrative" )
 {
     ADD_USER_SERIALIZER(NarrativeNodes);

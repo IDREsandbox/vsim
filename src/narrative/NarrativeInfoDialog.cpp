@@ -10,7 +10,7 @@ NarrativeInfoDialog::NarrativeInfoDialog(QWidget * parent)
 	//setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 }
 
-NarrativeInfoDialog::NarrativeInfoDialog(const Narrative2 *nar, QWidget *parent)
+NarrativeInfoDialog::NarrativeInfoDialog(const Narrative *nar, QWidget *parent)
 	: NarrativeInfoDialog(parent)
 {
 	ui.editTitle->setText(QString::fromStdString(nar->getTitle()));

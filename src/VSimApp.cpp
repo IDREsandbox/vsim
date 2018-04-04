@@ -20,9 +20,8 @@
 
 #include "VSimApp.h"
 #include "Util.h"
-#include "deprecated/narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
-#include "narrative/Narrative2.h"
+#include "narrative/Narrative.h"
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeCanvas.h"
 #include "OSGViewerWidget.h"
@@ -94,7 +93,11 @@ VSimApp::VSimApp(MainWindow* window)
 		setCameraMatrix(m_camera_target);
 	});
 
-	initWithVSim(m_root);
+	initWithVSim(m_root.get());
+}
+
+VSimApp::~VSimApp() {
+
 }
 
 void VSimApp::setWindow(MainWindow *)
@@ -176,7 +179,7 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 	m_window->m_osg_widget->reset();
 
 	// dereference the old root, apply the new one
-	m_root = root;
+	m_root.reset(root);
 
 	emit sReset();
 	return true;
@@ -238,7 +241,7 @@ bool VSimApp::openVSim(const std::string & filename)
 
 bool VSimApp::saveVSim(const std::string& filename)
 {
-	bool ok = FileUtil::writeVSimFile(filename, m_root);
+	bool ok = FileUtil::writeVSimFile(filename, m_root.get());
 	if (!ok) {
 		QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
 		return false;
@@ -361,7 +364,7 @@ bool VSimApp::importNarratives()
 	//else if (nar) {
 	//	qInfo() << "file is an old narrative";
 	//	group = new NarrativeGroup;
-	//	group->addChild(new Narrative2(nar));
+	//	group->addChild(new Narrative(nar));
 	//}
 	//else {
 	//	qWarning() << "Error importing narratives - root node is not a NarrativeGroup or osg::Group";

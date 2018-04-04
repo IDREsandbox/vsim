@@ -3,21 +3,21 @@
 
 #include <QObject>
 #include <osg/Group>
-#include <osg/NodeVisitor>
+#include <memory>
 
 class NarrativeGroup;
 class ModelGroup;
 class EResourceGroup;
 class ECategoryGroup;
+namespace VSim { namespace FlatBuffers {
+	struct SettingsT;
+}}
 
-class VSimRoot : public QObject, public osg::Group {
+class VSimRoot : public QObject {
 	Q_OBJECT
 public:
 	VSimRoot();
-	VSimRoot(const VSimRoot& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
-	VSimRoot(osg::Group *old_group); // Convert old VSim format to new VSim format
-
-	META_Node(, VSimRoot);
+	~VSimRoot();
 
 	void loadOld(osg::Group *old_group);
 	// Merges two VSimRoots together
@@ -41,19 +41,20 @@ public:
 	void debug();
 
 private:
-	osg::ref_ptr<NarrativeGroup> m_narratives;
-	osg::ref_ptr<ModelGroup> m_models;
-	osg::ref_ptr<EResourceGroup> m_resources;
+	NarrativeGroup *m_narratives; // qt ownership
+	ModelGroup *m_models;
+	EResourceGroup *m_resources;
+	std::unique_ptr<VSim::FlatBuffers::SettingsT> m_settings;
 };
 
-class DebugVisitor : public osg::NodeVisitor {
-public:
-	DebugVisitor() : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), m_tabs(0) {}
-	virtual void apply(osg::Group &group) override;
-	virtual void apply(osg::Node &node) override;
-
-private:
-	int m_tabs;
-};
+//class DebugVisitor : public osg::NodeVisitor {
+//public:
+//	DebugVisitor() : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), m_tabs(0) {}
+//	virtual void apply(osg::Group &group) override;
+//	virtual void apply(osg::Node &node) override;
+//
+//private:
+//	int m_tabs;
+//};
 
 #endif

@@ -15,11 +15,9 @@ public:
 	NarrativeSlideLabel(); 
 
 	NarrativeSlideLabel(const NarrativeSlideLabel& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
-	virtual ~NarrativeSlideLabel() {}
-	META_Node(, NarrativeSlideLabel);
 
 	// serialization
-	const std::string &getHtml() const;
+	std::string getHtml() const;
 	void setHtml(const std::string &html);
 
 	void setType(LabelType);
@@ -56,10 +54,6 @@ public: // COMMANDS
 private:
 	QTextDocument *m_document;
 	LabelType m_style_type;
-
-	// This is a temporaries for the serializer, the actual data is stored in the document
-	// the issue is that const std::string& are references to strings that dont exists
-	mutable std::string m_text;
 
 	Qt::Alignment m_v_align;
 };

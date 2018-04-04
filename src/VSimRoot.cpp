@@ -1,8 +1,9 @@
 #include "VSimRoot.h"
 #include <iostream>
 #include "narrative/NarrativeSlideLabel.h"
+#include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeGroup.h"
-#include "narrative/Narrative2.h"
+#include "narrative/Narrative.h"
 #include "ModelGroup.h"
 #include "resources/EResourceGroup.h"
 #include "resources/EResource.h"
@@ -13,6 +14,9 @@
 // debug
 #include "LabelStyleGroup.h"
 #include "LabelStyle.h"
+
+#include "types_generated.h" // SettingsT
+#include "settings_generated.h" // SettingsT
 
 VSimRoot::VSimRoot() {
 	qDebug() << "root constructor, adding children";
@@ -25,16 +29,9 @@ VSimRoot::VSimRoot() {
 	m_resources = new EResourceGroup;
 	m_models->setName("Resources");
 }
-VSimRoot::VSimRoot(const VSimRoot& n, const osg::CopyOp& copyop)
-	: VSimRoot() 
-{
-	qDebug() << "vs root copy op";
-}
 
-VSimRoot::VSimRoot(osg::Group * old_group)
-	: VSimRoot()
+VSimRoot::~VSimRoot()
 {
-	loadOld(old_group);
 }
 
 NarrativeGroup * VSimRoot::narratives() const
@@ -90,14 +87,10 @@ void VSimRoot::preSave()
 void VSimRoot::debug()
 {
 	qInfo() << "root";
-	for (uint i = 0; i < getNumChildren(); i++) {
-		osg::Node *node = getChild(i);
-		qInfo() << "-" << QString::fromStdString(node->getName()) << node->className();
-	}
 
 	qInfo() << "Narratives:" << m_narratives->getNumChildren();
 	for (uint i = 0; i < m_narratives->getNumChildren(); i++) {
-		Narrative2 *nar = dynamic_cast<Narrative2*>(m_narratives->getChild(i));
+		Narrative *nar = dynamic_cast<Narrative*>(m_narratives->getChild(i));
 		if (!nar) continue;
 		qInfo() << "Narrative" << i << QString::fromStdString(nar->getTitle());
 		for (uint j = 0; j < nar->getNumChildren(); j++) {
@@ -186,25 +179,19 @@ void VSimRoot::merge(VSimRoot *other)
 	}
 
 	m_models->merge(other->models());
-
-	// what are we supposed to do with all of the other children? copy them over?
-	for (uint i = 0; i < other->getNumChildren(); i++) {
-		osg::Node *node = other->getChild(i);
-		addChild(node);
-	}
 }
 
-void DebugVisitor::apply(osg::Group &group)
-{
-	std::cout << std::string(m_tabs, '\t');
-	std::cout << group.className() << " " << group.getName() << " " << group.getNumChildren() << '\n';
-
-	m_tabs++;
-	traverse(group);
-	m_tabs--;
-}
-
-void DebugVisitor::apply(osg::Node & node)
-{
-	std::cout << std::string(m_tabs, '\t') << node.className() << " " << node.getName() << "\n";
-}
+//void DebugVisitor::apply(osg::Group &group)
+//{
+//	std::cout << std::string(m_tabs, '\t');
+//	std::cout << group.className() << " " << group.getName() << " " << group.getNumChildren() << '\n';
+//
+//	m_tabs++;
+//	traverse(group);
+//	m_tabs--;
+//}
+//
+//void DebugVisitor::apply(osg::Node & node)
+//{
+//	std::cout << std::string(m_tabs, '\t') << node.className() << " " << node.getName() << "\n";
+//}

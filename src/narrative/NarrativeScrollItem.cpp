@@ -7,7 +7,7 @@ NarrativeScrollItem::NarrativeScrollItem(QWidget *parent)
 	ui.setupUi(this);
 }
 
-void NarrativeScrollItem::setNarrative(Narrative2 *narrative)
+void NarrativeScrollItem::setNarrative(Narrative *narrative)
 {
 	if (m_narrative != nullptr) disconnect(m_narrative, 0, this, 0);
 	m_narrative = narrative;
@@ -19,11 +19,11 @@ void NarrativeScrollItem::setNarrative(Narrative2 *narrative)
 	ui.author->setText(QString::fromStdString(narrative->getAuthor()));
 	
 	// connections
-	connect(narrative, &Narrative2::sTitleChanged, this,
+	connect(narrative, &Narrative::sTitleChanged, this,
 		[this](const std::string &text) {ui.title->setText(QString::fromStdString(text)); });
-	connect(narrative, &Narrative2::sDescriptionChanged, this,
+	connect(narrative, &Narrative::sDescriptionChanged, this,
 		[this](const std::string &text) {ui.description->setText(QString::fromStdString(text)); });
-	connect(narrative, &Narrative2::sAuthorChanged, this,
+	connect(narrative, &Narrative::sAuthorChanged, this,
 		[this](const std::string &text) {ui.author->setText(QString::fromStdString(text)); });
 }
 

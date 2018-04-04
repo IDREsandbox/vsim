@@ -15,7 +15,7 @@ class VSimApp;
 class MainWindow;
 class MainWindowTopBar;
 class NarrativeGroup;
-class Narrative2;
+class Narrative;
 class NarrativeSlide;
 class NarrativeSlideItem;
 class NarrativeSlideLabel;
@@ -74,14 +74,14 @@ public:
 	//void selectLabel(int narrative, int slide, NarrativeSlideItem *label);
 	void selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem *> &labels);
 
-	Narrative2 *getCurrentNarrative();
+	Narrative *getCurrentNarrative();
 	int getCurrentNarrativeIndex();
-	std::vector<Narrative2*> getSelectedNarratives() const;
+	std::vector<Narrative*> getSelectedNarratives() const;
 
 	NarrativeSlide *getCurrentSlide();
 	int getCurrentSlideIndex();
 	
-	Narrative2 *getNarrative(int index);
+	Narrative *getNarrative(int index);
 	NarrativeSlide *getSlide(int narrative, int slide);
 	NarrativeSlideLabel *getLabel(int narrative, int slide, int label);
 

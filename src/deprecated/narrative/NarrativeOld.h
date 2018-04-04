@@ -4,8 +4,8 @@
  *  Created on: Feb 4, 2011
  *	Author: eduardo
  */
-#ifndef NARRATIVE_H_
-#define NARRATIVE_H_
+#ifndef NARRATIVEOLD_H
+#define NARRATIVEOLD_H
 
 #include <osg/Node>
 #include <assert.h>
@@ -23,19 +23,22 @@ struct NarrativeSelectionInfo
 	NarrativeSelectionInfo(int in_node, bool in_trans): node(in_node), isTransitionSelected(in_trans) {}
 };
 
-class Narrative: public osg::Node
+class NarrativeOld: public osg::Node
 {
 public:
-	Narrative();
-	Narrative(const Narrative& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY):
+	NarrativeOld();
+	NarrativeOld(const NarrativeOld& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY):
 			osg::Node(n, copyop),
 			m_selection(n.m_selection),
 			m_nodes(n.m_nodes),
 			m_transitions(n.m_transitions),
 			m_locked(false) {}
-	virtual ~Narrative();
+	virtual ~NarrativeOld();
 
-	META_Node(, Narrative)
+	// manual meta_node so that we can rename this class to NarrativeOld
+	virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const NarrativeOld*>(obj) != NULL; }
+	virtual const char* className() const { return "Narrative"; }
+	virtual const char* libraryName() const { return ""; }
 
 	std::string& getName() {	return m_name;}
 	const std::string& getName() const {	return m_name;}
@@ -66,4 +69,4 @@ protected:
 	bool m_locked;
 };
 
-#endif /* NARRATIVE_H_ */
+#endif /* NARRATIVEOLD_H */

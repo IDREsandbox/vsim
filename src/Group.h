@@ -14,8 +14,6 @@ class Group : public QObject, public osg::Group {
 	Q_OBJECT
 public:
 	Group() {};
-	Group(const Group& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {};
-	META_Node(, Group)
 
 	// Use this instead of the osg one. For some reason the osg one isn't virtual or const
 	virtual osg::Node *child(unsigned int index) const;
