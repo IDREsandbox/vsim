@@ -17,8 +17,9 @@ public:
 	VSimRoot(const VSimRoot& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	VSimRoot(osg::Group *old_group); // Convert old VSim format to new VSim format
 
-	META_Node(, VSimRoot)
+	META_Node(, VSimRoot);
 
+	void loadOld(osg::Group *old_group);
 	// Merges two VSimRoots together
 	void merge(VSimRoot *other);
 

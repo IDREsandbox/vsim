@@ -87,6 +87,7 @@ Suppose a gui thing is listening to changes in Joe*. The model removes Joe* and 
 
 1. aboutToRemove/removed
 2. removed(*)
+3. keep smart pointer reference
 
 ## Efficient removal/insertion
 

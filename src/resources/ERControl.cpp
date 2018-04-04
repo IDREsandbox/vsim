@@ -131,6 +131,10 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObj
 		}
 	});
 
+	connect(m_app, &VSimApp::sAboutToReset, this, [this]() {
+		setDisplay(-1);
+	});
+
 	load(ers);
 }
 
@@ -468,7 +472,7 @@ int ERControl::getCombinedLastSelected()
 	osg::Node *node = proxy->child(last);
 	int last_base = m_ers->indexOf(node);
 
-	if (last_base >= m_ers->getNumChildren()) return -1;
+	if (last_base >= (int)m_ers->getNumChildren()) return -1;
 	return last_base;
 }
 

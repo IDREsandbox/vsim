@@ -89,6 +89,7 @@ message("flatc found: ${FLATC_EXEC}")
 set(fbs_src
   eresources.fbs
   narratives.fbs
+  settings.fbs
   types.fbs
   vsim.fbs
   )
@@ -104,6 +105,7 @@ foreach(fbs ${fbs_src})
     OUTPUT ${fbs_header_full}
     COMMAND echo "Compiling flatbuffer - ${fbs}"
     COMMAND ${FLATC_EXEC} -c --no-includes
+            --gen-object-api
             -o ${CMAKE_BINARY_DIR}/generated
             -I ${CMAKE_CURRENT_SOURCE_DIR}/src
             ${fbs_full}
@@ -131,7 +133,7 @@ file(GLOB_RECURSE VSim_headers
   src/*.h
   )
 file(GLOB_RECURSE VSim_serializers
-  src/*Serializer*.cpp
+  src/*/Serializer*.cpp
   )
 
 message("SOURCES:\n" "${VSim_src}")
@@ -325,7 +327,7 @@ set(TEST_LIST
 foreach(test ${TEST_LIST})
   message("add test: " ${test})
   # EXCLUDE_FROM_ALL
-  add_executable(${test} tests/${test}.cpp)
+  add_executable(${test} tests/${test}.cpp ${VSim_serializers})
   add_test(NAME ${test} COMMAND ${test})
   target_link_libraries(${test} VSim_objects)
   target_link_libraries(${test} Qt5::Widgets Qt5::Test)
@@ -337,9 +339,13 @@ install(TARGETS VSim DESTINATION .)
 install(DIRECTORY assets DESTINATION .)
 install(FILES CHANGELOG.md COPYRIGHT LICENSE README.md THIRD-PARTY-NOTICES DESTINATION .)
 
+#assets copying
+file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}")
+
 if (WIN32)
+  # this doesn't really work
   # visual studio path https://stackoverflow.com/questions/28533012/how-to-set-runtime-path-for-cmake-custom-command-on-windows
-  # set(CMAKE_MSVCIDE_RUN_PATH "${OPENSCENEGRAPH_BINARY_DIR};${OPENSCENEGRAPH_BINARY_DIR}/osgPlugins-3.4.0/;${THIRDPARTY_BINARY_DIR};${QT_DIR}/bin/")
+  # set(CMAKE_MSVCIDE_RUN_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
   # message("msvc path" ${CMAKE_MSVCIDE_RUN_PATH})
 
   # osg dll list

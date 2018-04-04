@@ -39,7 +39,7 @@ public:
 	void setWindow(MainWindow*);
 
 	// this is called on every new, reset, etc
-	bool initWithVSim(osg::Node *root = nullptr);
+	bool initWithVSim(VSimRoot *root = nullptr);
 
 	// state
 	enum State {

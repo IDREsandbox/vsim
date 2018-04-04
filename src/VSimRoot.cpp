@@ -34,26 +34,7 @@ VSimRoot::VSimRoot(const VSimRoot& n, const osg::CopyOp& copyop)
 VSimRoot::VSimRoot(osg::Group * old_group)
 	: VSimRoot()
 {
-	qDebug() << "converting to vsim" << old_group->getNumChildren();
-	// find ModelInformation
-
-	// NarrativeGroup
-	m_narratives = new NarrativeGroup(old_group);
-	m_narratives->setName("Narratives");
-
-	m_resources = new EResourceGroup(old_group);
-	m_resources->setName("Resources");
-
-	// Move everything unknown to the model group for displaying
-	for (uint i = 0; i < old_group->getNumChildren(); i++) {
-		osg::Node *node = old_group->getChild(i);
-		if (dynamic_cast<Narrative*>(node)
-			|| dynamic_cast<EResourcesList*>(node)
-			|| dynamic_cast<EResourcesNode*>(node)) {
-			continue;
-		}
-		m_models->addChild(old_group->getChild(i));
-	}
+	loadOld(old_group);
 }
 
 NarrativeGroup * VSimRoot::narratives() const
@@ -166,6 +147,30 @@ void VSimRoot::debug()
 
 	//DebugVisitor v;
 	//m_models->accept(v);
+}
+
+void VSimRoot::loadOld(osg::Group * old_group)
+{
+	qDebug() << "loading old vsim" << old_group->getNumChildren();
+	// find ModelInformation
+
+	// NarrativeGroup
+	m_narratives = new NarrativeGroup(old_group);
+	m_narratives->setName("Narratives");
+
+	m_resources = new EResourceGroup(old_group);
+	m_resources->setName("Resources");
+
+	// Move everything unknown to the model group for displaying
+	for (uint i = 0; i < old_group->getNumChildren(); i++) {
+		osg::Node *node = old_group->getChild(i);
+		if (dynamic_cast<Narrative*>(node)
+			|| dynamic_cast<EResourcesList*>(node)
+			|| dynamic_cast<EResourcesNode*>(node)) {
+			continue;
+		}
+		m_models->addChild(old_group->getChild(i));
+	}
 }
 
 void VSimRoot::merge(VSimRoot *other)

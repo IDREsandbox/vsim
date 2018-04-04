@@ -1,0 +1,55 @@
+include "types.fbs";
+
+namespace VSim.FlatBuffers;
+
+table Settings {
+  model_information:ModelInformation;
+  other_settings:OtherSettings;
+  navigation_settings:NavigationSettings;
+  graphics_settings:GraphicsSettings; 
+}
+
+table ModelInformation {
+  model_name:string;
+  release_date_posix_sec:uint64;
+  project_date_posix_sec:uint64;
+  authors:string;
+  contributors:string;
+  place_of_publication:string;
+  url:string;
+}
+
+table GraphicsSettings {
+  camera_settings:CameraSettings;
+  // anti aliasing
+  // lighting?
+}
+
+table CameraSettings {
+  fov:float = 60.0;
+  nearClip:float = 1.0;
+  farClip:float = 5000.0;
+}
+
+table NavigationSettings {
+  flight_speed_tick:uint32 = 1;
+  //first_person_smoothing:float = 1.0f;
+  //gravity on
+  //collisions on
+}
+
+table OtherSettings {
+  start_camera:CameraPosDirUp;
+  nbar:bool = true;
+  ebar:bool = true;
+  //branding:bool = false;
+  //loop:bool = false;
+  //year:int32;
+  //time_enabled:int32;
+  //canvas_base_width:int32 = 800;
+  //canvas_base_height:int32 = 600;
+  //exp date
+  //lock ccreator
+  //lock no import/new
+  //lock no export
+}

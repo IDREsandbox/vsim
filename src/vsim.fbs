@@ -1,33 +1,58 @@
 include "types.fbs";
 include "eresources.fbs";
 include "narratives.fbs";
+include "settings.fbs";
 
 namespace VSim.FlatBuffers;
 
 file_extension "vsim";
 file_identifier "VSIM";
 
-table Model {
-  data:[byte];
+// Flatbuffers doesn't support files > 2GB, so we have to tack on the
+// model data after the vsim flatbuffer. To know where the model starts,
+// we have to use a size-prefixed flatbuffer.
+
+// We might as well have our own header, to avoid collisions with
+// the osgb header.
+
+// file format
+// vsim header -              [[4: vsim][4: unused]]
+// size prefixed flatbuffer - [[4: size][flatbuffer]] 
+// osgb -                     [model data]
+
+// vsim header -
+// v  s  i  m  x  x  x  x
+// 76 73 69 6d xx xx xx xx
+
+table Model { // model metadata
   format:string;
-  ascii:bool;
+  ascii:bool = false;
+  zlib:bool = false;
+  size:uint64;
+  // included:bool;
+  // path:string;
+  // size_prefixed:bool // potential change
+
+  // buffer_after_flatbuffer: bool = true; // dont need yet
+  // it's hard to figure out size before writing
+  // - could use mutable buffers
+  // - could write data to string first
+  // - could write size-prefixed blocks
+  // for now just be lazy, don't need yet
+  // data:[byte]; // always store external
+}
+
+table ModelTable {
+  models:[Model];
 }
 
 table Root {
   version:string;
   narratives:NarrativeTable;
   eresources:ERTable;
-  model:Model;
-  // model information
-  // lighting settings
-  // camera settings
-  // start year
-}
+  models:ModelTable;
 
-// table CameraOptions {
-//   fov:float = 60;
-//   nearClip:float = 1;
-//   farClip:float = 1000;
-// }
+  settings:Settings;
+}
 
 root_type Root;

@@ -83,7 +83,8 @@ Things we don't care about
         - big namespaces
         - if (notnull)
         - construction of parents has to happen after constructing children
-    - extra build step. The cmake and .vcxproj shenanigans are already written but I don't really trust them
+    - file size < 2GB, this leads to a bit of hacking shenanigans
+    - extra build step. The cmake and .vcxproj shenanigans are already written
     - extra installation steps, have to install package, have to setup flatc and path
 - bonuses, but these probably aren't a big deal
     - cross language - don't have to use C++ :O woah
