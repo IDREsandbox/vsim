@@ -29,7 +29,7 @@ EResource::EResource(const EResourcesNode *er, const std::map<std::string, ECate
 	m_filepath(er->getResourcePath()),
 	m_description(er->getResourceDiscription()),
 	m_authors(er->getAuthor()),
-	m_global(er->getGlobal()),
+	m_global(!er->getGlobal()),
 	m_reposition(er->getReposition()),
 	m_launch(er->getAutoLaunch()),
 	m_copyright((Copyright)er->getCopyRight()),

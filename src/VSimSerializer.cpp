@@ -201,7 +201,7 @@ flatbuffers::Offset<fb::ModelTable>
 		auto o_format = builder->CreateString("osgb");
 
 		bool ascii = false;
-		bool zlib = true;
+		bool zlib = false;
 
 		// write osg stuff
 		osg::Node *node = model_group->child(i);

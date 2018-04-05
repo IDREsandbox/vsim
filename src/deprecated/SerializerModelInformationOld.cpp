@@ -7,11 +7,12 @@
 
 #include <osgDB/ObjectWrapper>
 
-#include "ModelInformation.h"
+#include "ModelInformationOld.h"
 
-REGISTER_OBJECT_WRAPPER( ModelInformation,
-                         new ::ModelInformation,
-                         ::ModelInformation,
+REGISTER_OBJECT_WRAPPER2( ModelInformationOld,
+                         new ::ModelInformationOld,
+                         ::ModelInformationOld,
+						 "::ModelInformation",
                          "osg::Object osg::Node ::ModelInformation" )
 {
     ADD_STRING_SERIALIZER(ModelName, "");

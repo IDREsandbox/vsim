@@ -1,12 +1,12 @@
-#ifndef MODELINFORMATION_H
-#define MODELINFORMATION_H
+#ifndef MODELINFORMATIONOLD_H
+#define MODELINFORMATIONOLD_H
 
 #include <string>
 #include <osg/Matrix>
 
-class ModelInformation : public osg::Node {
+class ModelInformationOld : public osg::Node {
 public:
-	ModelInformation()
+	ModelInformationOld()
 		: Branding_On(true),
 		Loop_On(true),
 		Collision_On(true),
@@ -28,7 +28,7 @@ public:
 	{
 		Initial_Matrix.makeIdentity();//initially identity matrix
 	};
-	ModelInformation(const ModelInformation&, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) 
+	ModelInformationOld(const ModelInformationOld&, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
 		: Branding_On(true),
 		Loop_On(true),
 		Collision_On(true),
@@ -49,9 +49,9 @@ public:
 		Flight_Acc_Factor(6.0)
 	{
 	};
-	virtual ~ModelInformation(){};
+	virtual ~ModelInformationOld(){};
 	
-	META_Node(, ModelInformation)
+	META_Node(, ModelInformationOld)
 
 	const std::string& getModelName() const { 
 		return Model_Name;

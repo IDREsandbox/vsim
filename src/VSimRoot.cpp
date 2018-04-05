@@ -10,6 +10,10 @@
 #include "resources/ECategoryGroup.h"
 #include "resources/ECategory.h"
 #include "deprecated/resources/EResourcesList.h"
+#include "deprecated/ModelInformationOld.h"
+#include "deprecated/narrative/NarrativeOld.h"
+#include <QDate>
+#include "Util.h"
 
 // debug
 #include "LabelStyleGroup.h"
@@ -160,12 +164,37 @@ void VSimRoot::loadOld(osg::Group * old_group)
 	m_resources = new EResourceGroup(old_group);
 	m_resources->setName("Resources");
 
+	// scan for model information
+	for (uint i = 0; i < old_group->getNumChildren(); i++) {
+		osg::Node *node = old_group->getChild(i);
+		ModelInformationOld *info = dynamic_cast<ModelInformationOld*>(node);
+		if (!info) continue;
+
+		auto *new_info = new VSim::FlatBuffers::ModelInformationT;
+		m_settings->model_information.reset(new_info);
+
+		new_info->authors = info->getPrimaryAuthors();
+		new_info->contributors = info->getContributors();
+		new_info->model_name = info->getModelName();
+		new_info->place_of_publication = info->getPlaceofPublication();
+		QDate date;
+		bool hit = Util::mxdxyyToQDate(info->getProjectDate(), &date);
+		if (!hit) date = QDate();
+		new_info->project_date_julian_day = date.toJulianDay();
+		new_info->version = info->getReleaseDateVersion();
+		new_info->url = info->getAccessInformationURL();
+	}
+
 	// Move everything unknown to the model group for displaying
 	for (uint i = 0; i < old_group->getNumChildren(); i++) {
 		osg::Node *node = old_group->getChild(i);
-		if (dynamic_cast<Narrative*>(node)
+		if (dynamic_cast<NarrativeOld*>(node)
 			|| dynamic_cast<EResourcesList*>(node)
-			|| dynamic_cast<EResourcesNode*>(node)) {
+			|| dynamic_cast<EResourcesNode*>(node)
+			|| dynamic_cast<ModelInformationOld*>(node)
+			|| dynamic_cast<VSCanvas*>(node)
+			) {
+			qDebug() << "found old thing?" << node << "skipping";
 			continue;
 		}
 		m_models->addChild(old_group->getChild(i));

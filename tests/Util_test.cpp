@@ -8,6 +8,24 @@
 class Util_test : public QObject {
 	Q_OBJECT
 private slots:
+	void mxdxyyDateTest() {
+		QDate date;
+		bool hit;
+		hit = Util::mxdxyyToQDate("1/2/94", &date);
+		QVERIFY(hit);
+		QCOMPARE(date, QDate(1994, 1, 2));
+
+		hit = Util::mxdxyyToQDate("111/2/1994", &date);
+		QVERIFY(!hit);
+
+		hit = Util::mxdxyyToQDate("11/2/80", &date);
+		QVERIFY(hit);
+		QCOMPARE(date, QDate(1980, 11, 2));
+		
+		hit = Util::mxdxyyToQDate("12/30/79", &date);
+		QVERIFY(hit);
+		QCOMPARE(date, QDate(2079, 12, 30));
+	}
 	void fixIndicesTest() {
 		std::vector<int> mini, mini_ans, mini_result;
 		std::set<int> mini_ins, mini_rem;

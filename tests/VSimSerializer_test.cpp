@@ -19,15 +19,12 @@ private:
 
 private slots:
 
-void robustStreamTest() {
+void robustStreamTestOld() {
 	VSimRoot root;
 	std::ifstream in("assets/test/cow_old.vsim", std::ios::binary);
 	QVERIFY(in.good());
 	bool ok = VSimSerializer::readStreamRobust(in, &root);
 	QVERIFY(ok);
-
-	// debug root
-	// root->debug();
 
 	QCOMPARE(root.narratives()->getNumChildren(), 2);
 	// narrative titles
@@ -35,7 +32,62 @@ void robustStreamTest() {
 	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(1))->getTitle(), "nar1");
 	QCOMPARE(root.resources()->getNumChildren(), 1);
 	QCOMPARE(root.resources()->getResource(0)->getResourceName(), "er1");
-	//QCOMPARE(nroot.models()->child(0)->getName(), "cow.osg");
+
+	// check model information
+	auto *settings = root.settings();
+	QVERIFY(settings->model_information);
+	auto *info = settings->model_information.get();
+	QCOMPARE(info->authors, "authors");
+	QCOMPARE(info->contributors, "contributors");
+	QCOMPARE(info->model_name, "name");
+	QCOMPARE(info->place_of_publication, "place");
+	QCOMPARE(info->url, "url");
+	QCOMPARE(info->project_date_julian_day, QDate(2018, 4, 5).toJulianDay());
+}
+void robustStreamTest() {
+	// read new model
+	VSimRoot root;
+	std::ifstream in("assets/test/cow_new.vsim", std::ios::binary);
+	QVERIFY(in.good());
+	bool ok = VSimSerializer::readStreamRobust(in, &root);
+	QVERIFY(ok);
+
+	QCOMPARE(root.narratives()->getNumChildren(), 2);
+	// narrative titles
+	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(0))->getTitle(), "nar1");
+	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(1))->getTitle(), "nar2");
+	QCOMPARE(root.resources()->getNumChildren(), 1);
+	QCOMPARE(root.resources()->getResource(0)->getResourceName(), "er1");
+
+	// check model information
+	auto *settings = root.settings();
+	QVERIFY(settings->model_information);
+	auto *info = settings->model_information.get();
+	QCOMPARE(info->authors, "authors");
+	QCOMPARE(info->contributors, "contributors");
+	QCOMPARE(info->model_name, "name");
+	QCOMPARE(info->place_of_publication, "place");
+	QCOMPARE(info->url, "url");
+	QCOMPARE(info->project_date_julian_day, QDate(2018, 4, 5).toJulianDay());
+}
+
+void oldERTest() {
+	VSimRoot root;
+	std::ifstream in("assets/test/local_global_old.vsim", std::ios::binary);
+	QVERIFY(in.good());
+
+	bool ok = VSimSerializer::readStreamRobust(in, &root);
+	QVERIFY(ok);
+
+	QCOMPARE(root.resources()->getNumChildren(), 2);
+	EResource *res1 = dynamic_cast<EResource*>(root.resources()->child(0));
+	EResource *res2 = dynamic_cast<EResource*>(root.resources()->child(1));
+	QCOMPARE(res1->getResourceName(), "local");
+	QCOMPARE(res1->getCategory()->getCategoryName(), "l");
+	QCOMPARE(res1->getGlobal(), false);
+	QCOMPARE(res2->getResourceName(), "global");
+	QCOMPARE(res2->getCategory()->getCategoryName(), "g");
+	QCOMPARE(res2->getGlobal(), true);
 }
 
 void osgStreamTest() {

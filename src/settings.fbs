@@ -11,7 +11,7 @@ table Settings {
 
 table ModelInformation {
   model_name:string;
-  release_date_julian_day:uint64;
+  version:string;
   project_date_julian_day:uint64;
   authors:string;
   contributors:string;

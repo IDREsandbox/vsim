@@ -6,6 +6,7 @@
 #include <osg/io_utils>
 #include <iostream>
 #include <chrono>
+#include <regex>
 
 // ext must be of the form "txt".
 std::string Util::addExtensionIfNotExist(const std::string& filename, const std::string& ext)
@@ -58,6 +59,28 @@ std::string Util::getFilename(const std::string & path)
 {
 	int endpath = path.find_last_of("\\/");
 	return path.substr(endpath + 1);
+}
+
+bool Util::mxdxyyToQDate(const std::string & str, QDate *out)
+{
+	std::regex reg("(\\d{1,2})/(\\d{1,2})/(\\d{2})");
+	std::smatch match;
+	bool hit = std::regex_match(str, match, reg);
+	if (!hit || match.size() != 4) {
+		return false;
+	}
+	int m, d, y;
+	m = std::stoi(match[1].str());
+	d = std::stoi(match[2].str());
+	y = std::stoi(match[3].str());
+	if (y < 80) {
+		y = 2000 + y;
+	}
+	else {
+		y = 1900 + y;
+	}
+	*out = QDate(y, m, d);
+	return true;
 }
 
 QRect Util::rectFit(QRect container, float whratio)

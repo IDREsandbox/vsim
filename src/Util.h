@@ -7,13 +7,18 @@
 #include <osg/Vec4>
 #include <osg/Matrix>
 #include <algorithm>
+#include <QDate>
 
 namespace Util
 {
 	std::string addExtensionIfNotExist(const std::string& filename, const std::string& ext);
 	std::string getExtension(const std::string& filename);
 	std::string getFilename(const std::string &path);
-	
+
+	// converts m*/d*/yy to QDate, * means 1 or 2 chars
+	// year conversion: <80 is 20xx, >=80 is 19xx
+	bool mxdxyyToQDate(const std::string &str, QDate *out);
+
 	// Fits the largest possible rectangle with given aspect ratio into another rectangle
 	QRect rectFit(QRect container, float whratio);
 
