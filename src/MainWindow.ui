@@ -113,7 +113,6 @@
     </property>
     <addaction name="actionModel_Outliner"/>
     <addaction name="actionTime_Slider"/>
-    <addaction name="actionFont_Color_Styles"/>
     <addaction name="separator"/>
     <addaction name="actionHistory"/>
    </widget>
@@ -122,10 +121,18 @@
      <string>Navigation</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionModel_Information"/>
+    <addaction name="actionFont_Color_Styles"/>
+   </widget>
    <addaction name="menuhello_to_the_world"/>
    <addaction name="menuEdit"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuWindows"/>
+   <addaction name="menuSettings"/>
    <addaction name="menuTest"/>
   </widget>
   <action name="actionNew">
@@ -425,6 +432,11 @@
    </property>
    <property name="shortcut">
     <string>C</string>
+   </property>
+  </action>
+  <action name="actionModel_Information">
+   <property name="text">
+    <string>Model Information</string>
    </property>
   </action>
  </widget>

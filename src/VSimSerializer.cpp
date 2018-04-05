@@ -238,6 +238,9 @@ void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer, VSimRoot *r
 	if (buffer->eresources()) {
 		ERSerializer::readERTable(buffer->eresources(), ers);
 	}
+	if (buffer->settings()) {
+		buffer->settings()->UnPackTo(root->settings());
+	}
 }
 
 flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
@@ -248,12 +251,14 @@ flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
 	auto o_nars = NarrativeSerializer::createNarrativeTable(builder, root->narratives());
 	auto o_ers = ERSerializer::createERTable(builder, root->resources());
 	auto o_models = createModels(builder, root->models(), model_data);
+	auto o_settings = fb::CreateSettings(*builder, root->settings());
 
 	fb::RootBuilder b_root(*builder);
 	b_root.add_version(o_version);
 	b_root.add_narratives(o_nars);
 	b_root.add_eresources(o_ers);
 	b_root.add_models(o_models);
+	b_root.add_settings(o_settings);
 	auto o_root = b_root.Finish();
 
 	return o_root;

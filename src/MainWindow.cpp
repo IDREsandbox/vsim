@@ -27,6 +27,10 @@
 #include "VSimApp.h"
 #include "VSimRoot.h"
 #include "ModelTableModel.h"
+#include "ModelInformationDialog.h"
+
+#include "types_generated.h"
+#include "settings_generated.h"
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent),
@@ -118,6 +122,7 @@ MainWindow::MainWindow(QWidget *parent)
 		qInfo() << "app state" << VSimApp::StateStrings[m_app->state()];
 	});
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
+	connect(ui->actionModel_Information, &QAction::triggered, this, &MainWindow::execModelInformation);
 
 	// player
 
@@ -363,4 +368,22 @@ void MainWindow::actionImportModel()
 	qInfo() << "importing - " << filename;
 	//m_vsimapp->importModel(filename.toStdString());
 	emit sImportModel(filename.toStdString());
+}
+
+void MainWindow::execModelInformation()
+{
+	// get model information
+	auto *settings = m_app->getRoot()->settings();
+	auto *info = settings->model_information.get(); // possibly missing
+
+	ModelInformationDialog dlg(info);
+	int result = dlg.exec();
+	if (result == QDialog::Accepted) {
+		auto new_data = dlg.getData();
+
+		settings->model_information.reset(
+			new VSim::FlatBuffers::ModelInformationT(
+				new_data
+			));
+	}
 }

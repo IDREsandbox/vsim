@@ -33,6 +33,8 @@ public:
 	const EResourceGroup *getResources() const;
 	void setResources(EResourceGroup *resources);
 
+	VSim::FlatBuffers::SettingsT *settings() const; // not optional
+
 	void postLoad();
 	void preSave();
 

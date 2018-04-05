@@ -67,6 +67,8 @@ public slots:
 	void actionSaveAs();
 	void actionImportModel();
 
+	void execModelInformation();
+
 	// TODO
 	// void narListForward();
 	// void narListAdd();

@@ -11,8 +11,8 @@ table Settings {
 
 table ModelInformation {
   model_name:string;
-  release_date_posix_sec:uint64;
-  project_date_posix_sec:uint64;
+  release_date_julian_day:uint64;
+  project_date_julian_day:uint64;
   authors:string;
   contributors:string;
   place_of_publication:string;
@@ -40,8 +40,8 @@ table NavigationSettings {
 
 table OtherSettings {
   start_camera:CameraPosDirUp;
-  nbar:bool = true;
-  ebar:bool = true;
+  //nbar:bool = true;
+  //ebar:bool = true;
   //branding:bool = false;
   //loop:bool = false;
   //year:int32;

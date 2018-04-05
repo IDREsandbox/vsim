@@ -27,6 +27,8 @@ VSimRoot::VSimRoot() {
 
 	m_resources = new EResourceGroup;
 	m_models->setName("Resources");
+
+	m_settings = std::make_unique<VSim::FlatBuffers::SettingsT>();
 }
 
 VSimRoot::~VSimRoot()
@@ -71,6 +73,11 @@ const EResourceGroup * VSimRoot::getResources() const
 void VSimRoot::setResources(EResourceGroup * resources)
 {
 	m_resources = resources;
+}
+
+VSim::FlatBuffers::SettingsT * VSimRoot::settings() const
+{
+	return m_settings.get();
 }
 
 void VSimRoot::postLoad()

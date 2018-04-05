@@ -132,7 +132,7 @@ private:
 	void enableEditing(bool enable);
 
 private:
-	VSimApp * m_app;
+	VSimApp *m_app;
 	int m_current_narrative; // opened narrative
 	int m_current_slide; // active canvas slide
 	bool m_editing_slide;

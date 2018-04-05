@@ -86,16 +86,14 @@ if (NOT FLATC_EXEC)
 endif()
 message("flatc found: ${FLATC_EXEC}")
 
-set(fbs_src
-  eresources.fbs
-  narratives.fbs
-  settings.fbs
-  types.fbs
-  vsim.fbs
+file(GLOB_RECURSE fbs_src
+  src/*.fbs
   )
+message("FBS SRC:\n" "${fbs_src}")
 set(fbs_header_list "")
-foreach(fbs ${fbs_src})
-  set(fbs_full ${CMAKE_CURRENT_SOURCE_DIR}/src/${fbs})
+foreach(fbs_full ${fbs_src})
+  # set(fbs_full ${CMAKE_CURRENT_SOURCE_DIR}/src/${fbs})
+  get_filename_component(fbs ${fbs_full} NAME)
   string(REGEX REPLACE "\\.fbs$" "_generated.h" fbs_header ${fbs})
   set(fbs_header_full ${CMAKE_BINARY_DIR}/generated/${fbs_header})
   list(APPEND fbs_header_list ${fbs_header_full})
@@ -111,7 +109,7 @@ foreach(fbs ${fbs_src})
             ${fbs_full}
     DEPENDS flatc ${fbs_full})
 endforeach()
-message("fbs header list: " "${fbs_header_list}")
+message("FBS HEADERS:\n" "${fbs_header_list}")
 include_directories (${CMAKE_BINARY_DIR}/generated)
 add_custom_target(fbs_headers ALL DEPENDS ${fbs_header_list})
 
