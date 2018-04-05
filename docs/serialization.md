@@ -1,9 +1,8 @@
-
 # Serialization
 
 ## Flatbuffers
 
-The vsim format was changed from using osg to using flatbuffers. The app tries to read both. Conversion between flatbuffers and the app are explicitly written out (we don't use the buffers directly).
+The vsim format was changed from using osg to using flatbuffers. The app tries to read both. Conversion between flatbuffers and the app are explicitly written out (we don't use the buffers directly, except for Settings).
 
 Flatbuffer quirks
 
@@ -84,7 +83,7 @@ Things we don't care about
         - big namespaces
         - if (notnull)
         - construction of parents has to happen after constructing children
-    - file size < 2GB, this leads to a bit of hacking shenanigans
+    - file size < 2GB, this leads to a bit of hacking
     - extra build step. The cmake and .vcxproj shenanigans are already written
     - extra installation steps, have to install package, have to setup flatc and path
 - bonuses, but these probably aren't a big deal
@@ -147,4 +146,4 @@ You can write qt stuff to/from streams. It could be useful to write QFont and st
 
 ### Google Protocol Buffers
 
-This is meant for lots of small messages over networks, our thing is kind of big
+This is meant for lots of small messages over networks. Our thing is kind of big

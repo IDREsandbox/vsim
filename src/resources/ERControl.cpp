@@ -159,7 +159,7 @@ void ERControl::load(EResourceGroup *ers)
 
 void ERControl::newER()
 {
-	ERDialog dlg(m_category_control, m_app->getCurrentDirectory());
+	ERDialog dlg(m_category_control, m_app->getCurrentDirectory().c_str());
 
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
@@ -218,7 +218,7 @@ void ERControl::editERInfo()
 	}
 	EResource *resource = m_ers->getResource(active_item);
 
-	ERDialog dlg(m_category_control, m_app->getCurrentDirectory());
+	ERDialog dlg(m_category_control, m_app->getCurrentDirectory().c_str());
 
 	dlg.init(resource);
 	int result = dlg.exec();
@@ -276,7 +276,7 @@ void ERControl::openResource()
 	if (!res) return;
 
 	if (res->getERType() == EResource::FILE) {
-		QString path = m_app->getCurrentDirectory() + "/" + res->getResourcePath().c_str();
+		QString path = QString::fromStdString(m_app->getCurrentDirectory() + "/" + res->getResourcePath());
 		qInfo() << "Attempting to open file:" << path;
 		QDesktopServices::openUrl(QUrl(path));
 	}

@@ -67,6 +67,12 @@ public slots:
 	void actionSaveAs();
 	void actionImportModel();
 
+	void actionImportNarratives();
+	void actionExportNarratives();
+
+	void actionImportERs();
+	void actionExportERs();
+
 	void execModelInformation();
 
 	// TODO

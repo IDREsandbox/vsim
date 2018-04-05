@@ -1,24 +1,27 @@
 
-New .vsim Format
- - app data lives in the scene graph
- - scene graph saved as is
+# New .vsim Format
+- uses Google Flatbuffers for app data
+    - Narratives and slides
+	- Embedded Resources
+	- model information, model metadata
+- uses OSG binary format (.osgb) for model data
 
-VSimRoot
-  NarrativeGroup "Narratives"
-    *Narrative
-	  *NarrativeSlide
-	    *NarrativeSlideLabel
-  EResourceGroup "Resources"
-    *EResource
-	ECategoryGroup
-	  *ECategory
-  ModelGroup "Models"
-  ModelInformation "ModelInformation"
- 
-*indicates children of an osg::Group
+Flatbuffer schemas are in .fbs files, they're pretty self-documenting.
 
+One issue with flatbuffers is that they don't support files > 2GB, so we hack
+around this by dumping the model binary after the flatbuffer. To know where
+the flatbuffer ends and the model starts, we use a size-prefixed flatbuffer.
 
-Old .vsim Format
+file format
+vsim header -              [[4: vsim][4: unused]]
+size prefixed flatbuffer - [[4: size][flatbuffer]] 
+osgb -                     [model data]
+
+vsim header -
+V  S  I  M  x  x  x  x
+56 53 49 4d xx xx xx xx
+
+#Old .vsim Format
  - everything is a node under the root
  - extract nodes on load
  - reinsert nodes on export
@@ -60,58 +63,11 @@ Old .vsim Format
 			Description
 	}
 
-
-The narrative formats are pretty much the same, 
-New .nar Format (vsim/osgb/osgt)
 Old .nar Format (osgb)	
-
-
-
-Model loading logic
-
-Open should always be vsim/osgb/osgt
-
-vsim?
- old format
- new format
-
-osgb/osgt?
- this might be a vsim file, not sure...
-
-load it as is, into an osg::Node
- look for the following and create if they don't exist:
-  "Narratives"
-  "Models"
-  "ModelInformation"
-  mark the root as "vsim"
- look for the following in root, and move to the correct groups OR convert if necessary:
-  ::Narrative
-  ::ModelInformation with no name, give it a name
-
-
-#Import
-
-vsim/osgb/osgt
- this is really complicated... it should be the same as load, but append Narratives and Models
- we might need to add a "vsim" tag somewhere to distinguish (like the root name)
- 1. convert to new format
- 2. merge with 
-
+Narrative1 ::Narrative {
+	. . .
+}
 
 osg/obj/fbx/dae/skt/flt/etc?
  this is a raw model, do importing instead
-
-
-#Export
-
-vsim/osgb/osgt
- export as is
-
-
-
-#Compatibility Rules
-
-for new and old .vsim binary files to be compatible
-- inheritance cannot change
-- serializer can't change
-
+ 

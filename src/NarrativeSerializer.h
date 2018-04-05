@@ -19,6 +19,7 @@ namespace FlatBuffers {
 }
 
 namespace NarrativeSerializer {
+	// adds loaded narratives to group
 	void readNarrativeTable(const VSim::FlatBuffers::NarrativeTable *buffer,
 		NarrativeGroup *group);
 	flatbuffers::Offset<VSim::FlatBuffers::NarrativeTable>

@@ -19,6 +19,7 @@
 #include "editButtons.h"
 #include "narrative/NarrativeCanvas.h"
 #include "narrative/NarrativePlayer.h"
+#include "narrative/NarrativeControl.h"
 
 #include "resources/ERDisplay.h"
 #include "resources/ERControl.h"
@@ -28,6 +29,9 @@
 #include "VSimRoot.h"
 #include "ModelTableModel.h"
 #include "ModelInformationDialog.h"
+
+#include "FileUtil.h"
+#include <fstream>
 
 #include "types_generated.h"
 #include "settings_generated.h"
@@ -99,8 +103,8 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::actionSaveAs);
 	connect(ui->actionImport_Model, &QAction::triggered, this, &MainWindow::actionImportModel);
 	connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
-	connect(ui->actionImport_Narratives, &QAction::triggered, this, &MainWindow::sImportNarratives);
-	connect(ui->actionExport_Narratives, &QAction::triggered, this, &MainWindow::sExportNarratives);
+	connect(ui->actionImport_Narratives, &QAction::triggered, this, &MainWindow::actionImportNarratives);
+	connect(ui->actionExport_Narratives, &QAction::triggered, this, &MainWindow::actionExportNarratives);
 
 	connect(ui->actionOSG_Debug, &QAction::triggered, this, &MainWindow::sDebugOSG);
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
@@ -313,8 +317,8 @@ void MainWindow::actionNew()
 void MainWindow::actionOpen()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim",
-		m_app->getCurrentDirectory(),
-		"VSim files (*.vsim;*.osg;*.osgt;*.osgb; );;"
+		m_app->getCurrentDirectory().c_str(),
+		"VSim files (*.vsim;);;"
 		"Model files (*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
 	if (filename == "") {
@@ -346,7 +350,7 @@ void MainWindow::actionSaveAs()
 {
 	QString filename = QFileDialog::getSaveFileName(this, "Save VSim",
 		m_app->getFileName().c_str(),
-		"VSim file (*.vsim;*.osgt;*.osgb);;");
+		"VSim file (*.vsim);;");
 	if (filename == "") {
 		return;
 	}
@@ -359,7 +363,7 @@ void MainWindow::actionSaveAs()
 void MainWindow::actionImportModel()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Import Model",
-		m_app->getCurrentDirectory(),
+		m_app->getLastDiretory().c_str(),
 		"Model files (*.vsim;*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
 	if (filename == "") {
@@ -368,6 +372,70 @@ void MainWindow::actionImportModel()
 	qInfo() << "importing - " << filename;
 	//m_vsimapp->importModel(filename.toStdString());
 	emit sImportModel(filename.toStdString());
+}
+
+void MainWindow::actionImportNarratives()
+{
+	// Open dialog
+	qInfo("Importing narratives");
+	QStringList list = QFileDialog::getOpenFileNames(this, "Import Narratives",
+		m_app->getLastDiretory().c_str(), "Narrative files (*.nar);;All types (*.*)");
+	if (list.empty()) {
+		qInfo() << "import cancel";
+		return;
+	}
+	QStringList error_list;
+	int count = 0;
+	for (const QString &filename : list) {
+		if (filename.isEmpty()) continue;
+
+		m_app->setLastDirectory(filename.toStdString(), true);
+
+		std::ifstream in(filename.toStdString(), std::ios::binary);
+		if (in.good()) {
+			bool ok = FileUtil::importNarrativesStream(in, m_app->getRoot()->narratives());
+			if (ok) {
+				count++;
+				continue;
+			}
+		}
+		// error case
+		error_list.append(filename);
+	}
+
+	if (!error_list.empty()) {
+		QString s;
+		for (const auto &s : error_list);
+		QMessageBox::warning(this, "Import Narratives", "Error importing narratives from " + error_list.join(", "));;
+	}
+}
+
+void MainWindow::actionExportNarratives()
+{
+	// Open dialog
+	qInfo("Exporting narratives");
+	QString filename = QFileDialog::getSaveFileName(this, "Export Narratives",
+		m_app->getLastDiretory().c_str(), "Narrative files (*.nar);;All types (*.*)");
+	if (filename == "") {
+		qInfo() << "import cancel";
+		return;
+	}
+	std::ofstream out(filename.toStdString(), std::ios::binary);
+	if (out.good()) {
+		bool ok = FileUtil::exportNarrativesStream(out, m_app->getRoot()->narratives(),
+			m_app->narrativeControl()->getSelectedNarratives());
+		if (ok) return;
+	}
+	QMessageBox::warning(this, "Export Error", "Error exporting narratives to " + filename);
+}
+
+
+void MainWindow::actionExportERs()
+{
+}
+
+void MainWindow::actionImportERs()
+{
 }
 
 void MainWindow::execModelInformation()

@@ -55,7 +55,7 @@ public:
 	void removeNode(int nodeIndex);
 	unsigned int getNumNodes() const { return m_nodes.size(); }
 	NarrativeNode* getNode(unsigned int i) const { return m_nodes[i].get(); }
-	NarrativeTransition* getTransition(unsigned int i) const { assert(i < m_transitions.size() - 1); return m_transitions[i].get(); }
+	NarrativeTransition* getTransition(unsigned int i) const { assert(i <= m_transitions.size() - 1); return m_transitions[i].get(); }
 	void clear() { m_nodes.clear(); m_transitions.clear(); setName(""); setSelection(-1, false); }
 	
 

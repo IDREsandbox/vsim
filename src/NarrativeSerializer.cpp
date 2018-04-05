@@ -35,8 +35,6 @@ flatbuffers::Offset<fb::FillStyle>
 void NarrativeSerializer::readNarrativeTable(
 	const fb::NarrativeTable *buffer, NarrativeGroup *group)
 {
-	group->clear();
-
 	auto fb_nars = buffer->narratives();
 	if (fb_nars) {
 		for (auto fb_nar : *fb_nars) {

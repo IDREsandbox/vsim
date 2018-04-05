@@ -657,15 +657,9 @@ int NarrativeControl::getCurrentNarrativeIndex()
 	return m_current_narrative;
 }
 
-std::vector<Narrative*> NarrativeControl::getSelectedNarratives() const
+std::set<int> NarrativeControl::getSelectedNarratives() const
 {
-	std::vector<Narrative*> nars;
-	auto sel = m_narrative_selection->toSet();
-	for (auto i : sel) {
-		Narrative *nar = dynamic_cast<Narrative*>(m_narrative_group->child(i));
-		nars.push_back(nar);
-	}
-	return nars;
+	return m_narrative_selection->toSet();
 }
 
 int NarrativeControl::getCurrentSlideIndex()

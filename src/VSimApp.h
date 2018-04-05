@@ -89,8 +89,13 @@ public:
 	// undo/redo
 	QUndoStack *getUndoStack() const;
 
-	// file stuff
-	QString getCurrentDirectory() const;
+	// last directory used by a file dialog
+	std::string getLastDiretory() const;
+	void setLastDirectory(const std::string &dir, bool isFile = false);
+
+	// current vsim working directory, based on the .vsim file location
+	std::string getCurrentDirectory() const;
+	
 	std::string getFileName() const;
 	void setFileName(const std::string &);
 
@@ -123,6 +128,7 @@ private:
 
 	QUndoStack *m_undo_stack;
 
+	std::string m_last_directory;
 	std::string m_filename;
 	bool m_model_loaded;
 
@@ -144,12 +150,6 @@ private:
 	QTimer *m_slide_timer;
 
 	State m_state;
-	bool m_play_state;
-	bool m_playing;
-	bool m_editing_narrative;
-	bool m_flying;
-	bool m_transitioning;
-	int m_transition_to;
 
 	// thumbnails
 	NarrativeCanvas *m_render_canvas;

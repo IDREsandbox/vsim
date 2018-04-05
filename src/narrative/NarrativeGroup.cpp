@@ -15,3 +15,8 @@ NarrativeGroup::NarrativeGroup(const osg::Group *old_group)
 		}
 	}
 }
+
+Narrative * NarrativeGroup::narrative(int index) const
+{
+	return dynamic_cast<Narrative*>(child(index));
+}

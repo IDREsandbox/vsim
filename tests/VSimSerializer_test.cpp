@@ -5,6 +5,7 @@
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 #include "Util.h"
+#include "FileUtil.h"
 #include "VSimRoot.h"
 #include "narrative/Narrative.h"
 #include "narrative/NarrativeGroup.h"
@@ -52,6 +53,8 @@ void robustStreamTest() {
 	bool ok = VSimSerializer::readStreamRobust(in, &root);
 	QVERIFY(ok);
 
+	root.debug();
+
 	QCOMPARE(root.narratives()->getNumChildren(), 2);
 	// narrative titles
 	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(0))->getTitle(), "nar1");
@@ -80,14 +83,61 @@ void oldERTest() {
 	QVERIFY(ok);
 
 	QCOMPARE(root.resources()->getNumChildren(), 2);
-	EResource *res1 = dynamic_cast<EResource*>(root.resources()->child(0));
-	EResource *res2 = dynamic_cast<EResource*>(root.resources()->child(1));
+	EResource *res1 = root.resources()->getResource(0);
+	EResource *res2 = root.resources()->getResource(1);
 	QCOMPARE(res1->getResourceName(), "local");
 	QCOMPARE(res1->getCategory()->getCategoryName(), "l");
 	QCOMPARE(res1->getGlobal(), false);
 	QCOMPARE(res2->getResourceName(), "global");
 	QCOMPARE(res2->getCategory()->getCategoryName(), "g");
 	QCOMPARE(res2->getGlobal(), true);
+}
+
+void oldImportNarratives() {
+	NarrativeGroup group;
+	qDebug() << "reading old narrative file";
+	std::ifstream ifs("assets/test/old_nar.nar", std::ios::binary);
+	bool ok = FileUtil::importNarrativesStream(ifs, &group);
+	QVERIFY(ok);
+
+	QCOMPARE(group.getNumChildren(), 1);
+	QCOMPARE(group.narrative(0)->getTitle(), "nar1");
+}
+
+void importExportNarratives() {
+	NarrativeGroup group1;
+	Narrative *nar1 = new Narrative;
+	Narrative *nar2 = new Narrative;
+	Narrative *nar3 = new Narrative;
+
+	nar1->setTitle("nar1");
+	nar2->setTitle("nar2");
+	nar3->setTitle("nar3");
+
+	group1.addChild(nar1);
+	group1.addChild(nar2);
+	group1.addChild(nar3);
+
+	std::stringstream ss;
+	qDebug() << "export narrative stream";
+	FileUtil::exportNarrativesStream(ss, &group1, { 0, 2 });
+
+	NarrativeGroup group2;
+	Narrative *nar4 = new Narrative;
+	nar4->setTitle("nar4");
+	group2.addChild(nar4);
+
+	qDebug() << "import narrative stream";
+	FileUtil::importNarrativesStream(ss, &group2);
+	
+	QCOMPARE(group2.getNumChildren(), 3);
+	QCOMPARE(group2.narrative(0)->getTitle(), "nar4");
+	QCOMPARE(group2.narrative(1)->getTitle(), "nar1");
+	QCOMPARE(group2.narrative(2)->getTitle(), "nar3");
+}
+
+void exportNarratives() {
+
 }
 
 void osgStreamTest() {

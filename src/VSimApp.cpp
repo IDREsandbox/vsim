@@ -256,57 +256,7 @@ bool VSimApp::saveCurrentVSim()
 
 bool VSimApp::exportNarratives()
 {
-	//// figure out the selected narratives, if none are selected then error
-	//osg::ref_ptr<osg::Group> export_group = new NarrativeGroup;
-	////NarrativeControl::SelectionLevel level = m_narrative_control->getSelectionLevel();
 
-	//auto narratives = m_narrative_control->getSelectedNarratives();
-	//if (narratives.empty()) {
-	//	QMessageBox::warning(m_window, "Export Narratives Error", "No narratives selected");
-	//	return false;
-	//}
-
-	//for (auto nar : narratives) {
-	//	export_group->addChild(nar);
-	//}
-
-	//// Open up the save dialog
-	//qInfo() << "Export narratives";
-	//QString filename = QFileDialog::getSaveFileName(m_window, "Export Narratives",
-	//	getCurrentDirectory(), "Narrative file (*.nar)");
-	//if (filename == "") {
-	//	qInfo() << "Export narratives cancel";
-	//	return false;
-	//}
-
-	//// Open the file, create the osg reader/writer
-	//qInfo() << "Exporting narratives" << filename;
-	//std::ofstream ofs;
-	//ofs.open(filename.toStdString(), std::ios::binary);
-	//if (!ofs.good()) {
-	//	QMessageBox::warning(m_window, "Export Error", "Error opening file for writing " + filename);
-	//	return false;
-	//}
-
-	//osgDB::ReaderWriter *rw = osgDB::Registry::instance()->getReaderWriterForExtension("osgb");
-	//if (!rw) {
-	//	QMessageBox::warning(m_window, "Export Error", "Error creating osgb writer " + filename);
-	//	return false;
-	//}
-
-	//qInfo() << "Exporting narratives";
-	//osgDB::Options* options = new osgDB::Options;
-	////options->setPluginStringData("fileType", "Ascii");
-	//options->setPluginStringData("WriteImageHint", "IncludeData");
-	//osgDB::ReaderWriter::WriteResult result = rw->writeNode(*export_group, ofs, options);
-
-	//if (result.success()) {
-	//	return true;
-	//}
-	//else {
-	//	QMessageBox::warning(m_window, "Save Error", "Error writing osg nodes " + filename);
-	//	return false;
-	//}
 	return false;
 }
 
@@ -380,10 +330,26 @@ VSimRoot * VSimApp::getRoot() const
 	return m_root.get();
 }
 
-QString VSimApp::getCurrentDirectory() const
+std::string VSimApp::getLastDiretory() const
+{
+	return m_last_directory;
+}
+
+void VSimApp::setLastDirectory(const std::string & dir, bool isFile)
+{
+	if (isFile) {
+		QFileInfo f(dir.c_str());
+		m_last_directory = f.dir().path().toStdString();
+	}
+	else {
+		m_last_directory = dir;
+	}
+}
+
+std::string VSimApp::getCurrentDirectory() const
 {
 	QFileInfo f(m_filename.c_str());
-	return f.dir().path();
+	return f.dir().path().toStdString();
 }
 
 std::string VSimApp::getFileName() const
