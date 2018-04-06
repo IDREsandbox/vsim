@@ -354,6 +354,22 @@ void NarrativeControl::moveNarratives(const std::vector<std::pair<size_t, size_t
 	m_undo_stack->endMacro();
 }
 
+void NarrativeControl::mergeNarratives(const NarrativeGroup * g)
+{
+	std::set<int> indices;
+	m_undo_stack->beginMacro("Import Narratives");
+	m_undo_stack->push(new SelectNarrativesCommand(this, {}, ON_UNDO));
+	for (size_t i = 0; i < g->getNumChildren(); i++) {
+		Narrative *nar = g->narrative(i);
+		if (!nar) continue;
+		indices.insert(m_narrative_group->getNumChildren());
+		m_undo_stack->push(new Group::AddNodeCommand(m_narrative_group, nar));
+	}
+	SelectionData sel(indices.begin(), indices.end());
+	m_undo_stack->push(new SelectNarrativesCommand(this, sel, ON_REDO));
+	m_undo_stack->endMacro();
+}
+
 void NarrativeControl::loadNarratives(NarrativeGroup * group)
 {
 	// figure out selection

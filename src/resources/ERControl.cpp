@@ -322,7 +322,7 @@ void ERControl::mergeERs(const EResourceGroup *ers)
 		res.push_back(ers->getResource(i));
 	}
 
-	auto *cmd = new QUndoCommand();
+	auto *cmd = new QUndoCommand("Import Resources");
 	new SelectERCommand(this, {}, Command::ON_UNDO, cmd);
 	EResourceGroup::mergeCommand(m_ers, ers, cmd);
 	new SelectERCommand(this, res, Command::ON_REDO, cmd);

@@ -17,6 +17,7 @@
 #include "ModelOutliner.h"
 
 #include "editButtons.h"
+#include "narrative/NarrativeGroup.h"
 #include "narrative/NarrativeCanvas.h"
 #include "narrative/NarrativePlayer.h"
 #include "narrative/NarrativeControl.h"
@@ -390,6 +391,7 @@ void MainWindow::actionImportNarratives()
 	}
 	QStringList error_list;
 	int count = 0;
+	NarrativeGroup group;
 	for (const QString &filename : list) {
 		if (filename.isEmpty()) continue;
 
@@ -397,7 +399,7 @@ void MainWindow::actionImportNarratives()
 
 		std::ifstream in(filename.toStdString(), std::ios::binary);
 		if (in.good()) {
-			bool ok = FileUtil::importNarrativesStream(in, m_app->getRoot()->narratives());
+			bool ok = FileUtil::importNarrativesStream(in, &group);
 			if (ok) {
 				count++;
 				continue;
@@ -406,6 +408,8 @@ void MainWindow::actionImportNarratives()
 		// error case
 		error_list.append(filename);
 	}
+
+	m_app->narrativeControl()->mergeNarratives(&group);
 
 	if (!error_list.empty()) {
 		QString s;

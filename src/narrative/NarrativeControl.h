@@ -99,6 +99,7 @@ public: // Actions
 	void editNarrativeInfo();
 	void deleteNarratives();
 	void moveNarratives(const std::vector<std::pair<size_t, size_t>> &mapping);
+	void mergeNarratives(const NarrativeGroup *g);
 
 	// Slides
 	QAction *a_new_slide;
