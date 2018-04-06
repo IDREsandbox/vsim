@@ -107,8 +107,8 @@ table CanvasLabel {
   html:string;
   fill_style:FillStyle;
   line_style:LineStyle;
+  valign:VAlign;
   //text_style:TextStyle; // the other text stuff is kept in the html
-  valign:VAlign; 
 }
 
 table CanvasImage {

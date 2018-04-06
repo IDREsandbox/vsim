@@ -7,15 +7,9 @@ See (serialization)[./serialization.md] for pros/cons/decisions
     - Narratives and slides
 	- Embedded Resources
 	- model information, model metadata
-- uses OSG binary format (.osgb) for model data
+- uses OSG binary format (.osgb) for model data, we aren't restricted to this
 
 Flatbuffer schemas are in .fbs files, they're pretty self-documenting.
-
-One issue with flatbuffers is that they don't support files > 2GB, so we hack
-around this by dumping the model binary after the flatbuffer. To know where
-the flatbuffer ends and the model starts, we use a size-prefixed flatbuffer.
-Model size/format information is kept in the flatbuffer (we're not restricted
-to using osgb).
 
 file format
 ```
@@ -29,6 +23,22 @@ vsim header -
     V  S  I  M  x  x  x  x
     56 53 49 4d xx xx xx xx
 ```
+
+### Issues
+
+One issue with flatbuffers is that they don't support files > 2GB, so we hack
+around this by dumping the model binary after the flatbuffer. To know where
+the flatbuffer ends and the model starts, we use a size-prefixed flatbuffer.
+Model size/format information is kept in the flatbuffer.
+
+ it's hard to figure out model size before writing (see vsim.fbs, Model)
+ solutions:
+- use mutable buffers & mmap, go back and update sizes after writing out models
+- could write model data to string in memory first
+    - currently used, but we might have memory issues later
+- could write size-prefixed blocks
+    - maybe?
+ for now be lazy, no changes
 
 ## Old .vsim Format
 - based on OSG serializers

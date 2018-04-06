@@ -12,17 +12,11 @@ table Model { // model metadata
   format:string;
   ascii:bool = false;
   zlib:bool = false;
-  size:uint64;
+  size:uint64; // assigning this is difficult, perhaps use 
   // included:bool;
   // path:string;
   // size_prefixed:bool // potential change
-
-  // buffer_after_flatbuffer: bool = true; // dont need yet
-  // it's hard to figure out size before writing
-  // - could use mutable buffers
-  // - could write data to string first
-  // - could write size-prefixed blocks
-  // for now just be lazy, don't need yet
+  // buffer_after_flatbuffer: bool = true; // just assume true
   // data:[byte]; // always store external
 }
 
