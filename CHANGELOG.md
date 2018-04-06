@@ -4,6 +4,7 @@
 - .vsim uses Google Flatbuffers for serialization
 - import/export narratives, old narratives, undoable
 - import/export resources, old resources, undoable
+- model information, dialog, serialization
 
 ## 2018-3-20
 ### Added
