@@ -1,5 +1,10 @@
 # Changelog
 
+## 2018-4-6
+- .vsim uses Google Flatbuffers for serialization
+- import/export narratives, old narratives, undoable
+- import/export resources, old resources, undoable
+
 ## 2018-3-20
 ### Added
 
