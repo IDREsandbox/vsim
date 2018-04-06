@@ -43,12 +43,10 @@ EResource::EResource(const EResourcesNode *er, const std::map<std::string, ECate
 	ECategory *cat = nullptr;
 	auto it = cats.find(er->getCategoryName());
 	if (it != cats.end()) {
-		qDebug() << "Assiging an old ER cat" << this << it->first.c_str();
 		cat = it->second;
 	}
 
 	if (er->getMinYear() != 0 || er->getMaxYear() != 0) {
-		qDebug() << "- nonzero resource year:" << QString::fromStdString(er->getResourceName()) << m_min_year << m_max_year;
 	}
 
 	setCategory(cat);

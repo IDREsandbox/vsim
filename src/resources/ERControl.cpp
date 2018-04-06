@@ -184,6 +184,7 @@ void ERControl::newER()
 	resource->setCameraMatrix(m_app->getCameraMatrix());
 	resource->setCategory(dlg.getCategory());
 
+	m_undo_stack->push(new SelectERCommand(this, { resource }, Command::ON_UNDO));
 	m_undo_stack->push(new Group::AddNodeCommand(m_ers, resource));
 	m_undo_stack->push(new SelectERCommand(this, { resource }, Command::ON_REDO));
 	m_undo_stack->endMacro();
@@ -194,18 +195,21 @@ void ERControl::deleteER()
 	std::set<int> selection = getCombinedSelection();
 	if (selection.empty()) return;
 
-	m_undo_stack->beginMacro("Delete Resources");
-	m_undo_stack->push(new SelectERCommand(this, getCombinedSelectionP(), Command::ON_UNDO));
-	// save old categories, so that we can restore them later
-	auto cmd = new Group::EditCommand(m_ers, selection);
+	auto *null_cats = new Group::EditCommand(m_ers, selection);
 	for (int i : selection) {
 		EResource *res = m_ers->getResource(i);
 		if (!res) continue;
-		new EResource::SetCategoryCommand(res, nullptr, cmd);
+		new EResource::SetCategoryCommand(res, nullptr, null_cats);
 	}
-	m_undo_stack->push(cmd);
+
+	m_undo_stack->beginMacro("Delete Resources");
+	m_undo_stack->push(new SelectERCommand(this, getCombinedSelectionP(), Command::ON_UNDO));
+	// save old categories, so that we can restore them later
+
+	m_undo_stack->push(null_cats);
 	// remove resources
 	m_undo_stack->push(new Group::RemoveSetCommand(m_ers, selection));
+	m_undo_stack->push(new SelectERCommand(this, {}, Command::ON_REDO));
 	m_undo_stack->endMacro();
 }
 
@@ -308,6 +312,22 @@ void ERControl::setPosition()
 	m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_app->getCameraMatrix()));
 	m_undo_stack->push(new SelectERCommand(this, { resource }));
 	m_undo_stack->endMacro();
+}
+
+void ERControl::mergeERs(const EResourceGroup *ers)
+{
+	qInfo() << "Merging ER Groups";
+	std::vector<EResource*> res;
+	for (size_t i = 0; i < ers->getNumChildren(); i++) {
+		res.push_back(ers->getResource(i));
+	}
+
+	auto *cmd = new QUndoCommand();
+	new SelectERCommand(this, {}, Command::ON_UNDO, cmd);
+	EResourceGroup::mergeCommand(m_ers, ers, cmd);
+	new SelectERCommand(this, res, Command::ON_REDO, cmd);
+
+	m_undo_stack->push(cmd);
 }
 
 void ERControl::gotoPosition()
@@ -484,7 +504,8 @@ SelectERCommand::SelectERCommand(ERControl *control,
 	const std::vector<EResource*> &resources,
 	Command::When when,
 	QUndoCommand *parent)
-	: m_control(control),
+	: QUndoCommand(parent),
+	m_control(control),
 	m_resources(resources),
 	m_when(when)
 {

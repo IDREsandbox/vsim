@@ -5,10 +5,20 @@
 #include <fstream>
 #include <sstream>
 #include <QDebug>
+#include <unordered_set>
 
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative.h"
+#include "resources/EResourceGroup.h"
+#include "resources/EResource.h"
+#include "resources/ECategoryGroup.h"
+#include "resources/ECategory.h"
+#include "resources/ERControl.h"
 #include "deprecated/narrative/NarrativeOld.h"
+#include "deprecated/resources/EResourcesList.h"
+#include "deprecated/resources/EResourcesCategory.h"
+
+#include "Group.h"
 
 namespace fb = VSim::FlatBuffers;
 bool FileUtil::readVSimFile(const std::string & path, VSimRoot * root)
@@ -60,7 +70,9 @@ bool FileUtil::importNarrativesStream(std::istream &in, NarrativeGroup *group)
 	NarrativeOld *old = dynamic_cast<NarrativeOld*>(node.get());
 	if (old) {
 		group->addChild(new Narrative(old));
+		return true;
 	}
+	return false;
 }
 
 bool FileUtil::exportNarrativesStream(std::ostream &out, const NarrativeGroup *group,
@@ -89,48 +101,69 @@ bool FileUtil::exportNarrativesStream(std::ostream &out, const NarrativeGroup *g
 	return out.good();
 }
 
-//bool FileUtil::importNarratives(const std::string & path, NarrativeGroup *group)
-//{
-//	//// Open dialog
-//	//qInfo("Importing narratives");
-//	//QString filename = QFileDialog::getOpenFileName(m_window, "Import Narratives",
-//	//	getCurrentDirectory(), "Narrative files (*.nar);;All types (*.*)");
-//	//if (filename == "") {
-//	//	qInfo() << "import cancel";
-//	//	return false;
-//	//}
-//
-//	//osg::ref_ptr<osg::Node> loadedModel;
-//
-//	//// open file
-//	std::ifstream ifs;
-//	ifs.open(path, std::ios::binary);
-//	if (!ifs.good()) {
-//		return false;
-//	}
-//
-//	return importNarrativesStream(ifs, group);
-//}
-//
-//bool FileUtil::exportNarratives(const std::string & path, const NarrativeGroup * group,
-//	const std::set<int>& selection)
-//{
-//	std::ofstream ofs;
-//	ofs.open(path, std::ios::binary);
-//	if (!ofs.good()) {
-//		return false;
-//	}
-//
-//	return exportNarrativesStream(ofs, group, selection);
-//}
-
-bool FileUtil::importEResources(const std::string & path, EResourceGroup * group)
+bool FileUtil::importEResources(std::istream &in, EResourceGroup *group)
 {
+	// read into buffer
+	std::stringstream ss;
+	ss << in.rdbuf();
+	std::string s = ss.str();
+	const uint8_t *buf = reinterpret_cast<const uint8_t*>(s.c_str());
+
+	bool fb_match = fb::VerifyERTableBuffer(flatbuffers::Verifier(buf, s.length()));
+	if (fb_match) {
+		// reading flatbuffers
+		const fb::ERTable *fb_root = fb::GetERTable(s.c_str());
+		ERSerializer::readERTable(fb_root, group);
+		return true;
+	}
+
+	// trying to read old stuff
+	osg::ref_ptr<osg::Node> node = VSimSerializer::readOSGB(ss, false, false);
+	if (!node) {
+		qWarning() << "failed to load resource file";
+		return false;
+	}
+	// try group, try narrative
+	EResourcesList *old = dynamic_cast<EResourcesList*>(node.get());
+	if (old) {
+		qInfo() << "loaded old eresourceslist";
+		group->loadOld(old);
+		return true;
+	}
+
+	// failure
 	return false;
 }
 
-bool FileUtil::exportEResources(const std::string & path, const EResourceGroup * group,
+bool FileUtil::exportEResources(std::ostream &out, const EResourceGroup * group,
 	const std::set<int>& selection)
 {
-	return false;
+	if (!out.good()) {
+		return false;
+	}
+
+	// make a new group w/ copy of narratives
+	EResourceGroup g;
+	std::unordered_set<ECategory*> cats;
+	for (auto i : selection) {
+		EResource *res = group->getResource(i);
+		if (res) {
+			g.addChild(res);
+		}
+		ECategory *cat = res->category();
+		if (cat && (cats.find(cat) == cats.end())) {
+			cats.insert(cat);
+			g.categories()->addChild(cat);
+			cats.insert(res->category());
+		}
+	}
+
+	flatbuffers::FlatBufferBuilder builder;
+	auto o_table = ERSerializer::createERTable(&builder, &g);
+	fb::FinishERTableBuffer(builder, o_table);
+
+	const char *buf = reinterpret_cast<const char*>(builder.GetBufferPointer());
+	out.write(buf, builder.GetSize());
+
+	return out.good();
 }

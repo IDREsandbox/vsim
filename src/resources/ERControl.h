@@ -38,6 +38,8 @@ public:
 	void editERInfo();
 	void openResource(); // open the file
 	void setPosition();
+	void mergeERs(const EResourceGroup *ers);
+
 	void gotoPosition();
 
 	// -1 to hide
@@ -46,7 +48,12 @@ public:
 	// show and goto resource
 	void onSelectionChange();
 
+	// selection
 	void selectERs(const std::vector<EResource*> &res);
+	std::set<int> getCombinedSelection();
+	std::vector<EResource*> getCombinedSelectionP();
+	int getCombinedLastSelected();
+	void clearSelection();
 
 	void debug();
 
@@ -57,12 +64,6 @@ public: // actions
 	QAction *a_open_er;
 	QAction *a_position_er;
 	QAction *a_goto_er;
-
-private:
-	std::set<int> getCombinedSelection();
-	std::vector<EResource*> getCombinedSelectionP();
-	int getCombinedLastSelected();
-	void clearSelection();
 
 private:
 	VSimApp *m_app;

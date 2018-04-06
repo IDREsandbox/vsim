@@ -21,6 +21,8 @@
 #include "narrative/NarrativePlayer.h"
 #include "narrative/NarrativeControl.h"
 
+#include "resources/EResourceGroup.h"
+#include "resources/ERControl.h"
 #include "resources/ERDisplay.h"
 #include "resources/ERControl.h"
 #include "resources/ERFilterArea.h"
@@ -105,6 +107,8 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
 	connect(ui->actionImport_Narratives, &QAction::triggered, this, &MainWindow::actionImportNarratives);
 	connect(ui->actionExport_Narratives, &QAction::triggered, this, &MainWindow::actionExportNarratives);
+	connect(ui->actionImport_Resources, &QAction::triggered, this, &MainWindow::actionImportERs);
+	connect(ui->actionExport_Resources, &QAction::triggered, this, &MainWindow::actionExportERs);
 
 	connect(ui->actionOSG_Debug, &QAction::triggered, this, &MainWindow::sDebugOSG);
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
@@ -417,7 +421,7 @@ void MainWindow::actionExportNarratives()
 	QString filename = QFileDialog::getSaveFileName(this, "Export Narratives",
 		m_app->getLastDiretory().c_str(), "Narrative files (*.nar);;All types (*.*)");
 	if (filename == "") {
-		qInfo() << "import cancel";
+		qInfo() << "export cancel";
 		return;
 	}
 	std::ofstream out(filename.toStdString(), std::ios::binary);
@@ -429,13 +433,46 @@ void MainWindow::actionExportNarratives()
 	QMessageBox::warning(this, "Export Error", "Error exporting narratives to " + filename);
 }
 
+void MainWindow::actionImportERs()
+{
+	qInfo("Importing resources");
+	QString path = QFileDialog::getOpenFileName(this, "Import Resources",
+		m_app->getLastDiretory().c_str(), "Narrative files (*.ere);;All types (*.*)");
+	if (path.isEmpty()) {
+		qInfo() << "import cancel";
+		return;
+	}
+
+	m_app->setLastDirectory(path.toStdString(), true);
+
+	std::ifstream in(path.toStdString(), std::ios::binary);
+	if (in.good()) {
+		EResourceGroup g;
+		bool ok = FileUtil::importEResources(in, &g);
+		m_app->erControl()->mergeERs(&g);
+		return;
+	}
+	QMessageBox::warning(this, "Import Narratives",
+		"Error importing narratives from " + path);
+}
 
 void MainWindow::actionExportERs()
 {
-}
-
-void MainWindow::actionImportERs()
-{
+	// Open dialog
+	qInfo("Exporting resources");
+	QString filename = QFileDialog::getSaveFileName(this, "Export Resources",
+		m_app->getLastDiretory().c_str(), "Resources (*.ere);;All types (*.*)");
+	if (filename == "") {
+		qInfo() << "export cancel";
+		return;
+	}
+	std::ofstream out(filename.toStdString(), std::ios::binary);
+	if (out.good()) {
+		bool ok = FileUtil::exportEResources(out, m_app->getRoot()->resources(),
+			m_app->erControl()->getCombinedSelection());
+		if (ok) return;
+	}
+	QMessageBox::warning(this, "Export Error", "Error exporting resources to " + filename);
 }
 
 void MainWindow::execModelInformation()

@@ -2,7 +2,7 @@ include "types.fbs";
 
 namespace VSim.FlatBuffers;
 
-file_extension "er";
+file_extension "ere";
 file_identifier "VSER";
 
 table ERTable {

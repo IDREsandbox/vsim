@@ -20,7 +20,7 @@ namespace FileUtil
 	//bool exportNarratives(const std::string &path, const NarrativeGroup *group,
 	//	const std::set<int> &selection);
 
-	bool importEResources(const std::string &path, EResourceGroup *group);
-	bool exportEResources(const std::string &path, const EResourceGroup *group,
+	bool importEResources(std::istream &in, EResourceGroup *group);
+	bool exportEResources(std::ostream &out, const EResourceGroup *group,
 		const std::set<int> &selection);
 }

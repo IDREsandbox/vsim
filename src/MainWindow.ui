@@ -86,9 +86,14 @@
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
+    <addaction name="separator"/>
     <addaction name="actionImport_Model"/>
+    <addaction name="separator"/>
     <addaction name="actionImport_Narratives"/>
     <addaction name="actionExport_Narratives"/>
+    <addaction name="separator"/>
+    <addaction name="actionImport_Resources"/>
+    <addaction name="actionExport_Resources"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -437,6 +442,16 @@
   <action name="actionModel_Information">
    <property name="text">
     <string>Model Information</string>
+   </property>
+  </action>
+  <action name="actionImport_Resources">
+   <property name="text">
+    <string>Import Resources...</string>
+   </property>
+  </action>
+  <action name="actionExport_Resources">
+   <property name="text">
+    <string>Export Resources...</string>
    </property>
   </action>
  </widget>

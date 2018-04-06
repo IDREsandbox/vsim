@@ -11,6 +11,7 @@
 #include "narrative/NarrativeGroup.h"
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"
+#include "resources/ECategoryGroup.h"
 #include "ModelGroup.h"
 
 namespace fb = VSim::FlatBuffers;
@@ -53,8 +54,6 @@ void robustStreamTest() {
 	bool ok = VSimSerializer::readStreamRobust(in, &root);
 	QVERIFY(ok);
 
-	root.debug();
-
 	QCOMPARE(root.narratives()->getNumChildren(), 2);
 	// narrative titles
 	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(0))->getTitle(), "nar1");
@@ -91,6 +90,63 @@ void oldERTest() {
 	QCOMPARE(res2->getResourceName(), "global");
 	QCOMPARE(res2->getCategory()->getCategoryName(), "g");
 	QCOMPARE(res2->getGlobal(), true);
+}
+
+void importExportER() {
+	// export
+	// er1 cat1
+	// er2 duplicate(2)
+	// er5 cat1
+
+	// existing
+	// er4 duplicate(3)
+
+	// expected
+	// er4 duplicate(3)
+	// er1 cat1
+	// er2 duplicate(3)
+	// er5 cat1
+
+	// export group
+	EResourceGroup group1;
+	ECategory *cat1 = new ECategory;
+	ECategory *cat2 = new ECategory;
+	cat1->setCategoryName("cat1");
+	cat2->setCategoryName("cat2");
+	group1.categories()->addChild(cat1);
+	group1.categories()->addChild(cat2);
+
+	EResource *er1 = new EResource;
+	EResource *er2 = new EResource;
+	EResource *er3 = new EResource;
+	er1->setResourceName("er1");
+	er2->setResourceName("er2");
+	er3->setResourceName("er3");
+	group1.addChild(er1);
+	group1.addChild(er2);
+	group1.addChild(er3);
+	er1->setCategory(cat1);
+	er2->setCategory(cat2);
+
+	std::stringstream ss;
+	qDebug() << "export ers stream";
+	FileUtil::exportEResources(ss, &group1, { 0, 1 });
+
+	// existing group
+	EResourceGroup group2;
+
+	qDebug() << "import ers stream";
+	FileUtil::importEResources(ss, &group2);
+
+	// merged group
+	QCOMPARE(group2.getNumChildren(), 2);
+	QCOMPARE(group2.getResource(0)->getResourceName(), "er1");
+	QCOMPARE(group2.getResource(1)->getResourceName(), "er2");
+	QCOMPARE(group2.getResource(0)->getCategory()->getCategoryName(), "cat1");
+	QCOMPARE(group2.getResource(1)->getCategory()->getCategoryName(), "cat2");
+	QCOMPARE(group2.categories()->getNumChildren(), 2);
+	QCOMPARE(group2.categories()->category(0)->getCategoryName(), "cat1");
+	QCOMPARE(group2.categories()->category(1)->getCategoryName(), "cat2");	
 }
 
 void oldImportNarratives() {
@@ -136,8 +192,23 @@ void importExportNarratives() {
 	QCOMPARE(group2.narrative(2)->getTitle(), "nar3");
 }
 
-void exportNarratives() {
+void oldImportResources() {
+	EResourceGroup group;
+	qDebug() << "reading old narrative file";
+	std::ifstream ifs("assets/test/old_ers.ere", std::ios::binary);
+	bool ok = FileUtil::importEResources(ifs, &group);
+	QVERIFY(ok);
 
+	QCOMPARE(group.getNumChildren(), 2);
+	EResource *res1 = group.getResource(0);
+	EResource *res2 = group.getResource(1);
+	QCOMPARE(res1->getResourceName(), "local");
+	QCOMPARE(res1->getCategory()->getCategoryName(), "l");
+	QCOMPARE(res1->getGlobal(), false);
+	QCOMPARE(res2->getResourceName(), "global");
+	QCOMPARE(res2->getCategory()->getCategoryName(), "g");
+	QCOMPARE(res2->getGlobal(), true);
+	QCOMPARE(group.categories()->getNumChildren(), 2);
 }
 
 void osgStreamTest() {
