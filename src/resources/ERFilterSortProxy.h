@@ -8,23 +8,25 @@
 #include <vector>
 
 #include "Group.h"
+#include "GroupTemplate.h"
 
 class EResource;
 class ECategory;
 class ECategoryGroup;
 class CheckableListProxy;
 
-class ERFilterSortProxy : public Group {
+class ERFilterSortProxy : public TGroup<EResource> {
 	Q_OBJECT
 public:
-	ERFilterSortProxy(Group *base = nullptr);
+	ERFilterSortProxy(TGroup<EResource> *base = nullptr);
 
-	void setBase(Group *base);
+	void setBase(TGroup<EResource> *base);
 
 	// group overrides
-	virtual osg::Node *child(unsigned int index) const override;
-	virtual unsigned int getNumChildren() const override;
-	virtual int indexOf(const osg::Node *node) const override;
+	EResource *child(size_t index) const override;
+	size_t size() const override;
+	int indexOf(const EResource *node) const override;
+
 	// not supported
 	//virtual bool insertChild(unsigned int index, Node *child) override;
 	//virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
@@ -109,7 +111,7 @@ private:
 
 private:
 	// filter sort proxy
-	osg::ref_ptr<Group> m_base;
+	TGroup<EResource> *m_base;
 	std::vector<int> m_map_to_base;
 
 	// ER specific

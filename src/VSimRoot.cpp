@@ -84,16 +84,6 @@ VSim::FlatBuffers::SettingsT * VSimRoot::settings() const
 	return m_settings.get();
 }
 
-void VSimRoot::postLoad()
-{
-	m_resources->postLoad();
-}
-
-void VSimRoot::preSave()
-{
-	m_resources->preSave();
-}
-
 void VSimRoot::debug()
 {
 	qInfo() << "root";

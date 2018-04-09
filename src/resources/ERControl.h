@@ -6,6 +6,7 @@
 #include <QUndoStack>
 #include <QSortFilterProxyModel>
 #include <vector>
+#include <memory>
 
 #include "Command.h"
 
@@ -50,7 +51,7 @@ public:
 
 	// selection
 	void selectERs(const std::vector<EResource*> &res);
-	std::set<int> getCombinedSelection();
+	std::set<size_t> getCombinedSelection();
 	std::vector<EResource*> getCombinedSelectionP();
 	int getCombinedLastSelected();
 	void clearSelection();
@@ -69,8 +70,8 @@ private:
 	VSimApp *m_app;
 	MainWindow *m_window;
 
-	osg::ref_ptr<EResourceGroup> m_ers;
-	osg::ref_ptr<ECategoryGroup> m_categories;
+	EResourceGroup *m_ers;
+	ECategoryGroup *m_categories;
 
 	int m_active_item;
 	ERDisplay *m_display;
@@ -84,9 +85,9 @@ private:
 	QUndoStack *m_undo_stack;
 
 	// filter stuff
-	osg::ref_ptr<ERFilterSortProxy> m_filter_proxy;
-	osg::ref_ptr<ERFilterSortProxy> m_global_proxy;
-	osg::ref_ptr<ERFilterSortProxy> m_local_proxy;
+	std::unique_ptr<ERFilterSortProxy> m_filter_proxy;
+	std::unique_ptr<ERFilterSortProxy> m_global_proxy;
+	std::unique_ptr<ERFilterSortProxy> m_local_proxy;
 
 	CheckableListProxy *m_category_checkbox_model;
 

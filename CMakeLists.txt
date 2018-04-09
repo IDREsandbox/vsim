@@ -208,8 +208,10 @@ target_link_libraries(Util_test ${OPENSCENEGRAPH_LIBRARIES})
 # group test
 set(Group_src
   tests/Group_test.cpp
-  src/Group.cpp
-  src/Group.h
+  # src/Group.cpp
+  # src/Group.h
+  src/GroupTemplate.inl
+  src/GroupTemplate.h
   src/Util.cpp
   src/Util.h)
 add_executable(Group_test ${Group_src})

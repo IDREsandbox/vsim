@@ -4,8 +4,7 @@
 #include <QTextCursor>
 #include <iostream>
 NarrativeSlide::NarrativeSlide()
-	: Group(),
-	m_camera_matrix(),
+	: m_camera_matrix(),
 	m_duration(4.0f),
 	m_stay_on_node(false),
 	m_transition_duration(4.0f),
@@ -95,7 +94,7 @@ NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransit
 				cursor.setCharFormat(format);
 				cursor.insertText(old_text.c_str());
 
-				addChild(new_label);
+				append(std::shared_ptr<NarrativeSlideItem>(new_label));
 			}
 			// finally we can make a new label
 			

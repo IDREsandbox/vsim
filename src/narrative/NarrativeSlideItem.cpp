@@ -2,7 +2,6 @@
 #include "Util.h"
 
 NarrativeSlideItem::NarrativeSlideItem()
-	: osg::Node()
 {
 }
 

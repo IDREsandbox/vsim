@@ -9,14 +9,13 @@
 #include "NarrativeSlideDurationDialog.h"
 
 class NarrativeSlide;
-class SlideScrollBox : public GroupScrollBox {
+class SlideScrollBox : public GroupScrollBox<NarrativeSlide> {
 	Q_OBJECT
 
 public:
 	SlideScrollBox(QWidget * parent = nullptr);
 
-	void setGroup(Group *group) override;
-	ScrollBoxItem *createItem(osg::Node *node) override;
+	ScrollBoxItem *createItem(NarrativeSlide *slide) override;
 
 	std::vector<NarrativeSlide*> getDirtySlides(); // slides whose thumbnails need to be drawn
 

@@ -10,7 +10,7 @@
 #include "GroupModel.h"
 #include "Util.h"
 
-ERFilterSortProxy::ERFilterSortProxy(Group *base)
+ERFilterSortProxy::ERFilterSortProxy(TGroup<EResource> *base)
 	: m_base(nullptr),
 	m_sort_by(NONE),
 	m_category_filters(nullptr),
@@ -25,7 +25,7 @@ ERFilterSortProxy::ERFilterSortProxy(Group *base)
 	sortBy(NONE);
 }
 
-void ERFilterSortProxy::setBase(Group *base)
+void ERFilterSortProxy::setBase(TGroup<EResource> *base)
 {
 	if (m_base != nullptr) disconnect(m_base, 0, this, 0);
 
@@ -35,7 +35,11 @@ void ERFilterSortProxy::setBase(Group *base)
 	reload();
 
 	// listen to new set
-	connect(base, &Group::sInsertedSet, this,
+	//connect(base, &GroupSignals::sInserted, this,
+	//	[this](auto stuff) {
+
+	//});
+	connect(base, &GroupSignals::sInsertedMulti, this,
 		[this](const std::vector<std::pair<size_t, osg::Node*>> &nodes) {
 		
 		// fix indices

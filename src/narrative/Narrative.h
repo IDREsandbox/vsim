@@ -5,12 +5,14 @@
 #include <osg/Node>
 #include <QObject>
 #include "Group.h"
+#include "GroupTemplate.h"
 #include "Command.h"
 
 class LabelStyleGroup;
 class NarrativeOld;
+class NarrativeSlide;
 
-class Narrative : public Group {
+class Narrative : public TGroup<NarrativeSlide> {
 	Q_OBJECT
 
 public:

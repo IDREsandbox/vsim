@@ -36,12 +36,12 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_display = m_window->erDisplay();
 	m_filter_area = m_window->erFilterArea();
 
-	m_filter_proxy = new ERFilterSortProxy(nullptr);
+	m_filter_proxy = std::unique_ptr<ERFilterSortProxy>(new ERFilterSortProxy(nullptr));
 	m_filter_proxy->sortBy(ERFilterSortProxy::ALPHABETICAL);
-	m_global_proxy = new ERFilterSortProxy(m_filter_proxy);
+	m_global_proxy = std::unique_ptr<ERFilterSortProxy>(new ERFilterSortProxy(m_filter_proxy.get()));
 	m_global_proxy->showGlobal(true);
 	m_global_proxy->showLocal(false);
-	m_local_proxy = new ERFilterSortProxy(m_filter_proxy);
+	m_local_proxy = std::unique_ptr<ERFilterSortProxy>(new ERFilterSortProxy(m_filter_proxy.get()));
 	m_local_proxy->showGlobal(false);
 	m_local_proxy->showLocal(true);
 
@@ -149,8 +149,8 @@ void ERControl::load(EResourceGroup *ers)
 
 	m_filter_proxy->setBase(ers);
 
-	m_global_box->setGroup(m_global_proxy);
-	m_local_box->setGroup(m_local_proxy);
+	m_global_box->setGroup(m_global_proxy.get());
+	m_local_box->setGroup(m_local_proxy.get());
 
 	m_category_control->load(m_categories);
 
@@ -168,7 +168,7 @@ void ERControl::newER()
 	qInfo() << "Command - New Embedded Resource";
 	m_undo_stack->beginMacro("New Resource");
 
-	EResource *resource = new EResource;
+	auto resource = std::shared_ptr<EResource>(new EResource);
 	resource->setResourceName(dlg.getTitle());
 	resource->setAuthor(dlg.getAuthor());
 	resource->setResourceDescription(dlg.getDescription());
@@ -184,18 +184,18 @@ void ERControl::newER()
 	resource->setCameraMatrix(m_app->getCameraMatrix());
 	resource->setCategory(dlg.getCategory());
 
-	m_undo_stack->push(new SelectERCommand(this, { resource }, Command::ON_UNDO));
-	m_undo_stack->push(new Group::AddNodeCommand(m_ers, resource));
-	m_undo_stack->push(new SelectERCommand(this, { resource }, Command::ON_REDO));
+	m_undo_stack->push(new SelectERCommand(this, { resource.get() }, Command::ON_UNDO));
+	m_undo_stack->push(new AddNodeCommand<EResource>(m_ers, resource));
+	m_undo_stack->push(new SelectERCommand(this, { resource.get() }, Command::ON_REDO));
 	m_undo_stack->endMacro();
 }
 
 void ERControl::deleteER()
 {
-	std::set<int> selection = getCombinedSelection();
+	std::set<size_t> selection = getCombinedSelection();
 	if (selection.empty()) return;
 
-	auto *null_cats = new Group::EditCommand(m_ers, selection);
+	auto *null_cats = new EditCommand<EResource>(m_ers, selection);
 	for (int i : selection) {
 		EResource *res = m_ers->getResource(i);
 		if (!res) continue;
@@ -208,7 +208,7 @@ void ERControl::deleteER()
 
 	m_undo_stack->push(null_cats);
 	// remove resources
-	m_undo_stack->push(new Group::RemoveSetCommand(m_ers, selection));
+	m_undo_stack->push(new RemoveMultiCommand<EResource>(m_ers, selection));
 	m_undo_stack->push(new SelectERCommand(this, {}, Command::ON_REDO));
 	m_undo_stack->endMacro();
 }
@@ -236,7 +236,7 @@ void ERControl::editERInfo()
 	m_undo_stack->beginMacro("Set Resource Info");
 	//m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
 
-	auto cmd = new Group::EditCommand(m_ers, { active_item });
+	auto cmd = new EditCommand<EResource>(m_ers, { (size_t)active_item });
 
 	if (resource->getResourceName() != dlg.getTitle())
 		new EResource::SetResourceNameCommand(resource, dlg.getTitle(), cmd);
@@ -318,7 +318,7 @@ void ERControl::mergeERs(const EResourceGroup *ers)
 {
 	qInfo() << "Merging ER Groups";
 	std::vector<EResource*> res;
-	for (size_t i = 0; i < ers->getNumChildren(); i++) {
+	for (size_t i = 0; i < ers->size(); i++) {
 		res.push_back(ers->getResource(i));
 	}
 
@@ -398,30 +398,32 @@ void ERControl::debug()
 	m_global_proxy->debug();
 
 	qInfo() << "Categories";
-	for (unsigned int i = 0; i < m_categories->getNumChildren(); i++) {
+	for (unsigned int i = 0; i < m_categories->size(); i++) {
 		ECategory *cat = m_categories->category(i);
 		qInfo() << i << ":" << "node" << (void*)m_categories->child(i) <<
 			"cat" << (void*)cat << QString::fromStdString(cat->getCategoryName()) << cat->getColor();
 	}
 }
 
-std::set<int> ERControl::getCombinedSelection()
+std::set<size_t> ERControl::getCombinedSelection()
 {
 	// remap selection to nodes
-	std::set<osg::Node*> nodes;
-	std::set<int> local_selection = m_local_selection->toSet();
+	std::set<EResource*> nodes;
+	std::set<size_t> local_selection = m_local_selection->toUSet();
 	for (auto i : local_selection) {
 		nodes.insert(m_local_proxy->child(i));
 	}
-	std::set<int> global_selection = m_global_selection->toSet();
+	std::set<size_t> global_selection = m_global_selection->toUSet();
 	for (auto i : global_selection) {
 		nodes.insert(m_global_proxy->child(i));
 	}
 
 	// map nodes to indices
-	std::set<int> selection;
-	for (auto node : nodes) {
-		selection.insert(m_ers->indexOf(node));
+	std::set<size_t> selection;
+	for (size_t i = 0; i < m_ers->size(); i++) {
+		if (std::find(nodes.begin(), nodes.end(), m_ers->child(i)) != nodes.end()) {
+			selection.insert(i);
+		}
 	}
 	return selection;
 }
@@ -465,32 +467,31 @@ int ERControl::getCombinedLastSelected()
 		|| sender == m_local_box->selectionStack())
 		&& local_last != -1) {
 		last = local_last;
-		proxy = m_local_proxy;
+		proxy = m_local_proxy.get();
 	}
 	else if ((sender == m_global_box
 		|| sender == m_global_box->selectionStack())
 		&& global_last != -1) {
 		last = global_last;
-		proxy = m_global_proxy;
+		proxy = m_global_proxy.get();
 	}
 	else {
 		// just take whatever is selected
 		if (local_last != -1) {
 			last = local_last;
-			proxy = m_local_proxy;
+			proxy = m_local_proxy.get();
 		}
 		else {
 			last = global_last;
-			proxy = m_global_proxy;
+			proxy = m_global_proxy.get();
 		}
 	}
 
 	// convert into original index
 	if (last < 0) return -1;
-	osg::Node *node = proxy->child(last);
+	EResource *node = proxy->child(last);
 	int last_base = m_ers->indexOf(node);
 
-	if (last_base >= (int)m_ers->getNumChildren()) return -1;
 	return last_base;
 }
 

@@ -96,7 +96,7 @@ void NarrativeCanvas::setSlide(NarrativeSlide *slide)
 	CanvasContainer::clear();
 	if (!slide) return;
 
-	for (uint i = 0; i < slide->getNumChildren(); i++) {
+	for (uint i = 0; i < slide->size(); i++) {
 		NarrativeSlideItem *item = dynamic_cast<NarrativeSlideItem*>(m_slide->child(i));
 		if (item) addItem(item);
 	}

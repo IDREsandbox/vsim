@@ -7,22 +7,11 @@ SlideScrollBox::SlideScrollBox(QWidget * parent)
 	: GroupScrollBox(parent)
 {
 	setSpacing(10);
-
-	setMIMEType("application/x-narrative");
+	setMIMEType("application/x-slide");
 }
 
-void SlideScrollBox::setGroup(Group * group)
+ScrollBoxItem * SlideScrollBox::createItem(NarrativeSlide *slide)
 {
-	GroupScrollBox::setGroup(group);
-}
-
-ScrollBoxItem * SlideScrollBox::createItem(osg::Node * node)
-{
-	NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(node);
-	if (slide == nullptr) {
-		qWarning() << "insert new slide" << node << "is not a NarrativeSlide";
-		return nullptr;
-	}
 	SlideScrollItem *item = new SlideScrollItem(this);
 	item->setSlide(slide);
 	connect(item, &SlideScrollItem::sDurationDoubleClick, this, &SlideScrollBox::sSetDuration);
@@ -43,8 +32,8 @@ std::vector<NarrativeSlide*> SlideScrollBox::getDirtySlides()
 	if (!m_group) return {};
 
 	std::vector<NarrativeSlide*> items;
-	for (size_t i = 0; i < m_group->getNumChildren(); i++) {
-		NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(m_group->child(i));
+	for (size_t i = 0; i < m_group->size(); i++) {
+		NarrativeSlide *slide = m_group->child(i);
 		if (slide && slide->thumbnailDirty()) {
 			items.push_back(slide);
 		}

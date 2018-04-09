@@ -6,13 +6,14 @@
 #include <osg/Group>
 #include "Command.h"
 #include "Group.h"
+#include "GroupTemplate.h"
 
 class ECategoryGroup;
 class EResource;
 class ECategory;
 class EResourcesList;
 
-class EResourceGroup : public Group {
+class EResourceGroup : public TGroup<EResource> {
 	Q_OBJECT
 
 public:
@@ -23,13 +24,8 @@ public:
 	void loadOld(const EResourcesList *old_ers);
 
 	ECategoryGroup *categories() const;
-	const ECategoryGroup *getCategories() const;
-	void setCategories(ECategoryGroup *categories);
 
 	EResource *getResource(int) const;
-
-	void preSave();
-	void postLoad();
 
 	void debug();
 
@@ -40,7 +36,7 @@ public: // commands
 		const EResourceGroup *other, QUndoCommand *cmd);
 
 private:
-	osg::ref_ptr<ECategoryGroup> m_categories;
+	std::unique_ptr<ECategoryGroup> m_categories;
 };
 
 #endif // ERESOURCEGROUP_H

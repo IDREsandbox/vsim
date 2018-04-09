@@ -8,7 +8,7 @@ ECategoryGroup::ECategoryGroup()
 
 ECategory * ECategoryGroup::category(int index) const
 {
-	return dynamic_cast<ECategory*>(child(index));
+	return child(index);
 }
 
 

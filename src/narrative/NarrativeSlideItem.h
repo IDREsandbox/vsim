@@ -9,7 +9,7 @@
 
 #include "Command.h"
 
-class NarrativeSlideItem : public QObject, public osg::Node
+class NarrativeSlideItem : public QObject
 {
 	Q_OBJECT
 public:

@@ -6,10 +6,11 @@
 #include <osg/Group>
 #include "Command.h"
 #include "Group.h"
+#include "GroupTemplate.h"
 
 class Narrative;
 
-class NarrativeGroup : public Group {
+class NarrativeGroup : public TGroup<Narrative> {
 	Q_OBJECT
 public:
 	NarrativeGroup() {}

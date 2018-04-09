@@ -7,8 +7,7 @@
 #include "LabelStyleGroup.h"
 
 Narrative::Narrative()
-	: Group(),
-	m_title("Untitled"),
+	: m_title("Untitled"),
 	m_description(""),
 	m_author(""),
 	m_locked(false)
@@ -27,7 +26,7 @@ Narrative::Narrative(const NarrativeOld * old)
 		NarrativeNode *node = old->getNode(i);
 		NarrativeTransition *transition = old->getTransition(i);
 		NarrativeSlide *new_slide = new NarrativeSlide(node, transition);
-		addChild(new_slide);
+		append(std::shared_ptr<NarrativeSlide>(new_slide));
 	}
 }
 

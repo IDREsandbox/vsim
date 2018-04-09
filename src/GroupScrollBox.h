@@ -11,39 +11,30 @@
 #include <QTimer>
 
 #include "Group.h"
+#include "GroupTemplate.h"
 #include "HorizontalScrollBox.h"
 
 // Connects a Group to a scroll box
 // Children classes override createItem to create a specific item
 // based on the group type
+template <class T>
 class GroupScrollBox : public HorizontalScrollBox {
-	Q_OBJECT
 public:
 	GroupScrollBox(QWidget* parent);
 
+	// Data tracking
+	virtual void setGroup(TGroup<T> *group);
+	TGroup<T> *getGroup() const;
+
 	void reload();
 
-	// Data tracking
-	virtual void setGroup(Group *group);
-	Group *getGroup() const;
-
-	// 
-	virtual ScrollBoxItem* createItem(osg::Node*);
-
-signals:
-	void sSelectionChange();
-	// void sMove(std::set<int> from, int to); // move is in HorizontalScrollBox
-	void sDelete();
-	void sNew();
+protected:
+	//virtual ScrollBoxItem* createItem(size_t index);
+	virtual ScrollBoxItem* createItem(T *node);
 
 protected:
-	void insertItemsForIndices(const std::vector<std::pair<size_t, osg::Node*>> &insertions);
-
-	// void sSelectionCleared(); // in HorizontalScrollBox
-
-protected:
-	Group *m_group;
-
+	TGroup<T> *m_group;
 };
 
+#include "GroupScrollBox.inl"
 #endif

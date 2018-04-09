@@ -10,8 +10,11 @@
 #include <QUndoStack>
 #include "Command.h"
 #include "Group.h"
+#include "GroupTemplate.h"
 
-class NarrativeSlide : public Group
+class NarrativeSlideItem;
+
+class NarrativeSlide : public TGroup<NarrativeSlideItem>
 {
 	Q_OBJECT
 

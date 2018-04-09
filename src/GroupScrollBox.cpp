@@ -7,30 +7,29 @@
 
 #include "GroupScrollBox.h"
 
-GroupScrollBox::GroupScrollBox(QWidget* parent)
+template <class T>
+GroupScrollBox<T>::GroupScrollBox(QWidget* parent)
 	: HorizontalScrollBox(parent),
 	m_group(nullptr)
 {
 }
 
-void GroupScrollBox::reload()
+template <class T>
+void GroupScrollBox<T>::reload()
 {
-	clear();
 	if (!m_group) return;
 
-	// create items
-	if (m_group) {
-		std::vector<std::pair<size_t, osg::Node*>> items;
-		for (uint i = 0; i < m_group->getNumChildren(); i++) {
-			items.push_back({ i, m_group->child(i) });
-		}
-		insertItemsForIndices(items);
+	std::vector<std::pair<size_t, ScrollBoxItem*>> insertions;
+	for (size_t i = 0; i < m_group->size(); i++) {
+		T *node = m_group->child(i);
+		ScrollBoxItem *item = createItem(node);
+		insertions.push_back(std::make_pair(i, item));
 	}
-
-	refresh();
+	insertItems(insertions);
 }
 
-void GroupScrollBox::setGroup(Group * group)
+template <class T>
+void GroupScrollBox<T>::setGroup(TGroup<T> *group)
 {
 	// disconnect incoming signals if already connected to a narrative
 	if (m_group != nullptr) disconnect(m_group, 0, this, 0);
@@ -47,49 +46,51 @@ void GroupScrollBox::setGroup(Group * group)
 	reload();
 
 	if (group) {
-		connect(m_group, &Group::destroyed, this,
+		connect(m_group, &GroupSignals::destroyed, this,
 			[this]() {
 			m_group = nullptr;
 			setGroup(nullptr); // clear stuff
 		});
-		connect(m_group, &Group::sInsertedSet, this,
-			[this](auto insertions) {
+		connect(m_group, &GroupSignals::sInserted, this,
+			[this](size_t index, size_t count) {
 			insertItemsForIndices(insertions);
+
+			std::vector<std::pair<size_t, ScrollBoxItem*>> insertions;
+			for (size_t i = 0; i < count; i++) {
+				T *node = m_group->child(index + i);
+				ScrollBoxItem *item = createItem(node);
+				insertions.push_back(std::make_pair(i, item));
+			}
+
+			insertItems(insertions);
 		});
-		connect(m_group, &Group::sRemovedSet, this,
+		connect(m_group, &GroupSignals::sRemoved, this,
 			[this](const std::vector<size_t> &removals) {
 			removeItems(removals);
 		});
-		connect(m_group, &Group::sReset, this,
+		connect(m_group, &GroupSignals::sAboutToReset, this,
+			[this]() {
+			clear();
+		});
+		connect(m_group, &GroupSignals::sReset, this,
 			[this]() {
 			reload();
 		});
-		connect(m_group, &Group::sItemsMoved, this,
+		connect(m_group, &GroupSignals::sItemsMoved, this,
 			[this](auto stuff) {
 			moveItems(stuff);
 		});
 	}
 }
 
-Group * GroupScrollBox::getGroup() const
+template <class T>
+TGroup<T> *GroupScrollBox<T>::getGroup() const
 {
 	return m_group;
 }
 
-ScrollBoxItem *GroupScrollBox::createItem(osg::Node *)
+template <class T>
+ScrollBoxItem *GroupScrollBox<T>::createItem(T *)
 {
-	return nullptr;
-}
-
-void GroupScrollBox::insertItemsForIndices(const std::vector<std::pair<size_t, osg::Node*>>& insertions)
-{
-	// create items
-	if (m_group) {
-		std::vector<std::pair<size_t, ScrollBoxItem*>> items;
-		for (auto &pair : insertions) {
-			ScrollBoxItem *item = createItem(pair.second);
-			items.push_back({ pair.first, item });
-		}
-		insertItems(items);
-	}
+	return new ScrollBoxItem;
 }

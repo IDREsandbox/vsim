@@ -1,3 +1,6 @@
+#ifndef UTIL_H
+#define UTIL_H
+
 #include <string>
 #include <QRect>
 #include <QImage>
@@ -264,3 +267,5 @@ namespace Util
 
 	Util::endPt hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl = .0001);
 }
+
+#endif

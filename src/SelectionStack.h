@@ -34,6 +34,7 @@ public:
 	void set(const SelectionData &d);
 	SelectionData data() const;
 	std::set<int> toSet() const;
+	std::set<size_t> toUSet() const;
 	static SelectionData dataFromSet(const std::set<int> &set);
 
 signals:

@@ -35,9 +35,6 @@ public:
 
 	VSim::FlatBuffers::SettingsT *settings() const; // not optional
 
-	void postLoad();
-	void preSave();
-
 	void debug();
 
 private:

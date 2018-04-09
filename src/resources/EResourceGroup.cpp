@@ -11,8 +11,7 @@
 
 EResourceGroup::EResourceGroup()
 {
-	m_categories = new ECategoryGroup;
-	m_categories->setName("Categories");
+	m_categories = std::unique_ptr<ECategoryGroup>(new ECategoryGroup);
 }
 
 EResourceGroup::EResourceGroup(const osg::Group *old_root)
@@ -42,93 +41,35 @@ void EResourceGroup::loadOld(const EResourcesList * old_ers)
 			// already in the map so skip
 			continue;
 		}
-		ECategory *cat = new ECategory;
+		auto cat = std::shared_ptr<ECategory>(new ECategory);
 		cat->setCategoryName(old->getCategoryName());
 		cat->setColor(QColor(old->getRed(), old->getGreen(), old->getBlue()));
 
-		name_map.insert(std::make_pair(old->getCategoryName(), cat));
-		m_categories->addChild(cat);
+		name_map.insert(std::make_pair(old->getCategoryName(), cat.get()));
+		m_categories->append(cat);
 	}
 
 	// copy the data
 	for (EResourcesNode *node : old_ers->m_list) {
-		EResource *er = new EResource(node, name_map);
-		addChild(er);
+		auto er = std::shared_ptr<EResource>(new EResource(node, name_map));
+		append(er);
 	}
 }
 
 ECategoryGroup * EResourceGroup::categories() const
 {
-	return m_categories;
-}
-const ECategoryGroup * EResourceGroup::getCategories() const
-{
-	return m_categories;
-}
-void EResourceGroup::setCategories(ECategoryGroup * categories)
-{
-	m_categories = categories;
+	return m_categories.get();
 }
 
 EResource * EResourceGroup::getResource(int i) const
 {
-	if (i >= (int)getNumChildren() || i < 0) return nullptr;
-	return dynamic_cast<EResource*>(child(i));
-}
-
-void EResourceGroup::preSave()
-{
-	// index map
-	std::unordered_map<ECategory*, size_t> cat_to_index;
-	for (size_t i = 0; i < m_categories->getNumChildren(); i++) {
-		ECategory *cat = m_categories->category(i);
-		if (!cat) continue;
-		cat_to_index[cat] = i;
-	}
-	// set the integer pointers
-	for (size_t i = 0; i < getNumChildren(); i++) {
-		EResource *res = getResource(i);
-		if (!res) continue;
-		ECategory *cat = res->category();
-		int cat_index;
-		if (cat) cat_index = (int)cat_to_index[cat];
-		else cat_index = -1;
-		res->setCategoryIndex(cat_index);
-	}
-}
-
-void EResourceGroup::postLoad()
-{
-	// set categories
-	for (size_t i = 0; i < getNumChildren(); i++) {
-		EResource *res = getResource(i);
-		if (!res) continue;
-
-		// old resources already have these assigned
-		ECategory *old_cat = res->category();
-		if (old_cat) {
-			continue;
-		}
-
-		int cat_index = res->getCategoryIndex();
-		if (cat_index < 0 || cat_index >= (int)m_categories->getNumChildren()) {
-			res->setCategory(nullptr);
-			continue;
-		}
-
-		ECategory *cat = m_categories->category(cat_index);
-		res->setCategory(cat);
-	}
+	return child(i);
 }
 
 void EResourceGroup::debug() {
-	qInfo() << "Embedded Resources:" << getNumChildren();
-	for (uint i = 0; i < getNumChildren(); i++) {
-		EResource *er = dynamic_cast<EResource*>(getChild(i));
-		if (!er) {
-			qInfo() << "not an EResource";
-			continue;
-		}
+	qInfo() << "Embedded Resources:" << size();
+	for (uint i = 0; i < size(); i++) {
+		EResource *er = child(i);
 		ECategory *cat = er->category();
 		QString cat_name;
 		if (cat) cat_name = cat->getCategoryName().c_str();
@@ -136,13 +77,11 @@ void EResourceGroup::debug() {
 			<< QString::fromStdString(er->getResourceName())
 			<< "global:" << er->getGlobal()
 			<< "cat:" << cat_name << cat;
-
 	}
-	const ECategoryGroup *cats = getCategories();
-	qInfo() << "ER Categories:" << cats->getNumChildren();
-	for (uint i = 0; i < cats->getNumChildren(); i++) {
-		const ECategory *cat = dynamic_cast<const ECategory*>(cats->getChild(i));
-		if (!cat) continue;
+	const ECategoryGroup *cats = categories();
+	qInfo() << "ER Categories:" << cats->size();
+	for (uint i = 0; i < cats->size(); i++) {
+		ECategory *cat = cats->child(i);
 		qInfo() << "Category" << i << QString::fromStdString(cat->getCategoryName()) << cat;
 	}
 }
@@ -152,21 +91,21 @@ void EResourceGroup::mergeCommand(EResourceGroup *group,
 {
 	// build existing category map
 	std::map<std::string, ECategory*> cat_map;
-	for (size_t i = 0; i < group->categories()->getNumChildren(); i++) {
+	for (size_t i = 0; i < group->categories()->size(); i++) {
 		ECategory *cat = group->categories()->category(i);
 		if (!cat) continue;
 		cat_map[cat->getCategoryName()] = cat;
 	}
 
 	// copy categories that don't exist, replace categories that do
-	for (size_t i = 0; i < other->categories()->getNumChildren(); i++) {
+	for (size_t i = 0; i < other->categories()->size(); i++) {
 		ECategory *new_cat = other->categories()->category(i);
 		if (!new_cat) continue;
 
 		auto it = cat_map.find(new_cat->getCategoryName());
 		if (it == cat_map.end()) { // category doesn't already exist
-			auto *add_cat = new Group::AddNodeCommand(group->categories(),
-				new_cat, -1, cmd);
+			auto *add_cat = new AddNodeCommand<ECategory>(group->categories(),
+				other->categories()->childShared(i), -1, cmd);
 
 			cat_map[new_cat->getCategoryName()] = new_cat;
 		}
@@ -180,13 +119,10 @@ void EResourceGroup::mergeCommand(EResourceGroup *group,
 		}
 	}
 
-	std::vector<EResource*> added;
-	for (size_t i = 0; i < other->getNumChildren(); i++) {
-		EResource *res = other->getResource(i);
+	// copy resources
+	for (size_t i = 0; i < other->size(); i++) {
+		auto res = other->childShared(i);
 		if (!res) continue;
-
-		auto *add_res = new Group::AddNodeCommand(group, res, -1, cmd);
-		added.push_back(res);
+		auto *add_res = new AddNodeCommand<EResource>(group, res, -1, cmd);
 	}
-
 }

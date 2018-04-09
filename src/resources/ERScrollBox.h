@@ -3,15 +3,14 @@
 
 #include "GroupScrollBox.h"
 
-class ERFilterSortProxy;
-
-class ERScrollBox : public GroupScrollBox {
+class EResource;
+class ERScrollBox : public GroupScrollBox<EResource> {
 	Q_OBJECT
 
 public:
 	ERScrollBox(QWidget * parent = nullptr);
 
-	ScrollBoxItem *createItem(osg::Node *node) override;
+	ScrollBoxItem *createItem(EResource *er) override;
 
 protected:
 	void itemMouseDoubleClickEvent(QMouseEvent * event, int index) override;

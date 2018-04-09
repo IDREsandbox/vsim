@@ -38,6 +38,7 @@ Suppose a gui thing is listening to changes in Joe*. The model removes Joe* and 
 5. guaranteed lifetime + careful ordering
     - guarantee life of model before calling setGroup()
 6. null on destroy event
+    - if there are chained listeners to destroy event it breaks
 
 What kind of ownership should we use?
 

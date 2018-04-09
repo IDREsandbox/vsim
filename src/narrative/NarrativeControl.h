@@ -36,7 +36,6 @@ public:
 
 	// initializes gui from osg data
 	void load(NarrativeGroup *narratives);
-	void loadNarratives(NarrativeGroup *group);
 
 	// Opens narrative in slide box
 	// - closes slide if not already open
@@ -145,7 +144,7 @@ private:
 	QPropertyAnimation *m_fade_out_anim;
 	QPropertyAnimation *m_fade_in_anim;
 
-	osg::ref_ptr<NarrativeGroup> m_narrative_group;
+	NarrativeGroup *m_narrative_group;
 
 	MainWindow *m_window;
 	MainWindowTopBar *m_bar;
