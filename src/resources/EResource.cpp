@@ -1,6 +1,7 @@
 //#include "deprecated/resources/EResourcesNode.h"
 #include "resources/EResource.h"
 #include "deprecated/resources/EResourcesNode.h"
+#include "resources/ECategory.h"
 #include "ECategoryGroup.h"
 #include <QDebug>
 
@@ -19,12 +20,12 @@ EResource::EResource()
 	m_ertype(ANNOTATION),
 	m_camera_position(osg::Vec3f(0, 0, 0)),
 	m_camera_matrix(osg::Matrixd()),
-	m_category(nullptr),
+	m_category(),
 	m_index(-1)
 {
 }
 
-EResource::EResource(const EResourcesNode *er, const std::map<std::string, ECategory*> &cats)
+EResource::EResource(const EResourcesNode *er)
 	: m_name(er->getResourceName()),
 	m_filepath(er->getResourcePath()),
 	m_description(er->getResourceDiscription()),
@@ -40,16 +41,10 @@ EResource::EResource(const EResourcesNode *er, const std::map<std::string, ECate
 	m_camera_matrix(er->getViewMatrix()),
 	m_camera_position(m_camera_matrix.getTrans())
 {
-	ECategory *cat = nullptr;
-	auto it = cats.find(er->getCategoryName());
-	if (it != cats.end()) {
-		cat = it->second;
-	}
 
 	if (er->getMinYear() != 0 || er->getMaxYear() != 0) {
 	}
 
-	setCategory(cat);
 }
 
 const std::string& EResource::getResourceName() const 
@@ -187,28 +182,44 @@ void EResource::setCameraMatrix(const osg::Matrixd& matrix)
 
 ECategory * EResource::category() const
 {
-	return m_category.get();
+	return m_category.lock().get(); // this is probably super illegal
 }
 
-const ECategory *EResource::getCategory() const
-{ 
-	return m_category.get(); 
-}
-
-void EResource::setCategory(ECategory *category) 
+std::shared_ptr<ECategory> EResource::categoryShared() const
 {
-	ECategory *old_cat = m_category.get();
+	return m_category.lock();
+}
+
+void EResource::setCategory(std::shared_ptr<ECategory> category)
+{
+	std::shared_ptr<ECategory> old_cat = m_category.lock();
+
 	if (old_cat) {
 		old_cat->removeResource(this);
 	}
 
 	m_category = category;
 
-	if (m_category.get()) {
-		m_category->addResource(this);
+	if (category) {
+		category->addResource(this);
 	}
-	emit sCategoryChanged(old_cat, category);
+	emit sCategoryChanged(old_cat.get(), category.get());
 }
+
+//void EResource::setCategory(ECategory *category) 
+//{
+//	ECategory *old_cat = m_category.get();
+//	if (old_cat) {
+//		old_cat->removeResource(this);
+//	}
+//
+//	m_category = category;
+//
+//	if (m_category.get()) {
+//		m_category->addResource(this);
+//	}
+//	emit sCategoryChanged(old_cat, category);
+//}
 
 int EResource::getCategoryIndex() const
 {

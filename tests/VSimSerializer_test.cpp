@@ -28,11 +28,11 @@ void robustStreamTestOld() {
 	bool ok = VSimSerializer::readStreamRobust(in, &root);
 	QVERIFY(ok);
 
-	QCOMPARE(root.narratives()->getNumChildren(), 2);
+	QCOMPARE(root.narratives()->size(), 2);
 	// narrative titles
 	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(0))->getTitle(), "nar2");
 	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(1))->getTitle(), "nar1");
-	QCOMPARE(root.resources()->getNumChildren(), 1);
+	QCOMPARE(root.resources()->size(), 1);
 	QCOMPARE(root.resources()->getResource(0)->getResourceName(), "er1");
 
 	// check model information
@@ -54,11 +54,11 @@ void robustStreamTest() {
 	bool ok = VSimSerializer::readStreamRobust(in, &root);
 	QVERIFY(ok);
 
-	QCOMPARE(root.narratives()->getNumChildren(), 2);
+	QCOMPARE(root.narratives()->size(), 2);
 	// narrative titles
 	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(0))->getTitle(), "nar1");
 	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(1))->getTitle(), "nar2");
-	QCOMPARE(root.resources()->getNumChildren(), 1);
+	QCOMPARE(root.resources()->size(), 1);
 	QCOMPARE(root.resources()->getResource(0)->getResourceName(), "er1");
 
 	// check model information
@@ -81,7 +81,7 @@ void oldERTest() {
 	bool ok = VSimSerializer::readStreamRobust(in, &root);
 	QVERIFY(ok);
 
-	QCOMPARE(root.resources()->getNumChildren(), 2);
+	QCOMPARE(root.resources()->size(), 2);
 	EResource *res1 = root.resources()->getResource(0);
 	EResource *res2 = root.resources()->getResource(1);
 	QCOMPARE(res1->getResourceName(), "local");
@@ -139,12 +139,12 @@ void importExportER() {
 	FileUtil::importEResources(ss, &group2);
 
 	// merged group
-	QCOMPARE(group2.getNumChildren(), 2);
+	QCOMPARE(group2.size(), 2);
 	QCOMPARE(group2.getResource(0)->getResourceName(), "er1");
 	QCOMPARE(group2.getResource(1)->getResourceName(), "er2");
 	QCOMPARE(group2.getResource(0)->getCategory()->getCategoryName(), "cat1");
 	QCOMPARE(group2.getResource(1)->getCategory()->getCategoryName(), "cat2");
-	QCOMPARE(group2.categories()->getNumChildren(), 2);
+	QCOMPARE(group2.categories()->size(), 2);
 	QCOMPARE(group2.categories()->category(0)->getCategoryName(), "cat1");
 	QCOMPARE(group2.categories()->category(1)->getCategoryName(), "cat2");	
 }
@@ -156,7 +156,7 @@ void oldImportNarratives() {
 	bool ok = FileUtil::importNarrativesStream(ifs, &group);
 	QVERIFY(ok);
 
-	QCOMPARE(group.getNumChildren(), 1);
+	QCOMPARE(group.size(), 1);
 	QCOMPARE(group.narrative(0)->getTitle(), "nar1");
 }
 
@@ -186,7 +186,7 @@ void importExportNarratives() {
 	qDebug() << "import narrative stream";
 	FileUtil::importNarrativesStream(ss, &group2);
 	
-	QCOMPARE(group2.getNumChildren(), 3);
+	QCOMPARE(group2.size(), 3);
 	QCOMPARE(group2.narrative(0)->getTitle(), "nar4");
 	QCOMPARE(group2.narrative(1)->getTitle(), "nar1");
 	QCOMPARE(group2.narrative(2)->getTitle(), "nar3");
@@ -199,7 +199,7 @@ void oldImportResources() {
 	bool ok = FileUtil::importEResources(ifs, &group);
 	QVERIFY(ok);
 
-	QCOMPARE(group.getNumChildren(), 2);
+	QCOMPARE(group.size(), 2);
 	EResource *res1 = group.getResource(0);
 	EResource *res2 = group.getResource(1);
 	QCOMPARE(res1->getResourceName(), "local");
@@ -208,7 +208,7 @@ void oldImportResources() {
 	QCOMPARE(res2->getResourceName(), "global");
 	QCOMPARE(res2->getCategory()->getCategoryName(), "g");
 	QCOMPARE(res2->getGlobal(), true);
-	QCOMPARE(group.categories()->getNumChildren(), 2);
+	QCOMPARE(group.categories()->size(), 2);
 }
 
 void osgStreamTest() {
@@ -363,9 +363,9 @@ void writeReadFlatbuffer() {
 	VSimSerializer::readRoot(fb_root, &nroot);
 
 	// check
-	QCOMPARE(nroot.narratives()->getNumChildren(), 2);
+	QCOMPARE(nroot.narratives()->size(), 2);
 	QCOMPARE(dynamic_cast<Narrative*>(nroot.narratives()->child(0))->getTitle(), "nar1");
-	QCOMPARE(nroot.resources()->getNumChildren(), 2);
+	QCOMPARE(nroot.resources()->size(), 2);
 	QCOMPARE(nroot.resources()->getResource(0)->getResourceName(), "er1");
 }
 void writeReadStream() {
@@ -396,9 +396,9 @@ void writeReadStream() {
 
 	// check models
 	QCOMPARE(ok, true);
-	QCOMPARE(nroot.narratives()->getNumChildren(), 2);
+	QCOMPARE(nroot.narratives()->size(), 2);
 	QCOMPARE(dynamic_cast<Narrative*>(nroot.narratives()->child(0))->getTitle(), "nar1");
-	QCOMPARE(nroot.resources()->getNumChildren(), 2);
+	QCOMPARE(nroot.resources()->size(), 2);
 	QCOMPARE(nroot.resources()->getResource(0)->getResourceName(), "er1");
 	QCOMPARE(nroot.models()->child(0)->getName(), "cow.osg");
 }

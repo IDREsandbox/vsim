@@ -119,6 +119,64 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 add_custom_target(CopyDLLs)
 
 # source
+set(Util_src
+  src/Util.h
+  src/Util.cpp
+  # src/Group.cpp
+  # src/Group.h
+  src/GroupTemplate.inl
+  src/GroupTemplate.h
+  src/GroupModel.cpp
+  src/GroupModel.h
+  src/TypesSerializer.cpp
+  src/TypesSerializer.h
+  ${CMAKE_BINARY_DIR}/generated/types_generated.h
+  src/Command.h
+)
+add_library(Util_object ${Util_src})
+
+set(ERModel_src
+  src/ERSerializer.cpp
+  src/ERSerializer.h
+  ${CMAKE_BINARY_DIR}/generated/eresources_generated.h
+  src/resources/ERFilterSortProxy.h
+  src/resources/ERFilterSortProxy.cpp
+  src/resources/ECategory.h
+  src/resources/ECategory.cpp
+  src/resources/ECategoryGroup.h
+  src/resources/ECategoryGroup.cpp
+  src/resources/EResource.h
+  src/resources/EResource.cpp
+  src/resources/EResourceGroup.h
+  src/resources/EResourceGroup.cpp
+  src/CheckableListProxy.h
+  src/CheckableListProxy.cpp
+)
+add_library(ERModel_object ${ERModel_src})
+target_link_libraries(ERModel_object Util_object)
+
+set(NarrativeModel_src
+  src/NarrativeSerializer.cpp
+  src/NarrativeSerializer.h
+  ${CMAKE_BINARY_DIR}/generated/narratives_generated.h
+  src/narrative/NarrativeGroup.cpp
+  src/narrative/NarrativeGroup.h
+  src/narrative/Narrative.cpp
+  src/narrative/Narrative.h
+  src/narrative/NarrativeSlide.cpp
+  src/narrative/NarrativeSlide.h
+  src/narrative/NarrativeSlideItem.cpp
+  src/narrative/NarrativeSlideItem.h
+  src/narrative/NarrativeSlideLabel.cpp
+  src/narrative/NarrativeSlideLabel.h
+  src/LabelStyle.cpp
+  src/LabelStyle.h
+  src/LabelStyleGroup.cpp
+  src/LabelStyleGroup.h
+)
+add_library(NarrativeModel_object ${NarrativeModel_src})
+target_link_libraries(NarrativeModel_object Util_object)
+
 message(${PROJECT_SOURCE_DIR})
 message("binary dir " ${PROJECT_BINARY_DIR})
 file(GLOB_RECURSE VSim_src
@@ -179,8 +237,7 @@ set(HorizontalScrollBox_src
   experiments/HorizontalScrollBox_experiment/HorizontalScrollBox_experiment.cpp
 )
 add_executable(HorizontalScrollBox_experiment ${HorizontalScrollBox_src})
-target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets)
-target_link_libraries(HorizontalScrollBox_experiment ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets Qt5::Test)
 
 set(Canvas_src
   src/narrative/CanvasContainer.h
@@ -190,8 +247,7 @@ set(Canvas_src
   experiments/Canvas_experiment/Canvas_experiment.cpp
 )
 add_executable(Canvas_experiment ${Canvas_src})
-target_link_libraries(Canvas_experiment Qt5::Widgets)
-target_link_libraries(Canvas_experiment ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(Canvas_experiment Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 # tests ####################################
 
@@ -203,86 +259,54 @@ set(Util_src
 add_executable(Util_test ${Util_src})
 add_test(NAME Util_test COMMAND Util_test)
 target_link_libraries(Util_test Qt5::Widgets Qt5::Test)
-target_link_libraries(Util_test ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(Util_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 # group test
 set(Group_src
   tests/Group_test.cpp
-  # src/Group.cpp
-  # src/Group.h
-  src/GroupTemplate.inl
-  src/GroupTemplate.h
-  src/Util.cpp
-  src/Util.h)
+  )
 add_executable(Group_test ${Group_src})
 add_test(NAME Group_test COMMAND Group_test)
-target_link_libraries(Group_test Qt5::Widgets Qt5::Test)
-target_link_libraries(Group_test ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(Group_test Util_object)
+target_link_libraries(Group_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 # er filter proxy test
 set(ERFilterSortProxy_src
   tests/ERFilterSortProxy_test.cpp
-  src/Group.cpp
-  src/Group.h
-  src/resources/ERFilterSortProxy.h
-  src/resources/ERFilterSortProxy.cpp
-  src/resources/ECategory.h
-  src/resources/ECategory.cpp
-  src/resources/ECategoryGroup.h
-  src/resources/ECategoryGroup.cpp
-  src/resources/EResource.h
-  src/resources/EResource.cpp
-  src/resources/EResourceGroup.h
-  src/resources/EResourceGroup.cpp
-  src/CheckableListProxy.h
-  src/CheckableListProxy.cpp
-  src/GroupModel.h
-  src/GroupModel.cpp
-  src/Util.h
-  src/Util.cpp
-  src/Command.h
   )
 add_executable(ERFilterSortProxy_test ${ERFilterSortProxy_src})
 add_test(NAME ERFilterSortProxy_test COMMAND ERFilterSortProxy_test)
-target_link_libraries(ERFilterSortProxy_test Qt5::Widgets Qt5::Test)
-target_link_libraries(ERFilterSortProxy_test ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(ERFilterSortProxy_test ERModel_object)
+target_link_libraries(ERFilterSortProxy_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 set(ERSerializer_src
   tests/ERSerializer_test.cpp
-  src/Group.cpp
-  src/Group.h
-  src/ERSerializer.cpp
-  src/ERSerializer.h
-  src/TypesSerializer.cpp
-  src/TypesSerializer.h
-  ${CMAKE_BINARY_DIR}/generated/types_generated.h
-  ${CMAKE_BINARY_DIR}/generated/eresources_generated.h
-  src/resources/ERFilterSortProxy.h
-  src/resources/ERFilterSortProxy.cpp
-  src/resources/ECategory.h
-  src/resources/ECategory.cpp
-  src/resources/ECategoryGroup.h
-  src/resources/ECategoryGroup.cpp
-  src/resources/EResource.h
-  src/resources/EResource.cpp
-  src/resources/EResourceGroup.h
-  src/resources/EResourceGroup.cpp
-  src/CheckableListProxy.h
-  src/CheckableListProxy.cpp
-  src/Util.h
-  src/Util.cpp
 )
 add_executable(ERSerializer_test ${ERSerializer_src})
 add_test(NAME ERSerializer_test COMMAND ERSerializer_test)
-target_link_libraries(ERSerializer_test Qt5::Widgets Qt5::Test)
-target_link_libraries(ERSerializer_test ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(ERSerializer_test ERModel_object)
+target_link_libraries(ERSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+
+set(EResource_test
+  tests/EResource_test.cpp
+)
+add_executable(EResource_test ${ERSerializer_src})
+add_test(NAME EResource_test COMMAND EResource_test)
+target_link_libraries(EResource_test ERModel_object)
+target_link_libraries(EResource_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+
+set(NarrativeSerializer_src
+  tests/NarrativeSerializer_test.cpp
+)
+add_executable(NarrativeSerializer_test ${NarrativeSerializer_src})
+add_test(NAME NarrativeSerializer_test COMMAND NarrativeSerializer_test)
+target_link_libraries(NarrativeSerializer_test NarrativeModel_object)
+target_link_libraries(NarrativeSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 # tests that involve everything
 set(TEST_LIST
   Selection_test
   VSimSerializer_test
-  NarrativeSerializer_test
-  EResource_test
   )
 # file(GLOB TEST_SEARCH tests/*.cpp)
 # foreach(TEST_SRC ${TEST_SEARCH})

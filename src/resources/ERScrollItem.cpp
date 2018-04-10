@@ -1,4 +1,6 @@
 ﻿#include "resources/ERScrollItem.h"
+#include "resources/EResource.h"
+#include "resources/ECategory.h"
 
 ERScrollItem::ERScrollItem(QWidget * parent)
 	: ScrollBoxItem(parent),

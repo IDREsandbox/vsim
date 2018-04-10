@@ -11,230 +11,176 @@ class ERFilterSortProxy_test : public QObject {
 private:
 	void reset() {
 	}
-	void GROUPCOMPARE(Group *group, std::vector<osg::Node*> target) {
-		QCOMPARE(group->getNumChildren(), target.size());
-		for (unsigned int i = 0; i < group->getNumChildren(); i++) {
-			if (i >= target.size()) return;
-			QCOMPARE(group->child(i), target[i]);
+	void GROUPCOMPARE(const TGroup<EResource> *group, const std::vector<std::shared_ptr<EResource>> &target) {
+		QCOMPARE(group->size(), target.size());
+		for (unsigned int i = 0; i < group->size(); i++) {
+			QCOMPARE(group->child(i), target[i].get());
 		}
 	}
 private slots:
 
 	void sortByTest() {
-		osg::ref_ptr<Group> group = new EResourceGroup;
-		osg::ref_ptr<EResource> res0 = new EResource;
-		osg::ref_ptr<EResource> res1 = new EResource;
-		osg::ref_ptr<EResource> res2 = new EResource;
-		osg::ref_ptr<EResource> res3 = new EResource;
-		osg::ref_ptr<EResource> res4 = new EResource;
+		EResourceGroup group;
+
+		auto res0 = std::make_shared<EResource>();
+		auto res1 = std::make_shared<EResource>();
+		auto res2 = std::make_shared<EResource>();
+		auto res3 = std::make_shared<EResource>();
+		auto res4 = std::make_shared<EResource>();
 		res0->setResourceName("foo");
 		res1->setResourceName("bar");
 		res2->setResourceName("Bab");
 		res3->setResourceName("Alphabet");
 		res4->setResourceName("Joe");
 
-		group->addChild(res0);
-		group->addChild(res1);
-		group->addChild(res2);
-		group->addChild(res3);
-		osg::ref_ptr<ERFilterSortProxy> proxy = new ERFilterSortProxy(group);
-		proxy->sortBy(ERFilterSortProxy::ALPHABETICAL);
-		proxy->showGlobal(true);
-		proxy->showLocal(true);
+		group.append(res0);
+		group.append(res1);
+		group.append(res2);
+		group.append(res3);
+		ERFilterSortProxy proxy(&group);
+		proxy.sortBy(ERFilterSortProxy::ALPHABETICAL);
+		proxy.showGlobal(true);
+		proxy.showLocal(true);
 
-		GROUPCOMPARE(proxy, {res3, res2, res1, res0});
-		group->addChild(res4);
-		GROUPCOMPARE(proxy, { res3, res2, res4, res1, res0 });
+		GROUPCOMPARE(&proxy, {res3, res2, res1, res0});
+		group.append(res4);
+		GROUPCOMPARE(&proxy, { res3, res2, res4, res1, res0 });
 
 		// test indicesOf
 		std::vector<int> indices;
 		std::vector<int> ans;
-		indices = proxy->indicesOf({res0, res1, res3});
+		indices = proxy.indicesOf({res0.get(), res1.get(), res3.get()});
 		ans = {4, 3, 0};
 		QVERIFY(indices == ans);
 
-		indices = proxy->indicesOf({nullptr, res4, res2});
+		indices = proxy.indicesOf({nullptr, res4.get(), res2.get() });
 		ans = {-1, 2, 1};
 		QVERIFY(indices == ans);
 
-		indices = proxy->indicesOf({nullptr, res0, nullptr, res3}, false);
+		indices = proxy.indicesOf({nullptr, res0.get(), nullptr, res3.get()}, false);
 		ans = {4, 0};
 		QVERIFY(indices == ans);
 	}
-	//void insertSignalTests() {
-	//	reset();
-	//	group->addChild(res0);
-	//	group->addChild(res1);
-	//	group->addChild(res2);
-	//	group->addChild(res3);
-	//	proxy = new ERFilterSortProxy(group);
-	//	proxy->sortBy(ERFilterSortProxy::ALPHABETICAL);
-	//	proxy->showGlobal(true);
-	//	proxy->showLocal(true);
-	//	// {Alphabet, Bab, bar, foo}
-	//	// add Joe, should be index 2
-	//	QSignalSpy newSpy(proxy, &Group::sNew);
-	//	group->addChild(res4);
-	//	qDebug() << "nothng?";
-	//	proxy->debug();
-	//	// sNew(2)
-	//	QCOMPARE(newSpy.size(), 1);
-	//	QCOMPARE(newSpy.takeFirst().at(0).toInt(), 2);
-	//}
-	//void globalTest() {
-	//	reset();
-
-	//	reset();
-	//	osg::ref_ptr<Group> group = new EResourceGroup;
-	//	osg::ref_ptr<EResource> res0 = new EResource;
-	//	osg::ref_ptr<EResource> res1 = new EResource;
-	//	osg::ref_ptr<EResource> res2 = new EResource;
-	//	osg::ref_ptr<EResource> res3 = new EResource;
-	//	osg::ref_ptr<EResource> res4 = new EResource;
-	//	res0->setName("n0");
-	//	res1->setName("n1");
-	//	res2->setName("n2");
-	//	res3->setName("n3");
-	//	res0->setGlobal(true);
-	//	res1->setGlobal(false);
-	//	res2->setGlobal(false);
-	//	res3->setGlobal(true);
-
-	//	ERFilterSortProxy proxy(group);
-
-	//	proxy.showGlobal(true);
-	//	proxy.showLocal(true);
-	//	GROUPCOMPARE(&proxy, { res0, res1, res2, res3 });
-
-
-	//	proxy.showGlobal(false);
-	//	proxy.showLocal(true);
-	//	GROUPCOMPARE(&proxy, { res1, res2 });
-
-	//	proxy.showGlobal(true);
-	//	proxy.showLocal(false);
-	//	GROUPCOMPARE(&proxy, { res0, res3 });
-	//}
 
 	void globalTest() {
-		osg::ref_ptr<Group> group = new EResourceGroup;
-		osg::ref_ptr<EResource> foo = new EResource;
+		EResourceGroup group;
+		auto foo = std::make_shared<EResource>();
 		foo->setResourceName("foo");
 		foo->setGlobal(true);
-		osg::ref_ptr<EResource> bar = new EResource;
+		auto bar = std::make_shared<EResource>();
 		bar->setResourceName("bar");
 		bar->setGlobal(true);
-		osg::ref_ptr<EResource> cat = new EResource;
+		auto cat = std::make_shared<EResource>();
 		cat->setResourceName("cat");
 		cat->setGlobal(false);
 
-		group->addChild(foo);
-		group->addChild(bar);
-		group->addChild(cat);
+		group.append(foo);
+		group.append(bar);
+		group.append(cat);
 
-		osg::ref_ptr<ERFilterSortProxy> proxy = new ERFilterSortProxy(group);
-		proxy->sortBy(ERFilterSortProxy::NONE);
+		ERFilterSortProxy proxy(&group);
+		proxy.sortBy(ERFilterSortProxy::NONE);
 
-		proxy->showGlobal(false);
-		proxy->showLocal(false);
-		GROUPCOMPARE(proxy, { });
+		proxy.showGlobal(false);
+		proxy.showLocal(false);
+		GROUPCOMPARE(&proxy, { });
 
-		proxy->showGlobal(false);
-		proxy->showLocal(true);
-		GROUPCOMPARE(proxy, { cat });
+		proxy.showGlobal(false);
+		proxy.showLocal(true);
+		GROUPCOMPARE(&proxy, { cat });
 
-		proxy->showGlobal(true);
-		proxy->showLocal(false);
-		GROUPCOMPARE(proxy, { foo, bar });
+		proxy.showGlobal(true);
+		proxy.showLocal(false);
+		GROUPCOMPARE(&proxy, { foo, bar });
 
-		proxy->showGlobal(true);
-		proxy->showLocal(true);
-		GROUPCOMPARE(proxy, { foo, bar, cat });
+		proxy.showGlobal(true);
+		proxy.showLocal(true);
+		GROUPCOMPARE(&proxy, { foo, bar, cat });
 	}
 	void removeTest() {
-		osg::ref_ptr<Group> group = new EResourceGroup;
-		osg::ref_ptr<EResource> foo = new EResource;
+		EResourceGroup group;
+		auto foo = std::make_shared<EResource>();
 		foo->setResourceName("foo");
-		osg::ref_ptr<EResource> bar = new EResource;
+		auto bar = std::make_shared<EResource>();
 		bar->setResourceName("bar");
-		osg::ref_ptr<EResource> cat = new EResource;
+		auto cat = std::make_shared<EResource>();
 		cat->setResourceName("cat");
 
-		osg::ref_ptr<ERFilterSortProxy> p1 = new ERFilterSortProxy(group);
-		p1->sortBy(ERFilterSortProxy::ALPHABETICAL);
+		ERFilterSortProxy p1(&group);
+		p1.sortBy(ERFilterSortProxy::ALPHABETICAL);
 
-		group->addChild(foo);
-		group->addChild(bar);
-		group->addChild(cat);
+		group.append(foo);
+		group.append(bar);
+		group.append(cat);
 
-		group->removeChildrenSet({ 0, 1 });
-		GROUPCOMPARE(p1, { cat });
+		group.removeMulti({ 0, 1 });
+		GROUPCOMPARE(&p1, { cat });
 	}
 	void chainedProxy() {
-		osg::ref_ptr<Group> group = new EResourceGroup;
-		osg::ref_ptr<EResource> foo = new EResource;
+		EResourceGroup group;
+		auto foo = std::make_shared<EResource>();
 		foo->setResourceName("foo");
 		foo->setGlobal(false);
-		osg::ref_ptr<EResource> bar = new EResource;
+		auto bar = std::make_shared<EResource>();
 		bar->setResourceName("bar");
 		bar->setGlobal(false);
-		osg::ref_ptr<EResource> cat = new EResource;
+		auto cat = std::make_shared<EResource>();
 		cat->setResourceName("cat");
 		cat->setGlobal(true);
 
-		osg::ref_ptr<ERFilterSortProxy> p1 = new ERFilterSortProxy(group);
-		p1->showGlobal(false);
-		p1->showLocal(true);
-		p1->sortBy(ERFilterSortProxy::NONE);
+		ERFilterSortProxy p1(&group);
+		p1.showGlobal(false);
+		p1.showLocal(true);
+		p1.sortBy(ERFilterSortProxy::NONE);
 
-		osg::ref_ptr<ERFilterSortProxy> p2 = new ERFilterSortProxy(p1);
-		p2->showGlobal(true);
-		p2->showLocal(true);
-		p2->sortBy(ERFilterSortProxy::ALPHABETICAL);
+		ERFilterSortProxy p2(&p1);
+		p2.showGlobal(true);
+		p2.showLocal(true);
+		p2.sortBy(ERFilterSortProxy::ALPHABETICAL);
 
-		group->addChild(foo);
-		group->addChild(bar);
-		group->addChild(cat);
+		group.append(foo);
+		group.append(bar);
+		group.append(cat);
 
-		GROUPCOMPARE(p1, {foo, bar});
-		GROUPCOMPARE(p2, {bar, foo});
+		GROUPCOMPARE(&p1, {foo, bar});
+		GROUPCOMPARE(&p2, {bar, foo});
 	}
 	void giantChainedProxy() {
-		osg::ref_ptr<Group> group = new EResourceGroup;
-		osg::ref_ptr<ERFilterSortProxy> p1 = new ERFilterSortProxy(group);
-		osg::ref_ptr<ERFilterSortProxy> p2 = new ERFilterSortProxy(group);
-		osg::ref_ptr<ERFilterSortProxy> p3 = new ERFilterSortProxy(group);
-		p3->sortBy(ERFilterSortProxy::ALPHABETICAL);
+		EResourceGroup group;
+		ERFilterSortProxy p1(&group);
+		ERFilterSortProxy p2(&group);
+		ERFilterSortProxy p3(&group);
+		p3.sortBy(ERFilterSortProxy::ALPHABETICAL);
 		Util::tic();
 		int x = 10;
 		for (int i = 0; i < x; i++) {
-			EResource *res = new EResource;
+			auto res = std::make_shared<EResource>();
 			res->setResourceName(std::to_string(i));
-			group->addChild(res);
+			group.append(res);
 		}
 		qDebug() << "single construction" << x << Util::toc();
 
 		Util::tic();
-		EResource *res = new EResource;
-		group->addChild(res);
+		auto res = std::make_shared<EResource>();
+		group.append(res);
 		qDebug() << "single construction +1" << Util::toc();
 
 		Util::tic();
-		group->removeChildren(0, group->getNumChildren());
+		group.clear();
 		qDebug() << "removeChildren" << Util::toc();
 
 		Util::tic();
-		std::vector<std::pair<size_t, osg::Node*>> insertions;
+		std::vector<std::pair<size_t, std::shared_ptr<EResource>>> insertions;
 		for (int i = 0; i < x; i++) {
-			EResource *res = new EResource;
+			auto res = std::make_shared<EResource>();
 			res->setResourceName(std::to_string(i));
 			insertions.push_back({ i, res });
 		}
-		group->insertChildrenSet(insertions);
+		group.insertMulti(insertions);
 		qDebug() << "group construction" << Util::toc();
 
 		Util::tic();
-		group->clear();
+		group.clear();
 		qDebug() << "clear:" << Util::toc();
 	}
 };

@@ -18,7 +18,7 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
 	// style
-	m_style = new LabelStyle;
+	m_style = std::make_unique<LabelStyle>();
 
 	// create a canvas, fullscreen it
 	m_canvas = new NarrativeCanvas(ui.previewFrame);
@@ -32,12 +32,12 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	m_canvas->setStyleSheet("NarrativeCanvas { background: rgb(50,50,50); }");
 
 	// create a slide
-	m_slide = new NarrativeSlide();
-	m_label = new NarrativeSlideLabel();
-	m_slide->addChildrenP({ m_label });
+	m_slide = std::make_shared<NarrativeSlide>();
+	m_label = std::make_shared<NarrativeSlideLabel>();
+	m_slide->append(m_label);
 	m_label->setRect(QRectF(-.5, -.25, 1, .5));
 
-	m_canvas->setSlide(m_slide);
+	m_canvas->setSlide(m_slide.get());
 
 	m_font_sizes = QFontDatabase::standardSizes();
 	QStringList size_strings;
@@ -152,19 +152,19 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 		refresh();
 	});
 
-	setStyle(m_style);
+	setStyle(m_style.get());
 	refresh();
 }
 
 void StyleSettingsWidget::refresh()
 {
-	m_label->applyStyle(m_style);
+	m_label->applyStyle(m_style.get());
 }
 
 void StyleSettingsWidget::setStyle(const LabelStyle * style)
 {
-	if (style != m_style) m_style->copy(style);
-	
+	if (style != m_style.get()) m_style->copy(style);
+
 	// update all the ui stuff
 
 	ui.colorPicker->setStyleSheet(Util::colorToStylesheet(style->m_fg_color));
@@ -219,5 +219,5 @@ void StyleSettingsWidget::setStyle(const LabelStyle * style)
 
 LabelStyle * StyleSettingsWidget::getStyle() const
 {
-	return m_style;
+	return m_style.get();
 }

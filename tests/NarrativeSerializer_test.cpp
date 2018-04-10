@@ -36,18 +36,18 @@ void slideWriteRead() {
 	slide.setCameraMatrix(camera_matrix);
 
 	// make some labels
-	NarrativeSlideLabel *label1 = new NarrativeSlideLabel();
+	auto label1 = std::make_shared<NarrativeSlideLabel>();
 	label1->setBackground(QColor(123, 42, 99, 12));
 	label1->setHtml("Label1");
 	label1->setRect(QRectF(.3, .3, 10.0, 10.0));
 	label1->setType(LabelType::NONE);
 	label1->setVAlignInt(Qt::AlignVCenter);
 
-	NarrativeSlideLabel *label2 = new NarrativeSlideLabel();
+	auto label2 = std::make_shared<NarrativeSlideLabel>();
 	label2->setHtml("Label2");
 
-	slide.addChild(label1);
-	slide.addChild(label2);
+	slide.append(label1);
+	slide.append(label2);
 
 	// TODO: make some images
 
@@ -63,7 +63,7 @@ void slideWriteRead() {
 	NarrativeSerializer::readNarrativeSlide(fb_slide, &nslide);
 
 	// check
-	QCOMPARE(nslide.getNumChildren(), 2);
+	QCOMPARE(nslide.size(), 2);
 	QCOMPARE(slide.getDuration(), nslide.getDuration());
 	QCOMPARE(slide.getStayOnNode(), nslide.getStayOnNode());
 	QCOMPARE(slide.getTransitionDuration(), nslide.getTransitionDuration());
@@ -90,14 +90,14 @@ void slideWriteRead() {
 }
 
 void narrativeGroupWriteRead() {
-	osg::ref_ptr<NarrativeGroup> nars = new NarrativeGroup;
+	NarrativeGroup nars;
 
 	// make some narratives
-	Narrative *nar1 = new Narrative;
+	auto nar1 = std::make_shared<Narrative>();
 	nar1->setTitle("nar1");
 	nar1->setAuthor("auth1");
 	nar1->setDescription("desc1");
-	nars->addChild(nar1);
+	nars.append(nar1);
 
 	// edit a style
 	auto styles = nar1->labelStyles();
@@ -112,21 +112,21 @@ void narrativeGroupWriteRead() {
 	lstyle->m_margin = 3;
 
 	// make some slides
-	NarrativeSlide *slide1 = new NarrativeSlide;
+	auto slide1 = std::make_shared<NarrativeSlide>();
 	slide1->setTransitionDuration(4.5f);
-	nar1->addChild(slide1);
+	nar1->append(slide1);
 
-	NarrativeSlide *slide2 = new NarrativeSlide;
+	auto slide2 = std::make_shared<NarrativeSlide>();
 	slide2->setTransitionDuration(99.6f);
-	nar1->addChild(slide2);
+	nar1->append(slide2);
 
-	Narrative *nar2 = new Narrative;
+	auto nar2 = std::make_shared<Narrative>();
 	nar2->setTitle("nar2");
-	nars->addChild(nar2);
+	nars.append(nar2);
 
 	// write to buffer
 	flatbuffers::FlatBufferBuilder builder;
-	auto o_table = NarrativeSerializer::createNarrativeTable(&builder, nars);
+	auto o_table = NarrativeSerializer::createNarrativeTable(&builder, &nars);
 	builder.Finish(o_table);
 
 	// read from buffer
@@ -135,7 +135,7 @@ void narrativeGroupWriteRead() {
 	NarrativeSerializer::readNarrativeTable(fb_table, &nnars);
 
 	// verify
-	QCOMPARE(nnars.getNumChildren(), 2);
+	QCOMPARE(nnars.size(), 2);
 
 	Narrative *nnar1 = dynamic_cast<Narrative*>(nnars.child(0));
 	QCOMPARE(nnar1->getTitle(), nar1->getTitle());
@@ -158,13 +158,12 @@ void narrativeGroupWriteRead() {
 	QCOMPARE(nlstyle->m_margin, 3);
 
 	// slides
-	QCOMPARE(nnar1->getNumChildren(), 2);
+	QCOMPARE(nnar1->size(), 2);
 	NarrativeSlide *nslide1 = dynamic_cast<NarrativeSlide*>(nnar1->child(0));
 	QCOMPARE(nslide1->getTransitionDuration(), 4.5f);
 
 	NarrativeSlide *nslide2 = dynamic_cast<NarrativeSlide*>(nnar1->child(1));
 	QCOMPARE(nslide2->getTransitionDuration(), 99.6f);
-
 }
 
 };

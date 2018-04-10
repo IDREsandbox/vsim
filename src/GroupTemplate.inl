@@ -73,6 +73,10 @@ bool TGroup<T>::insert(size_t index, const std::vector<std::shared_ptr<T>>& node
 	for (size_t i = 0; i < nodes.size(); i++) {
 		list[i] = { i + index, nodes[i] };
 	}
+	std::vector<size_t> indices(nodes.size());
+	std::iota(indices.begin(), indices.end(), index);
+
+
 	//emit sAboutToInsertMuliP(pointers);
 	//emit sAboutToInsertMulti(list);
 	emit sAboutToInsert(index, nodes.size());
@@ -81,7 +85,7 @@ bool TGroup<T>::insert(size_t index, const std::vector<std::shared_ptr<T>>& node
 	m_children.insert(it, nodes.begin(), nodes.end());
 
 	emit sInserted(index, nodes.size());
-	//emit sInsertedMulti(list);
+	emit sInsertedMulti(indices);
 	//emit sInsertedMultiP(pointers);
 	return true;
 }
@@ -99,7 +103,7 @@ bool TGroup<T>::remove(size_t index, size_t count)
 		list.push_back(index + i);
 	}
 	//emit sAboutToRemoveMultiP(pointers);
-	//emit sAboutToRemoveMulti(list);
+	emit sAboutToRemoveMulti(list);
 	emit sAboutToRemove(index, count);
 
 	auto begin = m_children.begin() + index;
@@ -107,7 +111,7 @@ bool TGroup<T>::remove(size_t index, size_t count)
 	m_children.erase(begin, end);
 
 	emit sRemoved(index, count);
-	//emit sRemovedMulti(list);
+	emit sRemovedMulti(list);
 	//emit sRemovedMultiP(pointers);
 	return true;
 }

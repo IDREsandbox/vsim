@@ -147,12 +147,9 @@ void VSimRoot::loadOld(osg::Group * old_group)
 	qDebug() << "loading old vsim" << old_group->getNumChildren();
 	// find ModelInformation
 
-	// NarrativeGroup
 	m_narratives = new NarrativeGroup(old_group);
-	m_narratives->setName("Narratives");
 
 	m_resources = new EResourceGroup(old_group);
-	m_resources->setName("Resources");
 
 	// scan for model information
 	for (uint i = 0; i < old_group->getNumChildren(); i++) {

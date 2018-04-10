@@ -3,6 +3,7 @@
 
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"
+#include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
 #include <unordered_map>
 
@@ -18,7 +19,7 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 		ECategory * cat = new ECategory();
 		if (o_cat->name()) cat->setCategoryName(o_cat->name()->str());
 		if (o_cat->color()) cat->setColor(TypesSerializer::fb2qtColor(*o_cat->color()));
-		cats->addChild(cat);
+		cats->append(std::shared_ptr<ECategory>(cat));
 	}
 
 	auto resources = buffer->resources();
@@ -43,20 +44,20 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 		// set category pointer
 		int cat_index = o_res->category_index();
 		if (cat_index >= 0) {
-			ECategory *cat = cats->category(cat_index);
+			auto cat = cats->childShared(cat_index);
 			res->setCategory(cat);
 		}
 
-		group->addChild(res);
+		group->append(std::shared_ptr<EResource>(res));
 	}
 }
 
 flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(flatbuffers::FlatBufferBuilder *builder, const EResourceGroup *group)
 {
-	const ECategoryGroup *cats = group->getCategories();
+	const ECategoryGroup *cats = group->categories();
 
 	std::unordered_map<ECategory*, size_t> cat_to_index;
-	for (size_t i = 0; i < cats->getNumChildren(); i++) {
+	for (size_t i = 0; i < cats->size(); i++) {
 		ECategory *cat = cats->category(i);
 		if (!cat) continue;
 		cat_to_index[cat] = i;
@@ -65,7 +66,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(flatbuffers::FlatBu
 	// build categories
 	std::vector<flatbuffers::Offset<fb::ECategory>> categories;
 	
-	for (size_t i = 0; i < cats->getNumChildren(); i++) {
+	for (size_t i = 0; i < cats->size(); i++) {
 		ECategory *cat = dynamic_cast<ECategory*>(cats->child(i));
 
 		// strings
@@ -83,7 +84,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(flatbuffers::FlatBu
 	// build resources
 	std::vector<flatbuffers::Offset<fb::EResource>> resources;
 
-	for (size_t i = 0; i < group->getNumChildren(); i++) {
+	for (size_t i = 0; i < group->size(); i++) {
 		EResource *res = dynamic_cast<EResource*>(group->child(i));
 		if (!res) continue;
 

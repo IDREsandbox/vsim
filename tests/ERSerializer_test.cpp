@@ -18,21 +18,20 @@ private:
 
 private slots:
 void writeReadTest() {
-	osg::ref_ptr<EResourceGroup> resources = new EResourceGroup;
-	osg::ref_ptr<ECategoryGroup> cats = resources->categories();
+	EResourceGroup resources;
+	ECategoryGroup *cats = resources.categories();
 
-	ECategory *cat1 = new ECategory;
+	auto cat1 = std::make_shared<ECategory>();
 	cat1->setCategoryName("cat1");
 	cat1->setColor(QColor(255, 150, 50));
-	cats->addChild(cat1);
+	cats->append(cat1);
 
-	ECategory *cat2 = new ECategory;
+	auto cat2 = std::make_shared<ECategory>();
 	cat2->setCategoryName("cat2");
 	cat2->setColor(QColor(0, 0, 199));
-	cats->addChild(cat2);
+	cats->append(cat2);
 
-	EResource *res;
-	res = new EResource;
+	auto res = std::make_shared<EResource>();
 	res->setResourceName("res1");
 	res->setAuthor("auth1");
 	res->setERType(EResource::ANNOTATION);
@@ -55,31 +54,31 @@ void writeReadTest() {
 	osg::Matrix camera_matrix = osg::Matrix::inverse(view_matrix);
 	res->setCameraMatrix(camera_matrix);
 
-	resources->addChild(res);
+	resources.append(res);
 
-	res = new EResource;
+	res = std::make_shared<EResource>();
 	res->setResourceName("res2");
 	res->setERType(EResource::FILE);
 	res->setCategory(cat2);
-	resources->addChild(res);
+	resources.append(res);
 
 	// save to buffer
 	flatbuffers::FlatBufferBuilder builder;
 	flatbuffers::Offset<fb::ERTable> o_ers =
-		ERSerializer::createERTable(&builder, resources.get());
+		ERSerializer::createERTable(&builder, &resources);
 	builder.Finish(o_ers);
 
 	// read from buffer
 	//ERSerializer::readERTable();
 	const fb::ERTable *table = flatbuffers::GetRoot<fb::ERTable>(builder.GetBufferPointer());
 
-	osg::ref_ptr<EResourceGroup> nresources = new EResourceGroup;
-	ERSerializer::readERTable(table, nresources);
+	EResourceGroup nresources;
+	ERSerializer::readERTable(table, &nresources);
 
 	// check
 	// categories
-	ECategoryGroup *ncats = nresources->categories();
-	QCOMPARE(ncats->getNumChildren(), 2);
+	ECategoryGroup *ncats = resources.categories();
+	QCOMPARE(ncats->size(), 2);
 	ECategory *ncat1 = ncats->category(0);
 	QCOMPARE(ncat1->getCategoryName(), "cat1");
 	QCOMPARE(ncat1->getColor(), QColor(255, 150, 50));
@@ -88,8 +87,8 @@ void writeReadTest() {
 	QCOMPARE(ncat2->getColor(), QColor(0, 0, 199));
 
 	// resources
-	QCOMPARE(nresources->getNumChildren(), 2);
-	EResource *nres = nresources->getResource(0);
+	QCOMPARE(resources.size(), 2);
+	EResource *nres = resources.getResource(0);
 	QCOMPARE(nres->getERType(), EResource::ANNOTATION);
 	QCOMPARE(nres->getResourceName(), "res1");
 	QCOMPARE(nres->getAuthor(), "auth1");
@@ -102,12 +101,12 @@ void writeReadTest() {
 	QCOMPARE(nres->getReposition(), true);
 	QCOMPARE(nres->getAutoLaunch(), false);
 	QCOMPARE(nres->getLocalRange(), 15.0f);
-	QCOMPARE(nres->getCategory(), ncat1);
+	QCOMPARE(nres->category(), ncat1);
 
 	auto cm = nres->getCameraMatrix();
 	QVERIFY(Util::osgMatrixEq(nres->getCameraMatrix(), camera_matrix, .00001));
 
-	nres = nresources->getResource(1);
+	nres = resources.getResource(1);
 	QCOMPARE(nres->getResourceName(), "res2");
 	QCOMPARE(nres->getERType(), EResource::FILE);
 }

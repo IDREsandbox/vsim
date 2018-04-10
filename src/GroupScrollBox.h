@@ -10,7 +10,6 @@
 #include <set>
 #include <QTimer>
 
-#include "Group.h"
 #include "GroupTemplate.h"
 #include "HorizontalScrollBox.h"
 

@@ -53,9 +53,9 @@ namespace Util
 	// ex. [a, b, c, d], insertions: a[1] = e, a[3] = f
 	//     [a, e, b, f, c, d]
 	// fixme [0, 1, 2, 3] -> [0, 2, 4, 5]
-	std::vector<int> fixIndices(const std::vector<int> &fixme, const std::set<int> &changes);
+	std::vector<size_t> fixIndices(const std::vector<size_t> &fixme, const std::set<size_t> &changes);
 
-	std::vector<int> fixIndicesRemove(const std::vector<int> &fixme, const std::set<int> &changes);
+	std::vector<size_t> fixIndicesRemove(const std::vector<size_t> &fixme, const std::set<size_t> &changes);
 
 	// inserts multiple items into a vector
 	// expects the insertions to be sorted

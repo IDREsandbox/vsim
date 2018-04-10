@@ -25,7 +25,10 @@ EResourceGroup::EResourceGroup(const osg::Group *old_root)
 		}
 
 		const EResourcesList *old_ers = dynamic_cast<const EResourcesList*>(node);
-		if (old_ers) loadOld(old_ers);
+		if (old_ers) {
+			loadOld(old_ers);
+			break;
+		}
 	}
 }
 
@@ -35,7 +38,7 @@ EResourceGroup::~EResourceGroup()
 
 void EResourceGroup::loadOld(const EResourcesList * old_ers)
 {
-	std::map<std::string, ECategory*> name_map;
+	std::map<std::string, std::shared_ptr<ECategory>> name_map;
 	for (EResourcesNode *old : old_ers->m_list) {
 		if (name_map.find(old->getCategoryName()) != name_map.end()) {
 			// already in the map so skip
@@ -45,13 +48,22 @@ void EResourceGroup::loadOld(const EResourcesList * old_ers)
 		cat->setCategoryName(old->getCategoryName());
 		cat->setColor(QColor(old->getRed(), old->getGreen(), old->getBlue()));
 
-		name_map.insert(std::make_pair(old->getCategoryName(), cat.get()));
+		name_map.insert(std::make_pair(old->getCategoryName(), cat));
 		m_categories->append(cat);
+
 	}
 
 	// copy the data
 	for (EResourcesNode *node : old_ers->m_list) {
-		auto er = std::shared_ptr<EResource>(new EResource(node, name_map));
+		auto er = std::make_shared<EResource>(node);
+		// assign category
+
+		ECategory *cat = nullptr;
+		auto it = name_map.find(node->getCategoryName());
+		if (it != name_map.end()) {
+			er->setCategory(it->second);
+		}
+
 		append(er);
 	}
 }
@@ -90,27 +102,25 @@ void EResourceGroup::mergeCommand(EResourceGroup *group,
 	const EResourceGroup *other, QUndoCommand *cmd)
 {
 	// build existing category map
-	std::map<std::string, ECategory*> cat_map;
+	std::map<std::string, std::shared_ptr<ECategory>> cat_map;
 	for (size_t i = 0; i < group->categories()->size(); i++) {
-		ECategory *cat = group->categories()->category(i);
-		if (!cat) continue;
+		auto cat = group->categories()->childShared(i);
 		cat_map[cat->getCategoryName()] = cat;
 	}
 
 	// copy categories that don't exist, replace categories that do
 	for (size_t i = 0; i < other->categories()->size(); i++) {
-		ECategory *new_cat = other->categories()->category(i);
-		if (!new_cat) continue;
+		auto new_cat = other->categories()->childShared(i);
 
 		auto it = cat_map.find(new_cat->getCategoryName());
 		if (it == cat_map.end()) { // category doesn't already exist
 			auto *add_cat = new AddNodeCommand<ECategory>(group->categories(),
-				other->categories()->childShared(i), -1, cmd);
+				new_cat, -1, cmd);
 
 			cat_map[new_cat->getCategoryName()] = new_cat;
 		}
 		else { // category already exists
-			ECategory *old_cat = it->second;
+			auto old_cat = it->second;
 			// replace all node categories
 			std::set<EResource*> resources = new_cat->resources();
 			for (auto *res : resources) {

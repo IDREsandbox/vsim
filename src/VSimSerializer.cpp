@@ -197,7 +197,7 @@ flatbuffers::Offset<fb::ModelTable>
 {
 	// build models
 	std::vector<flatbuffers::Offset<fb::Model>> v_models;
-	for (size_t i = 0; i < model_group->getNumChildren(); i++) {
+	for (size_t i = 0; i < model_group->size(); i++) {
 		auto o_format = builder->CreateString("osgb");
 
 		bool ascii = false;

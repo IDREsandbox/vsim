@@ -4,7 +4,6 @@
 #include <string>
 #include <osg/Node>
 #include <QObject>
-#include "Group.h"
 #include "GroupTemplate.h"
 #include "Command.h"
 

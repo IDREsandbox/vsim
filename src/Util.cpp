@@ -169,7 +169,7 @@ QString Util::setToString(std::set<int> set)
 	return str;
 }
 
-std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<int>& insertions)
+std::vector<size_t> Util::fixIndices(const std::vector<size_t> &fixme, const std::set<size_t>& insertions)
 {
 	size_t max_index = 0;
 	for (int x : fixme) {
@@ -200,7 +200,7 @@ std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<
 	//	}
 	//	delta_array[i] = shift;
 	//}
-	std::vector<int> result(fixme);
+	std::vector<size_t> result(fixme);
 	for (size_t i = 0; i < result.size(); i++) {
 		size_t old_index = result[i];
 		result[i] = old_index + delta_array[old_index];
@@ -235,7 +235,7 @@ std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<
 	//return result;
 }
 
-std::vector<int> Util::fixIndicesRemove(const std::vector<int>& fixme, const std::set<int>& changes)
+std::vector<size_t> Util::fixIndicesRemove(const std::vector<size_t>& fixme, const std::set<size_t>& changes)
 {
 	if (fixme.size() == 0) return {};
 	int max = *std::max_element(fixme.begin(), fixme.end());
@@ -248,7 +248,7 @@ std::vector<int> Util::fixIndicesRemove(const std::vector<int>& fixme, const std
 		delta_array[i] = shift;
 	}
 
-	std::vector<int> result(fixme);
+	std::vector<size_t> result(fixme);
 	for (size_t i = 0; i < result.size(); i++) {
 		size_t old_index = result[i];
 		result[i] = old_index + delta_array[old_index];

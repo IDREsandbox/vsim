@@ -4,14 +4,12 @@
 #include <string>
 #include <osg/Node>
 #include <QObject>
-#include "Group.h"
 #include "Command.h"
 #include <QColor>
 
 class EResource;
-class ECategory : public Group {
+class ECategory : public QObject {
 	Q_OBJECT
-
 public:
 	ECategory();
 

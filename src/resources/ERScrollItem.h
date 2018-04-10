@@ -3,7 +3,9 @@
 #include <QWidget>
 #include "ui_ERScrollItem.h"
 #include "ScrollBoxItem.h"
-#include "resources/EResource.h"
+
+class EResource;
+class ECategory;
 
 class ERScrollItem : public ScrollBoxItem {
 	Q_OBJECT

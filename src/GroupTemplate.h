@@ -31,7 +31,7 @@ signals:
 	void sRemoved(size_t index, size_t count);
 
 	// arbitrary indices, used for proxy
-	void sAboutToInsertMulti(const std::vector<size_t> &);
+	//void sAboutToInsertMulti(const std::vector<size_t> &); // unused
 	void sInsertedMulti(const std::vector<size_t> &);
 	void sAboutToRemoveMulti(const std::vector<size_t> &);
 	void sRemovedMulti(const std::vector<size_t> &);

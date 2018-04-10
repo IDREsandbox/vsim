@@ -69,7 +69,7 @@ bool FileUtil::importNarrativesStream(std::istream &in, NarrativeGroup *group)
 	// try group, try narrative
 	NarrativeOld *old = dynamic_cast<NarrativeOld*>(node.get());
 	if (old) {
-		group->addChild(new Narrative(old));
+		group->append(std::make_shared<Narrative>(old));
 		return true;
 	}
 	return false;
@@ -85,10 +85,9 @@ bool FileUtil::exportNarrativesStream(std::ostream &out, const NarrativeGroup *g
 	// make a new group w/ copy of narratives
 	NarrativeGroup g;
 	for (auto i : selection) {
-		Narrative *nar = dynamic_cast<Narrative*>(group->child(i));
-		if (nar) {
-			g.addChild(nar);
-		}
+		auto nar = group->childShared(i);
+		if (!nar) continue;
+		g.append(nar);
 	}
 
 	flatbuffers::FlatBufferBuilder builder;
@@ -144,17 +143,17 @@ bool FileUtil::exportEResources(std::ostream &out, const EResourceGroup * group,
 
 	// make a new group w/ copy of narratives
 	EResourceGroup g;
-	std::unordered_set<ECategory*> cats;
+	std::unordered_set<ECategory*> cats_added; // already has 
 	for (auto i : selection) {
-		EResource *res = group->getResource(i);
-		if (res) {
-			g.addChild(res);
-		}
-		ECategory *cat = res->category();
-		if (cat && (cats.find(cat) == cats.end())) {
-			cats.insert(cat);
-			g.categories()->addChild(cat);
-			cats.insert(res->category());
+		auto res = group->childShared(i);
+		if (!res) continue;
+
+		g.append(res);
+
+		auto cat = res->categoryShared();
+		if (cat && (cats_added.find(cat.get()) == cats_added.end())) {
+			cats_added.insert(cat.get());
+			g.categories()->append(cat);
 		}
 	}
 

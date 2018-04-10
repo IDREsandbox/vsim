@@ -9,7 +9,6 @@
 
 #include <QUndoStack>
 #include "Command.h"
-#include "Group.h"
 #include "GroupTemplate.h"
 
 class NarrativeSlideItem;

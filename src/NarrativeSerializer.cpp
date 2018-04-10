@@ -40,7 +40,7 @@ void NarrativeSerializer::readNarrativeTable(
 		for (auto fb_nar : *fb_nars) {
 			if (!fb_nar) continue;
 
-			Narrative *nar = new Narrative;
+			auto nar = std::make_shared<Narrative>();
 
 			if (fb_nar->styles()) readStyleTable(fb_nar->styles(), nar->labelStyles());
 			if (fb_nar->title()) nar->setTitle(fb_nar->title()->str());
@@ -52,9 +52,9 @@ void NarrativeSerializer::readNarrativeTable(
 				for (auto fb_slide : *fb_slides) {
 					if (!fb_slide) continue;
 
-					NarrativeSlide *slide = new NarrativeSlide;
-					readNarrativeSlide(fb_slide, slide);
-					nar->addChild(slide);
+					auto slide = std::make_shared<NarrativeSlide>();
+					readNarrativeSlide(fb_slide, slide.get());
+					nar->append(slide);
 				}
 			}
 			// styles
@@ -63,7 +63,7 @@ void NarrativeSerializer::readNarrativeTable(
 				readStyleTable(fb_styles, nar->labelStyles());
 			}
 
-			group->addChild(nar);
+			group->append(nar);
 		}
 	}
 }
@@ -74,8 +74,8 @@ flatbuffers::Offset<fb::NarrativeTable>
 {
 	// build narratives
 	std::vector<flatbuffers::Offset<fb::Narrative>> v_nars;
-	for (uint i = 0; i < group->getNumChildren(); i++) {
-		Narrative *nar = dynamic_cast<Narrative*>(group->child(i));
+	for (uint i = 0; i < group->size(); i++) {
+		Narrative *nar = group->child(i);
 		if (!nar) continue;
 
 		// build styles
@@ -83,8 +83,8 @@ flatbuffers::Offset<fb::NarrativeTable>
 
 		// build slides
 		std::vector<flatbuffers::Offset<fb::Slide>> v_slides;
-		for (uint i = 0; i < nar->getNumChildren(); i++) {
-			NarrativeSlide *slide = dynamic_cast<NarrativeSlide*>(nar->child(i));
+		for (uint i = 0; i < nar->size(); i++) {
+			NarrativeSlide *slide = nar->child(i);
 			auto o_slide = createNarrativeSlide(builder, slide);
 			v_slides.push_back(o_slide);
 		} // end slides
@@ -135,7 +135,7 @@ void NarrativeSerializer::readNarrativeSlide(const fb::Slide * buffer,
 			if (type == fb::CanvasItem_CanvasLabel) {
 				auto fb_label = static_cast<const fb::CanvasLabel *>(ptr);
 
-				NarrativeSlideLabel *label = new NarrativeSlideLabel();
+				auto label = std::make_shared<NarrativeSlideLabel>();
 
 				if (fb_label->html()) label->setHtml(fb_label->html()->str());
 				label->setType(static_cast<LabelType>(fb_label->type()));
@@ -153,7 +153,7 @@ void NarrativeSerializer::readNarrativeSlide(const fb::Slide * buffer,
 					label->setRect(r);
 				}
 
-				slide->addChild(label);
+				slide->append(label);
 			}
 			else if (type == fb::CanvasItem_CanvasImage) {
 				// TODO
@@ -169,7 +169,7 @@ flatbuffers::Offset<fb::Slide>
 	// build canvas items
 	std::vector<uint8_t> v_item_types;
 	std::vector<flatbuffers::Offset<void>> v_items;
-	for (uint i = 0; i < slide->getNumChildren(); i++) {
+	for (uint i = 0; i < slide->size(); i++) {
 		NarrativeSlideLabel *label = dynamic_cast<NarrativeSlideLabel*>(slide->child(i));
 		if (!label) continue;
 		auto o_html = builder->CreateString(label->getHtml());

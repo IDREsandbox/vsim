@@ -5,7 +5,6 @@
 #include <QUndoCommand>
 #include <osg/Group>
 #include "Command.h"
-#include "Group.h"
 #include "GroupTemplate.h"
 
 class ECategoryGroup;

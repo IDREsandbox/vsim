@@ -1,17 +1,17 @@
-#ifndef LABELSTYLEGROUP
+#ifndef LABELSTYLEGROUP_H
 #define LABELSTYLEGROUP_H
 
 #include <QObject>
 #include <QUndoCommand>
 #include <osg/Group>
 #include <memory>
-#include "Group.h"
+#include "GroupTemplate.h"
 #include "LabelType.h"
 
 
 class LabelStyle;
 
-class LabelStyleGroup : public Group {
+class LabelStyleGroup : public TGroup<LabelStyle> {
 	Q_OBJECT;
 public:
 	LabelStyleGroup();

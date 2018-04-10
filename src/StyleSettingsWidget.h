@@ -2,6 +2,7 @@
 #define STYLESETTINGSWIDGET_H
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <memory>
 
 #include "ui_StyleSettingsWidget.h"
 
@@ -24,11 +25,11 @@ private:
 private:
 	Ui::StyleSettingsWidget ui;
 
-	NarrativeCanvas *m_canvas;
-	NarrativeSlide *m_slide;
-	NarrativeSlideLabel *m_label;
+	NarrativeCanvas *m_canvas; // qt owned
+	std::shared_ptr<NarrativeSlide> m_slide;
+	std::shared_ptr<NarrativeSlideLabel> m_label;
 
-	LabelStyle *m_style;
+	std::unique_ptr<LabelStyle> m_style;
 
 	QList<int> m_font_sizes = QFontDatabase::standardSizes();
 };

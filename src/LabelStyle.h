@@ -10,23 +10,18 @@
 #include <QFont>
 #include <QTextCursor>
 
-#include "Group.h"
 #include "LabelType.h"
 
-class LabelStyle : public QObject, public osg::Node {
+class LabelStyle : public QObject {
 	Q_OBJECT
 
 public:
 	LabelStyle();
-	//LabelStyle(Style base_style);
-	LabelStyle(const LabelStyle& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	LabelStyle(LabelType type, const std::string font, int size, QColor fg, QColor bg,
 		QFont::Weight we, bool ital, Qt::Alignment al, int m);
-	virtual ~LabelStyle();
+	~LabelStyle();
 
 	void copy(const LabelStyle *other);
-
-	META_Node(, LabelStyle);
 
 	//void applyToLabel(NarrativeSlideLabel *label);
 	//void applyToDocument(QTextDocument *doc);
