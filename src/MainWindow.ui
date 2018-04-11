@@ -101,6 +101,7 @@
     <property name="title">
      <string>Test</string>
     </property>
+    <addaction name="actionRoot_Debug"/>
     <addaction name="actionOSG_Debug"/>
     <addaction name="actionCamera_Debug"/>
     <addaction name="actionControl_Debug"/>
@@ -452,6 +453,11 @@
   <action name="actionExport_Resources">
    <property name="text">
     <string>Export Resources...</string>
+   </property>
+  </action>
+  <action name="actionRoot_Debug">
+   <property name="text">
+    <string>Root Debug</string>
    </property>
   </action>
  </widget>

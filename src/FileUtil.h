@@ -15,12 +15,9 @@ namespace FileUtil
 
 	bool importNarrativesStream(std::istream &in, NarrativeGroup *group);
 	bool exportNarrativesStream(std::ostream &out, const NarrativeGroup *group,
-		const std::set<int> &selection);
-	//bool importNarratives(const std::string &path, NarrativeGroup *group);
-	//bool exportNarratives(const std::string &path, const NarrativeGroup *group,
-	//	const std::set<int> &selection);
+		const std::set<size_t> &selection);
 
 	bool importEResources(std::istream &in, EResourceGroup *group);
 	bool exportEResources(std::ostream &out, const EResourceGroup *group,
-		const std::set<int> &selection);
+		const std::set<size_t> &selection);
 }

@@ -19,6 +19,7 @@ public:
 
 	// node edit
 	// void setNodeYear(osg::Node *node, int year, bool begin);
+	void addNode(osg::Node *node, const std::string &path);
 
 	// applies node visitor to all models
 	void accept(osg::NodeVisitor &visitor);
@@ -34,10 +35,14 @@ public:
 
 	static bool nodeTimeInName(const std::string &name, int * begin, int * end);
 
+	osg::Group *sceneRoot() const;
+	void debugScene() const;
+
 signals:
 	void sTimeEnableChange(bool enabled);
 	void sYearChange(int year);
 
+	void sKeysChanged();
 	//void sNodeYearChanged(osg::Node *node, int year, bool begin);
 
 private:
@@ -116,6 +121,16 @@ public:
 	virtual void apply(osg::Group &node) override;
 private:
 	int m_year;
+};
+
+class DebugVisitor : public osg::NodeVisitor {
+public:
+	DebugVisitor();
+	virtual void apply(osg::Group &group) override;
+	virtual void apply(osg::Node &node) override;
+
+private:
+	int m_tabs;
 };
 
 #endif

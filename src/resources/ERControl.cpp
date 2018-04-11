@@ -4,6 +4,7 @@
 #include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
 #include "resources/ECategoryControl.h"
+#include "resources/ECategoryModel.h"
 #include "resources/ERDialog.h"
 #include "resources/ERScrollBox.h"
 #include "resources/NewCatDialog.h"
@@ -15,6 +16,7 @@
 #include "CheckableListProxy.h"
 #include "VSimApp.h"
 #include "SelectionStack.h"
+#include "GroupCommands.h"
 
 #include <QDesktopServices>
 
@@ -182,7 +184,7 @@ void ERControl::newER()
 	resource->setLocalRange(dlg.getLocalRange());
 	resource->setERType(dlg.getERType());
 	resource->setCameraMatrix(m_app->getCameraMatrix());
-	resource->setCategory(dlg.getCategory());
+	resource->setCategory(dlg.categoryShared());
 
 	m_undo_stack->push(new SelectERCommand(this, { resource.get() }, Command::ON_UNDO));
 	m_undo_stack->push(new AddNodeCommand<EResource>(m_ers, resource));
@@ -262,8 +264,8 @@ void ERControl::editERInfo()
 		new EResource::SetLocalRangeCommand(resource, dlg.getLocalRange(), cmd);
 	if (resource->getERType() != dlg.getERType())
 		new EResource::SetErTypeCommand(resource, dlg.getERType(), cmd);
-	if (resource->getCategory() != dlg.getCategory())
-		new EResource::SetCategoryCommand(resource, dlg.getCategory(), cmd);
+	if (resource->category() != dlg.getCategory())
+		new EResource::SetCategoryCommand(resource, dlg.categoryShared(), cmd);
 
 	//m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
 	m_undo_stack->push(new SelectERCommand(this, { resource }));

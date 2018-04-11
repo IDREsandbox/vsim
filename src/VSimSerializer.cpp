@@ -179,6 +179,7 @@ void VSimSerializer::readModels(const VSim::FlatBuffers::ModelTable *buffer,
 		size_t size = fb_model->size();
 		// bool external = fb_model->external();
 		if (fb_model->name()) model->setName(fb_model->name()->str());
+		if (fb_model->path()) model->setPath(fb_model->path()->str());
 
 		// read in size bytes, to use as a size limit
 		std::string buffer;

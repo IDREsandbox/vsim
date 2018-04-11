@@ -7,8 +7,8 @@
 #include <QUndoStack>
 #include <QUndoCommand>
 #include <QMetaType>
-//#include "Group.h"
 #include "GroupTemplate.h"
+#include "GroupCommands.h"
 
 struct Foo {
 	int val;

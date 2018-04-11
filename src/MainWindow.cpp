@@ -8,6 +8,9 @@
 #include <QMimeData>
 #include <QDir>
 
+#include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
+
 #include "MainWindow.h"
 
 #include "ui_MainWindow.h"
@@ -30,8 +33,11 @@
 
 #include "VSimApp.h"
 #include "VSimRoot.h"
-#include "ModelTableModel.h"
+#include "OSGYearModel.h"
 #include "ModelInformationDialog.h"
+#include "Model.h"
+#include "ModelGroup.h"
+#include "GroupCommands.h"
 
 #include "FileUtil.h"
 #include <fstream>
@@ -111,7 +117,12 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionImport_Resources, &QAction::triggered, this, &MainWindow::actionImportERs);
 	connect(ui->actionExport_Resources, &QAction::triggered, this, &MainWindow::actionExportERs);
 
-	connect(ui->actionOSG_Debug, &QAction::triggered, this, &MainWindow::sDebugOSG);
+	connect(ui->actionOSG_Debug, &QAction::triggered, this, [this]() {
+		m_app->getRoot()->models()->debugScene();
+	});
+	connect(ui->actionRoot_Debug, &QAction::triggered, this, [this]() {
+		m_app->getRoot()->debug();
+	});
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
 	connect(ui->actionControl_Debug, &QAction::triggered, this, &MainWindow::sDebugControl);
 	connect(ui->actionReload_Style, &QAction::triggered, this, [this]() {
@@ -164,22 +175,18 @@ void MainWindow::setApp(VSimApp * vsim)
 
 	connect(this, &MainWindow::sOpenFile, m_app, &VSimApp::openVSim);
 	connect(this, &MainWindow::sSaveFile, m_app, &VSimApp::saveVSim);
-	connect(this, &MainWindow::sImportModel, m_app, &VSimApp::importModel);
-	connect(this, &MainWindow::sNew, m_app, [vsim]() { vsim->initWithVSim(); });
+	connect(this, &MainWindow::sNew, m_app, [vsim]() {
+		vsim->setFileName("");
+		vsim->initWithVSim();
+	});
 	connect(this, &MainWindow::sSaveCurrent, m_app, &VSimApp::saveCurrentVSim);
-	connect(this, &MainWindow::sImportNarratives, m_app, &VSimApp::importNarratives);
-	connect(this, &MainWindow::sExportNarratives, m_app, &VSimApp::exportNarratives);
 
-	outliner()->setModel(m_app->modelTable());
+	outliner()->setModel(nullptr); // TODO: fix outliner
 	outliner()->header()->resizeSection(0, 200);
 	outliner()->resize(505, 600);
 	outliner()->expandAll();
 
 	connect(m_app, &VSimApp::sReset, this, &MainWindow::onReset);
-	connect(this, &MainWindow::sDebugOSG, this, [this]() {
-		m_app->getRoot()->debug();
-		m_app->erControl()->debug();
-	});
 	connect(this, &MainWindow::sDebugCamera, m_app, &VSimApp::debugCamera);
 
 }
@@ -375,8 +382,20 @@ void MainWindow::actionImportModel()
 		return;
 	}
 	qInfo() << "importing - " << filename;
-	//m_vsimapp->importModel(filename.toStdString());
-	emit sImportModel(filename.toStdString());
+
+	osg::ref_ptr<osg::Node> loadedModel;
+	// TODO: special import for vsim files
+
+	// otherwise
+	loadedModel = osgDB::readNodeFile(filename.toStdString());
+	if (!loadedModel.get()) {
+		qWarning() << "Error importing" << filename;
+		QMessageBox::warning(this, "Import Error", "Error loading file " + filename);
+		return;
+	}
+
+	m_app->getRoot()->models()->addNode(loadedModel, filename.toStdString());
+	m_osg_widget->reset();
 }
 
 void MainWindow::actionImportNarratives()

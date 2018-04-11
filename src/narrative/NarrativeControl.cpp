@@ -22,7 +22,7 @@
 #include "narrative/SlideScrollBox.h"
 #include "narrative/SlideScrollItem.h"
 #include "narrative/NarrativeSlideLabel.h"
-#include "ModelGroup.h"
+#include "GroupCommands.h"
 
 //style
 #include "StyleSettingsDialog.h"
@@ -655,9 +655,9 @@ int NarrativeControl::getCurrentNarrativeIndex()
 	return m_current_narrative;
 }
 
-std::set<int> NarrativeControl::getSelectedNarratives() const
+std::set<size_t> NarrativeControl::getSelectedNarratives() const
 {
-	return m_narrative_selection->toSet();
+	return m_narrative_selection->toUSet();
 }
 
 int NarrativeControl::getCurrentSlideIndex()
@@ -856,7 +856,7 @@ void NarrativeControl::newLabel(LabelType style) {
 	qInfo() << "Creating new canvas label";
 
 	Narrative *nar = getCurrentNarrative();
-	LabelStyle *label_style = nar->getLabelStyles()->getStyle((LabelType)style);
+	LabelStyle *label_style = nar->labelStyles()->getStyle((LabelType)style);
 	if (label_style) label->applyStyle(label_style);
 
 	// push command
@@ -1026,28 +1026,6 @@ void SelectSlidesCommand::redo() {
 		m_control->selectSlides(m_narrative, m_slides);
 	}
 }
-
-//SelectLabelCommand::SelectLabelCommand(NarrativeControl * control, int narrative, int slide, int label, SelectionCommandWhen when, QUndoCommand * parent)
-//	: QUndoCommand(parent),
-//	m_control(control),
-//	m_narrative(narrative),
-//	m_slide(slide),
-//	m_label(label),
-//	m_when(when)
-//{
-//}
-//void SelectLabelCommand::undo()
-//{
-//	if (m_when != ON_REDO) {
-//		m_control->selectLabel(m_narrative, m_slide, m_label);
-//	}
-//}
-//void SelectLabelCommand::redo()
-//{
-//	if (m_when != ON_UNDO) {
-//		m_control->selectLabel(m_narrative, m_slide, m_label);
-//	}
-//}
 
 SelectLabelsCommand::SelectLabelsCommand(NarrativeControl * control, int narrative, int slide, std::set<NarrativeSlideItem *> labels, SelectionCommandWhen when, QUndoCommand * parent)
 	: QUndoCommand(parent),

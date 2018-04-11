@@ -36,14 +36,4 @@ private:
 	std::unique_ptr<VSim::FlatBuffers::SettingsT> m_settings;
 };
 
-//class DebugVisitor : public osg::NodeVisitor {
-//public:
-//	DebugVisitor() : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), m_tabs(0) {}
-//	virtual void apply(osg::Group &group) override;
-//	virtual void apply(osg::Node &node) override;
-//
-//private:
-//	int m_tabs;
-//};
-
 #endif

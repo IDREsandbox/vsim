@@ -75,7 +75,7 @@ public:
 
 	Narrative *getCurrentNarrative();
 	int getCurrentNarrativeIndex();
-	std::set<int> getSelectedNarratives() const;
+	std::set<size_t> getSelectedNarratives() const;
 
 	NarrativeSlide *getCurrentSlide();
 	int getCurrentSlideIndex();

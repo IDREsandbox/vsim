@@ -101,9 +101,6 @@ void VSimRoot::debug()
 	for (uint i = 0; i < m_models->size(); i++) {
 		qInfo() << "Model" << QString::fromStdString(m_models->child(i)->name());
 	}
-
-	//DebugVisitor v;
-	//m_models->accept(v);
 }
 
 void VSimRoot::loadOld(osg::Group * old_group)

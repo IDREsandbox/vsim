@@ -126,6 +126,7 @@ set(Util_src
   # src/Group.h
   src/GroupTemplate.inl
   src/GroupTemplate.h
+  src/GroupCommands.h
   src/GroupEnums.h
   src/GroupModelTemplate.inl
   src/GroupModelTemplate.h
@@ -211,6 +212,8 @@ target_link_libraries(VSimRoot_object Util_object Deprecated_object NarrativeMod
 set(VSim_src
   src/resources/ECategoryControl.cpp
   src/resources/ECategoryControl.h
+  src/resources/ERControl.cpp
+  src/resources/ERControl.h
   src/resources/ERDialog.cpp
   src/resources/ERDialog.h
   src/resources/ERDisplay.cpp
@@ -226,6 +229,8 @@ set(VSim_src
 
   src/narrative/CanvasContainer.h
   src/narrative/CanvasContainer.cpp
+  src/narrative/NarrativeCanvas.h
+  src/narrative/NarrativeCanvas.cpp
   src/narrative/NarrativeControl.h
   src/narrative/NarrativeControl.cpp
   src/narrative/NarrativeInfoDialog.h
@@ -245,8 +250,6 @@ set(VSim_src
 
   src/BaseFirstPersonManipulator.cpp
   src/BaseFirstPersonManipulator.h
-  src/CheckableListProxy.cpp
-  src/CheckableListProxy.h
   src/editButtons.cpp
   src/editButtons.h
   src/EditDeleteDelegate.cpp
@@ -261,7 +264,7 @@ set(VSim_src
   src/FlightManipulator.h
   src/FocusFilter.cpp
   src/FocusFilter.h
-  src/GroupScrollBox.cpp
+  src/GroupScrollBox.inl
   src/GroupScrollBox.h
   src/HorizontalScrollBox.cpp
   src/HorizontalScrollBox.h
@@ -277,6 +280,8 @@ set(VSim_src
   src/ModelOutliner.h
   src/mrichtextedit.cpp
   src/mrichtextedit.h
+  src/mtextedit.cpp
+  src/mtextedit.h
   src/Navigation.h
   src/NavigationControl.cpp
   src/NavigationControl.h
@@ -307,6 +312,7 @@ set(VSim_src
 )
 add_library(VSim_objects ${VSim_src})
 message("SOURCES:\n" "${VSim_src}")
+target_link_libraries(VSim_objects VSimRoot_object)
 
 # message(${PROJECT_SOURCE_DIR})
 # message("binary dir " ${PROJECT_BINARY_DIR})

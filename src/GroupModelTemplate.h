@@ -8,16 +8,20 @@
 template <class T>
 class TGroupModel : public QAbstractItemModel {
 public:
-	static T *get(QAbstractItemModel *model, int row) {
-		return static_cast<T*>(
-			model->data(model->index(row, 0), PointerRole).value<void*>());
-	}
-
 	TGroupModel(QObject *parent);
 
 	virtual void setGroup(TGroup<T> *group);
+	TGroup<T> *group() const;
 
+	// model -> group conversions
+	static T *get(const QAbstractItemModel *model, int row);
+	static std::shared_ptr<T> getShared(TGroup<T> *base,
+		const QAbstractItemModel *model, int row);
+	static int baseIndex(const QAbstractItemModel *model, int row);
+
+	// pass in a model index from this model or a proxy
 	T *get(const QModelIndex &index) const;
+	std::shared_ptr<T> getShared(const QModelIndex &index) const;
 
 	QModelIndex indexOf(T *node) const;
 

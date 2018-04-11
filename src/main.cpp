@@ -1,9 +1,9 @@
 #include <QtWidgets/QApplication>
 #include "MainWindow.h"
 #include "VSimApp.h"
-#include "ModelTableModel.h"
 
 #include <memory>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
 
 	window.show();
 
+	// TODO: remove circular dependency
 	window.setApp(&vsim);
 	//vsim.setWindow(&window);
 

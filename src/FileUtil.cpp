@@ -74,7 +74,7 @@ bool FileUtil::importNarrativesStream(std::istream &in, NarrativeGroup *group)
 }
 
 bool FileUtil::exportNarrativesStream(std::ostream &out, const NarrativeGroup *group,
-	const std::set<int> &selection)
+	const std::set<size_t> &selection)
 {
 	if (!out.good()) {
 		return false;
@@ -133,7 +133,7 @@ bool FileUtil::importEResources(std::istream &in, EResourceGroup *group)
 }
 
 bool FileUtil::exportEResources(std::ostream &out, const EResourceGroup * group,
-	const std::set<int>& selection)
+	const std::set<size_t>& selection)
 {
 	if (!out.good()) {
 		return false;

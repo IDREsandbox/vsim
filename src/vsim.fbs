@@ -15,6 +15,7 @@ table Model { // model metadata
   size:uint64; // assigning this is difficult, perhaps use 
   external:bool = false;
   name:string;
+  path:string;
   // included:bool;
   // path:string;
   // size_prefixed:bool // potential change

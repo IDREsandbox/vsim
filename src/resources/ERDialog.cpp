@@ -9,8 +9,9 @@
 #include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
 #include "resources/ECategoryControl.h"
+#include "resources/ECategoryModel.h"
 #include "EditDeleteDelegate.h"
-#include "GroupModel.h"
+#include "GroupModelTemplate.h"
 
 ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWidget * parent)
 	: QDialog(parent),
@@ -60,13 +61,13 @@ ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWi
 
 	connect(ui.addnew, &QPushButton::pressed, this,
 		[this]() {
-		ECategory *cat = m_control->execNewCategory();
-		setCategory(cat);
+		auto cat = m_control->execNewCategory();
+		setCategory(cat.get());
 	});
 	connect(m_category_delegate, &EditDeleteDelegate::sEdit, this,
 		[this](QAbstractItemModel *model, const QModelIndex &index) {
 		ECategory *cat = m_control->execEditCategory(model, index);
-		setCategory(cat);
+		ui.categories->setCurrentIndex(index.row());
 	});
 	connect(m_category_delegate, &EditDeleteDelegate::sDelete, m_control, &ECategoryControl::execDeleteCategory);
 }
@@ -187,19 +188,20 @@ EResource::ERType ERDialog::getERType() const
 
 ECategory * ERDialog::categoryAt(int i) const
 {
-	if (i >= ui.categories->count()) return nullptr; // i out of range
-	QModelIndex index = m_control->categoryModel()->index(i, 0);
-	if (!index.isValid()) return nullptr; // invalid in model
-	ECategory *cat =
-		dynamic_cast<ECategory*>(
-			static_cast<osg::Node*>(
-				m_control->categoryModel()->data(index, GroupModel::PointerRole).value<void*>()));
+	ECategory *cat = TGroupModel<ECategory>::get(m_control->categoryModel(), i);
 	return cat;
 }
 
 ECategory *ERDialog::getCategory() const
 {
 	return categoryAt(ui.categories->currentIndex());
+}
+
+std::shared_ptr<ECategory> ERDialog::categoryShared() const
+{
+	int row = ui.categories->currentIndex();
+	QModelIndex index = ui.categories->model()->index(row, 0);
+	return m_control->categoryModel()->getShared(index);
 }
 
 void ERDialog::setCategory(const ECategory * cat)

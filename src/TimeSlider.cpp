@@ -30,13 +30,13 @@ TimeSlider::~TimeSlider() {
 
 void TimeSlider::setGroup(ModelGroup * group)
 {
-	if (m_group.get() != nullptr) disconnect(m_group.get(), 0, this, 0);
+	if (m_group != nullptr) disconnect(m_group, 0, this, 0);
 	m_group = group;
 	if (group == nullptr) {
 		return;
 	}
 	connect(m_group, &ModelGroup::sYearChange, this, &TimeSlider::onYearChange);
-	connect(m_group, &ModelGroup::sNodeYearChanged, this, &TimeSlider::onRangeChange);
+	connect(m_group, &ModelGroup::sKeysChanged, this, &TimeSlider::onRangeChange);
 	connect(m_group, &ModelGroup::sTimeEnableChange, this, &TimeSlider::onTimeEnableChange);
 
 	setEnabled(true);

@@ -23,7 +23,7 @@ public:
 
 	// Data tracking
 	virtual void setGroup(TGroup<T> *group);
-	TGroup<T> *getGroup() const;
+	TGroup<T> *group() const;
 
 	void reload();
 

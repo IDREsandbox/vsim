@@ -6,6 +6,8 @@
 #include "resources/EResource.h"
 #include "resources/ECategory.h"
 
+#include "GroupCommands.h"
+
 #include <QDebug>
 #include <unordered_map>
 

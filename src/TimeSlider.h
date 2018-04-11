@@ -34,7 +34,7 @@ private:
 
 	bool m_enabled;
 
-	osg::ref_ptr<ModelGroup> m_group;
+	ModelGroup *m_group;
 };
 
 #endif // TIMESLIDER_HPP

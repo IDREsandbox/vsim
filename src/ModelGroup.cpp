@@ -1,7 +1,7 @@
 #include "ModelGroup.h"
-#include "ModelGroup.h"
 #include <QDebug>
 #include <regex>
+#include <iostream>
 #include "Util.h"
 
 #include "Model.h"
@@ -11,17 +11,31 @@ ModelGroup::ModelGroup()
 	m_time_enabled(false)
 {
 	enableTime(true);
-	//qDebug() << "new model table" << m_data_table.get();
+	m_root = new osg::Group;
 
 	connect(this, &GroupSignals::sInserted, this,
 		[this](size_t index, size_t count) {
 
 		for (size_t i = 0; i < count; i++) {
+			qDebug() << "adding a model thing";
 			Model *model = child(index + i);
 			osg::Node *node = model->node();
 
+			m_root->addChild(node);
+
 			TimeInitVisitor v(model); // check for T: start end
 			node->accept(v);
+			
+			connect(model, &Model::sNodeYearChanged, this, [this]() {
+				emit sKeysChanged();
+			});
+		}
+	});
+	connect(this, &GroupSignals::sAboutToRemove, this,
+		[this](size_t index, size_t count) {
+		for (size_t i = 0; i < count; i++) {
+			disconnect(child(index + i), 0, this, 0);
+			m_root->removeChild(child(i)->node());
 		}
 	});
 }
@@ -48,6 +62,15 @@ ModelGroup::ModelGroup()
 //	}
 //	emit sNodeYearChanged(node, year, begin);
 //}
+
+void ModelGroup::addNode(osg::Node * node, const std::string & path)
+{
+	auto model = std::make_shared<Model>();
+	model->setPath(path);
+	model->setName(Util::getFilename(path));
+	model->setNode(node);
+	append(model);
+}
 
 void ModelGroup::accept(osg::NodeVisitor & visitor)
 {
@@ -119,6 +142,17 @@ bool ModelGroup::nodeTimeInName(const std::string & name, int * begin, int * end
 		return true;
 	}
 	return false;
+}
+
+osg::Group * ModelGroup::sceneRoot() const
+{
+	return m_root;
+}
+
+void ModelGroup::debugScene() const
+{
+	DebugVisitor v;
+	m_root->accept(v);
 }
 
 TimeInitVisitor::TimeInitVisitor(Model *model)
@@ -217,4 +251,25 @@ void TimeMaskVisitor::apply(osg::Group &group)
 		}
 	}
 	traverse(group);
+}
+
+
+DebugVisitor::DebugVisitor()
+	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), m_tabs(0) 
+{
+}
+
+void DebugVisitor::apply(osg::Group &group)
+{
+	std::cout << std::string(m_tabs, '\t');
+	std::cout << group.className() << " " << group.getName() << " " << group.getNumChildren() << '\n';
+
+	m_tabs++;
+	traverse(group);
+	m_tabs--;
+}
+
+void DebugVisitor::apply(osg::Node & node)
+{
+	std::cout << std::string(m_tabs, '\t') << node.className() << " " << node.getName() << "\n";
 }

@@ -23,7 +23,7 @@ class NarrativePlayer;
 class ERControl;
 class MainWindow;
 class VSimRoot;
-class ModelTableModel;
+class OSGYearModel;
 class Narrative;
 class NavigationControl;
 class NarrativeSlide;
@@ -99,15 +99,12 @@ public:
 	std::string getFileName() const;
 	void setFileName(const std::string &);
 
-	void addModel(osg::Node *node, const std::string &name);
-	bool importModel(const std::string& filename); // TODO: more complicated logic with vsim
 	bool openVSim(const std::string& filename);
 	bool saveVSim(const std::string& filename);
 	bool saveCurrentVSim();
 
-	// components
 	VSimRoot *getRoot() const;
-	ModelTableModel *modelTable() const;
+	//OSGYearModel *modelTable() const;
 	NarrativeControl *narrativeControl() const;
 	ERControl *erControl() const;
 
@@ -132,7 +129,7 @@ private:
 	QElapsedTimer *m_dt_timer;
 
 	std::unique_ptr<VSimRoot> m_root;
-	ModelTableModel *m_model_table_model;
+	//ModelGroupModel *m_model_table_model;
 
 	NarrativeControl *m_narrative_control;
 	ERControl *m_er_control;

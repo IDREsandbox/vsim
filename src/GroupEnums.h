@@ -4,7 +4,8 @@
 #include <QAbstractItemModel>
 
 enum UserDataRole {
-	PointerRole = Qt::UserRole
+	PointerRole = Qt::UserRole,
+	BaseIndexRole = Qt::UserRole + 1
 };
 
 #endif

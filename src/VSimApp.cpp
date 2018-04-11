@@ -32,17 +32,16 @@
 #include "narrative/NarrativePlayer.h"
 #include "resources/ERControl.h"
 #include "VSimRoot.h"
-#include "ModelTableModel.h"
 #include "MainWindowTopBar.h"
 #include "NavigationControl.h"
 #include "FileUtil.h"
+#include "ModelGroup.h"
 
 #include <QMenuBar>
 
 VSimApp::VSimApp(MainWindow* window)
 	: m_window(window),
-	m_filename(""),
-	m_model_table_model(new ModelTableModel(this))
+	m_filename("")
 {
 	// undo stack
 	m_undo_stack = new QUndoStack(this);
@@ -165,12 +164,12 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 	emit sAboutToReset();
 
 	// move all of the gui stuff over to the new root
-	m_window->getViewerWidget()->mainView()->setSceneData(root->models()); // ideally this would be only models, but its easy to mess things up
-	m_model_table_model->setGroup(root->models());
 	m_narrative_control->load(root->narratives());
 	m_er_control->load(root->resources());
 	m_window->timeSlider()->setGroup(root->models());
-	m_render_view->mainView()->setSceneData(root->models());
+	m_render_view->mainView()->setSceneData(root->models()->sceneRoot());
+	m_window->getViewerWidget()->mainView()->setSceneData(root->models()->sceneRoot());
+
 	m_render_canvas->setSlide(nullptr);
 
 	m_undo_stack->clear();
@@ -180,30 +179,6 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 	m_root.reset(root);
 
 	emit sReset();
-	return true;
-}
-
-
-void VSimApp::addModel(osg::Node *node, const std::string &name)
-{
-	m_root->models()->addChild(node);
-	node->setName(name);
-	m_window->m_osg_widget->reset();
-}
-
-bool VSimApp::importModel(const std::string& filename)
-{
-	osg::ref_ptr<osg::Node> loadedModel(NULL);
-	// TODO: special import for vsim files
-
-	// otherwise
-	loadedModel = osgDB::readNodeFile(filename);
-	if (!loadedModel.get()) {
-		qWarning() << "Error importing" << filename.c_str();
-		QMessageBox::warning(m_window, "Import Error", "Error loading file " + QString::fromStdString(filename));
-		return false;
-	}
-	addModel(loadedModel, Util::getFilename(filename));
 	return true;
 }
 
@@ -227,9 +202,10 @@ bool VSimApp::openVSim(const std::string & filename)
 			goto error;
 		}
 		initWithVSim();
-		addModel(loadedModel, Util::getFilename(filename));
+		m_root->models()->addNode(loadedModel, filename);
 
-		setFileName((path.absolutePath() + "/" + path.baseName() + ".vsim").toStdString());
+		setFileName("");
+		setLastDirectory(path.absolutePath().toStdString());
 		return true;
 	}
 	error:
@@ -374,10 +350,10 @@ void VSimApp::debugCamera()
 
 }
 
-ModelTableModel * VSimApp::modelTable() const
-{
-	return m_model_table_model;
-}
+//OSGYearModel *VSimApp::modelTable() const
+//{
+//	return m_model_table_model;
+//}
 
 NarrativeControl * VSimApp::narrativeControl() const
 {
