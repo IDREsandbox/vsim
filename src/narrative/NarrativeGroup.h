@@ -12,8 +12,7 @@ class Narrative;
 class NarrativeGroup : public TGroup<Narrative> {
 	Q_OBJECT
 public:
-	NarrativeGroup() {}
-	NarrativeGroup(const osg::Group *old_group);
+	NarrativeGroup();
 
 	Narrative *narrative(int index) const;
 };

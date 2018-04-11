@@ -14,24 +14,6 @@ EResourceGroup::EResourceGroup()
 	m_categories = std::unique_ptr<ECategoryGroup>(new ECategoryGroup);
 }
 
-EResourceGroup::EResourceGroup(const osg::Group *old_root)
-	: EResourceGroup()
-{
-	for (int i = old_root->getNumChildren() - 1; i >= 0; i--) {
-		const osg::Node *node = old_root->getChild(i);
-		const EResourcesNode *old_EResource = dynamic_cast<const EResourcesNode*>(node);
-		if (old_EResource) {
-			qInfo() << "Found an old EResource" << QString::fromStdString(old_EResource->getName()) << "- adding to group";
-		}
-
-		const EResourcesList *old_ers = dynamic_cast<const EResourcesList*>(node);
-		if (old_ers) {
-			loadOld(old_ers);
-			break;
-		}
-	}
-}
-
 EResourceGroup::~EResourceGroup()
 {
 }

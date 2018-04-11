@@ -4,6 +4,7 @@
 #include <string>
 #include <QObject>
 #include <memory>
+#include <osg/Matrix>
 
 #include "Command.h"
 
@@ -74,7 +75,6 @@ public:
 	void setERType(ERType ertype);
 
 	const osg::Matrixd& getCameraMatrix() const;
-	osg::Matrixd& getCameraMatrix();
 	void setCameraMatrix(const osg::Matrixd& matrix);
 
 	ECategory *category() const;

@@ -6,18 +6,22 @@
 #include <QUndoStack>
 #include <QDebug>
 #include <set>
-#include "Group.h"
+#include "GroupTemplate.h"
 
-class ModelGroup : public Group {
+class Model;
+class ModelGroup : public TGroup<Model> {
 	Q_OBJECT
 public:
 	ModelGroup();
 
 	// merge another model group
-	void merge(ModelGroup *other);
+	// void merge(const ModelGroup *other);
 
 	// node edit
-	void setNodeYear(osg::Node *node, int year, bool begin);
+	// void setNodeYear(osg::Node *node, int year, bool begin);
+
+	// applies node visitor to all models
+	void accept(osg::NodeVisitor &visitor);
 
 	// Set the year to view, hides/shows models accordingly
 	// 0 shows all models
@@ -28,19 +32,19 @@ public:
 
 	std::set<int> getKeyYears();
 
-	virtual bool addChild(osg::Node *child) override;
-
 	static bool nodeTimeInName(const std::string &name, int * begin, int * end);
 
 signals:
 	void sTimeEnableChange(bool enabled);
 	void sYearChange(int year);
 
-	void sNodeYearChanged(osg::Node *node, int year, bool begin);
+	//void sNodeYearChanged(osg::Node *node, int year, bool begin);
 
 private:
 	int m_year;
 	bool m_time_enabled;
+
+	osg::ref_ptr<osg::Group> m_root;
 };
 
 //
@@ -85,11 +89,11 @@ private:
 // based on names
 class TimeInitVisitor : public osg::NodeVisitor {
 public:
-	TimeInitVisitor(ModelGroup *group);
+	TimeInitVisitor(Model *group);
 	virtual void apply(osg::Group &node) override;
-	static void touch(ModelGroup *group, osg::Node *node);
+	static void touch(Model *model, osg::Node *node);
 private:
-	ModelGroup * m_group;
+	Model *m_model;
 	int m_year;
 };
 

@@ -104,10 +104,6 @@ public:
 	bool openVSim(const std::string& filename);
 	bool saveVSim(const std::string& filename);
 	bool saveCurrentVSim();
-	bool exportNarratives();
-	bool importNarratives();
-	bool exportResources();
-	bool importResources();
 
 	// components
 	VSimRoot *getRoot() const;

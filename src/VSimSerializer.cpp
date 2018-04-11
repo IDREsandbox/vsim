@@ -3,6 +3,7 @@
 #include "ERSerializer.h"
 #include "VSimRoot.h"
 #include "ModelGroup.h"
+#include "Model.h"
 #include <flatbuffers/flatbuffers.h>
 #include <sstream>
 #include <iterator>
@@ -170,10 +171,14 @@ void VSimSerializer::readModels(const VSim::FlatBuffers::ModelTable *buffer,
 	auto v_models = buffer->models();
 	if (!v_models) return;
 	for (auto fb_model : *v_models) {
+		auto model = std::make_shared<Model>();
+
 		bool ascii = fb_model->ascii();
 		bool zlib = fb_model->zlib();
 		std::string format = fb_model->format()->str();
 		size_t size = fb_model->size();
+		// bool external = fb_model->external();
+		if (fb_model->name()) model->setName(fb_model->name()->str());
 
 		// read in size bytes, to use as a size limit
 		std::string buffer;
@@ -181,13 +186,15 @@ void VSimSerializer::readModels(const VSim::FlatBuffers::ModelTable *buffer,
 		std::stringstream ss;
 		ss << buffer;
 
-		osg::ref_ptr<osg::Node> model;
+		osg::ref_ptr<osg::Node> node;
 		// read vsim
 		if (format == "osgb") {
-			model = readOSGB(ss, ascii, zlib);
+			node = readOSGB(ss, ascii, zlib);
 		}
+		if (!node) continue;
 
-		models->addChild(model);
+		model->setNode(node);
+		models->append(model);
 	}
 }
 
@@ -198,13 +205,15 @@ flatbuffers::Offset<fb::ModelTable>
 	// build models
 	std::vector<flatbuffers::Offset<fb::Model>> v_models;
 	for (size_t i = 0; i < model_group->size(); i++) {
+		auto model = model_group->child(i);
 		auto o_format = builder->CreateString("osgb");
+		auto o_name = builder->CreateString(model->name());
 
 		bool ascii = false;
 		bool zlib = false;
 
 		// write osg stuff
-		osg::Node *node = model_group->child(i);
+		osg::Node *node = model->node();
 		if (!node) continue;
 		size_t size = writeOSGB(model_data, node, ascii, zlib);
 
@@ -213,6 +222,7 @@ flatbuffers::Offset<fb::ModelTable>
 		b_model.add_zlib(zlib);
 		b_model.add_size(size);
 		b_model.add_format(o_format);
+		//b_model.add_external();
 		auto o_model = b_model.Finish();
 		v_models.push_back(o_model);
 	}

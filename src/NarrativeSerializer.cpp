@@ -79,7 +79,7 @@ flatbuffers::Offset<fb::NarrativeTable>
 		if (!nar) continue;
 
 		// build styles
-		auto o_styles = createStyleTable(builder, nar->getLabelStyles());
+		auto o_styles = createStyleTable(builder, nar->labelStyles());
 
 		// build slides
 		std::vector<flatbuffers::Offset<fb::Slide>> v_slides;

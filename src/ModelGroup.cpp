@@ -1,7 +1,10 @@
 #include "ModelGroup.h"
+#include "ModelGroup.h"
 #include <QDebug>
 #include <regex>
 #include "Util.h"
+
+#include "Model.h"
 
 ModelGroup::ModelGroup()
 	: m_year(0),
@@ -9,29 +12,50 @@ ModelGroup::ModelGroup()
 {
 	enableTime(true);
 	//qDebug() << "new model table" << m_data_table.get();
+
+	connect(this, &GroupSignals::sInserted, this,
+		[this](size_t index, size_t count) {
+
+		for (size_t i = 0; i < count; i++) {
+			Model *model = child(index + i);
+			osg::Node *node = model->node();
+
+			TimeInitVisitor v(model); // check for T: start end
+			node->accept(v);
+		}
+	});
 }
 
-void ModelGroup::merge(ModelGroup *other)
-{
-	for (uint i = 0; i < other->getNumChildren(); i++) {
-		addChild(other->getChild(i));
-	}
-}
+//void ModelGroup::merge(ModelGroup *other)
+//{
+//	for (size_t i = 0; i < other->size(); i++) {
+//		append(other->childShared(i));
+//	}
+//}
 
-void ModelGroup::setNodeYear(osg::Node *node, int year, bool begin)
-{
-	std::string prop;
-	if (begin) prop = "yearBegin";
-	else prop = "yearEnd";
+//void ModelGroup::setNodeYear(osg::Node *node, int year, bool begin)
+//{
+//	std::string prop;
+//	if (begin) prop = "yearBegin";
+//	else prop = "yearEnd";
+//
+//	if (year == 0) {
+//		osg::UserDataContainer *cont = node->getUserDataContainer();
+//		cont->removeUserObject(cont->getUserObjectIndex(prop));
+//	}
+//	else {
+//		node->setUserValue(prop, year);
+//	}
+//	emit sNodeYearChanged(node, year, begin);
+//}
 
-	if (year == 0) {
-		osg::UserDataContainer *cont = node->getUserDataContainer();
-		cont->removeUserObject(cont->getUserObjectIndex(prop));
+void ModelGroup::accept(osg::NodeVisitor & visitor)
+{
+	// apply year to all models
+	for (auto &model : *this) {
+		if (!model) continue;
+		model->node()->accept(visitor);
 	}
-	else {
-		node->setUserValue(prop, year);
-	}
-	emit sNodeYearChanged(node, year, begin);
 }
 
 int ModelGroup::getYear() const
@@ -85,18 +109,6 @@ std::set<int> ModelGroup::getKeyYears()
 	return years;
 }
 
-bool ModelGroup::addChild(osg::Node *child)
-{
-	bool ok = Group::addChild(child);
-	if (!ok) return false;
-
-	// time init the child
-	TimeInitVisitor v(this); // check for T: start end
-	child->accept(v);
-
-	return true;
-}
-
 bool ModelGroup::nodeTimeInName(const std::string & name, int * begin, int * end)
 {
 	std::regex r(".*T:.* (-?\\d+) (-?\\d+)");
@@ -109,29 +121,29 @@ bool ModelGroup::nodeTimeInName(const std::string & name, int * begin, int * end
 	return false;
 }
 
-TimeInitVisitor::TimeInitVisitor(ModelGroup * group)
+TimeInitVisitor::TimeInitVisitor(Model *model)
 	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),
-	m_group(group)
+	m_model(model)
 {
 }
 
 void TimeInitVisitor::apply(osg::Group &group)
 {
 	for (uint i = 0; i < group.getNumChildren(); i++) {
-		touch(m_group, group.getChild(i));
+		touch(m_model, group.getChild(i));
 	}
 	traverse(group);
 }
 
-void TimeInitVisitor::touch(ModelGroup *group, osg::Node *node) {
+void TimeInitVisitor::touch(Model *model, osg::Node *node) {
 	int begin, end;
 	bool match = ModelGroup::nodeTimeInName(node->getName(), &begin, &end);
 	if (match) {
 		if (begin != 0) {
-			group->setNodeYear(node, begin, true);
+			model->setNodeYear(node, begin, true);
 		}
 		if (end != 0) {
-			group->setNodeYear(node, end, false);
+			model->setNodeYear(node, end, false);
 		}
 	}
 }

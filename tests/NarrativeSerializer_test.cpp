@@ -137,12 +137,12 @@ void narrativeGroupWriteRead() {
 	// verify
 	QCOMPARE(nnars.size(), 2);
 
-	Narrative *nnar1 = dynamic_cast<Narrative*>(nnars.child(0));
+	Narrative *nnar1 = nnars.child(0);
 	QCOMPARE(nnar1->getTitle(), nar1->getTitle());
 	QCOMPARE(nnar1->getAuthor(), nar1->getAuthor());
 	QCOMPARE(nnar1->getDescription(), nar1->getDescription());
 
-	Narrative *nnar2 = dynamic_cast<Narrative*>(nnars.child(1));
+	Narrative *nnar2 = nnars.child(1);
 	QCOMPARE(nnar2->getTitle(), "nar2");
 
 	// style

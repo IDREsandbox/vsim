@@ -1,8 +1,7 @@
 #include "resources/ECategory.h"
 
 ECategory::ECategory()
-	: Group(),
-	m_cat_name("Untitled"),
+	: m_cat_name("Untitled"),
 	m_color(0, 0, 0)
 {
 

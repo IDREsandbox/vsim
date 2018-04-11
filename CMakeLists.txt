@@ -126,14 +126,21 @@ set(Util_src
   # src/Group.h
   src/GroupTemplate.inl
   src/GroupTemplate.h
-  src/GroupModel.cpp
-  src/GroupModel.h
+  src/GroupEnums.h
+  src/GroupModelTemplate.inl
+  src/GroupModelTemplate.h
   src/TypesSerializer.cpp
   src/TypesSerializer.h
   ${CMAKE_BINARY_DIR}/generated/types_generated.h
   src/Command.h
 )
 add_library(Util_object ${Util_src})
+
+file(GLOB_RECURSE Deprecated_src
+  src/deprecated/*.h
+  src/deprecated/*.cpp
+  )
+add_library(Deprecated_object ${Deprecated_src})
 
 set(ERModel_src
   src/ERSerializer.cpp
@@ -145,6 +152,8 @@ set(ERModel_src
   src/resources/ECategory.cpp
   src/resources/ECategoryGroup.h
   src/resources/ECategoryGroup.cpp
+  src/resources/ECategoryModel.h
+  src/resources/ECategoryModel.cpp
   src/resources/EResource.h
   src/resources/EResource.cpp
   src/resources/EResourceGroup.h
@@ -153,7 +162,7 @@ set(ERModel_src
   src/CheckableListProxy.cpp
 )
 add_library(ERModel_object ${ERModel_src})
-target_link_libraries(ERModel_object Util_object)
+target_link_libraries(ERModel_object Util_object Deprecated_object)
 
 set(NarrativeModel_src
   src/NarrativeSerializer.cpp
@@ -173,30 +182,150 @@ set(NarrativeModel_src
   src/LabelStyle.h
   src/LabelStyleGroup.cpp
   src/LabelStyleGroup.h
+  src/LabelType.h
 )
 add_library(NarrativeModel_object ${NarrativeModel_src})
-target_link_libraries(NarrativeModel_object Util_object)
+target_link_libraries(NarrativeModel_object Util_object Deprecated_object)
 
-message(${PROJECT_SOURCE_DIR})
-message("binary dir " ${PROJECT_BINARY_DIR})
-file(GLOB_RECURSE VSim_src
-  src/*.h
-  src/*.cpp
-  )
-list(FILTER VSim_src EXCLUDE REGEX ".*src/windows/*")
-list(FILTER VSim_src EXCLUDE REGEX ".*src/main.cpp")
-file(GLOB_RECURSE VSim_headers
-  src/*.h
-  )
-file(GLOB_RECURSE VSim_serializers
+set(VSimRoot_src
+  src/VSimRoot.cpp
+  src/VSimRoot.h
+  src/VSimSerializer.cpp
+  src/VSimSerializer.h
+  src/Model.cpp
+  src/Model.h
+  src/ModelGroup.cpp
+  src/ModelGroup.h
+  src/OSGGroupModel.cpp
+  src/OSGGroupModel.h
+  src/OSGYearModel.cpp
+  src/OSGYearModel.h
+  src/FileUtil.cpp
+  src/FileUtil.h
+  ${CMAKE_BINARY_DIR}/generated/vsim_generated.h
+  ${CMAKE_BINARY_DIR}/generated/settings_generated.h
+)
+add_library(VSimRoot_object ${VSimRoot_src})
+target_link_libraries(VSimRoot_object Util_object Deprecated_object NarrativeModel_object ERModel_object)
+
+set(VSim_src
+  src/resources/ECategoryControl.cpp
+  src/resources/ECategoryControl.h
+  src/resources/ERDialog.cpp
+  src/resources/ERDialog.h
+  src/resources/ERDisplay.cpp
+  src/resources/ERDisplay.h
+  src/resources/ERFilterArea.cpp
+  src/resources/ERFilterArea.h
+  src/resources/ERScrollBox.cpp
+  src/resources/ERScrollBox.h
+  src/resources/ERScrollItem.cpp
+  src/resources/ERScrollItem.h
+  src/resources/NewCatDialog.cpp
+  src/resources/NewCatDialog.h
+
+  src/narrative/CanvasContainer.h
+  src/narrative/CanvasContainer.cpp
+  src/narrative/NarrativeControl.h
+  src/narrative/NarrativeControl.cpp
+  src/narrative/NarrativeInfoDialog.h
+  src/narrative/NarrativeInfoDialog.cpp
+  src/narrative/NarrativePlayer.cpp
+  src/narrative/NarrativePlayer.h
+  src/narrative/NarrativeScrollBox.cpp
+  src/narrative/NarrativeScrollBox.h
+  src/narrative/NarrativeScrollItem.cpp
+  src/narrative/NarrativeScrollItem.h
+  src/narrative/NarrativeSlideDurationDialog.cpp
+  src/narrative/NarrativeSlideDurationDialog.h
+  src/narrative/SlideScrollBox.cpp
+  src/narrative/SlideScrollBox.h
+  src/narrative/SlideScrollItem.cpp
+  src/narrative/SlideScrollItem.h
+
+  src/BaseFirstPersonManipulator.cpp
+  src/BaseFirstPersonManipulator.h
+  src/CheckableListProxy.cpp
+  src/CheckableListProxy.h
+  src/editButtons.cpp
+  src/editButtons.h
+  src/EditDeleteDelegate.cpp
+  src/EditDeleteDelegate.h
+  src/ERBar.cpp
+  src/ERBar.h
+  src/FileUtil.cpp
+  src/FileUtil.h
+  src/FirstPersonManipulator.cpp
+  src/FirstPersonManipulator.h
+  src/FlightManipulator.cpp
+  src/FlightManipulator.h
+  src/FocusFilter.cpp
+  src/FocusFilter.h
+  src/GroupScrollBox.cpp
+  src/GroupScrollBox.h
+  src/HorizontalScrollBox.cpp
+  src/HorizontalScrollBox.h
+  src/KeyTracker.cpp
+  src/KeyTracker.h
+  src/MainWindow.cpp
+  src/MainWindow.h
+  src/MainWindowTopBar.cpp
+  src/MainWindowTopBar.h
+  src/ModelInformationDialog.cpp
+  src/ModelInformationDialog.h
+  src/ModelOutliner.cpp
+  src/ModelOutliner.h
+  src/mrichtextedit.cpp
+  src/mrichtextedit.h
+  src/Navigation.h
+  src/NavigationControl.cpp
+  src/NavigationControl.h
+  src/NumberSlider.cpp
+  src/NumberSlider.h
+  src/ObjectManipulator.cpp
+  src/ObjectManipulator.h
+  src/OSGViewerWidget.cpp
+  src/OSGViewerWidget.h
+  src/ScrollBoxItem.cpp
+  src/ScrollBoxItem.h
+  src/Selection.cpp
+  src/Selection.h
+  src/SelectionStack.cpp
+  src/SelectionStack.h
+  src/SimpleCameraManipulator.cpp
+  src/SimpleCameraManipulator.h
+  src/StyleSettingsDialog.cpp
+  src/StyleSettingsDialog.h
+  src/StyleSettingsWidget.cpp
+  src/StyleSettingsWidget.h
+  src/TickSlider.cpp
+  src/TickSlider.h
+  src/TimeSlider.cpp
+  src/TimeSlider.h
+  src/VSimApp.cpp
+  src/VSimApp.h
+)
+add_library(VSim_objects ${VSim_src})
+message("SOURCES:\n" "${VSim_src}")
+
+# message(${PROJECT_SOURCE_DIR})
+# message("binary dir " ${PROJECT_BINARY_DIR})
+# file(GLOB_RECURSE VSim_src
+#   src/*.h
+#   src/*.cpp
+#   )
+# list(FILTER VSim_src EXCLUDE REGEX ".*src/windows/*")
+# list(FILTER VSim_src EXCLUDE REGEX ".*src/main.cpp")
+# file(GLOB_RECURSE VSim_headers
+#   src/*.h
+#   )
+file(GLOB_RECURSE OldSerializers
   src/*/Serializer*.cpp
   )
 
-message("SOURCES:\n" "${VSim_src}")
-message("SERIALIZERS:\n" "${VSim_serializers}")
+message("SERIALIZERS:\n" "${OldSerializers}")
 
-add_library(VSim_objects ${VSim_src} ${fbs_header_list})
-add_executable(VSim src/main.cpp ${VSim_serializers})
+add_executable(VSim src/main.cpp ${OldSerializers})
 add_dependencies(VSim CopyDLLs)
 
 # linking
@@ -303,10 +432,18 @@ add_test(NAME NarrativeSerializer_test COMMAND NarrativeSerializer_test)
 target_link_libraries(NarrativeSerializer_test NarrativeModel_object)
 target_link_libraries(NarrativeSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
+set(VSimSerializer_test_src
+  tests/VSimSerializer_test.cpp
+)
+add_executable(VSimSerializer_test ${VSimSerializer_test_src} ${OldSerializers})
+add_test(NAME VSimSerializer_test COMMAND VSimSerializer_test)
+target_link_libraries(VSimSerializer_test VSimRoot_object)
+target_link_libraries(VSimSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+
 # tests that involve everything
 set(TEST_LIST
   Selection_test
-  VSimSerializer_test
+  
   )
 # file(GLOB TEST_SEARCH tests/*.cpp)
 # foreach(TEST_SRC ${TEST_SEARCH})
@@ -317,7 +454,7 @@ set(TEST_LIST
 foreach(test ${TEST_LIST})
   message("add test: " ${test})
   # EXCLUDE_FROM_ALL
-  add_executable(${test} tests/${test}.cpp ${VSim_serializers})
+  add_executable(${test} tests/${test}.cpp ${OldSerializers})
   add_test(NAME ${test} COMMAND ${test})
   target_link_libraries(${test} VSim_objects)
   target_link_libraries(${test} Qt5::Widgets Qt5::Test)

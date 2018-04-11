@@ -29,8 +29,6 @@ public:
 	void setLock(bool lock){ m_locked = lock;}
 
 	LabelStyleGroup *labelStyles() const;
-	const LabelStyleGroup *getLabelStyles() const;
-	void setLabelStyles(LabelStyleGroup *styles);
 
 signals:
 	void sTitleChanged(const std::string&);
@@ -64,7 +62,7 @@ private:
 	std::string m_author;
 	bool m_locked;
 
-	osg::ref_ptr<LabelStyleGroup> m_styles;
+	std::unique_ptr<LabelStyleGroup> m_styles;
 };
 
 #endif /* NARRATIVE_H */

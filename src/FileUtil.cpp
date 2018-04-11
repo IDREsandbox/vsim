@@ -18,8 +18,6 @@
 #include "deprecated/resources/EResourcesList.h"
 #include "deprecated/resources/EResourcesCategory.h"
 
-#include "Group.h"
-
 namespace fb = VSim::FlatBuffers;
 bool FileUtil::readVSimFile(const std::string & path, VSimRoot * root)
 {

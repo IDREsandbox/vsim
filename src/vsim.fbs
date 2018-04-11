@@ -13,6 +13,8 @@ table Model { // model metadata
   ascii:bool = false;
   zlib:bool = false;
   size:uint64; // assigning this is difficult, perhaps use 
+  external:bool = false;
+  name:string;
   // included:bool;
   // path:string;
   // size_prefixed:bool // potential change

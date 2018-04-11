@@ -1,14 +1,15 @@
-#ifndef GROUPMODEL_H
-#define GROUPMODEL_H
+#ifndef OSGGROUPMODEL_H
+#define OSGGROUPMODEL_H
 
 #include <QAbstractItemModel>
 #include <osg/Node>
 
-class Group;
+enum UserDataRole {
+	PointerRole = Qt::UserRole
+};
 
-// Turn a osg::Group into a Qt model
-
-class GroupModel : public QAbstractItemModel {
+// Turn a osg::Node into a Qt model
+class OSGGroupModel : public QAbstractItemModel {
 	Q_OBJECT
 public:
 	enum UserDataRole {
@@ -21,11 +22,10 @@ public:
 				model->data(model->index(row, 0), PointerRole).value<void*>()));
 	}
 
-	GroupModel(QObject *parent);
-	virtual void setGroup(Group *group);
+	OSGGroupModel(QObject *parent);
+	virtual void setNode(osg::Node *group);
 
 	// tree like
-	void setHierarchal(bool hierarchal);
 	osg::Node *getNode(const QModelIndex &index) const;
 	QModelIndex indexOf(osg::Node *node) const;
 
@@ -39,18 +39,8 @@ public:
 	virtual QVariant data(const QModelIndex &index, int role) const override;
 	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-	// dynamic definition
-	//typedef std::function<QVariant(const Group*, int, Qt::ItemDataRole)> GetterFunc;
-	//void addColumn(GetterFunc getter);
-
-	// list of stuff
-	// addColumn(type?, name, getter, setter, flags);
-
 protected:
-	virtual void connectGroup(Group *g);
 
-	Group *m_group;
-
-	bool m_hierarchal;
+	osg::ref_ptr<osg::Node> m_node;
 };
 #endif

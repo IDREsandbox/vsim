@@ -11,8 +11,10 @@
 #include "narrative/NarrativeGroup.h"
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"
+#include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
 #include "ModelGroup.h"
+#include "Model.h"
 
 namespace fb = VSim::FlatBuffers;
 class VSimSerializer_test : public QObject {
@@ -30,8 +32,8 @@ void robustStreamTestOld() {
 
 	QCOMPARE(root.narratives()->size(), 2);
 	// narrative titles
-	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(0))->getTitle(), "nar2");
-	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(1))->getTitle(), "nar1");
+	QCOMPARE(root.narratives()->child(0)->getTitle(), "nar1");
+	QCOMPARE(root.narratives()->child(1)->getTitle(), "nar2");
 	QCOMPARE(root.resources()->size(), 1);
 	QCOMPARE(root.resources()->getResource(0)->getResourceName(), "er1");
 
@@ -56,8 +58,8 @@ void robustStreamTest() {
 
 	QCOMPARE(root.narratives()->size(), 2);
 	// narrative titles
-	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(0))->getTitle(), "nar1");
-	QCOMPARE(dynamic_cast<Narrative*>(root.narratives()->child(1))->getTitle(), "nar2");
+	QCOMPARE(root.narratives()->child(0)->getTitle(), "nar1");
+	QCOMPARE(root.narratives()->child(1)->getTitle(), "nar2");
 	QCOMPARE(root.resources()->size(), 1);
 	QCOMPARE(root.resources()->getResource(0)->getResourceName(), "er1");
 
@@ -82,13 +84,13 @@ void oldERTest() {
 	QVERIFY(ok);
 
 	QCOMPARE(root.resources()->size(), 2);
-	EResource *res1 = root.resources()->getResource(0);
-	EResource *res2 = root.resources()->getResource(1);
+	auto res1 = root.resources()->getResource(0);
+	auto res2 = root.resources()->getResource(1);
 	QCOMPARE(res1->getResourceName(), "local");
-	QCOMPARE(res1->getCategory()->getCategoryName(), "l");
+	QCOMPARE(res1->category()->getCategoryName(), "l");
 	QCOMPARE(res1->getGlobal(), false);
 	QCOMPARE(res2->getResourceName(), "global");
-	QCOMPARE(res2->getCategory()->getCategoryName(), "g");
+	QCOMPARE(res2->category()->getCategoryName(), "g");
 	QCOMPARE(res2->getGlobal(), true);
 }
 
@@ -109,22 +111,22 @@ void importExportER() {
 
 	// export group
 	EResourceGroup group1;
-	ECategory *cat1 = new ECategory;
-	ECategory *cat2 = new ECategory;
+	auto cat1 = std::make_shared<ECategory>();
+	auto cat2 = std::make_shared<ECategory>();
 	cat1->setCategoryName("cat1");
 	cat2->setCategoryName("cat2");
-	group1.categories()->addChild(cat1);
-	group1.categories()->addChild(cat2);
+	group1.categories()->append(cat1);
+	group1.categories()->append(cat2);
 
-	EResource *er1 = new EResource;
-	EResource *er2 = new EResource;
-	EResource *er3 = new EResource;
+	auto er1 = std::make_shared<EResource>();
+	auto er2 = std::make_shared<EResource>();
+	auto er3 = std::make_shared<EResource>();
 	er1->setResourceName("er1");
 	er2->setResourceName("er2");
 	er3->setResourceName("er3");
-	group1.addChild(er1);
-	group1.addChild(er2);
-	group1.addChild(er3);
+	group1.append(er1);
+	group1.append(er2);
+	group1.append(er3);
 	er1->setCategory(cat1);
 	er2->setCategory(cat2);
 
@@ -142,8 +144,8 @@ void importExportER() {
 	QCOMPARE(group2.size(), 2);
 	QCOMPARE(group2.getResource(0)->getResourceName(), "er1");
 	QCOMPARE(group2.getResource(1)->getResourceName(), "er2");
-	QCOMPARE(group2.getResource(0)->getCategory()->getCategoryName(), "cat1");
-	QCOMPARE(group2.getResource(1)->getCategory()->getCategoryName(), "cat2");
+	QCOMPARE(group2.getResource(0)->category()->getCategoryName(), "cat1");
+	QCOMPARE(group2.getResource(1)->category()->getCategoryName(), "cat2");
 	QCOMPARE(group2.categories()->size(), 2);
 	QCOMPARE(group2.categories()->category(0)->getCategoryName(), "cat1");
 	QCOMPARE(group2.categories()->category(1)->getCategoryName(), "cat2");	
@@ -162,26 +164,26 @@ void oldImportNarratives() {
 
 void importExportNarratives() {
 	NarrativeGroup group1;
-	Narrative *nar1 = new Narrative;
-	Narrative *nar2 = new Narrative;
-	Narrative *nar3 = new Narrative;
+	auto nar1 = std::make_shared<Narrative>();
+	auto nar2 = std::make_shared<Narrative>();
+	auto nar3 = std::make_shared<Narrative>();
 
 	nar1->setTitle("nar1");
 	nar2->setTitle("nar2");
 	nar3->setTitle("nar3");
 
-	group1.addChild(nar1);
-	group1.addChild(nar2);
-	group1.addChild(nar3);
+	group1.append(nar1);
+	group1.append(nar2);
+	group1.append(nar3);
 
 	std::stringstream ss;
 	qDebug() << "export narrative stream";
 	FileUtil::exportNarrativesStream(ss, &group1, { 0, 2 });
 
 	NarrativeGroup group2;
-	Narrative *nar4 = new Narrative;
+	auto nar4 = std::make_shared<Narrative>();
 	nar4->setTitle("nar4");
-	group2.addChild(nar4);
+	group2.append(nar4);
 
 	qDebug() << "import narrative stream";
 	FileUtil::importNarrativesStream(ss, &group2);
@@ -200,13 +202,13 @@ void oldImportResources() {
 	QVERIFY(ok);
 
 	QCOMPARE(group.size(), 2);
-	EResource *res1 = group.getResource(0);
-	EResource *res2 = group.getResource(1);
+	auto res1 = group.getResource(0);
+	auto res2 = group.getResource(1);
 	QCOMPARE(res1->getResourceName(), "local");
-	QCOMPARE(res1->getCategory()->getCategoryName(), "l");
+	QCOMPARE(res1->category()->getCategoryName(), "l");
 	QCOMPARE(res1->getGlobal(), false);
 	QCOMPARE(res2->getResourceName(), "global");
-	QCOMPARE(res2->getCategory()->getCategoryName(), "g");
+	QCOMPARE(res2->category()->getCategoryName(), "g");
 	QCOMPARE(res2->getGlobal(), true);
 	QCOMPARE(group.categories()->size(), 2);
 }
@@ -339,15 +341,15 @@ void writeReadFlatbuffer() {
 	std::stringstream model_data;
 
 	// add some narratives
-	Narrative *nar = new Narrative();
+	auto nar = std::make_shared<Narrative>();
 	nar->setTitle("nar1");
-	root.narratives()->addChild(nar);
-	root.narratives()->addChild(new Narrative);
+	root.narratives()->append(nar);
+	root.narratives()->append(std::make_shared<Narrative>());
 	// add some ers
-	EResource *er = new EResource;
+	auto er = std::make_shared<EResource>();
 	er->setResourceName("er1");
-	root.resources()->addChild(er);
-	root.resources()->addChild(new EResource);
+	root.resources()->append(er);
+	root.resources()->append(std::make_shared<EResource>());
 
 	// write to flatbuffer
 	flatbuffers::FlatBufferBuilder builder;
@@ -364,7 +366,7 @@ void writeReadFlatbuffer() {
 
 	// check
 	QCOMPARE(nroot.narratives()->size(), 2);
-	QCOMPARE(dynamic_cast<Narrative*>(nroot.narratives()->child(0))->getTitle(), "nar1");
+	QCOMPARE(nroot.narratives()->child(0)->getTitle(), "nar1");
 	QCOMPARE(nroot.resources()->size(), 2);
 	QCOMPARE(nroot.resources()->getResource(0)->getResourceName(), "er1");
 }
@@ -372,19 +374,23 @@ void writeReadStream() {
 	VSimRoot root;
 
 	// add some narratives
-	Narrative *nar = new Narrative();
+	auto nar = std::make_shared<Narrative>();
 	nar->setTitle("nar1");
-	root.narratives()->addChild(nar);
-	root.narratives()->addChild(new Narrative);
+	root.narratives()->append(nar);
+	root.narratives()->append(std::make_shared<Narrative>());
 	// add some ers
-	EResource *er = new EResource;
+	auto er = std::make_shared<EResource>();
 	er->setResourceName("er1");
-	root.resources()->addChild(er);
-	root.resources()->addChild(new EResource);
+	root.resources()->append(er);
+	root.resources()->append(std::make_shared<EResource>());
 	// add some models
 	osg::ref_ptr<osg::Node> cow;
 	cow = osgDB::readNodeFile("assets/test/cow.osgt");
-	root.models()->addChild(cow);
+	auto model = std::make_shared<Model>();
+	model->setNode(cow);
+	model->setPath("assets/test/cow.osgt");
+	model->setName("cow");
+	root.models()->append(model);
 
 	// write to stream
 	std::stringstream stream;
@@ -397,13 +403,10 @@ void writeReadStream() {
 	// check models
 	QCOMPARE(ok, true);
 	QCOMPARE(nroot.narratives()->size(), 2);
-	QCOMPARE(dynamic_cast<Narrative*>(nroot.narratives()->child(0))->getTitle(), "nar1");
+	QCOMPARE(nroot.narratives()->child(0)->getTitle(), "nar1");
 	QCOMPARE(nroot.resources()->size(), 2);
 	QCOMPARE(nroot.resources()->getResource(0)->getResourceName(), "er1");
-	QCOMPARE(nroot.models()->child(0)->getName(), "cow.osg");
-}
-
-void writeReadTestFull() {
+	QCOMPARE(nroot.models()->child(0)->node()->getName(), "cow.osg");
 }
 
 };

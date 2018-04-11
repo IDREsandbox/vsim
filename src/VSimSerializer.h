@@ -15,11 +15,6 @@ class VSimRoot;
 class VSimApp;
 
 namespace VSimSerializer {
-	struct Options {
-		bool models_ascii;
-		bool models_zlib;
-	};
-
 	// read osg stream, binary or ascii
 
 	// full compatible version

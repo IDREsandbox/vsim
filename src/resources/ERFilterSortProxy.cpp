@@ -7,8 +7,8 @@
 #include "resources/EResource.h"
 #include "resources/ECategoryGroup.h"
 #include "CheckableListProxy.h"
-#include "GroupModel.h"
 #include "Util.h"
+#include "GroupModelTemplate.h"
 
 ERFilterSortProxy::ERFilterSortProxy(TGroup<EResource> *base)
 	: m_base(nullptr),
@@ -123,7 +123,7 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 	connect(cats, &QAbstractItemModel::rowsAboutToBeRemoved, this,
 		[this, cats](const QModelIndex &parent, int first, int last) {
 		for (int i = first; i <= last; i++) {
-			ECategory *cat = GroupModel::get<ECategory*>(cats, i);
+			ECategory *cat = TGroupModel<ECategory>::get(cats, i);
 			if (!cat) continue;
 			m_categories_enabled.erase(cat);
 		}
@@ -566,7 +566,7 @@ void ERFilterSortProxy::reload()
 void ERFilterSortProxy::updateCategorySet(int model_row)
 {
 	if (model_row == 0) return;
-	ECategory *cat = GroupModel::get<ECategory*>(m_category_filters, model_row);
+	ECategory *cat = TGroupModel<ECategory>::get(m_category_filters, model_row);
 	if (!cat) return;
 	Qt::CheckState checked = 
 		m_category_filters->data(

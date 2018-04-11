@@ -24,7 +24,6 @@ private:
 	std::unique_ptr<LabelStyle> m_h2;
 	std::unique_ptr<LabelStyle> m_bod;
 	std::unique_ptr<LabelStyle> m_lab;
-	//osg::ref_ptr<LabelStyle> m_img;
 };
 
 #endif // LABELSTYLEGROUP_H

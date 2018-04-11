@@ -12,7 +12,7 @@ Narrative::Narrative()
 	m_author(""),
 	m_locked(false)
 {
-	setLabelStyles(new LabelStyleGroup());
+	m_styles = std::make_unique<LabelStyleGroup>();
 }
 
 Narrative::Narrative(const NarrativeOld * old)
@@ -25,8 +25,8 @@ Narrative::Narrative(const NarrativeOld * old)
 	for (uint i = 0; i < old->getNumNodes(); i++) {
 		NarrativeNode *node = old->getNode(i);
 		NarrativeTransition *transition = old->getTransition(i);
-		NarrativeSlide *new_slide = new NarrativeSlide(node, transition);
-		append(std::shared_ptr<NarrativeSlide>(new_slide));
+		auto new_slide = std::make_shared<NarrativeSlide>(node, transition);
+		append(new_slide);
 	}
 }
 
@@ -54,14 +54,5 @@ void Narrative::setDescription(const std::string& description) {
 }
 LabelStyleGroup * Narrative::labelStyles() const
 {
-	return m_styles;
-}
-const LabelStyleGroup * Narrative::getLabelStyles() const
-{
-	return m_styles;
-}
-void Narrative::setLabelStyles(LabelStyleGroup *styles)
-{
-	if (styles == nullptr) styles = new LabelStyleGroup();
-	m_styles = styles;
+	return m_styles.get();
 }

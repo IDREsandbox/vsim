@@ -169,10 +169,6 @@ const osg::Matrixd& EResource::getCameraMatrix() const
 { 
 	return m_camera_matrix; 
 }
-osg::Matrixd& EResource::getCameraMatrix()
-{ 
-	return m_camera_matrix; 
-}
 void EResource::setCameraMatrix(const osg::Matrixd& matrix)
 {
     m_camera_matrix = matrix;
