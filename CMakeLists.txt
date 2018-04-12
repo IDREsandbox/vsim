@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.7)
 project (VSim)
 
 # version number
@@ -21,58 +21,47 @@ enable_testing()
 cmake_policy(SET CMP0020 NEW)
 
 # qt flags
-# this thing doesn't work...
-# set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "autogennnn") # for shared gen files?
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# set(CMAKE_AUTORCC ON)
 
-# dependencies
-# search path
-
-# required bin folders for dll copying and find_package search
-if (WIN32)
-  set(QT_DIR "" CACHE FILEPATH "where is the Qt install directory")
-  if(NOT IS_DIRECTORY ${QT_DIR})
-    message("QT_DIR: ${QT_DIR}")
-    message(FATAL_ERROR "Must define QT_DIR")
-  endif()
-
-  set(OSG_DIR "" CACHE FILEPATH "where is the osg install directory")
-  if(NOT IS_DIRECTORY ${OSG_DIR})
-    message("OSG_DIR: ${OSG_DIR}")
-    message(FATAL_ERROR "Must define OSG_DIR")
-  endif()
-
-  set(TP_BIN "" CACHE FILEPATH "where are the osg dependency binaries (zlib and stuff)")
-  if(NOT IS_DIRECTORY ${TP_BIN})
-    message("TP_BIN: ${TP_BIN}")
-    message(FATAL_ERROR "Must define TP_BIN")
-  endif()
-endif()
-
-# set CMAKE_PREFIX_PATH to install directories for find_package
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};${OSG_DIR};${QT_DIR};)
-
-# set osg binary dir for dll copying
-message("QT_DIR:" "${QT_DIR}")
-message("OSG_DIR:" "${OSG_DIR}")
-message("TP_BIN:" "${TP_BIN}")
-set(OSG_BIN "${OSG_DIR}/bin")
-message("OSG_BIN:" "${OSG_BIN}")
-
-find_package(OpenSceneGraph 3.4.0 REQUIRED osgDB osgUtil osgGA osgViewer osgText)
-include_directories("${PROJECT_BINARY_DIR}")
+set(osgComponents 
+  osg
+  osgAnimation
+  osgDB
+  osgFX
+  osgGA
+  osgManipulator
+  osgParticle
+  osgPresentation
+  osgShadow
+  osgSim
+  osgTerrain
+  osgText
+  #osgUI
+  osgUtil
+  osgViewer
+  osgVolume
+  osgWidget
+  OpenThreads
+)
+find_package(OpenSceneGraph 3.4.0 REQUIRED ${osgComponents})
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
+
 find_package(Qt5 REQUIRED Core Gui Widgets Test)
-# for some reason find_package doesn't work for libraries
+# find_package(Qt5Test REQUIRED)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
 include_directories(${PROJECT_BINARY_DIR}/VSim_objects_autogen/include_Release)
-add_definitions(${Qt5Widgets_DEFINITIONS})
-add_definitions(${Qt5Test_DEFINITIONS})
+
+
+get_cmake_property(_variableNames VARIABLES)
+list (SORT _variableNames)
+foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()
+
 
 # flatbuffers stuff
 # sources in src/*
@@ -114,9 +103,6 @@ include_directories (${CMAKE_BINARY_DIR}/generated)
 add_custom_target(fbs_headers ALL DEPENDS ${fbs_header_list})
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
-
-# dll copy stuff
-add_custom_target(CopyDLLs)
 
 # source
 set(Util_src
@@ -332,7 +318,6 @@ file(GLOB_RECURSE OldSerializers
 message("SERIALIZERS:\n" "${OldSerializers}")
 
 add_executable(VSim src/main.cpp ${OldSerializers})
-add_dependencies(VSim CopyDLLs)
 
 # linking
 # target_link_libraries(VSim_objects Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
@@ -372,7 +357,7 @@ set(HorizontalScrollBox_src
   experiments/HorizontalScrollBox_experiment/HorizontalScrollBox_experiment.cpp
 )
 add_executable(HorizontalScrollBox_experiment ${HorizontalScrollBox_src})
-target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets Qt5::Test)
+target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 set(Canvas_src
   src/narrative/CanvasContainer.h
@@ -393,7 +378,6 @@ set(Util_src
   src/Util.h)
 add_executable(Util_test ${Util_src})
 add_test(NAME Util_test COMMAND Util_test)
-target_link_libraries(Util_test Qt5::Widgets Qt5::Test)
 target_link_libraries(Util_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 # group test
@@ -419,7 +403,7 @@ set(ERSerializer_src
 )
 add_executable(ERSerializer_test ${ERSerializer_src})
 add_test(NAME ERSerializer_test COMMAND ERSerializer_test)
-target_link_libraries(ERSerializer_test ERModel_object)
+target_link_libraries(ERSerializer_test ERModel_object Util_object Deprecated_object)
 target_link_libraries(ERSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 set(EResource_test
@@ -440,16 +424,27 @@ target_link_libraries(NarrativeSerializer_test Qt5::Widgets Qt5::Test ${OPENSCEN
 
 set(VSimSerializer_test_src
   tests/VSimSerializer_test.cpp
+  ${OldSerializers}
 )
 add_executable(VSimSerializer_test ${VSimSerializer_test_src} ${OldSerializers})
 add_test(NAME VSimSerializer_test COMMAND VSimSerializer_test)
 target_link_libraries(VSimSerializer_test VSimRoot_object)
 target_link_libraries(VSimSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
+# function(add_vsim_test testName testSrc)
+#   add_executable(${testName} ${testSrc})
+#   add_test(NAME ${testName} COMMAND ${testName})
+#   target_link_libraries(${testName} Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+# endfunction()
+# message("serializer src\n ${VSimSerializer_test_src}")
+# add_vsim_test(VSimSerializer_test ${VSimSerializer_test_src})
+# target_link_libraries(VSimSerializer_test VSimRoot_object)
+
+
+
 # tests that involve everything
 set(TEST_LIST
   Selection_test
-  
   )
 # file(GLOB TEST_SEARCH tests/*.cpp)
 # foreach(TEST_SRC ${TEST_SEARCH})
@@ -469,139 +464,52 @@ endforeach(test)
 
 #install
 install(TARGETS VSim DESTINATION .)
-install(DIRECTORY assets DESTINATION .)
 install(FILES CHANGELOG.md COPYRIGHT LICENSE README.md THIRD-PARTY-NOTICES DESTINATION .)
 
 #assets copying
 file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}")
+install(DIRECTORY assets DESTINATION .)
 
 if (WIN32)
-  # this doesn't really work
-  # visual studio path https://stackoverflow.com/questions/28533012/how-to-set-runtime-path-for-cmake-custom-command-on-windows
-  # set(CMAKE_MSVCIDE_RUN_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
-  # message("msvc path" ${CMAKE_MSVCIDE_RUN_PATH})
 
-  # osg dll list
-  file(GLOB OSG_DLL_SEARCH ${OSG_BIN}/*.dll)
-  # take off the path & extension -> DLL_LIST
-  list(FILTER OSG_DLL_SEARCH EXCLUDE REGEX ".*d.dll")
-  set(OSG_DLL_LIST "")
-  foreach(DLL ${OSG_DLL_SEARCH})
-    get_filename_component(COMP ${DLL} NAME_WE)
-	list(APPEND OSG_DLL_LIST ${COMP})
-  endforeach(DLL)
-  message("OSG DLL LIST:\n" "${OSG_DLL_LIST}")
+  # call this after install to copy dlls to install folder
+  add_custom_target(install_deps
+      COMMAND powershell -noprofile -executionpolicy Bypass -file ${_VCPKG_TOOLCHAIN_DIR}/msbuild/applocal.ps1
+      -targetBinary ${CMAKE_INSTALL_PREFIX}/VSim.exe
+      -installedDir "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin"
+      -OutVariable out
+  )
+  set_target_properties(install_deps PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+  set(vcpkgBin ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin)  
+  file(GLOB osgSearch ${vcpkgBin}/osg*.dll) # osgSearch: /stuff/bin/osg148-osg.dll
+  set(osgList "") # osgList: osg148-osg
+  foreach(dll ${osgSearch})
+    get_filename_component(comp ${dll} NAME_WE)
+    list(APPEND osgList ${comp})
+  endforeach()
+  message("OSG DLL LIST:\n" "${osgList}")
 
   # copy OSG dlls on postbuild
-  foreach(DLL ${OSG_DLL_LIST})
+  add_custom_target(CopyDLLs)
+  foreach(dll ${osgList})
     set(PREFIX ${OSG_BIN}/${DLL})
-   add_custom_command(
-     TARGET CopyDLLs
-     PRE_BUILD
-     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-         ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-         $<CONFIG>
-   )
-    install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
-  endforeach(DLL)
-
-  # find the osg plugin directory
-  file(GLOB OSG_PLUGIN_DIR ${OSG_BIN}/osgPlugins*)
-  get_filename_component(OSG_PLUGIN_PREFIX ${OSG_PLUGIN_DIR} NAME)
-  message("PLUGIN PREFIX: " ${OSG_PLUGIN_PREFIX})
-  # do the same thing as before -> PLUGIN_LIST
-  file(GLOB PLUGIN_SEARCH ${OSG_PLUGIN_DIR}/*.dll)
-  list(FILTER PLUGIN_SEARCH EXCLUDE REGEX ".*d.dll")
-  foreach(DLL ${PLUGIN_SEARCH})
-    get_filename_component(COMP ${DLL} NAME_WE)
-	list(APPEND PLUGIN_LIST ${COMP})
-  endforeach(DLL)
-  message("PLUGIN LIST:\n" "${PLUGIN_LIST}")
-
-  # create the plugin directory
-  add_custom_command(
-    TARGET CopyDLLs
-    PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-        $<CONFIG>/${OSG_PLUGIN_PREFIX}
-  )
-
-  # copy OSG plugin dlls
-  foreach(DLL ${PLUGIN_LIST})
-    set(PREFIX ${OSG_BIN}/${OSG_PLUGIN_PREFIX}/${DLL})
-   add_custom_command(
-     TARGET CopyDLLs
-     POST_BUILD
-     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-         ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-         $<CONFIG>/${OSG_PLUGIN_PREFIX}/
-   )
-    install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION "${OSG_PLUGIN_PREFIX}/")
-  endforeach(DLL)
-
-  # third party dll list
-  set(THIRDPARTYDLLS
-   libpng16
-   zlib
-   )
-
-  # third party dll copying
-  foreach(DLL ${THIRDPARTYDLLS})
-    set(PREFIX ${TP_BIN}/${DLL})
-    add_custom_command(
-     TARGET CopyDLLs
-     PRE_BUILD
-     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-         ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll
-         $<CONFIG>
-    )
-    install(FILES ${PREFIX}$<$<CONFIG:DEBUG>:d>.dll DESTINATION ".")
-  endforeach(DLL)
-
-  # Qt
-  foreach(dll
-      Qt5::Core
-      Qt5::Gui
-      Qt5::Widgets
-	    Qt5::Test
-      )
-    # copy to the Release directory
     add_custom_command(
       TARGET CopyDLLs
-      POST_BUILD
+      PRE_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:${dll}>
+        ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin/${dll}.dll
         $<CONFIG>
     )
-	# if you want the debug dll location
-	#get_target_property(debug_path ${dll} IMPORTED_LOCATION_DEBUG)
-	#$<$<CONFIG:Debug>:${debug_path}>$<$<NOT:$<CONFIG:Debug>>:${release_path}>
-    # copy to the install directory
-    install(FILES $<TARGET_FILE:${dll}> DESTINATION ".")
-    message("imported target: ${dll}, path: ${dll_location}")
+    install(FILES ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin/${dll}.dll DESTINATION ".")
   endforeach(dll)
 
-  # Qt plugins
-  foreach(dll
-      ${Qt5Gui_PLUGINS}
-      )
-    get_target_property(loc ${dll} LOCATION)
-     # get the relative path, something like plugins/imageformats/png.dll
-    file(RELATIVE_PATH rel ${QT_DIR} ${loc})
-    # then extract the directory - plugins/imageformats
-    get_filename_component(directory ${rel} DIRECTORY)
-    # finally add it to the install
-    install(FILES $<TARGET_FILE:${dll}> DESTINATION ${directory})
-    #message("imported target: ${dll}, path: ${dll_location}")
-  endforeach(dll)
+  # copy osg plugins
+  find_file(osg_plugins NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_TOOLS_DIRS})
+  install(DIRECTORY ${osg_plugins} DESTINATION .)
+  file(COPY ${osg_plugins} DESTINATION "${CMAKE_BINARY_DIR}")
 
-  # windows platform
-  install(FILES ${QT_DIR}/plugins/platforms/qwindows.dll DESTINATION platforms)
-endif(WIN32)
-
-IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
-    message("debug mode")
-ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+endif()
 
 # # build a CPack driven installer package
 # include (InstallRequiredSystemLibraries)

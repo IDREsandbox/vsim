@@ -63,7 +63,7 @@ void slideWriteRead() {
 	NarrativeSerializer::readNarrativeSlide(fb_slide, &nslide);
 
 	// check
-	QCOMPARE(nslide.size(), 2);
+	QCOMPARE(nslide.size(), 2u);
 	QCOMPARE(slide.getDuration(), nslide.getDuration());
 	QCOMPARE(slide.getStayOnNode(), nslide.getStayOnNode());
 	QCOMPARE(slide.getTransitionDuration(), nslide.getTransitionDuration());
@@ -135,7 +135,7 @@ void narrativeGroupWriteRead() {
 	NarrativeSerializer::readNarrativeTable(fb_table, &nnars);
 
 	// verify
-	QCOMPARE(nnars.size(), 2);
+	QCOMPARE(nnars.size(), 2u);
 
 	Narrative *nnar1 = nnars.child(0);
 	QCOMPARE(nnar1->getTitle(), nar1->getTitle());
@@ -143,13 +143,13 @@ void narrativeGroupWriteRead() {
 	QCOMPARE(nnar1->getDescription(), nar1->getDescription());
 
 	Narrative *nnar2 = nnars.child(1);
-	QCOMPARE(nnar2->getTitle(), "nar2");
+	QCOMPARE(nnar2->getTitle().c_str(), "nar2");
 
 	// style
 	auto nstyles = nnar1->labelStyles();
 	auto nlstyle = nstyles->getStyle(LabelType::LABEL);
 	QCOMPARE(nlstyle->m_align, Qt::AlignCenter);
-	QCOMPARE(nlstyle->m_font_family, "cool font");
+	QCOMPARE(nlstyle->m_font_family.c_str(), "cool font");
 	QCOMPARE(nlstyle->m_bg_color, QColor(1, 2, 3, 4));
 	QCOMPARE(nlstyle->m_fg_color, QColor(255, 255, 0));
 	QCOMPARE(nlstyle->m_underline, true);
@@ -158,7 +158,7 @@ void narrativeGroupWriteRead() {
 	QCOMPARE(nlstyle->m_margin, 3);
 
 	// slides
-	QCOMPARE(nnar1->size(), 2);
+	QCOMPARE(nnar1->size(), 2u);
 	NarrativeSlide *nslide1 = dynamic_cast<NarrativeSlide*>(nnar1->child(0));
 	QCOMPARE(nslide1->getTransitionDuration(), 4.5f);
 

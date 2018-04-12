@@ -105,8 +105,11 @@ private slots:
 		TGroup<Foo> g;
 		auto n = makeShared(2);
 		auto x = std::shared_ptr<Foo>(new Foo);
+		g.insert(0, n);
 		g.append(x);
 		GROUPCOMPARE(&g, { n[0], n[1], x });
+		QCOMPARE(std::string("mee"), std::string("mee"));
+		QCOMPARE(4u, (size_t)4);
 	}
 	void insert() {
 		TGroup<Foo> g;

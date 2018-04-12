@@ -27,8 +27,8 @@ private slots:
 		QCOMPARE(date, QDate(2079, 12, 30));
 	}
 	void fixIndicesTest() {
-		std::vector<int> mini, mini_ans, mini_result;
-		std::set<int> mini_ins, mini_rem;
+		std::vector<size_t> mini, mini_ans, mini_result;
+		std::set<size_t> mini_ins, mini_rem;
 		mini = { 0, 1, 2, 3 };
 		mini_ins = { 0, 2 };
 		mini_ans = { 1, 3, 4, 5 };

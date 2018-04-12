@@ -30,23 +30,23 @@ void robustStreamTestOld() {
 	bool ok = VSimSerializer::readStreamRobust(in, &root);
 	QVERIFY(ok);
 
-	QCOMPARE(root.narratives()->size(), 2);
+	QCOMPARE(root.narratives()->size(), 2u);
 	// narrative titles
-	QCOMPARE(root.narratives()->child(0)->getTitle(), "nar1");
-	QCOMPARE(root.narratives()->child(1)->getTitle(), "nar2");
-	QCOMPARE(root.resources()->size(), 1);
-	QCOMPARE(root.resources()->getResource(0)->getResourceName(), "er1");
+	QCOMPARE(root.narratives()->child(0)->getTitle().c_str(), "nar1");
+	QCOMPARE(root.narratives()->child(1)->getTitle().c_str(), "nar2");
+	QCOMPARE(root.resources()->size(), 1u);
+	QCOMPARE(root.resources()->getResource(0)->getResourceName().c_str(), "er1");
 
 	// check model information
 	auto *settings = root.settings();
 	QVERIFY(settings->model_information);
 	auto *info = settings->model_information.get();
-	QCOMPARE(info->authors, "authors");
-	QCOMPARE(info->contributors, "contributors");
-	QCOMPARE(info->model_name, "name");
-	QCOMPARE(info->place_of_publication, "place");
-	QCOMPARE(info->url, "url");
-	QCOMPARE(info->project_date_julian_day, QDate(2018, 4, 5).toJulianDay());
+	QCOMPARE(info->authors.c_str(), "authors");
+	QCOMPARE(info->contributors.c_str(), "contributors");
+	QCOMPARE(info->model_name.c_str(), "name");
+	QCOMPARE(info->place_of_publication.c_str(), "place");
+	QCOMPARE(info->url.c_str(), "url");
+	QCOMPARE(info->project_date_julian_day, (size_t)QDate(2018, 4, 5).toJulianDay());
 }
 void robustStreamTest() {
 	// read new model
@@ -56,23 +56,23 @@ void robustStreamTest() {
 	bool ok = VSimSerializer::readStreamRobust(in, &root);
 	QVERIFY(ok);
 
-	QCOMPARE(root.narratives()->size(), 2);
+	QCOMPARE(root.narratives()->size(), 2u);
 	// narrative titles
-	QCOMPARE(root.narratives()->child(0)->getTitle(), "nar1");
-	QCOMPARE(root.narratives()->child(1)->getTitle(), "nar2");
-	QCOMPARE(root.resources()->size(), 1);
-	QCOMPARE(root.resources()->getResource(0)->getResourceName(), "er1");
+	QCOMPARE(root.narratives()->child(0)->getTitle().c_str(), "nar1");
+	QCOMPARE(root.narratives()->child(1)->getTitle().c_str(), "nar2");
+	QCOMPARE(root.resources()->size(), 1u);
+	QCOMPARE(root.resources()->getResource(0)->getResourceName().c_str(), "er1");
 
 	// check model information
 	auto *settings = root.settings();
 	QVERIFY(settings->model_information);
 	auto *info = settings->model_information.get();
-	QCOMPARE(info->authors, "authors");
-	QCOMPARE(info->contributors, "contributors");
-	QCOMPARE(info->model_name, "name");
-	QCOMPARE(info->place_of_publication, "place");
-	QCOMPARE(info->url, "url");
-	QCOMPARE(info->project_date_julian_day, QDate(2018, 4, 5).toJulianDay());
+	QCOMPARE(info->authors.c_str(), "authors");
+	QCOMPARE(info->contributors.c_str(), "contributors");
+	QCOMPARE(info->model_name.c_str(), "name");
+	QCOMPARE(info->place_of_publication.c_str(), "place");
+	QCOMPARE(info->url.c_str(), "url");
+	QCOMPARE(info->project_date_julian_day, (size_t)QDate(2018, 4, 5).toJulianDay());
 }
 
 void oldERTest() {
@@ -83,14 +83,14 @@ void oldERTest() {
 	bool ok = VSimSerializer::readStreamRobust(in, &root);
 	QVERIFY(ok);
 
-	QCOMPARE(root.resources()->size(), 2);
+	QCOMPARE(root.resources()->size(), 2u);
 	auto res1 = root.resources()->getResource(0);
 	auto res2 = root.resources()->getResource(1);
-	QCOMPARE(res1->getResourceName(), "local");
-	QCOMPARE(res1->category()->getCategoryName(), "l");
+	QCOMPARE(res1->getResourceName().c_str(), "local");
+	QCOMPARE(res1->category()->getCategoryName().c_str(), "l");
 	QCOMPARE(res1->getGlobal(), false);
-	QCOMPARE(res2->getResourceName(), "global");
-	QCOMPARE(res2->category()->getCategoryName(), "g");
+	QCOMPARE(res2->getResourceName().c_str(), "global");
+	QCOMPARE(res2->category()->getCategoryName().c_str(), "g");
 	QCOMPARE(res2->getGlobal(), true);
 }
 
@@ -141,14 +141,14 @@ void importExportER() {
 	FileUtil::importEResources(ss, &group2);
 
 	// merged group
-	QCOMPARE(group2.size(), 2);
-	QCOMPARE(group2.getResource(0)->getResourceName(), "er1");
-	QCOMPARE(group2.getResource(1)->getResourceName(), "er2");
-	QCOMPARE(group2.getResource(0)->category()->getCategoryName(), "cat1");
-	QCOMPARE(group2.getResource(1)->category()->getCategoryName(), "cat2");
-	QCOMPARE(group2.categories()->size(), 2);
-	QCOMPARE(group2.categories()->category(0)->getCategoryName(), "cat1");
-	QCOMPARE(group2.categories()->category(1)->getCategoryName(), "cat2");	
+	QCOMPARE(group2.size(), 2u);
+	QCOMPARE(group2.getResource(0)->getResourceName().c_str(), "er1");
+	QCOMPARE(group2.getResource(1)->getResourceName().c_str(), "er2");
+	QCOMPARE(group2.getResource(0)->category()->getCategoryName().c_str(), "cat1");
+	QCOMPARE(group2.getResource(1)->category()->getCategoryName().c_str(), "cat2");
+	QCOMPARE(group2.categories()->size(), 2u);
+	QCOMPARE(group2.categories()->category(0)->getCategoryName().c_str(), "cat1");
+	QCOMPARE(group2.categories()->category(1)->getCategoryName().c_str(), "cat2");	
 }
 
 void oldImportNarratives() {
@@ -158,8 +158,8 @@ void oldImportNarratives() {
 	bool ok = FileUtil::importNarrativesStream(ifs, &group);
 	QVERIFY(ok);
 
-	QCOMPARE(group.size(), 1);
-	QCOMPARE(group.narrative(0)->getTitle(), "nar1");
+	QCOMPARE(group.size(), 1u);
+	QCOMPARE(group.narrative(0)->getTitle().c_str(), "nar1");
 }
 
 void importExportNarratives() {
@@ -188,10 +188,10 @@ void importExportNarratives() {
 	qDebug() << "import narrative stream";
 	FileUtil::importNarrativesStream(ss, &group2);
 	
-	QCOMPARE(group2.size(), 3);
-	QCOMPARE(group2.narrative(0)->getTitle(), "nar4");
-	QCOMPARE(group2.narrative(1)->getTitle(), "nar1");
-	QCOMPARE(group2.narrative(2)->getTitle(), "nar3");
+	QCOMPARE(group2.size(), 3u);
+	QCOMPARE(group2.narrative(0)->getTitle().c_str(), "nar4");
+	QCOMPARE(group2.narrative(1)->getTitle().c_str(), "nar1");
+	QCOMPARE(group2.narrative(2)->getTitle().c_str(), "nar3");
 }
 
 void oldImportResources() {
@@ -201,16 +201,16 @@ void oldImportResources() {
 	bool ok = FileUtil::importEResources(ifs, &group);
 	QVERIFY(ok);
 
-	QCOMPARE(group.size(), 2);
+	QCOMPARE(group.size(), 2u);
 	auto res1 = group.getResource(0);
 	auto res2 = group.getResource(1);
-	QCOMPARE(res1->getResourceName(), "local");
-	QCOMPARE(res1->category()->getCategoryName(), "l");
+	QCOMPARE(res1->getResourceName().c_str(), "local");
+	QCOMPARE(res1->category()->getCategoryName().c_str(), "l");
 	QCOMPARE(res1->getGlobal(), false);
-	QCOMPARE(res2->getResourceName(), "global");
-	QCOMPARE(res2->category()->getCategoryName(), "g");
+	QCOMPARE(res2->getResourceName().c_str(), "global");
+	QCOMPARE(res2->category()->getCategoryName().c_str(), "g");
 	QCOMPARE(res2->getGlobal(), true);
-	QCOMPARE(group.categories()->size(), 2);
+	QCOMPARE(group.categories()->size(), 2u);
 }
 
 void osgStreamTest() {
@@ -365,10 +365,10 @@ void writeReadFlatbuffer() {
 	VSimSerializer::readRoot(fb_root, &nroot);
 
 	// check
-	QCOMPARE(nroot.narratives()->size(), 2);
-	QCOMPARE(nroot.narratives()->child(0)->getTitle(), "nar1");
-	QCOMPARE(nroot.resources()->size(), 2);
-	QCOMPARE(nroot.resources()->getResource(0)->getResourceName(), "er1");
+	QCOMPARE(nroot.narratives()->size(), 2u);
+	QCOMPARE(nroot.narratives()->child(0)->getTitle().c_str(), "nar1");
+	QCOMPARE(nroot.resources()->size(), 2u);
+	QCOMPARE(nroot.resources()->getResource(0)->getResourceName().c_str(), "er1");
 }
 void writeReadStream() {
 	VSimRoot root;
@@ -402,11 +402,11 @@ void writeReadStream() {
 
 	// check models
 	QCOMPARE(ok, true);
-	QCOMPARE(nroot.narratives()->size(), 2);
-	QCOMPARE(nroot.narratives()->child(0)->getTitle(), "nar1");
-	QCOMPARE(nroot.resources()->size(), 2);
-	QCOMPARE(nroot.resources()->getResource(0)->getResourceName(), "er1");
-	QCOMPARE(nroot.models()->child(0)->node()->getName(), "cow.osg");
+	QCOMPARE(nroot.narratives()->size(), 2u);
+	QCOMPARE(nroot.narratives()->child(0)->getTitle().c_str(), "nar1");
+	QCOMPARE(nroot.resources()->size(), 2u);
+	QCOMPARE(nroot.resources()->getResource(0)->getResourceName().c_str(), "er1");
+	QCOMPARE(nroot.models()->child(0)->node()->getName().c_str(), "cow.osg");
 }
 
 };

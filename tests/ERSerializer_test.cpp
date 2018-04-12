@@ -78,22 +78,22 @@ void writeReadTest() {
 	// check
 	// categories
 	ECategoryGroup *ncats = resources.categories();
-	QCOMPARE(ncats->size(), 2);
+	QCOMPARE(ncats->size(), 2u);
 	ECategory *ncat1 = ncats->category(0);
-	QCOMPARE(ncat1->getCategoryName(), "cat1");
+	QCOMPARE(ncat1->getCategoryName().c_str(), "cat1");
 	QCOMPARE(ncat1->getColor(), QColor(255, 150, 50));
 	ECategory *ncat2 = ncats->category(1);
-	QCOMPARE(ncat2->getCategoryName(), "cat2");
+	QCOMPARE(ncat2->getCategoryName().c_str(), "cat2");
 	QCOMPARE(ncat2->getColor(), QColor(0, 0, 199));
 
 	// resources
-	QCOMPARE(resources.size(), 2);
+	QCOMPARE(resources.size(), 2u);
 	EResource *nres = resources.getResource(0);
 	QCOMPARE(nres->getERType(), EResource::ANNOTATION);
-	QCOMPARE(nres->getResourceName(), "res1");
-	QCOMPARE(nres->getAuthor(), "auth1");
-	QCOMPARE(nres->getResourceDescription(), "desc1");
-	QCOMPARE(nres->getResourcePath(), "path1");
+	QCOMPARE(nres->getResourceName(), std::string("res1"));
+	QCOMPARE(nres->getAuthor(), std::string("auth1"));
+	QCOMPARE(nres->getResourceDescription(), std::string("desc1"));
+	QCOMPARE(nres->getResourcePath(), std::string("path1"));
 	QCOMPARE(nres->getGlobal(), true);
 	QCOMPARE(nres->getCopyright(), EResource::Copyright::PERMISSION);
 	QCOMPARE(nres->getMinYear(), 1994);
@@ -107,7 +107,7 @@ void writeReadTest() {
 	QVERIFY(Util::osgMatrixEq(nres->getCameraMatrix(), camera_matrix, .00001));
 
 	nres = resources.getResource(1);
-	QCOMPARE(nres->getResourceName(), "res2");
+	QCOMPARE(nres->getResourceName(), std::string("res2"));
 	QCOMPARE(nres->getERType(), EResource::FILE);
 }
 };
