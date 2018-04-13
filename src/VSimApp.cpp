@@ -75,6 +75,13 @@ VSimApp::VSimApp(MainWindow* window)
 	m_render_view->resize(m_thumbnail_size);
 	m_render_view->move(0, 0);
 	m_render_view->setCameraFrozen(true);
+	m_render_view->hide();
+	m_render_view->enableRendering(false);
+
+	m_viewer = new osgViewer::CompositeViewer;
+	m_main_view = m_window->getViewerWidget();
+	//m_viewer->addView(m_main_view->mainView());
+	m_main_view->setViewer(m_viewer);
 
 	// Narrative player
 	m_narrative_player = new NarrativePlayer(this, m_narrative_control, m_window->topBar(), this);
@@ -84,7 +91,7 @@ VSimApp::VSimApp(MainWindow* window)
 	//connect(m_narrative_player, &NarrativePlayer::updateCamera, m_window->getViewerWidget(), &OSGViewerWidget::setCameraMatrix);
 	//connect(this, &VSimApp::tick, m_narrative_player, &NarrativePlayer::update);
 	//connect(m_narrative_player, &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
-	connect(this, &VSimApp::sTick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
+	//connect(this, &VSimApp::sTick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 
 	m_camera_timer = new QTimer(this);
 	connect(m_camera_timer, &QTimer::timeout, this, [this]() {
@@ -215,12 +222,18 @@ bool VSimApp::openVSim(const std::string & filename)
 
 bool VSimApp::saveVSim(const std::string& filename)
 {
-	bool ok = FileUtil::writeVSimFile(filename, m_root.get());
-	if (!ok) {
-		QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
-		return false;
+	QFileInfo path(QString(filename.c_str()));
+	if (path.suffix() == "vsim") {
+		bool ok = FileUtil::writeVSimFile(filename, m_root.get());
+		if (!ok) {
+			QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
+			return false;
+		}
+		setFileName(filename);
 	}
-	setFileName(filename);
+	else {
+		// try to write osg stuff
+	}
 	return true;
 }
 
@@ -309,7 +322,7 @@ QImage VSimApp::generateThumbnail(NarrativeSlide * slide)
 
 	// render osg
 	m_render_view->setCameraMatrix(slide->getCameraMatrix());
-	m_render_view->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), m_thumbnail_size), 0);
+	//m_render_view->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), m_thumbnail_size), 0);
 
 	// render canvas
 	m_render_canvas->setSlide(slide);

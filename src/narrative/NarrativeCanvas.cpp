@@ -103,13 +103,13 @@ void NarrativeCanvas::setSlide(NarrativeSlide *slide)
 	connect(slide, &NarrativeSlide::sInserted, this,
 		[this](size_t index, size_t count) {
 		for (size_t i = 0; i < count; i++) {
-			addItem(m_slide->child(i));
+			addItem(m_slide->child(index + i));
 		}
 	});
 	connect(slide, &NarrativeSlide::sAboutToRemove, this,
 		[this](size_t index, size_t count) {
 		for (size_t i = 0; i < count; i++) {
-			removeItem(m_slide->child(i));
+			removeItem(m_slide->child(index + i));
 		}
 	});
 }

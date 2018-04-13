@@ -16,6 +16,7 @@
 #include "ui_MainWindow.h"
 
 #include "OSGViewerWidget.h"
+#include <osgUtil/Optimizer>
 #include "TimeSlider.h"
 #include "ModelOutliner.h"
 
@@ -140,6 +141,11 @@ MainWindow::MainWindow(QWidget *parent)
 		qInfo() << "nav" << m_osg_widget->getNavigationMode();
 		qInfo() << "freeze" << m_osg_widget->getCameraFrozen();
 		qInfo() << "app state" << VSimApp::StateStrings[m_app->state()];
+	});
+	connect(ui->actionOptimize_Scene, &QAction::triggered, this, [this]() {
+		auto *root = m_app->getRoot()->models()->sceneRoot();
+		osgUtil::Optimizer optimizer;
+		optimizer.optimize(root);
 	});
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
 	connect(ui->actionModel_Information, &QAction::triggered, this, &MainWindow::execModelInformation);

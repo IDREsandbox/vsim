@@ -132,11 +132,12 @@ std::set<int> ModelGroup::getKeyYears()
 	return years;
 }
 
+std::regex g_node_time_regex(".*T:.*?(-?\\d+)(-?\\d+)");
 bool ModelGroup::nodeTimeInName(const std::string & name, int * begin, int * end)
 {
-	std::regex r(".*T:.* (-?\\d+) (-?\\d+)");
+	//std::regex r(".*T:.*?(-?\\d+)(-?\\d+)");
 	std::smatch match;
-	if (std::regex_search(name, match, r)) {
+	if (std::regex_match(name, match, g_node_time_regex)) {
 		*begin = std::stoi(match[1]);
 		*end = std::stoi(match[2]);
 		return true;
