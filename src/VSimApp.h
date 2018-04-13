@@ -11,6 +11,7 @@
 #include <osg/ref_ptr>
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
+#include <osgViewer/CompositeViewer>
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QUndoStack>
@@ -145,8 +146,10 @@ private:
 	State m_state;
 
 	// thumbnails
+	osg::ref_ptr<osgViewer::CompositeViewer> m_viewer;
 	NarrativeCanvas *m_render_canvas;
 	OSGViewerWidget *m_render_view;
+	OSGViewerWidget *m_main_view;
 	QSize m_thumbnail_size;
 };
 

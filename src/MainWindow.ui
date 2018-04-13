@@ -107,6 +107,7 @@
     <addaction name="actionControl_Debug"/>
     <addaction name="actionReload_Style"/>
     <addaction name="actionEditor_Debug"/>
+    <addaction name="actionOptimize_Scene"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -458,6 +459,11 @@
   <action name="actionRoot_Debug">
    <property name="text">
     <string>Root Debug</string>
+   </property>
+  </action>
+  <action name="actionOptimize_Scene">
+   <property name="text">
+    <string>Optimize Scene</string>
    </property>
   </action>
  </widget>

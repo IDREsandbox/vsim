@@ -498,16 +498,18 @@ if (WIN32)
       TARGET CopyDLLs
       PRE_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin/${dll}.dll
+        ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin/${dll}$<$<CONFIG:Debug>:d>.dll
         $<CONFIG>
     )
-    install(FILES ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin/${dll}.dll DESTINATION ".")
+    install(FILES ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin/${dll}.dll DESTINATION ".")
   endforeach(dll)
 
   # copy osg plugins
+  find_file(osg_plugins_debug NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/tools/osg)
   find_file(osg_plugins NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_TOOLS_DIRS})
-  install(DIRECTORY ${osg_plugins} DESTINATION .)
+  file(COPY ${osg_plugins_debug} DESTINATION "${CMAKE_BINARY_DIR}")
   file(COPY ${osg_plugins} DESTINATION "${CMAKE_BINARY_DIR}")
+  install(DIRECTORY ${osg_plugins} DESTINATION .)
 
 endif()
 

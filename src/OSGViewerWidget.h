@@ -28,8 +28,6 @@ enum Manipulator {
 	MANIPULATOR_OBJECT
 };
 
-static osgViewer::CompositeViewer *g_viewer;
-
 class OSGViewerWidget : public QOpenGLWidget
 {
 	Q_OBJECT
@@ -67,6 +65,9 @@ public:
 
 	void enableGravity(bool enable);
 	void enableCollisions(bool enable);
+
+	void enableRendering(bool enable);
+	void setViewer(osgViewer::CompositeViewer *viewer);
 
 	void reset();
 
@@ -130,6 +131,8 @@ private:
 	bool m_gravity_on;
 	bool m_collisions_on;
 	int m_speed_tick;
+
+	bool m_rendering_enabled;
 
 	// key press tracker
 	KeyTracker m_key_tracker;
