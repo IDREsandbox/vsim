@@ -1,43 +1,84 @@
 #include "ModelGroup.h"
 #include <QDebug>
 #include <regex>
+#include <iostream>
 #include "Util.h"
+
+#include "Model.h"
 
 ModelGroup::ModelGroup()
 	: m_year(0),
 	m_time_enabled(false)
 {
 	enableTime(true);
-	//qDebug() << "new model table" << m_data_table.get();
+	m_root = new osg::Group;
+
+	connect(this, &GroupSignals::sInserted, this,
+		[this](size_t index, size_t count) {
+
+		for (size_t i = 0; i < count; i++) {
+			qDebug() << "adding a model thing";
+			Model *model = child(index + i);
+			osg::Node *node = model->node();
+
+			m_root->addChild(node);
+
+			TimeInitVisitor v(model); // check for T: start end
+			node->accept(v);
+			
+			connect(model, &Model::sNodeYearChanged, this, [this]() {
+				emit sKeysChanged();
+			});
+		}
+	});
+	connect(this, &GroupSignals::sAboutToRemove, this,
+		[this](size_t index, size_t count) {
+		for (size_t i = 0; i < count; i++) {
+			disconnect(child(index + i), 0, this, 0);
+			m_root->removeChild(child(i)->node());
+		}
+	});
 }
 
-ModelGroup::ModelGroup(const ModelGroup & n, const osg::CopyOp & copyop)
-	: m_year(n.m_year)
+//void ModelGroup::merge(ModelGroup *other)
+//{
+//	for (size_t i = 0; i < other->size(); i++) {
+//		append(other->childShared(i));
+//	}
+//}
+
+//void ModelGroup::setNodeYear(osg::Node *node, int year, bool begin)
+//{
+//	std::string prop;
+//	if (begin) prop = "yearBegin";
+//	else prop = "yearEnd";
+//
+//	if (year == 0) {
+//		osg::UserDataContainer *cont = node->getUserDataContainer();
+//		cont->removeUserObject(cont->getUserObjectIndex(prop));
+//	}
+//	else {
+//		node->setUserValue(prop, year);
+//	}
+//	emit sNodeYearChanged(node, year, begin);
+//}
+
+void ModelGroup::addNode(osg::Node * node, const std::string & path)
 {
-	qDebug() << "Model Group copy constructor?";
+	auto model = std::make_shared<Model>();
+	model->setPath(path);
+	model->setName(Util::getFilename(path));
+	model->setNode(node);
+	append(model);
 }
 
-void ModelGroup::merge(ModelGroup *other)
+void ModelGroup::accept(osg::NodeVisitor & visitor)
 {
-	for (uint i = 0; i < other->getNumChildren(); i++) {
-		addChild(other->getChild(i));
+	// apply year to all models
+	for (auto &model : *this) {
+		if (!model) continue;
+		model->node()->accept(visitor);
 	}
-}
-
-void ModelGroup::setNodeYear(osg::Node *node, int year, bool begin)
-{
-	std::string prop;
-	if (begin) prop = "yearBegin";
-	else prop = "yearEnd";
-
-	if (year == 0) {
-		osg::UserDataContainer *cont = node->getUserDataContainer();
-		cont->removeUserObject(cont->getUserObjectIndex(prop));
-	}
-	else {
-		node->setUserValue(prop, year);
-	}
-	emit sNodeYearChanged(node, year, begin);
 }
 
 int ModelGroup::getYear() const
@@ -91,23 +132,12 @@ std::set<int> ModelGroup::getKeyYears()
 	return years;
 }
 
-bool ModelGroup::addChild(osg::Node *child)
-{
-	bool ok = Group::addChild(child);
-	if (!ok) return false;
-
-	// time init the child
-	TimeInitVisitor v(this); // check for T: start end
-	child->accept(v);
-
-	return true;
-}
-
+std::regex g_node_time_regex(".*T:.*?(-?\\d+)(-?\\d+)");
 bool ModelGroup::nodeTimeInName(const std::string & name, int * begin, int * end)
 {
-	std::regex r(".*T:.* (-?\\d+) (-?\\d+)");
+	//std::regex r(".*T:.*?(-?\\d+)(-?\\d+)");
 	std::smatch match;
-	if (std::regex_search(name, match, r)) {
+	if (std::regex_match(name, match, g_node_time_regex)) {
 		*begin = std::stoi(match[1]);
 		*end = std::stoi(match[2]);
 		return true;
@@ -115,29 +145,40 @@ bool ModelGroup::nodeTimeInName(const std::string & name, int * begin, int * end
 	return false;
 }
 
-TimeInitVisitor::TimeInitVisitor(ModelGroup * group)
+osg::Group * ModelGroup::sceneRoot() const
+{
+	return m_root;
+}
+
+void ModelGroup::debugScene() const
+{
+	DebugVisitor v;
+	m_root->accept(v);
+}
+
+TimeInitVisitor::TimeInitVisitor(Model *model)
 	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),
-	m_group(group)
+	m_model(model)
 {
 }
 
 void TimeInitVisitor::apply(osg::Group &group)
 {
 	for (uint i = 0; i < group.getNumChildren(); i++) {
-		touch(m_group, group.getChild(i));
+		touch(m_model, group.getChild(i));
 	}
 	traverse(group);
 }
 
-void TimeInitVisitor::touch(ModelGroup *group, osg::Node *node) {
+void TimeInitVisitor::touch(Model *model, osg::Node *node) {
 	int begin, end;
 	bool match = ModelGroup::nodeTimeInName(node->getName(), &begin, &end);
 	if (match) {
 		if (begin != 0) {
-			group->setNodeYear(node, begin, true);
+			model->setNodeYear(node, begin, true);
 		}
 		if (end != 0) {
-			group->setNodeYear(node, end, false);
+			model->setNodeYear(node, end, false);
 		}
 	}
 }
@@ -211,4 +252,25 @@ void TimeMaskVisitor::apply(osg::Group &group)
 		}
 	}
 	traverse(group);
+}
+
+
+DebugVisitor::DebugVisitor()
+	: osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), m_tabs(0) 
+{
+}
+
+void DebugVisitor::apply(osg::Group &group)
+{
+	std::cout << std::string(m_tabs, '\t');
+	std::cout << group.className() << " " << group.getName() << " " << group.getNumChildren() << '\n';
+
+	m_tabs++;
+	traverse(group);
+	m_tabs--;
+}
+
+void DebugVisitor::apply(osg::Node & node)
+{
+	std::cout << std::string(m_tabs, '\t') << node.className() << " " << node.getName() << "\n";
 }

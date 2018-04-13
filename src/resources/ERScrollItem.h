@@ -3,7 +3,9 @@
 #include <QWidget>
 #include "ui_ERScrollItem.h"
 #include "ScrollBoxItem.h"
-#include "resources/EResource.h"
+
+class EResource;
+class ECategory;
 
 class ERScrollItem : public ScrollBoxItem {
 	Q_OBJECT
@@ -20,7 +22,7 @@ public:
 
 	static QString colorString(QColor color);
 
-	void showTypeIcon(EResource::ERType);
+	void showTypeIcon(int);
 	void showGotoIcon(bool show);
 	void showAutoLaunchIcon(bool show);
 	void setDistance(double dist);

@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <ROOT>$(SolutionDir)/../</ROOT>
+    <DEPS>$(ROOT)dependencies</DEPS>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>.\GeneratedFiles;$(ROOT)/src;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>osg.lib;osgDB.lib;osgGA.lib;osgUtil.lib;osgText.lib;osgViewer.lib;OpenThreads.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(DEPS)\osg-build\install\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="ROOT">
+      <Value>$(ROOT)</Value>
+    </BuildMacro>
+    <BuildMacro Include="DEPS">
+      <Value>$(DEPS)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,32 @@
+namespace VSim.FlatBuffers;
+
+struct Vec2 {
+  x:float;
+  y:float;
+}
+
+struct Vec3 {
+  x:float;
+  y:float;
+  z:float;
+}
+
+struct CameraPosDirUp {
+  pos:Vec3;
+  dir:Vec3;
+  up:Vec3;
+}
+
+struct Color {
+  r:ubyte;
+  g:ubyte;
+  b:ubyte;
+  a:ubyte;
+}
+
+table SimpleImage {
+  width:int32;
+  height:int32;
+  data:[Color];
+  // format: rgba
+}

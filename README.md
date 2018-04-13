@@ -8,6 +8,6 @@
 
 [vsim format](docs/vsimformat.txt)
 
-[model view notes](docs/modelview.md)
+[code notes](docs/code.md)
 
 [pretty graphs](docs/diagrams.md)

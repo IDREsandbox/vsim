@@ -3,13 +3,15 @@
 
 #include "GroupScrollBox.h"
 
-class NarrativeScrollBox : public GroupScrollBox {
+class Narrative;
+
+class NarrativeScrollBox : public GroupScrollBox<Narrative> {
 	Q_OBJECT
 
 public:
 	NarrativeScrollBox(QWidget * parent = nullptr);
 
-	ScrollBoxItem *createItem(osg::Node *node) override;
+	ScrollBoxItem *createItem(Narrative *node) override;
 
 protected:
 	void itemMouseDoubleClickEvent(QMouseEvent *event, int index) override;

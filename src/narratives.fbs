@@ -1,0 +1,119 @@
+include "types.fbs";
+
+namespace VSim.FlatBuffers;
+
+file_extension "nar";
+file_identifier "VSNR";
+
+table NarrativeTable {
+  narratives:[Narrative];
+}
+
+table Narrative {
+  slides:[Slide];
+  styles:StyleTable;
+  title:string;
+  author:string;
+  description:string;
+  //locked:bool = false;
+}
+
+table StyleTable {
+  header1:LabelStyle;
+  header2:LabelStyle;
+  body:LabelStyle;
+  label:LabelStyle;
+  image:ImageStyle;
+}
+
+union CanvasItem {
+  CanvasLabel,
+  CanvasImage
+}
+
+table Slide {
+  items:[CanvasItem];
+  camera:CameraPosDirUp;
+  duration:float;
+  wait_for_click:bool;
+  transition_duration:float;
+}
+
+enum LabelType : byte {
+  None,
+  Header1,
+  Header2,
+  Body,
+  Label
+}
+
+enum VAlign : int32 {
+  Top = 0x20,
+  VCenter = 0x40,
+  Bottom = 0x80
+}
+
+enum HAlign : int32 {
+  Left = 0x1,
+  Right = 0x2,
+  HCenter = 0x4,
+  Justify = 0x8
+}
+
+table LineStyle {
+  // border color
+  // border width
+  // border style
+}
+
+table FillStyle {
+  color:Color;
+  // 
+}
+
+table TextStyle {
+  foreground:Color;
+  halign:HAlign;
+  valign:VAlign;
+  margin:int;
+  font_family:string;
+  point_size:int;
+  weight:int; // bold
+  italicized:bool;
+  underlined:bool;
+}
+
+table LabelStyle {
+  type:LabelType;
+  fill_style:FillStyle;
+  text_style:TextStyle;
+  line_style:LineStyle;
+}
+
+table ImageStyle {
+  line_style:LineStyle;
+}
+
+struct Rect {
+  x:float;
+  y:float;
+  w:float;
+  h:float;
+}
+
+table CanvasLabel {
+  rect:Rect;
+  type:LabelType;
+  html:string;
+  fill_style:FillStyle;
+  line_style:LineStyle;
+  valign:VAlign;
+  //text_style:TextStyle; // the other text stuff is kept in the html
+}
+
+table CanvasImage {
+  rect:Rect;
+  line_style:LineStyle;
+}
+
+root_type NarrativeTable;

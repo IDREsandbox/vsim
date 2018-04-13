@@ -6,119 +6,117 @@
 #include "resources/EResource.h"
 #include "resources/ECategory.h"
 
+#include "GroupCommands.h"
+
 #include <QDebug>
 #include <unordered_map>
 
 EResourceGroup::EResourceGroup()
 {
-	m_categories = new ECategoryGroup;
-	m_categories->setName("Categories");
+	m_categories = std::unique_ptr<ECategoryGroup>(new ECategoryGroup);
 }
 
-EResourceGroup::EResourceGroup(const EResourceGroup & n, const osg::CopyOp & copyop)
+EResourceGroup::~EResourceGroup()
 {
 }
 
-EResourceGroup::EResourceGroup(const osg::Group *old_root)
-	: EResourceGroup()
+void EResourceGroup::loadOld(const EResourcesList * old_ers)
 {
-	for (int i = old_root->getNumChildren() - 1; i >= 0; i--) {
-		const osg::Node *node = old_root->getChild(i);
-		const EResourcesNode *old_EResource = dynamic_cast<const EResourcesNode*>(node);
-		if (old_EResource) {
-			qInfo() << "Found an old EResource" << QString::fromStdString(old_EResource->getName()) << "- adding to group";
+	std::map<std::string, std::shared_ptr<ECategory>> name_map;
+	for (EResourcesNode *old : old_ers->m_list) {
+		if (name_map.find(old->getCategoryName()) != name_map.end()) {
+			// already in the map so skip
+			continue;
+		}
+		auto cat = std::shared_ptr<ECategory>(new ECategory);
+		cat->setCategoryName(old->getCategoryName());
+		cat->setColor(QColor(old->getRed(), old->getGreen(), old->getBlue()));
+
+		name_map.insert(std::make_pair(old->getCategoryName(), cat));
+		m_categories->append(cat);
+
+	}
+
+	// copy the data
+	for (EResourcesNode *node : old_ers->m_list) {
+		auto er = std::make_shared<EResource>(node);
+		// assign category
+
+		ECategory *cat = nullptr;
+		auto it = name_map.find(node->getCategoryName());
+		if (it != name_map.end()) {
+			er->setCategory(it->second);
 		}
 
-		const EResourcesList *old_ers = dynamic_cast<const EResourcesList*>(node);
-		std::map<std::string, ECategory*> name_map;
-		if (old_ers) {
-			qInfo() << "Found an old ER List";
-
-			for (EResourcesNode *old : old_ers->m_list) {
-				if (name_map.find(old->getCategoryName()) != name_map.end()) {
-					// already in the map so skip
-					continue;
-				}
-				ECategory *cat = new ECategory;
-				cat->setCategoryName(old->getCategoryName());
-				cat->setRed(old->getRed());
-				cat->setGreen(old->getGreen());
-				cat->setBlue(old->getBlue());
-
-				name_map.insert(std::make_pair(old->getCategoryName(), cat));
-				m_categories->addChild(cat);
-			}
-
-			// copy the data
-			for (EResourcesNode *node : old_ers->m_list) {
-				EResource *er = new EResource(node, name_map);
-				addChild(er);
-			}
-
-		}
+		append(er);
 	}
 }
 
 ECategoryGroup * EResourceGroup::categories() const
 {
-	return m_categories;
-}
-const ECategoryGroup * EResourceGroup::getCategories() const
-{
-	return m_categories;
-}
-void EResourceGroup::setCategories(ECategoryGroup * categories)
-{
-	m_categories = categories;
+	return m_categories.get();
 }
 
-EResource * EResourceGroup::getResource(int i)
+EResource * EResourceGroup::getResource(int i) const
 {
-	if (i >= (int)getNumChildren() || i < 0) return nullptr;
-	return dynamic_cast<EResource*>(child(i));
+	return child(i);
 }
 
-void EResourceGroup::preSave()
-{
-	// index map
-	std::unordered_map<ECategory*, size_t> cat_to_index;
-	for (size_t i = 0; i < m_categories->getNumChildren(); i++) {
-		ECategory *cat = m_categories->category(i);
-		if (!cat) continue;
-		cat_to_index[cat] = i;
+void EResourceGroup::debug() {
+	qInfo() << "Embedded Resources:" << size();
+	for (uint i = 0; i < size(); i++) {
+		EResource *er = child(i);
+		ECategory *cat = er->category();
+		QString cat_name;
+		if (cat) cat_name = cat->getCategoryName().c_str();
+		qInfo() << "Resource" << i
+			<< QString::fromStdString(er->getResourceName())
+			<< "global:" << er->getGlobal()
+			<< "cat:" << cat_name << cat;
 	}
-	// set the integer pointers
-	for (size_t i = 0; i < getNumChildren(); i++) {
-		EResource *res = getResource(i);
-		if (!res) continue;
-		ECategory *cat = res->category();
-		int cat_index;
-		if (cat) cat_index = (int)cat_to_index[cat];
-		else cat_index = -1;
-		res->setCategoryIndex(cat_index);
+	const ECategoryGroup *cats = categories();
+	qInfo() << "ER Categories:" << cats->size();
+	for (uint i = 0; i < cats->size(); i++) {
+		ECategory *cat = cats->child(i);
+		qInfo() << "Category" << i << QString::fromStdString(cat->getCategoryName()) << cat;
 	}
 }
 
-void EResourceGroup::postLoad()
+void EResourceGroup::mergeCommand(EResourceGroup *group,
+	const EResourceGroup *other, QUndoCommand *cmd)
 {
-	// set categories
-	for (size_t i = 0; i < getNumChildren(); i++) {
-		EResource *res = getResource(i);
+	// build existing category map
+	std::map<std::string, std::shared_ptr<ECategory>> cat_map;
+	for (size_t i = 0; i < group->categories()->size(); i++) {
+		auto cat = group->categories()->childShared(i);
+		cat_map[cat->getCategoryName()] = cat;
+	}
+
+	// copy categories that don't exist, replace categories that do
+	for (size_t i = 0; i < other->categories()->size(); i++) {
+		auto new_cat = other->categories()->childShared(i);
+
+		auto it = cat_map.find(new_cat->getCategoryName());
+		if (it == cat_map.end()) { // category doesn't already exist
+			auto *add_cat = new AddNodeCommand<ECategory>(group->categories(),
+				new_cat, -1, cmd);
+
+			cat_map[new_cat->getCategoryName()] = new_cat;
+		}
+		else { // category already exists
+			auto old_cat = it->second;
+			// replace all node categories
+			std::set<EResource*> resources = new_cat->resources();
+			for (auto *res : resources) {
+				res->setCategory(old_cat);
+			}
+		}
+	}
+
+	// copy resources
+	for (size_t i = 0; i < other->size(); i++) {
+		auto res = other->childShared(i);
 		if (!res) continue;
-
-		// old resources already have these assigned
-		ECategory *old_cat = res->category();
-		if (old_cat) {
-			continue;
-		}
-
-		int cat_index = res->getCategoryIndex();
-		if (cat_index < 0 || cat_index >= (int)m_categories->getNumChildren()) {
-			res->setCategory(nullptr);
-			continue;
-		}
-
-		ECategory *cat = m_categories->category(cat_index);
-		res->setCategory(cat);
+		auto *add_res = new AddNodeCommand<EResource>(group, res, -1, cmd);
 	}
 }

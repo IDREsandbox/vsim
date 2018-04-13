@@ -11,12 +11,7 @@ LabelStyle::LabelStyle()
 	m_point_size(12),
 	m_weight(QFont::Weight::Normal),
 	m_ital(false),
-	m_underline(false),
-	m_strikethrough(false)
-{
-}
-
-LabelStyle::LabelStyle(const LabelStyle& n, const osg::CopyOp& copyop)
+	m_underline(false)
 {
 }
 
@@ -37,46 +32,6 @@ LabelStyle::LabelStyle(LabelType type, std::string font, int size, QColor fg, QC
 	m_fg_color = fg;
 	m_weight = we;
 	m_ital = ital;
-
-
-	//font(f), size(s), red(r), green(g), blue(b), opacity(o),
-	//	shadow(sh), red_bg(rbg), green_bg(gbg), blue_bg(bbg), opacity_bg(obg), width(w), height(h),
-	//	weight(we), align(al), margin(m)
-
-	//m_width = w;
-	//m_height = h;
-	//m_bg_color = QColor(rbg, bbg, gbg, obg);
-
-	//// make a dummy document
-	//m_base_document = new QTextDocument(this);
-	//m_base_document->setHtml("a");
-
-	//// frame format
-	//m_frame_format = m_base_document->rootFrame()->frameFormat();
-	//m_frame_format.setMargin(m);
-	//m_frame_format.setBackground(QBrush(QColor(0, 0, 0, 0)));
-	////m_frame_format.setBackground(QBrush(m_bg_color));
-
-	//// char format
-	//m_cursor = QTextCursor(m_base_document);
-	//m_cursor.select(QTextCursor::Document);
-	//m_char_format = m_cursor.charFormat();
-	//m_char_format.setFontFamily(QString::fromStdString(f));
-	//m_char_format.setForeground(QBrush(QColor(r, g, b, o)));
-	//m_char_format.setFontWeight(we);
-	//m_char_format.setFontItalic(ital);
-	//m_char_format.setFontPointSize(s);
-	////m_char_format.setVerticalAlignment(QTextCharFormat::AlignMiddle);
-
-	//// block format
-	//m_block_format = m_cursor.blockFormat();
-	//m_block_format.setAlignment(al);
-	//// TODO: vertical alignment
-
-	//// apply formats
-	//m_cursor.setCharFormat(m_char_format);
-	//m_cursor.setBlockFormat(m_block_format);
-	//m_base_document->rootFrame()->setFrameFormat(m_frame_format);
 }
 
 LabelStyle::~LabelStyle()
@@ -96,7 +51,6 @@ void LabelStyle::copy(const LabelStyle *other)
 	m_point_size = other->m_point_size;
 	m_ital = other->m_ital;
 	m_underline = other->m_underline;
-	m_strikethrough = other->m_strikethrough;
 }
 
 QColor LabelStyle::backgroundColor() const

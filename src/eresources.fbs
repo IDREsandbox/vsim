@@ -1,0 +1,53 @@
+include "types.fbs";
+
+namespace VSim.FlatBuffers;
+
+file_extension "ere";
+file_identifier "VSER";
+
+table ERTable {
+  resources:[EResource];
+  categories:[ECategory];
+}
+
+enum Copyright : byte {
+  Copyrighted,
+  FairUse,
+  Held,
+  Public,
+  Unknown,
+  Permission,
+  Web,
+  Unspecified,
+}
+
+enum ERType : byte {
+  Url,
+  Annotation,
+  File
+}
+
+table EResource {
+  type:ERType;
+  name:string;
+  author:string;
+  path:string;
+  description:string;
+  global:bool;
+  copyright:Copyright;
+  year_min:int32;
+  year_max:int32;
+  reposition:bool;
+  autolaunch:bool;
+  range:float32;
+  camera:CameraPosDirUp;
+
+  category_index:int32;
+}
+
+table ECategory {
+  name:string;
+  color:Color;
+}
+
+root_type ERTable;

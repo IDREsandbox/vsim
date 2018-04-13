@@ -86,9 +86,14 @@
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
+    <addaction name="separator"/>
     <addaction name="actionImport_Model"/>
+    <addaction name="separator"/>
     <addaction name="actionImport_Narratives"/>
     <addaction name="actionExport_Narratives"/>
+    <addaction name="separator"/>
+    <addaction name="actionImport_Resources"/>
+    <addaction name="actionExport_Resources"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -96,11 +101,13 @@
     <property name="title">
      <string>Test</string>
     </property>
+    <addaction name="actionRoot_Debug"/>
     <addaction name="actionOSG_Debug"/>
     <addaction name="actionCamera_Debug"/>
     <addaction name="actionControl_Debug"/>
     <addaction name="actionReload_Style"/>
     <addaction name="actionEditor_Debug"/>
+    <addaction name="actionOptimize_Scene"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -113,7 +120,6 @@
     </property>
     <addaction name="actionModel_Outliner"/>
     <addaction name="actionTime_Slider"/>
-    <addaction name="actionFont_Color_Styles"/>
     <addaction name="separator"/>
     <addaction name="actionHistory"/>
    </widget>
@@ -122,10 +128,18 @@
      <string>Navigation</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionModel_Information"/>
+    <addaction name="actionFont_Color_Styles"/>
+   </widget>
    <addaction name="menuhello_to_the_world"/>
    <addaction name="menuEdit"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuWindows"/>
+   <addaction name="menuSettings"/>
    <addaction name="menuTest"/>
   </widget>
   <action name="actionNew">
@@ -425,6 +439,31 @@
    </property>
    <property name="shortcut">
     <string>C</string>
+   </property>
+  </action>
+  <action name="actionModel_Information">
+   <property name="text">
+    <string>Model Information</string>
+   </property>
+  </action>
+  <action name="actionImport_Resources">
+   <property name="text">
+    <string>Import Resources...</string>
+   </property>
+  </action>
+  <action name="actionExport_Resources">
+   <property name="text">
+    <string>Export Resources...</string>
+   </property>
+  </action>
+  <action name="actionRoot_Debug">
+   <property name="text">
+    <string>Root Debug</string>
+   </property>
+  </action>
+  <action name="actionOptimize_Scene">
+   <property name="text">
+    <string>Optimize Scene</string>
    </property>
   </action>
  </widget>

@@ -5,32 +5,37 @@
 #include <QUndoCommand>
 #include <osg/Group>
 #include "Command.h"
-#include "Group.h"
+#include "GroupTemplate.h"
 
 class ECategoryGroup;
 class EResource;
 class ECategory;
+class EResourcesList;
 
-class EResourceGroup : public Group {
+class EResourceGroup : public TGroup<EResource> {
 	Q_OBJECT
 
 public:
 	EResourceGroup();
-	EResourceGroup(const EResourceGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 	EResourceGroup(const osg::Group *old_root);
-	META_Node(, EResourceGroup);
+	~EResourceGroup();
+
+	void loadOld(const EResourcesList *old_ers);
 
 	ECategoryGroup *categories() const;
-	const ECategoryGroup *getCategories() const;
-	void setCategories(ECategoryGroup *categories);
 
-	EResource *getResource(int);
+	EResource *getResource(int) const;
 
-	void preSave();
-	void postLoad();
+	void debug();
+
+public: // commands
+
+	// adds merge operations as children to cmd
+	static void mergeCommand(EResourceGroup *group,
+		const EResourceGroup *other, QUndoCommand *cmd);
 
 private:
-	osg::ref_ptr<ECategoryGroup> m_categories;
+	std::unique_ptr<ECategoryGroup> m_categories;
 };
 
 #endif // ERESOURCEGROUP_H

@@ -1,4 +1,6 @@
 ﻿#include "resources/ERScrollItem.h"
+#include "resources/EResource.h"
+#include "resources/ECategory.h"
 
 ERScrollItem::ERScrollItem(QWidget * parent)
 	: ScrollBoxItem(parent),
@@ -34,11 +36,12 @@ ERScrollItem::ERScrollItem(QWidget * parent)
 	m_launch_icon->setFixedSize(16, 16);
 	icon_layout->addWidget(m_launch_icon);
 
-	m_distance_label = new QLabel(this);
-	ui.gridLayout->addWidget(m_distance_label, 0, 0);
-	ui.gridLayout->setAlignment(m_distance_label, Qt::AlignHCenter | Qt::AlignBottom);
-	m_distance_label->setText("distance");
-	m_distance_label->show();
+	// this is super slow
+	//m_distance_label = new QLabel(this);
+	//ui.gridLayout->addWidget(m_distance_label, 0, 0);
+	//ui.gridLayout->setAlignment(m_distance_label, Qt::AlignHCenter | Qt::AlignBottom);
+	//m_distance_label->setText("distance");
+	//m_distance_label->show();
 
 	showTypeIcon(EResource::ANNOTATION);
 }
@@ -133,7 +136,7 @@ QString ERScrollItem::colorString(QColor color)
 	return s.arg(color.red()).arg(color.green()).arg(color.blue());
 }
 
-void ERScrollItem::showTypeIcon(EResource::ERType type)
+void ERScrollItem::showTypeIcon(int type)
 {
 	QString path;
 	switch (type) {
@@ -163,5 +166,5 @@ void ERScrollItem::showAutoLaunchIcon(bool show)
 
 void ERScrollItem::setDistance(double dist)
 {
-	m_distance_label->setText(QString::number(dist, 'f', 2));
+	//m_distance_label->setText(QString::number(dist, 'f', 2));
 }

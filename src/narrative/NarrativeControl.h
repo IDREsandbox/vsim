@@ -15,7 +15,7 @@ class VSimApp;
 class MainWindow;
 class MainWindowTopBar;
 class NarrativeGroup;
-class Narrative2;
+class Narrative;
 class NarrativeSlide;
 class NarrativeSlideItem;
 class NarrativeSlideLabel;
@@ -36,7 +36,6 @@ public:
 
 	// initializes gui from osg data
 	void load(NarrativeGroup *narratives);
-	void loadNarratives(NarrativeGroup *group);
 
 	// Opens narrative in slide box
 	// - closes slide if not already open
@@ -74,14 +73,14 @@ public:
 	//void selectLabel(int narrative, int slide, NarrativeSlideItem *label);
 	void selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem *> &labels);
 
-	Narrative2 *getCurrentNarrative();
+	Narrative *getCurrentNarrative();
 	int getCurrentNarrativeIndex();
-	std::vector<Narrative2*> getSelectedNarratives() const;
+	std::set<size_t> getSelectedNarratives() const;
 
 	NarrativeSlide *getCurrentSlide();
 	int getCurrentSlideIndex();
 	
-	Narrative2 *getNarrative(int index);
+	Narrative *getNarrative(int index);
 	NarrativeSlide *getSlide(int narrative, int slide);
 	NarrativeSlideLabel *getLabel(int narrative, int slide, int label);
 
@@ -99,6 +98,7 @@ public: // Actions
 	void editNarrativeInfo();
 	void deleteNarratives();
 	void moveNarratives(const std::vector<std::pair<size_t, size_t>> &mapping);
+	void mergeNarratives(const NarrativeGroup *g);
 
 	// Slides
 	QAction *a_new_slide;
@@ -132,7 +132,7 @@ private:
 	void enableEditing(bool enable);
 
 private:
-	VSimApp * m_app;
+	VSimApp *m_app;
 	int m_current_narrative; // opened narrative
 	int m_current_slide; // active canvas slide
 	bool m_editing_slide;
@@ -144,7 +144,7 @@ private:
 	QPropertyAnimation *m_fade_out_anim;
 	QPropertyAnimation *m_fade_in_anim;
 
-	osg::ref_ptr<NarrativeGroup> m_narrative_group;
+	NarrativeGroup *m_narrative_group;
 
 	MainWindow *m_window;
 	MainWindowTopBar *m_bar;

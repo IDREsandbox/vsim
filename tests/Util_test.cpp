@@ -8,9 +8,27 @@
 class Util_test : public QObject {
 	Q_OBJECT
 private slots:
+	void mxdxyyDateTest() {
+		QDate date;
+		bool hit;
+		hit = Util::mxdxyyToQDate("1/2/94", &date);
+		QVERIFY(hit);
+		QCOMPARE(date, QDate(1994, 1, 2));
+
+		hit = Util::mxdxyyToQDate("111/2/1994", &date);
+		QVERIFY(!hit);
+
+		hit = Util::mxdxyyToQDate("11/2/80", &date);
+		QVERIFY(hit);
+		QCOMPARE(date, QDate(1980, 11, 2));
+		
+		hit = Util::mxdxyyToQDate("12/30/79", &date);
+		QVERIFY(hit);
+		QCOMPARE(date, QDate(2079, 12, 30));
+	}
 	void fixIndicesTest() {
-		std::vector<int> mini, mini_ans, mini_result;
-		std::set<int> mini_ins, mini_rem;
+		std::vector<size_t> mini, mini_ans, mini_result;
+		std::set<size_t> mini_ins, mini_rem;
 		mini = { 0, 1, 2, 3 };
 		mini_ins = { 0, 2 };
 		mini_ans = { 1, 3, 4, 5 };
@@ -138,6 +156,32 @@ private slots:
 		expected = {{0, {'a'}}, {2, {'b', 'c', 'e'}}, {6, {'o'}}};
 		result = Util::clumpify2(list);
 		QCOMPARE(result, expected);
+	}
+	void matrixEqTest(){
+		double d1[16] = {
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		};
+		osg::Matrix m1(d1);
+		double d2[16] = {
+			0, 0, 0, 6.8,
+			1.2, 0, 0, 0,
+			0, 0, 4.5, 0,
+			0, 0, 0, 0
+		};
+		osg::Matrix m2(d2);
+		double d3[16] = {
+			0, 0, 0, .0001,
+			.0008, 0, 0, 0,
+			0, -.0001, 0, 0,
+			0, 0, 0, 0
+		};
+		osg::Matrix m3(d3);
+		QVERIFY(Util::osgMatrixEq(m1, m1) == true);
+		QVERIFY(Util::osgMatrixEq(m1, m2) == false);
+		QVERIFY(Util::osgMatrixEq(m1, m3, .001) == true);
 	}
 };
 

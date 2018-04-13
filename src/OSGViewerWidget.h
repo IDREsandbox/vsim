@@ -14,11 +14,13 @@
 #include <osgViewer/CompositeViewer>
 #include <osg/Camera>
 #include <QElapsedTimer>
-#include "SimpleCameraManipulator.h"
-#include "FirstPersonManipulator.h"
-#include "FlightManipulator.h"
-#include "ObjectManipulator.h"
-#include "KeyTracker.h"
+
+class SimpleCameraManipulator;
+class FirstPersonManipulator;
+class FlightManipulator;
+class ObjectManipulator;
+class KeyTracker;
+
 #include "Navigation.h"
 
 enum Manipulator {
@@ -27,8 +29,6 @@ enum Manipulator {
 	MANIPULATOR_FLIGHT,
 	MANIPULATOR_OBJECT
 };
-
-static osgViewer::CompositeViewer *g_viewer;
 
 class OSGViewerWidget : public QOpenGLWidget
 {
@@ -67,6 +67,9 @@ public:
 
 	void enableGravity(bool enable);
 	void enableCollisions(bool enable);
+
+	void enableRendering(bool enable);
+	void setViewer(osgViewer::CompositeViewer *viewer);
 
 	void reset();
 
@@ -131,8 +134,10 @@ private:
 	bool m_collisions_on;
 	int m_speed_tick;
 
+	bool m_rendering_enabled;
+
 	// key press tracker
-	KeyTracker m_key_tracker;
+	KeyTracker *m_key_tracker;
 
 	QElapsedTimer m_frame_timer;
 };

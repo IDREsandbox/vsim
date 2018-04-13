@@ -108,6 +108,9 @@ protected:
 	void dragMoveEvent(QDragMoveEvent *event) override;
 	void dropEvent(QDropEvent *event) override;
 
+signals:
+	void sSelectionChange();
+
 protected:
 	// The auto-sliding effect when you're dragging a widget needs a loop
 	void moveTimer();

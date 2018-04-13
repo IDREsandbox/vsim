@@ -1,27 +1,10 @@
 #include "resources/ECategory.h"
 
 ECategory::ECategory()
-	: Group(),
-	m_cat_name("Untitled"),
-	m_red(0),
-	m_blue(0),
-	m_green(0)
+	: m_cat_name("Untitled"),
+	m_color(0, 0, 0)
 {
 
-}
-
-ECategory::ECategory(const ECategory& e, const osg::CopyOp& copyop)
-	: Group(e, copyop),
-	m_cat_name(e.m_cat_name),
-	m_red(e.m_red),
-	m_blue(e.m_blue),
-	m_green(e.m_green)
-{
-
-}
-
-ECategory::~ECategory()
-{
 }
 
 const std::string& ECategory::getCategoryName() const
@@ -37,40 +20,13 @@ void ECategory::setCategoryName(const std::string& name)
 
 QColor ECategory::getColor() const
 {
-	return QColor(m_red, m_green, m_blue);
+	return m_color;
 }
 
 void ECategory::setColor(QColor color)
 {
-	m_red = color.red();
-	m_green = color.green();
-	m_blue = color.blue();
+	m_color = color;
 	emit sColorChanged(color);
-}
-
-int ECategory::getRed() const
-{
-	return m_red;
-}
-void ECategory::setRed(int red)
-{
-	m_red = red;
-}
-int ECategory::getGreen() const
-{
-	return m_green;
-}
-void ECategory::setGreen(int green)
-{
-	m_green = green;
-}
-int ECategory::getBlue() const
-{
-	return m_blue;
-}
-void ECategory::setBlue(int blue)
-{
-	m_blue = blue;
 }
 
 void ECategory::addResource(EResource * res)

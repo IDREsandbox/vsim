@@ -19,7 +19,6 @@ HSBScrollArea::HSBScrollArea(QWidget *parent)
 {
 }
 void HSBScrollArea::paintEvent(QPaintEvent *e) {
-	qDebug() << "area paint event?" << e;
 	e->accept();
 }
 
@@ -44,7 +43,6 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_scroll->setObjectName("scrollArea");
 	m_scroll->setStyleSheet("#scrollArea { background:rgba(0, 0, 0, 0);}");
 
-	qDebug() << "Scroll area widget before??" << m_scroll->widget();
 	m_scroll_area_widget = new HSBScrollArea();
 	m_scroll->setWidget(m_scroll_area_widget);
 	m_scroll_area_widget->show();

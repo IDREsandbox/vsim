@@ -11,21 +11,21 @@
 #include <osg/ref_ptr>
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
+#include <osgViewer/CompositeViewer>
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QUndoStack>
 #include <vector>
 #include <QSize>
-
-#include "VSimRoot.h"
+#include <memory>
 
 class NarrativeControl;
 class NarrativePlayer;
 class ERControl;
 class MainWindow;
 class VSimRoot;
-class ModelTableModel;
-class Narrative2;
+class OSGYearModel;
+class Narrative;
 class NavigationControl;
 class NarrativeSlide;
 class NarrativeCanvas;
@@ -36,10 +36,11 @@ class VSimApp : public QObject
 	Q_OBJECT
 public:
 	VSimApp(MainWindow*);
+	~VSimApp();
 	void setWindow(MainWindow*);
 
 	// this is called on every new, reset, etc
-	bool initWithVSim(osg::Node *root = nullptr);
+	bool initWithVSim(VSimRoot *root = nullptr);
 
 	// state
 	enum State {
@@ -90,24 +91,22 @@ public:
 	// undo/redo
 	QUndoStack *getUndoStack() const;
 
-	// file stuff
-	QString getCurrentDirectory() const;
+	// last directory used by a file dialog
+	std::string getLastDiretory() const;
+	void setLastDirectory(const std::string &dir, bool isFile = false);
+
+	// current vsim working directory, based on the .vsim file location
+	std::string getCurrentDirectory() const;
+	
 	std::string getFileName() const;
 	void setFileName(const std::string &);
 
-	void addModel(osg::Node *node, const std::string &name);
-	bool importModel(const std::string& filename); // TODO: more complicated logic with vsim
 	bool openVSim(const std::string& filename);
 	bool saveVSim(const std::string& filename);
 	bool saveCurrentVSim();
-	bool exportNarratives();
-	bool importNarratives();
-	bool exportResources();
-	bool importResources();
 
-	// components
 	VSimRoot *getRoot() const;
-	ModelTableModel *modelTable() const;
+	//OSGYearModel *modelTable() const;
 	NarrativeControl *narrativeControl() const;
 	ERControl *erControl() const;
 
@@ -124,14 +123,15 @@ private:
 
 	QUndoStack *m_undo_stack;
 
+	std::string m_last_directory;
 	std::string m_filename;
 	bool m_model_loaded;
 
 	QTimer *m_timer;
 	QElapsedTimer *m_dt_timer;
 
-	osg::ref_ptr<VSimRoot> m_root;
-	ModelTableModel *m_model_table_model;
+	std::unique_ptr<VSimRoot> m_root;
+	//ModelGroupModel *m_model_table_model;
 
 	NarrativeControl *m_narrative_control;
 	ERControl *m_er_control;
@@ -149,8 +149,10 @@ private:
 	State m_state;
 
 	// thumbnails
+	osg::ref_ptr<osgViewer::CompositeViewer> m_viewer;
 	NarrativeCanvas *m_render_canvas;
 	OSGViewerWidget *m_render_view;
+	OSGViewerWidget *m_main_view;
 	QSize m_thumbnail_size;
 };
 

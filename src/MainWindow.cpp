@@ -8,25 +8,43 @@
 #include <QMimeData>
 #include <QDir>
 
+#include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
+
 #include "MainWindow.h"
 
 #include "ui_MainWindow.h"
 
 #include "OSGViewerWidget.h"
+#include <osgUtil/Optimizer>
 #include "TimeSlider.h"
 #include "ModelOutliner.h"
 
 #include "editButtons.h"
+#include "narrative/NarrativeGroup.h"
 #include "narrative/NarrativeCanvas.h"
 #include "narrative/NarrativePlayer.h"
+#include "narrative/NarrativeControl.h"
 
+#include "resources/EResourceGroup.h"
+#include "resources/ERControl.h"
 #include "resources/ERDisplay.h"
 #include "resources/ERControl.h"
 #include "resources/ERFilterArea.h"
 
 #include "VSimApp.h"
 #include "VSimRoot.h"
-#include "ModelTableModel.h"
+#include "OSGYearModel.h"
+#include "ModelInformationDialog.h"
+#include "Model.h"
+#include "ModelGroup.h"
+#include "GroupCommands.h"
+
+#include "FileUtil.h"
+#include <fstream>
+
+#include "types_generated.h"
+#include "settings_generated.h"
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent),
@@ -95,10 +113,17 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::actionSaveAs);
 	connect(ui->actionImport_Model, &QAction::triggered, this, &MainWindow::actionImportModel);
 	connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
-	connect(ui->actionImport_Narratives, &QAction::triggered, this, &MainWindow::sImportNarratives);
-	connect(ui->actionExport_Narratives, &QAction::triggered, this, &MainWindow::sExportNarratives);
+	connect(ui->actionImport_Narratives, &QAction::triggered, this, &MainWindow::actionImportNarratives);
+	connect(ui->actionExport_Narratives, &QAction::triggered, this, &MainWindow::actionExportNarratives);
+	connect(ui->actionImport_Resources, &QAction::triggered, this, &MainWindow::actionImportERs);
+	connect(ui->actionExport_Resources, &QAction::triggered, this, &MainWindow::actionExportERs);
 
-	connect(ui->actionOSG_Debug, &QAction::triggered, this, &MainWindow::sDebugOSG);
+	connect(ui->actionOSG_Debug, &QAction::triggered, this, [this]() {
+		m_app->getRoot()->models()->debugScene();
+	});
+	connect(ui->actionRoot_Debug, &QAction::triggered, this, [this]() {
+		m_app->getRoot()->debug();
+	});
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
 	connect(ui->actionControl_Debug, &QAction::triggered, this, &MainWindow::sDebugControl);
 	connect(ui->actionReload_Style, &QAction::triggered, this, [this]() {
@@ -117,7 +142,13 @@ MainWindow::MainWindow(QWidget *parent)
 		qInfo() << "freeze" << m_osg_widget->getCameraFrozen();
 		qInfo() << "app state" << VSimApp::StateStrings[m_app->state()];
 	});
+	connect(ui->actionOptimize_Scene, &QAction::triggered, this, [this]() {
+		auto *root = m_app->getRoot()->models()->sceneRoot();
+		osgUtil::Optimizer optimizer;
+		optimizer.optimize(root);
+	});
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
+	connect(ui->actionModel_Information, &QAction::triggered, this, &MainWindow::execModelInformation);
 
 	// player
 
@@ -150,22 +181,18 @@ void MainWindow::setApp(VSimApp * vsim)
 
 	connect(this, &MainWindow::sOpenFile, m_app, &VSimApp::openVSim);
 	connect(this, &MainWindow::sSaveFile, m_app, &VSimApp::saveVSim);
-	connect(this, &MainWindow::sImportModel, m_app, &VSimApp::importModel);
-	connect(this, &MainWindow::sNew, m_app, [vsim]() { vsim->initWithVSim(); });
+	connect(this, &MainWindow::sNew, m_app, [vsim]() {
+		vsim->setFileName("");
+		vsim->initWithVSim();
+	});
 	connect(this, &MainWindow::sSaveCurrent, m_app, &VSimApp::saveCurrentVSim);
-	connect(this, &MainWindow::sImportNarratives, m_app, &VSimApp::importNarratives);
-	connect(this, &MainWindow::sExportNarratives, m_app, &VSimApp::exportNarratives);
 
-	outliner()->setModel(m_app->modelTable());
+	outliner()->setModel(nullptr); // TODO: fix outliner
 	outliner()->header()->resizeSection(0, 200);
 	outliner()->resize(505, 600);
 	outliner()->expandAll();
 
 	connect(m_app, &VSimApp::sReset, this, &MainWindow::onReset);
-	connect(this, &MainWindow::sDebugOSG, this, [this]() {
-		m_app->getRoot()->debug();
-		m_app->erControl()->debug();
-	});
 	connect(this, &MainWindow::sDebugCamera, m_app, &VSimApp::debugCamera);
 
 }
@@ -308,8 +335,8 @@ void MainWindow::actionNew()
 void MainWindow::actionOpen()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim",
-		m_app->getCurrentDirectory(),
-		"VSim files (*.vsim;*.osg;*.osgt;*.osgb; );;"
+		m_app->getCurrentDirectory().c_str(),
+		"VSim files (*.vsim;);;"
 		"Model files (*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
 	if (filename == "") {
@@ -341,7 +368,7 @@ void MainWindow::actionSaveAs()
 {
 	QString filename = QFileDialog::getSaveFileName(this, "Save VSim",
 		m_app->getFileName().c_str(),
-		"VSim file (*.vsim;*.osgt;*.osgb);;");
+		"VSim file (*.vsim);;");
 	if (filename == "") {
 		return;
 	}
@@ -354,13 +381,143 @@ void MainWindow::actionSaveAs()
 void MainWindow::actionImportModel()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Import Model",
-		m_app->getCurrentDirectory(),
+		m_app->getLastDiretory().c_str(),
 		"Model files (*.vsim;*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
 	if (filename == "") {
 		return;
 	}
 	qInfo() << "importing - " << filename;
-	//m_vsimapp->importModel(filename.toStdString());
-	emit sImportModel(filename.toStdString());
+
+	osg::ref_ptr<osg::Node> loadedModel;
+	// TODO: special import for vsim files
+
+	// otherwise
+	loadedModel = osgDB::readNodeFile(filename.toStdString());
+	if (!loadedModel.get()) {
+		qWarning() << "Error importing" << filename;
+		QMessageBox::warning(this, "Import Error", "Error loading file " + filename);
+		return;
+	}
+
+	m_app->getRoot()->models()->addNode(loadedModel, filename.toStdString());
+	m_osg_widget->reset();
+}
+
+void MainWindow::actionImportNarratives()
+{
+	// Open dialog
+	qInfo("Importing narratives");
+	QStringList list = QFileDialog::getOpenFileNames(this, "Import Narratives",
+		m_app->getLastDiretory().c_str(), "Narrative files (*.nar);;All types (*.*)");
+	if (list.empty()) {
+		qInfo() << "import cancel";
+		return;
+	}
+	QStringList error_list;
+	int count = 0;
+	NarrativeGroup group;
+	for (const QString &filename : list) {
+		if (filename.isEmpty()) continue;
+
+		m_app->setLastDirectory(filename.toStdString(), true);
+
+		std::ifstream in(filename.toStdString(), std::ios::binary);
+		if (in.good()) {
+			bool ok = FileUtil::importNarrativesStream(in, &group);
+			if (ok) {
+				count++;
+				continue;
+			}
+		}
+		// error case
+		error_list.append(filename);
+	}
+
+	m_app->narrativeControl()->mergeNarratives(&group);
+
+	if (!error_list.empty()) {
+		QString s;
+		for (const auto &s : error_list);
+		QMessageBox::warning(this, "Import Narratives", "Error importing narratives from " + error_list.join(", "));;
+	}
+}
+
+void MainWindow::actionExportNarratives()
+{
+	// Open dialog
+	qInfo("Exporting narratives");
+	QString filename = QFileDialog::getSaveFileName(this, "Export Narratives",
+		m_app->getLastDiretory().c_str(), "Narrative files (*.nar);;All types (*.*)");
+	if (filename == "") {
+		qInfo() << "export cancel";
+		return;
+	}
+	std::ofstream out(filename.toStdString(), std::ios::binary);
+	if (out.good()) {
+		bool ok = FileUtil::exportNarrativesStream(out, m_app->getRoot()->narratives(),
+			m_app->narrativeControl()->getSelectedNarratives());
+		if (ok) return;
+	}
+	QMessageBox::warning(this, "Export Error", "Error exporting narratives to " + filename);
+}
+
+void MainWindow::actionImportERs()
+{
+	qInfo("Importing resources");
+	QString path = QFileDialog::getOpenFileName(this, "Import Resources",
+		m_app->getLastDiretory().c_str(), "Narrative files (*.ere);;All types (*.*)");
+	if (path.isEmpty()) {
+		qInfo() << "import cancel";
+		return;
+	}
+
+	m_app->setLastDirectory(path.toStdString(), true);
+
+	std::ifstream in(path.toStdString(), std::ios::binary);
+	if (in.good()) {
+		EResourceGroup g;
+		bool ok = FileUtil::importEResources(in, &g);
+		m_app->erControl()->mergeERs(&g);
+		return;
+	}
+	QMessageBox::warning(this, "Import Narratives",
+		"Error importing narratives from " + path);
+}
+
+void MainWindow::actionExportERs()
+{
+	// Open dialog
+	qInfo("Exporting resources");
+	QString filename = QFileDialog::getSaveFileName(this, "Export Resources",
+		m_app->getLastDiretory().c_str(), "Resources (*.ere);;All types (*.*)");
+	if (filename == "") {
+		qInfo() << "export cancel";
+		return;
+	}
+	std::ofstream out(filename.toStdString(), std::ios::binary);
+	if (out.good()) {
+		bool ok = FileUtil::exportEResources(out, m_app->getRoot()->resources(),
+			m_app->erControl()->getCombinedSelection());
+		if (ok) return;
+	}
+	QMessageBox::warning(this, "Export Error", "Error exporting resources to " + filename);
+}
+
+void MainWindow::execModelInformation()
+{
+	// get model information
+	auto *settings = m_app->getRoot()->settings();
+	auto *info = settings->model_information.get(); // possibly missing
+
+	ModelInformationDialog dlg(info);
+	int result = dlg.exec();
+	if (result == QDialog::Accepted) {
+		auto new_data = dlg.getData();
+
+		settings->model_information.reset(
+			new VSim::FlatBuffers::ModelInformationT(
+				new_data
+			));
+	}
 }

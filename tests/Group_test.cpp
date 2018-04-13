@@ -3,41 +3,255 @@
 #include <set>
 #include <QSignalSpy>
 #include <QVariant>
-#include "Group.h"
 #include <stdio.h>
 #include <QUndoStack>
 #include <QUndoCommand>
 #include <QMetaType>
+#include "GroupTemplate.h"
+#include "GroupCommands.h"
+
+struct Foo {
+	int val;
+	std::string name;
+};
+
 class Group_test : public QObject {
 	Q_OBJECT
 private:
 	QUndoStack stack;
 
-	void GROUPCOMPARE(Group *group, std::vector<osg::Node*> target) {
-		QCOMPARE(group->getNumChildren(), target.size());
-		for (unsigned int i = 0; i < group->getNumChildren(); i++) {
+	void printGroup(TGroup<Foo> *group) {
+		for (size_t i = 0; i < group->size(); i++) {
+			qDebug() << i << group->child(i)->name.c_str();
+		}
+	}
+
+	template<class T>
+	void GROUPCOMPARE(TGroup<T> *group, std::vector<std::shared_ptr<Foo>> target) {
+		QCOMPARE(group->size(), target.size());
+		for (size_t i = 0; i < group->size(); i++) {
 			if (i >= target.size()) return;
-			QCOMPARE(group->child(i), target[i]);
+			QCOMPARE(group->childShared(i), target[i]);
 		}
 	}
 	
-	std::vector<osg::Node*> makeNodes(size_t count) {
-		std::vector<osg::Node*> n;
+	std::vector<Foo*> makeNodes(size_t count) {
+		std::vector<Foo*> n;
 		for (size_t i = 0; i < count; i++) {
-			osg::Node* node = new osg::Node;
-			node->setName(std::to_string(i));
+			Foo* node = new Foo;
+			node->name = std::to_string(i);
+			node->val = i;
 			n.push_back(node);
 		}
 		return n;
 	}
-	std::vector<osg::ref_ptr<osg::Node>> makeRefs(const std::vector<osg::Node*> &nodes) {
-		std::vector<osg::ref_ptr<osg::Node>> n;
-		for(auto node : nodes) {
-			n.push_back(osg::ref_ptr<osg::Node>(node));
+	std::vector<std::shared_ptr<Foo>> makeShared(int count) {
+		std::vector<std::shared_ptr<Foo>> n;
+		for (int i = 0; i < count; i++) {
+			Foo* node = new Foo;
+			node->name = std::to_string(i);
+			node->val = i;
+			n.push_back(std::shared_ptr<Foo>(node));
 		}
 		return n;
 	}
+	//std::vector<std::shared_ptr<Foo>> makeRefs(const std::vector<Foo*> &nodes) {
+	//	std::vector<std::shared_ptr<Foo>> n;
+	//	for(auto node : nodes) {
+	//		n.push_back(std::shared_ptr<Foo>(node));
+	//	}
+	//	return n;
+	//}
+	//get makeRefs(const std::vector<Foo*> &nodes) {
+	//	std::vector<std::shared_ptr<Foo>> n;
+	//	for (auto node : nodes) {
+	//		n.push_back(std::shared_ptr<Foo>(node));
+	//	}
+	//	return n;
+	//}
+
 private slots:
+
+	void sharedTest() {
+		Foo *f = new Foo;
+		std::shared_ptr<Foo> s1 = std::shared_ptr<Foo>(f);
+		std::shared_ptr<Foo> s2 = s1;
+	}
+
+	void iterate() {
+		TGroup<Foo> group;
+		auto n = makeShared(4);
+		group.insert(0, n);
+
+		for (auto &shared : group) {
+			qDebug() << shared->val;
+		}
+	}
+
+	void move() {
+		TGroup<Foo> group;
+		auto n = makeShared(4);
+		group.insert(0, n);
+
+		// swap 0 to 1
+		group.move({ {0,1} });
+		GROUPCOMPARE(&group, {n[1], n[0], n[2], n[3]});
+
+		// swap 2,3 to 1,2
+		group.move({ {2,1},{3,2} });
+		GROUPCOMPARE(&group, { n[1], n[2], n[3], n[0] });
+	}
+	void append() {
+		TGroup<Foo> g;
+		auto n = makeShared(2);
+		auto x = std::shared_ptr<Foo>(new Foo);
+		g.insert(0, n);
+		g.append(x);
+		GROUPCOMPARE(&g, { n[0], n[1], x });
+		QCOMPARE(std::string("mee"), std::string("mee"));
+		QCOMPARE(4u, (size_t)4);
+	}
+	void insert() {
+		TGroup<Foo> g;
+		auto n = makeShared(4);
+
+		g.insert(0, {n[0], n[1]});
+		GROUPCOMPARE(&g, { n[0], n[1] });
+
+		g.insert(0, {n[2], n[3]});
+		GROUPCOMPARE(&g, { n[2], n[3], n[0], n[1] });
+	}
+	void remove() {
+		TGroup<Foo> g;
+		auto n = makeShared(4);
+		g.insert(0, n);
+
+		g.remove(1, 2);
+		GROUPCOMPARE(&g, { n[0], n[3] });
+	}
+	void insertMulti() {
+		TGroup<Foo> g;
+		auto n = makeShared(6);
+
+		g.insertMulti({
+			{ 0, n[0] },
+			{ 1, n[1] },
+			{ 2, n[2] }});
+		GROUPCOMPARE(&g, { n[0], n[1], n[2] });
+
+		g.insertMulti({
+			{ 0, n[3] },
+			{ 1, n[4] },
+			{ 4, n[5] }});
+
+		GROUPCOMPARE(&g, { n[3], n[4], n[0], n[1], n[5], n[2] });
+	}
+
+	void removeMulti() {
+		TGroup<Foo> g;
+		auto n = makeShared(6);
+		g.insert(0, n);
+
+		g.removeMulti({0});
+		GROUPCOMPARE(&g, { n[1], n[2], n[3], n[4], n[5]});
+
+		g.removeMulti({ 4 });
+		GROUPCOMPARE(&g, { n[1], n[2], n[3], n[4]});
+
+		g.removeMulti({ 0, 2 });
+		GROUPCOMPARE(&g, { n[2], n[4] });
+	}
+
+	//void insertMultiP() {
+	//	TGroup<Foo> g;
+	//	auto n = makeShared(6);
+
+	//	g.insertMultiP(std::set<std::shared_ptr<Foo>>(n.begin() + 1, n.begin() + 4));
+	//	printGroup(&g);
+	//	GROUPCOMPARE(&g, { n[1], n[2], n[3] });
+	//}
+	//void removeMultiP() {
+	//	TGroup<Foo> g;
+	//	auto n = makeShared(6);
+	//	g.insert(0, n);
+
+	//	g.removeMultiP({n[3], n[1], n[0]});
+	//	GROUPCOMPARE(&g, { n[2], n[4], n[5] });
+	//}
+
+	void addNodeCommand() {
+		QUndoStack stack;
+		TGroup<Foo> g;
+		auto n = makeShared(2);
+		g.insert(0, n);
+
+		auto x = std::make_shared<Foo>();
+		x->name = "newguy";
+		x->val = 100;
+		stack.push(new AddNodeCommand<Foo>(&g, x));
+		GROUPCOMPARE(&g, { n[0], n[1], x });
+
+		stack.undo();
+		GROUPCOMPARE(&g, { n[0], n[1] });
+
+		stack.push(new AddNodeCommand<Foo>(&g, x, 1));
+		printGroup(&g);
+		GROUPCOMPARE(&g, { n[0], x, n[1] });
+	}
+
+	void moveCommand() {
+		QUndoStack stack;
+		TGroup<Foo> g;
+		auto n = makeShared(4);
+		g.insert(0, n);
+
+		stack.push(new MoveNodesCommand<Foo>(&g, { {1, 2}, {2, 1} }));
+		GROUPCOMPARE(&g, { n[0], n[2], n[1], n[3] });
+
+		stack.undo();
+		GROUPCOMPARE(&g, { n[0], n[1], n[2], n[3] });
+	}
+
+	void removeMultiCommand() {
+		QUndoStack stack;
+		TGroup<Foo> g;
+		auto n = makeShared(4);
+		g.insert(0, n);
+
+		stack.push(new RemoveMultiCommand<Foo>(&g, { 1, 3 }));
+		GROUPCOMPARE(&g, { n[0], n[2] });
+
+		stack.undo();
+		GROUPCOMPARE(&g, { n[0], n[1], n[2], n[3] });
+	}
+
+
+	//void removeChildren() {
+	//	reset();
+	//	group->addChild(node0);
+	//	group->addChild(node1);
+	//	group->addChild(node2);
+	//	QSignalSpy spy(group, &Group::sDelete);
+	//	group->removeChildren(0, 2);
+	//	GROUPCOMPARE(group, { node2 });
+	//	QCOMPARE(spy.size(), 2);
+	//}
+	//void removeChildren2() {
+	//	reset();
+	//	group->addChild(node0);
+	//	group->addChild(node1);
+	//	QSignalSpy spy(group, &Group::sDelete);
+	//	group->removeChildren(0, 2);
+	//	GROUPCOMPARE(group, {});
+	//	QCOMPARE(spy.size(), 2);
+	//}
+	//void addChild() {
+	//	reset();
+	//	QSignalSpy spy(group, &Group::sNew);
+	//	group->addChild(node0);
+	//	QCOMPARE(spy.size(), 1);
+	//}
+
 	//void dumbCommand() {
 	//	reset();
 	//	group->addChild(node0);
@@ -94,139 +308,7 @@ private slots:
 	//	GROUPCOMPARE(group, { node0, node1 });
 	//	QCOMPARE(newSpy.size(), 1);
 	//}
-	void move() {
-		osg::ref_ptr<Group> group;
-		osg::ref_ptr<osg::Node> node0;
-		osg::ref_ptr<osg::Node> node1;
-		osg::ref_ptr<osg::Node> node2;
-		osg::ref_ptr<osg::Node> node3;
-		group = new Group;
-		node0 = new osg::Node;
-		node1 = new osg::Node;
-		node2 = new osg::Node;
-		node3 = new osg::Node;
-		group->addChild(node0);
-		group->addChild(node1);
-		group->addChild(node2);
-		group->addChild(node3);
-		node0->setName("0");
-		node1->setName("1");
-		node2->setName("2");
-		node3->setName("3");
-		//qRegisterMetaType<std::vector<std::pair<size_t, size_t>>>("MoveList");
-		//QSignalSpy spy(group, &Group::sItemsMoved);
 
-		// swap 0 to 1
-		qInfo() << "swap 1";
-		group->move({ {0,1} });
-		GROUPCOMPARE(group, {node1, node0, node2, node3});
-		//qDebug() << "after swap";
-		//for (uint i = 0; i < group->getNumChildren(); i++) {
-		//	qDebug() << group->child(i)->getName().c_str();
-		//}
-		//QCOMPARE(spy.size(), 1);
-
-		qInfo() << "swap 0, 2, 3";
-		// swap 2,3 to 1,2
-		group->move({ {2,1},{3,2} });
-		GROUPCOMPARE(group, {node1, node2, node3, node0});
-	}
-	//void removeChildren() {
-	//	reset();
-	//	group->addChild(node0);
-	//	group->addChild(node1);
-	//	group->addChild(node2);
-	//	QSignalSpy spy(group, &Group::sDelete);
-	//	group->removeChildren(0, 2);
-	//	GROUPCOMPARE(group, { node2 });
-	//	QCOMPARE(spy.size(), 2);
-	//}
-	//void removeChildren2() {
-	//	reset();
-	//	group->addChild(node0);
-	//	group->addChild(node1);
-	//	QSignalSpy spy(group, &Group::sDelete);
-	//	group->removeChildren(0, 2);
-	//	GROUPCOMPARE(group, {});
-	//	QCOMPARE(spy.size(), 2);
-	//}
-	//void addChild() {
-	//	reset();
-	//	QSignalSpy spy(group, &Group::sNew);
-	//	group->addChild(node0);
-	//	QCOMPARE(spy.size(), 1);
-	//}
-	void insert() {
-		osg::ref_ptr<Group> g = new Group;
-		auto n = makeNodes(6);
-		auto ref = makeRefs(n);
-
-		g->insert(0, {n[0], n[1]});
-		GROUPCOMPARE(g, { n[0], n[1] });
-
-		g->insert(0, {n[2], n[3]});
-		GROUPCOMPARE(g, { n[2], n[3], n[0], n[1] });
-	}
-	void remove() {
-
-	}
-	void insertChildrenSet() {
-		osg::ref_ptr<Group> g = new Group;
-		std::vector<osg::Node*> n;
-		for (size_t i = 0; i < 6; i++) {
-			osg::Node *node = new osg::Node;
-			node->setName(std::to_string(i));
-			n.push_back(node);
-		}
-
-		g->insertChildrenSet({
-			{ 0, n[0] },
-			{ 1, n[1] },
-			{ 2, n[2] }});
-		GROUPCOMPARE(g, { n[0], n[1], n[2] });
-
-		g->insertChildrenSet({
-			{ 0, n[3] },
-			{ 1, n[4] },
-			{ 4, n[5] }});
-		//for (size_t i = 0; i < g->getNumChildren(); i++) {
-		//	// did these guys get deleted?
-		//	qDebug() << g->child(i) << g->child(i)->getName().c_str();
-		//}
-		GROUPCOMPARE(g, { n[3], n[4], n[0], n[1], n[5], n[2] });
-	}
-	void removeChildrenSet() {
-		osg::ref_ptr<Group> g = new Group;
-		std::vector<osg::Node*> n;
-		for (size_t i = 0; i < 6; i++) {
-			osg::Node *node = new osg::Node;
-			node->setName(std::to_string(i));
-			n.push_back(node);
-			g->addChild(node);
-		}
-
-		g->removeChildrenSet({0});
-		GROUPCOMPARE(g, { n[1], n[2], n[3], n[4], n[5]});
-
-		g->removeChildrenSet({ 4 });
-		GROUPCOMPARE(g, { n[1], n[2], n[3], n[4]});
-
-		g->removeChildrenSet({ 1, 2 });
-		GROUPCOMPARE(g, { n[1], n[4] });
-	}
-	//void removeChildrenP() {
-	//	osg::ref_ptr<Group> g = new Group;
-	//	std::vector<osg::Node*> n;
-	//	for (size_t i = 0; i < 6; i++) {
-	//		osg::Node *node = new osg::Node;
-	//		node->setName(std::to_string(i));
-	//		n.push_back(node);
-	//		g->addChild(node);
-	//	}
-
-	//	g->removeChildrenP({n[3], n[1], n[0]});
-	//	GROUPCOMPARE(g, { n[2], n[4], n[5] });
-	//}
 };
 
 QTEST_MAIN(Group_test)

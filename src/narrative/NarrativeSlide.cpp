@@ -4,16 +4,11 @@
 #include <QTextCursor>
 #include <iostream>
 NarrativeSlide::NarrativeSlide()
-	: Group(),
-	m_camera_matrix(),
+	: m_camera_matrix(),
 	m_duration(4.0f),
 	m_stay_on_node(false),
 	m_transition_duration(4.0f),
 	m_thumbnail_dirty(true)
-{
-}
-
-NarrativeSlide::NarrativeSlide(const NarrativeSlide & n, const osg::CopyOp & copyop)
 {
 }
 
@@ -26,13 +21,12 @@ NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransit
 	m_transition_duration = old_transition->getDuration();
 
 	// convert old labels into new ones
-	qDebug() << "converting old slide" << old->getNumChildren();
+	//qDebug() << "converting old slide" << old->getNumChildren();
 	for (uint i = 0; i < old->getNumChildren(); i++) {
 		const osg::Node *child = old->getChild(i);
 		const VSCanvas *canvas = dynamic_cast<const VSCanvas*>(child);
 		// get the children
 		if (!canvas) continue;
-		qDebug() << canvas->getNumChildren();
 
 		for (uint j = 0; j < canvas->getNumChildren(); j++) {
 			const osg::Node *canchild = canvas->getChild(j);
@@ -64,7 +58,6 @@ NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransit
 
 				float height = old_label->getText()->getCharacterHeight();
 
-				// TODO: how to convert old font?
 				const osgText::Font *f = old_label->getText()->getFont();
 				if (!f) {
 				}
@@ -94,7 +87,7 @@ NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransit
 				cursor.setCharFormat(format);
 				cursor.insertText(old_text.c_str());
 
-				addChild(new_label);
+				append(std::shared_ptr<NarrativeSlideItem>(new_label));
 			}
 			// finally we can make a new label
 
@@ -102,10 +95,6 @@ NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransit
 
 		}
 	}
-}
-
-NarrativeSlide::~NarrativeSlide()
-{
 }
 
 const osg::Matrixd & NarrativeSlide::getCameraMatrix() const

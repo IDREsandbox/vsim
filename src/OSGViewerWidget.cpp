@@ -30,19 +30,21 @@
 #include <QSurfaceFormat>
 #include <QTimer>
 
+#include "SimpleCameraManipulator.h"
+#include "FirstPersonManipulator.h"
+#include "FlightManipulator.h"
+#include "ObjectManipulator.h"
+#include "KeyTracker.h"
+
 OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	: QOpenGLWidget(parent,	f),
-	m_speed_tick(0)
+	m_speed_tick(0),
+	m_rendering_enabled(true)
 {
-	if (!g_viewer) {
-		g_viewer = new osgViewer::CompositeViewer();
-	}
-
 	// Create viewer, graphics context, and link them together
-	m_viewer = g_viewer;
 
 	m_main_view = new osgViewer::View();
-	//m_viewer->addView(m_main_view);
+
 	//m_viewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 	//osg::ref_ptr<osg::DisplaySettings> display_settings = new osg::DisplaySettings;
 	//display_settings->setNumMultiSamples(8);
@@ -118,7 +120,8 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	//this->setMinimumSize(100, 100);
 
 	// Key tracking
-	this->installEventFilter(&m_key_tracker);
+	m_key_tracker = new KeyTracker(this);
+	this->installEventFilter(m_key_tracker);
 	this->installEventFilter(this);
 
 	// Mouse tracking
@@ -320,6 +323,18 @@ void OSGViewerWidget::enableCollisions(bool enable)
 	m_first_person_manipulator->enableCollisions(enable);
 }
 
+void OSGViewerWidget::enableRendering(bool enable)
+{
+	m_rendering_enabled = enable;
+	if (enable) update();
+}
+
+void OSGViewerWidget::setViewer(osgViewer::CompositeViewer * viewer)
+{
+	m_viewer = viewer;
+	m_viewer->addView(m_main_view);
+}
+
 void OSGViewerWidget::reset()
 {
 	// pretty much copied from osgGA::CameraManipulator::computeHomePosition
@@ -378,6 +393,14 @@ QImage OSGViewerWidget::renderView(QSize size, const osg::Matrixd & matrix)
 
 void OSGViewerWidget::paintEvent(QPaintEvent *e)
 {
+	// let qt do setup stuff and call paintGL
+	QOpenGLWidget::paintEvent(e);
+}
+
+void OSGViewerWidget::paintGL()
+{
+	if (!m_viewer) return;
+	//qDebug() << "paint gl" << this << m_viewer->getNumViews();
 	qint64 dt = m_frame_timer.nsecsElapsed();
 	m_frame_timer.restart();
 	double dt_sec = (double)dt / 1.0e9;
@@ -385,7 +408,7 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 	//emit frame(dt_sec);
 
 	if (m_manipulator == MANIPULATOR_FIRST_PERSON) {
-		m_first_person_manipulator->update(dt_sec, &m_key_tracker, m_main_view->getSceneData());
+		m_first_person_manipulator->update(dt_sec, m_key_tracker, m_main_view->getSceneData());
 	}
 	else if (m_manipulator == MANIPULATOR_FLIGHT) {
 		// shouldn't be in mousemove because entering flight mode doesn't necessarily
@@ -397,19 +420,18 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 		double ny = 2 * dy / (double)height();
 		m_flight_manipulator->setMousePosition(nx, ny);
 
-		m_flight_manipulator->update(dt_sec, &m_key_tracker, m_main_view->getSceneData());
+		m_flight_manipulator->update(dt_sec, m_key_tracker, m_main_view->getSceneData());
 	}
 
-	// let qt do setup stuff and call paintGL
-	QOpenGLWidget::paintEvent(e);
-}
-
-void OSGViewerWidget::paintGL()
-{
 	// hacky way that lets us have multiple OSGViewerWidgets sharing one CompositeViewer
-	m_viewer->addView(m_main_view);
-	m_viewer->frame();
-	m_viewer->removeView(m_main_view);
+	//m_viewer->addView(m_main_view);
+	//frame()
+	//m_viewer->removeView(m_main_view);
+	// this is really slow for some reason
+	if (m_rendering_enabled) {
+		m_viewer->frame(dt);
+	}
+	
 }
 
 void OSGViewerWidget::resizeGL(int width, int height)
@@ -418,11 +440,10 @@ void OSGViewerWidget::resizeGL(int width, int height)
 	graphicsWindow_->resized(this->x(), this->y(), width, height);
 
 	std::vector<osg::Camera*> cameras;
+	if (!m_viewer) return;
 	m_viewer->getCameras(cameras);
 
-	if (cameras.size() > 0) {
-		cameras[0]->setViewport(0, 0, width, height);
-	}
+	m_main_view->getCamera()->setViewport(0, 0, width, height);
 }
 
 void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
@@ -622,6 +643,7 @@ void OSGViewerWidget::takeCursor()
 {
 	grabMouse(Qt::BlankCursor);
 	centerCursor();
+	m_key_tracker->stealKeys({Qt::Key_W, Qt::Key_A, Qt::Key_S, Qt::Key_D, Qt::Key_Shift, Qt::Key_Control});
 }
 
 void OSGViewerWidget::releaseCursor()
@@ -633,6 +655,7 @@ void OSGViewerWidget::releaseCursor()
 	QCursor current = cursor();
 	setCursor(Qt::BlankCursor);
 	setCursor(current);
+	m_key_tracker->stealKeys({});
 }
 
 osgGA::EventQueue* OSGViewerWidget::getEventQueue() const

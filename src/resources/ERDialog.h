@@ -37,6 +37,7 @@ public:
 
 	ECategory *categoryAt(int index) const;
 	ECategory *getCategory() const;
+	std::shared_ptr<ECategory> categoryShared() const;
 	void setCategory(const ECategory *cat);
 
 	void chooseFile();

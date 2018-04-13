@@ -1,3 +1,6 @@
+#ifndef UTIL_H
+#define UTIL_H
+
 #include <string>
 #include <QRect>
 #include <QImage>
@@ -7,13 +10,18 @@
 #include <osg/Vec4>
 #include <osg/Matrix>
 #include <algorithm>
+#include <QDate>
 
 namespace Util
 {
 	std::string addExtensionIfNotExist(const std::string& filename, const std::string& ext);
 	std::string getExtension(const std::string& filename);
 	std::string getFilename(const std::string &path);
-	
+
+	// converts m*/d*/yy to QDate, * means 1 or 2 chars
+	// year conversion: <80 is 20xx, >=80 is 19xx
+	bool mxdxyyToQDate(const std::string &str, QDate *out);
+
 	// Fits the largest possible rectangle with given aspect ratio into another rectangle
 	QRect rectFit(QRect container, float whratio);
 
@@ -45,9 +53,9 @@ namespace Util
 	// ex. [a, b, c, d], insertions: a[1] = e, a[3] = f
 	//     [a, e, b, f, c, d]
 	// fixme [0, 1, 2, 3] -> [0, 2, 4, 5]
-	std::vector<int> fixIndices(const std::vector<int> &fixme, const std::set<int> &changes);
+	std::vector<size_t> fixIndices(const std::vector<size_t> &fixme, const std::set<size_t> &changes);
 
-	std::vector<int> fixIndicesRemove(const std::vector<int> &fixme, const std::set<int> &changes);
+	std::vector<size_t> fixIndicesRemove(const std::vector<size_t> &fixme, const std::set<size_t> &changes);
 
 	// inserts multiple items into a vector
 	// expects the insertions to be sorted
@@ -242,6 +250,7 @@ namespace Util
 	// 
 	QString osgMatrixToQString(osg::Matrix);
 	osg::Vec4d mult_vec(osg::Matrixd M, osg::Vec4d v);
+	bool osgMatrixEq(const osg::Matrix m1, const osg::Matrix m2, double epsilon = .001);
 
 	//4x4 transpose
 	osg::Matrixd transpose(osg::Matrixd m);
@@ -258,3 +267,5 @@ namespace Util
 
 	Util::endPt hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl = .0001);
 }
+
+#endif

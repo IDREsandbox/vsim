@@ -1,10 +1,17 @@
 #include "KeyTracker.h"
 
+KeyTracker::KeyTracker(QObject * parent)
+	: QObject(parent)
+{
+}
+
 bool KeyTracker::eventFilter(QObject * obj, QEvent * e)
 {
 	QEvent::Type type = e->type();
 	QKeyEvent *ke;
 	QMouseEvent *me;
+
+	bool steal = false;
 
 	switch (e->type()) {
 	case QEvent::KeyPress:
@@ -21,6 +28,14 @@ bool KeyTracker::eventFilter(QObject * obj, QEvent * e)
 	case QEvent::MouseButtonRelease:
 		me = (QMouseEvent*)e;
 		m_mouse_buttons = me->buttons();
+		break;
+	case QEvent::ShortcutOverride:
+		ke = (QKeyEvent*)e;
+		if (m_key_steal.find(ke->key()) != m_key_steal.end()) {
+			// found in steal map
+			ke->accept();
+			return true;
+		}
 		break;
 	default:
 		break;
@@ -50,4 +65,12 @@ Qt::MouseButtons KeyTracker::mouseButtons()
 bool KeyTracker::mouseButton(Qt::MouseButton button)
 {
 	return m_mouse_buttons & button;
+}
+
+void KeyTracker::stealKeys(const QList<int>& list)
+{
+	m_key_steal.clear();
+	for (auto key : list) {
+		m_key_steal.insert(key);
+	}
 }

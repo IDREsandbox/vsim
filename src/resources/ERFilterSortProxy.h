@@ -7,33 +7,34 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Group.h"
+#include "GroupTemplate.h"
 
 class EResource;
 class ECategory;
 class ECategoryGroup;
 class CheckableListProxy;
 
-class ERFilterSortProxy : public Group {
+class ERFilterSortProxy : public TGroup<EResource> {
 	Q_OBJECT
 public:
-	ERFilterSortProxy(Group *base = nullptr);
+	ERFilterSortProxy(TGroup<EResource> *base = nullptr);
 
-	void setBase(Group *base);
+	void setBase(TGroup<EResource> *base);
 
 	// group overrides
-	virtual osg::Node *child(unsigned int index) const override;
-	virtual unsigned int getNumChildren() const override;
-	virtual int indexOf(const osg::Node *node) const override;
+	EResource *child(size_t index) const override;
+	size_t size() const override;
+	int indexOf(const EResource *node) const override;
+
 	// not supported
 	//virtual bool insertChild(unsigned int index, Node *child) override;
 	//virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
 
-	typedef bool(*LessThanFunc)(osg::Node*, osg::Node*);
-	static bool lessThanNone(osg::Node *left, osg::Node *right);
-	static bool lessThanDistance(osg::Node *left, osg::Node *right);
-	static bool lessThanAlphabetical(osg::Node *left, osg::Node *right);
-	virtual bool lessThan(int left, int right);
+	//typedef bool(*LessThanFunc)(osg::Node*, osg::Node*);
+	//static bool lessThanNone(osg::Node *left, osg::Node *right);
+	//static bool lessThanDistance(osg::Node *left, osg::Node *right);
+	//static bool lessThanAlphabetical(osg::Node *left, osg::Node *right);
+	virtual bool lessThan(size_t left, size_t right);
 
 	// information
 
@@ -42,11 +43,10 @@ public:
 	std::vector<int> indicesOf(const std::vector<EResource*> &res, bool blanks = true);
 
 	// filter sort overrides
-	virtual bool accept(osg::Node *node);
+	virtual bool accept(EResource *node);
 
-	virtual LessThanFunc lessThanFunc() const;
-
-	virtual void track(osg::Node *node);
+	//virtual LessThanFunc lessThanFunc() const;
+	//virtual void track(EResource *node);
 
 	EResource *getResource(int index) const;
 	void debug();
@@ -81,11 +81,11 @@ protected:
 
 	//
 	//void checkAndAddSet(std::set<int> base_index);
-	std::set<int> baseToLocal(const std::set<int> base_indices) const;
+	std::set<size_t> baseToLocal(const std::set<size_t> base_indices) const;
 
-	void recheck(const std::set<int> &base_indices);
-	void checkAndInsertSet(const std::set<int> &insertions);
-	void checkAndRemoveSet(const std::set<int> &base_indices);
+	void recheck(const std::set<size_t> &base_indices);
+	void checkAndInsertSet(const std::set<size_t> &insertions);
+	void checkAndRemoveSet(const std::set<size_t> &base_indices);
 
 	// when a name changes or something
 	void onResourceChange(EResource *res);
@@ -109,8 +109,8 @@ private:
 
 private:
 	// filter sort proxy
-	osg::ref_ptr<Group> m_base;
-	std::vector<int> m_map_to_base;
+	TGroup<EResource> *m_base;
+	std::vector<size_t> m_map_to_base;
 
 	// ER specific
 	SortBy m_sort_by;

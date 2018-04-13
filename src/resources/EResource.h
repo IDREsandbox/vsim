@@ -2,27 +2,23 @@
 #define ERESOURCE_H
 
 #include <string>
-#include <osg/Node>
-#include <osg/observer_ptr>
 #include <QObject>
+#include <memory>
+#include <osg/Matrix>
 
-//#include "deprecated/resources/EResourcesNode.h"
-#include "Group.h"
 #include "Command.h"
-#include "resources/ECategory.h"
 
 class EResourcesNode;
 class ECategoryGroup;
-class EResource : public QObject, public osg::Node {
+class ECategory;
+class EResource : public QObject {
 	Q_OBJECT
 
 public:
 	EResource();
-	EResource(const EResource& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
-	EResource(const EResourcesNode *old, const std::map<std::string, ECategory*> &cats); // converts old resource to a new one
-	virtual ~EResource();
 
-	META_Node(, EResource)
+	// converts old resource to a new one, doesn't set category
+	EResource(const EResourcesNode *old);
 
 	const std::string& getResourceName() const;
 	void setResourceName(const std::string& name);
@@ -79,7 +75,6 @@ public:
 	void setERType(ERType ertype);
 
 	const osg::Matrixd& getCameraMatrix() const;
-	osg::Matrixd& getCameraMatrix();
 	void setCameraMatrix(const osg::Matrixd& matrix);
 	bool getPositional() const;
 	void setPositional(bool p) const;
@@ -87,8 +82,10 @@ public:
 	void setDistanceTo(double dist);
 
 	ECategory *category() const;
-	const ECategory *getCategory() const;
-	void setCategory(ECategory *category);
+	std::shared_ptr<ECategory> categoryShared() const;
+
+	//void setCategory(ECategory *category);
+	void setCategory(std::shared_ptr<ECategory> category);
 
 	// serializer only
 	int getCategoryIndex() const;
@@ -181,10 +178,10 @@ public: // resource commands
 	};
 
 	// category commands
-	class SetCategoryCommand : public ModifyCommand<EResource, ECategory*> {
+	class SetCategoryCommand : public ModifyCommand<EResource, std::shared_ptr<ECategory>> {
 	public:
-		SetCategoryCommand(EResource *res, ECategory *category, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&EResource::category, &setCategory, category, res, parent) {}
+		SetCategoryCommand(EResource *res, std::shared_ptr<ECategory> category, QUndoCommand *parent = nullptr)
+			: ModifyCommand(&EResource::categoryShared, &setCategory, category, res, parent) {}
 	};
 	
 private:
@@ -209,7 +206,7 @@ private:
 	double m_distance_to;
 
 	int m_category_index;
-	osg::observer_ptr<ECategory> m_category;
+	std::weak_ptr<ECategory> m_category;
 
 	int m_index;
 };

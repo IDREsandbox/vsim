@@ -1,0 +1,39 @@
+include "types.fbs";
+include "eresources.fbs";
+include "narratives.fbs";
+include "settings.fbs";
+
+namespace VSim.FlatBuffers;
+
+file_extension "vsim";
+file_identifier "VSIM";
+
+table Model { // model metadata
+  format:string;
+  ascii:bool = false;
+  zlib:bool = false;
+  size:uint64; // assigning this is difficult, perhaps use 
+  external:bool = false;
+  name:string;
+  path:string;
+  // included:bool;
+  // path:string;
+  // size_prefixed:bool // potential change
+  // buffer_after_flatbuffer: bool = true; // just assume true
+  // data:[byte]; // always store external
+}
+
+table ModelTable {
+  models:[Model];
+}
+
+table Root {
+  version:string;
+  narratives:NarrativeTable;
+  eresources:ERTable;
+  models:ModelTable;
+
+  settings:Settings;
+}
+
+root_type Root;

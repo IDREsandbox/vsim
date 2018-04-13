@@ -6,6 +6,7 @@
 #include <osg/io_utils>
 #include <iostream>
 #include <chrono>
+#include <regex>
 
 // ext must be of the form "txt".
 std::string Util::addExtensionIfNotExist(const std::string& filename, const std::string& ext)
@@ -58,6 +59,28 @@ std::string Util::getFilename(const std::string & path)
 {
 	int endpath = path.find_last_of("\\/");
 	return path.substr(endpath + 1);
+}
+
+bool Util::mxdxyyToQDate(const std::string & str, QDate *out)
+{
+	std::regex reg("(\\d{1,2})/(\\d{1,2})/(\\d{2})");
+	std::smatch match;
+	bool hit = std::regex_match(str, match, reg);
+	if (!hit || match.size() != 4) {
+		return false;
+	}
+	int m, d, y;
+	m = std::stoi(match[1].str());
+	d = std::stoi(match[2].str());
+	y = std::stoi(match[3].str());
+	if (y < 80) {
+		y = 2000 + y;
+	}
+	else {
+		y = 1900 + y;
+	}
+	*out = QDate(y, m, d);
+	return true;
 }
 
 QRect Util::rectFit(QRect container, float whratio)
@@ -146,7 +169,7 @@ QString Util::setToString(std::set<int> set)
 	return str;
 }
 
-std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<int>& insertions)
+std::vector<size_t> Util::fixIndices(const std::vector<size_t> &fixme, const std::set<size_t>& insertions)
 {
 	size_t max_index = 0;
 	for (int x : fixme) {
@@ -177,7 +200,7 @@ std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<
 	//	}
 	//	delta_array[i] = shift;
 	//}
-	std::vector<int> result(fixme);
+	std::vector<size_t> result(fixme);
 	for (size_t i = 0; i < result.size(); i++) {
 		size_t old_index = result[i];
 		result[i] = old_index + delta_array[old_index];
@@ -212,7 +235,7 @@ std::vector<int> Util::fixIndices(const std::vector<int> &fixme, const std::set<
 	//return result;
 }
 
-std::vector<int> Util::fixIndicesRemove(const std::vector<int>& fixme, const std::set<int>& changes)
+std::vector<size_t> Util::fixIndicesRemove(const std::vector<size_t>& fixme, const std::set<size_t>& changes)
 {
 	if (fixme.size() == 0) return {};
 	int max = *std::max_element(fixme.begin(), fixme.end());
@@ -225,7 +248,7 @@ std::vector<int> Util::fixIndicesRemove(const std::vector<int>& fixme, const std
 		delta_array[i] = shift;
 	}
 
-	std::vector<int> result(fixme);
+	std::vector<size_t> result(fixme);
 	for (size_t i = 0; i < result.size(); i++) {
 		size_t old_index = result[i];
 		result[i] = old_index + delta_array[old_index];
@@ -362,6 +385,17 @@ osg::Vec4d Util::mult_vec(osg::Matrixd M, osg::Vec4d v)
 	return v_new;
 }
 
+bool Util::osgMatrixEq(const osg::Matrix m1, const osg::Matrix m2, double epsilon)
+{
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			bool different = std::fabs(m1(i, j) - m2(i, j)) > epsilon;
+			if (different) return false;
+		}
+	}
+	return true;
+}
+
 //4x4 transpose
 osg::Matrixd Util::transpose(osg::Matrixd m)
 {
@@ -487,7 +521,7 @@ QString Util::osgMatrixToQString(osg::Matrix m)
 		for (int j = 0; j < 4; j++) {
 			s.append(QString::number(m(i, j)) + " ");
 		}
-		s.append("| ");
+		if (i < 3) s.append("| ");
 	}
 	return s;
 }

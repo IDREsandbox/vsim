@@ -1,17 +1,15 @@
 #ifndef ECATEGORYMODEL_H
 #define ECATEGORYMODEL_H
 
-#include "resources/ECategory.h"
-#include "resources/ECategoryGroup.h"
+#include "GroupModelTemplate.h"
 
-#include "GroupModel.h"
+class ECategory;
 
-class ECategoryModel : public GroupModel {
+class ECategoryModel : public TGroupModel<ECategory> {
 	Q_OBJECT;
 public:
 	ECategoryModel(QObject *parent);
 	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 	virtual QVariant data(const QModelIndex &index, int role) const override;
-
 };
 #endif

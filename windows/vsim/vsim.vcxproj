@@ -1,0 +1,448 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\BaseFirstPersonManipulator.h" />
+    <QtMoc Include="..\..\src\CheckableListProxy.h" />
+    <ClInclude Include="..\..\src\Command.h" />
+    <ClInclude Include="..\..\src\deprecated\narrative\Narrative.h" />
+    <ClInclude Include="..\..\src\deprecated\narrative\NarrativeNode.h" />
+    <ClInclude Include="..\..\src\deprecated\osgNewWidget\Canvas.h" />
+    <ClInclude Include="..\..\src\deprecated\osgNewWidget\Label.h" />
+    <ClInclude Include="..\..\src\deprecated\osgNewWidget\VSWidget.h" />
+    <ClInclude Include="..\..\src\deprecated\osgNewWidget\Widget.h" />
+    <ClInclude Include="..\..\src\deprecated\resources\EResourcesCategory.h" />
+    <ClInclude Include="..\..\src\deprecated\resources\EResourcesList.h" />
+    <ClInclude Include="..\..\src\deprecated\resources\EResourcesNode.h" />
+    <QtMoc Include="..\..\src\narrative\CanvasContainer.h" />
+    <QtMoc Include="..\..\src\narrative\Narrative2.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativeCanvas.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativeControl.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativeGroup.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativeInfoDialog.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativePlayer.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativeScrollBox.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativeScrollItem.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativeSlide.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativeSlideDurationDialog.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativeSlideItem.h" />
+    <QtMoc Include="..\..\src\narrative\NarrativeSlideLabel.h" />
+    <QtMoc Include="..\..\src\narrative\SlideScrollBox.h" />
+    <QtMoc Include="..\..\src\narrative\SlideScrollItem.h" />
+    <QtMoc Include="..\..\src\resources\ECategory.h" />
+    <QtMoc Include="..\..\src\resources\ECategoryControl.h" />
+    <QtMoc Include="..\..\src\resources\ECategoryGroup.h" />
+    <QtMoc Include="..\..\src\resources\ECategoryModel.h" />
+    <QtMoc Include="..\..\src\resources\ERControl.h" />
+    <QtMoc Include="..\..\src\resources\ERDialog.h" />
+    <QtMoc Include="..\..\src\resources\ERDisplay.h" />
+    <QtMoc Include="..\..\src\resources\EResource.h" />
+    <QtMoc Include="..\..\src\resources\EResourceGroup.h" />
+    <QtMoc Include="..\..\src\resources\ERFilterArea.h" />
+    <QtMoc Include="..\..\src\resources\ERFilterSortProxy.h" />
+    <QtMoc Include="..\..\src\resources\ERScrollBox.h" />
+    <QtMoc Include="..\..\src\resources\ERScrollItem.h" />
+    <QtMoc Include="..\..\src\resources\NewCatDialog.h" />
+    <QtMoc Include="..\..\src\editButtons.h" />
+    <QtMoc Include="..\..\src\EditDeleteDelegate.h" />
+    <QtMoc Include="..\..\src\ERBar.h" />
+    <ClInclude Include="..\..\src\ERSerializer.h" />
+    <ClInclude Include="..\..\src\FileUtil.h" />
+    <ClInclude Include="..\..\src\FirstPersonManipulator.h" />
+    <ClInclude Include="..\..\src\FlightManipulator.h" />
+    <QtMoc Include="..\..\src\FocusFilter.h" />
+    <QtMoc Include="..\..\src\Group.h" />
+    <QtMoc Include="..\..\src\GroupModel.h" />
+    <QtMoc Include="..\..\src\GroupProxy.h" />
+    <QtMoc Include="..\..\src\GroupScrollBox.h" />
+    <QtMoc Include="..\..\src\HorizontalScrollBox.h" />
+    <ClInclude Include="..\..\src\KeyTracker.h" />
+    <QtMoc Include="..\..\src\LabelStyle.h" />
+    <QtMoc Include="..\..\src\LabelStyleGroup.h" />
+    <ClInclude Include="..\..\src\LabelType.h" />
+    <QtMoc Include="..\..\src\MainWindow.h" />
+    <QtMoc Include="..\..\src\MainWindowTopBar.h" />
+    <QtMoc Include="..\..\src\ModelGroup.h" />
+    <ClInclude Include="..\..\src\ModelInformation.h" />
+    <QtMoc Include="..\..\src\ModelOutliner.h" />
+    <QtMoc Include="..\..\src\ModelTableModel.h" />
+    <QtMoc Include="..\..\src\mrichtextedit.h" />
+    <QtMoc Include="..\..\src\mtextedit.h" />
+    <ClInclude Include="..\..\src\NarrativeSerializer.h" />
+    <ClInclude Include="..\..\src\Navigation.h" />
+    <QtMoc Include="..\..\src\NavigationControl.h" />
+    <QtMoc Include="..\..\src\NumberSlider.h" />
+    <ClInclude Include="..\..\src\ObjectManipulator.h" />
+    <QtMoc Include="..\..\src\OSGViewerWidget.h" />
+    <ClInclude Include="..\..\src\RegisterMetaTypes.h" />
+    <QtMoc Include="..\..\src\ScrollBoxItem.h" />
+    <QtMoc Include="..\..\src\Selection.h" />
+    <QtMoc Include="..\..\src\SelectionStack.h" />
+    <ClInclude Include="..\..\src\SimpleCameraManipulator.h" />
+    <QtMoc Include="..\..\src\StyleSettingsDialog.h" />
+    <QtMoc Include="..\..\src\StyleSettingsWidget.h" />
+    <QtMoc Include="..\..\src\TextToolbar.h" />
+    <QtMoc Include="..\..\src\TickSlider.h" />
+    <QtMoc Include="..\..\src\TimeSlider.h" />
+    <ClInclude Include="..\..\src\TypesSerializer.h" />
+    <ClInclude Include="..\..\src\Util.h" />
+    <QtMoc Include="..\..\src\VSimApp.h" />
+    <QtMoc Include="..\..\src\VSimRoot.h" />
+    <ClInclude Include="..\..\src\VSimSerializer.h" />
+    <ClInclude Include="GeneratedFiles\eresources_generated.h" />
+    <ClInclude Include="GeneratedFiles\narratives_generated.h" />
+    <ClInclude Include="GeneratedFiles\settings_generated.h" />
+    <ClInclude Include="GeneratedFiles\types_generated.h" />
+    <ClInclude Include="GeneratedFiles\vsim_generated.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B12702AD-ABFB-343A-A199-8E24837244A3}</ProjectGuid>
+    <Keyword>Qt4VSv1.0</Keyword>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <PropertyGroup Condition="'$(QtMsBuild)'=='' or !Exists('$(QtMsBuild)\qt.targets')">
+    <QtMsBuild>$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
+    <Import Project="$(QtMsBuild)\qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\global.props" />
+    <Import Project="..\qt.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\global.props" />
+    <Import Project="..\qt.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\global.props" />
+    <Import Project="..\qt.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\global.props" />
+    <Import Project="..\qt.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>14.0.25431.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>UNICODE;WIN32;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
+      <Define>UNICODE;WIN32;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB</Define>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <DynamicSource>output</DynamicSource>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include</IncludePath>
+    </QtMoc>
+    <QtUic>
+      <OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile>
+      <InputFile>%(FullPath)</InputFile>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
+    </QtUic>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>UNICODE;WIN32;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <QtUic>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile>
+      <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
+    </QtUic>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
+      <Define>UNICODE;WIN32;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB</Define>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <DynamicSource>output</DynamicSource>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include</IncludePath>
+    </QtMoc>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>UNICODE;WIN32;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
+      <Define>UNICODE;WIN32;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB</Define>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <DynamicSource>output</DynamicSource>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include</IncludePath>
+    </QtMoc>
+    <QtUic>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile>
+      <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
+    </QtUic>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>UNICODE;WIN32;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <QtMoc>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</OutputFile>
+      <Define>UNICODE;WIN32;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB</Define>
+      <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <DynamicSource>output</DynamicSource>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include</IncludePath>
+    </QtMoc>
+    <QtUic>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile>
+      <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
+    </QtUic>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="../src/*.fbs">
+      <Message>Generating headers from flatbuffers %(Identity)</Message>
+      <Command>flatc -c --gen-object-api -o ./GeneratedFiles %(Identity)</Command>
+      <Outputs>./GeneratedFiles/%(Filename)_generated.h</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\BaseFirstPersonManipulator.cpp" />
+    <ClCompile Include="..\..\src\CheckableListProxy.cpp" />
+    <ClCompile Include="..\..\src\deprecated\narrative\Narrative.cpp" />
+    <ClCompile Include="..\..\src\deprecated\narrative\NarrativeNode.cpp" />
+    <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrative.cpp" />
+    <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrativeNode.cpp" />
+    <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrativeTransition.cpp" />
+    <ClCompile Include="..\..\src\deprecated\osgNewWidget\Canvas.cpp" />
+    <ClCompile Include="..\..\src\deprecated\osgNewWidget\Label.cpp" />
+    <ClCompile Include="..\..\src\deprecated\osgNewWidget\SerializerCanvas.cpp" />
+    <ClCompile Include="..\..\src\deprecated\osgNewWidget\SerializerLabel.cpp" />
+    <ClCompile Include="..\..\src\deprecated\osgNewWidget\SerializerVSCanvas.cpp" />
+    <ClCompile Include="..\..\src\deprecated\osgNewWidget\SerializerVSLabel.cpp" />
+    <ClCompile Include="..\..\src\deprecated\osgNewWidget\SerializerVSWidget.cpp" />
+    <ClCompile Include="..\..\src\deprecated\osgNewWidget\SerializerWidget.cpp" />
+    <ClCompile Include="..\..\src\deprecated\osgNewWidget\VSWidget.cpp" />
+    <ClCompile Include="..\..\src\deprecated\osgNewWidget\Widget.cpp" />
+    <ClCompile Include="..\..\src\deprecated\resources\EResourcesCategory.cpp" />
+    <ClCompile Include="..\..\src\deprecated\resources\EResourcesList.cpp" />
+    <ClCompile Include="..\..\src\deprecated\resources\EResourcesNode.cpp" />
+    <ClCompile Include="..\..\src\deprecated\resources\SerializerEResourcesList.cpp" />
+    <ClCompile Include="..\..\src\deprecated\resources\SerializerEResourcesNode.cpp" />
+    <ClCompile Include="..\..\src\deprecated\SerializerModelInformation.cpp" />
+    <ClCompile Include="..\..\src\editButtons.cpp" />
+    <ClCompile Include="..\..\src\EditDeleteDelegate.cpp" />
+    <ClCompile Include="..\..\src\ERBar.cpp" />
+    <ClCompile Include="..\..\src\ERSerializer.cpp" />
+    <ClCompile Include="..\..\src\FileUtil.cpp" />
+    <ClCompile Include="..\..\src\FirstPersonManipulator.cpp" />
+    <ClCompile Include="..\..\src\FlightManipulator.cpp" />
+    <ClCompile Include="..\..\src\FocusFilter.cpp" />
+    <ClCompile Include="..\..\src\Group.cpp" />
+    <ClCompile Include="..\..\src\GroupModel.cpp" />
+    <ClCompile Include="..\..\src\GroupProxy.cpp" />
+    <ClCompile Include="..\..\src\GroupScrollBox.cpp" />
+    <ClCompile Include="..\..\src\HorizontalScrollBox.cpp" />
+    <ClCompile Include="..\..\src\KeyTracker.cpp" />
+    <ClCompile Include="..\..\src\LabelStyle.cpp" />
+    <ClCompile Include="..\..\src\LabelStyleGroup.cpp" />
+    <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\MainWindow.cpp" />
+    <ClCompile Include="..\..\src\MainWindowTopBar.cpp" />
+    <ClCompile Include="..\..\src\ModelGroup.cpp" />
+    <ClCompile Include="..\..\src\ModelOutliner.cpp" />
+    <ClCompile Include="..\..\src\ModelTableModel.cpp" />
+    <ClCompile Include="..\..\src\mrichtextedit.cpp" />
+    <ClCompile Include="..\..\src\mtextedit.cpp" />
+    <ClCompile Include="..\..\src\NarrativeSerializer.cpp" />
+    <ClCompile Include="..\..\src\narrative\CanvasContainer.cpp" />
+    <ClCompile Include="..\..\src\narrative\Narrative2.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativeCanvas.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativeControl.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativeGroup.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativeInfoDialog.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativePlayer.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativeScrollBox.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativeScrollItem.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativeSlide.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativeSlideDurationDialog.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativeSlideItem.cpp" />
+    <ClCompile Include="..\..\src\narrative\NarrativeSlideLabel.cpp" />
+    <ClCompile Include="..\..\src\narrative\SlideScrollBox.cpp" />
+    <ClCompile Include="..\..\src\narrative\SlideScrollItem.cpp" />
+    <ClCompile Include="..\..\src\NavigationControl.cpp" />
+    <ClCompile Include="..\..\src\NumberSlider.cpp" />
+    <ClCompile Include="..\..\src\ObjectManipulator.cpp" />
+    <ClCompile Include="..\..\src\OSGViewerWidget.cpp" />
+    <ClCompile Include="..\..\src\resources\ECategory.cpp" />
+    <ClCompile Include="..\..\src\resources\ECategoryControl.cpp" />
+    <ClCompile Include="..\..\src\resources\ECategoryGroup.cpp" />
+    <ClCompile Include="..\..\src\resources\ECategoryModel.cpp" />
+    <ClCompile Include="..\..\src\resources\ERControl.cpp" />
+    <ClCompile Include="..\..\src\resources\ERDialog.cpp" />
+    <ClCompile Include="..\..\src\resources\ERDisplay.cpp" />
+    <ClCompile Include="..\..\src\resources\EResource.cpp" />
+    <ClCompile Include="..\..\src\resources\EResourceGroup.cpp" />
+    <ClCompile Include="..\..\src\resources\ERFilterArea.cpp" />
+    <ClCompile Include="..\..\src\resources\ERFilterSortProxy.cpp" />
+    <ClCompile Include="..\..\src\resources\ERScrollBox.cpp" />
+    <ClCompile Include="..\..\src\resources\ERScrollItem.cpp" />
+    <ClCompile Include="..\..\src\resources\NewCatDialog.cpp" />
+    <ClCompile Include="..\..\src\ScrollBoxItem.cpp" />
+    <ClCompile Include="..\..\src\Selection.cpp" />
+    <ClCompile Include="..\..\src\SelectionStack.cpp" />
+    <ClCompile Include="..\..\src\SimpleCameraManipulator.cpp" />
+    <ClCompile Include="..\..\src\StyleSettingsDialog.cpp" />
+    <ClCompile Include="..\..\src\StyleSettingsWidget.cpp" />
+    <ClCompile Include="..\..\src\TextToolbar.cpp" />
+    <ClCompile Include="..\..\src\TickSlider.cpp" />
+    <ClCompile Include="..\..\src\TimeSlider.cpp" />
+    <ClCompile Include="..\..\src\TypesSerializer.cpp" />
+    <ClCompile Include="..\..\src\Util.cpp" />
+    <ClCompile Include="..\..\src\VSimApp.cpp" />
+    <ClCompile Include="..\..\src\VSimRoot.cpp" />
+    <ClCompile Include="..\..\src\VSimSerializer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="..\..\src\CanvasSettings.ui" />
+    <QtUic Include="..\..\src\editButtons.ui" />
+    <QtUic Include="..\..\src\ERBar.ui" />
+    <QtUic Include="..\..\src\MainWindow.ui" />
+    <QtUic Include="..\..\src\MainWindowTopBar.ui" />
+    <QtUic Include="..\..\src\mrichtextedit.ui" />
+    <QtUic Include="..\..\src\NumberSlider.ui" />
+    <QtUic Include="..\..\src\StyleSettingsDialog.ui" />
+    <QtUic Include="..\..\src\StyleSettingsWidget.ui" />
+    <QtUic Include="..\..\src\TextToolbar.ui" />
+    <QtUic Include="..\..\src\TimeSlider.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\eresources.fbs" />
+    <None Include="..\..\src\narratives.fbs" />
+    <None Include="..\..\src\settings.fbs" />
+    <None Include="..\..\src\types.fbs" />
+    <None Include="..\..\src\vsim.fbs" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_Win32="5.8" Qt5Version_x0020_x64="msvc2017_64" MocOptions="" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

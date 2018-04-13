@@ -1,8 +1,10 @@
 #include "ECategoryModel.h"
+#include "resources/ECategory.h"
+#include "resources/ECategoryGroup.h"
 #include <QDebug>
 
 ECategoryModel::ECategoryModel(QObject *parent)
-	: GroupModel(parent)
+	: TGroupModel<ECategory>(parent)
 {
 }
 
@@ -14,14 +16,11 @@ int ECategoryModel::columnCount(const QModelIndex & parent) const
 
 QVariant ECategoryModel::data(const QModelIndex & index, int role) const
 {
-	if (!m_group) {
-		//qDebug() << "group is null";
-		return QVariant();
-	}
-	if (index.row() < 0 || index.row() >= (int)m_group->getNumChildren()) return QVariant();
+	if (!m_group) return QVariant();
+	if (index.row() < 0 || index.row() >= (int)m_group->size()) return QVariant();
 	if (index.column() > 0) return QVariant();
 
-	ECategory *cat = dynamic_cast<ECategory*>(m_group->child(index.row()));
+	ECategory *cat = m_group->child(index.row());
 	if (cat == nullptr) {
 		//qDebug() << "non-category in CategoryModel";
 		return QVariant();
@@ -35,5 +34,5 @@ QVariant ECategoryModel::data(const QModelIndex & index, int role) const
 		return QString::fromStdString(cat->getCategoryName());
 	}
 
-	return GroupModel::data(index, role);
+	return TGroupModel<ECategory>::data(index, role);
 }

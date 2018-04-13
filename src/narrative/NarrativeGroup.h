@@ -5,15 +5,16 @@
 #include <QUndoCommand>
 #include <osg/Group>
 #include "Command.h"
-#include "Group.h"
+#include "GroupTemplate.h"
 
-class NarrativeGroup : public Group {
+class Narrative;
+
+class NarrativeGroup : public TGroup<Narrative> {
 	Q_OBJECT
 public:
-	NarrativeGroup() {}
-	NarrativeGroup(const NarrativeGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
-	NarrativeGroup(const osg::Group *old_group);
-	META_Node(, NarrativeGroup)
+	NarrativeGroup();
+
+	Narrative *narrative(int index) const;
 };
 
 #endif

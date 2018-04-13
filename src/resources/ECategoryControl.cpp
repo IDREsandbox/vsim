@@ -4,12 +4,14 @@
 
 #include "VSimApp.h"
 #include "resources/EResource.h"
-
+#include "resources/ECategory.h"
+#include "resources/ECategoryGroup.h"
 #include "resources/ECategoryModel.h"
 #include "EditDeleteDelegate.h"
 #include "CheckableListProxy.h"
 
 #include "resources/NewCatDialog.h"
+#include "GroupCommands.h"
 
 ECategoryControl::ECategoryControl(VSimApp *app, QObject * parent)
 	: QObject(parent),
@@ -45,10 +47,8 @@ ECategoryControl::ECategoryControl(VSimApp *app, QObject * parent)
 
 void ECategoryControl::load(ECategoryGroup * cats)
 {
-	//if (m_categories.get()) disconnect(m_categories.get(), 0, this, 0);
-	// TODO: something with null?
-	m_categories = cats;
 	m_category_model->setGroup(cats);
+	m_categories = cats;
 }
 
 void ECategoryControl::execDeleteCategory(QAbstractItemModel * model, const QModelIndex & index)
@@ -61,11 +61,7 @@ void ECategoryControl::execDeleteCategory(QAbstractItemModel * model, const QMod
 			QMessageBox::Yes | QMessageBox::No);
 	if (reply != QMessageBox::Yes) return;
 
-	ECategory *cat =
-		dynamic_cast<ECategory*>(
-			static_cast<osg::Node*>(
-				model->data(index, GroupModel::PointerRole).value<void*>()));
-
+	ECategory *cat = TGroupModel<ECategory>::get(model, index.row());
 	if (!cat) return;
 
 	m_undo_stack->beginMacro("Delete Category");
@@ -74,17 +70,15 @@ void ECategoryControl::execDeleteCategory(QAbstractItemModel * model, const QMod
 		// null out resource categories so that they get restored on undo
 		m_undo_stack->push(new EResource::SetCategoryCommand(res, nullptr));
 	}
-	m_undo_stack->push(new Group::DeleteNodeCommand(m_categories, m_categories->indexOf(cat)));
+	m_undo_stack->push(new RemoveMultiCommand<ECategory>(m_categories, { (size_t)m_categories->indexOf(cat) }));
 	m_undo_stack->endMacro();
 }
 
 ECategory *ECategoryControl::execEditCategory(QAbstractItemModel * model, const QModelIndex & index)
 {
-	ECategory *cat =
-		dynamic_cast<ECategory*>(
-			static_cast<osg::Node*>(
-				model->data(index, GroupModel::PointerRole).value<void*>()));
+	ECategory *cat = TGroupModel<ECategory>::get(model, index.row());
 	if (!cat) return nullptr;
+
 	NewCatDialog dlg("Edit Category");
 	dlg.setColor(cat->getColor());
 	dlg.setTitle(QString::fromStdString(cat->getCategoryName()));
@@ -97,7 +91,7 @@ ECategory *ECategoryControl::execEditCategory(QAbstractItemModel * model, const 
 	return cat;
 }
 
-ECategory *ECategoryControl::execNewCategory()
+std::shared_ptr<ECategory> ECategoryControl::execNewCategory()
 {
 	NewCatDialog dlg;
 	int result = dlg.exec();
@@ -105,14 +99,20 @@ ECategory *ECategoryControl::execNewCategory()
 		return nullptr;
 	}
 
-	ECategory *category = new ECategory();
+	auto category = std::make_shared<ECategory>();
 	category->setCategoryName(dlg.getCatTitle().toStdString());
 	category->setColor(dlg.getColor());
-	m_categories->addChild(category);
+	m_categories->append(category);
 	return category;
 }
 
-QAbstractItemModel * ECategoryControl::categoryModel() const
+ECategoryModel *ECategoryControl::categoryModel() const
+{
+	return m_category_model;
+}
+
+QAbstractItemModel *ECategoryControl::sortedCategoryModel() const
 {
 	return m_category_sort_proxy;
 }
+

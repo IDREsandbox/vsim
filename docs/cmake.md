@@ -103,3 +103,25 @@ wait a long time
 
 [dependencies](dependencies.md)
 
+## Objects
+
+To make tests more fine grained we split the project up into object libraries. Ideally these would correspond to different folders but we haven't gotten around to it yet.
+
+The benefit is that to test Group you don't need to recompile the entire project.
+
+Util_objects - stuff used by everything, util functions, GroupTemplate
+Deprecated_objects - the old stuff
+ERModel_objects - gui independent ER stuff, depends on Util, Deprecated
+NarrativeModel_objects - gui independent Narrative stuff, depends on Util, Deprecated
+VSim_objects - everything else
+VSim - main executable
+
+## Styling
+
+Everything is case insensitive in cmake.
+
+variableNames
+TargetNames
+TargetName_src
+TargetName_test
+Library_obj

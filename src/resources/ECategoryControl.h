@@ -1,8 +1,8 @@
 #ifndef ECATEGORYCONTROL_H
 #define ECATEGORYCONTROL_H
 
+#include <memory>
 #include <QObject>
-#include <osg/Node>
 #include <QUndoStack>
 #include <QSortFilterProxyModel>
 
@@ -26,13 +26,14 @@ public:
 
 	void execDeleteCategory(QAbstractItemModel *model, const QModelIndex &index);
 	ECategory *execEditCategory(QAbstractItemModel *model, const QModelIndex &index);
-	ECategory *execNewCategory();
+	std::shared_ptr<ECategory> execNewCategory();
 
-	QAbstractItemModel *categoryModel() const;
+	ECategoryModel *categoryModel() const;
+	QAbstractItemModel *sortedCategoryModel() const;
 
 private:
 	VSimApp *m_app;
-	osg::ref_ptr<ECategoryGroup> m_categories;
+	ECategoryGroup *m_categories;
 
 	QUndoStack *m_undo_stack;
 

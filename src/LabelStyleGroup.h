@@ -1,31 +1,29 @@
-#ifndef LABELSTYLEGROUP
+#ifndef LABELSTYLEGROUP_H
 #define LABELSTYLEGROUP_H
 
 #include <QObject>
 #include <QUndoCommand>
 #include <osg/Group>
-#include "Command.h"
-#include "Group.h"
+#include <memory>
+#include "GroupTemplate.h"
 #include "LabelType.h"
+
 
 class LabelStyle;
 
-class LabelStyleGroup : public Group {
+class LabelStyleGroup : public TGroup<LabelStyle> {
 	Q_OBJECT;
 public:
 	LabelStyleGroup();
-	LabelStyleGroup(const LabelStyleGroup& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
-	META_Node(, LabelStyleGroup);
+	~LabelStyleGroup();
 
-	void init();
 	LabelStyle *getStyle(LabelType style) const;
 
 private:
-	LabelStyle *m_h1;
-	LabelStyle *m_h2;
-	LabelStyle *m_bod;
-	LabelStyle *m_lab;
-	//osg::ref_ptr<LabelStyle> m_img;
+	std::unique_ptr<LabelStyle> m_h1;
+	std::unique_ptr<LabelStyle> m_h2;
+	std::unique_ptr<LabelStyle> m_bod;
+	std::unique_ptr<LabelStyle> m_lab;
 };
 
 #endif // LABELSTYLEGROUP_H

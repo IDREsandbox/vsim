@@ -9,28 +9,19 @@
 
 #include "Command.h"
 
-class NarrativeSlideItem : public QObject, public osg::Node
+class NarrativeSlideItem : public QObject
 {
 	Q_OBJECT
 public:
 	NarrativeSlideItem();
-	NarrativeSlideItem(const NarrativeSlideItem& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
-	virtual ~NarrativeSlideItem() {}
-	META_Node(, NarrativeSlideItem);
 
 	// rect
 	QRectF getRect() const;
 	void setRect(QRectF rect);
-	// for serializer
-	const osg::Vec4 &getXYWH() const;
-	void setXYWH(const osg::Vec4 &vec);
 
 	// color
 	QColor getBackground() const;
 	void setBackground(const QColor &color);
-	// for serializer
-	const osg::Vec4 &getBackgroundRGBA() const;
-	void setBackgroundRGBA(const osg::Vec4 &vec);
 
 signals:
 	void sTransformed(QRectF rect);
@@ -46,9 +37,6 @@ public: // COMMANDS
 private:
 	QRectF m_rect;
 	QColor m_color;
-
-	mutable osg::Vec4 m_rect_vec;
-	mutable osg::Vec4 m_color_vec;
 };
 
 #endif

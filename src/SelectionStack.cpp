@@ -124,6 +124,11 @@ std::set<int> SelectionStack::toSet() const
 	return s;
 }
 
+std::set<size_t> SelectionStack::toUSet() const
+{
+	return std::set<size_t>(m_stack.begin(), m_stack.end());
+}
+
 SelectionData SelectionStack::dataFromSet(const std::set<int> &set)
 {
 	SelectionData d(set.begin(), set.end());

@@ -6,6 +6,7 @@
 #include <QUndoStack>
 #include <QSortFilterProxyModel>
 #include <vector>
+#include <memory>
 
 #include "Command.h"
 
@@ -29,7 +30,7 @@ class ERControl : public QObject
 {
 	Q_OBJECT;
 public:
-	ERControl(VSimApp *app, MainWindow *window, EResourceGroup *ers, QObject *parent = nullptr);
+	ERControl(VSimApp *app, MainWindow *window, QObject *parent = nullptr);
 
 	void load(EResourceGroup *ers);
 
@@ -41,6 +42,8 @@ public:
 	void editERInfo();
 	void openResource(); // open the file
 	void setPosition();
+	void mergeERs(const EResourceGroup *ers);
+
 	void gotoPosition();
 
 	// -1 to hide
@@ -49,7 +52,12 @@ public:
 	// show and goto resource
 	void onSelectionChange();
 
+	// selection
 	void selectERs(const std::vector<EResource*> &res);
+	std::set<size_t> getCombinedSelection();
+	std::vector<EResource*> getCombinedSelectionP();
+	int getCombinedLastSelected();
+	void clearSelection();
 
 	void debug();
 
@@ -62,17 +70,11 @@ public: // actions
 	QAction *a_goto_er;
 
 private:
-	std::set<int> getCombinedSelection();
-	std::vector<EResource*> getCombinedSelectionP();
-	int getCombinedLastSelected();
-	void clearSelection();
-
-private:
 	VSimApp *m_app;
 	MainWindow *m_window;
 
-	osg::ref_ptr<EResourceGroup> m_ers;
-	osg::ref_ptr<ECategoryGroup> m_categories;
+	EResourceGroup *m_ers;
+	ECategoryGroup *m_categories;
 
 	int m_active_item;
 	ERDisplay *m_display;
@@ -86,9 +88,9 @@ private:
 	QUndoStack *m_undo_stack;
 
 	// filter stuff
-	osg::ref_ptr<ERFilterSortProxy> m_filter_proxy;
-	osg::ref_ptr<ERFilterSortProxy> m_global_proxy;
-	osg::ref_ptr<ERFilterSortProxy> m_local_proxy;
+	std::unique_ptr<ERFilterSortProxy> m_filter_proxy;
+	std::unique_ptr<ERFilterSortProxy> m_global_proxy;
+	std::unique_ptr<ERFilterSortProxy> m_local_proxy;
 
 	CheckableListProxy *m_category_checkbox_model;
 
