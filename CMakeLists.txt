@@ -53,14 +53,13 @@ find_package(Qt5 REQUIRED Core Gui Widgets Test)
 # find_package(Qt5Test REQUIRED)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
-include_directories(${PROJECT_BINARY_DIR}/VSim_objects_autogen/include_Release)
 
-
-get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
+# # if you want to print everything
+# get_cmake_property(_variableNames VARIABLES)
+# list (SORT _variableNames)
+# foreach (_variableName ${_variableNames})
+#     message(STATUS "${_variableName}=${${_variableName}}")
+# endforeach()
 
 
 # flatbuffers stuff
@@ -69,11 +68,11 @@ endforeach()
 find_package(flatbuffers REQUIRED)
 find_path(flatbuffers_include "flatbuffers")
 include_directories(${flatbuffers_include})
-find_program(FLATC_EXEC "flatc")
-if (NOT FLATC_EXEC)
+find_program(flatcExec "flatc")
+if (NOT flatcExec)
     message(FATAL_ERROR "flatbuffer compiler flatc not found")
 endif()
-message("flatc found: ${FLATC_EXEC}")
+message("flatc found: ${flatcExec}")
 
 file(GLOB_RECURSE fbs_src
   src/*.fbs
@@ -91,7 +90,7 @@ foreach(fbs_full ${fbs_src})
   add_custom_command(
     OUTPUT ${fbs_header_full}
     COMMAND echo "Compiling flatbuffer - ${fbs}"
-    COMMAND ${FLATC_EXEC} -c --no-includes
+    COMMAND ${flatcExec} -c --no-includes
             --gen-object-api
             -o ${CMAKE_BINARY_DIR}/generated
             -I ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -100,7 +99,7 @@ foreach(fbs_full ${fbs_src})
 endforeach()
 message("FBS HEADERS:\n" "${fbs_header_list}")
 include_directories (${CMAKE_BINARY_DIR}/generated)
-add_custom_target(fbs_headers ALL DEPENDS ${fbs_header_list})
+#add_custom_target(FBSHeaders ALL DEPENDS ${fbs_header_list})
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
@@ -121,13 +120,13 @@ set(Util_src
   ${CMAKE_BINARY_DIR}/generated/types_generated.h
   src/Command.h
 )
-add_library(Util_object ${Util_src})
+add_library(Util_obj ${Util_src})
 
 file(GLOB_RECURSE Deprecated_src
   src/deprecated/*.h
   src/deprecated/*.cpp
   )
-add_library(Deprecated_object ${Deprecated_src})
+add_library(Deprecated_obj ${Deprecated_src})
 
 set(ERModel_src
   src/ERSerializer.cpp
@@ -148,8 +147,8 @@ set(ERModel_src
   src/CheckableListProxy.h
   src/CheckableListProxy.cpp
 )
-add_library(ERModel_object ${ERModel_src})
-target_link_libraries(ERModel_object Util_object Deprecated_object)
+add_library(ERModel_obj ${ERModel_src})
+target_link_libraries(ERModel_obj Util_obj Deprecated_obj)
 
 set(NarrativeModel_src
   src/NarrativeSerializer.cpp
@@ -171,8 +170,8 @@ set(NarrativeModel_src
   src/LabelStyleGroup.h
   src/LabelType.h
 )
-add_library(NarrativeModel_object ${NarrativeModel_src})
-target_link_libraries(NarrativeModel_object Util_object Deprecated_object)
+add_library(NarrativeModel_obj ${NarrativeModel_src})
+target_link_libraries(NarrativeModel_obj Util_obj Deprecated_obj)
 
 set(VSimRoot_src
   src/VSimRoot.cpp
@@ -192,8 +191,8 @@ set(VSimRoot_src
   ${CMAKE_BINARY_DIR}/generated/vsim_generated.h
   ${CMAKE_BINARY_DIR}/generated/settings_generated.h
 )
-add_library(VSimRoot_object ${VSimRoot_src})
-target_link_libraries(VSimRoot_object Util_object Deprecated_object NarrativeModel_object ERModel_object)
+add_library(VSimRoot_obj ${VSimRoot_src})
+target_link_libraries(VSimRoot_obj Util_obj Deprecated_obj NarrativeModel_obj ERModel_obj)
 
 set(VSim_src
   src/resources/ECategoryControl.cpp
@@ -296,9 +295,9 @@ set(VSim_src
   src/VSimApp.cpp
   src/VSimApp.h
 )
-add_library(VSim_objects ${VSim_src})
+add_library(VSim_obj ${VSim_src})
 message("SOURCES:\n" "${VSim_src}")
-target_link_libraries(VSim_objects VSimRoot_object)
+target_link_libraries(VSim_obj VSimRoot_obj)
 
 # message(${PROJECT_SOURCE_DIR})
 # message("binary dir " ${PROJECT_BINARY_DIR})
@@ -311,17 +310,16 @@ target_link_libraries(VSim_objects VSimRoot_object)
 # file(GLOB_RECURSE VSim_headers
 #   src/*.h
 #   )
-file(GLOB_RECURSE OldSerializers
+file(GLOB_RECURSE oldSerializers
   src/*/Serializer*.cpp
   )
 
-message("SERIALIZERS:\n" "${OldSerializers}")
+message("SERIALIZERS:\n" "${oldSerializers}")
 
-add_executable(VSim src/main.cpp ${OldSerializers})
+add_executable(VSim src/main.cpp ${oldSerializers})
 
 # linking
-# target_link_libraries(VSim_objects Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
-target_link_libraries(VSim VSim_objects Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(VSim VSim_obj Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
 
 # gui tests (experiments) ##################
 # add_subdirectory("experiments")
@@ -386,7 +384,7 @@ set(Group_src
   )
 add_executable(Group_test ${Group_src})
 add_test(NAME Group_test COMMAND Group_test)
-target_link_libraries(Group_test Util_object)
+target_link_libraries(Group_test Util_obj)
 target_link_libraries(Group_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 # er filter proxy test
@@ -395,7 +393,7 @@ set(ERFilterSortProxy_src
   )
 add_executable(ERFilterSortProxy_test ${ERFilterSortProxy_src})
 add_test(NAME ERFilterSortProxy_test COMMAND ERFilterSortProxy_test)
-target_link_libraries(ERFilterSortProxy_test ERModel_object)
+target_link_libraries(ERFilterSortProxy_test ERModel_obj)
 target_link_libraries(ERFilterSortProxy_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 set(ERSerializer_src
@@ -403,7 +401,7 @@ set(ERSerializer_src
 )
 add_executable(ERSerializer_test ${ERSerializer_src})
 add_test(NAME ERSerializer_test COMMAND ERSerializer_test)
-target_link_libraries(ERSerializer_test ERModel_object Util_object Deprecated_object)
+target_link_libraries(ERSerializer_test ERModel_obj Util_obj Deprecated_obj)
 target_link_libraries(ERSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 set(EResource_test
@@ -411,7 +409,7 @@ set(EResource_test
 )
 add_executable(EResource_test ${ERSerializer_src})
 add_test(NAME EResource_test COMMAND EResource_test)
-target_link_libraries(EResource_test ERModel_object)
+target_link_libraries(EResource_test ERModel_obj)
 target_link_libraries(EResource_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 set(NarrativeSerializer_src
@@ -419,16 +417,16 @@ set(NarrativeSerializer_src
 )
 add_executable(NarrativeSerializer_test ${NarrativeSerializer_src})
 add_test(NAME NarrativeSerializer_test COMMAND NarrativeSerializer_test)
-target_link_libraries(NarrativeSerializer_test NarrativeModel_object)
+target_link_libraries(NarrativeSerializer_test NarrativeModel_obj)
 target_link_libraries(NarrativeSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
-set(VSimSerializer_test_src
+set(VSimSerializer_src
   tests/VSimSerializer_test.cpp
-  ${OldSerializers}
+  ${oldSerializers}
 )
-add_executable(VSimSerializer_test ${VSimSerializer_test_src} ${OldSerializers})
+add_executable(VSimSerializer_test ${VSimSerializer_src} ${oldSerializers})
 add_test(NAME VSimSerializer_test COMMAND VSimSerializer_test)
-target_link_libraries(VSimSerializer_test VSimRoot_object)
+target_link_libraries(VSimSerializer_test VSimRoot_obj)
 target_link_libraries(VSimSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 # function(add_vsim_test testName testSrc)
@@ -436,14 +434,14 @@ target_link_libraries(VSimSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAP
 #   add_test(NAME ${testName} COMMAND ${testName})
 #   target_link_libraries(${testName} Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 # endfunction()
-# message("serializer src\n ${VSimSerializer_test_src}")
-# add_vsim_test(VSimSerializer_test ${VSimSerializer_test_src})
-# target_link_libraries(VSimSerializer_test VSimRoot_object)
+# message("serializer src\n ${VSimSerializer_src}")
+# add_vsim_test(VSimSerializer_test ${VSimSerializer_src})
+# target_link_libraries(VSimSerializer_test VSimRoot_obj)
 
 
 
 # tests that involve everything
-set(TEST_LIST
+set(testList
   Selection_test
   )
 # file(GLOB TEST_SEARCH tests/*.cpp)
@@ -452,12 +450,12 @@ set(TEST_LIST
 #   list(APPEND TEST_LIST ${TEST_NAME})
 # endforeach(TEST_SRC)
 
-foreach(test ${TEST_LIST})
+foreach(test ${testList})
   message("add test: " ${test})
   # EXCLUDE_FROM_ALL
-  add_executable(${test} tests/${test}.cpp ${OldSerializers})
+  add_executable(${test} tests/${test}.cpp)
   add_test(NAME ${test} COMMAND ${test})
-  target_link_libraries(${test} VSim_objects)
+  target_link_libraries(${test} VSim_obj)
   target_link_libraries(${test} Qt5::Widgets Qt5::Test)
   target_link_libraries(${test} ${OPENSCENEGRAPH_LIBRARIES})
 endforeach(test)
@@ -472,14 +470,16 @@ install(DIRECTORY assets DESTINATION .)
 
 if (WIN32)
 
-  # call this after install to copy dlls to install folder
-  add_custom_target(install_deps
+  # installs dll's using vcpkg applocal tool
+  add_custom_target(InstallDLLs
       COMMAND powershell -noprofile -executionpolicy Bypass -file ${_VCPKG_TOOLCHAIN_DIR}/msbuild/applocal.ps1
       -targetBinary ${CMAKE_INSTALL_PREFIX}/VSim.exe
       -installedDir "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin"
       -OutVariable out
   )
-  set_target_properties(install_deps PROPERTIES EXCLUDE_FROM_ALL TRUE)
+  set_target_properties(InstallDLLs PROPERTIES EXCLUDE_FROM_ALL TRUE)
+  # runs this target after installation
+  install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build . --target InstallDLLs --config RELEASE)")
 
   set(vcpkgBin ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin)  
   file(GLOB osgSearch ${vcpkgBin}/osg*.dll) # osgSearch: /stuff/bin/osg148-osg.dll
@@ -491,11 +491,11 @@ if (WIN32)
   message("OSG DLL LIST:\n" "${osgList}")
 
   # copy OSG dlls on postbuild
-  add_custom_target(CopyDLLs)
+  add_custom_target(CopyBuildDLLs)
   foreach(dll ${osgList})
     set(PREFIX ${OSG_BIN}/${DLL})
     add_custom_command(
-      TARGET CopyDLLs
+      TARGET CopyBuildDLLs
       PRE_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin/${dll}$<$<CONFIG:Debug>:d>.dll
@@ -505,11 +505,11 @@ if (WIN32)
   endforeach(dll)
 
   # copy osg plugins
-  find_file(osg_plugins_debug NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/tools/osg)
-  find_file(osg_plugins NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_TOOLS_DIRS})
-  file(COPY ${osg_plugins_debug} DESTINATION "${CMAKE_BINARY_DIR}")
-  file(COPY ${osg_plugins} DESTINATION "${CMAKE_BINARY_DIR}")
-  install(DIRECTORY ${osg_plugins} DESTINATION .)
+  find_file(osgPluginsDebug NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/tools/osg)
+  find_file(osgPlugins NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_TOOLS_DIRS})
+  file(COPY ${osgPluginsDebug} DESTINATION "${CMAKE_BINARY_DIR}")
+  file(COPY ${osgPlugins} DESTINATION "${CMAKE_BINARY_DIR}")
+  install(DIRECTORY ${osgPlugins} DESTINATION .)
 
 endif()
 

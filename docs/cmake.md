@@ -115,3 +115,13 @@ ERModel_objects - gui independent ER stuff, depends on Util, Deprecated
 NarrativeModel_objects - gui independent Narrative stuff, depends on Util, Deprecated
 VSim_objects - everything else
 VSim - main executable
+
+## Styling
+
+Everything is case insensitive in cmake.
+
+variableNames
+TargetNames
+TargetName_src
+TargetName_test
+Library_obj
