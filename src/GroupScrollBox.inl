@@ -50,7 +50,7 @@ void GroupScrollBox<T>::setGroup(TGroup<T> *group)
 			for (size_t i = 0; i < count; i++) {
 				T *node = m_group->child(index + i);
 				ScrollBoxItem *item = createItem(node);
-				insertions.push_back(std::make_pair(i, item));
+				insertions.push_back(std::make_pair(index + i, item));
 			}
 
 			insertItems(insertions);
