@@ -425,6 +425,14 @@ add_test(NAME NarrativeSerializer_test COMMAND NarrativeSerializer_test)
 target_link_libraries(NarrativeSerializer_test NarrativeModel_obj)
 target_link_libraries(NarrativeSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
+set(ModelGroup_test_src
+  tests/ModelGroup_test.cpp
+)
+add_executable(ModelGroup_test ${ModelGroup_test_src})
+add_test(NAME ModelGroup_test COMMAND ModelGroup_test)
+target_link_libraries(ModelGroup_test VSimRoot_obj)
+target_link_libraries(ModelGroup_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+
 set(VSimSerializer_src
   tests/VSimSerializer_test.cpp
   ${oldSerializers}
