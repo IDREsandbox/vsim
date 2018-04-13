@@ -30,6 +30,12 @@
 #include <QSurfaceFormat>
 #include <QTimer>
 
+#include "SimpleCameraManipulator.h"
+#include "FirstPersonManipulator.h"
+#include "FlightManipulator.h"
+#include "ObjectManipulator.h"
+#include "KeyTracker.h"
+
 OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	: QOpenGLWidget(parent,	f),
 	m_speed_tick(0),
@@ -114,7 +120,8 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	//this->setMinimumSize(100, 100);
 
 	// Key tracking
-	this->installEventFilter(&m_key_tracker);
+	m_key_tracker = new KeyTracker(this);
+	this->installEventFilter(m_key_tracker);
 	this->installEventFilter(this);
 
 	// Mouse tracking
@@ -401,7 +408,7 @@ void OSGViewerWidget::paintGL()
 	//emit frame(dt_sec);
 
 	if (m_manipulator == MANIPULATOR_FIRST_PERSON) {
-		m_first_person_manipulator->update(dt_sec, &m_key_tracker, m_main_view->getSceneData());
+		m_first_person_manipulator->update(dt_sec, m_key_tracker, m_main_view->getSceneData());
 	}
 	else if (m_manipulator == MANIPULATOR_FLIGHT) {
 		// shouldn't be in mousemove because entering flight mode doesn't necessarily
@@ -413,7 +420,7 @@ void OSGViewerWidget::paintGL()
 		double ny = 2 * dy / (double)height();
 		m_flight_manipulator->setMousePosition(nx, ny);
 
-		m_flight_manipulator->update(dt_sec, &m_key_tracker, m_main_view->getSceneData());
+		m_flight_manipulator->update(dt_sec, m_key_tracker, m_main_view->getSceneData());
 	}
 
 	// hacky way that lets us have multiple OSGViewerWidgets sharing one CompositeViewer
@@ -636,6 +643,7 @@ void OSGViewerWidget::takeCursor()
 {
 	grabMouse(Qt::BlankCursor);
 	centerCursor();
+	m_key_tracker->stealKeys({Qt::Key_W, Qt::Key_A, Qt::Key_S, Qt::Key_D, Qt::Key_Shift, Qt::Key_Control});
 }
 
 void OSGViewerWidget::releaseCursor()
@@ -647,6 +655,7 @@ void OSGViewerWidget::releaseCursor()
 	QCursor current = cursor();
 	setCursor(Qt::BlankCursor);
 	setCursor(current);
+	m_key_tracker->stealKeys({});
 }
 
 osgGA::EventQueue* OSGViewerWidget::getEventQueue() const

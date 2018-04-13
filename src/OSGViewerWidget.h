@@ -14,11 +14,13 @@
 #include <osgViewer/CompositeViewer>
 #include <osg/Camera>
 #include <QElapsedTimer>
-#include "SimpleCameraManipulator.h"
-#include "FirstPersonManipulator.h"
-#include "FlightManipulator.h"
-#include "ObjectManipulator.h"
-#include "KeyTracker.h"
+
+class SimpleCameraManipulator;
+class FirstPersonManipulator;
+class FlightManipulator;
+class ObjectManipulator;
+class KeyTracker;
+
 #include "Navigation.h"
 
 enum Manipulator {
@@ -135,7 +137,7 @@ private:
 	bool m_rendering_enabled;
 
 	// key press tracker
-	KeyTracker m_key_tracker;
+	KeyTracker *m_key_tracker;
 
 	QElapsedTimer m_frame_timer;
 };
