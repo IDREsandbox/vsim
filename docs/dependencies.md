@@ -1,3 +1,24 @@
+# vcpkg
+
+Make sure you have at least 30GB before doing this
+
+```
+./vcpkg install flatbuffers:x64-windows osg:x64-windows qt5-base:x64-windows
+```
+
+packaging
+```
+./vcpkg export flatbuffers:x64-windows osg:x64-windows qt5-base:x64-windows --7zip
+```
+
+
+### CMake (option 1)
+
+Download CMake and add it to PATH https://cmake.org/download/
+CMake is used to build releases from the command prompt.
+
+```
+
 
 # Building OpenSceneGraph
 

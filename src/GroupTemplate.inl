@@ -1,4 +1,5 @@
 #include "GroupTemplate.h" // doesn't actually do anything, just for intellisense
+#include "VecUtil.h"
 
 template <class T>
 T *TGroup<T>::child(size_t i) const
@@ -17,7 +18,7 @@ inline std::shared_ptr<T> TGroup<T>::childShared(size_t index) const
 template <class T>
 void TGroup<T>::move(const std::vector<std::pair<size_t, size_t>>& mapping)
 {
-	Util::multiMove(&m_children, mapping);
+	VecUtil::multiMove(&m_children, mapping);
 	emit sItemsMoved(mapping);
 }
 
@@ -123,7 +124,7 @@ void TGroup<T>::insertMulti(const std::vector<std::pair<size_t, std::shared_ptr<
 
 	// convert to (index, vec<Node*>) list
 	std::vector<std::pair<size_t, std::vector<std::shared_ptr<T>>>> clumps;
-	clumps = Util::clumpify2(insertions);
+	clumps = VecUtil::clumpify2(insertions);
 
 	// insert in forward order
 	for (const auto &i_clump : clumps) {
@@ -136,21 +137,11 @@ void TGroup<T>::removeMulti(const std::vector<size_t> &indices)
 {
 	if (indices.size() == 0) return;
 
-	// (begin, end) pairs
-	std::vector<std::pair<size_t, size_t>> begin_end_pairs;
-	begin_end_pairs = Util::clumpify(indices);
-
-	// (index, count) pairs
-	std::vector<std::pair<size_t, size_t>> index_count_pairs;
-
-	for (const auto &begin_end : begin_end_pairs) {
-		size_t begin = begin_end.first;
-		size_t end = begin_end.second;
-		index_count_pairs.push_back({begin, end - begin + 1});
-	}
+	// (index, count)
+	auto ic_pairs = VecUtil::clumpify3(indices);
 
 	// remove clumps in reverse order
-	for (auto i_c = index_count_pairs.rbegin(); i_c != index_count_pairs.rend(); ++i_c) {
+	for (auto i_c = ic_pairs.rbegin(); i_c != ic_pairs.rend(); ++i_c) {
 		remove(i_c->first, i_c->second);
 	}
 }

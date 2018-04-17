@@ -14,9 +14,9 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 	ui.setupUi(this);
 
 	// sort by
-	ui.sortByBox->addItem("Title");
-	ui.sortByBox->addItem("Year");
-	ui.sortByBox->addItem("Distance");
+	//ui.sortByBox->addItem("Title");
+	//ui.sortByBox->addItem("Year");
+	//ui.sortByBox->addItem("Distance");
 
 	// category view
 	// ui.categoriesBox->setModel(m_category_model);
@@ -42,7 +42,7 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 
 	connect(ui.closeButton, &QPushButton::pressed, this, &QWidget::hide);
 	connect(ui.searchClearButton, &QPushButton::pressed, ui.searchLineEdit, &QLineEdit::clear);
-	connect(ui.clearButton, &QAbstractButton::pressed, this, &ERFilterArea::reset);
+	//connect(ui.clearButton, &QAbstractButton::pressed, this, &ERFilterArea::reset);
 
 	reset();
 }
@@ -60,13 +60,13 @@ void ERFilterArea::setCategoryModel(CheckableListProxy * categories)
 
 void ERFilterArea::reset()
 {
-	ui.globalCheckBox->setCheckState(Qt::Checked);
-	ui.localCheckBox->setCheckState(Qt::Checked);
-	ui.yearsCheckBox->setCheckState(Qt::Checked);
-	ui.radiusCheckBox->setCheckState(Qt::Checked);
+	ui.globalCheckBox->setChecked(true);
+	ui.localCheckBox->setChecked(true);
+	ui.yearsCheckBox->setChecked(true);
+	ui.showLocalCheckBox->setChecked(false);
 	ui.searchLineEdit->clear();
 	ui.sortByBox->setCurrentIndex(0);
 	if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
 	if (m_type_checkbox_model) m_type_checkbox_model->setCheckAll(true);
-	ui.filetypesBox->setCurrentText("FO");
+	ui.filetypesBox->setCurrentText("");
 }

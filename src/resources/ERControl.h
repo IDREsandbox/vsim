@@ -59,6 +59,14 @@ public:
 	int getCombinedLastSelected();
 	void clearSelection();
 
+	// filters
+	void resetFilters();
+	void sortBy();
+	void sortGlobal();
+	void sortLocal();
+	void setRadius(float radius);
+
+
 	void debug();
 
 public: // actions

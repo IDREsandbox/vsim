@@ -39,7 +39,7 @@ Download vcpkg https://github.com/Microsoft/vcpkg
 #### Flatbuffers
 
 ```
-./vcpkg flatbuffers:x64-windows
+./vcpkg install flatbuffers:x64-windows
 ```
 
 You have to add the flatbuffer compiler flatc to path.

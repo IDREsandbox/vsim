@@ -5,9 +5,12 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
+#include <osg/Vec3>
 
 #include "GroupTemplate.h"
+#include "EREnums.h"
 
 class EResource;
 class ECategory;
@@ -54,12 +57,7 @@ public:
 	// configuration
 	//void setCategories(ECategoryGroup *categories);
 
-	enum SortBy {
-		ALPHABETICAL,
-		DISTANCE,
-		NONE,
-	};
-	void sortBy(SortBy method);
+	void sortBy(ER::SortBy method);
 	//SortBy getSortMethod() const;
 
 	void setCategories(CheckableListProxy *cats);
@@ -69,11 +67,21 @@ public:
 	void showGlobal(bool global);
 	void enableRange(bool enable);
 	void enableYears(bool enable);
+	void setSearchRadius(float radius);
 
 	void setTitleSearch(const std::string &title);
 
 	void setPosition(osg::Vec3 pos);
 
+signals:
+	void sSortByChanged(ER::SortBy);
+	void sRadiusChanged(float radius);
+	void sUseRangeChanged(bool use);
+	void sUseYearsChanged(bool use);
+	void sShowLocalChanged(bool show);
+	void sShowGlobalChanged(bool show);
+	//void sTextSearchChanged(const std::string &text);
+	//void sFileTypesChanged();
 
 protected:
 	// add/removes a resource if it is acceptable
@@ -84,7 +92,7 @@ protected:
 	std::set<size_t> baseToLocal(const std::set<size_t> base_indices) const;
 
 	void recheck(const std::set<size_t> &base_indices);
-	void checkAndInsertSet(const std::set<size_t> &insertions);
+	void checkAndInsertSet(const std::set<size_t> &base_indices);
 	void checkAndRemoveSet(const std::set<size_t> &base_indices);
 
 	// when a name changes or something
@@ -106,6 +114,7 @@ private:
 	// adds/remove from m_categories_enabled based on model
 	void updateCategorySet(int model_row);
 	bool checkTitle(const std::string &s) const;
+	void removeAndSignal(const std::vector<size_t> &removals);
 
 private:
 	// filter sort proxy
@@ -113,7 +122,7 @@ private:
 	std::vector<size_t> m_map_to_base;
 
 	// ER specific
-	SortBy m_sort_by;
+	ER::SortBy m_sort_by;
 
 	CheckableListProxy *m_category_filters;
 	std::set<const ECategory*> m_categories_enabled;
@@ -130,6 +139,9 @@ private:
 	bool m_show_all;
 
 	osg::Vec3 m_position;
+	double m_radius;
+
+	std::unordered_set<EResource*> m_in_range;
 };
 
 #endif

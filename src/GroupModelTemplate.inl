@@ -22,7 +22,7 @@ inline void TGroupModel<T>::setGroup(TGroup<T>* group)
 	if (group != nullptr) {
 		connect(group, &GroupSignals::sAboutToInsert, this,
 			[this](size_t index, size_t count) {
-			beginInsertRows(QModelIndex(), index, index + count - 1);
+			beginInsertRows(QModelIndex(), (int)index, (int)(index + count - 1));
 		});
 		connect(group, &GroupSignals::sInserted, this,
 			[this](size_t index, size_t count) {
@@ -30,7 +30,7 @@ inline void TGroupModel<T>::setGroup(TGroup<T>* group)
 		});
 		connect(group, &GroupSignals::sAboutToRemove, this,
 			[this](size_t index, size_t count) {
-			beginRemoveRows(QModelIndex(), index, index + count - 1);
+			beginRemoveRows(QModelIndex(), (int)index, (int)(index + count - 1));
 		});
 		connect(group, &GroupSignals::sRemoved, this,
 			[this](size_t index, size_t count) {
@@ -137,7 +137,7 @@ inline int TGroupModel<T>::rowCount(const QModelIndex &parent) const
 {
 	if (!m_group) return 0;
 	if (parent != QModelIndex()) return 0; // only invalid has children
-	return m_group->size();
+	return (int)m_group->size();
 }
 
 template<class T>

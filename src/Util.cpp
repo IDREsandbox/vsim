@@ -7,6 +7,8 @@
 #include <iostream>
 #include <chrono>
 #include <regex>
+#include <unordered_set>
+#include <unordered_map>
 
 // ext must be of the form "txt".
 std::string Util::addExtensionIfNotExist(const std::string& filename, const std::string& ext)
@@ -169,119 +171,6 @@ QString Util::setToString(std::set<int> set)
 	return str;
 }
 
-std::vector<size_t> Util::fixIndices(const std::vector<size_t> &fixme, const std::set<size_t>& insertions)
-{
-	size_t max_index = 0;
-	for (int x : fixme) {
-		max_index = std::max((size_t)x, max_index);
-	}
-	// build delta_array, [+0, +0, +1, +1, +2, +2, +2]
-	std::vector<size_t> delta_array(max_index + 1, 0);
-	size_t shift = 0;
-	auto it = insertions.begin();
-	size_t old_index = 0;
-	size_t new_index = 0;
-	while (old_index < delta_array.size()) {
-		if (it == insertions.end() || new_index != *it) {
-			delta_array[old_index] = shift;
-			old_index++;
-			new_index++;
-		}
-		else {
-			shift++;
-			it++;
-			new_index++;
-		}
-	}
-	//for (size_t i = 0; i < delta_array.size(); i++) {
-	//	if (it != insertions.end() && i == *it) {
-	//		shift++;
-	//		it++;
-	//	}
-	//	delta_array[i] = shift;
-	//}
-	std::vector<size_t> result(fixme);
-	for (size_t i = 0; i < result.size(); i++) {
-		size_t old_index = result[i];
-		result[i] = old_index + delta_array[old_index];
-	}
-	return result;
-	// Set version, I was wondering which would be faster
-	// Should be O(nlogn) vs O(n), apparently this is really slow even for small n
-	// ex: insert [1, 4, 6]
-	// -> (1: 0, 4: 1, 6: 2)
-	// < 1 gets bumped +0
-	// >= 1, < 4 gets bumped +1
-	// >= 4, < 6 gets bumped +2
-	//std::map<int, int> index_to_delta;
-	//int delta = 0;
-	//for (int index : insertions) {
-	//	index_to_delta[index] = delta;
-	//	delta++;
-	//}
-	//std::vector<int> result(fixme);
-	//for (size_t i = 0; i < result.size(); i++) {
-	//	int x = result[i];
-	//	auto it = std::upper_bound(insertions.begin(), insertions.end(), x);
-	//	int d;
-	//	if (it == insertions.end()) {
-	//		d = insertions.size();
-	//	}
-	//	else {
-	//		d = index_to_delta[*it];
-	//	}
-	//	result[i] = x + d;
-	//}
-	//return result;
-}
-
-std::vector<size_t> Util::fixIndicesRemove(const std::vector<size_t>& fixme, const std::set<size_t>& changes)
-{
-	if (fixme.size() == 0) return {};
-	int max = *std::max_element(fixme.begin(), fixme.end());
-	std::vector<int> delta_array(max + 1, 0);
-	int shift = 0;
-	for (size_t i = 0; i < delta_array.size(); i++) {
-		if (changes.find(i) != changes.end()) {
-			shift--;
-		}
-		delta_array[i] = shift;
-	}
-
-	std::vector<size_t> result(fixme);
-	for (size_t i = 0; i < result.size(); i++) {
-		size_t old_index = result[i];
-		result[i] = old_index + delta_array[old_index];
-	}
-
-	return result;
-}
-
-std::vector<std::pair<size_t, size_t>> Util::clumpify(const std::vector<size_t>& indices)
-{
-	if (indices.size() == 0) return {};
-	size_t start = indices[0];
-	size_t prev = indices[0];
-	std::vector<std::pair<size_t, size_t>> output;
-
-	for (size_t x : indices) {
-		// continue case
-		if (x == prev + 1) {
-		}
-		// make range
-		else if (x > prev + 1) {
-			output.push_back({start, prev});
-			start = x;
-		}
-		// first item, or a bug if unsorted
-		else {
-		}
-		prev = x;
-	}
-	// always make range at end
-	output.push_back({ start, prev });
-	return output;
-}
 
 std::chrono::high_resolution_clock::time_point tic_time;
 void Util::tic()
@@ -428,6 +317,16 @@ Util::endPt Util::hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::V
 
 	return result;
 }
+
+bool Util::spheresOverlap(const osg::Vec3f & p1, float r1, const osg::Vec3f & p2, float r2)
+{
+	// dist < r0 + r1 means intersection
+	// square both sides for speed
+	float dist2 = (p2 - p1).length2();
+	float radius2 = (r1 + r2)*(r1 + r2);
+	return dist2 <= radius2;
+}
+
 
 osg::Matrixd Util::camMatHerm(double t, osg::Matrixd m0, osg::Matrixd m1) {
 	osg::Vec3d pos0 = m0.getTrans();

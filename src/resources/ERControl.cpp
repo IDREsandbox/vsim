@@ -39,13 +39,16 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_filter_area = m_window->erFilterArea();
 
 	m_filter_proxy = std::unique_ptr<ERFilterSortProxy>(new ERFilterSortProxy(nullptr));
-	m_filter_proxy->sortBy(ERFilterSortProxy::ALPHABETICAL);
+	m_filter_proxy->sortBy(ER::SortBy::TITLE);
+	m_filter_proxy->enableRange(false);
 	m_global_proxy = std::unique_ptr<ERFilterSortProxy>(new ERFilterSortProxy(m_filter_proxy.get()));
 	m_global_proxy->showGlobal(true);
 	m_global_proxy->showLocal(false);
+	m_global_proxy->enableRange(false);
 	m_local_proxy = std::unique_ptr<ERFilterSortProxy>(new ERFilterSortProxy(m_filter_proxy.get()));
 	m_local_proxy->showGlobal(false);
 	m_local_proxy->showLocal(true);
+	m_local_proxy->enableRange(true);
 
 	m_category_control = new ECategoryControl(app, this);
 
@@ -54,27 +57,27 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_filter_area->setCategoryModel(m_category_checkbox_model);
 	m_filter_proxy->setCategories(m_category_checkbox_model);
 
-	QAction *a_new_er = new QAction("New Resource", this);
+	a_new_er = new QAction("New Resource", this);
 	a_new_er->setIconText("+");
 	connect(a_new_er, &QAction::triggered, this, &ERControl::newER);
 
-	QAction *a_delete_er = new QAction("Delete Resources", this);
+	a_delete_er = new QAction("Delete Resources", this);
 	a_delete_er->setIconText("-");
 	connect(a_delete_er, &QAction::triggered, this, &ERControl::deleteER);
 
-	QAction *a_edit_er = new QAction("Edit Resource", this);
+	a_edit_er = new QAction("Edit Resource", this);
 	a_edit_er->setIconText("Edit");
 	connect(a_edit_er, &QAction::triggered, this, &ERControl::editERInfo);
 
-	QAction *a_open_er = new QAction("Open Resource", this);
+	a_open_er = new QAction("Open Resource", this);
 	a_open_er->setIconText("Open");
 	connect(a_open_er, &QAction::triggered, this, &ERControl::openResource);
 
-	QAction *a_position_er = new QAction("Set Resource Position", this);
+	a_position_er = new QAction("Set Resource Position", this);
 	a_position_er->setIconText("Set Position");
 	connect(a_position_er, &QAction::triggered, this, &ERControl::setPosition);
 
-	QAction *a_goto_er = new QAction("Goto Resource", this);
+	a_goto_er = new QAction("Goto Resource", this);
 	connect(a_goto_er, &QAction::triggered, this, &ERControl::gotoPosition);
 
 	// box menus
@@ -122,8 +125,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	// hide/show filter area
 	connect(m_window->erBar()->ui.filter, &QPushButton::pressed, this,
 		[this]() {
-		ERFilterArea *area = m_window->erFilterArea();
-		area->setVisible(!area->isVisible());
+		m_filter_area->setVisible(!m_filter_area->isVisible());
 	});
 
 	connect(m_app, &VSimApp::sStateChanged, this, [this]() {
@@ -132,6 +134,13 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 			setDisplay(-1);
 		}
 	});
+
+
+	// filter area stuff
+	connect(m_filter_area->ui.clearButton, &QAbstractButton::pressed, this, [this]() {
+
+	});
+
 
 	load(nullptr);
 }
@@ -171,7 +180,7 @@ void ERControl::update(double dt_sec)
 		res->setDistanceTo((pos - res_pos).length());
 	}
 
-	m_filter_proxy->setPosition(m_app->getPosition());
+	m_local_proxy->setPosition(pos);
 
 	//m_prev_position = pos;
 }
@@ -214,20 +223,16 @@ void ERControl::deleteER()
 	std::set<size_t> selection = getCombinedSelection();
 	if (selection.empty()) return;
 
-	auto *null_cats = new EditCommand<EResource>(m_ers, selection);
-	for (int i : selection) {
-		EResource *res = m_ers->getResource(i);
-		if (!res) continue;
-		new EResource::SetCategoryCommand(res, nullptr, null_cats);
-	}
+	std::vector<EResource*> resources;
+	for (size_t i : selection) resources.push_back(m_ers->getResource(i));
 
 	m_undo_stack->beginMacro("Delete Resources");
 	m_undo_stack->push(new SelectERCommand(this, getCombinedSelectionP(), Command::ON_UNDO));
-	// save old categories, so that we can restore them later
-
-	m_undo_stack->push(null_cats);
 	// remove resources
 	m_undo_stack->push(new RemoveMultiCommand<EResource>(m_ers, selection));
+	for (auto *res : resources) { // null old categories so they get restored later
+		m_undo_stack->push(new EResource::SetCategoryCommand(res, nullptr));
+	}
 	m_undo_stack->push(new SelectERCommand(this, {}, Command::ON_REDO));
 	m_undo_stack->endMacro();
 }
@@ -406,6 +411,27 @@ void ERControl::selectERs(const std::vector<EResource*> &res)
 
 	m_app->setState(VSimApp::EDIT_ERS);
 	setDisplay(getCombinedLastSelected());
+}
+
+void ERControl::resetFilters()
+{
+	m_local_proxy->enableRange(true);
+	m_local_proxy->setSearchRadius(10.0f);
+	m_filter_proxy->sortBy(ER::SortBy::TITLE);
+	m_filter_proxy->setTitleSearch("");
+	m_filter_proxy->showGlobal(true);
+	m_filter_proxy->showLocal(true);
+
+	ui.globalCheckBox->setChecked(true);
+	ui.localCheckBox->setChecked(true);
+	ui.yearsCheckBox->setChecked(true);
+	ui.showLocalCheckBox->setChecked(false);
+	ui.searchLineEdit->clear();
+	ui.sortByBox->setCurrentIndex(0);
+	if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
+	if (m_type_checkbox_model) m_type_checkbox_model->setCheckAll(true);
+	ui.filetypesBox->setCurrentText("");
+
 }
 
 void ERControl::debug()

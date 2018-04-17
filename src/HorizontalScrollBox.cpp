@@ -13,6 +13,7 @@
 #include "Selection.h"
 #include "SelectionStack.h"
 #include "Util.h"
+#include "VecUtil.h"
 
 HSBScrollArea::HSBScrollArea(QWidget *parent)
 	: QWidget(parent)
@@ -256,7 +257,7 @@ void HorizontalScrollBox::insertItems(const std::vector<std::pair<size_t, Scroll
 		connect(item, &ScrollBoxItem::sMouseDoubleClickEvent, this, &HorizontalScrollBox::itemMouseDoubleClickEvent);
 		connect(item, &ScrollBoxItem::sMouseReleaseEvent, this, &HorizontalScrollBox::itemMouseReleaseEvent);
 	}
-	Util::multiInsert(&m_items, insertions);
+	VecUtil::multiInsert(&m_items, insertions);
 	refresh();
 }
 
@@ -269,14 +270,14 @@ void HorizontalScrollBox::removeItems(const std::vector<size_t> indices, bool de
 			delete item;
 		}
 	}
-	Util::multiRemove(&m_items, indices);
+	VecUtil::multiRemove(&m_items, indices);
 	m_selection_stack->clear();
 	refresh();
 }
 
 void HorizontalScrollBox::moveItems(const std::vector<std::pair<size_t, size_t>> &mapping)
 {
-	Util::multiMove(&m_items, mapping);
+	VecUtil::multiMove(&m_items, mapping);
 	refresh();
 }
 

@@ -7,6 +7,7 @@
 #include <map>
 #include <QUndoStack>
 #include "GroupTemplate.h"
+#include "Command.h"
 
 template <class T>
 class MoveNodesCommand : public QUndoCommand {
@@ -220,22 +221,29 @@ public:
 	EditCommand(
 		TGroup<T> *group,
 		const std::set<size_t> &nodes,
+		Command::When when = Command::ON_BOTH,
 		QUndoCommand *parent = nullptr)
 		: QUndoCommand(parent),
 		m_group(group),
-		m_nodes(nodes) {
+		m_nodes(nodes),
+		m_when(when) {
 	}
 	virtual void undo() override {
 		QUndoCommand::undo();
-		m_group->sEdited(m_nodes); // emit after changes
+		if (m_when & Command::ON_UNDO) {
+			m_group->sEdited(m_nodes);
+		}
 	}
 	virtual void redo() override {
 		QUndoCommand::redo();
-		m_group->sEdited(m_nodes);
+		if (m_when & Command::ON_REDO) {
+			m_group->sEdited(m_nodes);
+		}
 	}
 private:
 	TGroup<T> *m_group;
 	std::set<size_t> m_nodes;
+	Command::When m_when;
 };
 
 #endif

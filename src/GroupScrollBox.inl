@@ -43,16 +43,14 @@ void GroupScrollBox<T>::setGroup(TGroup<T> *group)
 			m_group = nullptr;
 			setGroup(nullptr); // clear stuff
 		});
-		connect(m_group, &GroupSignals::sInserted, this,
-			[this](size_t index, size_t count) {
+		connect(m_group, &GroupSignals::sInsertedMulti, this,
+			[this](std::vector<size_t> list) {
 
 			std::vector<std::pair<size_t, ScrollBoxItem*>> insertions;
-			for (size_t i = 0; i < count; i++) {
-				T *node = m_group->child(index + i);
-				ScrollBoxItem *item = createItem(node);
-				insertions.push_back(std::make_pair(index + i, item));
+			for (auto i : list) {
+				ScrollBoxItem *item = createItem(m_group->child(i));
+				insertions.push_back(std::make_pair(i, item));
 			}
-
 			insertItems(insertions);
 		});
 		connect(m_group, &GroupSignals::sAboutToRemoveMulti, this,

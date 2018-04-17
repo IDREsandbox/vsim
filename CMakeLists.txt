@@ -105,8 +105,10 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 
 # source
 set(Util_src
-  src/Util.h
   src/Util.cpp
+  src/Util.h
+  src/VecUtil.cpp
+  src/VecUtil.h
   # src/Group.cpp
   # src/Group.h
   src/GroupTemplate.inl
@@ -211,6 +213,7 @@ set(VSim_src
   src/resources/ERScrollItem.h
   src/resources/NewCatDialog.cpp
   src/resources/NewCatDialog.h
+  src/resources/ERFilterArea.ui
 
   src/narrative/CanvasContainer.h
   src/narrative/CanvasContainer.cpp
@@ -378,7 +381,9 @@ target_link_libraries(Canvas_experiment Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_
 set(Util_src
   tests/Util_test.cpp
   src/Util.cpp
-  src/Util.h)
+  src/Util.h
+  src/VecUtil.cpp
+  src/VecUtil.h)
 add_executable(Util_test ${Util_src})
 add_test(NAME Util_test COMMAND Util_test)
 target_link_libraries(Util_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})

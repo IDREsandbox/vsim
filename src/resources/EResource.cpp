@@ -178,6 +178,11 @@ void EResource::setCameraMatrix(const osg::Matrixd& matrix)
 	emit sViewMatrixChanged(matrix);
 }
 
+const osg::Vec3f &EResource::getPosition() const
+{
+	return m_camera_position;
+}
+
 double EResource::getDistanceTo() const
 {
 	return m_distance_to;

@@ -76,8 +76,7 @@ public:
 
 	const osg::Matrixd& getCameraMatrix() const;
 	void setCameraMatrix(const osg::Matrixd& matrix);
-	bool getPositional() const;
-	void setPositional(bool p) const;
+	const osg::Vec3f &getPosition() const;
 	double getDistanceTo() const;
 	void setDistanceTo(double dist);
 
@@ -202,7 +201,6 @@ private:
 	osg::Vec3f m_camera_position;
 	osg::Matrixd m_camera_matrix;
 
-	bool m_positional;
 	double m_distance_to;
 
 	int m_category_index;

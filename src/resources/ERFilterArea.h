@@ -18,9 +18,10 @@ public:
 
 	void reset();
 
-private:
+public:
 	Ui::ERFilterArea ui;
 
+private:
 	ERFilterSortProxy *m_model;
 
 	//EditDeleteDelegate *m_category_delegate;

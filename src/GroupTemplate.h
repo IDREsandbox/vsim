@@ -6,7 +6,6 @@
 #include <set>
 #include <map>
 #include <QUndoStack>
-#include "Util.h"
 
 class GroupSignals : public QObject {
 	Q_OBJECT

@@ -38,7 +38,7 @@ private slots:
 		group.append(res2);
 		group.append(res3);
 		ERFilterSortProxy proxy(&group);
-		proxy.sortBy(ERFilterSortProxy::ALPHABETICAL);
+		proxy.sortBy(ER::SortBy::TITLE);
 		proxy.showGlobal(true);
 		proxy.showLocal(true);
 
@@ -79,7 +79,7 @@ private slots:
 		group.append(cat);
 
 		ERFilterSortProxy proxy(&group);
-		proxy.sortBy(ERFilterSortProxy::NONE);
+		proxy.sortBy(ER::SortBy::NONE);
 
 		proxy.showGlobal(false);
 		proxy.showLocal(false);
@@ -107,7 +107,7 @@ private slots:
 		cat->setResourceName("cat");
 
 		ERFilterSortProxy p1(&group);
-		p1.sortBy(ERFilterSortProxy::ALPHABETICAL);
+		p1.sortBy(ER::SortBy::TITLE);
 
 		group.append(foo);
 		group.append(bar);
@@ -131,12 +131,12 @@ private slots:
 		ERFilterSortProxy p1(&group);
 		p1.showGlobal(false);
 		p1.showLocal(true);
-		p1.sortBy(ERFilterSortProxy::NONE);
+		p1.sortBy(ER::SortBy::NONE);
 
 		ERFilterSortProxy p2(&p1);
 		p2.showGlobal(true);
 		p2.showLocal(true);
-		p2.sortBy(ERFilterSortProxy::ALPHABETICAL);
+		p2.sortBy(ER::SortBy::TITLE);
 
 		group.append(foo);
 		group.append(bar);
@@ -150,7 +150,7 @@ private slots:
 		ERFilterSortProxy p1(&group);
 		ERFilterSortProxy p2(&group);
 		ERFilterSortProxy p3(&group);
-		p3.sortBy(ERFilterSortProxy::ALPHABETICAL);
+		p3.sortBy(ER::SortBy::TITLE);
 		Util::tic();
 		int x = 10;
 		for (int i = 0; i < x; i++) {
