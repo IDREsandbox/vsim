@@ -2,48 +2,25 @@
 #include "resources/EResource.h"
 #include "resources/ECategory.h"
 
-ERScrollItem::ERScrollItem(QWidget * parent)
-	: ScrollBoxItem(parent),
+// some crazy alias
+static constexpr void(QGraphicsItem::* const updateAlias)(const QRectF &)
+	= qOverload<const QRectF &>(&QGraphicsItem::update);
+
+ERScrollItem::ERScrollItem()
+	: FastScrollItem(),
 	m_er(nullptr),
 	m_cat(nullptr)
 {
-	ui.setupUi(this);
+	m_text_icon = QPixmap("assets/icons/Text_16xSM.png");
+	m_file_icon = QPixmap("assets/icons/LinkFile_16x.png");
+	m_url_icon = QPixmap("assets/icons/Link_16xSM.png");
+	m_goto_icon = QPixmap("assets/icons/View_16xSM.png");
+	m_launch_icon = QPixmap("assets/icons/Effects_16xSM.png");
+}
 
-	m_icon_container = new QWidget(this);
-	QHBoxLayout *icon_layout = new QHBoxLayout(m_icon_container);
-	m_icon_container->setLayout(icon_layout);
-	icon_layout->setMargin(2);
-	icon_layout->setSpacing(0);
-	icon_layout->setDirection(QBoxLayout::Direction::RightToLeft);
-	ui.gridLayout->addWidget(m_icon_container, 0, 0);
-	ui.gridLayout->setAlignment(m_icon_container, Qt::AlignTop | Qt::AlignRight);
-	m_icon_container->show();
-
-	m_type_icon = new QLabel(m_icon_container);
-	m_type_icon->setFixedSize(16, 16);
-	icon_layout->addWidget(m_type_icon);
-	m_type_icon->show();
-
-	m_goto_icon = new QLabel(m_icon_container);
-	QPixmap goto_img("assets/icons/View_16xSM.png");
-	m_goto_icon->setPixmap(goto_img);
-	m_goto_icon->setFixedSize(16, 16);
-	icon_layout->addWidget(m_goto_icon);
-
-	m_launch_icon = new QLabel(m_icon_container);
-	QPixmap launch_img("assets/icons/Effects_16xSM.png");
-	m_launch_icon->setPixmap(launch_img);
-	m_launch_icon->setFixedSize(16, 16);
-	icon_layout->addWidget(m_launch_icon);
-
-	// this is super slow
-	//m_distance_label = new QLabel(this);
-	//ui.gridLayout->addWidget(m_distance_label, 0, 0);
-	//ui.gridLayout->setAlignment(m_distance_label, Qt::AlignHCenter | Qt::AlignBottom);
-	//m_distance_label->setText("distance");
-	//m_distance_label->show();
-
-	showTypeIcon(EResource::ANNOTATION);
+EResource * ERScrollItem::resource() const
+{
+	return m_er;
 }
 
 void ERScrollItem::setER(EResource *er)
@@ -52,11 +29,7 @@ void ERScrollItem::setER(EResource *er)
 
 	m_er = er;
 	if (er) {
-		ui.title->setText(QString::fromStdString(er->getResourceName()));
-		connect(er, &EResource::sResourceNameChanged, this,
-			[this]() {
-			ui.title->setText(QString::fromStdString(m_er->getResourceName()));
-		});
+		connect(er, &EResource::sResourceNameChanged, this, &updateAlias);
 
 		setCat(er->category());
 		connect(er, &EResource::sCategoryChanged, this,
@@ -64,18 +37,14 @@ void ERScrollItem::setER(EResource *er)
 			setCat(cat);
 		});
 
-		setDistance(er->getDistanceTo());
-		connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::setDistance);
+		//setDistance(er->getDistanceTo());
+		//connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::setDistance);
 
-		showTypeIcon(er->getERType());
-		connect(er, &EResource::sErTypeChanged, this, &ERScrollItem::showTypeIcon);
-
-		showGotoIcon(er->getReposition());
-		connect(er, &EResource::sRepositionChanged, this, &ERScrollItem::showGotoIcon);
-
-		showAutoLaunchIcon(er->getAutoLaunch());
-		connect(er, &EResource::sAutoLaunchChanged, this, &ERScrollItem::showAutoLaunchIcon);
+		connect(er, &EResource::sErTypeChanged, this, &updateAlias);
+		connect(er, &EResource::sRepositionChanged, this, &updateAlias);
+		connect(er, &EResource::sAutoLaunchChanged, this, &updateAlias);
 	}
+	update();
 }
 
 void ERScrollItem::setCat(ECategory *cat)
@@ -83,31 +52,32 @@ void ERScrollItem::setCat(ECategory *cat)
 	if (m_cat) disconnect(m_cat, 0, this, 0);
 	m_cat = cat;
 	if (cat) {
-		setColor(cat->getColor());
-		connect(cat, &ECategory::sColorChanged, this, &ERScrollItem::setColor);
+		connect(cat, &ECategory::sColorChanged, this, &updateAlias);
 	}
 	else {
-		setColor(QColor(20, 20, 20));
 	}
+	update();
 }
 
-int ERScrollItem::widthFromHeight(int height)
+void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
-	return height;
-}
+	
+	// base color
+	QColor color = QColor(50, 50, 50);
+	if (m_cat) color = m_cat->getColor();
 
-void ERScrollItem::setColor(QColor color)
-{
 	QColor select_color;
 	QColor text_color;
 	QColor select_text_color;
+	
+
 	// lighter or darker?
 	if (color.lightness() > 150) { // bright colors
-		select_color = color.darker(200);
+		select_color = color.darker(225);
 		text_color = QColor(0, 0, 0);
 	}
 	else { // dark colors
-		select_color = color.lighter(150);
+		select_color = color.lighter(180);
 		text_color = QColor(255, 255, 255);
 	}
 
@@ -119,52 +89,84 @@ void ERScrollItem::setColor(QColor color)
 		select_text_color = QColor(255, 255, 255);
 	}
 
-	QString s = "background:rgb(%1, %2, %3);";
-	setDeselectStyle(QString()
-		+ "background:" + colorString(color) + ";"
-		+ "color:" + colorString(text_color) + ";"
-	);
-	setSelectStyle(QString()
-		+ "background:" + colorString(select_color) + ";"
-		+ "color:" + colorString(select_text_color) + ";"
-	);
-}
-
-QString ERScrollItem::colorString(QColor color)
-{
-	QString s = "rgb(%1, %2, %3)";
-	return s.arg(color.red()).arg(color.green()).arg(color.blue());
-}
-
-void ERScrollItem::showTypeIcon(int type)
-{
-	QString path;
-	switch (type) {
-	case EResource::ANNOTATION:
-		path = "assets/icons/Text_16xSM.png";
-		break;
-	case EResource::FILE:
-		path = "assets/icons/LinkFile_16x.png";
-		break;
-	case EResource::URL:
-		path = "assets/icons/Link_16xSM.png";
-		break;
+	QColor use_color;
+	QColor use_text_color;
+	if (isSelected()) {
+		use_color = color;
+		use_text_color = text_color;
 	}
-	QPixmap pm(path);
-	m_type_icon->setPixmap(pm);
-}
+	else {
+		use_color = select_color;
+		use_text_color = select_color;
+	}
 
-void ERScrollItem::showGotoIcon(bool show)
-{
-	m_goto_icon->setVisible(show);
-}
+	// paint background
+	painter->setBrush(use_color);
+	painter->setPen(QPen(Qt::NoPen));
+	painter->drawRect(QRectF(QPointF(0, 0), m_size));
 
-void ERScrollItem::showAutoLaunchIcon(bool show)
-{
-	m_launch_icon->setVisible(show);
-}
+	// paint text
+	int text_margin = 5;
+	int margin = 5;
+	QRectF text_rect = QRectF(margin, margin,
+		m_size.width() - 2 * margin,
+		m_size.height() - 2 * margin);
 
-void ERScrollItem::setDistance(double dist)
-{
-	//m_distance_label->setText(QString::number(dist, 'f', 2));
+	QTextOption opt;
+	opt.setWrapMode(QTextOption::WordWrap);
+	opt.setAlignment(Qt::AlignCenter);
+	painter->setPen(use_text_color);
+	QString name_string = "Invalid";
+	if (m_er) name_string = m_er->getResourceName().c_str();
+	painter->drawText(text_rect, name_string, opt);
+
+	// paint distance
+	opt.setAlignment(Qt::AlignBottom);
+	QString distance_string;
+	if (m_er) {
+		distance_string = QString::number(m_er->getDistanceTo(), 'f', 2);
+	}
+	painter->drawText(text_rect, distance_string, opt);
+
+	// paint icons, right to left
+	// [repo] [auto] [type]
+	int icon_margin = 5;
+	int icon_spacing = 2;
+	int icon_size = 16;
+
+	if (m_er) {
+		QRect icon_rect = QRect(0, margin, icon_size, icon_size);
+		QPixmap type_icon;
+		switch (m_er->getERType()) {
+		case EResource::ANNOTATION:
+			type_icon = m_text_icon;
+			break;
+		case EResource::FILE:
+			type_icon = m_file_icon;
+			break;
+		case EResource::URL:
+			type_icon = m_url_icon;
+			break;
+		}
+		
+		float left = m_size.width() - icon_margin - icon_size;
+		icon_rect.setX(left);
+		painter->drawPixmap(icon_rect, type_icon);
+
+		left += icon_size;
+		left += icon_spacing;
+		icon_rect.setX(left);
+
+		if (m_er->getReposition()) {
+			painter->drawPixmap(icon_rect, m_goto_icon);
+
+			left += icon_size;
+			left += icon_spacing;
+			icon_rect.setX(left);
+		}
+
+		if (m_er->getAutoLaunch()) {
+			painter->drawPixmap(icon_rect, m_launch_icon);
+		}
+	}
 }

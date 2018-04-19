@@ -1,42 +1,34 @@
 ﻿#ifndef ERSCROLLITEM_H
 #define ERSCROLLITEM_H
-#include <QWidget>
-#include "ui_ERScrollItem.h"
-#include "ScrollBoxItem.h"
+
+#include "FastScrollBox.h"
 
 class EResource;
 class ECategory;
 
-class ERScrollItem : public ScrollBoxItem {
+class ERScrollItem : public FastScrollItem {
 	Q_OBJECT
 	
 public:
-	ERScrollItem(QWidget *parent);
+	ERScrollItem();
 
+	EResource *resource() const;
 	void setER(EResource *er);
 	void setCat(ECategory *cat);
 
-	virtual int widthFromHeight(int height);
-
-	void setColor(QColor color);
-
-	static QString colorString(QColor color);
-
-	void showTypeIcon(int);
-	void showGotoIcon(bool show);
-	void showAutoLaunchIcon(bool show);
-	void setDistance(double dist);
+protected:
+	void paint(QPainter *painter,
+		const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 private:
-	Ui::ERScrollItem ui;
 	EResource *m_er;
 	ECategory *m_cat;
 
-	QWidget *m_icon_container;
-	QLabel *m_type_icon;
-	QLabel *m_goto_icon;
-	QLabel *m_launch_icon;
-	QLabel *m_distance_label;
+	QPixmap m_text_icon;
+	QPixmap m_file_icon;
+	QPixmap m_url_icon;
+	QPixmap m_launch_icon;
+	QPixmap m_goto_icon;
 };
 
-#endif // ERSCROLLITEM_H
+#endif

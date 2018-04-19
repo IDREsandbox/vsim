@@ -205,6 +205,7 @@ set(VSim_src
   src/resources/ERDialog.h
   src/resources/ERDisplay.cpp
   src/resources/ERDisplay.h
+  src/resources/ERFilterArea.ui
   src/resources/ERFilterArea.cpp
   src/resources/ERFilterArea.h
   src/resources/ERScrollBox.cpp
@@ -213,7 +214,6 @@ set(VSim_src
   src/resources/ERScrollItem.h
   src/resources/NewCatDialog.cpp
   src/resources/NewCatDialog.h
-  src/resources/ERFilterArea.ui
 
   src/narrative/CanvasContainer.h
   src/narrative/CanvasContainer.cpp
@@ -244,6 +244,8 @@ set(VSim_src
   src/EditDeleteDelegate.h
   src/ERBar.cpp
   src/ERBar.h
+  src/FastScrollBox.cpp
+  src/FastScrollBox.h
   src/FileUtil.cpp
   src/FileUtil.h
   src/FirstPersonManipulator.cpp
@@ -287,6 +289,8 @@ set(VSim_src
   src/SelectionStack.h
   src/SimpleCameraManipulator.cpp
   src/SimpleCameraManipulator.h
+  src/StackObject.inl
+  src/StackObject.h
   src/StyleSettingsDialog.cpp
   src/StyleSettingsDialog.h
   src/StyleSettingsWidget.cpp
