@@ -25,8 +25,8 @@
     <ClInclude Include="..\..\src\BaseFirstPersonManipulator.h" />
     <QtMoc Include="..\..\src\CheckableListProxy.h" />
     <ClInclude Include="..\..\src\Command.h" />
-    <ClInclude Include="..\..\src\deprecated\narrative\Narrative.h" />
     <ClInclude Include="..\..\src\deprecated\narrative\NarrativeNode.h" />
+    <ClInclude Include="..\..\src\deprecated\narrative\NarrativeOld.h" />
     <ClInclude Include="..\..\src\deprecated\osgNewWidget\Canvas.h" />
     <ClInclude Include="..\..\src\deprecated\osgNewWidget\Label.h" />
     <ClInclude Include="..\..\src\deprecated\osgNewWidget\VSWidget.h" />
@@ -35,7 +35,6 @@
     <ClInclude Include="..\..\src\deprecated\resources\EResourcesList.h" />
     <ClInclude Include="..\..\src\deprecated\resources\EResourcesNode.h" />
     <QtMoc Include="..\..\src\narrative\CanvasContainer.h" />
-    <QtMoc Include="..\..\src\narrative\Narrative2.h" />
     <QtMoc Include="..\..\src\narrative\NarrativeCanvas.h" />
     <QtMoc Include="..\..\src\narrative\NarrativeControl.h" />
     <QtMoc Include="..\..\src\narrative\NarrativeGroup.h" />
@@ -67,15 +66,17 @@
     <QtMoc Include="..\..\src\EditDeleteDelegate.h" />
     <QtMoc Include="..\..\src\ERBar.h" />
     <ClInclude Include="..\..\src\ERSerializer.h" />
+    <QtMoc Include="..\..\src\FastScrollBox.h" />
     <ClInclude Include="..\..\src\FileUtil.h" />
     <ClInclude Include="..\..\src\FirstPersonManipulator.h" />
     <ClInclude Include="..\..\src\FlightManipulator.h" />
     <QtMoc Include="..\..\src\FocusFilter.h" />
-    <QtMoc Include="..\..\src\Group.h" />
-    <QtMoc Include="..\..\src\GroupModel.h" />
-    <QtMoc Include="..\..\src\GroupProxy.h" />
     <QtMoc Include="..\..\src\GroupScrollBox.h" />
     <QtMoc Include="..\..\src\HorizontalScrollBox.h" />
+    <ClInclude Include="..\..\src\GroupCommands.h" />
+    <ClInclude Include="..\..\src\GroupEnums.h" />
+    <ClInclude Include="..\..\src\GroupModelTemplate.h" />
+    <QtMoc Include="..\..\src\GroupTemplate.h" />
     <ClInclude Include="..\..\src\KeyTracker.h" />
     <QtMoc Include="..\..\src\LabelStyle.h" />
     <QtMoc Include="..\..\src\LabelStyleGroup.h" />
@@ -83,17 +84,22 @@
     <QtMoc Include="..\..\src\MainWindow.h" />
     <QtMoc Include="..\..\src\MainWindowTopBar.h" />
     <QtMoc Include="..\..\src\ModelGroup.h" />
+    <QtMoc Include="..\..\src\Model.h" />
+    <ClInclude Include="..\..\src\ModelGroupModel.h" />
     <ClInclude Include="..\..\src\ModelInformation.h" />
     <QtMoc Include="..\..\src\ModelOutliner.h" />
-    <QtMoc Include="..\..\src\ModelTableModel.h" />
     <QtMoc Include="..\..\src\mrichtextedit.h" />
     <QtMoc Include="..\..\src\mtextedit.h" />
+    <QtMoc Include="..\..\src\ModelInformationDialog.h" />
     <ClInclude Include="..\..\src\NarrativeSerializer.h" />
+    <QtMoc Include="..\..\src\narrative\Narrative.h" />
     <ClInclude Include="..\..\src\Navigation.h" />
     <QtMoc Include="..\..\src\NavigationControl.h" />
     <QtMoc Include="..\..\src\NumberSlider.h" />
     <ClInclude Include="..\..\src\ObjectManipulator.h" />
     <QtMoc Include="..\..\src\OSGViewerWidget.h" />
+    <QtMoc Include="..\..\src\OSGGroupModel.h" />
+    <QtMoc Include="..\..\src\OSGYearModel.h" />
     <ClInclude Include="..\..\src\RegisterMetaTypes.h" />
     <QtMoc Include="..\..\src\ScrollBoxItem.h" />
     <QtMoc Include="..\..\src\Selection.h" />
@@ -104,10 +110,12 @@
     <QtMoc Include="..\..\src\TextToolbar.h" />
     <QtMoc Include="..\..\src\TickSlider.h" />
     <QtMoc Include="..\..\src\TimeSlider.h" />
+    <QtMoc Include="..\..\src\StackObject.h" />
     <ClInclude Include="..\..\src\TypesSerializer.h" />
     <ClInclude Include="..\..\src\Util.h" />
     <QtMoc Include="..\..\src\VSimApp.h" />
     <QtMoc Include="..\..\src\VSimRoot.h" />
+    <ClInclude Include="..\..\src\VecUtil.h" />
     <ClInclude Include="..\..\src\VSimSerializer.h" />
     <ClInclude Include="GeneratedFiles\eresources_generated.h" />
     <ClInclude Include="GeneratedFiles\narratives_generated.h" />
@@ -157,22 +165,18 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\global.props" />
-    <Import Project="..\qt.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\global.props" />
-    <Import Project="..\qt.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\global.props" />
-    <Import Project="..\qt.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\global.props" />
-    <Import Project="..\qt.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -205,6 +209,7 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtMoc>
       <QTDIR>$(QTDIR)</QTDIR>
@@ -213,7 +218,7 @@
       <Define>UNICODE;WIN32;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB</Define>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <DynamicSource>output</DynamicSource>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.\;%(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
     <QtUic>
       <OutputFile>.\GeneratedFiles\ui_%(Filename).h</OutputFile>
@@ -235,6 +240,7 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <QtUic>
       <QTDIR>$(QTDIR)</QTDIR>
@@ -249,7 +255,7 @@
       <Define>UNICODE;WIN32;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB</Define>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <DynamicSource>output</DynamicSource>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.\;%(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -264,6 +270,7 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib</AdditionalDependencies>
     </Link>
     <QtMoc>
       <QTDIR>$(QTDIR)</QTDIR>
@@ -272,7 +279,7 @@
       <Define>UNICODE;WIN32;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB</Define>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <DynamicSource>output</DynamicSource>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.\;%(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
     <QtUic>
       <QTDIR>$(QTDIR)</QTDIR>
@@ -293,6 +300,7 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>qtmain.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib</AdditionalDependencies>
     </Link>
     <QtMoc>
       <QTDIR>$(QTDIR)</QTDIR>
@@ -301,7 +309,7 @@
       <Define>UNICODE;WIN32;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB</Define>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <DynamicSource>output</DynamicSource>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets;$(DEPS)\osg-build\install\include</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.\;%(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
     <QtUic>
       <QTDIR>$(QTDIR)</QTDIR>
@@ -311,7 +319,7 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="../src/*.fbs">
+    <CustomBuild Include="../../src/*.fbs">
       <Message>Generating headers from flatbuffers %(Identity)</Message>
       <Command>flatc -c --gen-object-api -o ./GeneratedFiles %(Identity)</Command>
       <Outputs>./GeneratedFiles/%(Filename)_generated.h</Outputs>
@@ -320,9 +328,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\BaseFirstPersonManipulator.cpp" />
     <ClCompile Include="..\..\src\CheckableListProxy.cpp" />
-    <ClCompile Include="..\..\src\deprecated\narrative\Narrative.cpp" />
     <ClCompile Include="..\..\src\deprecated\narrative\NarrativeNode.cpp" />
-    <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrative.cpp" />
+    <ClCompile Include="..\..\src\deprecated\narrative\NarrativeOld.cpp" />
+    <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrativeOld.cpp" />
     <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrativeNode.cpp" />
     <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrativeTransition.cpp" />
     <ClCompile Include="..\..\src\deprecated\osgNewWidget\Canvas.cpp" />
@@ -340,19 +348,16 @@
     <ClCompile Include="..\..\src\deprecated\resources\EResourcesNode.cpp" />
     <ClCompile Include="..\..\src\deprecated\resources\SerializerEResourcesList.cpp" />
     <ClCompile Include="..\..\src\deprecated\resources\SerializerEResourcesNode.cpp" />
-    <ClCompile Include="..\..\src\deprecated\SerializerModelInformation.cpp" />
+    <ClCompile Include="..\..\src\deprecated\SerializerModelInformationOld.cpp" />
     <ClCompile Include="..\..\src\editButtons.cpp" />
     <ClCompile Include="..\..\src\EditDeleteDelegate.cpp" />
     <ClCompile Include="..\..\src\ERBar.cpp" />
     <ClCompile Include="..\..\src\ERSerializer.cpp" />
+    <ClCompile Include="..\..\src\FastScrollBox.cpp" />
     <ClCompile Include="..\..\src\FileUtil.cpp" />
     <ClCompile Include="..\..\src\FirstPersonManipulator.cpp" />
     <ClCompile Include="..\..\src\FlightManipulator.cpp" />
     <ClCompile Include="..\..\src\FocusFilter.cpp" />
-    <ClCompile Include="..\..\src\Group.cpp" />
-    <ClCompile Include="..\..\src\GroupModel.cpp" />
-    <ClCompile Include="..\..\src\GroupProxy.cpp" />
-    <ClCompile Include="..\..\src\GroupScrollBox.cpp" />
     <ClCompile Include="..\..\src\HorizontalScrollBox.cpp" />
     <ClCompile Include="..\..\src\KeyTracker.cpp" />
     <ClCompile Include="..\..\src\LabelStyle.cpp" />
@@ -360,14 +365,16 @@
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\MainWindow.cpp" />
     <ClCompile Include="..\..\src\MainWindowTopBar.cpp" />
+    <ClCompile Include="..\..\src\Model.cpp" />
     <ClCompile Include="..\..\src\ModelGroup.cpp" />
+    <ClCompile Include="..\..\src\ModelGroupModel.cpp" />
+    <ClCompile Include="..\..\src\ModelInformationDialog.cpp" />
     <ClCompile Include="..\..\src\ModelOutliner.cpp" />
-    <ClCompile Include="..\..\src\ModelTableModel.cpp" />
     <ClCompile Include="..\..\src\mrichtextedit.cpp" />
     <ClCompile Include="..\..\src\mtextedit.cpp" />
     <ClCompile Include="..\..\src\NarrativeSerializer.cpp" />
     <ClCompile Include="..\..\src\narrative\CanvasContainer.cpp" />
-    <ClCompile Include="..\..\src\narrative\Narrative2.cpp" />
+    <ClCompile Include="..\..\src\narrative\Narrative.cpp" />
     <ClCompile Include="..\..\src\narrative\NarrativeCanvas.cpp" />
     <ClCompile Include="..\..\src\narrative\NarrativeControl.cpp" />
     <ClCompile Include="..\..\src\narrative\NarrativeGroup.cpp" />
@@ -384,7 +391,9 @@
     <ClCompile Include="..\..\src\NavigationControl.cpp" />
     <ClCompile Include="..\..\src\NumberSlider.cpp" />
     <ClCompile Include="..\..\src\ObjectManipulator.cpp" />
+    <ClCompile Include="..\..\src\OSGGroupModel.cpp" />
     <ClCompile Include="..\..\src\OSGViewerWidget.cpp" />
+    <ClCompile Include="..\..\src\OSGYearModel.cpp" />
     <ClCompile Include="..\..\src\resources\ECategory.cpp" />
     <ClCompile Include="..\..\src\resources\ECategoryControl.cpp" />
     <ClCompile Include="..\..\src\resources\ECategoryGroup.cpp" />
@@ -410,29 +419,35 @@
     <ClCompile Include="..\..\src\TimeSlider.cpp" />
     <ClCompile Include="..\..\src\TypesSerializer.cpp" />
     <ClCompile Include="..\..\src\Util.cpp" />
+    <ClCompile Include="..\..\src\VecUtil.cpp" />
     <ClCompile Include="..\..\src\VSimApp.cpp" />
     <ClCompile Include="..\..\src\VSimRoot.cpp" />
     <ClCompile Include="..\..\src\VSimSerializer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="..\..\src\CanvasSettings.ui" />
     <QtUic Include="..\..\src\editButtons.ui" />
     <QtUic Include="..\..\src\ERBar.ui" />
     <QtUic Include="..\..\src\MainWindow.ui" />
     <QtUic Include="..\..\src\MainWindowTopBar.ui" />
+    <QtUic Include="..\..\src\ModelInformationDialog.ui" />
     <QtUic Include="..\..\src\mrichtextedit.ui" />
+    <QtUic Include="..\..\src\narrative\NarrativeInfoDialog.ui" />
+    <QtUic Include="..\..\src\narrative\NarrativeScrollItem.ui" />
+    <QtUic Include="..\..\src\narrative\NarrativeSlideDurationDialog.ui" />
+    <QtUic Include="..\..\src\narrative\SlideScrollItem.ui" />
     <QtUic Include="..\..\src\NumberSlider.ui" />
+    <QtUic Include="..\..\src\resources\ERDialog.ui" />
+    <QtUic Include="..\..\src\resources\ERFilterArea.ui" />
     <QtUic Include="..\..\src\StyleSettingsDialog.ui" />
     <QtUic Include="..\..\src\StyleSettingsWidget.ui" />
     <QtUic Include="..\..\src\TextToolbar.ui" />
     <QtUic Include="..\..\src\TimeSlider.ui" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\eresources.fbs" />
-    <None Include="..\..\src\narratives.fbs" />
-    <None Include="..\..\src\settings.fbs" />
-    <None Include="..\..\src\types.fbs" />
-    <None Include="..\..\src\vsim.fbs" />
+    <None Include="..\..\src\GroupModelTemplate.inl" />
+    <None Include="..\..\src\GroupScrollBox.inl" />
+    <None Include="..\..\src\GroupTemplate.inl" />
+    <None Include="..\..\src\StackObject.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

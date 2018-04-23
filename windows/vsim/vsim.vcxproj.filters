@@ -56,9 +56,6 @@
     <ClInclude Include="GeneratedFiles\vsim_generated.h">
       <Filter>FlatBuffers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\deprecated\narrative\Narrative.h">
-      <Filter>Deprecated</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\deprecated\narrative\NarrativeNode.h">
       <Filter>Deprecated</Filter>
     </ClInclude>
@@ -134,6 +131,24 @@
     <ClInclude Include="..\..\src\VSimSerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\GroupCommands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\GroupEnums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\GroupModelTemplate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ModelGroupModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\VecUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\deprecated\narrative\NarrativeOld.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="../../*.fbs" />
@@ -146,15 +161,14 @@
     <CustomBuild Include="../../*.fbs" />
     <CustomBuild Include="../../*.fbs" />
     <CustomBuild Include="../../*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\deprecated\narrative\Narrative.cpp">
-      <Filter>Deprecated</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\deprecated\narrative\NarrativeNode.cpp">
-      <Filter>Deprecated</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrative.cpp">
       <Filter>Deprecated</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrativeNode.cpp">
@@ -208,13 +222,7 @@
     <ClCompile Include="..\..\src\deprecated\resources\SerializerEResourcesNode.cpp">
       <Filter>Deprecated</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\deprecated\SerializerModelInformation.cpp">
-      <Filter>Deprecated</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\narrative\CanvasContainer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\narrative\Narrative2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\narrative\NarrativeCanvas.cpp">
@@ -328,18 +336,6 @@
     <ClCompile Include="..\..\src\FocusFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Group.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\GroupModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\GroupProxy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\GroupScrollBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\HorizontalScrollBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -365,9 +361,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ModelOutliner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ModelTableModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\mrichtextedit.cpp">
@@ -433,15 +426,42 @@
     <ClCompile Include="..\..\src\VSimSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\FastScrollBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ModelGroupModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ModelInformationDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\OSGGroupModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\OSGYearModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\VecUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\narrative\Narrative.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\deprecated\narrative\NarrativeOld.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrativeOld.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\deprecated\SerializerModelInformationOld.cpp">
+      <Filter>Deprecated</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\src\narrative\CanvasContainer.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\narrative\Narrative2.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\narrative\NarrativeCanvas.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="..\..\src\narrative\NarrativeControl.h">
@@ -537,15 +557,6 @@
     <QtMoc Include="..\..\src\FocusFilter.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\src\Group.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\GroupModel.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\GroupProxy.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="..\..\src\GroupScrollBox.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -568,9 +579,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="..\..\src\ModelOutliner.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="..\..\src\ModelTableModel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="..\..\src\mrichtextedit.h">
@@ -618,11 +626,35 @@
     <QtMoc Include="..\..\src\VSimRoot.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="..\..\src\FastScrollBox.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\StackObject.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\narrative\NarrativeCanvas.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\GroupTemplate.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\Model.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\ModelInformationDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\OSGGroupModel.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\OSGYearModel.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\narrative\Narrative.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="..\..\src\CanvasSettings.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="..\..\src\editButtons.ui">
       <Filter>Form Files</Filter>
     </QtUic>
@@ -653,12 +685,32 @@
     <QtUic Include="..\..\src\TimeSlider.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="..\..\src\ModelInformationDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\narrative\NarrativeInfoDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\narrative\NarrativeScrollItem.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\narrative\NarrativeSlideDurationDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\narrative\SlideScrollItem.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\resources\ERFilterArea.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\resources\ERDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\eresources.fbs" />
-    <None Include="..\..\src\narratives.fbs" />
-    <None Include="..\..\src\settings.fbs" />
-    <None Include="..\..\src\types.fbs" />
-    <None Include="..\..\src\vsim.fbs" />
+    <None Include="..\..\src\StackObject.inl" />
+    <None Include="..\..\src\GroupModelTemplate.inl" />
+    <None Include="..\..\src\GroupScrollBox.inl" />
+    <None Include="..\..\src\GroupTemplate.inl" />
   </ItemGroup>
 </Project>
