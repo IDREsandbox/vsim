@@ -65,7 +65,8 @@ void ERFilterArea::reset()
 	ui.yearsCheckBox->setChecked(true);
 	ui.showLocalCheckBox->setChecked(false);
 	ui.searchLineEdit->clear();
-	ui.sortByBox->setCurrentIndex(0);
+	ui.sortGlobalBox->setCurrentIndex(0);
+	ui.sortLocalBox->setCurrentIndex(0);
 	if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
 	if (m_type_checkbox_model) m_type_checkbox_model->setCheckAll(true);
 	ui.filetypesBox->setCurrentText("");

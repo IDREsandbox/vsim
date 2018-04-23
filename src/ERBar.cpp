@@ -10,8 +10,8 @@ ERBar::ERBar(QWidget * parent)
 
 	FocusFilter *ff = new FocusFilter(this);
 	this->installEventFilter(ff);
-	ui.local->scrollArea()->installEventFilter(ff);
-	ui.global->scrollArea()->installEventFilter(ff);
+	ui.local->installEventFilter(ff);
+	ui.global->installEventFilter(ff);
 	for (QObject *obj : children()) {
 		obj->installEventFilter(ff);
 	}

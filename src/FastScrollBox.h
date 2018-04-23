@@ -25,7 +25,7 @@ public:
 
 	// selection
 	void selectAll(bool select = true);
-	StackObject<FastScrollItem*> *selection();
+	StackObject<FastScrollItem*> *selection() const;
 
 	void insertItems(const std::vector<std::pair<size_t, FastScrollItem*>>& insertions);
 	void removeItems(const std::vector<size_t> indices);

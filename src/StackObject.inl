@@ -2,7 +2,6 @@
 #define STACKOBJECT_INL
 #include "StackObject.h"
 
-
 template<class T>
 inline void StackObject<T>::add(T x)
 {
@@ -29,7 +28,6 @@ inline void StackObject<T>::remove(T x)
 
 	auto it = std::find(m_stack.begin(), m_stack.end(), x);
 	size_t index = it - m_stack.begin();
-	qDebug() << "stack remove" << index;
 
 	m_stack.erase(it);
 	m_set.erase(set_it);

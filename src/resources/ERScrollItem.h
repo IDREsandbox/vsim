@@ -16,6 +16,8 @@ public:
 	void setER(EResource *er);
 	void setCat(ECategory *cat);
 
+	void updateAlias();
+
 protected:
 	void paint(QPainter *painter,
 		const QStyleOptionGraphicsItem *option, QWidget *widget) override;

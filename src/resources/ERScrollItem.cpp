@@ -1,10 +1,10 @@
 ﻿#include "resources/ERScrollItem.h"
 #include "resources/EResource.h"
 #include "resources/ECategory.h"
-
-// some crazy alias
-static constexpr void(QGraphicsItem::* const updateAlias)(const QRectF &)
-	= qOverload<const QRectF &>(&QGraphicsItem::update);
+#include <QtGlobal>
+#include <QRect>
+#include <QDebug>
+#include <QGraphicsItem>
 
 ERScrollItem::ERScrollItem()
 	: FastScrollItem(),
@@ -29,7 +29,7 @@ void ERScrollItem::setER(EResource *er)
 
 	m_er = er;
 	if (er) {
-		connect(er, &EResource::sResourceNameChanged, this, &updateAlias);
+		connect(er, &EResource::sResourceNameChanged, this, &ERScrollItem::updateAlias);
 
 		setCat(er->category());
 		connect(er, &EResource::sCategoryChanged, this,
@@ -40,9 +40,10 @@ void ERScrollItem::setER(EResource *er)
 		//setDistance(er->getDistanceTo());
 		//connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::setDistance);
 
-		connect(er, &EResource::sErTypeChanged, this, &updateAlias);
-		connect(er, &EResource::sRepositionChanged, this, &updateAlias);
-		connect(er, &EResource::sAutoLaunchChanged, this, &updateAlias);
+		//connect(er, &EResource::sErTypeChanged, this, &ERScrollItem::updateAlias);
+		//connect(er, &EResource::sRepositionChanged, this, &ERScrollItem::updateAlias);
+		//connect(er, &EResource::sAutoLaunchChanged, this, &ERScrollItem::updateAlias);
+		connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::updateAlias);
 	}
 	update();
 }
@@ -52,16 +53,21 @@ void ERScrollItem::setCat(ECategory *cat)
 	if (m_cat) disconnect(m_cat, 0, this, 0);
 	m_cat = cat;
 	if (cat) {
-		connect(cat, &ECategory::sColorChanged, this, &updateAlias);
+		connect(cat, &ECategory::sColorChanged, this, &ERScrollItem::updateAlias);
 	}
 	else {
 	}
 	update();
 }
 
+void ERScrollItem::updateAlias()
+{
+	update(boundingRect());
+}
+
 void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
-	
+	//qDebug() << "paint work";
 	// base color
 	QColor color = QColor(50, 50, 50);
 	if (m_cat) color = m_cat->getColor();
@@ -69,7 +75,6 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 	QColor select_color;
 	QColor text_color;
 	QColor select_text_color;
-	
 
 	// lighter or darker?
 	if (color.lightness() > 150) { // bright colors
@@ -81,7 +86,7 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 		text_color = QColor(255, 255, 255);
 	}
 
-	// text color
+	// select text color
 	if (select_color.lightness() > 150) {
 		select_text_color = QColor(0, 0, 0);
 	}
@@ -92,18 +97,20 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 	QColor use_color;
 	QColor use_text_color;
 	if (isSelected()) {
-		use_color = color;
-		use_text_color = text_color;
+		use_color = select_color;
+		use_text_color = select_text_color;
 	}
 	else {
-		use_color = select_color;
-		use_text_color = select_color;
+		use_color = color;
+		use_text_color = text_color;
 	}
 
 	// paint background
 	painter->setBrush(use_color);
 	painter->setPen(QPen(Qt::NoPen));
 	painter->drawRect(QRectF(QPointF(0, 0), m_size));
+
+	if (!m_er) return;
 
 	// paint text
 	int text_margin = 5;
@@ -130,43 +137,41 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 
 	// paint icons, right to left
 	// [repo] [auto] [type]
-	int icon_margin = 5;
-	int icon_spacing = 2;
+	int icon_margin = 1;
+	int icon_spacing = 0;
 	int icon_size = 16;
 
-	if (m_er) {
-		QRect icon_rect = QRect(0, margin, icon_size, icon_size);
-		QPixmap type_icon;
-		switch (m_er->getERType()) {
-		case EResource::ANNOTATION:
-			type_icon = m_text_icon;
-			break;
-		case EResource::FILE:
-			type_icon = m_file_icon;
-			break;
-		case EResource::URL:
-			type_icon = m_url_icon;
-			break;
-		}
+	QRect icon_rect = QRect(0, margin, icon_size, icon_size);
+	QPixmap type_icon;
+	switch (m_er->getERType()) {
+	case EResource::ANNOTATION:
+		type_icon = m_text_icon;
+		break;
+	case EResource::FILE:
+		type_icon = m_file_icon;
+		break;
+	case EResource::URL:
+		type_icon = m_url_icon;
+		break;
+	}
 		
-		float left = m_size.width() - icon_margin - icon_size;
+	float left = m_size.width() - icon_margin - icon_size;
+	icon_rect.setX(left);
+	painter->drawPixmap(icon_rect, type_icon);
+
+	left -= icon_size;
+	left -= icon_spacing;
+	icon_rect.setX(left);
+
+	if (m_er->getReposition()) {
+		painter->drawPixmap(icon_rect, m_goto_icon);
+
+		left -= icon_size;
+		left -= icon_spacing;
 		icon_rect.setX(left);
-		painter->drawPixmap(icon_rect, type_icon);
+	}
 
-		left += icon_size;
-		left += icon_spacing;
-		icon_rect.setX(left);
-
-		if (m_er->getReposition()) {
-			painter->drawPixmap(icon_rect, m_goto_icon);
-
-			left += icon_size;
-			left += icon_spacing;
-			icon_rect.setX(left);
-		}
-
-		if (m_er->getAutoLaunch()) {
-			painter->drawPixmap(icon_rect, m_launch_icon);
-		}
+	if (m_er->getAutoLaunch()) {
+		painter->drawPixmap(icon_rect, m_launch_icon);
 	}
 }

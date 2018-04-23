@@ -19,6 +19,8 @@
 #include "GroupCommands.h"
 
 #include <QDesktopServices>
+#include <QPushButton>
+#include <QDebug>
 
 ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	: QObject(parent),
@@ -28,13 +30,13 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_categories(nullptr),
 	m_filter_proxy(nullptr),
 	m_global_proxy(nullptr),
-	m_local_proxy(nullptr)
+	m_local_proxy(nullptr),
+	m_last_touched(nullptr)
 {
 	m_undo_stack = m_app->getUndoStack();
 	m_global_box = m_window->erBar()->ui.global;
 	m_local_box = m_window->erBar()->ui.local;
-	m_global_selection = m_global_box->selectionStack();
-	m_local_selection = m_local_box->selectionStack();
+	m_last_touched = m_local_box;
 	m_display = m_window->erDisplay();
 	m_filter_area = m_window->erFilterArea();
 
@@ -110,16 +112,16 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	connect(m_local_box, &ERScrollBox::sOpen, a_open_er, &QAction::trigger);
 	connect(m_global_box, &ERScrollBox::sOpen, a_open_er, &QAction::trigger);
 
-	connect(m_local_box, &HorizontalScrollBox::sTouch, this, &ERControl::onSelectionChange);
-	connect(m_global_box, &HorizontalScrollBox::sTouch, this, &ERControl::onSelectionChange);
+	connect(m_local_box, &FastScrollBox::sTouch, this, &ERControl::onTouch);
+	connect(m_global_box, &FastScrollBox::sTouch, this, &ERControl::onTouch);
 
 	// mash the two selections together
 	// if one clears everything, then clear the other one too
-	connect(m_local_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
-		m_global_selection->clear();
+	connect(m_local_box, &FastScrollBox::sSelectionCleared, this, [this]() {
+		m_global_box->selection()->clear();
 	});
-	connect(m_global_box, &HorizontalScrollBox::sSelectionCleared, this, [this]() {
-		m_local_selection->clear();
+	connect(m_global_box, &FastScrollBox::sSelectionCleared, this, [this]() {
+		m_local_box->selection()->clear();
 	});
 
 	// hide/show filter area
@@ -131,7 +133,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	connect(m_app, &VSimApp::sStateChanged, this, [this]() {
 		VSimApp::State state = m_app->state();
 		if (!m_app->isFlying() && state != VSimApp::EDIT_ERS) {
-			setDisplay(-1);
+			setDisplay(nullptr);
 		}
 	});
 
@@ -147,7 +149,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 
 void ERControl::load(EResourceGroup *ers)
 {
-	setDisplay(-1);
+	setDisplay(nullptr);
 	if (ers == nullptr) {
 		m_ers = nullptr;
 		m_categories = nullptr;
@@ -239,19 +241,18 @@ void ERControl::deleteER()
 
 void ERControl::editERInfo()
 {
-	int active_item = getCombinedLastSelected();
-	if (active_item < 0) {
+	EResource *resource = getCombinedLastSelectedP();
+	if (resource == nullptr) {
 		qWarning() << "resource list - can't edit with no selection";
 		return;
 	}
-	EResource *resource = m_ers->getResource(active_item);
 
 	ERDialog dlg(m_category_control, m_app->getCurrentDirectory().c_str());
 
 	dlg.init(resource);
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
-		qInfo() << "resource list - cancelled edit on" << active_item;
+		qInfo() << "resource list - cancelled edit on" << resource;
 		return;
 	}
 
@@ -260,7 +261,9 @@ void ERControl::editERInfo()
 	m_undo_stack->beginMacro("Set Resource Info");
 	//m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
 
-	auto cmd = new EditCommand<EResource>(m_ers, { (size_t)active_item });
+	int index = m_ers->indexOf(resource);
+
+	auto cmd = new EditCommand<EResource>(m_ers, { (size_t)index });
 
 	if (resource->getResourceName() != dlg.getTitle())
 		new EResource::SetResourceNameCommand(resource, dlg.getTitle(), cmd);
@@ -298,9 +301,7 @@ void ERControl::editERInfo()
 
 void ERControl::openResource()
 {
-	int index = getCombinedLastSelected();
-	if (index < 0) return;
-	EResource *res = m_ers->getResource(index);
+	EResource *res = getCombinedLastSelectedP();
 	if (!res) return;
 
 	if (res->getERType() == EResource::FILE) {
@@ -324,14 +325,11 @@ void ERControl::openResource()
 
 void ERControl::setPosition()
 {
-	int active_item = getCombinedLastSelected();
-	qInfo() << "Set ER position" << active_item;
-	if (active_item < 0) {
+	EResource *resource = getCombinedLastSelectedP();
+	if (resource == nullptr) {
 		qWarning() << "Can't set ER position - no selection";
 		return;
 	}
-
-	EResource *resource = m_ers->getResource(active_item);
 	m_undo_stack->beginMacro("Set Resource Info");
 	m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_app->getCameraMatrix()));
 	m_undo_stack->push(new SelectERCommand(this, { resource }));
@@ -356,23 +354,17 @@ void ERControl::mergeERs(const EResourceGroup *ers)
 
 void ERControl::gotoPosition()
 {
-	int active_item = getCombinedLastSelected();
-	qInfo() << "Goto ER position" << active_item;
-	if (active_item < 0) {
+	EResource *resource = getCombinedLastSelectedP();
+	if (resource == nullptr) {
 		qWarning() << "Can't goto ER position - no selection";
 		return;
 	}
-	EResource *resource = m_ers->getResource(active_item);
 	m_app->setCameraMatrix(resource->getCameraMatrix());
 }
 
-void ERControl::setDisplay(int index, bool go)
+void ERControl::setDisplay(EResource *res, bool go)
 {
-	m_active_item = index;
-
-	EResource *res = nullptr;
-	if (m_ers) res = m_ers->getResource(m_active_item);
-	if (!res) {
+	if (res == nullptr) {
 		m_display->setInfo(nullptr);
 		m_display->hide();
 		return;
@@ -386,31 +378,34 @@ void ERControl::setDisplay(int index, bool go)
 	}
 }
 
-void ERControl::onSelectionChange()
+void ERControl::onTouch()
 {
-	int new_active = getCombinedLastSelected();
+	QObject *sender = QObject::sender();
+	if (sender == m_local_box) {
+		m_last_touched = m_local_box;
+	}
+	else if (sender == m_global_box) {
+		m_last_touched = m_global_box;
+	}
 
-	if (new_active >= 0) {
-		// set state
+	EResource *resource = getCombinedLastSelectedP();
+	if (resource) {
 		m_app->setState(VSimApp::EDIT_ERS);
-		setDisplay(new_active);
+		setDisplay(resource);
 	}
 	else {
-		setDisplay(-1);
+		setDisplay(nullptr);
 		m_app->setState(VSimApp::EDIT_FLYING);
 	}
 }
 
 void ERControl::selectERs(const std::vector<EResource*> &res)
 {
-	std::vector<int> globals = m_global_proxy->indicesOf(res, false);
-	m_global_box->selectionStack()->set(globals);
-
-	std::vector<int> locals = m_local_proxy->indicesOf(res, false);
-	m_local_box->selectionStack()->set(locals);
+	m_global_box->setSelection(res);
+	m_local_box->setSelection(res);
 
 	m_app->setState(VSimApp::EDIT_ERS);
-	setDisplay(getCombinedLastSelected());
+	setDisplay(getCombinedLastSelectedP());
 }
 
 void ERControl::resetFilters()
@@ -422,16 +417,14 @@ void ERControl::resetFilters()
 	m_filter_proxy->showGlobal(true);
 	m_filter_proxy->showLocal(true);
 
-	ui.globalCheckBox->setChecked(true);
-	ui.localCheckBox->setChecked(true);
-	ui.yearsCheckBox->setChecked(true);
-	ui.showLocalCheckBox->setChecked(false);
-	ui.searchLineEdit->clear();
-	ui.sortByBox->setCurrentIndex(0);
+	//ui.globalCheckBox->setChecked(true);
+	//ui.localCheckBox->setChecked(true);
+	//ui.yearsCheckBox->setChecked(true);
+	//ui.showLocalCheckBox->setChecked(false);
+	//ui.searchLineEdit->clear();
+	//ui.sortByBox->setCurrentIndex(0);
 	if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
-	if (m_type_checkbox_model) m_type_checkbox_model->setCheckAll(true);
-	ui.filetypesBox->setCurrentText("");
-
+	//if (m_type_checkbox_model) m_type_checkbox_model->setCheckAll(true);
 }
 
 void ERControl::debug()
@@ -450,100 +443,105 @@ void ERControl::debug()
 	}
 }
 
-std::set<size_t> ERControl::getCombinedSelection()
+std::set<size_t> ERControl::getCombinedSelection() const
 {
 	// remap selection to nodes
 	std::set<EResource*> nodes;
-	std::set<size_t> local_selection = m_local_selection->toUSet();
-	for (auto i : local_selection) {
-		nodes.insert(m_local_proxy->child(i));
-	}
-	std::set<size_t> global_selection = m_global_selection->toUSet();
-	for (auto i : global_selection) {
-		nodes.insert(m_global_proxy->child(i));
-	}
+
+	auto ls = m_local_box->getSelection();
+	auto gs = m_global_box->getSelection();
+	nodes.insert(ls.begin(), ls.end());
+	nodes.insert(gs.begin(), gs.end());
 
 	// map nodes to indices
-	std::set<size_t> selection;
+	std::set<size_t> indices;
 	for (size_t i = 0; i < m_ers->size(); i++) {
-		if (std::find(nodes.begin(), nodes.end(), m_ers->child(i)) != nodes.end()) {
-			selection.insert(i);
+		if (nodes.count(m_ers->child(i)) > 0) {
+			indices.insert(i);
 		}
 	}
-	return selection;
+	return indices;
 }
 
-std::vector<EResource*> ERControl::getCombinedSelectionP()
+std::vector<EResource*> ERControl::getCombinedSelectionP() const
 {
-	std::set<EResource*> has;
 	std::vector<EResource*> out;
 
-	// tape global on top of local
-	SelectionData local = m_local_selection->data();
-	for (int index : local) {
-		EResource *res = m_local_proxy->getResource(index);
-		if (has.find(res) == has.end() && res) {
-			has.insert(res);
-			out.push_back(res);
-		}
+	auto ls = m_local_box->getSelection();
+	auto gs = m_global_box->getSelection();
+	decltype(ls) *first, *second;
+
+	if (m_last_touched == m_global_box) {
+		// insert global on top
+		first = &ls;
+		second = &gs;
+	}
+	else {
+		first = &gs;
+		second = &ls;
 	}
 
-	SelectionData global = m_global_selection->data();
-	for (int index : global) {
-		EResource *res = m_global_proxy->getResource(index);
-		if (has.find(res) == has.end() && res) {
-			has.insert(res);
-			out.push_back(res);
-		}
-	}
+	out.insert(out.end(), first->begin(), first->end());
+	out.insert(out.end(), second->begin(), second->end());
 
 	return out;
 }
 
-int ERControl::getCombinedLastSelected()
+int ERControl::getCombinedLastSelected() const
 {
-	QObject *sender = QObject::sender();
-	ERFilterSortProxy *proxy;
-	int last;
-	int local_last = m_local_selection->last();
-	int global_last = m_global_selection->last();
-	// use the sender to determine the last selected
-	if ((sender == m_local_box 
-		|| sender == m_local_box->selectionStack())
-		&& local_last != -1) {
-		last = local_last;
-		proxy = m_local_proxy.get();
-	}
-	else if ((sender == m_global_box
-		|| sender == m_global_box->selectionStack())
-		&& global_last != -1) {
-		last = global_last;
-		proxy = m_global_proxy.get();
-	}
-	else {
-		// just take whatever is selected
-		if (local_last != -1) {
-			last = local_last;
-			proxy = m_local_proxy.get();
-		}
-		else {
-			last = global_last;
-			proxy = m_global_proxy.get();
-		}
-	}
+	//QObject *sender = QObject::sender();
+	//ERFilterSortProxy *proxy;
+	//int last;
+	//int local_last = m_local_selection->last();
+	//int global_last = m_global_selection->last();
+	//// use the sender to determine the last selected
+	//if ((sender == m_local_box 
+	//	|| sender == m_local_box->selectionStack())
+	//	&& local_last != -1) {
+	//	last = local_last;
+	//	proxy = m_local_proxy.get();
+	//}
+	//else if ((sender == m_global_box
+	//	|| sender == m_global_box->selectionStack())
+	//	&& global_last != -1) {
+	//	last = global_last;
+	//	proxy = m_global_proxy.get();
+	//}
+	//else {
+	//	// just take whatever is selected
+	//	if (local_last != -1) {
+	//		last = local_last;
+	//		proxy = m_local_proxy.get();
+	//	}
+	//	else {
+	//		last = global_last;
+	//		proxy = m_global_proxy.get();
+	//	}
+	//}
 
-	// convert into original index
-	if (last < 0) return -1;
-	EResource *node = proxy->child(last);
-	int last_base = m_ers->indexOf(node);
+	//// convert into original index
+	//if (last < 0) return -1;
+	//EResource *node = proxy->child(last);
+	//int last_base = m_ers->indexOf(node);
 
-	return last_base;
+	return -1;
+}
+
+EResource *ERControl::getCombinedLastSelectedP() const
+{
+	auto sel = getCombinedSelectionP();
+
+	if (sel.size() > 0) {
+		return *sel.rbegin();
+	}
+	
+	return nullptr;
 }
 
 void ERControl::clearSelection()
 {
-	m_global_box->selectionStack()->clear();
-	m_local_box->selectionStack()->clear();
+	m_global_box->setSelection({});
+	m_local_box->setSelection({});
 }
 
 SelectERCommand::SelectERCommand(ERControl *control,

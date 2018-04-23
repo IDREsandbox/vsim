@@ -47,16 +47,17 @@ public:
 	void gotoPosition();
 
 	// -1 to hide
-	void setDisplay(int index, bool go = true);
+	void setDisplay(EResource *res, bool go = true);
 
 	// show and goto resource
-	void onSelectionChange();
+	void onTouch();
 
 	// selection
 	void selectERs(const std::vector<EResource*> &res);
-	std::set<size_t> getCombinedSelection();
-	std::vector<EResource*> getCombinedSelectionP();
-	int getCombinedLastSelected();
+	std::set<size_t> getCombinedSelection() const;
+	std::vector<EResource*> getCombinedSelectionP() const;
+	int getCombinedLastSelected() const;
+	EResource *getCombinedLastSelectedP() const;
 	void clearSelection();
 
 	// filters
@@ -90,8 +91,7 @@ private:
 
 	ERScrollBox *m_global_box;
 	ERScrollBox *m_local_box;
-	SelectionStack *m_global_selection;
-	SelectionStack *m_local_selection;
+	ERScrollBox *m_last_touched;
 
 	QUndoStack *m_undo_stack;
 

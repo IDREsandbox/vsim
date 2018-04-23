@@ -540,8 +540,8 @@ void ERFilterSortProxy::setPosition(osg::Vec3 pos)
 		// two circles overlap
 		bool overlap = Util::spheresOverlap(pos, m_radius, res->getPosition(), res->getLocalRange());
 		bool was_in_range = m_in_range.find(res) != m_in_range.end();
-		qDebug() << "overlap?" << overlap << res;
-		qDebug() << "m_rad" << m_radius << "range" << res->getLocalRange() << "dist" << (pos - res->getPosition()).length() << "was" << was_in_range;
+		//qDebug() << "overlap?" << overlap << res;
+		//qDebug() << "m_rad" << m_radius << "range" << res->getLocalRange() << "dist" << (pos - res->getPosition()).length() << "was" << was_in_range;
 		// overlap and not in map, then insert it
 		if (overlap && !was_in_range) {
 			entered_range.insert(i);

@@ -108,7 +108,7 @@ void FastScrollBox::selectAll(bool select)
 	}
 }
 
-StackObject<FastScrollItem*>* FastScrollBox::selection()
+StackObject<FastScrollItem*>* FastScrollBox::selection() const
 {
 	return m_selection;
 }
@@ -134,6 +134,7 @@ void FastScrollBox::insertItems(const std::vector<std::pair<size_t, FastScrollIt
 		connect(item, &FastScrollItem::sContextMenuEvent,
 			[this](auto *event) {
 			if (m_item_menu) {
+				qDebug() << "accepting menu event";
 				event->accept();
 				m_item_menu->exec(event->screenPos());
 			} 
@@ -156,7 +157,7 @@ void FastScrollBox::removeItems(const std::vector<size_t> indices)
 		delete m_items[i];
 	}
 	std::set<size_t> ind(indices.begin(), indices.end());
-	for (int i = m_items.size() - 1; i >= 0; i--) {
+	for (int i = (int)m_items.size() - 1; i >= 0; i--) {
 		if (ind.count(i) > 0) m_items.erase(m_items.begin() + i);
 	}
 	//multiRemove();
@@ -243,12 +244,12 @@ void FastScrollBox::itemMousePressEvent(FastScrollItem * item, QGraphicsSceneMou
 	}
 	else if (event->button() == Qt::RightButton) {
 		if (!m_selection->has(item)) {
-			//qDebug() << "single select";
 			singleSelect(item);
 		}
 		else {
 			m_selection->add(item);
 		}
+		event->accept();
 	}
 	emit sTouch();
 }
@@ -269,7 +270,9 @@ void FastScrollBox::singleSelect(FastScrollItem * item)
 	}
 	//m_selection->clear();
 	//m_selection->add(item);
+	qDebug() << "before clear";
 	emit sSelectionCleared();
+	qDebug() << "after clear";
 }
 
 FastScrollItem::FastScrollItem()
@@ -338,7 +341,7 @@ void FastScrollItem::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 void FastScrollItem::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
 {
 	emit sContextMenuEvent(event);
-	QGraphicsObject::contextMenuEvent(event);
+	//QGraphicsObject::contextMenuEvent(event); // this forcibly ignores
 }
 
 void FastScrollItem::onResize()
@@ -410,7 +413,10 @@ void FastScrollBox::Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 
 void FastScrollBox::Scene::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
 {
+	// forwards event to items
+	// automatically clears if not accepted
 	QGraphicsScene::contextMenuEvent(event);
+
 	if (!event->isAccepted() && m_box->m_menu) {
 		m_box->m_menu->exec(event->screenPos());
 		event->accept();

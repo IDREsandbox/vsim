@@ -3,11 +3,34 @@
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"
 #include <QGraphicsSceneMouseEvent>
+#include <QTimer>
 
 ERScrollBox::ERScrollBox(QWidget * parent)
 	: FastScrollBox(parent),
 	m_group(nullptr)
 {
+	setStyleSheet("background:transparent;");
+	setAutoFillBackground(false);
+	m_view->setAutoFillBackground(false);
+	//m_view->setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
+	//m_view->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+	m_view->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
+	// put updates on a timer?
+
+	QTimer *t = new QTimer(this);
+	t->setInterval(15);
+	t->start();
+	connect(t, &QTimer::timeout, this, [this]() {
+		//m_view->updateSceneRect(m_view->rect);
+		////m_view->updateScene();
+		//m_view->SmartViewportUpdate;
+		// visible rect
+		QRect vr = m_view->viewport()->geometry();
+		QRectF sr = m_view->mapToScene(vr).boundingRect();
+		m_view->updateScene({ sr });
+		m_view->update();
+	});
+
 }
 
 void ERScrollBox::setGroup(TGroup<EResource> *group)
@@ -64,12 +87,17 @@ void ERScrollBox::reload()
 	insertForIndices(all);
 }
 
-void ERScrollBox::setSelection(const std::vector<EResource*>& sel)
+void ERScrollBox::setSelection(const std::vector<EResource*> &sel)
 {
 	auto item_selection = selection()->toVector();
 	
-	for (auto *item : item_selection) {
+	selection()->clear();
 
+	for (auto *res : sel) {
+		auto it = m_map.find(res);
+		if (it == m_map.end()) continue;
+		auto *item = it->second;
+		selection()->add(item);
 	}
 }
 
@@ -79,12 +107,12 @@ std::vector<EResource*> ERScrollBox::getSelection() const
 	auto item_selection = selection()->toVector();
 
 	for (auto *item : item_selection) {
-		out.push_back;
-		ERScrollItem *item = dynamic_cast<ERScrollItem*>(item);
-		if (item && item->) {
-			out.push_back(item->)
+		ERScrollItem *eri = dynamic_cast<ERScrollItem*>(item);
+		if (eri && eri->resource()) {
+			out.push_back(eri->resource());
 		}
 	}
+	return out;
 }
 
 void ERScrollBox::itemMouseDoubleClickEvent(FastScrollItem * item, QGraphicsSceneMouseEvent * event)
