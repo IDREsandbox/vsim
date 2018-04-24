@@ -426,7 +426,7 @@ void ERControl::setDisplay(EResource *res, bool go)
 	m_display->setInfo(res);
 	m_display->show();
 
-	if (go && res->getReposition()) {
+	if (go) {
 		m_going_to = true;
 		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .3);
 	}
@@ -462,7 +462,7 @@ void ERControl::onTouch()
 	EResource *resource = getCombinedLastSelectedP();
 	if (resource) {
 		m_app->setState(VSimApp::EDIT_ERS);
-		setDisplay(resource);
+		setDisplay(resource, resource->getReposition());
 	}
 	else {
 		setDisplay(nullptr);
@@ -472,16 +472,22 @@ void ERControl::onTouch()
 
 void ERControl::onTopChange()
 {
-	// check if our current thing is ok
-	if (!isSelectable(m_displayed)) {
-		setDisplay(nullptr);
-	}
+	// this stuff happens when moving around
+	// and there is no er touching
+
+	// null out the current thing?
+	//if (!isSelectable(m_displayed)) {
+	//	setDisplay(nullptr);
+	//}
 
 	// only go here if
 	EResource *res = getCombinedLastSelectedP();
 	if (res != m_displayed) {
 		setDisplay(res, false);
 	}
+	//EResource *res = getCombinedLastSelectedP();
+	//bool go = (res && res->getReposition());
+	//setDisplay(res, go);
 }
 
 void ERControl::addToSelection(EResource * res, bool top)

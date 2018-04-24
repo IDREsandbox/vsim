@@ -162,7 +162,7 @@ std::vector<EResource*> ERScrollBox::getSelection() const
 	auto item_selection = selection()->toVector();
 
 	for (auto *item : item_selection) {
-		ERScrollItem *eri = dynamic_cast<ERScrollItem*>(item);
+		ERScrollItem *eri = qgraphicsitem_cast<ERScrollItem*>(item);
 		if (eri && eri->resource()) {
 			out.push_back(eri->resource());
 		}

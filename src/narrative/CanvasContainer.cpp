@@ -541,6 +541,7 @@ void TransformManipulator::paintEvent(QPaintEvent * event)
 
 	// stroke the border blue;
 	painter.setPen(QPen(QBrush(QColor(100, 100, 255)), 0));
+	painter.setBrush(Qt::BrushStyle::NoBrush);
 	QPainterPath path;
 
 	int frame_size = m_frame_in + m_frame_out;

@@ -107,10 +107,19 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 		use_text_color = text_color;
 	}
 
+	QRectF rect = QRectF(QPointF(0, 0), m_size);
+
 	// paint background
 	painter->setBrush(use_color);
 	painter->setPen(QPen(Qt::NoPen));
-	painter->drawRect(QRectF(QPointF(0, 0), m_size));
+	painter->drawRect(rect);
+
+	// paint selection
+	if (isSelected()) {
+		painter->setPen(QPen(QColor(100, 100, 255), 2));
+		painter->setBrush(Qt::BrushStyle::NoBrush);
+		painter->drawRect(rect);
+	}
 
 	if (!m_er) return;
 
@@ -139,8 +148,8 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 
 	// paint icons, right to left
 	// [repo] [auto] [type]
-	int icon_margin = 1;
-	int icon_spacing = 0;
+	int icon_margin = 0;
+	int icon_spacing = -1;
 	int icon_size = 16;
 
 	QRect icon_rect = QRect(0, margin, icon_size, icon_size);

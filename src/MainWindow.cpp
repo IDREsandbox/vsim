@@ -93,7 +93,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// er display
 	m_er_display = new ERDisplay(ui->root);
-	m_er_display->setGeometry(10, 10, 265, 251);
+	//m_er_display->setGeometry(10, 10, 265, 251);
 	m_er_display->setObjectName("erDisplay");
 	m_er_display->hide();
 

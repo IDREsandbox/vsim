@@ -110,10 +110,13 @@ void FastScrollBox::clear()
 
 void FastScrollBox::selectAll(bool select)
 {
-	for (auto item : m_items) {
-		m_selection->add(item);
+	if (select) {
+		for (auto item : m_items) {
+			m_selection->add(item);
+		}
 	}
-	if (!select) {
+	else {
+		m_selection->clear();
 		emit sSelectionCleared();
 	}
 }
