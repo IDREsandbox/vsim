@@ -84,8 +84,8 @@ public:
 	osg::Matrixd getCameraMatrix() const;
 	void setCameraMatrix(const osg::Matrixd &matrix);
 	void setCameraMatrixSmooth(const osg::Matrixd &matrix, float time);
-	bool cameraMoving() const;
-	void stopCameraMoving();
+	bool goingSomewhere() const;
+	void stopGoingSomewhere();
 	QImage generateThumbnail(NarrativeSlide *slide);
 
 	// undo/redo
@@ -117,6 +117,10 @@ signals:
 	void sAboutToReset();
 	void sReset();
 	void sStateChanged(VSimApp::State old, VSimApp::State current);
+
+	void sGoingSomewhere();
+	void sArrived();
+	void sInterrupted();
 
 private:
 	MainWindow *m_window;

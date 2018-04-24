@@ -22,6 +22,7 @@ template <class T>
 class StackObject : public StackSignals {
 public:
 	void add(T);
+	void addAt(T, int index);
 	void remove(T);
 	void clear();
 	//void singleSelect(FastScrollItem *);

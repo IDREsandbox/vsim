@@ -10,10 +10,19 @@ class ERDisplay : public QFrame {
 public:
 	ERDisplay(QWidget *parent = nullptr);
 	void setInfo(EResource* er);
+	void setCount(int n);
 
 	//public slots:
 	//void showER();
 	//void hideER();
+
+	void reload();
+
+signals:
+	void sClose();
+	void sCloseAll();
+	void sOpen();
+	void sGoto();
 
 private:
 	Ui::ERDisplay ui;

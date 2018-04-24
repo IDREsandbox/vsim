@@ -82,6 +82,12 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	a_goto_er = new QAction("Goto Resource", this);
 	connect(a_goto_er, &QAction::triggered, this, &ERControl::gotoPosition);
 
+	a_close_er = new QAction("Close Resource", this);
+	connect(a_close_er, &QAction::triggered, this, &ERControl::closeER);
+
+	a_close_all = new QAction("Close All", this);
+	connect(a_close_all, &QAction::triggered, this, &ERControl::closeAll);
+
 	// box menus
 	QList<QAction*> actions = {
 		a_new_er,
@@ -115,6 +121,10 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	connect(m_local_box, &FastScrollBox::sTouch, this, &ERControl::onTouch);
 	connect(m_global_box, &FastScrollBox::sTouch, this, &ERControl::onTouch);
 
+	connect(m_local_box, &ERScrollBox::sTopChanged, this, &ERControl::onTopChange);
+	connect(m_global_box, &ERScrollBox::sTopChanged, this, &ERControl::onTopChange);
+
+
 	// mash the two selections together
 	// if one clears everything, then clear the other one too
 	connect(m_local_box, &FastScrollBox::sSelectionCleared, this, [this]() {
@@ -137,6 +147,17 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		}
 	});
 
+	connect(m_app, &VSimApp::sArrived, this, [this]() {
+		m_going_to = false;
+	});
+	connect(m_app, &VSimApp::sInterrupted, this, [this]() {
+		m_going_to = false;
+	});
+
+	connect(m_display, &ERDisplay::sClose, this, &ERControl::closeER);
+	connect(m_display, &ERDisplay::sCloseAll, this, &ERControl::closeAll);
+	connect(m_display, &ERDisplay::sOpen, this, &ERControl::openResource);
+	connect(m_display, &ERDisplay::sGoto, this, &ERControl::gotoPosition);
 
 	// filter area stuff
 	connect(m_filter_area->ui.clearButton, &QAbstractButton::pressed, this, [this]() {
@@ -364,6 +385,7 @@ void ERControl::gotoPosition()
 
 void ERControl::setDisplay(EResource *res, bool go)
 {
+	m_displayed = res;
 	if (res == nullptr) {
 		m_display->setInfo(nullptr);
 		m_display->hide();
@@ -374,8 +396,26 @@ void ERControl::setDisplay(EResource *res, bool go)
 	m_display->show();
 
 	if (go && res->getReposition()) {
+		m_going_to = true;
 		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .3);
 	}
+}
+
+void ERControl::closeER()
+{
+	// closes the current er
+
+	// -> deselection
+	// -> next in line pops up
+
+	m_local_box->deselect(m_displayed);
+	m_global_box->deselect(m_displayed);
+}
+
+void ERControl::closeAll()
+{
+	m_local_box->setSelection({});
+	m_global_box->setSelection({});
 }
 
 void ERControl::onTouch()
@@ -396,6 +436,20 @@ void ERControl::onTouch()
 	else {
 		setDisplay(nullptr);
 		m_app->setState(VSimApp::EDIT_FLYING);
+	}
+}
+
+void ERControl::onTopChange()
+{
+	// check if our current thing is ok
+	if (!isSelectable(m_displayed)) {
+		setDisplay(nullptr);
+	}
+
+	// only go here if
+	EResource *res = getCombinedLastSelectedP();
+	if (res != m_displayed) {
+		setDisplay(res, false);
 	}
 }
 
@@ -536,6 +590,11 @@ EResource *ERControl::getCombinedLastSelectedP() const
 	}
 	
 	return nullptr;
+}
+
+bool ERControl::isSelectable(EResource *res) const
+{
+	return m_global_box->has(res) || m_local_box->has(res);
 }
 
 void ERControl::clearSelection()

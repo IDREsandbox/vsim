@@ -23,6 +23,7 @@ class ERFilterArea;
 class NarrativeCanvas;
 class editButtons;
 class ERBar;
+class StatsWindow;
 
 class MainWindow : public QMainWindow
 {
@@ -113,6 +114,7 @@ public:
 	ModelOutliner *m_outliner;
 	TimeSlider *m_time_slider;
 	editButtons *m_label_buttons;
+	StatsWindow *m_stats_window;
 
 	QActionGroup *m_navigation_action_group;
 	QAction *m_action_first_person;

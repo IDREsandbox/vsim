@@ -6,21 +6,9 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>265</width>
-    <height>251</height>
+    <width>262</width>
+    <height>268</height>
    </rect>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>265</width>
-    <height>251</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>265</width>
-    <height>555</height>
-   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -35,14 +23,8 @@ border-color: rgb(238, 238, 238);</string>
     <widget class="QLabel" name="title">
      <property name="minimumSize">
       <size>
-       <width>247</width>
-       <height>31</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>247</width>
-       <height>31</height>
+       <width>0</width>
+       <height>25</height>
       </size>
      </property>
      <property name="text">
@@ -55,17 +37,11 @@ border-color: rgb(238, 238, 238);</string>
    </item>
    <item>
     <widget class="QLabel" name="text">
-     <property name="minimumSize">
-      <size>
-       <width>247</width>
-       <height>159</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>247</width>
-       <height>463</height>
-      </size>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
      <property name="text">
       <string>TextLabel</string>
@@ -82,14 +58,8 @@ border-color: rgb(238, 238, 238);</string>
     <widget class="QLabel" name="authors">
      <property name="minimumSize">
       <size>
-       <width>247</width>
-       <height>31</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>247</width>
-       <height>31</height>
+       <width>0</width>
+       <height>25</height>
       </size>
      </property>
      <property name="text">
@@ -99,6 +69,60 @@ border-color: rgb(238, 238, 238);</string>
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <property name="spacing">
+      <number>2</number>
+     </property>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="open">
+       <property name="text">
+        <string>Open</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="goto_button">
+       <property name="text">
+        <string>Goto</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="close">
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="close_all">
+       <property name="minimumSize">
+        <size>
+         <width>75</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Close All (0)</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

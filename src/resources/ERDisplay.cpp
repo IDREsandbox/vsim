@@ -7,6 +7,12 @@ ERDisplay::ERDisplay(QWidget *parent)
 	ui.setupUi(this);
 
 	ui.text->setWordWrap(true);
+
+	connect(ui.open, &QAbstractButton::pressed, this, &ERDisplay::sOpen);
+	connect(ui.goto_button, &QAbstractButton::pressed, this, &ERDisplay::sGoto);
+	connect(ui.close, &QAbstractButton::pressed, this, &ERDisplay::sClose);
+	connect(ui.close_all, &QAbstractButton::pressed, this, &ERDisplay::sCloseAll);
+
 }
 
 void ERDisplay::setInfo(EResource* er)
@@ -16,16 +22,26 @@ void ERDisplay::setInfo(EResource* er)
 	m_er = er;
 	if (er == nullptr) return;
 
-	connect(er, &EResource::sResourceNameChanged, this,
-		[this]() {ui.title->setText(QString::fromStdString(m_er->getResourceName())); });
+	connect(er, &EResource::sResourceNameChanged, this, &ERDisplay::reload);
+	connect(er, &EResource::sResourceAuthorChanged, this, &ERDisplay::reload);
+	connect(er, &EResource::sResourceDescriptionChanged, this, &ERDisplay::reload);
+	connect(er, &EResource::sErTypeChanged, this, &ERDisplay::reload);
 
-	connect(er, &EResource::sResourceDescriptionChanged, this,
-		[this]() {ui.text->setText(QString::fromStdString(m_er->getResourceDescription())); });
+	reload();
+}
 
-	connect(er, &EResource::sResourceAuthorChanged, this,
-		[this]() {ui.authors->setText(QString::fromStdString(m_er->getAuthor())); });
+void ERDisplay::reload()
+{
+	if (!m_er) return;
+	ui.title->setText(QString::fromStdString(m_er->getResourceName()));
+	ui.text->setText(QString::fromStdString(m_er->getResourceDescription()));
+	ui.authors->setText(QString::fromStdString(m_er->getAuthor()));
+	bool can_open = m_er->getERType() != EResource::ERType::ANNOTATION;
+	ui.open->setEnabled(can_open);
+}
 
-	ui.title->setText(QString::fromStdString(er->getResourceName()));
-	ui.text->setText(QString::fromStdString(er->getResourceDescription()));
-	ui.authors->setText(QString::fromStdString(er->getAuthor()));
+void ERDisplay::setCount(int n)
+{
+	QString s = QString("Close All (%1)").arg(QString::number(n));
+	ui.close_all->setText(s);
 }

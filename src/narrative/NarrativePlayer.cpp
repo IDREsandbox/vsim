@@ -152,7 +152,7 @@ void NarrativePlayer::toAtNode()
 	}
 
 	// force camera
-	m_app->stopCameraMoving();
+	m_app->stopGoingSomewhere();
 	m_app->setCameraMatrix(slide->getCameraMatrix());
 
 	if (slide->getStayOnNode()) {

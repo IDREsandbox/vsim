@@ -12,6 +12,9 @@ class ERScrollItem : public FastScrollItem {
 public:
 	ERScrollItem();
 
+	enum { Type = UserType + 2 };
+	int type() const override { return Type; }
+
 	EResource *resource() const;
 	void setER(EResource *er);
 	void setCat(ECategory *cat);

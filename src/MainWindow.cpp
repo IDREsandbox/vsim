@@ -19,6 +19,7 @@
 #include <osgUtil/Optimizer>
 #include "TimeSlider.h"
 #include "ModelOutliner.h"
+#include "StatsWindow.h"
 
 #include "editButtons.h"
 #include "narrative/NarrativeGroup.h"
@@ -64,12 +65,13 @@ MainWindow::MainWindow(QWidget *parent)
 	m_osg_widget = new OSGViewerWidget(ui->root);
 	ui->rootLayout->addWidget(m_osg_widget, 0, 0);
 
-	m_canvas = new NarrativeCanvas(ui->root);
+	//m_canvas = new NarrativeCanvas(ui->root);
+	m_canvas = new NarrativeCanvas(m_osg_widget);
 	m_canvas->setObjectName("canvas");
 	ui->rootLayout->addWidget(m_canvas, 0, 0);
 	m_canvas->setStyleSheet("#canvas{background:rgba(0, 0, 0, 0);}");
 
-	m_fade_canvas = new NarrativeCanvas(ui->root);
+	m_fade_canvas = new NarrativeCanvas(m_osg_widget);
 	m_canvas->setObjectName("fadeCanvas");
 	ui->rootLayout->addWidget(m_fade_canvas, 0, 0);
 	m_fade_canvas->lower();
@@ -78,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// splitter on top of osg viewer
 	// mask allows events to get to the canvas
-	ui->mainSplitter->setParent(ui->root);
+	ui->mainSplitter->setParent(m_osg_widget);
 	ui->rootLayout->addWidget(ui->mainSplitter, 0, 0);
 
 	ui->mainSplitter->setMouseTracking(true);
@@ -173,6 +175,24 @@ MainWindow::MainWindow(QWidget *parent)
 		auto *fsb = new FastScrollBox(this);
 		fsb->insertItems({ {0, new ERScrollItem} });
 		ui->bottomBar->ui.horizontalLayout->addWidget(fsb);
+	});
+
+	m_stats_window = new StatsWindow(this);
+	QAction *stats = new QAction("Stats", this);
+	ui->menuTest->addAction(stats);
+	stats->setShortcut(QKeySequence(Qt::Key_F11));
+	connect(stats, &QAction::triggered, this, [this]() {
+		m_stats_window->show();
+	});
+	QTimer *stats_timer = new QTimer(this);
+	stats_timer->setInterval(100);
+	stats_timer->start();
+	connect(stats_timer, &QTimer::timeout, this, [this]() {
+		// stats timer update
+		m_stats_window->ui.frame_time->setText(QString::number(m_osg_widget->getFrameTime()));
+		m_stats_window->ui.full_frame_time->setText(QString::number(m_osg_widget->getFullFrameTime()));
+		m_stats_window->ui.time_between->setText(QString::number(m_osg_widget->getTimeBetween()));
+
 	});
 }
 

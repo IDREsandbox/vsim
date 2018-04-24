@@ -21,6 +21,28 @@ inline void StackObject<T>::add(T x)
 }
 
 template<class T>
+inline void StackObject<T>::addAt(T x, int index)
+{
+	auto it = m_set.find(x);
+	
+	int target_index;
+	if (index < 0) {
+		// size 4, insert at -1 => insert at 3
+		target_index = size() + index;
+	}
+	if (target_index < 0) return;
+	if (target_index > size()) return;
+	if (it != m_set.end()) {
+		return;
+	}
+	else {
+		m_stack.insert(m_stack.begin() + target_index, x);
+	}
+	emit sAdded();
+	emit sChanged();
+}
+
+template<class T>
 inline void StackObject<T>::remove(T x)
 {
 	auto set_it = m_set.find(x);

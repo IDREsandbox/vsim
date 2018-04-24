@@ -48,9 +48,13 @@ public:
 
 	// -1 to hide
 	void setDisplay(EResource *res, bool go = true);
+	//void goToResource(EResource *res, bool instant = false);
+	void closeER();
+	void closeAll();
 
 	// show and goto resource
 	void onTouch();
+	void onTopChange();
 
 	// selection
 	void selectERs(const std::vector<EResource*> &res);
@@ -58,6 +62,7 @@ public:
 	std::vector<EResource*> getCombinedSelectionP() const;
 	int getCombinedLastSelected() const;
 	EResource *getCombinedLastSelectedP() const;
+	bool isSelectable(EResource *res) const; // checks both boxes if resource exists
 	void clearSelection();
 
 	// filters
@@ -77,6 +82,8 @@ public: // actions
 	QAction *a_open_er;
 	QAction *a_position_er;
 	QAction *a_goto_er;
+	QAction *a_close_er;
+	QAction *a_close_all;
 
 private:
 	VSimApp *m_app;
@@ -85,7 +92,8 @@ private:
 	EResourceGroup *m_ers;
 	ECategoryGroup *m_categories;
 
-	int m_active_item;
+	bool m_going_to;
+	EResource *m_displayed;
 	ERDisplay *m_display;
 	ERFilterArea *m_filter_area;
 
@@ -122,4 +130,4 @@ private:
 	Command::When m_when;
 };
 
-#endif /* ERCONTROL_H */
+#endif

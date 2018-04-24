@@ -111,6 +111,12 @@
     <QtMoc Include="..\..\src\TickSlider.h" />
     <QtMoc Include="..\..\src\TimeSlider.h" />
     <QtMoc Include="..\..\src\StackObject.h" />
+    <QtMoc Include="..\..\src\StatsWindow.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets</IncludePath>
+    </QtMoc>
     <ClInclude Include="..\..\src\TypesSerializer.h" />
     <ClInclude Include="..\..\src\Util.h" />
     <QtMoc Include="..\..\src\VSimApp.h" />
@@ -412,6 +418,7 @@
     <ClCompile Include="..\..\src\Selection.cpp" />
     <ClCompile Include="..\..\src\SelectionStack.cpp" />
     <ClCompile Include="..\..\src\SimpleCameraManipulator.cpp" />
+    <ClCompile Include="..\..\src\StatsWindow.cpp" />
     <ClCompile Include="..\..\src\StyleSettingsDialog.cpp" />
     <ClCompile Include="..\..\src\StyleSettingsWidget.cpp" />
     <ClCompile Include="..\..\src\TextToolbar.cpp" />
@@ -440,6 +447,7 @@
     <QtUic Include="..\..\src\resources\ERDisplay.ui" />
     <QtUic Include="..\..\src\resources\ERFilterArea.ui" />
     <QtUic Include="..\..\src\resources\NewCatDialog.ui" />
+    <QtUic Include="..\..\src\StatsWindow.ui" />
     <QtUic Include="..\..\src\StyleSettingsDialog.ui" />
     <QtUic Include="..\..\src\StyleSettingsWidget.ui" />
     <QtUic Include="..\..\src\TextToolbar.ui" />

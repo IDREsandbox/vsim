@@ -81,6 +81,10 @@ public:
 
 	QImage renderView(QSize size, const osg::Matrixd &matrix);
 
+	float getFrameTime() const;
+	float getTimeBetween() const;
+	float getFullFrameTime() const;
+
 signals:
 	void frame(double dt_sec);
 
@@ -140,5 +144,9 @@ private:
 	KeyTracker *m_key_tracker;
 
 	QElapsedTimer m_frame_timer;
+	QElapsedTimer m_between_timer;
+	float m_frame_time;
+	float m_full_frame_time;
+	float m_time_between;
 };
 #endif

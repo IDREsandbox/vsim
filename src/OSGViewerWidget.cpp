@@ -356,6 +356,7 @@ void OSGViewerWidget::reset()
 
 bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)
 {
+	// this is in the key tracker
 	//if (e->type() == QEvent::ShortcutOverride) {
 	//	if (getActualNavigationMode() == MANIPULATOR_FIRST_PERSON) {
 	//		qDebug() << "shortcut override wasd";
@@ -391,6 +392,21 @@ QImage OSGViewerWidget::renderView(QSize size, const osg::Matrixd & matrix)
 	return QImage();
 }
 
+float OSGViewerWidget::getFrameTime() const
+{
+	return m_frame_time;
+}
+
+float OSGViewerWidget::getTimeBetween() const
+{
+	return m_time_between;
+}
+
+float OSGViewerWidget::getFullFrameTime() const
+{
+	return m_full_frame_time;
+}
+
 void OSGViewerWidget::paintEvent(QPaintEvent *e)
 {
 	// let qt do setup stuff and call paintGL
@@ -399,11 +415,14 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 
 void OSGViewerWidget::paintGL()
 {
+	QElapsedTimer t; t.start();
 	if (!m_viewer) return;
 	//qDebug() << "paint gl" << this << m_viewer->getNumViews();
 	qint64 dt = m_frame_timer.nsecsElapsed();
 	m_frame_timer.restart();
 	double dt_sec = (double)dt / 1.0e9;
+
+	m_time_between = m_between_timer.nsecsElapsed() / 1000000.0;
 
 	//emit frame(dt_sec);
 
@@ -421,6 +440,7 @@ void OSGViewerWidget::paintGL()
 		m_flight_manipulator->setMousePosition(nx, ny);
 
 		m_flight_manipulator->update(dt_sec, m_key_tracker, m_main_view->getSceneData());
+
 	}
 
 	// hacky way that lets us have multiple OSGViewerWidgets sharing one CompositeViewer
@@ -429,9 +449,13 @@ void OSGViewerWidget::paintGL()
 	//m_viewer->removeView(m_main_view);
 	// this is really slow for some reason
 	if (m_rendering_enabled) {
+		QElapsedTimer ft; ft.start();
 		m_viewer->frame(dt);
+		m_frame_time = ft.nsecsElapsed() / 1000000.0;
 	}
-	
+
+	m_full_frame_time = t.nsecsElapsed() / 1000000.0;
+	m_between_timer.start();
 }
 
 void OSGViewerWidget::resizeGL(int width, int height)

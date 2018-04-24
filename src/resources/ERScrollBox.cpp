@@ -7,11 +7,12 @@
 
 ERScrollBox::ERScrollBox(QWidget * parent)
 	: FastScrollBox(parent),
-	m_group(nullptr)
+	m_group(nullptr),
+	m_old_top(nullptr)
 {
-	setStyleSheet("background:transparent;");
 	setAutoFillBackground(false);
 	m_view->setAutoFillBackground(false);
+	m_view->setStyleSheet("background:transparent;");
 	//m_view->setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
 	//m_view->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	m_view->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
@@ -31,6 +32,23 @@ ERScrollBox::ERScrollBox(QWidget * parent)
 		m_view->update();
 	});
 
+	// top changed signal
+	connect(selection(), &StackObject<FastScrollItem*>::sChanged, this, [this]() {
+		EResource *new_top = nullptr;
+
+		do {
+			auto *item = selection()->top();
+			if (!item) break;
+			ERScrollItem *eitem = qgraphicsitem_cast<ERScrollItem*>(item);
+			if (!eitem) break;
+			new_top = eitem->resource();
+		} while (false);
+
+		if (new_top != m_old_top) {
+			m_old_top = new_top;
+			emit sTopChanged(new_top);
+		}
+	});
 }
 
 void ERScrollBox::setGroup(TGroup<EResource> *group)
@@ -87,6 +105,30 @@ void ERScrollBox::reload()
 	insertForIndices(all);
 }
 
+void ERScrollBox::deselect(EResource * res) const
+{
+	auto it = m_map.find(res);
+	if (it == m_map.end()) return;
+	ERScrollItem *item = it->second;
+	selection()->remove(item);
+}
+
+bool ERScrollBox::has(EResource * res) const
+{
+	return m_map.count(res) > 0;
+}
+
+bool ERScrollBox::setTop(EResource * res)
+{
+	// map to item
+	auto it = m_map.find(res);
+	if (it == m_map.end()) return false;
+
+	ERScrollItem *item = it->second;
+	selection()->add(item);
+	return true;
+}
+
 void ERScrollBox::setSelection(const std::vector<EResource*> &sel)
 {
 	auto item_selection = selection()->toVector();
@@ -117,11 +159,11 @@ std::vector<EResource*> ERScrollBox::getSelection() const
 
 void ERScrollBox::itemMouseDoubleClickEvent(FastScrollItem * item, QGraphicsSceneMouseEvent * event)
 {
-	if (event->button() == Qt::LeftButton) {
+	if (event->button() == Qt::LeftButton
+		&& !(event->modifiers() & Qt::CTRL)) {
 		item->setSelected(true);
 		event->accept();
 		emit sOpen();
-		
 	}
 }
 

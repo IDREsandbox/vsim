@@ -19,11 +19,15 @@ public:
 	void setGroup(TGroup<EResource> *group);
 	void reload();
 
+	void deselect(EResource *res) const;
+	bool has(EResource *res) const;
+	bool setTop(EResource *res);
 	void setSelection(const std::vector<EResource*> &selection);
 	std::vector<EResource*> getSelection() const;
 
 signals:
 	void sOpen();
+	void sTopChanged(EResource *res);
 
 protected:
 	void itemMouseDoubleClickEvent(FastScrollItem *item,
@@ -37,6 +41,7 @@ private:
 	TGroup<EResource> *m_group;
 
 	std::map<EResource*, ERScrollItem*> m_map;
+	EResource *m_old_top;
 };
 
 #endif // ERSCROLLBOX_H

@@ -170,6 +170,10 @@
     <CustomBuild Include="../../src/*.fbs" />
     <CustomBuild Include="../../src/*.fbs" />
     <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\deprecated\narrative\NarrativeNode.cpp">
@@ -463,6 +467,9 @@
     <ClCompile Include="..\..\src\deprecated\SerializerModelInformationOld.cpp">
       <Filter>Deprecated</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\StatsWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\src\narrative\CanvasContainer.h">
@@ -657,6 +664,9 @@
     <QtMoc Include="..\..\src\narrative\Narrative.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="..\..\src\StatsWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="..\..\src\editButtons.ui">
@@ -714,6 +724,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="..\..\src\resources\ERDisplay.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\StatsWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

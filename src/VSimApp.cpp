@@ -96,6 +96,7 @@ VSimApp::VSimApp(MainWindow* window)
 	m_camera_timer = new QTimer(this);
 	connect(m_camera_timer, &QTimer::timeout, this, [this]() {
 		setCameraMatrix(m_camera_target);
+		emit sArrived();
 	});
 
 	initWithVSim(new VSimRoot);
@@ -120,7 +121,7 @@ void VSimApp::setState(State s)
 	if (s == m_state) return;
 	State old = s;
 	m_state = s;
-	stopCameraMoving();
+	stopGoingSomewhere();
 	emit sStateChanged(old, s);
 }
 
@@ -149,7 +150,7 @@ void VSimApp::update(float dt_sec)
 	//emit sTick(dt_sec);
 
 	// Smooth camera updates
-	if (cameraMoving()) {
+	if (goingSomewhere()) {
 		float t = (1 - m_camera_timer->remainingTime() / (float)m_camera_timer->interval());
 		setCameraMatrix(Util::cameraMatrixInterp(m_camera_start, m_camera_target, Util::simpleCubic(0, 1, t)));
 		//setCameraMatrix(Util::cameraMatrixInterp(m_camera_start, m_camera_target, t));
@@ -307,16 +308,18 @@ void VSimApp::setCameraMatrixSmooth(const osg::Matrixd & matrix, float time)
 	m_camera_timer->setInterval(time*1000);
 	m_camera_timer->setSingleShot(true);
 	m_camera_timer->start();
+	emit sGoingSomewhere();
 }
 
-bool VSimApp::cameraMoving() const
+bool VSimApp::goingSomewhere() const
 {
 	return m_camera_timer->isActive();
 }
 
-void VSimApp::stopCameraMoving()
+void VSimApp::stopGoingSomewhere()
 {
 	m_camera_timer->stop();
+	emit sInterrupted();
 }
 
 QImage VSimApp::generateThumbnail(NarrativeSlide * slide)

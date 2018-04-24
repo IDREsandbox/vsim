@@ -53,7 +53,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QMen
 		[this](VSimApp::State old, VSimApp::State current) {
 		if (!m_app->isFlying()) {
 			m_viewer->setCameraFrozen(true);
-			m_app->stopCameraMoving();
+			m_app->stopGoingSomewhere();
 		}
 		else {
 			m_viewer->setFocus();

@@ -33,6 +33,7 @@ FastScrollBox::FastScrollBox(QWidget * parent)
 	QHBoxLayout *layout = new QHBoxLayout(this);
 	this->setLayout(layout);
 	layout->addWidget(m_view);
+	layout->setMargin(0);
 
 	m_selection = new StackObject<FastScrollItem*>;
 	connect(m_selection, &StackSignals::sRemoved, this, [this]() {
@@ -142,6 +143,7 @@ void FastScrollBox::insertItems(const std::vector<std::pair<size_t, FastScrollIt
 				qDebug() << "accepting menu event";
 				event->accept();
 				m_item_menu->exec(event->screenPos());
+				emit sTouch();
 			} 
 		});
 		connect(item, &FastScrollItem::sMouseDoubleClickEvent,
@@ -246,6 +248,7 @@ void FastScrollBox::itemMousePressEvent(FastScrollItem * item, QGraphicsSceneMou
 			singleSelect(item);
 		}
 		event->accept();
+		emit sTouch();
 	}
 	else if (event->button() == Qt::RightButton) {
 		if (!m_selection->has(item)) {
@@ -255,8 +258,10 @@ void FastScrollBox::itemMousePressEvent(FastScrollItem * item, QGraphicsSceneMou
 			m_selection->add(item);
 		}
 		event->accept();
+		//emit sTouch();
+		// don't touch until after context menu
+		// this lets us set position
 	}
-	emit sTouch();
 }
 
 void FastScrollBox::itemMouseDoubleClickEvent(FastScrollItem * item, QGraphicsSceneMouseEvent * event)
@@ -400,6 +405,7 @@ void FastScrollBox::Scene::mousePressEvent(QGraphicsSceneMouseEvent * event)
 	if (!event->isAccepted() && event->button() == Qt::LeftButton) {
 		m_box->selectAll(false);
 		event->accept();
+		emit m_box->sTouch();
 	}
 }
 
