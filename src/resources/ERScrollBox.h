@@ -19,6 +19,7 @@ public:
 	void setGroup(TGroup<EResource> *group);
 	void reload();
 
+	void addToSelection(EResource *res, bool top = true);
 	void deselect(EResource *res) const;
 	bool has(EResource *res) const;
 	bool setTop(EResource *res);
@@ -34,6 +35,7 @@ protected:
 		QGraphicsSceneMouseEvent *event) override;
 
 private:
+	ERScrollItem *remap(EResource *res) const;
 	void insertForIndices(const std::vector<size_t> &ind);
 	ERScrollItem *createItem(EResource *res);
 

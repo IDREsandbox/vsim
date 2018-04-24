@@ -12,7 +12,7 @@ public:
 		: QObject(parent) {}
 
 signals:
-	void sAdded(); // something added to the top
+	void sAdded(size_t where); // something added to the top
 	void sRemoved(); // call removed() to get what
 	void sReset();
 	void sChanged(); // anything changes

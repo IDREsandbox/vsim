@@ -47,6 +47,7 @@ protected:
 
 private:
 	void singleSelect(FastScrollItem *item);
+	void ensureVisible();
 	//void shiftSelect();
 
 	class Scene : public QGraphicsScene {

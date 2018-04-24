@@ -16,7 +16,7 @@ inline void StackObject<T>::add(T x)
 		m_set.insert(x);
 		m_stack.push_back(x);
 	}
-	emit sAdded();
+	emit sAdded(m_stack.size() - 1);
 	emit sChanged();
 }
 
@@ -25,7 +25,7 @@ inline void StackObject<T>::addAt(T x, int index)
 {
 	auto it = m_set.find(x);
 	
-	int target_index;
+	int target_index = index;
 	if (index < 0) {
 		// size 4, insert at -1 => insert at 3
 		target_index = size() + index;
@@ -35,10 +35,9 @@ inline void StackObject<T>::addAt(T x, int index)
 	if (it != m_set.end()) {
 		return;
 	}
-	else {
-		m_stack.insert(m_stack.begin() + target_index, x);
-	}
-	emit sAdded();
+	m_stack.insert(m_stack.begin() + target_index, x);
+	m_set.insert(x);
+	emit sAdded(target_index);
 	emit sChanged();
 }
 

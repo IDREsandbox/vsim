@@ -57,6 +57,7 @@ public:
 	void onTopChange();
 
 	// selection
+	void addToSelection(EResource *res, bool top = true);
 	void selectERs(const std::vector<EResource*> &res);
 	std::set<size_t> getCombinedSelection() const;
 	std::vector<EResource*> getCombinedSelectionP() const;
@@ -71,7 +72,6 @@ public:
 	void sortGlobal();
 	void sortLocal();
 	void setRadius(float radius);
-
 
 	void debug();
 
@@ -112,6 +112,7 @@ private:
 
 	ECategoryControl *m_category_control;
 
+	float m_radius;
 	//osg::Vec3 m_prev_position;
 	//bool m_pos_dirty;
 };

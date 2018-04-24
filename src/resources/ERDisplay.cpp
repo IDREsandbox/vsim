@@ -22,6 +22,9 @@ void ERDisplay::setInfo(EResource* er)
 	m_er = er;
 	if (er == nullptr) return;
 
+	connect(er, &QObject::destroyed, this, [this]() {
+		m_er = nullptr;
+	});
 	connect(er, &EResource::sResourceNameChanged, this, &ERDisplay::reload);
 	connect(er, &EResource::sResourceAuthorChanged, this, &ERDisplay::reload);
 	connect(er, &EResource::sResourceDescriptionChanged, this, &ERDisplay::reload);

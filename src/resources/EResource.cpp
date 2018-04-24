@@ -3,7 +3,6 @@
 #include "deprecated/resources/EResourcesNode.h"
 #include "resources/ECategory.h"
 #include "ECategoryGroup.h"
-#include <QDebug>
 
 EResource::EResource()
 	: m_name("Untitled"),
@@ -21,7 +20,8 @@ EResource::EResource()
 	m_camera_position(osg::Vec3f(0, 0, 0)),
 	m_camera_matrix(osg::Matrixd()),
 	m_category(),
-	m_index(-1)
+	m_index(-1),
+	m_in_range(false)
 {
 }
 
@@ -134,7 +134,6 @@ bool EResource::getReposition() const
 }
 void EResource::setReposition(bool reposition)
 { 
-	qDebug() << "setting reposition";
 	m_reposition = reposition;
 	emit sRepositionChanged(reposition);
 }
@@ -144,7 +143,6 @@ bool EResource::getAutoLaunch() const
 }
 void EResource::setAutoLaunch(bool launch) 
 { 
-	qDebug() << "setting auto launch";
 	m_launch = launch; 
 	emit sAutoLaunchChanged(launch);
 }
@@ -192,6 +190,19 @@ void EResource::setDistanceTo(double dist)
 {
 	m_distance_to = dist;
 	emit sDistanceToChanged(dist);
+}
+
+bool EResource::inRange() const
+{
+	return m_in_range;
+}
+
+bool EResource::setInRange(bool in)
+{
+	if (m_in_range == in) return false;
+	m_in_range = in;
+	emit sInRangeChanged(in);
+	return true;
 }
 
 ECategory * EResource::category() const

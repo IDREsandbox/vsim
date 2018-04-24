@@ -39,8 +39,10 @@ FastScrollBox::FastScrollBox(QWidget * parent)
 	connect(m_selection, &StackSignals::sRemoved, this, [this]() {
 		m_selection->removed()->setSelected(false);
 	});
-	connect(m_selection, &StackSignals::sAdded, this, [this]() {
-		m_selection->top()->setSelected(true);
+	connect(m_selection, &StackSignals::sAdded, this, [this](size_t index) {
+		auto *item = m_selection->at(index);
+		item->setSelected(true);
+		ensureVisible();
 	});
 	connect(m_selection, &StackSignals::sChanged, this, [this]() {
 		//m_selection->top()->setTop(true);
@@ -93,6 +95,8 @@ void FastScrollBox::refresh()
 	m_scene->setSceneRect(0, 0, x, vh);
 	QRectF min(QPointF(0, 0), m_view->viewport()->size());
 	m_view->setSceneRect(m_scene->sceneRect().united(min));
+
+	ensureVisible();
 }
 
 void FastScrollBox::clear()
@@ -107,7 +111,7 @@ void FastScrollBox::clear()
 void FastScrollBox::selectAll(bool select)
 {
 	for (auto item : m_items) {
-		item->setSelected(select);
+		m_selection->add(item);
 	}
 	if (!select) {
 		emit sSelectionCleared();
@@ -126,12 +130,17 @@ void FastScrollBox::insertItems(const std::vector<std::pair<size_t, FastScrollIt
 		m_scene->addItem(item);
 		m_items.insert(m_items.begin() + pair.first, item);
 		connect(item, &FastScrollItem::sSelected, [this, item](bool selected) {
-			if (selected) {
-				m_selection->add(item);
-			}
-			else {
-				m_selection->remove(item);
-			}
+			// don't do anything
+			// don't rely on built in selection
+			//if (m_selection->has(item)) {
+			//	m_selection->add
+			//}
+			//if (selected) {
+			//	m_selection->add(item);
+			//}
+			//else {
+			//	m_selection->remove(item);
+			//}
 		});
 		connect(item, &FastScrollItem::sMousePressEvent,
 			[this, item](auto *event) {
@@ -275,6 +284,13 @@ void FastScrollBox::singleSelect(FastScrollItem * item)
 	m_selection->add(item);
 
 	emit sSelectionCleared();
+}
+
+void FastScrollBox::ensureVisible()
+{
+	if (m_selection->size() > 0) {
+		m_view->ensureVisible(m_selection->top());
+	}
 }
 
 FastScrollItem::FastScrollItem()

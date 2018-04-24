@@ -17,6 +17,7 @@
 #include "VSimApp.h"
 #include "SelectionStack.h"
 #include "GroupCommands.h"
+#include "Util.h"
 
 #include <QDesktopServices>
 #include <QPushButton>
@@ -31,7 +32,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_filter_proxy(nullptr),
 	m_global_proxy(nullptr),
 	m_local_proxy(nullptr),
-	m_last_touched(nullptr)
+	m_last_touched(nullptr),
+	m_radius(1.0f)
 {
 	m_undo_stack = m_app->getUndoStack();
 	m_global_box = m_window->erBar()->ui.global;
@@ -195,15 +197,44 @@ void ERControl::update(double dt_sec)
 {
 	// update all positions
 	osg::Vec3 pos = m_app->getPosition();
+	
+	std::set<size_t> change_list;
+	std::set<EResource*> trigger_list;
 	for (size_t i = 0; i < m_ers->size(); i++) {
 		EResource *res = m_ers->getResource(i);
-		if (!res) continue;
 		// update resource distance
 		osg::Vec3 res_pos = res->getCameraMatrix().getTrans();
 		res->setDistanceTo((pos - res_pos).length());
+
+		bool overlap = Util::spheresOverlap(pos, m_radius, res_pos, res->getLocalRange());
+		bool changed = res->setInRange(overlap);
+		if (changed) {
+			change_list.insert(i);
+		}
+		if (changed && overlap && res->getAutoLaunch()) {
+			trigger_list.insert(res);
+			//qDebug() << "in range" << res;
+		}
+		if (changed && !overlap) {
+			//qDebug() << "out of range" << res;
+		}
+	}
+	m_ers->sEdited(change_list);
+	// ... proxy stuff propagates to scroll boxes
+
+	// check the other end
+	for (auto *res : trigger_list) {
+		if (isSelectable(res)) {
+			//qDebug() << "triggered resource" << res;
+			// if we're going somewhere then queue
+			// if just moving around then stack
+			// confusing stuff
+			addToSelection(res, !m_going_to);
+		}
 	}
 
-	m_local_proxy->setPosition(pos);
+
+	//m_local_proxy->setPosition(pos);
 
 	//m_prev_position = pos;
 }
@@ -380,7 +411,7 @@ void ERControl::gotoPosition()
 		qWarning() << "Can't goto ER position - no selection";
 		return;
 	}
-	m_app->setCameraMatrix(resource->getCameraMatrix());
+	setDisplay(resource, true);
 }
 
 void ERControl::setDisplay(EResource *res, bool go)
@@ -453,6 +484,12 @@ void ERControl::onTopChange()
 	}
 }
 
+void ERControl::addToSelection(EResource * res, bool top)
+{
+	m_global_box->addToSelection(res, top);
+	m_local_box->addToSelection(res, top);
+}
+
 void ERControl::selectERs(const std::vector<EResource*> &res)
 {
 	m_global_box->setSelection(res);
@@ -465,11 +502,12 @@ void ERControl::selectERs(const std::vector<EResource*> &res)
 void ERControl::resetFilters()
 {
 	m_local_proxy->enableRange(true);
-	m_local_proxy->setSearchRadius(10.0f);
+	//m_local_proxy->setSearchRadius(10.0f);
 	m_filter_proxy->sortBy(ER::SortBy::TITLE);
 	m_filter_proxy->setTitleSearch("");
 	m_filter_proxy->showGlobal(true);
 	m_filter_proxy->showLocal(true);
+	setRadius(5.0f);
 
 	//ui.globalCheckBox->setChecked(true);
 	//ui.localCheckBox->setChecked(true);
@@ -479,6 +517,13 @@ void ERControl::resetFilters()
 	//ui.sortByBox->setCurrentIndex(0);
 	if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
 	//if (m_type_checkbox_model) m_type_checkbox_model->setCheckAll(true);
+}
+
+void ERControl::setRadius(float radius)
+{
+	m_radius = radius;
+	m_filter_area->ui.radiusSpinBox->setValue(m_radius);
+	//m_local_proxy->reload
 }
 
 void ERControl::debug()

@@ -79,6 +79,8 @@ public:
 	const osg::Vec3f &getPosition() const;
 	double getDistanceTo() const;
 	void setDistanceTo(double dist);
+	bool inRange() const;
+	bool setInRange(bool in); // returns true if changed
 
 	ECategory *category() const;
 	std::shared_ptr<ECategory> categoryShared() const;
@@ -106,6 +108,7 @@ signals:
 	void sErTypeChanged(ERType);
 	void sViewMatrixChanged(const osg::Matrixd&);
 	void sDistanceToChanged(double dist);
+	void sInRangeChanged(bool entered);
 
 	void sCategoryChanged(ECategory *old_category, ECategory *new_category);
 
@@ -202,6 +205,7 @@ private:
 	osg::Matrixd m_camera_matrix;
 
 	double m_distance_to;
+	bool m_in_range;
 
 	int m_category_index;
 	std::weak_ptr<ECategory> m_category;

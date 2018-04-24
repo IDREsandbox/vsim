@@ -4,6 +4,7 @@
 #include "resources/EResourceGroup.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QTimer>
+#include <QDebug>
 
 ERScrollBox::ERScrollBox(QWidget * parent)
 	: FastScrollBox(parent),
@@ -64,7 +65,7 @@ void ERScrollBox::setGroup(TGroup<EResource> *group)
 		connect(m_group, &GroupSignals::destroyed, this,
 			[this]() {
 			m_group = nullptr;
-			setGroup(nullptr); // clear stuff
+			//setGroup(nullptr); // clear stuff
 		});
 		connect(m_group, &GroupSignals::sInsertedMulti, this,
 			[this](std::vector<size_t> list) {
@@ -103,6 +104,18 @@ void ERScrollBox::reload()
 	std::vector<size_t> all(m_group->size());
 	std::iota(all.begin(), all.end(), 0);
 	insertForIndices(all);
+}
+
+void ERScrollBox::addToSelection(EResource * res, bool top)
+{
+	ERScrollItem *item = remap(res);
+	if (!item) return;
+	if (top) {
+		m_selection->add(item);
+	}
+	else {
+		m_selection->addAt(item, 0);
+	}
 }
 
 void ERScrollBox::deselect(EResource * res) const
@@ -165,6 +178,13 @@ void ERScrollBox::itemMouseDoubleClickEvent(FastScrollItem * item, QGraphicsScen
 		event->accept();
 		emit sOpen();
 	}
+}
+
+ERScrollItem * ERScrollBox::remap(EResource * res) const
+{
+	auto it = m_map.find(res);
+	if (it == m_map.end()) return nullptr;
+	return it->second;
 }
 
 void ERScrollBox::insertForIndices(const std::vector<size_t>& ind)

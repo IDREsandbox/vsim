@@ -20,8 +20,7 @@ ERFilterSortProxy::ERFilterSortProxy(TGroup<EResource> *base)
 	m_show_local(true),
 	m_enable_range(false),
 	m_enable_years(true),
-	m_show_all(false),
-	m_radius(1.0)
+	m_show_all(false)
 {
 	setBase(base);
 	sortBy(ER::SortBy::NONE);
@@ -217,9 +216,12 @@ bool ERFilterSortProxy::accept(EResource *res)
 	// check distance
 	if (!res->getGlobal() && m_enable_range) {
 		//bool in_range = m_in_range.find(res) != m_in_range.end();
-		if (m_in_range.find(res) == m_in_range.end()) {
+		if (!res->inRange()) {
 			return false;
 		}
+		//if (m_in_range.find(res) == m_in_range.end()) {
+		//	return false;
+		//}
 		//bool overlap = Util::spheresOverlap(m_position, m_radius,
 		//	res->getPosition(), res->getLocalRange());
 		//if (!overlap) return false;
@@ -450,13 +452,13 @@ void ERFilterSortProxy::enableYears(bool enable)
 	emit sUseYearsChanged(enable);
 }
 
-void ERFilterSortProxy::setSearchRadius(float radius)
-{
-	m_radius = radius;
-	setPosition(m_position);
-
-	emit sRadiusChanged(radius);
-}
+//void ERFilterSortProxy::setSearchRadius(float radius)
+//{
+//	m_radius = radius;
+//	setPosition(m_position);
+//
+//	emit sRadiusChanged(radius);
+//}
 
 void ERFilterSortProxy::setTitleSearch(const std::string & title)
 {
@@ -509,55 +511,55 @@ size_t ERFilterSortProxy::size() const
 	return m_map_to_base.size();
 }
 
-void ERFilterSortProxy::setPosition(osg::Vec3 pos)
-{
-	//if (m_position == pos) return;
-
-	if (!m_enable_range) return;
-
-	//qDebug() << "hnm?";
-	m_position = pos;
-
-	// 1.
-	// remove things that are out of range
-	// insert things that are in range
-
-	// 2.
-	// rescan everything (we have to anyway)
-	// apply differences
-
-	std::set<size_t> entered_range; // base indices
-	std::set<size_t> left_range; // base indices
-
-	// scan everything check if in range
-	for (size_t i = 0; i < m_base->size(); i++) {
-		EResource * res = m_base->child(i);
-
-		if (res->getGlobal()) continue;
-		res->getPosition();
-		res->getLocalRange();
-
-		// two circles overlap
-		bool overlap = Util::spheresOverlap(pos, m_radius, res->getPosition(), res->getLocalRange());
-		bool was_in_range = m_in_range.find(res) != m_in_range.end();
-		//qDebug() << "overlap?" << overlap << res;
-		//qDebug() << "m_rad" << m_radius << "range" << res->getLocalRange() << "dist" << (pos - res->getPosition()).length() << "was" << was_in_range;
-		// overlap and not in map, then insert it
-		if (overlap && !was_in_range) {
-			entered_range.insert(i);
-			m_in_range.insert(res);
-		}
-		// overlap and in map, then remove it
-		else if (!overlap && was_in_range) {
-			left_range.insert(i);
-			m_in_range.erase(res);
-		}
-	}
-
-	// re-check
-	checkAndInsertSet(entered_range);
-	checkAndRemoveSet(left_range);
-}
+//void ERFilterSortProxy::setPosition(osg::Vec3 pos)
+//{
+//	//if (m_position == pos) return;
+//
+//	if (!m_enable_range) return;
+//
+//	//qDebug() << "hnm?";
+//	m_position = pos;
+//
+//	// 1.
+//	// remove things that are out of range
+//	// insert things that are in range
+//
+//	// 2.
+//	// rescan everything (we have to anyway)
+//	// apply differences
+//
+//	std::set<size_t> entered_range; // base indices
+//	std::set<size_t> left_range; // base indices
+//
+//	// scan everything check if in range
+//	for (size_t i = 0; i < m_base->size(); i++) {
+//		EResource * res = m_base->child(i);
+//
+//		if (res->getGlobal()) continue;
+//		res->getPosition();
+//		res->getLocalRange();
+//
+//		// two circles overlap
+//		bool overlap = Util::spheresOverlap(pos, m_radius, res->getPosition(), res->getLocalRange());
+//		bool was_in_range = m_in_range.find(res) != m_in_range.end();
+//		//qDebug() << "overlap?" << overlap << res;
+//		//qDebug() << "m_rad" << m_radius << "range" << res->getLocalRange() << "dist" << (pos - res->getPosition()).length() << "was" << was_in_range;
+//		// overlap and not in map, then insert it
+//		if (overlap && !was_in_range) {
+//			entered_range.insert(i);
+//			m_in_range.insert(res);
+//		}
+//		// overlap and in map, then remove it
+//		else if (!overlap && was_in_range) {
+//			left_range.insert(i);
+//			m_in_range.erase(res);
+//		}
+//	}
+//
+//	// re-check
+//	checkAndInsertSet(entered_range);
+//	checkAndRemoveSet(left_range);
+//}
 
 EResource * ERFilterSortProxy::getResource(int i) const
 {
@@ -634,7 +636,6 @@ void ERFilterSortProxy::reload()
 
 	m_map_to_base = nodes_filtered;
 
-	qDebug() << "emit reset" << m_map_to_base.size();
 	emit sReset();
 }
 

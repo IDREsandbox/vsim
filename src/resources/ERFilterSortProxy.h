@@ -67,11 +67,11 @@ public:
 	void showGlobal(bool global);
 	void enableRange(bool enable);
 	void enableYears(bool enable);
-	void setSearchRadius(float radius);
+	//void setSearchRadius(float radius);
 
 	void setTitleSearch(const std::string &title);
 
-	void setPosition(osg::Vec3 pos);
+	//void setPosition(osg::Vec3 pos);
 
 signals:
 	void sSortByChanged(ER::SortBy);
@@ -138,10 +138,9 @@ private:
 	
 	bool m_show_all;
 
-	osg::Vec3 m_position;
-	double m_radius;
-
-	std::unordered_set<EResource*> m_in_range;
+	//osg::Vec3 m_position;
+	//double m_radius;
+	//std::unordered_set<EResource*> m_in_range;
 };
 
 #endif
