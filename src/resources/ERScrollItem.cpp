@@ -5,6 +5,7 @@
 #include <QRect>
 #include <QDebug>
 #include <QGraphicsItem>
+#include <QElapsedTimer>
 
 ERScrollItem::ERScrollItem()
 	: FastScrollItem(),
@@ -67,6 +68,7 @@ void ERScrollItem::updateAlias()
 
 void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
+	QElapsedTimer t; t.start();
 	//qDebug() << "paint work";
 	// base color
 	QColor color = QColor(50, 50, 50);
@@ -174,4 +176,6 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 	if (m_er->getAutoLaunch()) {
 		painter->drawPixmap(icon_rect, m_launch_icon);
 	}
+
+	//qDebug() << "paint item" << (void*)this << t.nsecsElapsed()/1000000.0;
 }

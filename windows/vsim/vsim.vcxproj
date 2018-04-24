@@ -437,7 +437,9 @@
     <QtUic Include="..\..\src\narrative\SlideScrollItem.ui" />
     <QtUic Include="..\..\src\NumberSlider.ui" />
     <QtUic Include="..\..\src\resources\ERDialog.ui" />
+    <QtUic Include="..\..\src\resources\ERDisplay.ui" />
     <QtUic Include="..\..\src\resources\ERFilterArea.ui" />
+    <QtUic Include="..\..\src\resources\NewCatDialog.ui" />
     <QtUic Include="..\..\src\StyleSettingsDialog.ui" />
     <QtUic Include="..\..\src\StyleSettingsWidget.ui" />
     <QtUic Include="..\..\src\TextToolbar.ui" />

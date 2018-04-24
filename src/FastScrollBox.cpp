@@ -22,7 +22,7 @@ FastScrollBox::FastScrollBox(QWidget * parent)
 	// this is way faster, for 1k+ items
 	m_scene->setItemIndexMethod(QGraphicsScene::NoIndex);
 
-	m_view = new QGraphicsView(this);
+	m_view = new View(this);
 	m_view->setScene(m_scene);
 	m_view->show();
 	m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
@@ -43,6 +43,11 @@ FastScrollBox::FastScrollBox(QWidget * parent)
 	});
 	connect(m_selection, &StackSignals::sChanged, this, [this]() {
 		//m_selection->top()->setTop(true);
+	});
+	connect(m_selection, &StackSignals::sReset, this, [this]() {
+		for (auto *i : m_items) {
+			i->setSelected(false);
+		}
 	});
 
 	//m_view->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -261,18 +266,10 @@ void FastScrollBox::itemMouseDoubleClickEvent(FastScrollItem * item, QGraphicsSc
 
 void FastScrollBox::singleSelect(FastScrollItem * item)
 {
-	item->setSelected(true);
-	for (auto *other : m_items) {
-		if (other != item) {
-			qDebug() << "ss desel" << other->m_number;
-			other->setSelected(false);
-		}
-	}
-	//m_selection->clear();
-	//m_selection->add(item);
-	qDebug() << "before clear";
+	m_selection->clear();
+	m_selection->add(item);
+
 	emit sSelectionCleared();
-	qDebug() << "after clear";
 }
 
 FastScrollItem::FastScrollItem()
@@ -421,4 +418,20 @@ void FastScrollBox::Scene::contextMenuEvent(QGraphicsSceneContextMenuEvent * eve
 		m_box->m_menu->exec(event->screenPos());
 		event->accept();
 	}
+}
+
+FastScrollBox::View::View(FastScrollBox * box)
+	: QGraphicsView(box),
+	m_box(box)
+{
+}
+
+void FastScrollBox::View::paintEvent(QPaintEvent * event)
+{
+	QElapsedTimer t; t.start();
+
+	//return;
+	QGraphicsView::paintEvent(event);
+
+	//qDebug() << "paint" << this << t.nsecsElapsed()/1000000.0;
 }

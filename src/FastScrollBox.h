@@ -61,8 +61,19 @@ private:
 		FastScrollBox * m_box;
 	};
 
+	class View : public QGraphicsView {
+	public:
+		View(FastScrollBox *box);
+
+		void paintEvent(QPaintEvent *event) override;
+	protected:
+
+	private:
+		FastScrollBox *m_box;
+	};
+
 public:
-	QGraphicsView *m_view;
+	View *m_view;
 	Scene *m_scene;
 	StackObject<FastScrollItem*> *m_selection;
 

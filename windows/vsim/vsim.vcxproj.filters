@@ -166,6 +166,10 @@
     <CustomBuild Include="../../src/*.fbs" />
     <CustomBuild Include="../../src/*.fbs" />
     <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="../../src/*.fbs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\deprecated\narrative\NarrativeNode.cpp">
@@ -704,6 +708,12 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="..\..\src\resources\ERDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\resources\NewCatDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\resources\ERDisplay.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

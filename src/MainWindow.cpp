@@ -31,6 +31,7 @@
 #include "resources/ERDisplay.h"
 #include "resources/ERControl.h"
 #include "resources/ERFilterArea.h"
+#include "resources/ERScrollItem.h"
 
 #include "VSimApp.h"
 #include "VSimRoot.h"
@@ -163,6 +164,15 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionTime_Slider, &QAction::triggered, this, [this]() {
 		m_time_slider->setVisible(!m_time_slider->isVisible());
 		if (m_time_slider->isVisible()) m_time_slider->setFocus();
+	});
+
+	QAction *box = new QAction("Scroll Box Thing", this);
+	ui->menuTest->addAction(box);
+	box->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
+	connect(box, &QAction::triggered, this, [this]() {
+		auto *fsb = new FastScrollBox(this);
+		fsb->insertItems({ {0, new ERScrollItem} });
+		ui->bottomBar->ui.horizontalLayout->addWidget(fsb);
 	});
 }
 
