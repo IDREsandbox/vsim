@@ -113,6 +113,7 @@ private:
 	ECategoryControl *m_category_control;
 
 	float m_radius;
+	bool m_enabled;
 	//osg::Vec3 m_prev_position;
 	//bool m_pos_dirty;
 };

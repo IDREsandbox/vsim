@@ -33,7 +33,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_global_proxy(nullptr),
 	m_local_proxy(nullptr),
 	m_last_touched(nullptr),
-	m_radius(1.0f)
+	m_radius(1.0f),
+	m_enabled(true)
 {
 	m_undo_stack = m_app->getUndoStack();
 	m_global_box = m_window->erBar()->ui.global;
@@ -144,8 +145,15 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 
 	connect(m_app, &VSimApp::sStateChanged, this, [this]() {
 		VSimApp::State state = m_app->state();
-		if (!m_app->isFlying() && state != VSimApp::EDIT_ERS) {
-			setDisplay(nullptr);
+		bool ok = m_app->isFlying()
+			|| state == VSimApp::EDIT_ERS;
+		if (ok) {
+			m_enabled = true;
+			setDisplay(m_displayed, false); // try to redisplay
+		}
+		else {
+			m_enabled = false;
+			m_display->hide();
 		}
 	});
 
@@ -355,15 +363,18 @@ void ERControl::openResource()
 {
 	EResource *res = getCombinedLastSelectedP();
 	if (!res) return;
-
-	if (res->getERType() == EResource::FILE) {
+	auto type = res->getERType();
+	gotoPosition();
+	if (type == EResource::FILE) {
 		QString path = QString::fromStdString(m_app->getCurrentDirectory() + "/" + res->getResourcePath());
 		qInfo() << "Attempting to open file:" << path;
 		QDesktopServices::openUrl(QUrl(path));
 	}
-	else if (res->getERType() == EResource::URL) {
+	else if (type == EResource::URL) {
 		qInfo() << "Attempting to open url:" << res->getResourcePath().c_str();
 		QDesktopServices::openUrl(QUrl(res->getResourcePath().c_str()));
+	}
+	else if (type == EResource::ANNOTATION) {
 	}
 }
 
@@ -424,7 +435,10 @@ void ERControl::setDisplay(EResource *res, bool go)
 	}
 
 	m_display->setInfo(res);
-	m_display->show();
+
+	if (m_enabled) {
+		m_display->show();
+	}
 
 	if (go) {
 		m_going_to = true;
