@@ -20,7 +20,8 @@ ERFilterSortProxy::ERFilterSortProxy(TGroup<EResource> *base)
 	m_show_local(true),
 	m_enable_range(false),
 	m_enable_years(true),
-	m_show_all(false)
+	m_show_all(false),
+	m_year(0)
 {
 	setBase(base);
 	sortBy(ER::SortBy::NONE);
@@ -88,10 +89,10 @@ void ERFilterSortProxy::setBase(TGroup<EResource> *base)
 
 void ERFilterSortProxy::sortBy(ER::SortBy method)
 {
-	if (m_sort_by == method) return;
+	//if (m_sort_by == method) return;
 	m_sort_by = method;
 
-	reload();
+	reload2();
 	emit sSortByChanged(method);
 	//if (method == NONE) {
 	//	rescan();
@@ -127,7 +128,7 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 			if (!cat) continue;
 			m_categories_enabled.erase(cat);
 		}
-		reload();
+		reload2();
 	});
 
 	// change -> add/remove accordingly
@@ -144,7 +145,7 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 		for (int i = topLeft.row(); i <= bottomRight.row(); i++) {
 			updateCategorySet(i);
 		}
-		reload();
+		reload2();
 	});
 
 	// reset
@@ -153,7 +154,7 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 		for (int i = 1; i < cats->rowCount(); i++) {
 			updateCategorySet(i);
 		}
-		reload();
+		reload2();
 	});
 
 }
@@ -162,19 +163,19 @@ void ERFilterSortProxy::setFiletypes(CheckableListProxy * types)
 {
 	if (m_type_filters != nullptr) disconnect(m_type_filters, 0, this, 0);
 	m_type_filters = types;
-	reload();
+	reload2();
 }
 
 void ERFilterSortProxy::showLocal(bool local)
 {
 	m_show_local = local;
-	reload();
+	reload2();
 }
 
 void ERFilterSortProxy::showGlobal(bool global)
 {
 	m_show_global = global;
-	reload();
+	reload2();
 }
 
 //ERFilterSortProxy::SortBy ERFilterSortProxy::getSortMethod() const
@@ -214,27 +215,24 @@ bool ERFilterSortProxy::accept(EResource *res)
 	// check title
 
 	// check distance
+	// check enable range
 	if (!res->getGlobal() && m_enable_range) {
-		//bool in_range = m_in_range.find(res) != m_in_range.end();
 		if (!res->inRange()) {
 			return false;
 		}
-		//if (m_in_range.find(res) == m_in_range.end()) {
-		//	return false;
-		//}
-		//bool overlap = Util::spheresOverlap(m_position, m_radius,
-		//	res->getPosition(), res->getLocalRange());
-		//if (!overlap) return false;
-		//if (!overlap) {
-		//	m_in_range.erase(res);
-		//	return false;
-		//}
 	}
 
-	//m_enable_range;
-
 	// check years
-	//m_enable_years;
+	if (m_enable_years && m_year != 0) {
+		int min = res->getMinYear();
+		if (min != 0 && min > m_year) {
+			return false;
+		}
+		int max = res->getMaxYear();
+		if (max != 0 && max < m_year) {
+			return false;
+		}
+	}
 
 	// check global/local
 	bool global = res->getGlobal();
@@ -246,13 +244,33 @@ bool ERFilterSortProxy::accept(EResource *res)
 
 bool ERFilterSortProxy::lessThan(size_t left, size_t right)
 {
-	if (m_sort_by == ER::SortBy::TITLE) {
-		EResource *lres = m_base->child(left);
-		EResource *rres = m_base->child(right);
-		if (!lres || !rres) return false;
+	EResource *lres = m_base->child(left);
+	EResource *rres = m_base->child(right);
+
+	switch (m_sort_by) {
+	case ER::SortBy::TITLE:
 		return lres->getResourceName() < rres->getResourceName();
+	case ER::SortBy::DISTANCE:
+	{
+		double ld = lres->getDistanceTo();
+		double rd = rres->getDistanceTo();
+		if (ld == rd) break; // alphabetical
+		return ld < rd;
 	}
-	return left < right;
+	case ER::SortBy::START_YEAR:
+	{
+		int ly = lres->getMinYear();
+		int ry = rres->getMinYear();
+		if (ly == ry) break; // alphabetical
+		if (ly == 0) return true;
+		if (ry == 0) return false;
+		return ly < ry;
+	}
+	case ER::SortBy::NONE:
+		return left < right;
+	}
+	// alphabetical by default
+	return lres->getResourceName() < rres->getResourceName();
 }
 
 std::vector<int> ERFilterSortProxy::indicesOf(const std::vector<EResource*>& resources, bool blanks)
@@ -463,7 +481,20 @@ void ERFilterSortProxy::enableYears(bool enable)
 void ERFilterSortProxy::setTitleSearch(const std::string & title)
 {
 	m_title_search = title;
-	reload();
+	reload2();
+}
+
+void ERFilterSortProxy::setYear(int year)
+{
+	m_year = year;
+	reload2();
+}
+
+void ERFilterSortProxy::positionChangePoke()
+{
+	if (m_sort_by == ER::SortBy::DISTANCE) {
+		reload2();
+	}
 }
 
 //
@@ -637,6 +668,51 @@ void ERFilterSortProxy::reload()
 	m_map_to_base = nodes_filtered;
 
 	emit sReset();
+}
+
+void ERFilterSortProxy::reload2()
+{
+	if (!m_base) return;
+
+	std::vector<size_t> nodes_filtered;
+	for (size_t i = 0; i < m_base->size(); i++) {
+		EResource *node = m_base->child(i);
+		// track(node);
+		if (accept(node)) {
+			nodes_filtered.push_back(i);
+		}
+	}
+
+	auto lt = [this](size_t l, size_t r) { return lessThan(l, r); };
+	std::sort(nodes_filtered.begin(), nodes_filtered.end(), lt);
+
+	std::vector<size_t> before = m_map_to_base;
+	std::vector<size_t> after = nodes_filtered;
+	std::vector<size_t> removals;
+	std::vector<size_t> insertions;
+	std::vector<std::pair<size_t, size_t>> moves;
+
+	// decomposes all changes into remove insert move
+	VecUtil::removalsInsertionsMoves(before,
+		after, &removals, &insertions, &moves);
+
+	// remove
+	emit sAboutToRemoveMulti(removals);
+	VecUtil::multiRemove(&m_map_to_base, removals);
+
+	emit sRemovedMulti(removals);
+
+	// insert
+	std::vector<std::pair<size_t, size_t>> insertions2;
+	for (size_t index : insertions) {
+		insertions2.push_back({ index, after[index] });
+	}
+	VecUtil::multiInsert(&m_map_to_base, insertions2);
+	emit sInsertedMulti(insertions);
+
+	// move
+	VecUtil::multiMove(&m_map_to_base, moves);
+	emit sItemsMoved(moves);
 }
 
 void ERFilterSortProxy::updateCategorySet(int model_row)

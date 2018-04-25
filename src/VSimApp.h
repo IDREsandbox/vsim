@@ -76,6 +76,10 @@ public:
 
 	void update(float dt_sec);
 
+	// year
+	void setYear(int year);
+	int getYear() const;
+
 	// status
 	void setStatusMessage(const QString &message, int timeout = 0);
 
@@ -117,6 +121,7 @@ signals:
 	void sAboutToReset();
 	void sReset();
 	void sStateChanged(VSimApp::State old, VSimApp::State current);
+	void sYearChanged(int old, int current);
 
 	void sGoingSomewhere();
 	void sArrived();
@@ -151,6 +156,8 @@ private:
 	QTimer *m_slide_timer;
 
 	State m_state;
+
+	int m_year;
 
 	// thumbnails
 	osg::ref_ptr<osgViewer::CompositeViewer> m_viewer;

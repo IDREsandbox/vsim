@@ -3,26 +3,39 @@
 #include <QFrame>
 #include <QListView>
 #include <QAbstractItemModel>
-#include "ui_ERFilterArea.h"
+#include <memory>
+
+#include "EREnums.h"
 
 class EditDeleteDelegate;
 class CheckableListProxy;
-class ERFilterSortProxy;
+
+namespace Ui { class ERFilterArea; };
 
 class ERFilterArea : public QFrame {
 	Q_OBJECT
 public:
 	ERFilterArea(QWidget *parent);
-	void setModel(ERFilterSortProxy *model);
 	void setCategoryModel(CheckableListProxy *categories);
 
 	void reset();
 
-public:
-	Ui::ERFilterArea ui;
+	void setSortGlobal(ER::SortBy sort);
+	void setSortLocal(ER::SortBy sort);
+	void enableRange(bool enable);
+	void setRadius(float radius);
+	void enableYears(bool enable);
+
+signals:
+	void sSortGlobal(ER::SortBy sort);
+	void sSortLocal(ER::SortBy sort);
+	void sEnableRange(bool enable);
+	void sSetRadius(float radius);
+	void sEnableYears(bool enable);
+	void sClear();
 
 private:
-	ERFilterSortProxy *m_model;
+	std::unique_ptr<Ui::ERFilterArea> ui;
 
 	//EditDeleteDelegate *m_category_delegate;
 	//QListView *m_category_view;

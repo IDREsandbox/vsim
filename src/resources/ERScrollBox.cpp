@@ -5,6 +5,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QTimer>
 #include <QDebug>
+#include <QScrollBar>
 
 ERScrollBox::ERScrollBox(QWidget * parent)
 	: FastScrollBox(parent),
@@ -88,8 +89,8 @@ void ERScrollBox::setGroup(TGroup<EResource> *group)
 			reload();
 		});
 		connect(m_group, &GroupSignals::sItemsMoved, this,
-			[this](auto stuff) {
-			// moveItems(stuff);
+			[this](auto moves) {
+			moveItems(moves);
 		});
 	}
 }
@@ -104,6 +105,13 @@ void ERScrollBox::reload()
 	std::vector<size_t> all(m_group->size());
 	std::iota(all.begin(), all.end(), 0);
 	insertForIndices(all);
+	//setSelection(old_selection);
+
+	//if (old_selection.size() != 0) {
+	//	qDebug() << "non null old selection" << old_selection.size();
+	//	qDebug() << "afterwards" << selection()->size();
+	//	qDebug() << "map size" << m_map.size();
+	//}
 }
 
 void ERScrollBox::addToSelection(EResource * res, bool top)

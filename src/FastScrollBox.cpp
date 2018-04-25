@@ -5,6 +5,7 @@
 #include <QResizeEvent>
 #include <QGraphicsSceneMouseEvent>
 #include <QElapsedTimer>
+#include "VecUtil.h"
 
 static void execMenu(const QPoint &pos) {
 	QMenu menu;
@@ -128,10 +129,10 @@ StackObject<FastScrollItem*>* FastScrollBox::selection() const
 
 void FastScrollBox::insertItems(const std::vector<std::pair<size_t, FastScrollItem*>>& insertions)
 {
+	if (insertions.size() == 0) return;
 	for (const auto &pair : insertions) {
 		auto *item = pair.second;
 		m_scene->addItem(item);
-		m_items.insert(m_items.begin() + pair.first, item);
 		connect(item, &FastScrollItem::sSelected, [this, item](bool selected) {
 			// don't do anything
 			// don't rely on built in selection
@@ -152,7 +153,6 @@ void FastScrollBox::insertItems(const std::vector<std::pair<size_t, FastScrollIt
 		connect(item, &FastScrollItem::sContextMenuEvent,
 			[this](auto *event) {
 			if (m_item_menu) {
-				qDebug() << "accepting menu event";
 				event->accept();
 				m_item_menu->exec(event->screenPos());
 				emit sTouch();
@@ -163,23 +163,19 @@ void FastScrollBox::insertItems(const std::vector<std::pair<size_t, FastScrollIt
 			itemMouseDoubleClickEvent(item, event);
 		});
 	}
-
+	VecUtil::multiInsert(&m_items, insertions);
 	refresh();
-	//multiInsert(&m_items, insertions);
 }
 
 void FastScrollBox::removeItems(const std::vector<size_t> indices)
 {
+	if (indices.size() == 0) return;
 	for (auto i : indices) {
 		m_scene->removeItem(m_items[i]);
 		m_selection->remove(m_items[i]);
 		delete m_items[i];
 	}
-	std::set<size_t> ind(indices.begin(), indices.end());
-	for (int i = (int)m_items.size() - 1; i >= 0; i--) {
-		if (ind.count(i) > 0) m_items.erase(m_items.begin() + i);
-	}
-	//multiRemove();
+	VecUtil::multiRemove(&m_items, indices);
 	refresh();
 }
 
@@ -194,6 +190,13 @@ void FastScrollBox::removeSelected()
 	std::vector<size_t> ind(m_items.size() - rindex);
 	std::iota(ind.begin(), ind.end(), rindex);
 	removeItems(ind);
+}
+
+void FastScrollBox::moveItems(const std::vector<std::pair<size_t, size_t>>& moves)
+{
+	if (moves.size() == 0) return;
+	VecUtil::multiMove(&m_items, moves);
+	refresh();
 }
 
 size_t FastScrollBox::itemCount() const
@@ -272,7 +275,7 @@ void FastScrollBox::itemMousePressEvent(FastScrollItem * item, QGraphicsSceneMou
 		event->accept();
 		//emit sTouch();
 		// don't touch until after context menu
-		// this lets us set position
+		// this lets us set position w/o going to immediately
 	}
 }
 

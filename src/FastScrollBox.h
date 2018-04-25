@@ -30,6 +30,7 @@ public:
 	void insertItems(const std::vector<std::pair<size_t, FastScrollItem*>>& insertions);
 	void removeItems(const std::vector<size_t> indices);
 	void removeSelected();
+	void moveItems(const std::vector<std::pair<size_t, size_t>> &moves);
 
 	size_t itemCount() const;
 	FastScrollItem *item(size_t index) const;
@@ -45,7 +46,7 @@ protected:
 	virtual void itemMousePressEvent(FastScrollItem *item, QGraphicsSceneMouseEvent *event);
 	virtual void itemMouseDoubleClickEvent(FastScrollItem *item, QGraphicsSceneMouseEvent *event);
 
-private:
+protected:
 	void singleSelect(FastScrollItem *item);
 	void ensureVisible();
 	//void shiftSelect();
@@ -73,7 +74,7 @@ private:
 		FastScrollBox *m_box;
 	};
 
-public:
+protected:
 	View *m_view;
 	Scene *m_scene;
 	StackObject<FastScrollItem*> *m_selection;

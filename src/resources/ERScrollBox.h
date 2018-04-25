@@ -45,6 +45,8 @@ private:
 
 	std::map<EResource*, ERScrollItem*> m_map;
 	EResource *m_old_top;
+
+	std::vector<EResource*> m_old_selection;
 };
 
 #endif // ERSCROLLBOX_H

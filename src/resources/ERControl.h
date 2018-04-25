@@ -76,6 +76,9 @@ public:
 
 	void debug();
 
+signals:
+	void sRadiusChanged(float radius);
+
 public: // actions
 	QAction *a_new_er;
 	QAction *a_delete_er;

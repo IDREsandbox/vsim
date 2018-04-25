@@ -140,12 +140,6 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		m_local_box->selection()->clear();
 	});
 
-	// hide/show filter area
-	connect(m_window->erBar()->ui.filter, &QPushButton::pressed, this,
-		[this]() {
-		m_filter_area->setVisible(!m_filter_area->isVisible());
-	});
-
 	connect(m_app, &VSimApp::sStateChanged, this, [this]() {
 		VSimApp::State state = m_app->state();
 		bool ok = m_app->isFlying()
@@ -172,11 +166,38 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	connect(m_display, &ERDisplay::sOpen, this, &ERControl::openResource);
 	connect(m_display, &ERDisplay::sGoto, this, &ERControl::gotoPosition);
 
-	// filter area stuff
-	connect(m_filter_area->ui.clearButton, &QAbstractButton::pressed, this, [this]() {
+	// filter area -> this
+	connect(m_filter_area, &ERFilterArea::sClear,
+		this, &ERControl::resetFilters);
+	connect(m_filter_area, &ERFilterArea::sSetRadius,
+		this, &ERControl::setRadius);
+	connect(m_filter_area, &ERFilterArea::sEnableRange,
+		m_local_proxy.get(), &ERFilterSortProxy::enableRange);
+	connect(m_filter_area, &ERFilterArea::sEnableYears,
+		m_filter_proxy.get(), &ERFilterSortProxy::enableYears);
+	connect(m_filter_area, &ERFilterArea::sSortLocal,
+		m_local_proxy.get(), &ERFilterSortProxy::sortBy);
+	connect(m_filter_area, &ERFilterArea::sSortGlobal,
+		m_global_proxy.get(), &ERFilterSortProxy::sortBy);
 
+	connect(m_window->erBar()->ui.filter, &QPushButton::pressed, this,
+		[this]() {
+		m_filter_area->setVisible(!m_filter_area->isVisible());
 	});
 
+	// this -> filter area
+	connect(m_local_proxy.get(), &ERFilterSortProxy::sSortByChanged,
+		m_filter_area, &ERFilterArea::setSortLocal);
+	connect(m_global_proxy.get(), &ERFilterSortProxy::sSortByChanged,
+		m_filter_area, &ERFilterArea::setSortGlobal);
+	connect(this, &ERControl::sRadiusChanged,
+		m_filter_area, &ERFilterArea::setRadius);
+	connect(m_filter_proxy.get(), &ERFilterSortProxy::sUseYearsChanged,
+		m_filter_area, &ERFilterArea::enableYears);
+	connect(m_local_proxy.get(), &ERFilterSortProxy::sUseRangeChanged,
+		m_filter_area, &ERFilterArea::enableRange);
+
+	resetFilters();
 
 	load(nullptr);
 }
@@ -244,6 +265,7 @@ void ERControl::update(double dt_sec)
 		}
 	}
 
+	m_local_proxy->positionChangePoke();
 
 	//m_local_proxy->setPosition(pos);
 
@@ -531,28 +553,20 @@ void ERControl::selectERs(const std::vector<EResource*> &res)
 void ERControl::resetFilters()
 {
 	m_local_proxy->enableRange(true);
-	//m_local_proxy->setSearchRadius(10.0f);
-	m_filter_proxy->sortBy(ER::SortBy::TITLE);
+	m_filter_proxy->sortBy(ER::SortBy::NONE);
+	m_local_proxy->sortBy(ER::SortBy::DISTANCE);
+	m_global_proxy->sortBy(ER::SortBy::TITLE);
 	m_filter_proxy->setTitleSearch("");
 	m_filter_proxy->showGlobal(true);
 	m_filter_proxy->showLocal(true);
 	setRadius(5.0f);
-
-	//ui.globalCheckBox->setChecked(true);
-	//ui.localCheckBox->setChecked(true);
-	//ui.yearsCheckBox->setChecked(true);
-	//ui.showLocalCheckBox->setChecked(false);
-	//ui.searchLineEdit->clear();
-	//ui.sortByBox->setCurrentIndex(0);
 	if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
-	//if (m_type_checkbox_model) m_type_checkbox_model->setCheckAll(true);
 }
 
 void ERControl::setRadius(float radius)
 {
 	m_radius = radius;
-	m_filter_area->ui.radiusSpinBox->setValue(m_radius);
-	//m_local_proxy->reload
+	emit sRadiusChanged(radius);
 }
 
 void ERControl::debug()

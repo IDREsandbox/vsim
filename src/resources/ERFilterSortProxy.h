@@ -70,8 +70,16 @@ public:
 	//void setSearchRadius(float radius);
 
 	void setTitleSearch(const std::string &title);
-
+	void setYear(int year);
 	//void setPosition(osg::Vec3 pos);
+
+	// resorts stuff based on distance
+	void positionChangePoke();
+
+	// redoes everything, emits reset signals
+	void reload();
+	// redoes everything, emits remove/insert/move signals
+	void reload2();
 
 signals:
 	void sSortByChanged(ER::SortBy);
@@ -107,8 +115,7 @@ protected:
 	//void remap(int base_index);
 	//bool inMap(EResource *res);
 
-	// redoes everything, emits reset signals
-	void reload();
+
 
 private:
 	// adds/remove from m_categories_enabled based on model
@@ -135,6 +142,7 @@ private:
 	bool m_enable_years;
 
 	std::string m_title_search;
+	int m_year;
 	
 	bool m_show_all;
 

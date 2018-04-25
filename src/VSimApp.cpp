@@ -162,6 +162,18 @@ void VSimApp::update(float dt_sec)
 	m_er_control->update(dt_sec);
 }
 
+void VSimApp::setYear(int year)
+{
+	int old = m_year;
+	m_year = year;
+	emit sYearChanged(old, year);
+}
+
+int VSimApp::getYear() const
+{
+	return m_year;
+}
+
 bool VSimApp::initWithVSim(VSimRoot *root)
 {
 	if (!root) {

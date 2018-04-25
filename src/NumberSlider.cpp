@@ -12,14 +12,6 @@ NumberSlider::NumberSlider(QWidget *parent)
 	setMin(0);
 	setMax(100);
 
-	//connect(ui.spinBox, qOverload<int>(&QSpinBox::valueChanged), this,
-	//	[this](int value) {
-	//	setValue(value);
-	//});
-	//connect(ui.slider, qOverload<int>(&QAbstractSlider::valueChanged), this,
-	//	[this](int value) {
-	//	setValue(value);
-	//});
 	connect(ui.spinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &NumberSlider::setValue);
 	connect(ui.slider, &QAbstractSlider::valueChanged, this, &NumberSlider::setValue);
 }
