@@ -29,6 +29,7 @@ public:
 signals:
 	void sOpen();
 	void sTopChanged(EResource *res);
+	void sSelectionChanged();
 
 protected:
 	void itemMouseDoubleClickEvent(FastScrollItem *item,

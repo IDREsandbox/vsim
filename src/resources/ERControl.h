@@ -55,6 +55,7 @@ public:
 	// show and goto resource
 	void onTouch();
 	void onTopChange();
+	void onSelectionChange();
 
 	// selection
 	void addToSelection(EResource *res, bool top = true);

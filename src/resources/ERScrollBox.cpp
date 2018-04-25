@@ -36,7 +36,7 @@ ERScrollBox::ERScrollBox(QWidget * parent)
 	// top changed signal
 	connect(selection(), &StackObject<FastScrollItem*>::sChanged, this, [this]() {
 		EResource *new_top = nullptr;
-
+		emit sSelectionChanged();
 		do {
 			auto *item = selection()->top();
 			if (!item) break;

@@ -223,11 +223,12 @@ void HorizontalScrollBox::refresh()
 
 	int xpos = m_spacing;
 
-	int bheight = m_height;
+	int bheight = std::max(m_height, 10);
 
 	for (int i = 0; i < m_items.size(); i++) {
 		ScrollBoxItem *o = m_items.at(i);
 		int bwidth = o->widthFromHeight(bheight);
+		bwidth = std::max(bwidth, 10);
 
 		//QRect geom(xpos, margins.top(), bwidth, bheight);
 		QRect geom(xpos, 0, bwidth, bheight);

@@ -127,6 +127,9 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	connect(m_local_box, &ERScrollBox::sTopChanged, this, &ERControl::onTopChange);
 	connect(m_global_box, &ERScrollBox::sTopChanged, this, &ERControl::onTopChange);
 
+	connect(m_local_box, &ERScrollBox::sSelectionChanged, this, &ERControl::onSelectionChange);
+	connect(m_global_box, &ERScrollBox::sSelectionChanged, this, &ERControl::onSelectionChange);
+
 
 	// mash the two selections together
 	// if one clears everything, then clear the other one too
@@ -502,6 +505,12 @@ void ERControl::onTopChange()
 	//EResource *res = getCombinedLastSelectedP();
 	//bool go = (res && res->getReposition());
 	//setDisplay(res, go);
+}
+
+void ERControl::onSelectionChange()
+{
+	auto s = getCombinedSelectionP();
+	m_display->setCount(s.size());
 }
 
 void ERControl::addToSelection(EResource * res, bool top)

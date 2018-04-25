@@ -104,7 +104,6 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_object_manipulator = new ObjectManipulator;
 	m_main_view->setCameraManipulator(m_object_manipulator);
 	m_manipulator = MANIPULATOR_SIMPLE;
-	m_navigation_disabled = false;
 
 	m_collisions_on = false;
 	m_gravity_on = false;
@@ -159,12 +158,10 @@ void OSGViewerWidget::setCameraMatrix(osg::Matrixd m)
 
 void OSGViewerWidget::setNavigationMode(Navigation::Mode mode)
 {
-	if (m_navigation_disabled) return;
-
 	m_camera_frozen = false;
 	m_navigation_mode = mode;
 
-	setManipulator(navigationToManipulator(mode));
+	figureOutNavigation();
 
 	emit sCameraFrozen(false);
 	emit sNavigationModeChanged(mode);
@@ -254,18 +251,8 @@ void OSGViewerWidget::adjustSpeed(int tick)
 
 void OSGViewerWidget::setCameraFrozen(bool freeze)
 {
-	if (m_navigation_disabled) return;
-
-	// already frozen
-	if (freeze && m_camera_frozen && m_manipulator == MANIPULATOR_SIMPLE) return;
-
-	if (freeze) {
-		setManipulator(MANIPULATOR_SIMPLE);
-	}
-	else {
-		setManipulator(navigationToManipulator(m_navigation_mode));
-	}
 	m_camera_frozen = freeze;
+	figureOutNavigation();
 	emit sCameraFrozen(freeze);
 }
 
@@ -274,15 +261,17 @@ bool OSGViewerWidget::getCameraFrozen() const
 	return m_camera_frozen;
 }
 
-void OSGViewerWidget::enableNavigation(bool enable)
+void OSGViewerWidget::figureOutNavigation()
 {
-	qInfo() << "ENABLE NAVIGATION" << enable;
-	m_navigation_disabled = !enable;
-	if (!enable) {
+	if (!hasFocus()) {
 		setManipulator(MANIPULATOR_SIMPLE);
+		return;
 	}
-	else {
+	if (m_camera_frozen) {
+		setManipulator(MANIPULATOR_SIMPLE);
+		return;
 	}
+	setManipulator(navigationToManipulator(m_navigation_mode));
 }
 
 void OSGViewerWidget::stopNavigation()
@@ -618,6 +607,17 @@ void OSGViewerWidget::wheelEvent(QWheelEvent* event) {
 	this->getEventQueue()->mouseScroll(motion);
 }
 
+void OSGViewerWidget::focusOutEvent(QFocusEvent * event)
+{
+	releaseMouse();
+	figureOutNavigation();
+}
+
+void OSGViewerWidget::focusInEvent(QFocusEvent * event)
+{
+	figureOutNavigation();
+}
+
 bool OSGViewerWidget::event(QEvent* event)
 {
 	bool handled = QOpenGLWidget::event(event);
@@ -665,20 +665,15 @@ void OSGViewerWidget::centerCursor()
 
 void OSGViewerWidget::takeCursor()
 {
-	grabMouse(Qt::BlankCursor);
+	//grabMouse(); // this is really buggy... just don't use it
+	setCursor(Qt::BlankCursor);
 	centerCursor();
 	m_key_tracker->stealKeys({Qt::Key_W, Qt::Key_A, Qt::Key_S, Qt::Key_D, Qt::Key_Shift, Qt::Key_Control});
 }
 
 void OSGViewerWidget::releaseCursor()
 {
-	releaseMouse();
-
-	// Sometimes the cursor stays invisible on release, so poking it
-	// here refreshes it
-	QCursor current = cursor();
-	setCursor(Qt::BlankCursor);
-	setCursor(current);
+	setCursor(Qt::ArrowCursor);
 	m_key_tracker->stealKeys({});
 }
 

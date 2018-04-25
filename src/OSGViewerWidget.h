@@ -58,7 +58,7 @@ public:
 
 	void setCameraFrozen(bool freeze);
 	bool getCameraFrozen() const;
-	void enableNavigation(bool enable);
+	void figureOutNavigation();
 
 	void stopNavigation();
 
@@ -104,6 +104,9 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent* event) override;
 	virtual void wheelEvent(QWheelEvent* event) override;
 
+	virtual void focusOutEvent(QFocusEvent *event) override;
+	virtual void focusInEvent(QFocusEvent *event) override;
+
 	virtual bool event(QEvent* event) override;
 
 private:
@@ -132,7 +135,6 @@ private:
 	osg::ref_ptr<FlightManipulator> m_flight_manipulator;
 	osg::ref_ptr<ObjectManipulator> m_object_manipulator;
 
-	bool m_navigation_disabled;
 	bool m_camera_frozen;
 	bool m_gravity_on;
 	bool m_collisions_on;

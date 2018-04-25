@@ -78,8 +78,18 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QMen
 	});
 	connect(a_freeze, &QAction::triggered, this,
 		[this]() {
-		m_viewer->setCameraFrozen(a_freeze->isChecked());
-		activate();
+
+		// if changing state then just activate
+		if (!m_app->isFlying()) {
+			activate();
+			a_freeze->setChecked(true);
+			m_viewer->setCameraFrozen(true);
+		}
+		else {
+			// if already frozen then unfreeze
+			m_viewer->setCameraFrozen(a_freeze->isChecked());
+			activate();
+		}
 	});
 	connect(a_home, &QAction::triggered, this,
 		[this]() {
