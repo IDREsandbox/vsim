@@ -27,7 +27,7 @@ public:
 	std::vector<EResource*> getSelection() const;
 
 signals:
-	void sOpen();
+	void sDoubleClick();
 	void sTopChanged(EResource *res);
 	void sSelectionChanged();
 

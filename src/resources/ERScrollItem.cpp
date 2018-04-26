@@ -12,11 +12,11 @@ ERScrollItem::ERScrollItem()
 	m_er(nullptr),
 	m_cat(nullptr)
 {
-	m_text_icon = QPixmap("assets/icons/Text_16xSM.png");
-	m_file_icon = QPixmap("assets/icons/LinkFile_16x.png");
-	m_url_icon = QPixmap("assets/icons/Link_16xSM.png");
-	m_goto_icon = QPixmap("assets/icons/View_16xSM.png");
-	m_launch_icon = QPixmap("assets/icons/Effects_16xSM.png");
+	m_text_icon = QPixmap("assets/icons/Text_16xMD.png");
+	m_file_icon = QPixmap("assets/icons/Document_16xMD.png");
+	m_url_icon = QPixmap("assets/icons/Link_16xMD.png");
+	m_goto_icon = QPixmap("assets/icons/View_16xMD.png");
+	m_launch_icon = QPixmap("assets/icons/Effects_16xMD.png");
 }
 
 EResource * ERScrollItem::resource() const
@@ -116,7 +116,7 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 
 	// paint selection
 	if (isSelected()) {
-		painter->setPen(QPen(QColor(100, 100, 255), 2));
+		painter->setPen(QPen(QColor(175, 175, 255), 3));
 		painter->setBrush(Qt::BrushStyle::NoBrush);
 		painter->drawRect(rect);
 	}
@@ -149,7 +149,7 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 	// paint icons, right to left
 	// [repo] [auto] [type]
 	int icon_margin = 0;
-	int icon_spacing = -1;
+	int icon_spacing = 0;
 	int icon_size = 16;
 
 	QRect icon_rect = QRect(0, margin, icon_size, icon_size);

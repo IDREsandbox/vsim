@@ -184,7 +184,7 @@ void ERScrollBox::itemMouseDoubleClickEvent(FastScrollItem * item, QGraphicsScen
 		&& !(event->modifiers() & Qt::CTRL)) {
 		item->setSelected(true);
 		event->accept();
-		emit sOpen();
+		emit sDoubleClick();
 	}
 }
 

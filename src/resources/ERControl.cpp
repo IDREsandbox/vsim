@@ -117,9 +117,13 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	bar->ui.deleteERButton->setDefaultAction(a_delete_er);
 	// edit
 	bar->ui.editERButton->setDefaultAction(a_edit_er);
-	// open
-	connect(m_local_box, &ERScrollBox::sOpen, a_open_er, &QAction::trigger);
-	connect(m_global_box, &ERScrollBox::sOpen, a_open_er, &QAction::trigger);
+	// goto and open
+	auto goto_open = [this]() {
+		gotoPosition();
+		openResource();
+	};
+	connect(m_local_box, &ERScrollBox::sDoubleClick, this, goto_open);
+	connect(m_global_box, &ERScrollBox::sDoubleClick, this, goto_open);
 
 	connect(m_local_box, &FastScrollBox::sTouch, this, &ERControl::onTouch);
 	connect(m_global_box, &FastScrollBox::sTouch, this, &ERControl::onTouch);
