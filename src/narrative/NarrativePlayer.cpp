@@ -4,6 +4,8 @@
 
 #include "narrative/NarrativeControl.h"
 #include "narrative/NarrativeSlide.h"
+#include "narrative/NarrativeGroup.h"
+
 #include "VSimApp.h"
 #include "MainWindowTopBar.h"
 
@@ -74,6 +76,15 @@ void NarrativePlayer::play()
 	}
 	else {
 		//try to select something
+		size_t n = m_narratives->narratives()->size();
+		if (n == 0) return;
+
+		Narrative *nar = m_narratives->getCurrentNarrative();
+		if (!nar) {
+			m_narratives->selectNarratives({ 0 });
+			// don't necessarily have to ->openNarrative()
+		}
+
 		NarrativeSlide *slide = m_narratives->getCurrentSlide();
 		if (!slide) {
 			m_narratives->openSlide(0);

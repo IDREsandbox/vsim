@@ -43,7 +43,7 @@ public:
 	void openNarrative(int index); // opens narrative in slide box
 
 	// Opens slide in canvas
-	// - requires an open narrative
+	// - requires a current/selected narrative
 	// - forces selection, shows canvas
 	// - hides on -1 or no narrative
 	// - returns true if open, false if failed
@@ -62,27 +62,22 @@ public:
 	//bool advance(bool forward);
 	bool advanceSlide(bool forward, bool instant = true);
 
-	enum SelectionLevel {
-		NARRATIVES,
-		SLIDES,
-		LABELS
-	};
-	SelectionLevel getSelectionLevel();
 	void selectNarratives(const SelectionData &narratives);
 	void selectSlides(int narrative, const SelectionData &slides);
 	//void selectLabel(int narrative, int slide, NarrativeSlideItem *label);
 	void selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem *> &labels);
 
-	Narrative *getCurrentNarrative();
-	int getCurrentNarrativeIndex();
+	NarrativeGroup *narratives() const;
+	Narrative *getCurrentNarrative() const;
+	int getCurrentNarrativeIndex() const;
 	std::set<size_t> getSelectedNarratives() const;
 
-	NarrativeSlide *getCurrentSlide();
-	int getCurrentSlideIndex();
+	NarrativeSlide *getCurrentSlide() const;
+	int getCurrentSlideIndex() const;
 	
-	Narrative *getNarrative(int index);
-	NarrativeSlide *getSlide(int narrative, int slide);
-	NarrativeSlideLabel *getLabel(int narrative, int slide, int label);
+	Narrative *getNarrative(int index) const;
+	NarrativeSlide *getSlide(int narrative, int slide) const;
+	NarrativeSlideLabel *getLabel(int narrative, int slide, int label) const;
 
 signals:
 	//void selectionChanged(); // this should happen after any edit event, 

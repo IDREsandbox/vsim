@@ -90,7 +90,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 			|| state == VSimApp::EDIT_ERS) {
 			// fade out
 			showCanvas(false, true);
-			//openSlide(-1);
+			openSlide(-1);
 		}
 
 		if (state != VSimApp::EDIT_CANVAS
@@ -603,13 +603,6 @@ void NarrativeControl::exitEdit() {
 	m_app->setState(VSimApp::EDIT_SLIDES);
 }
 
-NarrativeControl::SelectionLevel NarrativeControl::getSelectionLevel()
-{
-	if (m_current_narrative == -1) return NARRATIVES;
-	if (m_current_slide == -1) return SLIDES;
-	return LABELS;
-}
-
 void NarrativeControl::selectNarratives(const SelectionData &narratives)
 {
 	// if single selection and already open then don't do anything
@@ -650,7 +643,12 @@ void NarrativeControl::selectLabels(int narrative, int slide, const std::set<Nar
 	m_app->setState(VSimApp::EDIT_CANVAS);
 }
 
-int NarrativeControl::getCurrentNarrativeIndex()
+NarrativeGroup * NarrativeControl::narratives() const
+{
+	return m_narrative_group;
+}
+
+int NarrativeControl::getCurrentNarrativeIndex() const
 {
 	return m_current_narrative;
 }
@@ -660,37 +658,37 @@ std::set<size_t> NarrativeControl::getSelectedNarratives() const
 	return m_narrative_selection->toUSet();
 }
 
-int NarrativeControl::getCurrentSlideIndex()
+int NarrativeControl::getCurrentSlideIndex() const
 {
 	return m_current_slide;
 }
 
-Narrative * NarrativeControl::getCurrentNarrative()
+Narrative * NarrativeControl::getCurrentNarrative() const
 {
 	if (m_current_narrative < 0) return nullptr;
 	return getNarrative(m_current_narrative);
 }
 
-NarrativeSlide * NarrativeControl::getCurrentSlide()
+NarrativeSlide * NarrativeControl::getCurrentSlide() const
 {
 	if (m_current_narrative < 0) return nullptr;
 	return getSlide(m_current_narrative, m_current_slide);
 }
 
-Narrative *NarrativeControl::getNarrative(int index)
+Narrative *NarrativeControl::getNarrative(int index) const
 {
 	if (index < 0) return nullptr;
 	return m_narrative_group->child(index);
 }
 
-NarrativeSlide * NarrativeControl::getSlide(int narrative, int slide)
+NarrativeSlide * NarrativeControl::getSlide(int narrative, int slide) const
 {
 	Narrative *nar = getNarrative(narrative);
 	if (!nar) return nullptr;
 	return nar->child(slide);
 }
 
-NarrativeSlideLabel * NarrativeControl::getLabel(int narrative, int slide, int label)
+NarrativeSlideLabel * NarrativeControl::getLabel(int narrative, int slide, int label) const
 {
 	NarrativeSlide *s = getSlide(narrative, slide);
 	if (!s) return nullptr;
