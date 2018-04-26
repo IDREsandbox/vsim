@@ -1,5 +1,5 @@
-﻿#ifndef NARRATIVEINFODIALOG_HPP
-#define NARRATIVEINFODIALOG_HPP
+﻿#ifndef NARRATIVEINFODIALOG_H
+#define NARRATIVEINFODIALOG_H
 #include <QDialog>
 #include <QDialogButtonBox>
 
@@ -22,4 +22,4 @@ private:
 	Ui::dialog ui;
 };
 
-#endif // NARRATIVEINFODIALOG_HPP
+#endif // NARRATIVEINFODIALOG_H

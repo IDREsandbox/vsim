@@ -2,13 +2,15 @@
 #include <QMenu>
 #include "VSimApp.h"
 #include "OSGViewerWidget.h"
+#include <QDebug>
 
-NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QMenu *menu, QObject *parent)
+NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObject *parent)
 	: QObject(parent),
 	m_app(app),
-	m_viewer(viewer),
-	m_menu(menu)
+	m_viewer(viewer)
 {
+	m_ssm = m_viewer->getStateSetManipulator();
+
 	// navigation actions	
 	m_navigation_action_group = new QActionGroup(this);
 	m_navigation_action_group->setExclusive(true);
@@ -45,20 +47,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QMen
 	a_collisions->setShortcut(Qt::Key_C);
 
 	// initialize
-	initMenu(menu);
 	onModeChange(m_viewer->getNavigationMode());
-
-	// app -> this
-	connect(m_app, &VSimApp::sStateChanged, this,
-		[this](VSimApp::State old, VSimApp::State current) {
-		if (!m_app->isFlying()) {
-			m_viewer->setCameraFrozen(true);
-			m_app->stopGoingSomewhere();
-		}
-		else {
-			m_viewer->setFocus();
-		}
-	});
 
 	// gui -> osg
 	connect(m_navigation_action_group, &QActionGroup::triggered, this,
@@ -110,21 +99,126 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QMen
 	// osg -> gui
 	connect(m_viewer, &OSGViewerWidget::sCameraFrozen, a_freeze, &QAction::setChecked);
 	connect(m_viewer, &OSGViewerWidget::sNavigationModeChanged, this, &NavigationControl::onModeChange);
-}
 
-void NavigationControl::initMenu(QMenu * menu)
-{
-	menu->setTitle("Navigation");
-	menu->addSeparator()->setText("Navigation Mode");
-	menu->addAction(a_first_person);
-	menu->addAction(a_flight);
-	menu->addAction(a_object);
-	menu->addSeparator();
-	menu->addAction(a_freeze);
-	menu->addAction(a_home);
-	menu->addSeparator();
-	menu->addAction(a_gravity);
-	menu->addAction(a_collisions);
+	a_lighting = new QAction(this);
+	a_lighting->setCheckable(true);
+	a_lighting->setText("Lighting");
+	a_lighting->setShortcut(Qt::Key_L);
+	connect(a_lighting, &QAction::triggered, this,
+		[this](bool checked) {
+		m_ssm->setLightingEnabled(checked);
+	});
+
+	a_backface_culling = new QAction(this);
+	a_backface_culling->setCheckable(true);
+	a_backface_culling->setText("Backface Culling");
+	a_backface_culling->setShortcut(Qt::Key_B);
+	connect(a_backface_culling, &QAction::triggered, this,
+		[this](bool checked) {
+		m_ssm->setBackfaceEnabled(checked);
+	});
+
+	a_texturing = new QAction(this);
+	a_texturing->setCheckable(true);
+	a_texturing->setText("Texturing");
+	a_texturing->setShortcut(Qt::Key_X);
+	connect(a_texturing, &QAction::triggered, this,
+		[this](bool checked) {
+		m_ssm->setTextureEnabled(checked);
+	});
+
+	a_stats = new QAction(this);
+	a_stats->setText("Stats");
+	a_stats->setShortcut(Qt::Key_Y);
+	connect(a_stats, &QAction::triggered, this,
+		[this](bool checked) {
+		m_viewer->cycleStats();
+	});
+
+	m_mode_group = new QActionGroup(this);
+	m_mode_group->setExclusive(true);
+	connect(m_mode_group, &QActionGroup::triggered, this,
+		[this](QAction *which) {
+		if (which == a_fill) {
+			m_ssm->setPolygonMode(osg::PolygonMode::Mode::FILL);
+		}
+		else if (which == a_wireframe) {
+			m_ssm->setPolygonMode(osg::PolygonMode::Mode::LINE);
+		}
+		else {
+			m_ssm->setPolygonMode(osg::PolygonMode::Mode::POINT);
+		}
+	});
+
+	a_cycle_mode = new QAction(this);
+	a_cycle_mode->setText("Change Draw Mode");
+	a_cycle_mode->setShortcut(Qt::Key_Semicolon);
+	connect(a_cycle_mode, &QAction::triggered, this, [this]() {
+		//auto *ssm = m_viewer
+		QAction *next = a_fill;
+		if (a_fill->isChecked()) {
+			next = a_wireframe;
+		}
+		else if (a_wireframe->isChecked()) {
+			next = a_point;
+		}
+		else {
+			next = a_fill;
+		}
+		next->trigger();
+	});
+
+	a_fill = new QAction(this);
+	a_fill->setCheckable(true);
+	a_fill->setText("Fill");
+	a_fill->setShortcut(Qt::Key_U);
+	m_mode_group->addAction(a_fill);
+
+	a_wireframe = new QAction(this);
+	a_wireframe->setCheckable(true);
+	a_wireframe->setText("Wireframe");
+	a_wireframe->setShortcut(Qt::Key_I);
+	m_mode_group->addAction(a_wireframe);
+
+	a_point = new QAction(this);
+	a_point->setCheckable(true);
+	a_point->setText("Point Cloud");
+	a_point->setShortcut(Qt::Key_O);
+	m_mode_group->addAction(a_point);
+
+	// app -> this
+	connect(m_app, &VSimApp::sStateChanged, this,
+		[this](VSimApp::State old, VSimApp::State current) {
+		if (!m_app->isFlying()) {
+			m_viewer->setCameraFrozen(true);
+			m_app->stopGoingSomewhere();
+		}
+		else {
+			m_viewer->setFocus();
+		}
+	});
+	connect(m_app, &VSimApp::sReset, this,
+		[this]() {
+		m_viewer->setNavigationMode(Navigation::OBJECT);
+
+		// init render stuff
+		qDebug() << "init texturing" << m_ssm->getTextureEnabled();
+		a_lighting->setChecked(m_ssm->getLightingEnabled());
+		a_backface_culling->setChecked(m_ssm->getBackfaceEnabled());
+		a_texturing->setChecked(m_ssm->getTextureEnabled());
+
+		// initialize mode
+		auto pmode = m_ssm->getPolygonMode();
+		if (pmode == osg::PolygonMode::FILL) {
+			a_fill->setChecked(true);
+		}
+		else if (pmode == osg::PolygonMode::LINE) {
+			a_wireframe->setChecked(true);
+		}
+		else {
+			a_point->setChecked(true);
+		}
+	});
 }
 
 void NavigationControl::activate()

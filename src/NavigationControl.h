@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QAction>
 #include <QActionGroup>
+#include <osgGA/StateSetManipulator>
 #include "Navigation.h"
 
 class VSimApp;
@@ -18,16 +19,14 @@ class NavigationControl : public QObject
 public:
 	NavigationControl(VSimApp *app,
 		OSGViewerWidget *viewer,
-		QMenu *menu,
 		QObject *parent = nullptr);
-
-	void initMenu(QMenu *menu);
 
 	void activate(); // sets vsim state
 
 	void onModeChange(Navigation::Mode mode);
 
 public: // actions
+	QActionGroup *m_navigation_action_group;
 	QAction *a_first_person;
 	QAction *a_flight;
 	QAction *a_object;
@@ -36,12 +35,21 @@ public: // actions
 	QAction *a_gravity;
 	QAction *a_collisions;
 
+	QAction *a_lighting;
+	QAction *a_backface_culling;
+	QAction *a_texturing;
+	QAction *a_stats;
+
+	QActionGroup *m_mode_group;
+	QAction *a_cycle_mode;
+	QAction *a_fill;
+	QAction *a_wireframe;
+	QAction *a_point;
+
 private:
 	VSimApp *m_app;
 	OSGViewerWidget *m_viewer;
-
-	QActionGroup *m_navigation_action_group;
-	QMenu *m_menu;
+	osgGA::StateSetManipulator *m_ssm;
 
 	Navigation::Mode m_mode;
 	bool m_frozen;

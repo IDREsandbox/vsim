@@ -1,5 +1,5 @@
 ﻿#include <QDebug>
-#include "NarrativeInfoDialog.h"
+#include "narrative/NarrativeInfoDialog.h"
 
 NarrativeInfoDialog::NarrativeInfoDialog(QWidget * parent) 
 	: QDialog(parent) 

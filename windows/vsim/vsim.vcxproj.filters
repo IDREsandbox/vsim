@@ -151,29 +151,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="../../*.fbs" />
-    <CustomBuild Include="../../*.fbs" />
-    <CustomBuild Include="../../*.fbs" />
-    <CustomBuild Include="../../*.fbs" />
-    <CustomBuild Include="../../*.fbs" />
-    <CustomBuild Include="../../*.fbs" />
-    <CustomBuild Include="../../*.fbs" />
-    <CustomBuild Include="../../*.fbs" />
-    <CustomBuild Include="../../*.fbs" />
-    <CustomBuild Include="../../*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
-    <CustomBuild Include="../../src/*.fbs" />
+    <CustomBuild Include="..\..\src\narratives.fbs" />
+    <CustomBuild Include="..\..\src\eresources.fbs" />
+    <CustomBuild Include="..\..\src\settings.fbs" />
+    <CustomBuild Include="..\..\src\types.fbs" />
+    <CustomBuild Include="..\..\src\vsim.fbs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\deprecated\narrative\NarrativeNode.cpp">
@@ -470,6 +452,12 @@
     <ClCompile Include="..\..\src\StatsWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\TimeManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\AboutDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\src\narrative\CanvasContainer.h">
@@ -667,6 +655,12 @@
     <QtMoc Include="..\..\src\StatsWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="..\..\src\TimeManager.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\AboutDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="..\..\src\editButtons.ui">
@@ -727,6 +721,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="..\..\src\StatsWindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\AboutDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

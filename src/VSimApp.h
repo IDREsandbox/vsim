@@ -113,6 +113,7 @@ public:
 	//OSGYearModel *modelTable() const;
 	NarrativeControl *narrativeControl() const;
 	ERControl *erControl() const;
+	NavigationControl *navigationControl() const;
 
 	void debugCamera();
 

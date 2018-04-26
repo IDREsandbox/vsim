@@ -61,7 +61,7 @@ VSimApp::VSimApp(MainWindow* window)
 
 	m_narrative_control = new NarrativeControl(this, m_window, this);
 	m_er_control = new ERControl(this, m_window, this);
-	m_navigation_control = new NavigationControl(this, m_window->getViewerWidget(), m_window->navigationMenu(), this);
+	m_navigation_control = new NavigationControl(this, m_window->getViewerWidget(), this);
 
 	// thumbnails
 	m_thumbnail_size = QSize(288, 162);
@@ -395,4 +395,9 @@ NarrativeControl * VSimApp::narrativeControl() const
 ERControl * VSimApp::erControl() const
 {
 	return m_er_control;
+}
+
+NavigationControl * VSimApp::navigationControl() const
+{
+	return m_navigation_control;
 }

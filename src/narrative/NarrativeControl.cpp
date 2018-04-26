@@ -15,7 +15,7 @@
 #include "MainWindow.h"
 #include "OSGViewerWidget.h"
 
-#include "NarrativeInfoDialog.h"
+#include "narrative/NarrativeInfoDialog.h"
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative.h"
 #include "narrative/NarrativeScrollBox.h"

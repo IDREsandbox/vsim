@@ -11,8 +11,10 @@
 #include <osg/ref_ptr>
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
+#include <osgViewer/ViewerEventHandlers>
 #include <osgViewer/CompositeViewer>
 #include <osg/Camera>
+#include <osgGA/StateSetManipulator>
 #include <QElapsedTimer>
 
 class SimpleCameraManipulator;
@@ -40,6 +42,10 @@ public:
 	// osgViewer::Viewer* setViewer(osgViewer::Viewer*); // can't change the viewer
 	osgViewer::ViewerBase *getViewer() const;
 	osgViewer::View *mainView() const;
+
+	osgGA::StateSetManipulator *getStateSetManipulator();
+	void cycleStats();
+	//osgViewer::StatsHandler *getStatsHandler();
 
 	osg::Matrixd getCameraMatrix();
 	void setCameraMatrix(osg::Matrixd);
@@ -134,6 +140,9 @@ private:
 	osg::ref_ptr<FirstPersonManipulator> m_first_person_manipulator;
 	osg::ref_ptr<FlightManipulator> m_flight_manipulator;
 	osg::ref_ptr<ObjectManipulator> m_object_manipulator;
+
+	osg::ref_ptr<osgGA::StateSetManipulator> m_ssm;
+	osg::ref_ptr<osgViewer::StatsHandler> m_stats;
 
 	bool m_camera_frozen;
 	bool m_gravity_on;

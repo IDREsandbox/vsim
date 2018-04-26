@@ -41,6 +41,8 @@
 #include "Model.h"
 #include "ModelGroup.h"
 #include "GroupCommands.h"
+#include "NavigationControl.h"
+#include "AboutDialog.h"
 
 #include "FileUtil.h"
 #include <fstream>
@@ -168,6 +170,21 @@ MainWindow::MainWindow(QWidget *parent)
 		if (m_time_slider->isVisible()) m_time_slider->setFocus();
 	});
 
+	// about
+	connect(ui->actionAbout_VSim, &QAction::triggered, this, [this]() {
+		AboutDialog *dlg = new AboutDialog(this);
+		dlg->exec();
+	});
+
+	QAction *a_test = new QAction("Debug Menu", this);
+	a_test->setShortcut(QKeySequence(Qt::Key_F11));
+	addAction(a_test);
+	connect(a_test, &QAction::triggered, this, [this]() {
+		ui->menubar->addAction(ui->menuTest->menuAction());
+		ui->menuTest->show();
+	});
+	ui->menubar->removeAction(ui->menuTest->menuAction());
+
 	QAction *box = new QAction("Scroll Box Thing", this);
 	ui->menuTest->addAction(box);
 	box->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
@@ -180,7 +197,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_stats_window = new StatsWindow(this);
 	QAction *stats = new QAction("Stats", this);
 	ui->menuTest->addAction(stats);
-	stats->setShortcut(QKeySequence(Qt::Key_F11));
+	stats->setShortcut(QKeySequence(Qt::Key_F10));
 	connect(stats, &QAction::triggered, this, [this]() {
 		m_stats_window->show();
 	});
@@ -192,7 +209,6 @@ MainWindow::MainWindow(QWidget *parent)
 		m_stats_window->ui.frame_time->setText(QString::number(m_osg_widget->getFrameTime()));
 		m_stats_window->ui.full_frame_time->setText(QString::number(m_osg_widget->getFullFrameTime()));
 		m_stats_window->ui.time_between->setText(QString::number(m_osg_widget->getTimeBetween()));
-
 	});
 }
 
@@ -225,6 +241,32 @@ void MainWindow::setApp(VSimApp * vsim)
 	connect(m_app, &VSimApp::sReset, this, &MainWindow::onReset);
 	connect(this, &MainWindow::sDebugCamera, m_app, &VSimApp::debugCamera);
 
+	QMenu *nmenu = ui->menuNavigation;
+	auto *nav = m_app->navigationControl();
+
+	// init navigation menu
+	nmenu->setTitle("Navigation");
+	nmenu->addSeparator()->setText("Navigation Mode");
+	nmenu->addAction(nav->a_first_person);
+	nmenu->addAction(nav->a_flight);
+	nmenu->addAction(nav->a_object);
+	nmenu->addSeparator();
+	nmenu->addAction(nav->a_freeze);
+	nmenu->addAction(nav->a_home);
+	nmenu->addSeparator();
+	nmenu->addAction(nav->a_gravity);
+	nmenu->addAction(nav->a_collisions);
+
+	// init render menu
+	QMenu *rmenu = ui->menuRender;
+	rmenu->setTitle("Render");
+	rmenu->addAction(nav->a_lighting);
+	rmenu->addAction(nav->a_backface_culling);
+	rmenu->addAction(nav->a_texturing);
+	rmenu->addAction(nav->a_stats);
+	rmenu->addSeparator();
+	rmenu->addAction(nav->a_cycle_mode);
+	rmenu->addActions(nav->m_mode_group->actions());
 }
 
 void MainWindow::onReset()

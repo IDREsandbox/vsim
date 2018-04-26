@@ -72,19 +72,23 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	//camera->setCullingMode(osg::Camera::NO_CULLING);
 
 	// Stats Handler
-	osgViewer::StatsHandler *stats_handler = new osgViewer::StatsHandler;
-	stats_handler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_U);
-	stats_handler->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_Y);
-	m_main_view->addEventHandler(stats_handler);
+	m_stats = new osgViewer::StatsHandler;
+	m_stats->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F30); // biggest hack
+	//m_stats->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_N);
+	m_main_view->addEventHandler(m_stats);
 
 	// Camera State Handler
-	osgGA::StateSetManipulator* ssm = new osgGA::StateSetManipulator(m_main_view->getCamera()->getOrCreateStateSet());
-	ssm->setKeyEventToggleBackfaceCulling('B');
-	ssm->setKeyEventToggleLighting('L');
-	ssm->setKeyEventToggleTexturing('X');
-	ssm->setKeyEventCyclePolygonMode('M');
-	ssm->setLightingEnabled(false);
-	m_main_view->addEventHandler(ssm);
+	m_ssm = new osgGA::StateSetManipulator(m_main_view->getCamera()->getOrCreateStateSet());
+	//ssm->setKeyEventToggleBackfaceCulling('B');
+	//ssm->setKeyEventToggleLighting('L');
+	//ssm->setKeyEventToggleTexturing('X');
+	//ssm->setKeyEventCyclePolygonMode('M');
+	m_ssm->setLightingEnabled(true);
+	m_ssm->setBackfaceEnabled(true);
+	m_ssm->setTextureEnabled(true);
+	m_ssm->setPolygonMode(osg::PolygonMode::FILL);
+	//m_main_view->addEventHandler(ssm);
+	//auto ss = m_main_view->getCamera()->getStateSet();
 
 	// Lighting
 	m_main_view->setLightingMode(osg::View::SKY_LIGHT);
@@ -144,6 +148,17 @@ osgViewer::ViewerBase* OSGViewerWidget::getViewer() const
 osgViewer::View * OSGViewerWidget::mainView() const
 {
 	return m_main_view;
+}
+
+osgGA::StateSetManipulator * OSGViewerWidget::getStateSetManipulator()
+{
+	return m_ssm;
+}
+
+void OSGViewerWidget::cycleStats()
+{
+	this->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_F30);
+	//m_stats->handle();
 }
 
 osg::Matrixd OSGViewerWidget::getCameraMatrix()
