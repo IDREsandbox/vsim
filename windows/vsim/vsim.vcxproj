@@ -83,6 +83,12 @@
     <ClInclude Include="..\..\src\GroupEnums.h" />
     <ClInclude Include="..\..\src\GroupModelTemplate.h" />
     <QtMoc Include="..\..\src\GroupTemplate.h" />
+    <QtMoc Include="..\..\src\HistoryWindow.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\.;.\GeneratedFiles;.;$(ROOT)\src;$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtOpenGL;$(QTDIR)\include\QtWidgets</IncludePath>
+    </QtMoc>
     <ClInclude Include="..\..\src\KeyTracker.h" />
     <QtMoc Include="..\..\src\LabelStyle.h" />
     <QtMoc Include="..\..\src\LabelStyleGroup.h" />
@@ -377,6 +383,7 @@
     <ClCompile Include="..\..\src\FirstPersonManipulator.cpp" />
     <ClCompile Include="..\..\src\FlightManipulator.cpp" />
     <ClCompile Include="..\..\src\FocusFilter.cpp" />
+    <ClCompile Include="..\..\src\HistoryWindow.cpp" />
     <ClCompile Include="..\..\src\HorizontalScrollBox.cpp" />
     <ClCompile Include="..\..\src\KeyTracker.cpp" />
     <ClCompile Include="..\..\src\LabelStyle.cpp" />

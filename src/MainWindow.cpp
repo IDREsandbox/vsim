@@ -20,6 +20,7 @@
 #include "TimeSlider.h"
 #include "ModelOutliner.h"
 #include "StatsWindow.h"
+#include "HistoryWindow.h"
 
 #include "editButtons.h"
 #include "narrative/NarrativeGroup.h"
@@ -176,6 +177,13 @@ MainWindow::MainWindow(QWidget *parent)
 		dlg->exec();
 	});
 
+	// history
+	m_history_window = new HistoryWindow(this);
+	m_history_window->resize(250, 500);
+	connect(ui->actionHistory, &QAction::triggered, this, [this]() {
+		m_history_window->setVisible(!m_history_window->isVisible());
+	});
+
 	QAction *a_test = new QAction("Debug Menu", this);
 	a_test->setShortcut(QKeySequence(Qt::Key_F11));
 	addAction(a_test);
@@ -215,14 +223,28 @@ void MainWindow::setApp(VSimApp * vsim)
 {
 	m_app = vsim;
 
-	QAction *undo_action = m_app->getUndoStack()->createUndoAction(this, tr("&Undo"));
-	QAction *redo_action = m_app->getUndoStack()->createRedoAction(this, tr("&Redo"));
+	QUndoStack *stack = m_app->getUndoStack();
+	QAction *undo_action = stack->createUndoAction(this, tr("&Undo"));
+	QAction *redo_action = stack->createRedoAction(this, tr("&Redo"));
 	undo_action->setShortcuts(QKeySequence::Undo);
 	redo_action->setShortcuts(QKeySequence::Redo);
 	ui->menuEdit->addAction(undo_action);
 	ui->menuEdit->addAction(redo_action);
-	connect(undo_action, &QAction::triggered, this, []() {qInfo() << "undo"; });
-	connect(redo_action, &QAction::triggered, this, []() {qInfo() << "redo"; });
+	m_history_window->setStack(stack);
+	connect(undo_action, &QAction::triggered, this, [this, stack]() {
+		int index = stack->index();
+		if (index < 0 || index >= stack->count()) return;
+		QString text = stack->text(index);
+		ui->statusbar->showMessage("Undo " + text, 2000);
+		qInfo() << "undo" << text;
+	});
+	connect(redo_action, &QAction::triggered, this, [this, stack]() {
+		int prev = stack->index() - 1;
+		if (prev < 0 || prev >= stack->count()) return;
+		QString text = stack->text(prev);
+		ui->statusbar->showMessage("Redo " + text, 2000);
+		qInfo() << "redo" << text;
+	});
 
 	connect(this, &MainWindow::sOpenFile, m_app, &VSimApp::openVSim);
 	connect(this, &MainWindow::sSaveFile, m_app, &VSimApp::saveVSim);

@@ -406,7 +406,6 @@ void NarrativeControl::load(NarrativeGroup *narratives)
 
 void NarrativeControl::openNarrative(int index)
 {
-	qInfo() << "open narrative at" << index;
 	if (index == m_current_narrative) return;
 	Narrative *nar = getNarrative(index);
 	if (!nar || index < 0) {
@@ -441,7 +440,6 @@ bool NarrativeControl::openSlide(int index, bool go)
 	}
 
 	if (m_current_slide == index) {
-		qDebug() << "slide already open";
 	}
 	else {
 		// setting slide

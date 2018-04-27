@@ -333,6 +333,9 @@
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
    </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionTime_Slider">
    <property name="text">
@@ -356,6 +359,9 @@
   <action name="actionHistory">
    <property name="text">
     <string>History</string>
+   </property>
+   <property name="shortcut">
+    <string>J</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>

@@ -780,7 +780,7 @@ void TextItem::focusOutEvent(QFocusEvent * event)
 {
 	QGraphicsTextItem::focusOutEvent(event);
 
-	// setModified causes a new undo/redo to occur when resuming editing
+	// setModified false causes a new undo/redo to occur when resuming editing
 	document()->setModified(false);
 }
 
