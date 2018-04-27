@@ -33,32 +33,21 @@ QToolButton:disabled {
 	background: rgba(0,0,0,50);
 }
 
-HorizontalScrollBox QScrollBar:horizontal {
-    border: 2px solid grey;
-    background: rgba(20, 20, 50, 50);
+#mainSplitter QScrollBar::horizontal {
+    background: rgb(50, 50, 50);
     height: 15px;
-    margin: 0px 20px 0 20px;
+	margin: 0px;
 }
-HorizontalScrollBox QScrollBar::handle:horizontal {
-    background: #666666;
+#mainSplitter QScrollBar::handle:horizontal {
+    background: #777777;
     min-width: 20px;
+	margin: 3px;
 }
-HorizontalScrollBox QScrollBar::add-line:horizontal {
-    border: 2px solid grey;
-    background: #151515;
-    width: 20px;
-    subcontrol-position: right;
-    subcontrol-origin: margin;
+#mainSplitter QScrollBar::add-line:horizontal,
+#mainSplitter QScrollBar::sub-line:horizontal {
+width: 0px;
 }
-
-HorizontalScrollBox QScrollBar::sub-line:horizontal {
-    border: 2px solid grey;
-    background: #151515;
-    width: 20px;
-    subcontrol-position: left;
-    subcontrol-origin: margin;
-}
-HorizontalScrollBox QScrollBar::add-page:horizontal,
-HorizontalScrollBox QScrollBar::sub-page:horizontal {
+#mainSplitter QScrollBar::add-page:horizontal,
+#mainSplitter QScrollBar::sub-page:horizontal {
 	background: none;
 }

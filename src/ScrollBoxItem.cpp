@@ -4,7 +4,7 @@ ScrollBoxItem::ScrollBoxItem(QWidget *parent)
 	: QFrame(parent),
 	m_selected(false)
 {
-	setDeselectStyle("ScrollBoxItem { background: rgb(48, 48, 48, 200); }");
+	setDeselectStyle("ScrollBoxItem { background: rgb(60, 60, 60); }");
 	setSelectStyle("ScrollBoxItem { background: rgb(0, 100, 255); }");
 }
 

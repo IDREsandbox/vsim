@@ -181,7 +181,6 @@ MainWindow::MainWindow(QWidget *parent)
 	addAction(a_test);
 	connect(a_test, &QAction::triggered, this, [this]() {
 		ui->menubar->addAction(ui->menuTest->menuAction());
-		ui->menuTest->show();
 	});
 	ui->menubar->removeAction(ui->menuTest->menuAction());
 

@@ -14,7 +14,8 @@ ERScrollBox::ERScrollBox(QWidget * parent)
 {
 	setAutoFillBackground(false);
 	m_view->setAutoFillBackground(false);
-	m_view->setStyleSheet("background:transparent;");
+	m_view->setObjectName("view");
+	m_view->setStyleSheet("#view {background:transparent;}");
 	//m_view->setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
 	//m_view->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 	m_view->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
