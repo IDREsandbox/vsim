@@ -148,6 +148,7 @@ set(ERModel_src
   src/resources/EResourceGroup.cpp
   src/CheckableListProxy.h
   src/CheckableListProxy.cpp
+  src/resources/EREnums.h
 )
 add_library(ERModel_obj ${ERModel_src})
 target_link_libraries(ERModel_obj Util_obj Deprecated_obj)
@@ -236,6 +237,9 @@ set(VSim_src
   src/narrative/SlideScrollItem.cpp
   src/narrative/SlideScrollItem.h
 
+  src/AboutDialog.cpp
+  src/AboutDialog.h
+  src/AboutDialog.ui
   src/BaseFirstPersonManipulator.cpp
   src/BaseFirstPersonManipulator.h
   src/editButtons.cpp
@@ -244,6 +248,7 @@ set(VSim_src
   src/EditDeleteDelegate.h
   src/ERBar.cpp
   src/ERBar.h
+  src/ERBar.ui
   src/FastScrollBox.cpp
   src/FastScrollBox.h
   src/FileUtil.cpp
@@ -291,12 +296,17 @@ set(VSim_src
   src/SimpleCameraManipulator.h
   src/StackObject.inl
   src/StackObject.h
+  src/StatsWindow.cpp
+  src/StatsWindow.h
+  src/StatsWindow.ui
   src/StyleSettingsDialog.cpp
   src/StyleSettingsDialog.h
   src/StyleSettingsWidget.cpp
   src/StyleSettingsWidget.h
   src/TickSlider.cpp
   src/TickSlider.h
+  src/TimeManager.cpp
+  src/TimeManager.h
   src/TimeSlider.cpp
   src/TimeSlider.h
   src/VSimApp.cpp

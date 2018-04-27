@@ -51,11 +51,11 @@ public:
 		m_index(index) {
 	}
 	virtual void undo() override {
-		if (m_index < 0) m_index = m_group->size() - 1;
+		if (m_index < 0) m_index = (int)m_group->size() - 1;
 		m_group->remove(m_index, 1);
 	}
 	virtual void redo() override {
-		if (m_index < 0) m_index = m_group->size();
+		if (m_index < 0) m_index = (int)m_group->size();
 		m_group->insert(m_index, { m_node });
 	}
 private:

@@ -28,7 +28,7 @@ inline void StackObject<T>::addAt(T x, int index)
 	int target_index = index;
 	if (index < 0) {
 		// size 4, insert at -1 => insert at 3
-		target_index = size() + index;
+		target_index = (int)size() + index;
 	}
 	if (target_index < 0) return;
 	if (target_index > size()) return;

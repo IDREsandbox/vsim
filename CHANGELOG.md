@@ -1,5 +1,37 @@
 # Changelog
 
+## 2018-4-26
+
+### Embedded resources
+- ER box sped up dramatically (see karnak)
+- Local resources appear/disappear
+- Autolaunch
+- Goto on click (autoreposition)
+- Time slider affects local resources
+- Filtering - sort by years, sort by distance
+- Filtering - use years
+- Filtering - show all local
+- ER box - shows distance
+- ER box - selection highlighting
+- ER box - icons for type, popup, and reposition
+- ER display - goto, open, close, close all
+- ER set position multiedit
+
+### Other
+- About dialog
+- OSG render settings (see Render menu)
+- Hide debug menu (F11 to show)
+- Remove osg::Group dependency and dynamic_casts
+- Use vcpkg for dependencies
+
+### Fixes
+- First person mode releases mouse when opening time slider
+- First narrative plays if nothing is selected
+
+### Broken
+- Thumbnails broken
+- Model outliner broken
+
 ## 2018-4-6
 - .vsim uses Google Flatbuffers for serialization
 - import/export narratives, old narratives, undoable

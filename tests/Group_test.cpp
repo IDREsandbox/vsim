@@ -40,7 +40,7 @@ private:
 		for (size_t i = 0; i < count; i++) {
 			Foo* node = new Foo;
 			node->name = std::to_string(i);
-			node->val = i;
+			node->val = (int)i;
 			n.push_back(node);
 		}
 		return n;
