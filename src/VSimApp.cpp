@@ -36,6 +36,7 @@
 #include "NavigationControl.h"
 #include "FileUtil.h"
 #include "ModelGroup.h"
+#include "TimeManager.h"
 
 #include <QMenuBar>
 
@@ -46,6 +47,8 @@ VSimApp::VSimApp(MainWindow* window)
 	// undo stack
 	m_undo_stack = new QUndoStack(this);
 	m_undo_stack->setUndoLimit(50);
+
+	m_time_manager = new TimeManager(this, this);
 
 	// timers
 	m_timer = new QTimer(this);
@@ -85,13 +88,6 @@ VSimApp::VSimApp(MainWindow* window)
 
 	// Narrative player
 	m_narrative_player = new NarrativePlayer(this, m_narrative_control, m_window->topBar(), this);
-
-	//connect(window->topBar()->ui.play_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::play);
-	//connect(window->topBar()->ui.pause_2, &QPushButton::pressed, m_narrative_player, &NarrativePlayer::stop);
-	//connect(m_narrative_player, &NarrativePlayer::updateCamera, m_window->getViewerWidget(), &OSGViewerWidget::setCameraMatrix);
-	//connect(this, &VSimApp::tick, m_narrative_player, &NarrativePlayer::update);
-	//connect(m_narrative_player, &NarrativePlayer::enableNavigation, window->getViewerWidget(), &OSGViewerWidget::enableNavigation);
-	//connect(this, &VSimApp::sTick, window->getViewerWidget(), static_cast<void(OSGViewerWidget::*)()>(&OSGViewerWidget::update));
 
 	m_camera_timer = new QTimer(this);
 	connect(m_camera_timer, &QTimer::timeout, this, [this]() {
@@ -147,7 +143,6 @@ bool VSimApp::isFlying() const
 
 void VSimApp::update(float dt_sec)
 {
-	//emit sTick(dt_sec);
 
 	// Smooth camera updates
 	if (goingSomewhere()) {
@@ -158,20 +153,13 @@ void VSimApp::update(float dt_sec)
 	}
 
 	auto mat = getCameraMatrix();
+	osg::Vec3 old_position = m_position;
 	m_position = mat.getTrans();
-	m_er_control->update(dt_sec);
-}
+	if (old_position != m_position) {
+		emit sPositionChanged(m_position);
+	}
 
-void VSimApp::setYear(int year)
-{
-	int old = m_year;
-	m_year = year;
-	emit sYearChanged(old, year);
-}
-
-int VSimApp::getYear() const
-{
-	return m_year;
+	emit sTick(dt_sec);
 }
 
 bool VSimApp::initWithVSim(VSimRoot *root)
@@ -185,7 +173,7 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 	// move all of the gui stuff over to the new root
 	m_narrative_control->load(root->narratives());
 	m_er_control->load(root->resources());
-	m_window->timeSlider()->setGroup(root->models());
+	m_window->timeSlider()->setTimeManager(m_time_manager);
 	m_render_view->mainView()->setSceneData(root->models()->sceneRoot());
 	m_window->getViewerWidget()->mainView()->setSceneData(root->models()->sceneRoot());
 
@@ -400,4 +388,9 @@ ERControl * VSimApp::erControl() const
 NavigationControl * VSimApp::navigationControl() const
 {
 	return m_navigation_control;
+}
+
+TimeManager * VSimApp::timeManager() const
+{
+	return m_time_manager;
 }

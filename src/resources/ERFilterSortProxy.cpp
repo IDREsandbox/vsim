@@ -21,7 +21,8 @@ ERFilterSortProxy::ERFilterSortProxy(TGroup<EResource> *base)
 	m_enable_range(false),
 	m_enable_years(true),
 	m_show_all(false),
-	m_year(0)
+	m_year(0),
+	m_time_enabled(true)
 {
 	setBase(base);
 	sortBy(ER::SortBy::NONE);
@@ -46,30 +47,27 @@ void ERFilterSortProxy::setBase(TGroup<EResource> *base)
 		
 		// fix indices
 		std::set<size_t> set(ins.begin(), ins.end());
-		m_map_to_base = VecUtil::fixIndices(m_map_to_base, set);
+		m_map_to_base = VecUtil::fixIndicesAfterInsert(m_map_to_base, set);
 
 		checkAndInsertSet(set);
 	});
-
+	connect(base, &GroupSignals::sAboutToRemoveMulti, this,
+		[this](const std::vector<size_t> &base_removals) {
+		auto removals = mapFromBase(base_removals);
+		emit sAboutToRemoveMulti(removals);
+	});
 	// listen to delete
 	connect(base, &GroupSignals::sRemovedMulti, this,
-		[this](const std::vector<size_t> &removals) {
+		[this](const std::vector<size_t> &base_removals) {
 
-		std::unordered_set<size_t> removed(removals.begin(), removals.end());
-
-		// what gets removed from our local map
-		std::vector<size_t> local_removals;
-		for (size_t i = 0; i < m_map_to_base.size(); i++) {
-			if (removed.find(m_map_to_base[i]) != removed.end()) {
-				local_removals.push_back(i);
-			}
-		}
+		auto removals = mapFromBase(base_removals);
 
 		// fix up indices
-		std::set<size_t> removals_set(removals.begin(), removals.end());
-		m_map_to_base = VecUtil::fixIndicesRemove(m_map_to_base, removals_set);
+		std::set<size_t> removals_set(base_removals.begin(), base_removals.end());
+		m_map_to_base = VecUtil::fixIndicesAfterRemove(m_map_to_base, removals_set);
 
-		removeAndSignal(local_removals);
+		VecUtil::multiRemove(&m_map_to_base, removals);
+		emit sRemovedMulti(removals);
 	});
 	connect(base, &GroupSignals::sReset, this,
 		[this]() {
@@ -84,6 +82,17 @@ void ERFilterSortProxy::setBase(TGroup<EResource> *base)
 		auto new_edited = baseToLocal(indices);
 		std::set<size_t> uset(new_edited.begin(), new_edited.end());
 		if (new_edited.size() > 0) emit sEdited(uset);
+	});
+	connect(base, &GroupSignals::sItemsMoved, this,
+		[this](const std::vector<std::pair<size_t, size_t>> &moves) {
+		qDebug() << "base moved!" << moves.size();
+
+		m_map_to_base = VecUtil::fixIndicesAfterMove(m_map_to_base, moves);
+
+		// if sorting by none then we have to re-sort
+		if (m_sort_by == ER::SortBy::NONE) {
+			sortBy(ER::SortBy::NONE);
+		}
 	});
 }
 
@@ -223,7 +232,7 @@ bool ERFilterSortProxy::accept(EResource *res)
 	}
 
 	// check years
-	if (m_enable_years && m_year != 0) {
+	if (m_time_enabled && m_enable_years && m_year != 0) {
 		int min = res->getMinYear();
 		if (min != 0 && min > m_year) {
 			return false;
@@ -444,7 +453,9 @@ void ERFilterSortProxy::checkAndRemoveSet(const std::set<size_t> &base_indices)
 	std::set<size_t> nodes_to_remove = baseToLocal(nodes_to_remove_base);
 	std::vector<size_t> removals(nodes_to_remove.begin(), nodes_to_remove.end());
 
-	removeAndSignal(removals);
+	emit sAboutToRemoveMulti(removals);
+	VecUtil::multiRemove(&m_map_to_base, removals);
+	emit sRemovedMulti(removals);
 }
 void ERFilterSortProxy::onResourceChange(EResource * res)
 {
@@ -459,15 +470,22 @@ void ERFilterSortProxy::onResourceChange(EResource * res)
 void ERFilterSortProxy::enableRange(bool enable)
 {
 	m_enable_range = enable;
-	reload();
+	reload2();
 	emit sUseRangeChanged(enable);
 }
 
 void ERFilterSortProxy::enableYears(bool enable)
 {
 	m_enable_years = enable;
-	reload();
+	reload2();
 	emit sUseYearsChanged(enable);
+}
+
+void ERFilterSortProxy::appTimeEnable(bool enable)
+{
+	qDebug() << "app time enable";
+	m_time_enabled = enable;
+	reload2();
 }
 
 //void ERFilterSortProxy::setSearchRadius(float radius)
@@ -697,22 +715,27 @@ void ERFilterSortProxy::reload2()
 		after, &removals, &insertions, &moves);
 
 	// remove
-	emit sAboutToRemoveMulti(removals);
-	VecUtil::multiRemove(&m_map_to_base, removals);
-
-	emit sRemovedMulti(removals);
+	if (removals.size() > 0) {
+		emit sAboutToRemoveMulti(removals);
+		VecUtil::multiRemove(&m_map_to_base, removals);
+		emit sRemovedMulti(removals);
+	}
 
 	// insert
-	std::vector<std::pair<size_t, size_t>> insertions2;
-	for (size_t index : insertions) {
-		insertions2.push_back({ index, after[index] });
+	if (insertions.size() > 0) {
+		std::vector<std::pair<size_t, size_t>> insertions2;
+		for (size_t index : insertions) {
+			insertions2.push_back({ index, after[index] });
+		}
+		VecUtil::multiInsert(&m_map_to_base, insertions2);
+		emit sInsertedMulti(insertions);
 	}
-	VecUtil::multiInsert(&m_map_to_base, insertions2);
-	emit sInsertedMulti(insertions);
 
 	// move
-	VecUtil::multiMove(&m_map_to_base, moves);
-	emit sItemsMoved(moves);
+	if (moves.size() > 0) {
+		VecUtil::multiMove(&m_map_to_base, moves);
+		emit sItemsMoved(moves);
+	}
 }
 
 void ERFilterSortProxy::updateCategorySet(int model_row)
@@ -744,15 +767,6 @@ bool ERFilterSortProxy::checkTitle(const std::string & s) const
 	return true;
 }
 
-void ERFilterSortProxy::removeAndSignal(const std::vector<size_t>& removals)
-{
-	QList<size_t> s;
-	for (auto i : removals) s.append(i);
-	emit sAboutToRemoveMulti(removals);
-	VecUtil::multiRemove(&m_map_to_base, removals);
-	emit sRemovedMulti(removals);
-}
-
 int ERFilterSortProxy::indexOf(const EResource *node) const
 {
 	if (!m_base) return -1;
@@ -760,6 +774,20 @@ int ERFilterSortProxy::indexOf(const EResource *node) const
 		if (child(i) == node) return i;
 	}
 	return -1;
+}
+
+std::vector<size_t> ERFilterSortProxy::mapFromBase(std::vector<size_t> base_indices) const
+{
+	std::unordered_set<size_t> removed(base_indices.begin(), base_indices.end());
+
+	// what gets removed from our local map
+	std::vector<size_t> local_removals;
+	for (size_t i = 0; i < m_map_to_base.size(); i++) {
+		if (removed.find(m_map_to_base[i]) != removed.end()) {
+			local_removals.push_back(i);
+		}
+	}
+	return local_removals;
 }
 
 //void ERFilterSortProxy::track(EResource *res)

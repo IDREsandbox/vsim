@@ -18,6 +18,7 @@
 #include "SelectionStack.h"
 #include "GroupCommands.h"
 #include "Util.h"
+#include "TimeManager.h"
 
 #include <QDesktopServices>
 #include <QPushButton>
@@ -78,7 +79,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	a_open_er->setIconText("Open");
 	connect(a_open_er, &QAction::triggered, this, &ERControl::openResource);
 
-	a_position_er = new QAction("Set Resource Position", this);
+	a_position_er = new QAction("Set Resource Positions", this);
 	a_position_er->setIconText("Set Position");
 	connect(a_position_er, &QAction::triggered, this, &ERControl::setPosition);
 
@@ -157,13 +158,17 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 			m_display->hide();
 		}
 	});
-
+	connect(m_app, &VSimApp::sTick, this, &ERControl::onUpdate);
 	connect(m_app, &VSimApp::sArrived, this, [this]() {
 		m_going_to = false;
 	});
 	connect(m_app, &VSimApp::sInterrupted, this, [this]() {
 		m_going_to = false;
 	});
+	connect(m_app->timeManager(), &TimeManager::sYearChanged,
+		m_filter_proxy.get(), &ERFilterSortProxy::setYear);
+	connect(m_app->timeManager(), &TimeManager::sTimeEnableChanged,
+		m_filter_proxy.get(), &ERFilterSortProxy::appTimeEnable);
 
 	connect(m_display, &ERDisplay::sClose, this, &ERControl::closeER);
 	connect(m_display, &ERDisplay::sCloseAll, this, &ERControl::closeAll);
@@ -231,49 +236,7 @@ void ERControl::load(EResourceGroup *ers)
 
 void ERControl::update(double dt_sec)
 {
-	// update all positions
-	osg::Vec3 pos = m_app->getPosition();
-	
-	std::set<size_t> change_list;
-	std::set<EResource*> trigger_list;
-	for (size_t i = 0; i < m_ers->size(); i++) {
-		EResource *res = m_ers->getResource(i);
-		// update resource distance
-		osg::Vec3 res_pos = res->getCameraMatrix().getTrans();
-		res->setDistanceTo((pos - res_pos).length());
 
-		bool overlap = Util::spheresOverlap(pos, m_radius, res_pos, res->getLocalRange());
-		bool changed = res->setInRange(overlap);
-		if (changed) {
-			change_list.insert(i);
-		}
-		if (changed && overlap && res->getAutoLaunch()) {
-			trigger_list.insert(res);
-			//qDebug() << "in range" << res;
-		}
-		if (changed && !overlap) {
-			//qDebug() << "out of range" << res;
-		}
-	}
-	m_ers->sEdited(change_list);
-	// ... proxy stuff propagates to scroll boxes
-
-	// check the other end
-	for (auto *res : trigger_list) {
-		if (isSelectable(res)) {
-			//qDebug() << "triggered resource" << res;
-			// if we're going somewhere then queue
-			// if just moving around then stack
-			// confusing stuff
-			addToSelection(res, !m_going_to);
-		}
-	}
-
-	m_local_proxy->positionChangePoke();
-
-	//m_local_proxy->setPosition(pos);
-
-	//m_prev_position = pos;
 }
 
 void ERControl::newER()
@@ -345,14 +308,11 @@ void ERControl::editERInfo()
 		return;
 	}
 
-	//ECategory* category = getCategory(dlg.getCategory());
-
 	m_undo_stack->beginMacro("Set Resource Info");
-	//m_undo_stack->push(new SelectResourcesCommand(this, { active_item }));
 
 	int index = m_ers->indexOf(resource);
 
-	auto cmd = new EditCommand<EResource>(m_ers, { (size_t)index });
+	auto cmd = new EditCommand(m_ers, { (size_t)index });
 
 	if (resource->getResourceName() != dlg.getTitle())
 		new EResource::SetResourceNameCommand(resource, dlg.getTitle(), cmd);
@@ -381,7 +341,6 @@ void ERControl::editERInfo()
 	if (resource->category() != dlg.getCategory())
 		new EResource::SetCategoryCommand(resource, dlg.categoryShared(), cmd);
 
-	//m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_window->getViewerWidget()->getCameraMatrix()));
 	m_undo_stack->push(new SelectERCommand(this, { resource }));
 	m_undo_stack->push(cmd);
 
@@ -422,9 +381,19 @@ void ERControl::setPosition()
 		qWarning() << "Can't set ER position - no selection";
 		return;
 	}
-	m_undo_stack->beginMacro("Set Resource Info");
-	m_undo_stack->push(new EResource::SetCameraMatrixCommand(resource, m_app->getCameraMatrix()));
-	m_undo_stack->push(new SelectERCommand(this, { resource }));
+
+	auto indices = getCombinedSelection();
+	auto resources = getCombinedSelectionP();
+	auto cam = m_app->getCameraMatrix();
+
+	auto cmd = new EditCommand(m_ers, indices);
+	for (auto *res : resources) {
+		new EResource::SetCameraMatrixCommand(res, cam, cmd);
+	}
+
+	m_undo_stack->beginMacro("Set Resource Position(s)");
+	m_undo_stack->push(cmd);
+	m_undo_stack->push(new SelectERCommand(this, resources));
 	m_undo_stack->endMacro();
 }
 
@@ -563,6 +532,7 @@ void ERControl::resetFilters()
 	m_filter_proxy->setTitleSearch("");
 	m_filter_proxy->showGlobal(true);
 	m_filter_proxy->showLocal(true);
+	m_filter_proxy->appTimeEnable(m_app->timeManager()->timeEnabled());
 	setRadius(5.0f);
 	if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
 }
@@ -571,6 +541,49 @@ void ERControl::setRadius(float radius)
 {
 	m_radius = radius;
 	emit sRadiusChanged(radius);
+}
+
+void ERControl::onUpdate()
+{
+	// update all positions
+	const osg::Vec3 &pos = m_app->getPosition();
+
+	std::set<size_t> change_list;
+	std::set<EResource*> trigger_list;
+	for (size_t i = 0; i < m_ers->size(); i++) {
+		EResource *res = m_ers->getResource(i);
+		// update resource distance
+		osg::Vec3 res_pos = res->getCameraMatrix().getTrans();
+		res->setDistanceTo((pos - res_pos).length());
+
+		bool overlap = Util::spheresOverlap(pos, m_radius, res_pos, res->getLocalRange());
+		bool changed = res->setInRange(overlap);
+		if (changed) {
+			change_list.insert(i);
+		}
+		if (changed && overlap && res->getAutoLaunch()) {
+			trigger_list.insert(res);
+			//qDebug() << "in range" << res;
+		}
+		if (changed && !overlap) {
+			//qDebug() << "out of range" << res;
+		}
+	}
+	m_ers->sEdited(change_list);
+	// ... proxy stuff propagates to scroll boxes
+
+	// check the other end
+	for (auto *res : trigger_list) {
+		if (isSelectable(res)) {
+			//qDebug() << "triggered resource" << res;
+			// if we're going somewhere then queue (want to keep target on top)
+			// if just moving around then stack (want to change target)
+			// confusing stuff...
+			addToSelection(res, !m_going_to);
+		}
+	}
+
+	m_local_proxy->positionChangePoke();
 }
 
 void ERControl::debug()
@@ -631,46 +644,6 @@ std::vector<EResource*> ERControl::getCombinedSelectionP() const
 	out.insert(out.end(), second->begin(), second->end());
 
 	return out;
-}
-
-int ERControl::getCombinedLastSelected() const
-{
-	//QObject *sender = QObject::sender();
-	//ERFilterSortProxy *proxy;
-	//int last;
-	//int local_last = m_local_selection->last();
-	//int global_last = m_global_selection->last();
-	//// use the sender to determine the last selected
-	//if ((sender == m_local_box 
-	//	|| sender == m_local_box->selectionStack())
-	//	&& local_last != -1) {
-	//	last = local_last;
-	//	proxy = m_local_proxy.get();
-	//}
-	//else if ((sender == m_global_box
-	//	|| sender == m_global_box->selectionStack())
-	//	&& global_last != -1) {
-	//	last = global_last;
-	//	proxy = m_global_proxy.get();
-	//}
-	//else {
-	//	// just take whatever is selected
-	//	if (local_last != -1) {
-	//		last = local_last;
-	//		proxy = m_local_proxy.get();
-	//	}
-	//	else {
-	//		last = global_last;
-	//		proxy = m_global_proxy.get();
-	//	}
-	//}
-
-	//// convert into original index
-	//if (last < 0) return -1;
-	//EResource *node = proxy->child(last);
-	//int last_base = m_ers->indexOf(node);
-
-	return -1;
 }
 
 EResource *ERControl::getCombinedLastSelectedP() const

@@ -40,29 +40,6 @@ ModelGroup::ModelGroup()
 	});
 }
 
-//void ModelGroup::merge(ModelGroup *other)
-//{
-//	for (size_t i = 0; i < other->size(); i++) {
-//		append(other->childShared(i));
-//	}
-//}
-
-//void ModelGroup::setNodeYear(osg::Node *node, int year, bool begin)
-//{
-//	std::string prop;
-//	if (begin) prop = "yearBegin";
-//	else prop = "yearEnd";
-//
-//	if (year == 0) {
-//		osg::UserDataContainer *cont = node->getUserDataContainer();
-//		cont->removeUserObject(cont->getUserObjectIndex(prop));
-//	}
-//	else {
-//		node->setUserValue(prop, year);
-//	}
-//	emit sNodeYearChanged(node, year, begin);
-//}
-
 void ModelGroup::addNode(osg::Node * node, const std::string & path)
 {
 	auto model = std::make_shared<Model>();
@@ -81,10 +58,10 @@ void ModelGroup::accept(osg::NodeVisitor & visitor)
 	}
 }
 
-int ModelGroup::getYear() const
-{
-	return m_year;
-}
+//int ModelGroup::getYear() const
+//{
+//	return m_year;
+//}
 
 void ModelGroup::setYear(int year)
 {
@@ -96,23 +73,22 @@ void ModelGroup::setYear(int year)
 		accept(v);
 	}
 
-	emit sYearChange(year);
+	//emit sYearChange(year);
 }
 
-bool ModelGroup::timeEnabled() const
-{
-	return m_time_enabled;
-}
+//bool ModelGroup::timeEnabled() const
+//{
+//	return m_time_enabled;
+//}
 
 void ModelGroup::enableTime(bool enable)
 {
 	if (m_time_enabled == enable) return;
 
 	m_time_enabled = enable;
-	emit sTimeEnableChange(enable);
 
 	if (m_time_enabled) {
-		TimeMaskVisitor v(getYear());
+		TimeMaskVisitor v(m_year);
 		accept(v);
 	}
 	else {
@@ -130,19 +106,6 @@ std::set<int> ModelGroup::getKeyYears()
 	if (years.empty()) return years;
 
 	return years;
-}
-
-std::regex g_node_time_regex(".*T:.*?(-?\\d+) (-?\\d+)");
-bool ModelGroup::nodeTimeInName(const std::string & name, int * begin, int * end)
-{
-	//std::regex r(".*T:.*?(-?\\d+)(-?\\d+)");
-	std::smatch match;
-	if (std::regex_match(name, match, g_node_time_regex)) {
-		*begin = std::stoi(match[1]);
-		*end = std::stoi(match[2]);
-		return true;
-	}
-	return false;
 }
 
 osg::Group * ModelGroup::sceneRoot() const
@@ -172,7 +135,7 @@ void TimeInitVisitor::apply(osg::Group &group)
 
 void TimeInitVisitor::touch(Model *model, osg::Node *node) {
 	int begin, end;
-	bool match = ModelGroup::nodeTimeInName(node->getName(), &begin, &end);
+	bool match = Util::nodeTimeInName(node->getName(), &begin, &end);
 	if (match) {
 		if (begin != 0) {
 			model->setNodeYear(node, begin, true);

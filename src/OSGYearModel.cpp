@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <osg/ValueObject>
 
+#include "Util.h"
 #include "Model.h"
 #include "ModelGroup.h"
 
@@ -101,7 +102,7 @@ Qt::ItemFlags OSGYearModel::flags(const QModelIndex &index) const
 	if (col == 2 || col == 3) {
 		// if the filename is T: begin end, then not editable
 		int begin, end;
-		if (ModelGroup::nodeTimeInName(getNode(index)->getName(), &begin, &end)) 
+		if (Util::nodeTimeInName(getNode(index)->getName(), &begin, &end)) 
 			return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
 	// check if actually editable

@@ -97,6 +97,7 @@ template<class T>
 inline std::shared_ptr<T> TGroupModel<T>::getShared(const QModelIndex & index) const
 {
 	if (!m_group) return nullptr;
+	if (!index.isValid()) return nullptr;
 	if (index.model() == this) {
 		return m_group->childShared(index.row());
 	}

@@ -5,6 +5,13 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <cstddef>
+
+struct NameYearTuple {
+	std::string name;
+	int begin;
+	int end;
+};
 
 class Util_test : public QObject {
 	Q_OBJECT
@@ -33,25 +40,52 @@ private slots:
 		mini = { 0, 1, 2, 3 };
 		mini_ins = { 0, 2 };
 		mini_ans = { 1, 3, 4, 5 };
-		mini_result = VecUtil::fixIndices(mini, mini_ins);
+		mini_result = VecUtil::fixIndicesAfterInsert(mini, mini_ins);
 		QCOMPARE(mini_result, mini_ans);
 
 		mini = { 0, 1 };
 		mini_ins = { 0, 1 };
 		mini_ans = { 2, 3 };
-		mini_result = VecUtil::fixIndices(mini, mini_ins);
+		mini_result = VecUtil::fixIndicesAfterInsert(mini, mini_ins);
 		QCOMPARE(mini_result, mini_ans);
 
 		// removals
 		mini = { 1, 3, 4, 5 };
 		mini_rem = { 0, 2 };
 		mini_ans = { 0, 1, 2, 3 };
-		mini_result = VecUtil::fixIndicesRemove(mini, mini_rem);
+		mini_result = VecUtil::fixIndicesAfterRemove(mini, mini_rem);
 		//qDebug() << "after remove";
 		//for (int i : mini_result) {
 		//	qDebug() << i;
 		//}
 		QCOMPARE(mini_result, mini_ans);
+
+		mini = { 0, 1, 2 };
+		mini_rem = { 0, 2 };
+
+		mini_result = VecUtil::fixIndicesAfterRemove(mini, mini_rem);
+
+		std::vector<size_t> ptrs;
+		std::vector<std::pair<size_t, size_t>> moves;
+		std::vector<size_t> res, res_ex;
+
+		// a b c d e f
+		// e c a b d f
+		ptrs = {0, 1, 2, 3, 4, 5};
+		moves = { {2, 1}, {4, 0} };
+		res_ex = { 2, 3, 1, 4, 0, 5 };
+		res = VecUtil::fixIndicesAfterMove(ptrs, moves);
+		QCOMPARE(res, res_ex);
+
+		// before: a, b, c
+		// after:  b, c, a
+		// ptrs:   2, 0, 1
+		ptrs = { 0, 1, 2 };
+		moves = { { 0, 2 } };
+		res_ex = { 2, 0, 1 };
+		res = VecUtil::fixIndicesAfterMove(ptrs, moves);
+		QCOMPARE(res, res_ex);
+
 		//// speed tests for fun
 		//// big, 1/10 insert
 		//std::vector<int> big;
@@ -75,6 +109,25 @@ private slots:
 		//qDebug() << "big 1 insert, map" << Util::toc();
 
 	}
+
+	void timeRegexTest() {
+		std::vector<NameYearTuple> list = {
+			{ "T:g466 -1450 -1349", -1450, -1349},
+			{ "T:III -1369 -1349", -1369, -1349 },
+			{ "T:flagstaff_20 -1369 -1349", -1369, -1349 },
+			{ "T:01-middlekingdom -1523 -1466", -1523, -1466 },
+			{ "T:02-Hatshepsut -1465 -1349", -1465, -1349 }
+		};
+
+		for (auto &tuple : list) {
+			int begin = 0;
+			int end = 0;
+			Util::nodeTimeInName(tuple.name, &begin, &end);
+			QCOMPARE(begin, tuple.begin);
+			QCOMPARE(end, tuple.end);
+		}
+	}
+
 	void multiInsertTest() {
 		std::vector<std::string> strings = { "hey", "man", "sup" };
 		VecUtil::multiInsert(&strings, { {0, "what"}, {3, "kay"} });
@@ -129,10 +182,36 @@ private slots:
 
 		before = { 4, 7, 1, 2, 5 };
 		after = { 3, 6, 1, 4, 2 };
-		rem_ex = { 1, 4 };
-		ins_ex = { 0, 1 };
-		moves_ex = { {0, 3}, {3, 4} };
+		rem_ex = { 1, 4 }; // 4, 1, 2
+		ins_ex = { 0, 1 }; // 3, 6, 4, 1, 2
+		moves_ex = { {2, 3}, { 3, 2 } }; // 3, 6, 1, 4, 2
 		VecUtil::removalsInsertionsMoves(before, after, &rem, &ins, &moves);
+		QCOMPARE(rem, rem_ex);
+		QCOMPARE(ins, ins_ex);
+		QCOMPARE(moves, moves_ex);
+
+		before = { 5, 9, 3, 1 };
+		after = { 6, 5 };
+		rem_ex = { 1, 2, 3 };
+		ins_ex = { 0 };
+		moves_ex = { };
+		VecUtil::removalsInsertionsMoves(before, after, &rem, &ins, &moves);
+		QCOMPARE(rem, rem_ex);
+		QCOMPARE(ins, ins_ex);
+		QCOMPARE(moves, moves_ex);
+
+		before = { 0, 1 };
+		after = { 1 };
+		rem_ex = { 0 };
+		ins_ex = { };
+		moves_ex = { };
+		VecUtil::removalsInsertionsMoves(before, after, &rem, &ins, &moves);
+		//qDebug() << "removals" << rem.size();
+		//qDebug() << "ins" << ins.size();
+		//qDebug() << "move" << moves.size();
+		//for (auto p : moves) {
+		//	qDebug() << "m" << p.first << p.second;
+		//}
 		QCOMPARE(rem, rem_ex);
 		QCOMPARE(ins, ins_ex);
 		QCOMPARE(moves, moves_ex);

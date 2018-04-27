@@ -4,7 +4,7 @@
 #include <osg/Group>
 #include <memory>
 
-class ModelGroup;
+class TimeManager;
 
 namespace Ui { class TimeSlider; }
 
@@ -16,15 +16,15 @@ public:
 	TimeSlider(QWidget *parent = Q_NULLPTR);
 	~TimeSlider();
 
-	void setGroup(ModelGroup *group);
+	void setTimeManager(TimeManager *timer);
 
 	void enableSlider(bool);
 
-	// make calls out to ModelGroup
-	void onValueChange(int value);
+	// ui -> time manager
+	void onValueChange(int action);
 	void onCheckbox(int state);
 
-	// slots
+	// time manager -> ui
 	void onYearChange();
 	void onRangeChange();
 	void onTimeEnableChange(bool enable);
@@ -34,7 +34,7 @@ private:
 
 	bool m_enabled;
 
-	ModelGroup *m_group;
+	TimeManager *m_time;
 };
 
 #endif // TIMESLIDER_HPP

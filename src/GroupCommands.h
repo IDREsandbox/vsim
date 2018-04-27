@@ -215,11 +215,10 @@ private:
 //};
 
 // causes sEdited to be emitted on undo/redo
-template <class T>
 class EditCommand : public QUndoCommand {
 public:
 	EditCommand(
-		TGroup<T> *group,
+		GroupSignals *group,
 		const std::set<size_t> &nodes,
 		Command::When when = Command::ON_BOTH,
 		QUndoCommand *parent = nullptr)
@@ -241,7 +240,7 @@ public:
 		}
 	}
 private:
-	TGroup<T> *m_group;
+	GroupSignals *m_group;
 	std::set<size_t> m_nodes;
 	Command::When m_when;
 };

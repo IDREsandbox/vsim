@@ -22,6 +22,10 @@ namespace Util
 	// year conversion: <80 is 20xx, >=80 is 19xx
 	bool mxdxyyToQDate(const std::string &str, QDate *out);
 
+	// converts a name "T: pillar 123 456" into 123, 456
+	// also works for pillar T: 123 456
+	bool nodeTimeInName(const std::string &name, int * begin, int * end);
+
 	// Fits the largest possible rectangle with given aspect ratio into another rectangle
 	QRect rectFit(QRect container, float whratio);
 

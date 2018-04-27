@@ -21,6 +21,7 @@ EResource::EResource()
 	m_camera_matrix(osg::Matrixd()),
 	m_category(),
 	m_index(-1),
+	m_distance_to(0.0f),
 	m_in_range(false)
 {
 }

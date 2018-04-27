@@ -62,17 +62,15 @@ public:
 	void selectERs(const std::vector<EResource*> &res);
 	std::set<size_t> getCombinedSelection() const;
 	std::vector<EResource*> getCombinedSelectionP() const;
-	int getCombinedLastSelected() const;
 	EResource *getCombinedLastSelectedP() const;
 	bool isSelectable(EResource *res) const; // checks both boxes if resource exists
 	void clearSelection();
 
 	// filters
 	void resetFilters();
-	void sortBy();
-	void sortGlobal();
-	void sortLocal();
 	void setRadius(float radius);
+	void onPositionChange(const osg::Vec3 &pos);
+	void onUpdate();
 
 	void debug();
 

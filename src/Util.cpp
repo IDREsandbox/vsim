@@ -85,6 +85,19 @@ bool Util::mxdxyyToQDate(const std::string & str, QDate *out)
 	return true;
 }
 
+bool Util::nodeTimeInName(const std::string & name, int * begin, int * end)
+{
+	const std::regex g_node_time_regex(".*T:.*?(-?\\d+) (-?\\d+)");
+	//std::regex r(".*T:.*?(-?\\d+)(-?\\d+)");
+	std::smatch match;
+	if (std::regex_match(name, match, g_node_time_regex)) {
+		*begin = std::stoi(match[1]);
+		*end = std::stoi(match[2]);
+		return true;
+	}
+	return false;
+}
+
 QRect Util::rectFit(QRect container, float whratio)
 {
 	float container_ratio = container.width() / (float) container.height();

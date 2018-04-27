@@ -26,24 +26,16 @@ public:
 
 	// Set the year to view, hides/shows models accordingly
 	// 0 shows all models
-	int getYear() const;
 	void setYear(int year);
-	bool timeEnabled() const;
 	void enableTime(bool enable);
 
 	std::set<int> getKeyYears();
-
-	static bool nodeTimeInName(const std::string &name, int * begin, int * end);
 
 	osg::Group *sceneRoot() const;
 	void debugScene() const;
 
 signals:
-	void sTimeEnableChange(bool enabled);
-	void sYearChange(int year);
-
 	void sKeysChanged();
-	//void sNodeYearChanged(osg::Node *node, int year, bool begin);
 
 private:
 	int m_year;

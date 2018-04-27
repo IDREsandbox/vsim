@@ -29,6 +29,11 @@ public:
 	size_t size() const override;
 	int indexOf(const EResource *node) const override;
 
+	// same thing
+	std::vector<size_t> mapFromBase(std::vector<size_t> base_indices) const;
+	std::set<size_t> baseToLocal(const std::set<size_t> base_indices) const;
+	//std::vector<size_t> indicesOf(EResource *res) const;
+
 	// not supported
 	//virtual bool insertChild(unsigned int index, Node *child) override;
 	//virtual bool removeChildren(unsigned int index, unsigned int numChildrenToRemove) override;
@@ -66,7 +71,8 @@ public:
 	void showLocal(bool local);
 	void showGlobal(bool global);
 	void enableRange(bool enable);
-	void enableYears(bool enable);
+	void enableYears(bool enable); // both have to be true for time test
+	void appTimeEnable(bool enable); // this is for the global
 	//void setSearchRadius(float radius);
 
 	void setTitleSearch(const std::string &title);
@@ -97,7 +103,7 @@ protected:
 
 	//
 	//void checkAndAddSet(std::set<int> base_index);
-	std::set<size_t> baseToLocal(const std::set<size_t> base_indices) const;
+
 
 	void recheck(const std::set<size_t> &base_indices);
 	void checkAndInsertSet(const std::set<size_t> &base_indices);
@@ -121,7 +127,6 @@ private:
 	// adds/remove from m_categories_enabled based on model
 	void updateCategorySet(int model_row);
 	bool checkTitle(const std::string &s) const;
-	void removeAndSignal(const std::vector<size_t> &removals);
 
 private:
 	// filter sort proxy
@@ -140,6 +145,7 @@ private:
 	bool m_show_local;
 	bool m_enable_range;
 	bool m_enable_years;
+	bool m_time_enabled;
 
 	std::string m_title_search;
 	int m_year;

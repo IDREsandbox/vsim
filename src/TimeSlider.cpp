@@ -2,12 +2,12 @@
 #include "ui_timeslider.h"
 #include <QDebug>
 #include "Util.h"
-#include "ModelGroup.h"
+#include "TimeManager.h"
 
 TimeSlider::TimeSlider(QWidget *parent)
 	: QWidget(parent),
 	ui(new Ui::TimeSlider),
-	m_group(nullptr)
+	m_time(nullptr)
 {
 	ui->setupUi(this);
 	ui->slider->setMinimum(-50);
@@ -18,6 +18,7 @@ TimeSlider::TimeSlider(QWidget *parent)
 	ui->slider->setPageStep(10);
 
 	this->setWindowFlags(Qt::Dialog);
+	this->setWindowFlag(Qt::WindowType::WindowContextHelpButtonHint, false);
 
 	connect(ui->checkBox, &QCheckBox::stateChanged, this, &TimeSlider::onCheckbox);
 	connect(ui->slider, &QSlider::valueChanged, this, &TimeSlider::onValueChange);
@@ -28,23 +29,23 @@ TimeSlider::~TimeSlider() {
 	
 }
 
-void TimeSlider::setGroup(ModelGroup * group)
+void TimeSlider::setTimeManager(TimeManager *time)
 {
-	if (m_group != nullptr) disconnect(m_group, 0, this, 0);
-	m_group = group;
-	if (group == nullptr) {
+	if (m_time != nullptr) disconnect(m_time, 0, this, 0);
+	m_time = time;
+	if (m_time == nullptr) {
 		return;
 	}
-	connect(m_group, &ModelGroup::sYearChange, this, &TimeSlider::onYearChange);
-	connect(m_group, &ModelGroup::sKeysChanged, this, &TimeSlider::onRangeChange);
-	connect(m_group, &ModelGroup::sTimeEnableChange, this, &TimeSlider::onTimeEnableChange);
+	connect(m_time, &TimeManager::sYearChanged, this, &TimeSlider::onYearChange);
+	connect(m_time, &TimeManager::sKeysChanged, this, &TimeSlider::onRangeChange);
+	connect(m_time, &TimeManager::sTimeEnableChanged, this, &TimeSlider::onTimeEnableChange);
 
 	setEnabled(true);
 
-	// hacky initialization
+	// initialization
 	onRangeChange();
 	onYearChange();
-	onTimeEnableChange(m_group->timeEnabled());
+	onTimeEnableChange(m_time->timeEnabled());
 
 	ui->slider->setValue(ui->slider->minimum());
 }
@@ -58,27 +59,27 @@ void TimeSlider::enableSlider(bool enable)
 	ui->checkBox->setChecked(enable);
 }
 
-void TimeSlider::onValueChange(int value)
+void TimeSlider::onValueChange(int year)
 {
 	// tell the group to change data
-	if (value == 0) value = 1;
-	m_group->setYear(value);
+	if (year == 0) year = 1;
+	m_time->setYear(year);
 }
 
 void TimeSlider::onCheckbox(int state)
 {
 	if (state == Qt::Unchecked) {
-		m_group->enableTime(false);
+		m_time->enableTime(false);
 	}
 	else {
-		m_group->enableTime(true);
-		m_group->setYear(ui->slider->value());
+		m_time->enableTime(true);
+		m_time->setYear(ui->slider->value());
 	}
 }
 
 void TimeSlider::onYearChange()
 {
-	int year = m_group->getYear();
+	int year = m_time->year();
 	ui->slider->setValue(year);
 	ui->currentLabel->setText(QString::number(year));
 }
@@ -86,7 +87,7 @@ void TimeSlider::onYearChange()
 void TimeSlider::onRangeChange()
 {
 	int old_value = ui->slider->value();
-	std::set<int> years = m_group->getKeyYears();
+	std::set<int> years = m_time->keyYears();
 	int min, max;
 	if (years.size() == 0) {
 		years = { -2000, 2000 };

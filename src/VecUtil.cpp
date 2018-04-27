@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include <map>
+#include <numeric>
 
-std::vector<size_t> VecUtil::fixIndices(const std::vector<size_t> &fixme, const std::set<size_t>& insertions)
+std::vector<size_t> VecUtil::fixIndicesAfterInsert(const std::vector<size_t> &fixme, const std::set<size_t>& insertions)
 {
 	size_t max_index = 0;
 	for (size_t x : fixme) {
@@ -40,6 +42,7 @@ std::vector<size_t> VecUtil::fixIndices(const std::vector<size_t> &fixme, const 
 		result[i] = old_index + delta_array[old_index];
 	}
 	return result;
+
 	// Set version, I was wondering which would be faster
 	// Should be O(nlogn) vs O(n), apparently this is really slow even for small n
 	// ex: insert [1, 4, 6]
@@ -69,7 +72,7 @@ std::vector<size_t> VecUtil::fixIndices(const std::vector<size_t> &fixme, const 
 	//return result;
 }
 
-std::vector<size_t> VecUtil::fixIndicesRemove(const std::vector<size_t>& fixme, const std::set<size_t>& changes)
+std::vector<size_t> VecUtil::fixIndicesAfterRemove(const std::vector<size_t>& fixme, const std::set<size_t>& changes)
 {
 	if (fixme.size() == 0) return {};
 	size_t max = *std::max_element(fixme.begin(), fixme.end());
@@ -89,6 +92,48 @@ std::vector<size_t> VecUtil::fixIndicesRemove(const std::vector<size_t>& fixme, 
 	}
 
 	return result;
+}
+
+std::vector<size_t> VecUtil::fixIndicesAfterMove(const std::vector<size_t>& fixme, const std::vector<std::pair<size_t, size_t>>& moves)
+{
+	if (fixme.size() == 0) return {};
+	if (moves.size() == 0) return {};
+
+	size_t max = *std::max_element(fixme.begin(), fixme.end());
+	//size_t max_to = 0;
+	//size_t max_from = 0;
+	for (const auto &pair : moves) {
+		max = std::max(max, pair.first);
+		max = std::max(max, pair.first);
+	}
+	size_t count = max + 1; // how do we have to build a thing
+
+	// -> a, b, c
+	std::vector<size_t> before(count, 0);
+	std::iota(before.begin(), before.end(), 0);
+
+	// perform the move
+	// -> b, c, a
+	std::vector<size_t> after = before;
+	VecUtil::multiMove(&after, moves);
+
+	// after is a mapping from new to old
+	// -> 0:b, 1:c, 2:a
+	// if we want a mapping old to new then we flip
+	// -> 2, 0, 1
+	// -> a:2, b:0, c:1
+	std::vector<size_t> mapping(count, 0);
+	for (size_t i = 0; i < after.size(); i++) {
+		mapping[after[i]] = i;
+	}
+
+	// finally use the mapping to make the result
+	std::vector<size_t> out;
+	out.reserve(fixme.size());
+	for (auto x : fixme) {
+		out.push_back(mapping[x]);
+	}
+	return out;
 }
 
 std::vector<std::pair<size_t, size_t>> VecUtil::clumpify(const std::vector<size_t>& indices)
@@ -137,7 +182,11 @@ std::vector<std::pair<size_t, size_t>> VecUtil::clumpify3(const std::vector<size
 
 void VecUtil::removalsInsertionsMoves(const std::vector<size_t>& before, const std::vector<size_t>& after, std::vector<size_t>* removals, std::vector<size_t>* insertions, std::vector<std::pair<size_t, size_t>>* moves)
 {
-	// this is so silly
+	removals->clear();
+	insertions->clear();
+	moves->clear();
+	std::vector<size_t> from;
+	std::vector<size_t> to;
 
 	// maps value to index
 	std::unordered_map<size_t, size_t> old_rmap;
@@ -145,8 +194,9 @@ void VecUtil::removalsInsertionsMoves(const std::vector<size_t>& before, const s
 		old_rmap[before[i]] = i;
 	}
 
+	// maps value to new index
 	std::unordered_map<size_t, size_t> new_rmap;
-	for (size_t i = 0; i < before.size(); i++) {
+	for (size_t i = 0; i < after.size(); i++) {
 		new_rmap[after[i]] = i;
 	}
 
@@ -160,7 +210,9 @@ void VecUtil::removalsInsertionsMoves(const std::vector<size_t>& before, const s
 		// things in both are moves
 		else {
 			size_t where = it->second;
-			if (i != where) moves->push_back({ i, where });
+			//if (i != where) moves->push_back({ i, where });
+			from.push_back(i);
+			to.push_back(where);
 		}
 	}
 
@@ -169,6 +221,19 @@ void VecUtil::removalsInsertionsMoves(const std::vector<size_t>& before, const s
 		size_t v = after[i];
 		if (old_rmap.find(v) == old_rmap.end()) {
 			insertions->push_back(i);
+		}
+	}
+
+	// fix up the froms, then build the moves
+	std::set<size_t> rem_set(removals->begin(), removals->end());
+	std::set<size_t> ins_set(insertions->begin(), insertions->end());
+	from = VecUtil::fixIndicesAfterRemove(from, rem_set);
+	from = VecUtil::fixIndicesAfterInsert(from, ins_set);
+	for (size_t i = 0; i < from.size(); i++) {
+		size_t f = from[i];
+		size_t t = to[i];
+		if (f != t) {
+			moves->push_back({ f, t });
 		}
 	}
 }

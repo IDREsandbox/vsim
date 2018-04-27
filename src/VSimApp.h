@@ -30,6 +30,7 @@ class NavigationControl;
 class NarrativeSlide;
 class NarrativeCanvas;
 class OSGViewerWidget;
+class TimeManager;
 
 class VSimApp : public QObject
 {
@@ -76,10 +77,6 @@ public:
 
 	void update(float dt_sec);
 
-	// year
-	void setYear(int year);
-	int getYear() const;
-
 	// status
 	void setStatusMessage(const QString &message, int timeout = 0);
 
@@ -114,6 +111,7 @@ public:
 	NarrativeControl *narrativeControl() const;
 	ERControl *erControl() const;
 	NavigationControl *navigationControl() const;
+	TimeManager *timeManager() const;
 
 	void debugCamera();
 
@@ -122,7 +120,7 @@ signals:
 	void sAboutToReset();
 	void sReset();
 	void sStateChanged(VSimApp::State old, VSimApp::State current);
-	void sYearChanged(int old, int current);
+	void sPositionChanged(const osg::Vec3 &pos);
 
 	void sGoingSomewhere();
 	void sArrived();
@@ -147,6 +145,7 @@ private:
 	ERControl *m_er_control;
 	NarrativePlayer *m_narrative_player;
 	NavigationControl *m_navigation_control;
+	TimeManager *m_time_manager;
 
 	osg::Matrixd m_camera_start;
 	osg::Matrixd m_camera_target;
@@ -157,8 +156,6 @@ private:
 	QTimer *m_slide_timer;
 
 	State m_state;
-
-	int m_year;
 
 	// thumbnails
 	osg::ref_ptr<osgViewer::CompositeViewer> m_viewer;
