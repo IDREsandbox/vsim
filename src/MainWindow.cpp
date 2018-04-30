@@ -246,13 +246,10 @@ void MainWindow::setApp(VSimApp * vsim)
 		qInfo() << "redo" << text;
 	});
 
-	connect(this, &MainWindow::sOpenFile, m_app, &VSimApp::openVSim);
-	connect(this, &MainWindow::sSaveFile, m_app, &VSimApp::saveVSim);
 	connect(this, &MainWindow::sNew, m_app, [vsim]() {
 		vsim->setFileName("");
 		vsim->initWithVSim();
 	});
-	connect(this, &MainWindow::sSaveCurrent, m_app, &VSimApp::saveCurrentVSim);
 
 	outliner()->setModel(nullptr); // TODO: fix outliner
 	outliner()->header()->resizeSection(0, 200);
@@ -454,7 +451,8 @@ void MainWindow::actionSave()
 		actionSaveAs();
 		return;
 	}
-	emit sSaveCurrent();
+
+	m_app->saveCurrentVSim();
 }
 
 void MainWindow::actionSaveAs()
@@ -467,8 +465,10 @@ void MainWindow::actionSaveAs()
 	}
 	qInfo() << "saving as - " << filename;
 
-	//m_vsimapp->saveVSim(filename.toStdString());
-	emit sSaveFile(filename.toStdString());
+	bool ok = m_app->saveVSim(filename.toStdString());
+	if (!ok) {
+		QMessageBox::warning(this, "Save Error", "Error saving to file " + filename);
+	}
 }
 
 void MainWindow::actionImportModel()

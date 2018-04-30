@@ -226,7 +226,6 @@ bool VSimApp::saveVSim(const std::string& filename)
 	if (path.suffix() == "vsim") {
 		bool ok = FileUtil::writeVSimFile(filename, m_root.get());
 		if (!ok) {
-			QMessageBox::warning(m_window, "Save Error", "Error saving to file " + QString::fromStdString(filename));
 			return false;
 		}
 		setFileName(filename);
