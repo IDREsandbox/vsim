@@ -23,6 +23,7 @@
 #include <QDesktopServices>
 #include <QPushButton>
 #include <QDebug>
+#include <QDir>
 
 ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	: QObject(parent),
@@ -354,9 +355,16 @@ void ERControl::openResource()
 	auto type = res->getERType();
 	gotoPosition();
 	if (type == EResource::FILE) {
-		QString path = QString::fromStdString(m_app->getCurrentDirectory() + "/" + res->getResourcePath());
-		qInfo() << "Attempting to open file:" << path;
-		QDesktopServices::openUrl(QUrl(path));
+		QString abs;
+		QString path = res->getResourcePath().c_str();
+		if (QDir::isRelativePath(path)) {
+			abs = QString::fromStdString(m_app->getCurrentDirectory()) + "/" + path;
+		}
+		else {
+			abs = path;
+		}
+		qInfo() << "Attempting to open file:" << abs;
+		QDesktopServices::openUrl(QUrl(abs));
 	}
 	else if (type == EResource::URL) {
 		qInfo() << "Attempting to open url:" << res->getResourcePath().c_str();
