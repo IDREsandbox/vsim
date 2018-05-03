@@ -107,6 +107,7 @@ void FastScrollBox::clear()
 	}
 	m_items.clear();
 	m_selection->clear();
+	refresh();
 }
 
 void FastScrollBox::selectAll(bool select)
