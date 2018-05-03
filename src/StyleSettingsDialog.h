@@ -19,6 +19,9 @@ public:
 	// uses the last set m_styles if null
 	void takeStyles(LabelStyleGroup *group = nullptr);
 
+signals:
+	void sApplied();
+
 private:
 	Ui::StyleSettingsDialog ui;
 

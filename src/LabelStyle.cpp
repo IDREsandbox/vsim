@@ -2,6 +2,8 @@
 #include <QTextFrame>
 #include <QTextCursor>
 #include "Util.h"
+#include "narrative/NarrativeSlideLabel.h"
+#include <QDebug>
 
 LabelStyle::LabelStyle()
 	: m_type(NONE),
@@ -51,6 +53,79 @@ void LabelStyle::copy(const LabelStyle *other)
 	m_point_size = other->m_point_size;
 	m_ital = other->m_ital;
 	m_underline = other->m_underline;
+}
+
+void LabelStyle::applyToWidget(QWidget * widget, bool font_size)
+{
+	// doesn't work for QPushButton and other native? stuff
+	//widget->setBackgroundRole(QPalette::Background);
+	//widget->setAutoFillBackground(true);
+	//QPalette p = widget->palette();
+	//p.setBrush(widget->backgroundRole(), m_bg_color);
+	//p.setBrush(widget->foregroundRole(), m_fg_color);
+	//p.setBrush(QPalette::ButtonText, m_fg_color);
+	//widget->setPalette(p);
+
+	// color stylesheet
+	auto bg = m_bg_color;
+	auto fg = m_fg_color;
+	QString str = QString().sprintf(
+		"background:rgba(%d, %d, %d, %d);"
+		"color:rgb(%d, %d, %d);",
+		bg.red(), bg.green(), bg.blue(), bg.alpha(),
+		fg.red(), fg.green(), fg.blue());
+	widget->setStyleSheet(str);
+
+	QFont f = widget->font();
+	f.setFamily(m_font_family.c_str());
+	f.setWeight(m_weight);
+	if (font_size) f.setPointSize(m_point_size);
+	f.setItalic(m_ital);
+	f.setUnderline(m_underline);
+	widget->setFont(f);
+
+	// label->setAlignment(m_align); // QLabel only
+	// widget->setMargin(m_margin); // QLabel only
+}
+
+void LabelStyle::applyToNarrativeLabel(NarrativeSlideLabel *label)
+{
+	QColor m_bg_color;
+	label->setBackground(backgroundColor());
+	label->setVAlignInt(getAlign());
+
+	QTextFrameFormat tff;
+	tff.setMargin(getMargin());
+	tff.setBackground(QBrush(QColor(0, 0, 0, 0)));
+
+	QTextBlockFormat tbf;
+	Qt::Alignment hal = static_cast<Qt::Alignment>(getAlign());
+	// check alignment validity
+	if (hal & Qt::AlignHorizontal_Mask) {
+		tbf.setAlignment(hal & Qt::AlignHorizontal_Mask);
+	}
+
+	QTextCharFormat tcf;
+	QString ff = QString::fromStdString(getFontFamily());
+	if (!ff.isEmpty()) tcf.setFontFamily(ff);
+	tcf.setFontWeight(getWeight());
+	tcf.setForeground(foregroundColor());
+	tcf.setFontPointSize(getPointSize());
+	tcf.setFontItalic(getItalicized());
+	tcf.setFontUnderline(getUnderline());
+
+	// assign formats to document
+	QTextDocument *doc = label->getDocument();
+	QTextCursor cursor = QTextCursor(doc);
+	cursor.select(QTextCursor::Document);
+	cursor.mergeCharFormat(tcf);
+	cursor.mergeBlockCharFormat(tcf);
+	cursor.mergeBlockFormat(tbf);
+	QTextFrameFormat tff_merged = doc->rootFrame()->frameFormat();
+	tff_merged.merge(tff);
+	doc->rootFrame()->setFrameFormat(tff_merged);
+
+	label->setType(m_type);
 }
 
 QColor LabelStyle::backgroundColor() const

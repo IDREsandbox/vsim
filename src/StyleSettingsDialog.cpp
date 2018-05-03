@@ -67,4 +67,6 @@ void StyleSettingsDialog::takeStyles(LabelStyleGroup *styles)
 
 	LabelStyle *label = styles->getStyle(LabelType::LABEL);
 	label->copy(m_label_widget->getStyle());
+
+	emit sApplied();
 }

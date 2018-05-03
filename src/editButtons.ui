@@ -7,12 +7,18 @@
     <x>0</x>
     <y>0</y>
     <width>94</width>
-    <height>316</height>
+    <height>307</height>
    </rect>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgba(86, 86, 86, 80);
-color: rgb(255, 255, 255);</string>
+   <string notr="true">#editButtons {
+	background-color: rgba(20, 20, 20, 150);
+}
+QWidget {
+	color: rgb(255, 255, 255);
+	background-color: rgba(60, 60, 60);
+}
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -32,6 +38,12 @@ color: rgb(255, 255, 255);</string>
    </property>
    <item>
     <widget class="QPushButton" name="head1">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>75</width>

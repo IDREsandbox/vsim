@@ -186,6 +186,8 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 	m_root.reset(root);
 
 	emit sReset();
+
+	m_navigation_control->a_object->trigger();
 	return true;
 }
 

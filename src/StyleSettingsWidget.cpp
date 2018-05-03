@@ -158,7 +158,7 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 
 void StyleSettingsWidget::refresh()
 {
-	m_label->applyStyle(m_style.get());
+	m_style->applyToNarrativeLabel(m_label.get());
 }
 
 void StyleSettingsWidget::setStyle(const LabelStyle * style)

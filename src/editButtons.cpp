@@ -14,3 +14,20 @@ editButtons::editButtons(QWidget* parent) : QFrame(parent)
 	}
 	connect(ff, &FocusFilter::sFocusIn, this, &editButtons::sPoked);
 }
+
+QPushButton *editButtons::button(LabelType type)
+{
+	switch (type) {
+	case LabelType::BODY:
+		return ui.body;
+	case LabelType::HEADER1:
+		return ui.head1;
+	case LabelType::HEADER2:
+		return ui.head2;
+	case LabelType::LABEL:
+		return ui.label;
+	default:
+		return nullptr;
+	}
+	return nullptr;
+}

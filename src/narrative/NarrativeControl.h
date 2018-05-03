@@ -58,6 +58,7 @@ public:
 	void editSlide();
 	void exitEdit();
 	void editStyleSettings();
+	void onStylesChanged();
 
 	//bool advance(bool forward);
 	bool advanceSlide(bool forward, bool instant = true);

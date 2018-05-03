@@ -29,9 +29,6 @@ public:
 	int getVAlignInt() const;
 	Qt::Alignment getVAlign() const;
 
-	// 
-	void applyStyle(LabelStyle *style);
-
 	QTextDocument *getDocument() const;
 
 signals:

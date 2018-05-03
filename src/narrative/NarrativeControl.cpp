@@ -217,7 +217,10 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	//	openSlide(index);
 	//});
 	// back
-	connect(m_bar->ui.back, &QPushButton::clicked, this, &NarrativeControl::showNarrativeBox);
+	connect(m_bar->ui.back, &QPushButton::clicked, this, [this]() {
+		showNarrativeBox();
+		m_app->setState(VSimApp::State::EDIT_NARS);
+	});
 	//change
 	connect(m_slide_box, &HorizontalScrollBox::sTouch, this, [this]() {
 		int last = m_slide_selection->last();
@@ -267,10 +270,32 @@ void NarrativeControl::editStyleSettings()
 
 	StyleSettingsDialog dlg;
 	dlg.setStyles(narrative->labelStyles());
+	connect(&dlg, &StyleSettingsDialog::sApplied, this,
+		&NarrativeControl::onStylesChanged);
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		return;
 	}
+}
+
+void NarrativeControl::onStylesChanged()
+{
+	Narrative *nar = getCurrentNarrative();
+	if (!nar) return;
+	LabelStyleGroup *g = nar->labelStyles();
+
+	std::vector<LabelType> types = {
+		LabelType::BODY,
+		LabelType::HEADER1,
+		LabelType::HEADER2,
+		LabelType::LABEL,
+	};
+	for (auto type : types) {
+		QPushButton *button = m_label_buttons->button(type);
+		LabelStyle *style = g->getStyle(type);
+		style->applyToWidget(button, false);
+	}
+	m_label_buttons->adjustSize();
 }
 
 void NarrativeControl::newNarrative()
@@ -424,6 +449,7 @@ void NarrativeControl::openNarrative(int index)
 	m_current_narrative = index;
 	m_bar->setSlidesHeader(nar->getTitle());
 	m_slide_box->setGroup(nar);
+	onStylesChanged();
 }
 
 bool NarrativeControl::openSlide(int index, bool go)
@@ -853,7 +879,7 @@ void NarrativeControl::newLabel(LabelType style) {
 
 	Narrative *nar = getCurrentNarrative();
 	LabelStyle *label_style = nar->labelStyles()->getStyle((LabelType)style);
-	if (label_style) label->applyStyle(label_style);
+	if (label_style) label_style->applyToNarrativeLabel(label.get());
 
 	// push command
 	m_undo_stack->beginMacro("New Label");

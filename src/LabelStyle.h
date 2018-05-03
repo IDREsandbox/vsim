@@ -9,9 +9,11 @@
 #include <QTextDocument>
 #include <QFont>
 #include <QTextCursor>
+#include <QLabel>
 
 #include "LabelType.h"
 
+class NarrativeSlideLabel;
 class LabelStyle {
 public:
 	LabelStyle();
@@ -21,8 +23,8 @@ public:
 
 	void copy(const LabelStyle *other);
 
-	//void applyToLabel(NarrativeSlideLabel *label);
-	//void applyToDocument(QTextDocument *doc);
+	void applyToWidget(QWidget *widget, bool font_size = true);
+	void applyToNarrativeLabel(NarrativeSlideLabel *label);
 
 	// serializer
 	LabelType getType() const;
