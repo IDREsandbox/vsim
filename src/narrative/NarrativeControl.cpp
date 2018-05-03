@@ -697,7 +697,7 @@ NarrativeSlideLabel * NarrativeControl::getLabel(int narrative, int slide, int l
 void NarrativeControl::newSlide()
 {
 	Narrative *nar = getNarrative(m_current_narrative);
-	auto matrix = m_window->m_osg_widget->getCameraMatrix();
+	auto matrix = m_app->getCameraMatrix();
 
 	// figure out where to insert
 	int index;
@@ -787,7 +787,7 @@ void NarrativeControl::setSlideTransition()
 void NarrativeControl::setSlideCamera()
 {
 	auto selection = m_slide_selection->data();
-	osg::Matrixd matrix = m_window->m_osg_widget->getCameraMatrix();
+	osg::Matrixd matrix = m_app->getCameraMatrix();
 
 	m_undo_stack->beginMacro("Set Camera");
 	for (auto index : selection) {

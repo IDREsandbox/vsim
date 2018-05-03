@@ -82,7 +82,7 @@ bool VSimSerializer::readStream(std::istream & in, VSimRoot *root)
 	return true;
 }
 
-bool VSimSerializer::writeStream(std::ostream & out, VSimRoot * root)
+bool VSimSerializer::writeStream(std::ostream & out, const VSimRoot * root)
 {
 	// read header
 	// v s i m x x x x

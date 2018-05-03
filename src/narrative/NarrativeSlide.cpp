@@ -3,8 +3,9 @@
 #include "deprecated/osgNewWidget/VSWidget.h"
 #include <QTextCursor>
 #include <iostream>
-NarrativeSlide::NarrativeSlide()
-	: m_camera_matrix(),
+NarrativeSlide::NarrativeSlide(QObject *parent)
+	: TGroup<NarrativeSlideItem>(parent),
+	m_camera_matrix(),
 	m_duration(4.0f),
 	m_stay_on_node(false),
 	m_transition_duration(4.0f),
@@ -12,8 +13,7 @@ NarrativeSlide::NarrativeSlide()
 {
 }
 
-NarrativeSlide::NarrativeSlide(const NarrativeNode * old, const NarrativeTransition * old_transition)
-	: NarrativeSlide()
+void NarrativeSlide::loadOld(const NarrativeNode * old, const NarrativeTransition * old_transition)
 {
 	m_camera_matrix = old->getViewMatrix();
 	m_duration = old->getPauseAtNode();

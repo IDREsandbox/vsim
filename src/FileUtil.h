@@ -9,7 +9,7 @@ class EResourceGroup;
 namespace FileUtil
 {
 	bool readVSimFile(const std::string &path, VSimRoot *root);
-	bool writeVSimFile(const std::string &path, VSimRoot *root);
+	bool writeVSimFile(const std::string &path, const VSimRoot *root);
 
 	bool importModel(const std::string &path, VSimRoot *root);
 
@@ -20,4 +20,5 @@ namespace FileUtil
 	bool importEResources(std::istream &in, EResourceGroup *group);
 	bool exportEResources(std::ostream &out, const EResourceGroup *group,
 		const std::set<size_t> &selection);
+
 }

@@ -49,7 +49,7 @@ find_package(OpenSceneGraph 3.4.0 REQUIRED ${osgComponents})
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 
-find_package(Qt5 REQUIRED Core Gui Widgets Test)
+find_package(Qt5 REQUIRED Core Gui Widgets Test Concurrent)
 # find_package(Qt5Test REQUIRED)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
@@ -259,6 +259,9 @@ set(VSim_src
   src/FlightManipulator.h
   src/FocusFilter.cpp
   src/FocusFilter.h
+  src/FutureDialog.cpp
+  src/FutureDialog.h
+  src/FutureDialog.ui
   src/GroupScrollBox.inl
   src/GroupScrollBox.h
   src/HorizontalScrollBox.cpp
@@ -378,6 +381,8 @@ target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets ${OPENSCENEGRA
 add_executable(HSBSpeed_experiment ${HorizontalScrollBox_src}
   experiments/HSBSpeed/HSBSpeed.cpp)
 target_link_libraries(HSBSpeed_experiment Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
+
+add_subdirectory(experiments/FutureDialog_experiment)
 
 set(Canvas_src
   src/narrative/CanvasContainer.h

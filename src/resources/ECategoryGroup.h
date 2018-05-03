@@ -5,10 +5,11 @@
 
 class EResourcesList;
 class ECategory;
+
 class ECategoryGroup : public TGroup<ECategory> {
 	Q_OBJECT
 public:
-	ECategoryGroup();
+	ECategoryGroup(QObject *parent = nullptr);
 
 	ECategory *category(int index) const;
 };

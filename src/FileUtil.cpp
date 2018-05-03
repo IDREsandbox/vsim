@@ -28,7 +28,7 @@ bool FileUtil::readVSimFile(const std::string & path, VSimRoot * root)
 	return VSimSerializer::readStreamRobust(in, root);
 }
 
-bool FileUtil::writeVSimFile(const std::string & path, VSimRoot * root)
+bool FileUtil::writeVSimFile(const std::string & path, const VSimRoot * root)
 {
 	std::ofstream out(path, std::ios::binary);
 	if (!out.good()) {
@@ -67,7 +67,9 @@ bool FileUtil::importNarrativesStream(std::istream &in, NarrativeGroup *group)
 	// try group, try narrative
 	NarrativeOld *old = dynamic_cast<NarrativeOld*>(node.get());
 	if (old) {
-		group->append(std::make_shared<Narrative>(old));
+		auto nar = std::make_shared<Narrative>();
+		nar->loadOld(old);
+		group->append(nar);
 		return true;
 	}
 	return false;

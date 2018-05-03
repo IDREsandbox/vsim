@@ -10,6 +10,8 @@
 class GroupSignals : public QObject {
 	Q_OBJECT
 public:
+	GroupSignals(QObject *parent = nullptr)
+		: QObject(parent) {}
 
 signals:
 	void sAboutToReset();
@@ -58,7 +60,7 @@ signals:
 template <class T>
 class TGroup : public GroupSignals {
 public:
-	TGroup() {};
+	TGroup(QObject *parent = nullptr) : GroupSignals(parent) {};
 
 	// Use this instead of the osg one. For some reason the osg one isn't virtual or const
 	virtual T *child(size_t index) const;
@@ -83,10 +85,6 @@ public:
 	// pointer based, multiple
 	//virtual void insertMultiP(const std::set<std::shared_ptr<T>> &children);
 	//virtual void removeMultiP(const std::set<std::shared_ptr<T>> &children);
-
-public: // commands
-	class Test {
-	};
 
 private:
 	std::vector<std::shared_ptr<T>> m_children;

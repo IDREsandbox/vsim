@@ -14,6 +14,8 @@
 #include "deprecated/ModelInformationOld.h"
 #include "deprecated/narrative/NarrativeOld.h"
 #include <QDate>
+#include <QThread>
+#include <QEvent>
 #include "Util.h"
 
 // debug
@@ -141,7 +143,9 @@ void VSimRoot::loadOld(osg::Group * old_group)
 		const NarrativeOld *old_narrative = dynamic_cast<const NarrativeOld*>(node);
 		if (old_narrative) {
 			qInfo() << "Found an old narrative" << QString::fromStdString(old_narrative->getName()) << "- converting";
-			m_narratives->append(std::make_shared<Narrative>(old_narrative));
+			auto nar = std::make_shared<Narrative>();
+			nar->loadOld(old_narrative);
+			m_narratives->append(nar);
 			continue;
 		}
 
@@ -155,6 +159,38 @@ void VSimRoot::loadOld(osg::Group * old_group)
 		new_model->setNode(node);
 		new_model->setName(node->getName());
 		m_models->append(new_model);
+	}
+}
+
+void VSimRoot::moveAllToThread(QThread *t)
+{
+	// move all smart ptr managed qobjects to thread
+	// er group
+	// nar group
+	// model group
+	// er
+	// er cat
+	// nar
+	// slide
+	// label
+	m_resources->moveToThread(t);
+	m_narratives->moveToThread(t);
+	m_models->moveToThread(t);
+
+	for (auto er : *m_resources.get()) {
+		er->moveToThread(t);
+	}
+	for (auto cat : *m_resources->categories()) {
+		cat->moveToThread(t);
+	}
+	for (auto nar : *m_narratives) {
+		nar->moveToThread(t);
+		for (auto slide : *nar) {
+			slide->moveToThread(t);
+			for (auto item : *slide) {
+				item->moveToThread(t);
+			}
+		}
 	}
 }
 

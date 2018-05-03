@@ -149,6 +149,18 @@
     <ClInclude Include="..\..\src\deprecated\narrative\NarrativeOld.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\VSimRoot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\LabelStyle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\WeakObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\SimpleWorker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\narratives.fbs" />
@@ -461,6 +473,15 @@
     <ClCompile Include="..\..\src\HistoryWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\FutureDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\WeakObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SimpleWorker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\src\narrative\CanvasContainer.h">
@@ -565,9 +586,6 @@
     <QtMoc Include="..\..\src\HorizontalScrollBox.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\src\LabelStyle.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="..\..\src\LabelStyleGroup.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -625,9 +643,6 @@
     <QtMoc Include="..\..\src\VSimApp.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="..\..\src\VSimRoot.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="..\..\src\FastScrollBox.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -665,6 +680,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="..\..\src\HistoryWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\FutureDialog.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -730,6 +748,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="..\..\src\AboutDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="..\..\src\FutureDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

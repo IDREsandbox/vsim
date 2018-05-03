@@ -102,10 +102,6 @@ public:
 	std::string getFileName() const;
 	void setFileName(const std::string &);
 
-	bool openVSim(const std::string& filename);
-	bool saveVSim(const std::string& filename);
-	bool saveCurrentVSim();
-
 	VSimRoot *getRoot() const;
 	//OSGYearModel *modelTable() const;
 	NarrativeControl *narrativeControl() const;

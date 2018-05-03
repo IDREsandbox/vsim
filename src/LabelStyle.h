@@ -12,9 +12,7 @@
 
 #include "LabelType.h"
 
-class LabelStyle : public QObject {
-	Q_OBJECT
-
+class LabelStyle {
 public:
 	LabelStyle();
 	LabelStyle(LabelType type, const std::string font, int size, QColor fg, QColor bg,

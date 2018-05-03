@@ -12,7 +12,7 @@ class Model;
 class ModelGroup : public TGroup<Model> {
 	Q_OBJECT
 public:
-	ModelGroup();
+	ModelGroup(QObject *parent = nullptr);
 
 	// merge another model group
 	// void merge(const ModelGroup *other);

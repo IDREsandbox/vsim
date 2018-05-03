@@ -15,8 +15,9 @@ class Narrative : public TGroup<NarrativeSlide> {
 	Q_OBJECT
 
 public:
-	Narrative();
-	Narrative(const NarrativeOld *old); // converts old narrative to a new one
+	Narrative(QObject *parent = nullptr);
+
+	void loadOld(const NarrativeOld *old);
 
 	const std::string& getTitle() const;
 	void setTitle(const std::string& name);
@@ -62,7 +63,7 @@ private:
 	std::string m_author;
 	bool m_locked;
 
-	std::unique_ptr<LabelStyleGroup> m_styles;
+	LabelStyleGroup *m_styles;
 };
 
 #endif /* NARRATIVE_H */

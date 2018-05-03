@@ -67,8 +67,10 @@ public:
 public slots:
 	void actionNew();
 	void actionOpen();
+	void execOpen(const QString &filename);
 	void actionSave();
 	void actionSaveAs();
+	void execSave(const QString &filename); // runs thread and dialog
 	void actionImportModel();
 
 	void actionImportNarratives();
@@ -88,10 +90,6 @@ public slots:
 	// void narListInfo();
 
 signals:
-	void sOpenFile(const std::string&);
-	void sSaveFile(const std::string&);
-	void sSaveCurrent();
-	void sNew();
 	void sImportModel(const std::string&);
 	void sImportNarratives();
 	void sExportNarratives();
@@ -106,7 +104,7 @@ signals:
 public:
 	Ui::MainWindow *ui;
 
-public:
+private:
 	VSimApp *m_app;
 
 	OSGViewerWidget *m_osg_widget;

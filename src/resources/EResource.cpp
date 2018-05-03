@@ -4,8 +4,9 @@
 #include "resources/ECategory.h"
 #include "ECategoryGroup.h"
 
-EResource::EResource()
-	: m_name("Untitled"),
+EResource::EResource(QObject *parent)
+	: QObject(parent),
+	m_name("Untitled"),
 	m_filepath(""),
 	m_description(" "),
 	m_authors(" "),
@@ -26,29 +27,25 @@ EResource::EResource()
 {
 }
 
-EResource::EResource(const EResourcesNode *er)
-	: m_name(er->getResourceName()),
-	m_filepath(er->getResourcePath()),
-	m_description(er->getResourceDiscription()),
-	m_authors(er->getAuthor()),
-	m_global(!er->getGlobal()),
-	m_reposition(er->getReposition()),
-	m_launch(er->getAutoLaunch()),
-	m_copyright((Copyright)er->getCopyRight()),
-	m_min_year(er->getMinYear()),
-	m_max_year(er->getMaxYear()),
-	m_local_range(er->getLocalRange()),
-	m_ertype((ERType)er->getErType()),
-	m_camera_matrix(er->getViewMatrix()),
-	m_camera_position(m_camera_matrix.getTrans())
+void EResource::loadOld(const EResourcesNode * old)
 {
-
-	if (er->getMinYear() != 0 || er->getMaxYear() != 0) {
-	}
-
+	m_name = old->getResourceName();
+	m_filepath = old->getResourcePath();
+	m_description = old->getResourceDiscription();
+	m_authors = old->getAuthor();
+	m_global = !old->getGlobal();
+	m_reposition = old->getReposition();
+	m_launch = old->getAutoLaunch();
+	m_copyright = (Copyright)old->getCopyRight();
+	m_min_year = old->getMinYear();
+	m_max_year = old->getMaxYear();
+	m_local_range = old->getLocalRange();
+	m_ertype = (ERType)old->getErType();
+	m_camera_matrix = old->getViewMatrix();
+	m_camera_position = m_camera_matrix.getTrans();
 }
 
-const std::string& EResource::getResourceName() const 
+const std::string& EResource::getResourceName() const
 { 
 	return m_name; 
 }

@@ -9,8 +9,9 @@
 #include "LabelStyle.h"
 #include <QDebug>
 
-NarrativeSlideLabel::NarrativeSlideLabel()
-	: m_style_type(LabelType::NONE)
+NarrativeSlideLabel::NarrativeSlideLabel(QObject *parent)
+	: NarrativeSlideItem(parent),
+	m_style_type(LabelType::NONE)
 {
 	m_document = new QTextDocument(this);
 	setHtml("New Label");

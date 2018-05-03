@@ -180,66 +180,13 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 	m_render_canvas->setSlide(nullptr);
 
 	m_undo_stack->clear();
-	m_window->m_osg_widget->reset();
+	m_window->getViewerWidget()->reset();
 
 	// dereference the old root, apply the new one
 	m_root.reset(root);
 
 	emit sReset();
 	return true;
-}
-
-bool VSimApp::openVSim(const std::string & filename)
-{
-	QFileInfo path(QString(filename.c_str()));
-	if (path.suffix() == "vsim") {
-		VSimRoot *root = new VSimRoot;
-		bool ok = FileUtil::readVSimFile(filename, root);
-		if (!ok) {
-			goto error;
-		}
-		setFileName(filename);
-		initWithVSim(root);
-		return true;
-	}
-	else {
-		qInfo() << "opening a non-vsim model";
-		osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile(filename);
-		if (!loadedModel) {
-			goto error;
-		}
-		initWithVSim();
-		m_root->models()->addNode(loadedModel, filename);
-
-		setFileName("");
-		setLastDirectory(path.absolutePath().toStdString());
-		return true;
-	}
-	error:
-	QMessageBox::warning(m_window, "Load Error", "Failed to load model " + QString::fromStdString(filename));
-	return false;
-}
-
-bool VSimApp::saveVSim(const std::string& filename)
-{
-	QFileInfo path(QString(filename.c_str()));
-	if (path.suffix() == "vsim") {
-		bool ok = FileUtil::writeVSimFile(filename, m_root.get());
-		if (!ok) {
-			return false;
-		}
-		setFileName(filename);
-	}
-	else {
-		// try to write osg stuff
-	}
-	return true;
-}
-
-bool VSimApp::saveCurrentVSim()
-{
-	qInfo() << "saving current file";
-	return saveVSim(m_filename);
 }
 
 VSimRoot * VSimApp::getRoot() const

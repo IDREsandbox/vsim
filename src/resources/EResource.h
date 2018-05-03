@@ -15,10 +15,10 @@ class EResource : public QObject {
 	Q_OBJECT
 
 public:
-	EResource();
+	EResource(QObject *parent = nullptr);
 
 	// converts old resource to a new one, doesn't set category
-	EResource(const EResourcesNode *old);
+	void loadOld(const EResourcesNode *old);
 
 	const std::string& getResourceName() const;
 	void setResourceName(const std::string& name);

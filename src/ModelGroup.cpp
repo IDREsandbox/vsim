@@ -6,8 +6,9 @@
 
 #include "Model.h"
 
-ModelGroup::ModelGroup()
-	: m_year(0),
+ModelGroup::ModelGroup(QObject *parent)
+	: TGroup<Model>(parent),
+	m_year(0),
 	m_time_enabled(false)
 {
 	enableTime(true);

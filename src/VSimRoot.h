@@ -8,6 +8,7 @@ class NarrativeGroup;
 class ModelGroup;
 class EResourceGroup;
 class ECategoryGroup;
+class QThread;
 namespace VSim { namespace FlatBuffers {
 	struct SettingsT;
 }}
@@ -29,8 +30,10 @@ public:
 
 	void debug();
 
+	void moveAllToThread(QThread *thread);
+
 private:
-	std::unique_ptr<NarrativeGroup> m_narratives; // qt ownership
+	std::unique_ptr<NarrativeGroup> m_narratives;
 	std::unique_ptr<ModelGroup> m_models;
 	std::unique_ptr<EResourceGroup> m_resources;
 	std::unique_ptr<VSim::FlatBuffers::SettingsT> m_settings;

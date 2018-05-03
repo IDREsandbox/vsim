@@ -3,7 +3,8 @@
 
 #include "LabelStyle.h"
 
-LabelStyleGroup::LabelStyleGroup()
+LabelStyleGroup::LabelStyleGroup(QObject *parent)
+	: TGroup<LabelStyle>(parent)
 {
 	m_h1 = std::unique_ptr<LabelStyle>(new LabelStyle(LabelType::HEADER1, "Arial", 36, QColor(255, 255, 255, 255), QColor(0, 0, 0, 178),
 		QFont::Bold, false, Qt::AlignCenter, 13));

@@ -11,7 +11,7 @@ class EResource;
 class ECategory : public QObject {
 	Q_OBJECT
 public:
-	ECategory();
+	ECategory(QObject *parent = nullptr);
 
 	const std::string& getCategoryName() const;
 	void setCategoryName(const std::string& name);

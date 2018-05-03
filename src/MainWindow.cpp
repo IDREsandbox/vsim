@@ -21,6 +21,8 @@
 #include "ModelOutliner.h"
 #include "StatsWindow.h"
 #include "HistoryWindow.h"
+#include "FutureDialog.h"
+#include "SimpleWorker.h"
 
 #include "editButtons.h"
 #include "narrative/NarrativeGroup.h"
@@ -246,11 +248,6 @@ void MainWindow::setApp(VSimApp * vsim)
 		qInfo() << "redo" << text;
 	});
 
-	connect(this, &MainWindow::sNew, m_app, [vsim]() {
-		vsim->setFileName("");
-		vsim->initWithVSim();
-	});
-
 	outliner()->setModel(nullptr); // TODO: fix outliner
 	outliner()->header()->resizeSection(0, 200);
 	outliner()->resize(505, 600);
@@ -365,8 +362,9 @@ void MainWindow::dropEvent(QDropEvent * event)
 		if (text.startsWith("file:///")) {
 			text.remove(0, 8); // remove the prefix
 		}
+
 		//m_vsimapp->openVSim(text.toStdString());
-		emit sOpenFile(text.toStdString());
+		//emit sOpenFile(text.toStdString());
 	}
 }
 
@@ -419,40 +417,94 @@ void MainWindow::actionNew()
 			QMessageBox::Yes | QMessageBox::No);
 
 	if (reply == QMessageBox::Yes) {
-		emit sNew();
+		m_app->setFileName("");
+		m_app->initWithVSim();
 	}
 }
 void MainWindow::actionOpen()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim",
 		m_app->getCurrentDirectory().c_str(),
-		"VSim files (*.vsim;);;"
+		"VSim files (*.vsim);;"
 		"Model files (*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
-	if (filename == "") {
+	execOpen(filename);
+}
+
+void MainWindow::execOpen(const QString & filename)
+{
+	if (filename == "") return;
+	qInfo() << "opening - " << filename;
+	QFileInfo file_info(filename);
+	bool read_vsim = (file_info.suffix() == "vsim");
+
+	QFuture<VSimRoot*> open_future;
+	std::unique_ptr<VSimRoot> open_result;
+	QFuture<osg::ref_ptr<osg::Node>> import_future;
+	osg::ref_ptr<osg::Node> import_result;
+	FutureDialog dlg;
+	dlg.setText("Loading " + filename);
+	dlg.setWindowTitle("Open");
+
+	// run in thread
+	if (read_vsim) {
+		// read vsim file
+		open_future = QtConcurrent::run([filename]() -> VSimRoot* {
+			VSimRoot *root = new VSimRoot;
+			bool ok = FileUtil::readVSimFile(filename.toStdString(), root);
+			if (!ok) return nullptr;
+			root->moveAllToThread(QApplication::instance()->thread());
+			return root;
+		});
+	}
+	else {
+		// read some osg node, import it
+		import_future = QtConcurrent::run([&]() -> osg::ref_ptr<osg::Node> {
+			osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile(filename.toStdString());
+			return loadedModel;
+		});
+	}
+
+	// spin
+	if (read_vsim) {
+		dlg.spin(open_future); // spin until future is done
+							   // capture in unique here
+		open_result = std::unique_ptr<VSimRoot>(open_future.result());
+	}
+	else {
+		dlg.spin(import_future);
+		import_result = import_future.result();
+	}
+
+	if (dlg.canceled()) {
 		return;
 	}
-	qInfo() << "opening - " << filename;
-
-	//m_vsimapp->openVSim(filename.toStdString());
-	emit sOpenFile(filename.toStdString());
+	else if (read_vsim && open_result) {
+		qInfo() << "done loading vsim file for open";
+		m_app->setFileName(filename.toStdString());
+		m_app->initWithVSim(open_result.release());
+	}
+	else if (!read_vsim && import_result) {
+		VSimRoot *root = new VSimRoot;
+		root->models()->addNode(import_result, filename.toStdString());
+		m_app->setLastDirectory(filename.toStdString());
+		m_app->setFileName("");
+		m_app->initWithVSim(root);
+	}
+	else { // error
+		QMessageBox::warning(this, "Load Error", "Failed to load model " + filename);
+	}
 }
 
 void MainWindow::actionSave()
 {
-	if (m_app->getFileName() == "") {
+	QString filename = m_app->getFileName().c_str();
+	QFileInfo info(filename);
+	if (m_app->getFileName() == "" || info.suffix() != "vsim") {
 		actionSaveAs();
 		return;
 	}
-	QFileInfo info(m_app->getFileName().c_str());
-
-	QString ext = info.suffix();
-	if (ext != "vsim" && ext != "osgt" && ext != "osgb") {
-		actionSaveAs();
-		return;
-	}
-
-	m_app->saveCurrentVSim();
+	execSave(filename);
 }
 
 void MainWindow::actionSaveAs()
@@ -463,9 +515,38 @@ void MainWindow::actionSaveAs()
 	if (filename == "") {
 		return;
 	}
-	qInfo() << "saving as - " << filename;
 
-	bool ok = m_app->saveVSim(filename.toStdString());
+	execSave(filename);
+}
+
+void MainWindow::execSave(const QString & filename)
+{
+	std::string path = filename.toStdString();
+
+	QFuture<bool> future;
+	FutureDialog dlg;
+	dlg.setText("Saving " + filename);
+	dlg.setWindowTitle("Save");
+	dlg.setCancellable(false);
+
+	VSimRoot *root = m_app->getRoot();
+
+	SimpleWorker w;
+	dlg.watchThread(w.thread());
+	// move the root over, this is needed because QTextDocument
+	// allocates QObjects and causes crash
+	root->moveAllToThread(w.thread());
+	w.setFunc([path, root]() -> bool {
+		bool ok = FileUtil::writeVSimFile(path, root);
+		// move the root back to the main thread
+		root->moveAllToThread(QApplication::instance()->thread());
+		return ok;
+	});
+	w.start();
+	dlg.exec();
+
+	bool ok = w.result();
+
 	if (!ok) {
 		QMessageBox::warning(this, "Save Error", "Error saving to file " + filename);
 	}
@@ -475,26 +556,36 @@ void MainWindow::actionImportModel()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Import Model",
 		m_app->getLastDiretory().c_str(),
-		"Model files (*.vsim;*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
+		"Model files (*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
 	if (filename == "") {
 		return;
 	}
 	qInfo() << "importing - " << filename;
 
-	osg::ref_ptr<osg::Node> loadedModel;
-	// TODO: special import for vsim files
+	QFuture<osg::Node*> future;
+	FutureDialog dlg;
+	dlg.setFuture(future);
+	dlg.setText("Loading " + filename);
+	dlg.setWindowTitle("Open");
 
-	// otherwise
-	loadedModel = osgDB::readNodeFile(filename.toStdString());
-	if (!loadedModel.get()) {
+	osg::ref_ptr<osg::Node> loadedModel;
+
+	future = QtConcurrent::run(&osgDB::readNodeFile, filename.toStdString());
+	dlg.exec(); // spin until done loading
+	loadedModel = future.result();
+
+	if (dlg.canceled()) {
+	}
+	else if (loadedModel) {
+		m_app->getRoot()->models()->addNode(loadedModel, filename.toStdString());
+		m_app->navigationControl()->a_home->trigger(); // reset camera
+		m_app->setLastDirectory(filename.toStdString(), true);
+	}
+	else {
 		qWarning() << "Error importing" << filename;
 		QMessageBox::warning(this, "Import Error", "Error loading file " + filename);
-		return;
 	}
-
-	m_app->getRoot()->models()->addNode(loadedModel, filename.toStdString());
-	m_osg_widget->reset();
 }
 
 void MainWindow::actionImportNarratives()

@@ -5,27 +5,30 @@
 #include "deprecated/narrative/NarrativeOld.h"
 #include "narrative/NarrativeSlide.h"
 #include "LabelStyleGroup.h"
+#include "WeakObject.h"
 
-Narrative::Narrative()
-	: m_title("Untitled"),
+Narrative::Narrative(QObject *parent)
+	: TGroup<NarrativeSlide>(parent),
+	m_title("Untitled"),
 	m_description(""),
 	m_author(""),
 	m_locked(false)
 {
-	m_styles = std::make_unique<LabelStyleGroup>();
+	m_styles = new LabelStyleGroup(this);
 }
 
-Narrative::Narrative(const NarrativeOld * old)
-	: Narrative()
+void Narrative::loadOld(const NarrativeOld * old)
 {
 	m_title = old->getName();
 	m_description = old->getDescription();
 	m_author = old->getAuthor();
 	m_locked = old->getLock();
+	clear();
 	for (uint i = 0; i < old->getNumNodes(); i++) {
 		NarrativeNode *node = old->getNode(i);
 		NarrativeTransition *transition = old->getTransition(i);
-		auto new_slide = std::make_shared<NarrativeSlide>(node, transition);
+		auto new_slide = std::make_shared<NarrativeSlide>();
+		new_slide->loadOld(node, transition);
 		append(new_slide);
 	}
 }
@@ -54,5 +57,5 @@ void Narrative::setDescription(const std::string& description) {
 }
 LabelStyleGroup * Narrative::labelStyles() const
 {
-	return m_styles.get();
+	return m_styles;
 }

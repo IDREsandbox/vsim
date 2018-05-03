@@ -18,8 +18,8 @@ class NarrativeSlide : public TGroup<NarrativeSlideItem>
 	Q_OBJECT
 
 public:	// DATA
-	NarrativeSlide();
-	NarrativeSlide(const NarrativeNode *old, const NarrativeTransition *old_transition);
+	NarrativeSlide(QObject *parent = nullptr);
+	void loadOld(const NarrativeNode *old, const NarrativeTransition *old_transition);
 	
 	const osg::Matrixd& getCameraMatrix() const;
 	void setCameraMatrix(const osg::Matrixd& matrix);

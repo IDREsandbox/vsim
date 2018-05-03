@@ -5,15 +5,16 @@
 #include "resources/ECategoryGroup.h"
 #include "resources/EResource.h"
 #include "resources/ECategory.h"
-
+#include "WeakObject.h"
 #include "GroupCommands.h"
 
 #include <QDebug>
 #include <unordered_map>
 
-EResourceGroup::EResourceGroup()
+EResourceGroup::EResourceGroup(QObject *parent)
+	: TGroup<EResource>(parent)
 {
-	m_categories = std::unique_ptr<ECategoryGroup>(new ECategoryGroup);
+	m_categories = new ECategoryGroup(this);
 }
 
 EResourceGroup::~EResourceGroup()
@@ -28,7 +29,7 @@ void EResourceGroup::loadOld(const EResourcesList * old_ers)
 			// already in the map so skip
 			continue;
 		}
-		auto cat = std::shared_ptr<ECategory>(new ECategory);
+		auto cat = std::make_shared<ECategory>();
 		cat->setCategoryName(old->getCategoryName());
 		cat->setColor(QColor(old->getRed(), old->getGreen(), old->getBlue()));
 
@@ -39,7 +40,8 @@ void EResourceGroup::loadOld(const EResourcesList * old_ers)
 
 	// copy the data
 	for (EResourcesNode *node : old_ers->m_list) {
-		auto er = std::make_shared<EResource>(node);
+		auto er = std::make_shared<EResource>();
+		er->loadOld(node);
 		// assign category
 
 		ECategory *cat = nullptr;
@@ -54,7 +56,7 @@ void EResourceGroup::loadOld(const EResourcesList * old_ers)
 
 ECategoryGroup * EResourceGroup::categories() const
 {
-	return m_categories.get();
+	return m_categories;
 }
 
 EResource * EResourceGroup::getResource(int i) const

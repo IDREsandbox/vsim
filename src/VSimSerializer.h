@@ -26,7 +26,7 @@ namespace VSimSerializer {
 	// returns false if root left alone (full error, header read error)
 	// returns true if root changed (success, partial error)
 	bool readStream(std::istream &in, VSimRoot *root);
-	bool writeStream(std::ostream &out, VSimRoot *root);
+	bool writeStream(std::ostream &out, const VSimRoot *root);
 
 	// osg stuff
 	osg::ref_ptr<osg::Node> readOSGB(std::istream &in, bool ascii, bool zlib);

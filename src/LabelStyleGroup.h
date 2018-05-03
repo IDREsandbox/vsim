@@ -14,7 +14,7 @@ class LabelStyle;
 class LabelStyleGroup : public TGroup<LabelStyle> {
 	Q_OBJECT;
 public:
-	LabelStyleGroup();
+	LabelStyleGroup(QObject *parent = nullptr);
 	~LabelStyleGroup();
 
 	LabelStyle *getStyle(LabelType style) const;

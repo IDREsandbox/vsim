@@ -12,9 +12,7 @@ class NarrativeSlideLabel : public NarrativeSlideItem
 {
 	Q_OBJECT
 public:
-	NarrativeSlideLabel(); 
-
-	NarrativeSlideLabel(const NarrativeSlideLabel& n, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY) {}
+	NarrativeSlideLabel(QObject *parent = nullptr);
 
 	// serialization
 	std::string getHtml() const;

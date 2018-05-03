@@ -483,7 +483,6 @@ void ERFilterSortProxy::enableYears(bool enable)
 
 void ERFilterSortProxy::appTimeEnable(bool enable)
 {
-	qDebug() << "app time enable";
 	m_time_enabled = enable;
 	reload2();
 }

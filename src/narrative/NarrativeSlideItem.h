@@ -13,7 +13,7 @@ class NarrativeSlideItem : public QObject
 {
 	Q_OBJECT
 public:
-	NarrativeSlideItem();
+	NarrativeSlideItem(QObject *parent = nullptr);
 
 	// rect
 	QRectF getRect() const;

@@ -16,8 +16,7 @@ class EResourceGroup : public TGroup<EResource> {
 	Q_OBJECT
 
 public:
-	EResourceGroup();
-	EResourceGroup(const osg::Group *old_root);
+	EResourceGroup(QObject *parent = nullptr);
 	~EResourceGroup();
 
 	void loadOld(const EResourcesList *old_ers);
@@ -35,7 +34,7 @@ public: // commands
 		const EResourceGroup *other, QUndoCommand *cmd);
 
 private:
-	std::unique_ptr<ECategoryGroup> m_categories;
+	ECategoryGroup *m_categories;
 };
 
 #endif // ERESOURCEGROUP_H

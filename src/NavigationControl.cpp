@@ -202,7 +202,6 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 		m_viewer->setNavigationMode(Navigation::OBJECT);
 
 		// init render stuff
-		qDebug() << "init texturing" << m_ssm->getTextureEnabled();
 		a_lighting->setChecked(m_ssm->getLightingEnabled());
 		a_backface_culling->setChecked(m_ssm->getBackfaceEnabled());
 		a_texturing->setChecked(m_ssm->getTextureEnabled());

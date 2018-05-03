@@ -31,6 +31,6 @@ int main(int argc, char *argv[])
 	window.setApp(&vsim);
 	//vsim.setWindow(&window);
 
-	vsim.openVSim(startup);
+	window.execOpen(startup.c_str());
 	return a.exec();
 }

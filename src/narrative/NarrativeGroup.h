@@ -12,7 +12,7 @@ class Narrative;
 class NarrativeGroup : public TGroup<Narrative> {
 	Q_OBJECT
 public:
-	NarrativeGroup();
+	NarrativeGroup(QObject *parent = nullptr);
 
 	Narrative *narrative(int index) const;
 };

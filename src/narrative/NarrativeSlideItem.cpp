@@ -1,7 +1,8 @@
 #include "narrative/NarrativeSlideItem.h"
 #include "Util.h"
 
-NarrativeSlideItem::NarrativeSlideItem()
+NarrativeSlideItem::NarrativeSlideItem(QObject *parent)
+	: QObject(parent)
 {
 }
 

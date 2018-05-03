@@ -1,7 +1,8 @@
 #include "resources/ECategory.h"
 
-ECategory::ECategory()
-	: m_cat_name("Untitled"),
+ECategory::ECategory(QObject *parent)
+	: QObject(parent),
+	m_cat_name("Untitled"),
 	m_color(0, 0, 0)
 {
 
