@@ -25,6 +25,7 @@ class editButtons;
 class ERBar;
 class StatsWindow;
 class HistoryWindow;
+class CoordinateWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -117,6 +118,7 @@ private:
 	editButtons *m_label_buttons;
 	StatsWindow *m_stats_window;
 	HistoryWindow *m_history_window;
+	CoordinateWidget *m_coordinate_widget;
 
 	QActionGroup *m_navigation_action_group;
 	QAction *m_action_first_person;

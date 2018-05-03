@@ -31,6 +31,7 @@
     <ClInclude Include="..\..\src\BaseFirstPersonManipulator.h" />
     <QtMoc Include="..\..\src\CheckableListProxy.h" />
     <ClInclude Include="..\..\src\Command.h" />
+    <ClInclude Include="..\..\src\CoordinateWidget.h" />
     <ClInclude Include="..\..\src\deprecated\narrative\NarrativeNode.h" />
     <ClInclude Include="..\..\src\deprecated\narrative\NarrativeOld.h" />
     <ClInclude Include="..\..\src\deprecated\osgNewWidget\Canvas.h" />
@@ -385,6 +386,7 @@
     <ClCompile Include="..\..\src\AboutDialog.cpp" />
     <ClCompile Include="..\..\src\BaseFirstPersonManipulator.cpp" />
     <ClCompile Include="..\..\src\CheckableListProxy.cpp" />
+    <ClCompile Include="..\..\src\CoordinateWidget.cpp" />
     <ClCompile Include="..\..\src\deprecated\narrative\NarrativeNode.cpp" />
     <ClCompile Include="..\..\src\deprecated\narrative\NarrativeOld.cpp" />
     <ClCompile Include="..\..\src\deprecated\narrative\SerializerNarrativeOld.cpp" />

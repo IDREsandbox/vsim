@@ -46,6 +46,7 @@
 #include "GroupCommands.h"
 #include "NavigationControl.h"
 #include "AboutDialog.h"
+#include "CoordinateWidget.h"
 
 #include "FileUtil.h"
 #include <fstream>
@@ -186,6 +187,10 @@ MainWindow::MainWindow(QWidget *parent)
 		m_history_window->setVisible(!m_history_window->isVisible());
 	});
 
+	// coordinate
+	m_coordinate_widget = new CoordinateWidget(this);
+	ui->statusbar->addPermanentWidget(m_coordinate_widget);
+
 	QAction *a_test = new QAction("Debug Menu", this);
 	a_test->setShortcut(QKeySequence(Qt::Key_F11));
 	addAction(a_test);
@@ -246,6 +251,12 @@ void MainWindow::setApp(VSimApp * vsim)
 		QString text = stack->text(prev);
 		ui->statusbar->showMessage("Redo " + text, 2000);
 		qInfo() << "redo" << text;
+	});
+
+	// coordinate widget
+	connect(m_app, &VSimApp::sPositionChanged, this,
+		[this](const osg::Vec3 &vec) {
+		m_coordinate_widget->setCoordinate({vec.x(), vec.y(), vec.z()});
 	});
 
 	outliner()->setModel(nullptr); // TODO: fix outliner
