@@ -29,6 +29,7 @@
 #include <QWheelEvent>
 #include <QSurfaceFormat>
 #include <QTimer>
+#include <QAction>
 
 #include "SimpleCameraManipulator.h"
 #include "FirstPersonManipulator.h"
@@ -38,7 +39,6 @@
 
 OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	: QOpenGLWidget(parent,	f),
-	m_speed_tick(0),
 	m_rendering_enabled(true)
 {
 	// Create viewer, graphics context, and link them together
@@ -112,10 +112,31 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_collisions_on = false;
 	m_gravity_on = false;
 
+	// speed
+	a_speed_up = new QAction(this);
+	a_speed_up->setText("Speed up");
+	a_speed_up->setShortcut(QKeySequence(Qt::Key_Equal));
+	addAction(a_speed_up);
+	connect(a_speed_up, &QAction::triggered, this, [this]() {
+		adjustSpeed(1);
+		emit sSpeedActivelyChanged(m_speed_tick,
+			m_flight_manipulator->getSpeedMultiplier());
+	});
+
+	a_slow_down = new QAction(this);
+	a_slow_down->setText("Slow down");
+	a_slow_down->setShortcut(QKeySequence(Qt::Key_Minus));
+	addAction(a_slow_down);
+	connect(a_slow_down, &QAction::triggered, this, [this]() {
+		adjustSpeed(-1);
+		emit sSpeedActivelyChanged(m_speed_tick,
+			m_flight_manipulator->getSpeedMultiplier());
+	});
+
+	m_speed_tick = 0;
 	m_first_person_manipulator->setSpeedTick(m_speed_tick);
 	m_flight_manipulator->setSpeedTick(m_speed_tick);
-	//setNavigationMode(MANIPULATOR_OBJECT);
-	
+
 	// This ensures that the widget will receive keyboard events. This focus
 	// policy is not set by default. The default, Qt::NoFocus, will result in
 	// keyboard events that are ignored.
@@ -261,7 +282,6 @@ void OSGViewerWidget::adjustSpeed(int tick)
 	m_speed_tick = std::max(std::min(m_speed_tick, 28), -28);
 	m_first_person_manipulator->setSpeedTick(m_speed_tick);
 	m_flight_manipulator->setSpeedTick(m_speed_tick);
-	qInfo() << "Speed multiplier" << m_speed_tick << ":" << m_flight_manipulator->getSpeedMultiplier();
 }
 
 void OSGViewerWidget::setCameraFrozen(bool freeze)
@@ -291,8 +311,6 @@ void OSGViewerWidget::figureOutNavigation()
 
 void OSGViewerWidget::stopNavigation()
 {
-	qInfo() << "Camera stop";
-
 	// stop all manipulator momentum
 	m_first_person_manipulator->stop();
 	m_flight_manipulator->stop();
@@ -613,7 +631,12 @@ void OSGViewerWidget::wheelEvent(QWheelEvent* event) {
 	if (m_manipulator == MANIPULATOR_FIRST_PERSON
 		|| m_manipulator == MANIPULATOR_FLIGHT)
 	{
-		adjustSpeed((delta > 0) ? 1 : -1);
+		if (delta > 0) {
+			a_speed_up->trigger();
+		}
+		else {
+			a_slow_down->trigger();
+		}
 	}
 
 	// osg adapter

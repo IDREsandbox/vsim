@@ -79,21 +79,31 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 			m_viewer->setCameraFrozen(a_freeze->isChecked());
 			activate();
 		}
+		QString message = m_viewer->getCameraFrozen() ?
+			"Camera Freeze" : "Camera Unfreeze";
+		m_app->setStatusMessage(message);
 	});
 	connect(a_home, &QAction::triggered, this,
 		[this]() {
 		m_viewer->reset();
 		activate();
+		m_app->setStatusMessage("Home");
 	});
 	connect(a_gravity, &QAction::triggered, this,
 		[this]() {
-		m_viewer->enableGravity(a_gravity->isChecked());
+		bool enable = a_gravity->isChecked();
+		m_viewer->enableGravity(enable);
 		activate();
+		QString onoff = enable ? "On" : "Off";
+		m_app->setStatusMessage("Gravity " + onoff);
 	});
 	connect(a_collisions, &QAction::triggered, this,
 		[this]() {
-		m_viewer->enableCollisions(a_collisions->isChecked());
+		bool enable = a_collisions->isChecked();
+		m_viewer->enableCollisions(enable);
 		activate();
+		QString onoff = enable ? "On" : "Off";
+		m_app->setStatusMessage("Collisions " + onoff);
 	});
 
 	// osg -> gui
@@ -186,6 +196,15 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	a_point->setShortcut(Qt::Key_O);
 	m_mode_group->addAction(a_point);
 
+	// speed tick
+	a_speed_up = m_viewer->a_speed_up;
+	a_slow_down = m_viewer->a_slow_down;
+	connect(m_viewer, &OSGViewerWidget::sSpeedActivelyChanged, this,
+		[this](int tick, double multiplier) {
+		m_app->setStatusMessage("Speed: " + QString::number(tick)
+			+ " (x" + QString::number(multiplier, 'g', 4) + ")");
+	});
+
 	// app -> this
 	connect(m_app, &VSimApp::sStateChanged, this,
 		[this](VSimApp::State old, VSimApp::State current) {
@@ -241,4 +260,6 @@ void NavigationControl::onModeChange(Navigation::Mode mode)
 	else if (mode == Navigation::OBJECT) {
 		a_object->setChecked(true);
 	}
+	m_app->setStatusMessage(
+		QString(Navigation::ModeStrings[mode]) + " Mode");
 }

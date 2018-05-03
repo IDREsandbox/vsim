@@ -22,6 +22,7 @@ class FirstPersonManipulator;
 class FlightManipulator;
 class ObjectManipulator;
 class KeyTracker;
+class QAction;
 
 #include "Navigation.h"
 
@@ -60,6 +61,8 @@ public:
 	static Navigation::Mode manipulatorToNavigation(Manipulator);
 	static Manipulator navigationToManipulator(Navigation::Mode);
 
+	QAction *a_speed_up;
+	QAction *a_slow_down;
 	void adjustSpeed(int tick);
 
 	void setCameraFrozen(bool freeze);
@@ -96,6 +99,8 @@ signals:
 
 	void sNavigationModeChanged(Navigation::Mode);
 	void sCameraFrozen(bool);
+
+	void sSpeedActivelyChanged(int tick, double multiplier);
 
 protected:
 	virtual void paintEvent(QPaintEvent* paintEvent) override;

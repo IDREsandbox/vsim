@@ -7,6 +7,11 @@ namespace Navigation {
 		FLIGHT,
 		OBJECT
 	};
+	static constexpr const char *ModeStrings[] = {
+		"First Person",
+		"Flight",
+		"Object"
+	};
 };
 
 #endif

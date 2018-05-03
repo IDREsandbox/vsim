@@ -242,14 +242,14 @@ void MainWindow::setApp(VSimApp * vsim)
 		int index = stack->index();
 		if (index < 0 || index >= stack->count()) return;
 		QString text = stack->text(index);
-		ui->statusbar->showMessage("Undo " + text, 2000);
+		ui->statusbar->showMessage("Undo " + text);
 		qInfo() << "undo" << text;
 	});
 	connect(redo_action, &QAction::triggered, this, [this, stack]() {
 		int prev = stack->index() - 1;
 		if (prev < 0 || prev >= stack->count()) return;
 		QString text = stack->text(prev);
-		ui->statusbar->showMessage("Redo " + text, 2000);
+		ui->statusbar->showMessage("Redo " + text);
 		qInfo() << "redo" << text;
 	});
 
@@ -282,6 +282,9 @@ void MainWindow::setApp(VSimApp * vsim)
 	nmenu->addSeparator();
 	nmenu->addAction(nav->a_gravity);
 	nmenu->addAction(nav->a_collisions);
+	nmenu->addSeparator();
+	nmenu->addAction(nav->a_speed_up);
+	nmenu->addAction(nav->a_slow_down);
 
 	// init render menu
 	QMenu *rmenu = ui->menuRender;

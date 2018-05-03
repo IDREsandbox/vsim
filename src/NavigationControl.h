@@ -46,6 +46,9 @@ public: // actions
 	QAction *a_wireframe;
 	QAction *a_point;
 
+	QAction *a_speed_up; // forwarded from osg widget
+	QAction *a_slow_down;
+
 private:
 	VSimApp *m_app;
 	OSGViewerWidget *m_viewer;

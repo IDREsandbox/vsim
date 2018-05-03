@@ -78,7 +78,7 @@ public:
 	void update(float dt_sec);
 
 	// status
-	void setStatusMessage(const QString &message, int timeout = 0);
+	void setStatusMessage(const QString &message, int ms = 2000);
 
 	// camera
 	osg::Vec3d getPosition() const;
