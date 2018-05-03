@@ -1,5 +1,7 @@
 # Serialization
 
+See [vsim format](vsimformat.md)
+
 ## Flatbuffers
 
 The vsim format was changed from using osg to using flatbuffers. The app tries to read both. Conversion between flatbuffers and the app are explicitly written out (we don't use the buffers directly, except for Settings).
@@ -147,3 +149,7 @@ You can write qt stuff to/from streams. It could be useful to write QFont and st
 ### Google Protocol Buffers
 
 This is meant for lots of small messages over networks. Our thing is kind of big
+
+### Cap'n Proto
+
+This is a lot like flatbuffers but without the 2GB limit. Maybe we should have used this.

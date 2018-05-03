@@ -6,7 +6,7 @@
 
 [building dependencies](docs/dependencies.md)
 
-[vsim format](docs/vsimformat.txt)
+[vsim format](docs/vsimformat.md)
 
 [code notes](docs/code.md)
 
