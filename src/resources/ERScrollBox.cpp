@@ -106,13 +106,6 @@ void ERScrollBox::reload()
 	std::vector<size_t> all(m_group->size());
 	std::iota(all.begin(), all.end(), 0);
 	insertForIndices(all);
-	//setSelection(old_selection);
-
-	//if (old_selection.size() != 0) {
-	//	qDebug() << "non null old selection" << old_selection.size();
-	//	qDebug() << "afterwards" << selection()->size();
-	//	qDebug() << "map size" << m_map.size();
-	//}
 }
 
 void ERScrollBox::addToSelection(EResource * res, bool top)

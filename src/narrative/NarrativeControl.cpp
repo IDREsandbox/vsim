@@ -325,7 +325,7 @@ void NarrativeControl::newNarrative()
 void NarrativeControl::editNarrativeInfo()
 {
 	int active_item = m_narrative_selection->last();
-	qDebug() << "narrative list - begin edit on" << active_item;
+	qInfo() << "narrative list - begin edit on" << active_item;
 	if (active_item < 0) {
 		qWarning() << "narrative list - can't edit with no selection";
 		return;
@@ -336,7 +336,7 @@ void NarrativeControl::editNarrativeInfo()
 	NarrativeInfoDialog dlg(narrative);
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
-		qDebug() << "narrative list - cancelled edit on" << active_item;
+		qInfo() << "narrative list - cancelled edit on" << active_item;
 		return;
 	}
 
@@ -520,7 +520,7 @@ bool NarrativeControl::openSlide(int index, bool go)
 //		selectSlides(getCurrentNarrativeIndex(), {next});
 //	}
 //	else {
-//		qDebug() << "can't advance when editing slide";
+//		qInfo() << "can't advance when editing slide";
 //	}
 //}
 
@@ -999,9 +999,9 @@ void NarrativeControl::dirtyCurrentSlide()
 
 void NarrativeControl::redrawThumbnails(const std::vector<NarrativeSlide*> slides)
 {
-	qDebug() << "redraw thumbnails";
+	//qInfo() << "redraw thumbnails";
 	for (auto slide : slides) {
-		qDebug() << "redrawing thumbnail" << slide;
+		//qInfo() << "redrawing thumbnail" << slide;
 		QImage thumbnail;
 
 		thumbnail = m_app->generateThumbnail(slide);

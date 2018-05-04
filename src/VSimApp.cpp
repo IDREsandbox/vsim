@@ -26,7 +26,6 @@
 #include "narrative/NarrativeCanvas.h"
 #include "OSGViewerWidget.h"
 #include "MainWindow.h"
-#include "ModelOutliner.h"
 #include "TimeSlider.h"
 #include "narrative/NarrativeControl.h"
 #include "narrative/NarrativePlayer.h"
@@ -231,7 +230,8 @@ void VSimApp::setFileName(const std::string &str)
 
 void VSimApp::setStatusMessage(const QString & message, int timeout)
 {
-	m_window->statusBar()->showMessage(message, timeout);
+	if (m_window)
+		m_window->statusBar()->showMessage(message, timeout);
 }
 
 osg::Vec3d VSimApp::getPosition() const

@@ -14,7 +14,6 @@ HistoryWindow::HistoryWindow(QWidget * parent)
 	m_view = new QUndoView(this);
 	m_layout->addWidget(m_view);
 	m_layout->setMargin(0);
-	qDebug() << "size constraint" << m_layout->sizeConstraint();
 }
 
 void HistoryWindow::setStack(QUndoStack *stack)

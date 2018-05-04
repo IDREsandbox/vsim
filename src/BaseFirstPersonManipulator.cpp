@@ -53,9 +53,7 @@ void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::No
 		iv.setTraversalMask(0xffffffff);
 		world->accept(iv);
 
-		//qDebug() << "tracing" << pos[0] << pos[1] << pos[2] << new_pos_plus[0] << new_pos_plus[1] << new_pos_plus[2];
 		if (lsi->containsIntersections()) {
-			//qDebug() << "intersection";
 			osg::Vec3d point = lsi->getIntersections().begin()->getWorldIntersectPoint();
 			osg::Vec3d normal = lsi->getIntersections().begin()->getWorldIntersectNormal();
 			// if intersection then don't move
@@ -79,7 +77,6 @@ void BaseFirstPersonManipulator::rotateByPixels(double dx, double dy)
 	osg::Matrixd m = getMatrix();
 	double yaw, pitch, roll;
 	Util::quatToYPR(m.getRotate(), &yaw, &pitch, &roll);
-	//qDebug() << "ypr1" << y*180/M_PI << p*180/M_PI << r*180/M_PI;
 
 	// dx+ yaw decreases
 	// dx- yaw increases

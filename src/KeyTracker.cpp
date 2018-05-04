@@ -50,11 +50,11 @@ bool KeyTracker::keyPressed(int key)
 }
 
 void KeyTracker::debug() {
-	qDebug() << "Debugging key tracker";
+	qInfo() << "Debugging key tracker";
 	for (auto i : m_keymap) {
-		qDebug() << "key" << QKeySequence(i);
+		qInfo() << "key" << QKeySequence(i);
 	}
-	qDebug() << "mouse" << m_mouse_buttons;
+	qInfo() << "mouse" << m_mouse_buttons;
 }
 
 Qt::MouseButtons KeyTracker::mouseButtons()

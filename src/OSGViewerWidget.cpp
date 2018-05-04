@@ -74,7 +74,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	// Stats Handler
 	m_stats = new osgViewer::StatsHandler;
 	m_stats->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F30); // biggest hack
-	//m_stats->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_N);
+	m_stats->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_F29);
 	m_main_view->addEventHandler(m_stats);
 
 	// Camera State Handler

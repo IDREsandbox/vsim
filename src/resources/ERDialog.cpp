@@ -204,11 +204,11 @@ std::shared_ptr<ECategory> ERDialog::categoryShared() const
 	int row = ui.categories->currentIndex();
 	QModelIndex index = ui.categories->model()->index(row, 0);
 	if (!index.isValid()) {
-		qDebug() << "cat index invalid";
+		qWarning() << "cat index invalid";
 	}
 	auto shared = m_control->categoryModel()->getShared(index);
 	if (!shared) {
-		qDebug() << "shared is null";
+		qWarning() << "cat shared is null";
 	}
 	return m_control->categoryModel()->getShared(index);
 }

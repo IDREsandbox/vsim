@@ -15,13 +15,6 @@ Label::Label(int flags) :
 	m_text(NULL),
 	m_labelAlpha(1.0f)
 {
-	//qDebug() << "null mtext";
-		//std::string temp;
-		//temp = getLabel();
-		//setLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-		//m_letter_size = getTextSize();
-		//m_letter_size.x() /= 100;
-		//setLabel(temp);
 }
 
 Label::Label(const Label& label, const osg::CopyOp& copyop)
@@ -29,13 +22,6 @@ Label::Label(const Label& label, const osg::CopyOp& copyop)
 	m_text(label.m_text),
 	m_labelAlpha(label.m_labelAlpha)
 {
-	//qDebug() << "mtext copyop";
-		//std::string temp;
-		//temp = getLabel();
-		//setLabel("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-		//m_letter_size = getTextSize();
-		//m_letter_size.x() /= 100;
-		//setLabel(temp);
 }
 
 Label::~Label()
@@ -80,7 +66,6 @@ const osgText::Text* Label::getText() const
 void Label::setText(osgText::Text* text)
 {
 	//std::string s = text->getText().createUTF8EncodedString();
-	//qDebug() << "set text" << QString::fromStdString(s);
 	//OSG_ALWAYS << "setText" << std::endl;
 	m_text = text;
 	m_labelAlpha = m_text->getColor().a();

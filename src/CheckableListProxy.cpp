@@ -163,7 +163,6 @@ Qt::ItemFlags CheckableListProxy::flags(const QModelIndex & index) const
 	//Qt::ItemFlags flags = source->flags(source->index(index.row() - 1, index.column()));
 	//if (index.column() == 0) {
 	//	Qt::ItemFlags newflags = Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
-	//	//qDebug() << "flags" << index.row() << newflags;
 	//	return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
 	//	//return (flags | Qt::ItemIsUserCheckable) & ~Qt::ItemIsSelectable;
 	//}
@@ -181,7 +180,6 @@ QVariant CheckableListProxy::data(const QModelIndex & index, int role) const
 			return QString("(Show All)");
 		}
 		if (role == Qt::ItemDataRole::CheckStateRole) {
-			//qDebug() << "get check all" << m_check_all;
 			return m_check_all;
 		}
 		return QVariant();
@@ -234,7 +232,6 @@ bool CheckableListProxy::setData(const QModelIndex & index, const QVariant & val
 			m_unchecked_count++;
 		}
 		updateTristate();
-		//qDebug() << " -- data changed in model, emitting" << index.row() << index.row();
 		emit dataChanged(index, index, {Qt::ItemDataRole::CheckStateRole});
 		return true;
 	}

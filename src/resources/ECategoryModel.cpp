@@ -22,7 +22,6 @@ QVariant ECategoryModel::data(const QModelIndex & index, int role) const
 
 	ECategory *cat = m_group->child(index.row());
 	if (cat == nullptr) {
-		//qDebug() << "non-category in CategoryModel";
 		return QVariant();
 	}
 
@@ -30,7 +29,6 @@ QVariant ECategoryModel::data(const QModelIndex & index, int role) const
 		return cat->getColor();
 	}
 	else if (role == Qt::ItemDataRole::DisplayRole) {
-		//qDebug() << "display role" << index.row() << index.column() << QString::fromStdString(cat->getCategoryName());
 		return QString::fromStdString(cat->getCategoryName());
 	}
 

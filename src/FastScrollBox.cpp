@@ -457,10 +457,5 @@ FastScrollBox::View::View(FastScrollBox * box)
 
 void FastScrollBox::View::paintEvent(QPaintEvent * event)
 {
-	QElapsedTimer t; t.start();
-
-	//return;
 	QGraphicsView::paintEvent(event);
-
-	//qDebug() << "paint" << this << t.nsecsElapsed()/1000000.0;
 }

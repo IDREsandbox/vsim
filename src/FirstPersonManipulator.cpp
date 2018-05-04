@@ -28,7 +28,6 @@ void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::Node *
 	if (keys == nullptr) return;
 	
 	double dd = getMaxSpeed() * dt_sec; // should be multiplied by the time (13ms or so)
-	//qDebug() << "speed" << dd;
 	if (keys->keyPressed(Qt::Key_W)) {
 		m_pos_target[0] += dd;
 	}
@@ -56,12 +55,9 @@ void FirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::Node *
 	tx = m_pos_target.x();
 	ty = m_pos_target.y();
 	tz = m_pos_target.z();
-	//qDebug() << "pxpypz" << px << py << pz;
-	//qDebug() << "txtytz" << tx << ty << tz;
 	double cx = Util::exponentialSmooth2(&px, tx, m_movement_smoothing, dt_sec, .001);
 	double cy = Util::exponentialSmooth2(&py, ty, m_movement_smoothing, dt_sec, .001);
 	double cz = Util::exponentialSmooth2(&pz, tz, m_movement_smoothing, dt_sec, .001);
-	//qDebug() << "deltas" << cx << cy << cz;
 
 	if (std::abs(cx) >= .0005) moveForward(cx);
 	if (std::abs(cy) >= .0005) moveRight(-cy);

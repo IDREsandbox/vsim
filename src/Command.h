@@ -40,7 +40,6 @@ public:
 		m_obj(obj)
 	{
 		old_value = (obj->*m_getter)();
-		//qDebug() << m_getter << m_setter << new_value << old_value << m_obj;
 	}
 	void undo() {
 		(m_obj->*m_setter)(old_value);

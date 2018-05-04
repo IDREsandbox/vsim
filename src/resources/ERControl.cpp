@@ -571,10 +571,8 @@ void ERControl::onUpdate()
 		}
 		if (changed && overlap && res->getAutoLaunch()) {
 			trigger_list.insert(res);
-			//qDebug() << "in range" << res;
 		}
 		if (changed && !overlap) {
-			//qDebug() << "out of range" << res;
 		}
 	}
 	//m_ers->sEdited(change_list);

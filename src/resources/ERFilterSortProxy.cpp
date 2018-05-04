@@ -85,7 +85,6 @@ void ERFilterSortProxy::setBase(TGroup<EResource> *base)
 	});
 	connect(base, &GroupSignals::sItemsMoved, this,
 		[this](const std::vector<std::pair<size_t, size_t>> &moves) {
-		qDebug() << "base moved!" << moves.size();
 
 		m_map_to_base = VecUtil::fixIndicesAfterMove(m_map_to_base, moves);
 
@@ -389,24 +388,11 @@ void ERFilterSortProxy::checkAndInsertSet(const std::set<size_t> &base_indices)
 	auto lt = [this](size_t l, size_t r) { return lessThan(l, r); };
 	std::sort(nodes_filtered.begin(), nodes_filtered.end(), lt);
 
-	// base before
-	//qDebug() << "map before";
-	//for (int i : m_map_to_base) {
-	//	EResource *res = dynamic_cast<EResource*>(m_base->child(i));
-	//	qDebug() << i << ":" << res->getResourceName().c_str();
-	//}
-
 	// merge
 	std::vector<size_t> result;
 	std::merge(m_map_to_base.begin(), m_map_to_base.end(),
 		nodes_filtered.begin(), nodes_filtered.end(),
 		std::back_inserter(result), lt);
-
-	//qDebug() << "map after";
-	//for (int i : result) {
-	//	EResource *res = dynamic_cast<EResource*>(m_base->child(i));
-	//	qDebug() << i << ":" << res->getResourceName().c_str();
-	//}
 
 	// where were nodes inserted?
 	// compare two vectors, m_map_to_base and result
@@ -425,12 +411,6 @@ void ERFilterSortProxy::checkAndInsertSet(const std::set<size_t> &base_indices)
 			old_i++;
 		}
 	}
-
-	//qDebug() << "insertions at";
-	//for (auto &p: insertions) {
-	//	EResource *res = dynamic_cast<EResource*>(p.second);
-	//	qDebug() << p.first << ":" << res->getResourceName().c_str();
-	//}
 
 	m_map_to_base = result;
 	emit sInsertedMulti(indices);
@@ -565,7 +545,6 @@ size_t ERFilterSortProxy::size() const
 //
 //	if (!m_enable_range) return;
 //
-//	//qDebug() << "hnm?";
 //	m_position = pos;
 //
 //	// 1.
@@ -590,8 +569,6 @@ size_t ERFilterSortProxy::size() const
 //		// two circles overlap
 //		bool overlap = Util::spheresOverlap(pos, m_radius, res->getPosition(), res->getLocalRange());
 //		bool was_in_range = m_in_range.find(res) != m_in_range.end();
-//		//qDebug() << "overlap?" << overlap << res;
-//		//qDebug() << "m_rad" << m_radius << "range" << res->getLocalRange() << "dist" << (pos - res->getPosition()).length() << "was" << was_in_range;
 //		// overlap and not in map, then insert it
 //		if (overlap && !was_in_range) {
 //			entered_range.insert(i);
