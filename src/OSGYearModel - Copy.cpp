@@ -6,42 +6,14 @@
 #include "Util.h"
 #include "Model.h"
 #include "ModelGroup.h"
-#include "OSGNodeWrapper.h"
 
 OSGYearModel::OSGYearModel(QObject *parent)
-	: OSGGroupModel(parent),
-	m_base(nullptr)
+	: OSGGroupModel(parent)
 {
 }
 
-void OSGYearModel::setBase(OSGNodeWrapper *base)
+void OSGYearModel::setRoot(osg::ref_ptr<osg::Node> node)
 {
-	// TODO: disconnect old base
-	m_base = base;
-
-	setNode(m_base->getRoot());
-
-	beginResetModel();
-	endResetModel();
-
-	// TODO: connect insertions
-	// TODO: connect removals
-	// TODO: move this to OSGGroupModel?
-	connect(m_base, &OSGNodeWrapper::sAboutToReset, this,
-		[this]() {
-		beginResetModel();
-	});
-	connect(m_base, &OSGNodeWrapper::sReset, this,
-		[this]() {
-		endResetModel();
-	});
-	connect(m_base, &OSGNodeWrapper::sNodeYearChanged, this,
-		[this](osg::Node *node, int year, bool begin) {
-		Column c = begin ? BEGIN : END;
-		QModelIndex index = indexOf(node, c);
-		if (!index.isValid()) return;
-		emit dataChanged(index, index, { Qt::DisplayRole, Qt::EditRole });
-	});
 }
 
 //void OSGYearModel::setModel(Model *model)
@@ -85,7 +57,7 @@ void OSGYearModel::setBase(OSGNodeWrapper *base)
 
 int OSGYearModel::columnCount(const QModelIndex &parent) const
 {
-	return std::size(ColumnStrings);
+	return 4;
 }
 
 QVariant OSGYearModel::data(const QModelIndex &index, int role) const
@@ -104,19 +76,19 @@ QVariant OSGYearModel::data(const QModelIndex &index, int role) const
 
 	int col = index.column();
 	switch (col) {
-	case NAME:
+	case 0:
 		return QString::fromStdString(node->getName());
 		break;
-	case TYPE:
+	case 1:
 		return node->className();
 		break;
-	case BEGIN:
+	case 2:
 		ok = node->getUserValue("yearBegin", value);
 		if (ok) return value;
 		if (role == Qt::EditRole) return 0; // this makes the editor a spinbox
 		return QVariant();
 		break;
-	case END:
+	case 3:
 		ok = node->getUserValue("yearEnd", value);
 		if (ok) return value;
 		if (role == Qt::EditRole) return 0;
@@ -130,24 +102,18 @@ Qt::ItemFlags OSGYearModel::flags(const QModelIndex &index) const
 {
 	if (!index.isValid()) return 0;
 	int col = index.column();
-	bool editable = false;
-	Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	if (col == 1) return Qt::ItemIsEnabled;
 
-	if (col == NAME) {
-		editable = true;
-	}
-	if (col == BEGIN || col == END) {
-		// if the name is T: begin end, then times are fixed
-		// TODO: other stuck time conditions
+	if (col == 2 || col == 3) {
+		// if the filename is T: begin end, then not editable
 		int begin, end;
-		if (!Util::nodeTimeInName(getNode(index)->getName(), &begin, &end)) {
-			editable = true;
-		}
+		if (Util::nodeTimeInName(getNode(index)->getName(), &begin, &end)) 
+			return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
 	// check if actually editable
-	flags.setFlag(Qt::ItemIsEditable, editable);
 
-	return flags;
+	return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+	//return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }
 
 bool OSGYearModel::setData(const QModelIndex & index, const QVariant & value, int role)
@@ -160,20 +126,20 @@ bool OSGYearModel::setData(const QModelIndex & index, const QVariant & value, in
 	osg::Node *node = static_cast<osg::Node*>(index.internalPointer());
 	std::string prop;
 	switch (col) {
-	case NAME:
+	case 0:
 		// TODO make command?
 		node->setName(value.toString().toStdString());
 		// If the name has time values, then apply those
-		TimeInitVisitor::touch(m_base, node);
+		TimeInitVisitor::touch(m_model, node);
 		break;
-	case TYPE:
+	case 1:
 		return false;
 		break;
-	case BEGIN:
-		m_base->setNodeYear(node, value.toInt(), true);
+	case 2:
+		m_model->setNodeYear(node, value.toInt(), true);
 		break;
-	case END:
-		m_base->setNodeYear(node, value.toInt(), false);
+	case 3:
+		m_model->setNodeYear(node, value.toInt(), false);
 		break;
 	}
 	return false;
@@ -182,9 +148,18 @@ bool OSGYearModel::setData(const QModelIndex & index, const QVariant & value, in
 QVariant OSGYearModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-		
-		if (section >= columnCount()) return QVariant();
-		return ColumnStrings[section];
+		switch (section) {
+		case 0:
+			return "Name";
+		case 1:
+			return "Type";
+		case 2:
+			return "Begin Year";
+		case 3:
+			return "End Year";
+		default:
+			return QVariant();
+		}
 	}
 	return QVariant();
 }

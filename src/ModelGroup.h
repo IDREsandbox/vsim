@@ -9,6 +9,7 @@
 #include "GroupTemplate.h"
 
 class Model;
+class OSGNodeWrapper;
 class ModelGroup : public TGroup<Model> {
 	Q_OBJECT
 public:
@@ -26,22 +27,24 @@ public:
 
 	// Set the year to view, hides/shows models accordingly
 	// 0 shows all models
-	void setYear(int year);
-	void enableTime(bool enable);
+	//void setYear(int year);
+	//void enableTime(bool enable);
 
 	std::set<int> getKeyYears();
 
+	OSGNodeWrapper *rootWrapper() const;
 	osg::Group *sceneRoot() const;
 	void debugScene() const;
 
 signals:
 	void sKeysChanged();
 
-private:
-	int m_year;
-	bool m_time_enabled;
+	// model can be null if unknown
+	void sNodeYearChanged(osg::Node *node, int year, bool begin, Model *model);
 
+private:
 	osg::ref_ptr<osg::Group> m_root;
+	OSGNodeWrapper *m_root_wrapper;
 };
 
 //
@@ -81,48 +84,5 @@ private:
 //	int m_old_value;
 //	int m_new_value;
 //};
-
-// Goes through nodes and initializes yearBegin and yearEnd
-// based on names
-class TimeInitVisitor : public osg::NodeVisitor {
-public:
-	TimeInitVisitor(Model *group);
-	virtual void apply(osg::Group &node) override;
-	static void touch(Model *model, osg::Node *node);
-private:
-	Model *m_model;
-	int m_year;
-};
-
-// Returns a set of key transition times
-class TimeGetVisitor : public osg::NodeVisitor {
-public:
-	TimeGetVisitor();
-	virtual void apply(osg::Group &node) override;
-	std::set<int> results() const;
-private:
-	std::set<int> m_begins;
-	std::set<int> m_ends;
-	std::set<int> bar;
-};
-
-// Hides nodes based on year
-class TimeMaskVisitor : public osg::NodeVisitor {
-public:
-	TimeMaskVisitor(int year);
-	virtual void apply(osg::Group &node) override;
-private:
-	int m_year;
-};
-
-class DebugVisitor : public osg::NodeVisitor {
-public:
-	DebugVisitor();
-	virtual void apply(osg::Group &group) override;
-	virtual void apply(osg::Node &node) override;
-
-private:
-	int m_tabs;
-};
 
 #endif

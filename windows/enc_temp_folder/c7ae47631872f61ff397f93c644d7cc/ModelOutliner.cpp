@@ -55,6 +55,7 @@ void OutlinerTimeDelegate::paint(QPainter *painter, const QStyleOptionViewItem &
 			//QRect r = option.rect;
 			//button.rect = QRect(r.left(), r.top(), r.width(), r.height());
 			//button.text = "Add";
+			////qDebug() << "option state" << option.state;
 			//button.state = (option.state & QStyle::State_Sunken) ? QStyle::State_Sunken | QStyle::State_Enabled : QStyle::State_Enabled;
 			//QApplication::style()->drawControl(QStyle::CE_PushButton, &button, painter);
 		}

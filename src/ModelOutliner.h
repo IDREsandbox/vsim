@@ -4,11 +4,19 @@
 #include <QItemDelegate>
 #include <QStyledItemDelegate>
 
+class ModelGroup;
+class OSGYearModel;
 class ModelOutliner : public QTreeView {
 	Q_OBJECT
 public:
 	ModelOutliner(QWidget *parent = nullptr);
 
+	void setModelGroup(ModelGroup *models);
+
+private:
+	ModelGroup *m_models;
+
+	OSGYearModel *m_year_model;
 };
 
 class OutlinerTimeDelegate : public QStyledItemDelegate

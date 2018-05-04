@@ -4,6 +4,7 @@
 #include "Model.h"
 #include "VSimApp.h"
 #include "VSimRoot.h"
+#include "OSGNodeWrapper.h"
 
 TimeManager::TimeManager(VSimApp *app, QObject *parent)
 	: QObject(parent),
@@ -41,7 +42,7 @@ void TimeManager::setYear(int year)
 {
 	m_year = year;
 	emit sYearChanged(year);
-	if (m_models) m_models->setYear(year);
+	if (m_models) m_models->rootWrapper()->setYear(year);
 }
 
 bool TimeManager::timeEnabled() const
@@ -53,7 +54,7 @@ void TimeManager::enableTime(bool enable)
 {
 	m_enabled = enable;
 	emit sTimeEnableChanged(enable);
-	if (m_models) m_models->enableTime(enable);
+	if (m_models) m_models->rootWrapper()->enableTime(enable);
 }
 
 std::set<int> TimeManager::keyYears() const

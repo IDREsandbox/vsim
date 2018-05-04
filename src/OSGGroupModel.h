@@ -24,10 +24,13 @@ public:
 
 	OSGGroupModel(QObject *parent);
 	virtual void setNode(osg::Node *group);
+	bool rootIncluded() const;
+	void includeRoot(bool include);
 
 	// tree like
 	osg::Node *getNode(const QModelIndex &index) const;
 	QModelIndex indexOf(osg::Node *node) const;
+	QModelIndex indexOf(osg::Node *node, int column) const;
 
 	// overrides
 	//virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -40,7 +43,7 @@ public:
 	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
 protected:
-
 	osg::ref_ptr<osg::Node> m_node;
+	bool m_include_root;
 };
 #endif

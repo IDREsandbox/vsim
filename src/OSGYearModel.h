@@ -8,6 +8,7 @@
 // Columns: Name, Type, (Begin, End)
 
 class Model;
+class OSGNodeWrapper;
 
 class OSGYearModel : public OSGGroupModel {
 	Q_OBJECT
@@ -15,7 +16,22 @@ public:
 	OSGYearModel(QObject *parent = nullptr);
 	//virtual void setGroup(Group *group) override;
 
-	void setModel(Model *model);
+	//void setModel(Model *model);
+
+	enum Column {
+		NAME,
+		TYPE,
+		BEGIN,
+		END
+	};
+	static constexpr const char *ColumnStrings[] = {
+		"Name",
+		"Type",
+		"Begin Year",
+		"End Year"
+	};
+
+	void setBase(OSGNodeWrapper *base);
 
 	QVariant data(const QModelIndex &index, int role) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -24,9 +40,11 @@ public:
 	Qt::ItemFlags flags(const QModelIndex &index) const override;
 	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
+signals:
+	void sNodeYearChanged(osg::Node *node, int year, bool begin);
+
 private:
-	Model *m_model;
-	//osg::ref_ptr<ModelGroup> m_model_group;
+	OSGNodeWrapper *m_base;
 };
 
 #endif

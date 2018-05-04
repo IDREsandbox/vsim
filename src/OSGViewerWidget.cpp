@@ -107,7 +107,8 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_flight_manipulator = new FlightManipulator;
 	m_object_manipulator = new ObjectManipulator;
 	m_main_view->setCameraManipulator(m_object_manipulator);
-	m_manipulator = MANIPULATOR_SIMPLE;
+	m_manipulator = MANIPULATOR_OBJECT;
+	m_navigation_mode = Navigation::OBJECT;
 
 	m_collisions_on = false;
 	m_gravity_on = false;

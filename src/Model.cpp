@@ -18,22 +18,6 @@ osg::Node *Model::node() const
 	return m_node.get();
 }
 
-void Model::setNodeYear(osg::Node *node, int year, bool begin)
-{
-	std::string prop;
-	if (begin) prop = "yearBegin";
-	else prop = "yearEnd";
-
-	if (year == 0) {
-		osg::UserDataContainer *cont = node->getUserDataContainer();
-		cont->removeUserObject(cont->getUserObjectIndex(prop));
-	}
-	else {
-		node->setUserValue(prop, year);
-	}
-	emit sNodeYearChanged(node, year, begin);
-}
-
 std::string Model::name() const
 {
 	return m_name;

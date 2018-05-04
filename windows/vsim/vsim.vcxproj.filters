@@ -488,6 +488,9 @@
     <ClCompile Include="..\..\src\CoordinateWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\OSGNodeWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="..\..\src\narrative\CanvasContainer.h">
@@ -689,6 +692,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="..\..\src\FutureDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="..\..\src\OSGNodeWrapper.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

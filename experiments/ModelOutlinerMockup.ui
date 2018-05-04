@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ModelOutliner</class>
+ <widget class="QWidget" name="ModelOutliner">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>395</width>
+    <height>462</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Imported Models</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTreeWidget" name="treeWidget">
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
+     </property>
+     <property name="indentation">
+      <number>0</number>
+     </property>
+     <attribute name="headerVisible">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="headerDefaultSectionSize">
+      <number>80</number>
+     </attribute>
+     <attribute name="headerStretchLastSection">
+      <bool>false</bool>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Link</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Begin</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>End</string>
+      </property>
+     </column>
+     <item>
+      <property name="text">
+       <string>cowmodel</string>
+      </property>
+      <property name="text">
+       <string>./cow.osg</string>
+      </property>
+      <property name="text">
+       <string>516 BCE</string>
+      </property>
+      <property name="text">
+       <string>1258 CE</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>flight thing</string>
+      </property>
+      <property name="text">
+       <string>./something.flt</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>embedded</string>
+      </property>
+      <property name="text">
+       <string>(embedded)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>absolute path</string>
+      </property>
+      <property name="text">
+       <string>C:/absolute path</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Hierarchy</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTreeWidget" name="treeWidget_2">
+     <attribute name="headerDefaultSectionSize">
+      <number>60</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Begin</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>End</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

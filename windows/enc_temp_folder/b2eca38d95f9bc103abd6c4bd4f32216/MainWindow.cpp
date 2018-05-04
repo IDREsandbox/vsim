@@ -299,8 +299,11 @@ void MainWindow::setApp(VSimApp * vsim)
 
 void MainWindow::onReset()
 {
+	qDebug() << "on reset?";
 	updatePositions();
+	qDebug() << "model reset -> set group?";
 	m_outliner->setModelGroup(m_app->getRoot()->models());
+	qDebug() << "before expant all";
 	m_outliner->expandAll();
 }
 

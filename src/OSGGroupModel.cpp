@@ -7,7 +7,8 @@
 
 OSGGroupModel::OSGGroupModel(QObject *parent)
 	: QAbstractItemModel(parent),
-	m_node(nullptr)
+	m_node(nullptr),
+	m_include_root(true)
 {
 }
 
@@ -15,7 +16,16 @@ QModelIndex OSGGroupModel::index(int row, int column, const QModelIndex & parent
 {
 	if (!m_node) return QModelIndex();
 
+	// get root index when included
+	if (!parent.isValid() && m_include_root) {
+		if (row == 0) {
+			return createIndex(0, column, m_node);
+		}
+		return QModelIndex();
+	}
+
 	osg::Group *pgroup = nullptr;
+
 	if (!parent.isValid()) {
 		// root is parent
 		pgroup = m_node->asGroup();
@@ -50,7 +60,9 @@ QModelIndex OSGGroupModel::parent(const QModelIndex & index) const
 
 	// no parents?
 	int npar = node->getNumParents();
-	if (npar == 0) return QModelIndex();
+	if (npar == 0) { // this is the root
+		return QModelIndex();
+	}
 	osg::Node *parent = node->getParent(0);
 
 	return indexOf(parent);
@@ -62,14 +74,18 @@ int OSGGroupModel::rowCount(const QModelIndex & parent) const
 
 	osg::Group *group;
 	if (!parent.isValid()) {
-		group = m_node->asGroup();
+		if (m_include_root) {
+			return 1;
+		}
+		else {
+			group = m_node->asGroup();
+		}
 	}
 	else {
 		osg::Node *node = getNode(parent);
 		group = node->asGroup();
 	}
 	if (!group) return 0;
-
 	return group->getNumChildren();
 }
 
@@ -90,6 +106,9 @@ QVariant OSGGroupModel::data(const QModelIndex & index, int role) const
 	if (role == PointerRole) {
 		// return the root pointer
 		if (!index.isValid()) {
+			if (m_include_root) {
+				return QVariant::fromValue<void*>(nullptr);
+			}
 			return QVariant::fromValue((void*)(osg::Node*)m_node);
 		}
 		osg::Group *g = m_node->asGroup();
@@ -108,15 +127,28 @@ bool OSGGroupModel::setData(const QModelIndex & index, const QVariant & value, i
 void OSGGroupModel::setNode(osg::Node * group)
 {
 	beginResetModel();
-
 	m_node = group;
+	endResetModel();
+}
 
+bool OSGGroupModel::rootIncluded() const
+{
+	return m_include_root;
+}
+
+void OSGGroupModel::includeRoot(bool include)
+{
+	beginResetModel();
+	m_include_root = include;
 	endResetModel();
 }
 
 osg::Node *OSGGroupModel::getNode(const QModelIndex & index) const
 {
-	if (!index.isValid()) return m_node;
+	if (!index.isValid()) {
+		if (m_include_root) return nullptr;
+		return m_node;
+	}
 	osg::Node *node = static_cast<osg::Node*>(index.internalPointer());
 	return node;
 }
@@ -128,7 +160,12 @@ QModelIndex OSGGroupModel::indexOf(osg::Node *node) const
 	}
 
 	// Is this the root?
-	if (node == m_node) return QModelIndex();
+	if (node == m_node) {
+		if (m_include_root) {
+			return createIndex(0, 0, node);
+		}
+		return QModelIndex();
+	}
 
 	// no parents?
 	size_t npar = node->getNumParents();
@@ -144,4 +181,13 @@ QModelIndex OSGGroupModel::indexOf(osg::Node *node) const
 	if (row >= g->getNumChildren()) return QModelIndex(); // child not found
 
 	return createIndex(row, 0, node);
+}
+
+QModelIndex OSGGroupModel::indexOf(osg::Node * node, int column) const
+{
+	QModelIndex index = indexOf(node);
+	if (!index.isValid()) return QModelIndex();
+
+	QModelIndex outIndex = this->index(index.row(), column, index.parent());
+	return QModelIndex();
 }

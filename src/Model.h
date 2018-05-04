@@ -12,15 +12,13 @@ public:
 	void setNode(osg::Node *node);
 	osg::Node *node() const;
 
-	void setNodeYear(osg::Node *node, int year, bool begin);
-
 	std::string name() const;
 	void setName(const std::string &path);
 	std::string path() const;
 	void setPath(const std::string &path);
 
 signals:
-	void sNodeYearChanged(osg::Node *node, int year, bool begin);
+	//void sNodeYearChanged(osg::Node *node, int year, bool begin);
 	void sChanged();
 
 private:

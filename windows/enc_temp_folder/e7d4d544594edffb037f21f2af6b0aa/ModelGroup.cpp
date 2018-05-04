@@ -19,6 +19,7 @@ ModelGroup::ModelGroup(QObject *parent)
 		[this](size_t index, size_t count) {
 
 		for (size_t i = 0; i < count; i++) {
+			qDebug() << "adding a model thing";
 			Model *model = child(index + i);
 			osg::Node *node = model->node();
 
@@ -55,11 +56,13 @@ void ModelGroup::addNode(osg::Node * node, const std::string & path)
 
 void ModelGroup::accept(osg::NodeVisitor & visitor)
 {
+	qDebug() << "trying to apply?" << size();
 	// apply year to all models
 	int i = 0;
 	for (auto &model : *this) {
 		
 		if (!model) continue;
+		qDebug() << "applying" << i++;
 		model->node()->accept(visitor);
 	}
 }
