@@ -20,15 +20,24 @@ class TextItem;
 typedef std::vector<std::pair<RectItem*, QRectF>> ItemRectList;
 
 // A widget with transformable items inside
+// internal units [-.5, .5] height, [-r, r] width where r is aspect ratio
+// text and borders are scaled based on baseHeight()
+//   use toScene(px) to map baseheight units to
+//   ex. baseHeight of 600px, text height of 10px, will make a line ~1/60 of the screen
 class CanvasContainer : public QFrame {
 	Q_OBJECT;
 public:
 	CanvasContainer(QWidget *parent);
 
+	void addItem(RectItem *item);
+
 	bool isEditable() const;
 	void setEditable(bool editable);
 
 	void setBaseHeight(double height);
+	double baseHeight() const;
+	// maps pixel count to scene size
+	double toScene(int px) const;
 
 	// undo redo filter
 	bool eventFilter(QObject *obj, QEvent *e) override;
@@ -135,7 +144,7 @@ public:
 	void previewMove(QPoint current_point);
 	void endMove();
 	void startResize(QPoint start_point, Position drag_pos);
-	void previewResize(QPoint current_point);
+	void previewResize(QPoint current_point, bool fixed_ratio);
 	void endResize();
 
 protected:
@@ -175,18 +184,14 @@ private:
 };
 
 // A transformable rectangular item in a CanvasScene
-class RectItem : public QGraphicsRectItem {
+class RectItem : public QAbstractGraphicsShapeItem {
 public:
 	RectItem(QGraphicsItem *parent = nullptr);
 
-	// Use these over the QGraphicsItem functions
+	enum { Type = UserType + 1 };
+	int type() const override { return Type; };
 
-	// QGraphicsRectItem has a pos from QGraphicsItem, plus another
-	// pos from rect and a size.
-	// Having two positions is confusing. Use these for postions/sizes
-	// scene units [-1, 1]
 	QSizeF size() const;
-	//QPointF pos(); // <- uses the default
 	QRectF rect() const;
 	void setRect(QRectF r);
 	void setRect(double x, double y, double w, double h);
@@ -196,9 +201,29 @@ public:
 	//bool editable() const;
 	virtual void setEditable(bool enable);
 
+	// resize in fixed ratio (for images)
+	void setPrefersFixedRatio(bool fixed);
+	bool prefersFixedRatio();
+
+	// paint the border completely around rect
+	// ie no overlapping with rect
+	void setBorderAround(bool around);
+	bool borderAround();
+
 	void mouseEventSelection(QGraphicsSceneMouseEvent *event);
 
 	CanvasScene *canvasScene() const;
+
+	void setContainer(CanvasContainer *container);
+	CanvasContainer *container() const;
+
+	void debugPaint(bool debug);
+
+	// overrides
+	virtual QRectF boundingRect() const override;
+	virtual void paint(QPainter *painter,
+		const QStyleOptionGraphicsItem *option,
+		QWidget *widget = nullptr) override;
 
 protected:
 	virtual void onResize(QSizeF size);
@@ -206,8 +231,12 @@ protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
 
 private:
+	CanvasContainer *m_container;
 	double m_w;
 	double m_h;
+	bool m_prefers_fixed;
+	bool m_border_around;
+	bool m_debug_paint;
 	//bool m_editable;
 };
 
@@ -215,6 +244,8 @@ private:
 class TextRect : public RectItem {
 public:
 	TextRect(QGraphicsItem *parent = nullptr);
+	enum { Type = UserType + 2 };
+	int type() const override { return Type; };
 
 	void setBaseHeight(double height); // ex. 600.0 for 800x600
 
@@ -257,6 +288,21 @@ protected:
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
 	TextRect *m_rect;
+};
+
+class CanvasImage : public RectItem {
+public:
+	CanvasImage();
+	enum { Type = UserType + 3 };
+	int type() const override { return Type; };
+
+	void setPixmap(const QPixmap &p);
+
+protected:
+	void onResize(QSizeF size) override;
+
+private:
+	QGraphicsPixmapItem *m_pixmap;
 };
 
 #endif

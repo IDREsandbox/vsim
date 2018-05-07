@@ -54,6 +54,17 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 	connect(m_scene, &QGraphicsScene::selectionChanged, m_manipulator, &TransformManipulator::recalculate);
 }
 
+void CanvasContainer::addItem(RectItem *item)
+{
+	m_scene->addItem(item);
+	item->setContainer(this);
+	TextRect *text = qgraphicsitem_cast<TextRect*>(item);
+	CanvasImage *image = qgraphicsitem_cast<CanvasImage*>(item);
+	if (text) {
+		text->setBaseHeight(m_base_height);
+	}
+}
+
 bool CanvasContainer::isEditable() const
 {
 	return m_editable;
@@ -141,6 +152,16 @@ void CanvasContainer::setBaseHeight(double height)
 		rect->setBaseHeight(height);
 	}
 	m_base_height = height;
+}
+
+double CanvasContainer::baseHeight() const
+{
+	return m_base_height;
+}
+
+double CanvasContainer::toScene(int px) const
+{
+	return px / (double)m_base_height;
 }
 
 bool CanvasContainer::eventFilter(QObject * obj, QEvent * e)
@@ -234,7 +255,11 @@ void CanvasScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
 }
 
 RectItem::RectItem(QGraphicsItem * parent)
-	: QGraphicsRectItem(parent)
+	: QAbstractGraphicsShapeItem(parent),
+	m_container(nullptr),
+	m_prefers_fixed(false),
+	m_border_around(false),
+	m_debug_paint(false)
 {
 	setEditable(false);
 
@@ -261,16 +286,19 @@ void RectItem::setRect(QRectF r)
 
 void RectItem::setRect(double x, double y, double w, double h)
 {
-	setPos(x, y);
-	m_w = w;
-	m_h = h;
-	onResize(QSizeF(w, h));
-	QGraphicsRectItem::setRect(0, 0, w, h);
+	resize(w, h);
+	move(x, y);
 }
 
 void RectItem::resize(double w, double h)
 {
-	setRect(pos().x(), pos().y(), w, h);
+	prepareGeometryChange();
+	if (m_w == w && m_h == h) {
+		return;
+	}
+	m_w = w;
+	m_h = h;
+	onResize(QSizeF(w, h));
 }
 
 void RectItem::move(double x, double y)
@@ -284,7 +312,7 @@ void RectItem::onResize(QSizeF size)
 
 void RectItem::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
-	QGraphicsRectItem::mousePressEvent(mouseEvent);
+	QAbstractGraphicsShapeItem::mousePressEvent(mouseEvent);
 	mouseEventSelection(mouseEvent);
 	mouseEvent->accept();
 }
@@ -309,9 +337,84 @@ void RectItem::setEditable(bool enable)
 	}
 }
 
+void RectItem::setPrefersFixedRatio(bool fixed)
+{
+	m_prefers_fixed = fixed;
+}
+
+bool RectItem::prefersFixedRatio()
+{
+	return m_prefers_fixed;
+}
+
+void RectItem::setBorderAround(bool around)
+{
+	m_border_around = around;
+}
+
+bool RectItem::borderAround()
+{
+	return m_border_around;
+}
+
 CanvasScene * RectItem::canvasScene() const
 {
 	return dynamic_cast<CanvasScene*>(scene());
+}
+
+void RectItem::setContainer(CanvasContainer * container)
+{
+	m_container = container;
+}
+
+CanvasContainer * RectItem::container() const
+{
+	return m_container;
+}
+
+void RectItem::debugPaint(bool debug)
+{
+	m_debug_paint = debug;
+}
+
+QRectF RectItem::boundingRect() const
+{
+	QRectF r;
+	double pw = pen().widthF();
+	double w = size().width();
+	double h = size().height();
+	if (!m_border_around) {
+		r = QRectF(-pw / 2.0, -pw / 2.0, w + pw, h + pw);
+	}
+	else {
+		r = QRectF(-pw, -pw, w + 2.0 * pw, h + 2.0 * pw);
+	}
+	return r;
+}
+
+void RectItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
+{
+	if (m_debug_paint) {
+		painter->setPen(Qt::NoPen);
+		painter->setBrush(Qt::yellow);
+		painter->drawRect(boundingRect());
+	}
+	QRectF r;
+	double pw = pen().widthF();
+	double w = size().width();
+	double h = size().height();
+	if (!m_border_around) {
+		r = QRectF(QPointF(0, 0), size());
+	}
+	else {
+		// +1/2pw on each side
+		r = QRectF(-pw / 2.0, -pw / 2.0, w + pw, h + pw);
+	}
+	painter->setPen(pen());
+	painter->setBrush(brush());
+	painter->drawRect(r);
+	// if you want a rounded border
+	//painter->drawRoundedRect(r, pw, pw);
 }
 
 TransformManipulator::TransformManipulator(CanvasScene * scene, QGraphicsView *view, QWidget * parent)
@@ -457,7 +560,7 @@ void TransformManipulator::startResize(QPoint start_point, Position drag_pos)
 	m_start_drag_rect = m_rect;
 }
 
-void TransformManipulator::previewResize(QPoint current_point)
+void TransformManipulator::previewResize(QPoint current_point, bool fixed_ratio)
 {
 	if (!m_resizing) return;
 
@@ -469,36 +572,71 @@ void TransformManipulator::previewResize(QPoint current_point)
 	QRectF r_old = m_start_drag_rect;
 	QRectF r_new = r_old;
 
+	// figure out the new rectangle, depends on which button you're dragging
 	int row = m_drag_pos / 3;
 	int col = m_drag_pos % 3;
 
 	double min_size = .01;
 
-	// move left
-	if (col == 0) {
-		r_new.setLeft(std::min(
-			r_old.right() - min_size,
-			r_old.left() + diff.x()));
-	}
-	// move right
-	else if (col == 2) {
-		r_new.setRight(std::max(
-			r_old.left() + min_size,
-			r_old.right() + diff.x()));
-	}
-	// move top
-	if (row == 0) {
-		r_new.setTop(std::min(
-			r_old.bottom() - min_size,
-			r_old.top() + diff.y()));
+	// resize
+	double w_old = r_old.width();
+	double h_old = r_old.height();
+	double w_new = w_old;
+	double h_new = h_old;
+	double mdiff = 1.0;
+	QPointF change = diff;
 
+	// if dragging the left or top, then our diffs work backward
+	// +x is smaller, +y is smaller
+	if (col == 0) {
+		change.setX(-diff.x());
 	}
-	// move bottom
-	else if (row == 2) {
-		r_new.setBottom(std::max(
-			r_old.top() + min_size,
-			r_old.bottom() + diff.y()));
+	if (row == 0) {
+		change.setY(-diff.y());
 	}
+	if (col == 0 || col == 2) {
+		w_new = std::max(w_old + change.x(), min_size);
+	}
+	if (row == 0 || row == 2) {
+		h_new = std::max(h_old + change.y() * mdiff, min_size);
+	}
+
+	// force the diff ratio to be the same as the start rect ratio
+	double old_ratio = m_start_drag_rect.width() / m_start_drag_rect.height();
+	double new_ratio = w_new / h_new;
+	if (fixed_ratio) {
+		// if too wide, then change height to match ratio
+		if (new_ratio > old_ratio) {
+			h_new = w_new / old_ratio;
+		}
+		// if too tall, then change height to match ratio
+		else {
+			w_new = h_new * old_ratio;
+		}
+	}
+
+	// translation
+	double x_new = r_old.x();
+	double y_new = r_old.y();
+
+	// left buttons can move x
+	if (col == 0) {
+		x_new = r_old.right() - w_new;
+	}
+
+	// top buttons can move y
+	if (row == 0) {
+		y_new = r_old.bottom() - h_new;
+	}
+
+	r_new = QRectF(x_new, y_new, w_new, h_new);
+
+	// map all items to r_old coordinates, (0,0) is the top left
+	//   old' = old - oldtl
+	// then every point has an easy remapping
+	//   new' = old' * scale
+	// converting to new coordinates
+	//   new = new' + new
 
 	double scale_x = r_new.width() / r_old.width();
 	double scale_y = r_new.height() / r_old.height();
@@ -508,10 +646,12 @@ void TransformManipulator::previewResize(QPoint current_point)
 		RectItem *item = pair.first;
 		QRectF r = pair.second;
 
+		// to old coordinates
 		// old corners, relative to top left
 		QPointF tl = r.topLeft() - r_old.topLeft();
 		QPointF br = r.bottomRight() - r_old.topLeft();
 
+		// scale
 		// new corners
 		QPointF tl2 = QPointF(
 			tl.x() * scale_x,
@@ -522,6 +662,7 @@ void TransformManipulator::previewResize(QPoint current_point)
 			br.y() * scale_y
 		);
 
+		// to new coordinates
 		QRectF r2(tl2 + r_new.topLeft(), br2 + r_new.topLeft());
 		item->setRect(r2);
 	}
@@ -580,7 +721,25 @@ void TransformManipulator::ResizeButton::mousePressEvent(QMouseEvent *mouseEvent
 
 void TransformManipulator::ResizeButton::mouseMoveEvent(QMouseEvent *mouseEvent)
 {
-	m_boss->previewResize(mouseEvent->globalPos());
+	// if the only selection is an image and doing corners
+	bool fixed = false;
+
+	if (m_pos == TOP_LEFT
+		|| m_pos == TOP_RIGHT
+		|| m_pos == BOTTOM_LEFT
+		|| m_pos == BOTTOM_RIGHT) {
+		if (mouseEvent->modifiers() & Qt::ShiftModifier) {
+			fixed = true;
+		}
+		else {
+			auto sel = m_boss->m_scene->getSelectedRects();
+			if (sel.size() == 1 && (*sel.begin())->prefersFixedRatio()) {
+				fixed = true;
+			}
+		}
+	}
+
+	m_boss->previewResize(mouseEvent->globalPos(), fixed);
 }
 
 void TransformManipulator::ResizeButton::mouseReleaseEvent(QMouseEvent *mouseEvent)
@@ -589,7 +748,8 @@ void TransformManipulator::ResizeButton::mouseReleaseEvent(QMouseEvent *mouseEve
 }
 
 TextRect::TextRect(QGraphicsItem * parent)
-	: RectItem(parent)
+	: RectItem(parent),
+	m_valign(Qt::AlignTop)
 {
 	m_text = new TextItem(this);
 	m_text->show();
@@ -605,7 +765,7 @@ void TextRect::setBaseHeight(double height)
 {
 	m_base_height = height;
 	m_text->setScale(1 / height);
-	onResize(rect().size());
+	onResize(size());
 }
 
 QSizeF TextRect::scaledSize() const
@@ -798,4 +958,67 @@ void TextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event)
 		return;
 	}
 	QGraphicsTextItem::mouseDoubleClickEvent(event);
+}
+
+CanvasImage::CanvasImage()
+{
+	setPrefersFixedRatio(true);
+	setBorderAround(true);
+	m_pixmap = new QGraphicsPixmapItem(this);
+	m_pixmap->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+}
+
+void CanvasImage::setPixmap(const QPixmap & p)
+{
+	m_pixmap->setPixmap(p);
+
+	if (p.isNull()) return;
+
+	double bh = 600;
+	if (container()) bh = container()->baseHeight();
+
+	// find reasonable starting height
+	double set_h; // big units
+	if (p.height() < 50) {
+		set_h = 50;
+	}
+	else if (p.height() < bh) {
+		set_h = p.height();
+	}
+	else {
+		set_h = bh;
+	}
+
+	double ratio;
+	if (p.height() == 0 || p.width() == 0) {
+		ratio = 1.0;
+	}
+	else {
+		ratio = p.width() / (float)p.height();
+	}
+
+	// convert to small units and set
+	double h = set_h / bh;
+	double w = ratio * h;
+	resize(w, h);
+}
+
+void CanvasImage::onResize(QSizeF size)
+{
+	// pixels -> canvas ratio -> item ratio
+	// (300) -> .5 -> .3
+
+	if (m_pixmap->pixmap().isNull()) {
+		return;
+	}
+
+	QPixmap p = m_pixmap->pixmap();
+
+	// scale
+	double sx = size.width() / p.width();
+	double sy = size.height() / p.height();
+
+	QTransform t;
+	t.scale(sx, sy);
+	m_pixmap->setTransform(t);
 }

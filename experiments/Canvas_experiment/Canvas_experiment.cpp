@@ -26,11 +26,8 @@ int main(int argc, char *argv[])
 	canvas->setBaseHeight(600);
 	canvas->setEditable(true);
 
-	RectItem *rect;
 	TextRect *text;
-
 	text = new TextRect();
-	text->setBaseHeight(600);
 	text->setVAlign(Qt::AlignCenter);
 	QObject::connect(text->m_text->document(), &QTextDocument::undoCommandAdded,
 		[text]() {
@@ -38,17 +35,36 @@ int main(int argc, char *argv[])
 	});
 	text->m_text->setPlainText("helloooo\nWORLd");
 
-	rect = text;
-	rect->setRect(QRectF(0, 0, .2, .2));
-	rect->setBrush(QBrush(QColor(255,0,0)));
-	rect->setEditable(true);
-	canvas->scene()->addItem(rect);
+	text->setRect(QRectF(0, 0, .2, .2));
+	text->setBrush(QBrush(QColor(255, 0, 0, 100)));
+	text->setEditable(true);
+	//rect->debugPaint(true);
+	canvas->addItem(text);
 
 	RectItem *rect2 = new RectItem();
 	rect2->setRect(QRectF(-.2, -.2, .2, .2));
-	rect2->setBrush(QBrush(QColor(0, 255, 0)));
+	rect2->setBrush(QBrush(QColor(0, 255, 0, 100)));
 	rect2->setEditable(true);
-	canvas->scene()->addItem(rect2);
+	rect2->setPrefersFixedRatio(true);
+	rect2->debugPaint(true);
+	rect2->setPen(QPen(QBrush(QColor(0, 0, 0)), canvas->toScene(10)));
+	canvas->addItem(rect2);
+
+	RectItem *rect3 = new RectItem();
+	rect3->setRect(QRectF(-.2, 0, .2, .2));
+	rect3->setBrush(QBrush(QColor(0, 0, 255, 255)));
+	rect3->setPen(QPen(QBrush(QColor(0, 0, 0)), canvas->toScene(10)));
+	rect3->setBorderAround(true);
+	rect3->setEditable(true);
+	rect3->setPrefersFixedRatio(false);
+	canvas->addItem(rect3);
+
+	CanvasImage *image = new CanvasImage();
+	image->move(.2, -.2);
+	image->setPixmap(QPixmap("assets/karnak.jpg"));
+	image->setPen(QPen(QBrush(QColor(0, 0, 0)), canvas->toScene(10)));
+	image->setEditable(true);
+	canvas->addItem(image);
 
 	window.show();
 

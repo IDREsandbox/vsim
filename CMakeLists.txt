@@ -384,15 +384,7 @@ target_link_libraries(HSBSpeed_experiment Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIE
 
 add_subdirectory(experiments/FutureDialog_experiment)
 
-set(Canvas_src
-  src/narrative/CanvasContainer.h
-  src/narrative/CanvasContainer.cpp
-  src/narrative/CanvasContainer.h
-  src/narrative/CanvasContainer.cpp
-  experiments/Canvas_experiment/Canvas_experiment.cpp
-)
-add_executable(Canvas_experiment ${Canvas_src})
-target_link_libraries(Canvas_experiment Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+add_subdirectory(experiments/Canvas_experiment)
 
 # tests ####################################
 
