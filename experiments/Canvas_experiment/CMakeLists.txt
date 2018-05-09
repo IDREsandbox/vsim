@@ -1,7 +1,9 @@
 
+set(CMAKE_CURRENT_BINARY_DIR ${CMAKE_BINARY_DIR})
+
 set(Canvas_src
-  ${CMAKE_SOURCE_DIR}/src/narrative/CanvasContainer.h
   ${CMAKE_SOURCE_DIR}/src/narrative/CanvasContainer.cpp
+  ${CMAKE_SOURCE_DIR}/src/narrative/CanvasScene.cpp
   Canvas_experiment.cpp
 )
 add_executable(Canvas_experiment

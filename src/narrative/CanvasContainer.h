@@ -5,46 +5,29 @@
 #include <vector>
 #include <map>
 
-#include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGridLayout>
-#include <QGraphicsRectItem>
-#include <QGraphicsTextItem>
 
 class CanvasScene;
 class TransformManipulator;
 class RectItem;
-class TextRect;
-class TextItem;
 
 typedef std::vector<std::pair<RectItem*, QRectF>> ItemRectList;
 
-// A widget with transformable items inside
-// internal units [-.5, .5] height, [-r, r] width where r is aspect ratio
-// text and borders are scaled based on baseHeight()
-//   use toScene(px) to map baseheight units to
-//   ex. baseHeight of 600px, text height of 10px, will make a line ~1/60 of the screen
+// A viewer for CanvasScene
+// can transform scene items
 class CanvasContainer : public QFrame {
 	Q_OBJECT;
 public:
 	CanvasContainer(QWidget *parent);
 
-	void addItem(RectItem *item);
-
-	bool isEditable() const;
-	void setEditable(bool editable);
-
-	void setBaseHeight(double height);
-	double baseHeight() const;
-	// maps pixel count to scene size
-	double toScene(int px) const;
-
-	// undo redo filter
+	// undo redo filter on view, prevents
 	bool eventFilter(QObject *obj, QEvent *e) override;
 
-	void clear();
+	CanvasScene *scene() const;
+	void setScene(CanvasScene *scene);
 
-	QGraphicsScene *scene() const;
+	void setEditable(bool editable);
 
 protected:
 	void resizeEvent(QResizeEvent* event) override;
@@ -55,43 +38,8 @@ public:
 	QGridLayout *m_layout;
 
 	bool m_editable;
-	double m_base_height;
 
 	TransformManipulator *m_manipulator;
-
-	// makes the scene really big so we can always center
-	QGraphicsRectItem *m_giant_rect;
-	// debug shape
-	QGraphicsRectItem *m_center_rect;
-};
-
-// The internal scene for a CanvasContainer
-class CanvasScene : public QGraphicsScene {
-	Q_OBJECT;
-public:
-	CanvasScene(QObject *parent);
-	std::set<RectItem*> getSelectedRects() const;
-	void setSelectedRects(const std::set<RectItem*> &items);
-
-	// call this before transforming items
-	void beginTransform();
-
-	// call this after transforming items
-	void endTransform();
-
-	// get the original rects for items
-	// use after beginTransform()
-	const std::map<RectItem*, QRectF> &getTransformRects() const;
-
-signals:
-	void sRectsTransformed(const std::map<RectItem*, QRectF> &rects);
-
-protected:
-	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
-
-private:
-	std::map<RectItem*, QRectF> m_saved_rects;
 };
 
 // A rectangle drawn around selected items with
@@ -99,7 +47,6 @@ private:
 class TransformManipulator : public QWidget {
 public:
 	TransformManipulator(CanvasScene *scene, QGraphicsView *view, QWidget *parent = nullptr);
-	friend class ResizeButton;
 
 	enum Edge {
 		TOP,
@@ -130,7 +77,13 @@ public:
 		Qt::SizeFDiagCursor
 	};
 
+	void setScene(CanvasScene *scene);
+	// void enableEditing(bool); // use setEnabled() instead
+
+	// scans canvas for selection, then repositions
 	void recalculate();
+
+	// places the buttons/mask based on current rect
 	void reposition();
 
 	// scene position
@@ -181,128 +134,6 @@ private:
 	Position m_drag_pos;
 	QPoint m_start_drag_point; // global pixel coordinates
 	QRectF m_start_drag_rect; // scene coordinates
-};
-
-// A transformable rectangular item in a CanvasScene
-class RectItem : public QAbstractGraphicsShapeItem {
-public:
-	RectItem(QGraphicsItem *parent = nullptr);
-
-	enum { Type = UserType + 1 };
-	int type() const override { return Type; };
-
-	QSizeF size() const;
-	QRectF rect() const;
-	void setRect(QRectF r);
-	void setRect(double x, double y, double w, double h);
-	void resize(double w, double h);
-	void move(double x, double y);
-	//void setRotation(double deg_ccw);
-	//bool editable() const;
-	virtual void setEditable(bool enable);
-
-	// resize in fixed ratio (for images)
-	void setPrefersFixedRatio(bool fixed);
-	bool prefersFixedRatio();
-
-	// paint the border completely around rect
-	// ie no overlapping with rect
-	void setBorderAround(bool around);
-	bool borderAround();
-
-	void mouseEventSelection(QGraphicsSceneMouseEvent *event);
-
-	CanvasScene *canvasScene() const;
-
-	void setContainer(CanvasContainer *container);
-	CanvasContainer *container() const;
-
-	void debugPaint(bool debug);
-
-	// overrides
-	virtual QRectF boundingRect() const override;
-	virtual void paint(QPainter *painter,
-		const QStyleOptionGraphicsItem *option,
-		QWidget *widget = nullptr) override;
-
-protected:
-	virtual void onResize(QSizeF size);
-
-	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
-
-private:
-	CanvasContainer *m_container;
-	double m_w;
-	double m_h;
-	bool m_prefers_fixed;
-	bool m_border_around;
-	bool m_debug_paint;
-	//bool m_editable;
-};
-
-// A transformable text item in a CanvasScene
-class TextRect : public RectItem {
-public:
-	TextRect(QGraphicsItem *parent = nullptr);
-	enum { Type = UserType + 2 };
-	int type() const override { return Type; };
-
-	void setBaseHeight(double height); // ex. 600.0 for 800x600
-
-	QSizeF scaledSize() const; // returns size in terms of 800x600
-
-	QRectF boundingRect() const override;
-
-	void setEditable(bool enable) override;
-
-	void realign();
-	void setVAlign(Qt::Alignment al);
-
-	void setDocument(QTextDocument *doc);
-	QTextDocument *document();
-
-protected:
-	void onResize(QSizeF size) override;
-
-	QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-
-public:
-	TextItem * m_text;
-	double m_base_height;
-	Qt::Alignment m_valign;
-};
-
-// The internal text item for TextRect
-class TextItem : public QGraphicsTextItem {
-public:
-	TextItem(TextRect *parent);
-
-	QRectF boundingRect() const override;
-	QPainterPath shape() const override;
-
-	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-
-protected:
-	void focusOutEvent(QFocusEvent *event) override;
-	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
-
-	TextRect *m_rect;
-};
-
-class CanvasImage : public RectItem {
-public:
-	CanvasImage();
-	enum { Type = UserType + 3 };
-	int type() const override { return Type; };
-
-	void setPixmap(const QPixmap &p);
-
-protected:
-	void onResize(QSizeF size) override;
-
-private:
-	QGraphicsPixmapItem *m_pixmap;
 };
 
 #endif

@@ -56,4 +56,18 @@ private:
 	C *m_obj;
 };
 
+// Same thing but all templates
+// Ex: typedef ModifyCommand2<Obj, int, &getInt, &setInt> setIntCmd;
+template <typename C,
+	typename T,
+	std::remove_cv_t<std::remove_reference_t<T>>(C::*G)()const,
+	void(C::*S)(T)>
+class ModifyCommand2 : public ModifyCommand<C, T> {
+	using Getter = decltype(G);
+	using Setter = decltype(S);
+public:
+	ModifyCommand2(Getter getter, Setter setter, T value, C *obj, QUndoCommand *parent = nullptr)
+		: ModifyCommand(getter, setter, value, obj, parent) {}
+};
+
 #endif

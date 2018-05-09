@@ -1,4 +1,5 @@
 #include "narrative/CanvasContainer.h"
+#include "narrative/CanvasScene.h"
 //#include "narrative/NarrativeScrollItem.h"
 //#include "narrative/NarrativeScrollBox.h"
 //#include "narrative/SlideScrollBox.h"
@@ -7,6 +8,7 @@
 #include <iostream>
 #include <QTextDocument>
 #include <QDebug>
+#include <QDir>
 
 int main(int argc, char *argv[])
 {
@@ -20,20 +22,17 @@ int main(int argc, char *argv[])
 	QVBoxLayout *verticalLayout = new QVBoxLayout(&window);
 	window.setLayout(verticalLayout);
 
-	CanvasContainer *canvas = new CanvasContainer(&window);
-	canvas->setStyleSheet("background:rgba(0, 0, 0, 0);");
-	verticalLayout->addWidget(canvas);
+	CanvasScene *canvas = new CanvasScene(&window);
 	canvas->setBaseHeight(600);
 	canvas->setEditable(true);
 
-	TextRect *text;
-	text = new TextRect();
+	auto text = std::make_shared<TextRect>();
 	text->setVAlign(Qt::AlignCenter);
-	QObject::connect(text->m_text->document(), &QTextDocument::undoCommandAdded,
+	QObject::connect(text->document(), &QTextDocument::undoCommandAdded,
 		[text]() {
 		qDebug() << "undo command added";
 	});
-	text->m_text->setPlainText("helloooo\nWORLd");
+	text->document()->setPlainText("helloooo\nWORLd");
 
 	text->setRect(QRectF(0, 0, .2, .2));
 	text->setBrush(QBrush(QColor(255, 0, 0, 100)));
@@ -41,7 +40,7 @@ int main(int argc, char *argv[])
 	//rect->debugPaint(true);
 	canvas->addItem(text);
 
-	RectItem *rect2 = new RectItem();
+	auto rect2 = std::make_shared<RectItem>();
 	rect2->setRect(QRectF(-.2, -.2, .2, .2));
 	rect2->setBrush(QBrush(QColor(0, 255, 0, 100)));
 	rect2->setEditable(true);
@@ -50,7 +49,7 @@ int main(int argc, char *argv[])
 	rect2->setPen(QPen(QBrush(QColor(0, 0, 0)), canvas->toScene(10)));
 	canvas->addItem(rect2);
 
-	RectItem *rect3 = new RectItem();
+	auto rect3 = std::make_shared<RectItem>();
 	rect3->setRect(QRectF(-.2, 0, .2, .2));
 	rect3->setBrush(QBrush(QColor(0, 0, 255, 255)));
 	rect3->setPen(QPen(QBrush(QColor(0, 0, 0)), canvas->toScene(10)));
@@ -59,14 +58,22 @@ int main(int argc, char *argv[])
 	rect3->setPrefersFixedRatio(false);
 	canvas->addItem(rect3);
 
-	CanvasImage *image = new CanvasImage();
+	auto image = std::make_shared<CanvasImage>();
 	image->move(.2, -.2);
 	image->setPixmap(QPixmap("assets/karnak.jpg"));
 	image->setPen(QPen(QBrush(QColor(0, 0, 0)), canvas->toScene(10)));
 	image->setEditable(true);
 	canvas->addItem(image);
 
+	CanvasContainer *container = new CanvasContainer(&window);
+	container->setStyleSheet("background:rgba(0, 0, 0, 0);");
+	verticalLayout->addWidget(container);
+	container->setScene(canvas);
+	container->setEditable(true);
+	container->show();
+
 	window.show();
 
+	qDebug() << "current dir?" << QDir::currentPath();
 	return a.exec();
 }
