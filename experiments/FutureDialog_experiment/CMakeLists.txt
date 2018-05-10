@@ -4,7 +4,6 @@ set(FutureDialog_src
   FutureDialog_experiment.cpp
   Multithread.cpp
 )
-message("FUTURE DIALOG EXPERIMENT\n\n\n" "${FutureDialog_src}")
 add_executable(FutureDialog_experiment
   EXCLUDE_FROM_ALL
   ${FutureDialog_src})

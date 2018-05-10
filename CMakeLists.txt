@@ -50,8 +50,8 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 
 find_package(Qt5 REQUIRED Core Gui Widgets Test Concurrent)
-# find_package(Qt5Test REQUIRED)
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
+find_package(Qt5Concurrent REQUIRED)
+include_directories(${Qt5Widgets_INCLUDE_DIRS} ${Qt5Concurrent_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
 
 # # if you want to print everything
@@ -187,6 +187,8 @@ set(VSimRoot_src
   src/ModelGroup.h
   src/OSGGroupModel.cpp
   src/OSGGroupModel.h
+  src/OSGNodeWrapper.cpp
+  src/OSGNodeWrapper.h
   src/OSGYearModel.cpp
   src/OSGYearModel.h
   src/FileUtil.cpp
@@ -242,6 +244,8 @@ set(VSim_src
   src/AboutDialog.ui
   src/BaseFirstPersonManipulator.cpp
   src/BaseFirstPersonManipulator.h
+  src/CoordinateWidget.cpp
+  src/CoordinateWidget.h
   src/editButtons.cpp
   src/editButtons.h
   src/EditDeleteDelegate.cpp
@@ -264,6 +268,8 @@ set(VSim_src
   src/FutureDialog.ui
   src/GroupScrollBox.inl
   src/GroupScrollBox.h
+  src/HistoryWindow.cpp
+  src/HistoryWindow.h
   src/HorizontalScrollBox.cpp
   src/HorizontalScrollBox.h
   src/KeyTracker.cpp
@@ -297,6 +303,8 @@ set(VSim_src
   src/SelectionStack.h
   src/SimpleCameraManipulator.cpp
   src/SimpleCameraManipulator.h
+  src/SimpleWorker.cpp
+  src/SimpleWorker.h
   src/StackObject.inl
   src/StackObject.h
   src/StatsWindow.cpp
@@ -314,6 +322,8 @@ set(VSim_src
   src/TimeSlider.h
   src/VSimApp.cpp
   src/VSimApp.h
+  src/WeakObject.cpp
+  src/WeakObject.h
 )
 add_library(VSim_obj ${VSim_src})
 message("SOURCES:\n" "${VSim_src}")
