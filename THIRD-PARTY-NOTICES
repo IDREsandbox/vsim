@@ -1,8 +1,9 @@
 OpenSceneGraph - OSGPL 0.0 (wxWindows, LGPL)
-Qt 5.9 - LGPL 3
-MRichTextEdit, Jir� Proch�zka and Digia Plc - LGPL 2.1
-OSGWidget, Bastian Rieck - MIT License
+Qt - LGPL 3
+OSGWidget - Bastian Rieck, MIT License
 DroidSans.ttf - Apache License 2.0
+Material desgin icons - Google, Apache License 2.0
+QDarkStyleSheet - Colin Duquesnoy, MIT License, Creative Commons Attribution International 4.0
 
 ------------------------------------------------------------------------------
 

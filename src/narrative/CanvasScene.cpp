@@ -11,10 +11,18 @@
 CanvasScene::CanvasScene(QObject * parent)
 	: QGraphicsScene(parent),
 	m_editable(false),
-	m_base_height(800)
+	m_base_height(800),
+	m_selection_in_progress(false),
+	m_moving(false)
 {
 	m_giant_rect = new GiantRectItem(QRectF(-10, -10, 20, 20));
 	QGraphicsScene::addItem(m_giant_rect);
+
+	connect(this, &QGraphicsScene::selectionChanged, this, [this]() {
+		if (!m_selection_in_progress) {
+			emit sSelectionChanged();
+		}
+	});
 }
 
 CanvasScene::~CanvasScene()
@@ -25,36 +33,59 @@ CanvasScene::~CanvasScene()
 	}
 }
 
-void CanvasScene::addItem(std::shared_ptr<RectItem> item)
+void CanvasScene::addItem(std::shared_ptr<CanvasItem> item)
 {
 	m_items.insert(item);
 	QGraphicsScene::addItem(item.get());
+	item->setBaseHeight(m_base_height);
+
+	CanvasLabel *label = dynamic_cast<CanvasLabel*>(item.get());
+	if (label) {
+		connect(label->document(), &QTextDocument::undoCommandAdded,
+			this, [this, label]() {
+			emit sDocumentUndoCommandAdded(label, label->document());
+		});
+	}
 }
 
-void CanvasScene::removeItem(RectItem *item)
+void CanvasScene::removeItem(CanvasItem *item)
 {
+	emit sAboutToRemove(item);
+	// remove document connection
+	CanvasLabel *label = dynamic_cast<CanvasLabel*>(item);
+	if (label) {
+		disconnect(label->document(), 0, this, 0);
+	}
+
 	QGraphicsScene::removeItem(item);
 	std::set<SharedItem, ItemCompare>::iterator it = m_items.find(item);
 	if (it == m_items.end()) return;
 	m_items.erase(it);
+	emit sRemoved(item);
 }
 
-std::set<RectItem*> CanvasScene::getSelectedRects() const
+SharedItemSet CanvasScene::items() const
 {
-	std::set<RectItem*> rects_out;
+	return m_items;
+}
+
+std::set<CanvasItem*> CanvasScene::getSelected() const
+{
+	std::set<CanvasItem*> rects_out;
 
 	for (auto item : selectedItems()) {
-		RectItem *rect = dynamic_cast<RectItem*>(item);
+		CanvasItem *rect = dynamic_cast<CanvasItem*>(item);
 		if (rect) rects_out.insert(rect);
 	}
 	return rects_out;
 }
 
-void CanvasScene::setSelectedRects(const std::set<RectItem*>& items)
+void CanvasScene::setSelected(const std::set<CanvasItem*>& items)
 {
+	m_selection_in_progress = true;
 	// deselect items
 	for (auto item : selectedItems()) {
-		RectItem *rect = dynamic_cast<RectItem*>(item);
+		CanvasItem *rect = dynamic_cast<CanvasItem*>(item);
 		if (!rect) continue;
 		if (items.find(rect) == items.end()) {
 			rect->setSelected(false);
@@ -65,6 +96,33 @@ void CanvasScene::setSelectedRects(const std::set<RectItem*>& items)
 	for (auto item : items) {
 		item->setSelected(true);
 	}
+	m_selection_in_progress = false;
+	emit selectionChanged(); // REVIEW: should this be sSelectionChanged?
+}
+
+SharedItemSet CanvasScene::getSelectedShared() const
+{
+	SharedItemSet shareset;
+	auto set = getSelected();
+	for (CanvasItem *item : set) {
+		auto sitem = toShared(item);
+		if (sitem) shareset.insert(sitem);
+	}
+	return shareset;
+}
+
+SharedItem CanvasScene::toShared(CanvasItem *item) const
+{
+	auto it = m_items.find(item);
+	if (it == m_items.end()) {
+		return nullptr;
+	}
+	return *it;
+}
+
+bool CanvasScene::selectionInProgress()
+{
+	return m_selection_in_progress;
 }
 
 void CanvasScene::setBaseHeight(double height)
@@ -93,12 +151,12 @@ void CanvasScene::clear()
 
 void CanvasScene::beginTransform()
 {
-	auto items = getSelectedRects();
+	auto items = getSelected();
 	m_saved_rects.clear();
 	for (auto i : items) {
 		QRectF r = i->rect();
 		m_saved_rects.insert(
-			std::pair<RectItem*, QRectF>(i, r)
+			std::pair<CanvasItem*, QRectF>(i, r)
 		);
 	}
 	setFocusItem(nullptr);
@@ -106,12 +164,11 @@ void CanvasScene::beginTransform()
 
 void CanvasScene::endTransform()
 {
-
-	std::map<RectItem*, QRectF> out_map;
+	std::map<CanvasItem*, QRectF> out_map;
 	// go through old list, do a diff
 	auto saved_rects = getTransformRects();
 	for (auto &item_rect_pair : saved_rects) {
-		RectItem *item = item_rect_pair.first;
+		CanvasItem *item = item_rect_pair.first;
 		QRectF rect = item_rect_pair.second;
 
 		if (item->rect() != rect) {
@@ -119,12 +176,50 @@ void CanvasScene::endTransform()
 		}
 	}
 	if (out_map.size() > 0) {
-
 		emit sRectsTransformed(saved_rects, out_map);
+	}
+	saved_rects = {};
+}
+
+bool CanvasScene::transforming() const
+{
+	return m_saved_rects.size() > 0;
+}
+
+void CanvasScene::beginMove(QPointF start)
+{
+	if (!isEditable()) return;
+	m_start_move = start;
+	m_moving = true;
+	beginTransform();
+}
+
+void CanvasScene::previewMove(QPointF preview)
+{
+	if (!isEditable()) return;
+	QPointF diff = preview - m_start_move;
+	for (auto &pair : getTransformRects()) {
+		CanvasItem *item = pair.first;
+		QRectF r = pair.second;
+		item->setRect(r.x() + diff.x(), r.y() + diff.y(),
+			r.width(), r.height());
 	}
 }
 
-const std::map<RectItem*, QRectF> &CanvasScene::getTransformRects() const
+void CanvasScene::endMove(QPointF end)
+{
+	if (!isEditable()) return;
+	previewMove(end);
+	m_moving = false;
+	endTransform();
+}
+
+bool CanvasScene::moving() const
+{
+	return m_moving;
+}
+
+const std::map<CanvasItem*, QRectF> &CanvasScene::getTransformRects() const
 {
 	return m_saved_rects;
 }
@@ -146,7 +241,7 @@ void CanvasScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
 	QGraphicsScene::mousePressEvent(mouseEvent);
 	if (!mouseEvent->isAccepted()) {
 		// clear selection
-		setSelectedRects({});
+		setSelected({});
 	}
 }
 
@@ -169,7 +264,7 @@ void GiantRectItem::paint(QPainter *painter,
 }
 
 
-RectItem::RectItem(QGraphicsItem * parent)
+CanvasItem::CanvasItem(QGraphicsItem * parent)
 	: QAbstractGraphicsShapeItem(parent),
 	m_prefers_fixed(false),
 	m_border_around(false),
@@ -182,29 +277,29 @@ RectItem::RectItem(QGraphicsItem * parent)
 	setPen(QPen(QBrush(), 0, Qt::NoPen));
 }
 
-QSizeF RectItem::size() const
+QSizeF CanvasItem::size() const
 {
 	return QSizeF(m_w, m_h);
 }
 
-QRectF RectItem::rect() const
+QRectF CanvasItem::rect() const
 {
 	QPointF p = scenePos();
 	return QRectF(p.x(), p.y(), m_w, m_h);
 }
 
-void RectItem::setRect(QRectF r)
+void CanvasItem::setRect(QRectF r)
 {
 	setRect(r.x(), r.y(), r.width(), r.height());
 }
 
-void RectItem::setRect(double x, double y, double w, double h)
+void CanvasItem::setRect(double x, double y, double w, double h)
 {
 	resize(w, h);
 	move(x, y);
 }
 
-void RectItem::resize(double w, double h)
+void CanvasItem::resize(double w, double h)
 {
 	prepareGeometryChange();
 	if (m_w == w && m_h == h) {
@@ -215,25 +310,59 @@ void RectItem::resize(double w, double h)
 	onResize(QSizeF(w, h));
 }
 
-void RectItem::move(double x, double y)
+void CanvasItem::move(double x, double y)
 {
 	setPos(x, y);
 }
 
-void RectItem::onResize(QSizeF size) {
+void CanvasItem::onResize(QSizeF size) {
 }
 
-void RectItem::onBaseHeightChange(double bh) {
+void CanvasItem::onBaseHeightChange(double bh) {
 }
 
-void RectItem::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
+void CanvasItem::mousePressEvent(QGraphicsSceneMouseEvent *e)
 {
-	QAbstractGraphicsShapeItem::mousePressEvent(mouseEvent);
-	mouseEventSelection(mouseEvent);
-	mouseEvent->accept();
+	auto f = flags();
+	if (f & QGraphicsItem::ItemIsSelectable) {
+		mouseEventSelection(e);
+	}
+	if (f & QGraphicsItem::ItemIsMovable) {
+		if (e->button() == Qt::LeftButton) {
+			canvasScene()->beginTransform();
+		}
+		e->accept();
+	}
 }
 
-void RectItem::setEditable(bool enable)
+void CanvasItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *e)
+{
+	CanvasScene *scene = canvasScene();
+	if (scene->moving()) {
+		scene->endMove(e->scenePos());
+	}
+}
+
+void CanvasItem::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
+{
+	if (!editable()) return;
+	CanvasScene *scene = canvasScene();
+	
+	// start moving if not already
+	if (!scene->moving()) {
+		scene->beginMove(e->lastScenePos());
+	}
+	if (scene->moving()) {
+		scene->previewMove(e->scenePos());
+	}
+}
+
+bool CanvasItem::editable() const
+{
+	return flags() & QGraphicsItem::ItemIsMovable;
+}
+
+void CanvasItem::setEditable(bool enable)
 {
 	// item flags
 	if (enable) {
@@ -248,55 +377,56 @@ void RectItem::setEditable(bool enable)
 	}
 }
 
-void RectItem::setPrefersFixedRatio(bool fixed)
+void CanvasItem::setPrefersFixedRatio(bool fixed)
 {
 	m_prefers_fixed = fixed;
 }
 
-bool RectItem::prefersFixedRatio()
+bool CanvasItem::prefersFixedRatio()
 {
 	return m_prefers_fixed;
 }
 
-void RectItem::setBorderAround(bool around)
+void CanvasItem::setBorderAround(bool around)
 {
 	m_border_around = around;
 }
 
-bool RectItem::borderAround()
+bool CanvasItem::borderAround()
 {
 	return m_border_around;
 }
 
-CanvasScene * RectItem::canvasScene() const
+CanvasScene * CanvasItem::canvasScene() const
 {
 	return dynamic_cast<CanvasScene*>(scene());
 }
 
-void RectItem::debugPaint(bool debug)
+void CanvasItem::debugPaint(bool debug)
 {
 	m_debug_paint = debug;
 }
 
-int RectItem::borderWidthPixels() const
+int CanvasItem::borderWidthPixels() const
 {
 	return std::lround(pen().widthF() * m_base_height);
 }
 
-void RectItem::setBorderWidthPixels(int px)
+void CanvasItem::setBorderWidthPixels(int px)
 {
 	QPen p = pen();
 	p.setStyle(Qt::SolidLine);
-	p.setWidthF(px / m_base_height);
+	qreal w = px / m_base_height;
+	p.setWidthF(w);
 	setPen(p);
 }
 
-QColor RectItem::borderColor() const
+QColor CanvasItem::borderColor() const
 {
 	return pen().color();
 }
 
-void RectItem::setBorderColor(const QColor & color)
+void CanvasItem::setBorderColor(const QColor & color)
 {
 	QPen p = pen();
 	if (color.alpha() == 0) {
@@ -309,12 +439,12 @@ void RectItem::setBorderColor(const QColor & color)
 	setPen(p);
 }
 
-QColor RectItem::background() const
+QColor CanvasItem::background() const
 {
 	return brush().color();
 }
 
-void RectItem::setBackground(const QColor & color)
+void CanvasItem::setBackground(const QColor & color)
 {
 	QBrush b = brush();
 	if (b.color().alpha() == 0) {
@@ -327,7 +457,7 @@ void RectItem::setBackground(const QColor & color)
 	setBrush(b);
 }
 
-QRectF RectItem::boundingRect() const
+QRectF CanvasItem::boundingRect() const
 {
 	QRectF r;
 	double pw = pen().widthF();
@@ -342,7 +472,7 @@ QRectF RectItem::boundingRect() const
 	return r;
 }
 
-void RectItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
+void CanvasItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
 	if (m_debug_paint) {
 		painter->setPen(Qt::NoPen);
@@ -367,7 +497,7 @@ void RectItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option
 	//painter->drawRoundedRect(r, pw, pw);
 }
 
-void RectItem::mouseEventSelection(QGraphicsSceneMouseEvent * event)
+void CanvasItem::mouseEventSelection(QGraphicsSceneMouseEvent * event)
 {
 	bool left = event->button() & Qt::LeftButton;
 	bool right = event->button() & Qt::RightButton;
@@ -385,37 +515,37 @@ void RectItem::mouseEventSelection(QGraphicsSceneMouseEvent * event)
 	// - right and not already select
 	else if (left || right && !selected) {
 		// scene select one item
-		canvasScene()->setSelectedRects({ this });
+		canvasScene()->setSelected({ this });
 		// refocus
 		focusItem();
 	}
 }
 
-double RectItem::baseHeight() const {
+double CanvasItem::baseHeight() const {
 	return m_base_height;
 }
 
-void RectItem::setBaseHeight(double bh) {
+void CanvasItem::setBaseHeight(double bh) {
 	m_base_height = bh;
 	onBaseHeightChange(bh);
 }
 
-QSizeF RectItem::scaledSize() const
+QSizeF CanvasItem::scaledSize() const
 {
 	QSizeF s = size();
 	return QSizeF(s.width() * m_base_height, s.height() * m_base_height);
 }
 
-double RectItem::toPixels(double x) const {
+double CanvasItem::toPixels(double x) const {
 	return x * m_base_height;
 }
 
-double RectItem::toScene(double pixels) const {
+double CanvasItem::toScene(double pixels) const {
 	return pixels / m_base_height;
 }
 
-TextRect::TextRect(QGraphicsItem * parent)
-	: RectItem(parent),
+CanvasLabel::CanvasLabel(QGraphicsItem * parent)
+	: CanvasItem(parent),
 	m_valign(Qt::AlignTop)
 {
 	m_text = new TextItem(this);
@@ -428,13 +558,13 @@ TextRect::TextRect(QGraphicsItem * parent)
 	setDocument(m_text->document());
 }
 
-QRectF TextRect::boundingRect() const
+QRectF CanvasLabel::boundingRect() const
 {
 	// There was a bug where text that stuck out rendered
 	// incorrectly. Making this bound bigger fixes that.
 
 	// rect bound
-	QRectF r = RectItem::boundingRect();
+	QRectF r = CanvasItem::boundingRect();
 
 	// text bound
 	// our scale is [-1,1], text scale is [-300,300]
@@ -448,9 +578,9 @@ QRectF TextRect::boundingRect() const
 	return r.united(tr);
 }
 
-void TextRect::setEditable(bool enable)
+void CanvasLabel::setEditable(bool enable)
 {
-	RectItem::setEditable(enable);
+	CanvasItem::setEditable(enable);
 	// text flags
 	if (enable) {
 		m_text->setTextInteractionFlags(Qt::TextEditorInteraction);
@@ -460,7 +590,7 @@ void TextRect::setEditable(bool enable)
 	}
 }
 
-void TextRect::realign()
+void CanvasLabel::realign()
 {
 	// text's internal bounding rect
 	QRectF r = m_text->QGraphicsTextItem::boundingRect();
@@ -480,13 +610,18 @@ void TextRect::realign()
 	m_text->setPos(new_pos); // in [-1,1] coordinates
 }
 
-void TextRect::setVAlign(Qt::Alignment al)
+void CanvasLabel::setVAlign(Qt::Alignment al)
 {
-	m_valign = al;
+	m_valign = (Qt::Alignment)(Qt::AlignVertical_Mask & al);
 	realign();
 }
 
-void TextRect::setDocument(QTextDocument * doc)
+Qt::Alignment CanvasLabel::valign() const
+{
+	return m_valign;
+}
+
+void CanvasLabel::setDocument(QTextDocument * doc)
 {
 	m_text->setDocument(doc);
 	QObject::connect(doc, &QTextDocument::contentsChanged, m_text, [this]() {
@@ -494,34 +629,44 @@ void TextRect::setDocument(QTextDocument * doc)
 	});
 }
 
-QTextDocument * TextRect::document()
+QTextDocument * CanvasLabel::document()
 {
 	return m_text->document();
 }
 
-LabelType TextRect::styleType() const
+void CanvasLabel::setTextCursor(const QTextCursor & cursor)
+{
+	m_text->setTextCursor(cursor);
+}
+
+QTextCursor CanvasLabel::textCursor() const
+{
+	return m_text->textCursor();
+}
+
+LabelType CanvasLabel::styleType() const
 {
 	return m_style_type;
 }
 
-void TextRect::setStyleType(LabelType type)
+void CanvasLabel::setStyleType(LabelType type)
 {
 	m_style_type = type;
 }
 
-void TextRect::onResize(QSizeF size)
+void CanvasLabel::onResize(QSizeF size)
 {
 	m_text->setTextWidth(size.width() * baseHeight());
 	realign();
 }
 
-void TextRect::onBaseHeightChange(double height)
+void CanvasLabel::onBaseHeightChange(double height)
 {
 	m_text->setScale(1 / height);
 	onResize(size());
 }
 
-QVariant TextRect::itemChange(GraphicsItemChange change, const QVariant & value)
+QVariant CanvasLabel::itemChange(GraphicsItemChange change, const QVariant & value)
 {
 	// note: ItemSelectedChange is before and HasChanged is after
 	if (change == GraphicsItemChange::ItemSelectedHasChanged) {
@@ -537,10 +682,10 @@ QVariant TextRect::itemChange(GraphicsItemChange change, const QVariant & value)
 			m_text->setTextCursor(cursor);
 		}
 	}
-	return RectItem::itemChange(change, value);
+	return CanvasItem::itemChange(change, value);
 }
 
-TextItem::TextItem(TextRect * parent)
+TextItem::TextItem(CanvasLabel * parent)
 	: QGraphicsTextItem(parent),
 	m_rect(parent)
 {
@@ -617,21 +762,28 @@ CanvasImage::CanvasImage()
 void CanvasImage::setPixmap(const QPixmap & p)
 {
 	m_pixmap->setPixmap(p);
+	initSize();
+}
 
+void CanvasImage::initSize()
+{
+	QPixmap p = m_pixmap->pixmap();
 	if (p.isNull()) return;
 
 	double bh = baseHeight();
+	double max_hr = .8; // max height ratio w/ respect to canvas
+	double max_h = bh * max_hr;
 
 	// find reasonable starting height
 	double set_h; // big units
 	if (p.height() < 50) {
 		set_h = 50;
 	}
-	else if (p.height() < bh) {
+	else if (p.height() < max_h) {
 		set_h = p.height();
 	}
 	else {
-		set_h = bh;
+		set_h = max_h;
 	}
 
 	double ratio;
@@ -646,6 +798,7 @@ void CanvasImage::setPixmap(const QPixmap & p)
 	double h = set_h / bh;
 	double w = ratio * h;
 	resize(w, h);
+	move(-w / 2, -h / 2);
 }
 
 void CanvasImage::onResize(QSizeF size)

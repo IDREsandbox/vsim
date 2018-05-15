@@ -10,9 +10,9 @@
 
 class CanvasScene;
 class TransformManipulator;
-class RectItem;
+class CanvasItem;
 
-typedef std::vector<std::pair<RectItem*, QRectF>> ItemRectList;
+typedef std::vector<std::pair<CanvasItem*, QRectF>> ItemRectList;
 
 // A viewer for CanvasScene
 // can transform scene items
@@ -95,7 +95,7 @@ public:
 
 	void startMove(QPoint start_point);
 	void previewMove(QPoint current_point);
-	void endMove();
+	void endMove(QPoint end_point);
 	void startResize(QPoint start_point, Position drag_pos);
 	void previewResize(QPoint current_point, bool fixed_ratio);
 	void endResize();

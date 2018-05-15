@@ -6,6 +6,7 @@
 namespace Command {
 	// you can use these like flags
 	enum When {
+		NEVER = 0,
 		ON_UNDO = 1,
 		ON_REDO = 2,
 		ON_BOTH = ON_UNDO | ON_REDO
@@ -25,7 +26,7 @@ template <typename C, typename T>
 class ModifyCommand : public QUndoCommand {
 public:
 	ModifyCommand(
-		T(C::*getter)() const,//pointer to getter
+		std::remove_cv_t<std::remove_reference_t<T>>(C::*getter)() const,//pointer to getter
 		void(C::*setter)(T),//pointer to setter
 		//void(C::*signal)(T),//pointer to signal
 		T value,
@@ -48,7 +49,7 @@ public:
 		(m_obj->*m_setter)(new_value);
 	}
 private:
-	T(C::*m_getter)()const;
+	std::remove_cv_t<std::remove_reference_t<T>>(C::*m_getter)()const;
 	void(C::*m_setter)(T);
 	//void(C::*m_signal)(T);
 	std::remove_cv_t<std::remove_reference_t<T>> new_value;
@@ -60,14 +61,15 @@ private:
 // Ex: typedef ModifyCommand2<Obj, int, &getInt, &setInt> setIntCmd;
 template <typename C,
 	typename T,
-	std::remove_cv_t<std::remove_reference_t<T>>(C::*G)()const,
-	void(C::*S)(T)>
+	std::remove_cv_t<std::remove_reference_t<T>>(C::*Getter)()const,
+	void(C::*Setter)(T)>
 class ModifyCommand2 : public ModifyCommand<C, T> {
-	using Getter = decltype(G);
-	using Setter = decltype(S);
 public:
-	ModifyCommand2(Getter getter, Setter setter, T value, C *obj, QUndoCommand *parent = nullptr)
-		: ModifyCommand(getter, setter, value, obj, parent) {}
+	//using G = decltype(Getter);
+	//using S = decltype(Setter);
+
+	ModifyCommand2(C *obj, T value, QUndoCommand *parent = nullptr)
+		: ModifyCommand(Getter, Setter, value, obj, parent) {}
 };
 
 #endif

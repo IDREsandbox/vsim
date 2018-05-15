@@ -167,11 +167,11 @@ set(NarrativeModel_src
   src/narrative/NarrativeSlideItem.h
   src/narrative/NarrativeSlideLabel.cpp
   src/narrative/NarrativeSlideLabel.h
-  src/LabelStyle.cpp
-  src/LabelStyle.h
-  src/LabelStyleGroup.cpp
-  src/LabelStyleGroup.h
-  src/LabelType.h
+  src/narrative/LabelStyle.cpp
+  src/narrative/LabelStyle.h
+  src/narrative/LabelStyleGroup.cpp
+  src/narrative/LabelStyleGroup.h
+  src/narrative/LabelType.h
 )
 add_library(NarrativeModel_obj ${NarrativeModel_src})
 target_link_libraries(NarrativeModel_obj Util_obj Deprecated_obj)
@@ -385,6 +385,8 @@ target_link_libraries(HSBSpeed_experiment Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIE
 add_subdirectory(experiments/FutureDialog_experiment)
 
 add_subdirectory(experiments/Canvas_experiment)
+
+add_subdirectory(experiments/CanvasEditor_experiment)
 
 # tests ####################################
 

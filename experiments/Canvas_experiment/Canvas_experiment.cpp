@@ -26,21 +26,25 @@ int main(int argc, char *argv[])
 	canvas->setBaseHeight(600);
 	canvas->setEditable(true);
 
-	auto text = std::make_shared<TextRect>();
+	auto text = std::make_shared<CanvasLabel>();
 	text->setVAlign(Qt::AlignCenter);
 	QObject::connect(text->document(), &QTextDocument::undoCommandAdded,
 		[text]() {
 		qDebug() << "undo command added";
+		//qDebug() << "c has focus" << text->hasFocus();
 	});
 	text->document()->setPlainText("helloooo\nWORLd");
 
+	//QObject::connect(canvas, &CanvasScene::changed, [text]() {
+	//	qDebug() << "anyc" << text->hasFocus();
+	//});
 	text->setRect(QRectF(0, 0, .2, .2));
 	text->setBrush(QBrush(QColor(255, 0, 0, 100)));
 	text->setEditable(true);
 	//rect->debugPaint(true);
 	canvas->addItem(text);
 
-	auto rect2 = std::make_shared<RectItem>();
+	auto rect2 = std::make_shared<CanvasItem>();
 	rect2->setRect(QRectF(-.2, -.2, .2, .2));
 	rect2->setBrush(QBrush(QColor(0, 255, 0, 100)));
 	rect2->setEditable(true);
@@ -49,7 +53,7 @@ int main(int argc, char *argv[])
 	rect2->setPen(QPen(QBrush(QColor(0, 0, 0)), canvas->toScene(10)));
 	canvas->addItem(rect2);
 
-	auto rect3 = std::make_shared<RectItem>();
+	auto rect3 = std::make_shared<CanvasItem>();
 	rect3->setRect(QRectF(-.2, 0, .2, .2));
 	rect3->setBrush(QBrush(QColor(0, 0, 255, 255)));
 	rect3->setPen(QPen(QBrush(QColor(0, 0, 0)), canvas->toScene(10)));

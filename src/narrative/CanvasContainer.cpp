@@ -118,6 +118,8 @@ TransformManipulator::TransformManipulator(CanvasScene * scene, QGraphicsView *v
 	setGeometry(0, 0, 10, 10);
 	setCursor(Qt::CursorShape::SizeAllCursor);
 
+	setAttribute(Qt::WA_NoSystemBackground, true);
+
 	// buttons
 	for (int i = 0; i < 9; i++) {
 		// create button
@@ -144,7 +146,7 @@ void TransformManipulator::recalculate()
 		hide();
 		return;
 	}
-	auto rects = m_scene->getSelectedRects();
+	auto rects = m_scene->getSelected();
 	if (rects.size() == 0
 		|| !m_scene->isEditable()) {
 		hide();
@@ -223,8 +225,7 @@ QRectF TransformManipulator::baseRectF() const
 
 void TransformManipulator::setRect(QRectF rect)
 {
-	if (m_rect == rect)
-		return;
+	if (m_rect == rect) return;
 	m_rect = rect;
 	reposition();
 }
@@ -234,34 +235,21 @@ void TransformManipulator::startMove(QPoint start_pos)
 	if (!m_scene) return;
 	m_scene->beginTransform();
 	m_dragging = true;
-	m_start_drag_point = start_pos;
-	m_start_drag_rect = m_rect;
+	m_scene->beginMove(m_view->mapToScene(start_pos));
 }
 
 void TransformManipulator::previewMove(QPoint current_point)
 {
 	if (!m_scene) return;
 	if (!m_dragging) return;
-
-	QPointF start_scene = m_view->mapToScene(m_start_drag_point);
-	QPointF current_scene = m_view->mapToScene(current_point);
-	QPointF diff = current_scene - start_scene;
-
-	for (auto &pair : m_scene->getTransformRects()) {
-		RectItem *item = pair.first;
-		QRectF r = pair.second;
-
-		item->setRect(r.x() + diff.x(), r.y() + diff.y(),
-			r.width(), r.height());
-	}
-	auto rect = m_view->sceneRect();
+	m_scene->previewMove(m_view->mapToScene(current_point));
 }
 
-void TransformManipulator::endMove()
+void TransformManipulator::endMove(QPoint end_point)
 {
 	if (!m_scene) return;
 	m_dragging = false;
-	m_scene->endTransform();
+	m_scene->endMove(m_view->mapToScene(end_point));
 }
 
 void TransformManipulator::startResize(QPoint start_point, Position drag_pos)
@@ -358,7 +346,7 @@ void TransformManipulator::previewResize(QPoint current_point, bool fixed_ratio)
 
 	// resize/reposition all selected items
 	for (auto &pair : m_scene->getTransformRects()) {
-		RectItem *item = pair.first;
+		CanvasItem *item = pair.first;
 		QRectF r = pair.second;
 
 		// to old coordinates
@@ -420,7 +408,7 @@ void TransformManipulator::mouseMoveEvent(QMouseEvent * mouseEvent)
 
 void TransformManipulator::mouseReleaseEvent(QMouseEvent * mouseEvent)
 {
-	endMove();
+	endMove(mouseEvent->globalPos());
 }
 
 TransformManipulator::ResizeButton::ResizeButton(TransformManipulator *boss, Position pos, QWidget * parent)
@@ -451,7 +439,7 @@ void TransformManipulator::ResizeButton::mouseMoveEvent(QMouseEvent *mouseEvent)
 			fixed = true;
 		}
 		else {
-			auto sel = m_boss->m_scene->getSelectedRects();
+			auto sel = m_boss->m_scene->getSelected();
 			if (sel.size() == 1 && (*sel.begin())->prefersFixedRatio()) {
 				fixed = true;
 			}

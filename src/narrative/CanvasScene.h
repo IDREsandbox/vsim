@@ -15,26 +15,28 @@
 
 class CanvasScene;
 class TransformManipulator;
-class RectItem;
+class CanvasItem;
+class CanvasLabel;
 class GiantRectItem;
 
-typedef std::vector<std::pair<RectItem*, QRectF>> ItemRectList;
+typedef std::vector<std::pair<CanvasItem*, QRectF>> ItemRectList;
 
-typedef std::shared_ptr<RectItem> SharedItem;
-
-// so that our std::set<RectItem> can search with raw ptr
+using SharedItem = std::shared_ptr<CanvasItem>;
 struct ItemCompare {
 	using is_transparent = void;
 	bool operator() (const SharedItem& a, const SharedItem& b) const {
 		return a.get() < b.get();
 	}
-	bool operator() (const SharedItem& a, RectItem *b) const {
+	bool operator() (const SharedItem& a, CanvasItem *b) const {
 		return a.get() < b;
 	}
-	bool operator() (RectItem *a, const SharedItem& b) const {
+	bool operator() (CanvasItem *a, const SharedItem& b) const {
 		return a < b.get();
 	}
 };
+using SharedItemSet = std::set<SharedItem, ItemCompare>;
+
+// so that our std::set<CanvasItem> can search with raw ptr
 
 // A graphics scene with transformable items inside
 // internal units [-.5, .5] height, [-r, r] width where r is aspect ratio
@@ -47,11 +49,18 @@ public:
 	CanvasScene(QObject *parent);
 	~CanvasScene() override;
 
-	void addItem(std::shared_ptr<RectItem> item);
-	void removeItem(RectItem *item);
+	void addItem(std::shared_ptr<CanvasItem> item);
+	void removeItem(CanvasItem *item);
 
-	std::set<RectItem*> getSelectedRects() const;
-	void setSelectedRects(const std::set<RectItem*> &items);
+	SharedItemSet items() const;
+	std::set<CanvasItem*> getSelected() const;
+	void setSelected(const std::set<CanvasItem*> &items);
+	SharedItemSet getSelectedShared() const;
+	SharedItem toShared(CanvasItem *item) const;
+
+	// if you want to avoid n^2 selection callbacks
+	// wait until selectionInProgress() is false
+	bool selectionInProgress(); 
 
 	// Use this instead of Scene::clear()
 	// - items are shared pointers
@@ -66,8 +75,15 @@ public:
 	// emit sRectsTransformed
 	void endTransform();
 
+	bool transforming() const;
+
+	void beginMove(QPointF start);
+	void previewMove(QPointF preview);
+	void endMove(QPointF end);
+	bool moving() const;
+
 	// get the original rects before a transformation
-	const std::map<RectItem*, QRectF> &getTransformRects() const;
+	const std::map<CanvasItem*, QRectF> &getTransformRects() const;
 
 	// makes all items editable
 	bool isEditable() const;
@@ -81,19 +97,31 @@ public:
 	double toScene(int px) const;
 
 signals:
-	void sRectsTransformed(const std::map<RectItem*, QRectF> &old_rects,
-		const std::map<RectItem*, QRectF> &new_rects);
+	void sAdded(CanvasItem *item);
+	void sAboutToRemove(CanvasItem *item);
+	void sRemoved(CanvasItem *item);
+	void sRectsTransformed(const std::map<CanvasItem*, QRectF> &old_rects,
+		const std::map<CanvasItem*, QRectF> &new_rects);
+	void sSelectionChanged(); // use this to avoid O(n^2) stuff
+
+	// solutions for getting undo commands out
+	// 1. listen for added, removed, maintain QTextDocument list (lots of code) 
+	// 2. the scene can do these emissions (simpler?)
+	void sDocumentUndoCommandAdded(CanvasLabel *item, QTextDocument *doc);
 
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
 
 private:
-	std::map<RectItem*, QRectF> m_saved_rects;
-	std::set<SharedItem, ItemCompare> m_items;
+	std::map<CanvasItem*, QRectF> m_saved_rects;
+	SharedItemSet m_items;
 
 	bool m_editable;
 	double m_base_height;
+	bool m_selection_in_progress;
+	bool m_moving;
+	QPointF m_start_move;
 
 	// a giant background shape so that view can always center on (0,0)
 	GiantRectItem *m_giant_rect;
@@ -112,9 +140,9 @@ public:
 };
 
 // A transformable rectangular item in a CanvasScene
-class RectItem : public QAbstractGraphicsShapeItem {
+class CanvasItem : public QAbstractGraphicsShapeItem {
 public:
-	RectItem(QGraphicsItem *parent = nullptr);
+	CanvasItem(QGraphicsItem *parent = nullptr);
 
 	enum { Type = UserType + 1 };
 	int type() const override { return Type; };
@@ -172,18 +200,20 @@ public:
 		QWidget *widget = nullptr) override;
 
 public: // commands
-	using SetBorderWidthCommad =
-		ModifyCommand2<RectItem, int, &borderWidthPixels, &setBorderWidthPixels>;
+	using SetBorderWidthCommand =
+		ModifyCommand2<CanvasItem, int, &borderWidthPixels, &setBorderWidthPixels>;
 	using SetBorderColorCommand =
-		ModifyCommand2<RectItem, const QColor&, &borderColor, &setBorderColor>;
+		ModifyCommand2<CanvasItem, const QColor&, &borderColor, &setBorderColor>;
 	using SetBackgroundCommand =
-		ModifyCommand2<RectItem, const QColor&, &background, &setBackground>;
+		ModifyCommand2<CanvasItem, const QColor&, &background, &setBackground>;
 
 protected:
 	virtual void onResize(QSizeF size);
 	virtual void onBaseHeightChange(double bh);
 
-	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
+	void mousePressEvent(QGraphicsSceneMouseEvent *mouse_event) override;
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouse_event) override;
+	void mouseMoveEvent(QGraphicsSceneMouseEvent *mouse_event) override;
 
 private:
 	double m_w;
@@ -197,9 +227,9 @@ private:
 
 // A transformable text item in a CanvasScene
 class TextItem;
-class TextRect : public RectItem {
+class CanvasLabel : public CanvasItem {
 public:
-	TextRect(QGraphicsItem *parent = nullptr);
+	CanvasLabel(QGraphicsItem *parent = nullptr);
 	enum { Type = UserType + 2 };
 	int type() const override { return Type; };
 
@@ -209,12 +239,22 @@ public:
 
 	void realign(); // internal, shifts text to be centered/bottom
 	void setVAlign(Qt::Alignment al);
+	Qt::Alignment valign() const;
 
 	void setDocument(QTextDocument *doc);
 	QTextDocument *document();
 
+	void setTextCursor(const QTextCursor &cursor);
+	QTextCursor textCursor() const;
+
 	LabelType styleType() const;
 	void setStyleType(LabelType);
+
+public: // commands
+	using SetVAlignCommand =
+		ModifyCommand2<CanvasLabel, Qt::Alignment, &valign, &setVAlign>;
+	using SetStyleTypeCommand =
+		ModifyCommand2<CanvasLabel, LabelType, &styleType, &setStyleType>;
 
 protected:
 	void onResize(QSizeF size) override;
@@ -228,10 +268,10 @@ private:
 	LabelType m_style_type;
 };
 
-// The internal text item for TextRect
+// The internal text item for CanvasLabel
 class TextItem : public QGraphicsTextItem {
 public:
-	TextItem(TextRect *parent);
+	TextItem(CanvasLabel *parent);
 
 	QRectF boundingRect() const override;
 	QPainterPath shape() const override;
@@ -243,16 +283,19 @@ protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
-	TextRect *m_rect;
+	CanvasLabel *m_rect;
 };
 
-class CanvasImage : public RectItem {
+class CanvasImage : public CanvasItem {
 public:
 	CanvasImage();
 	enum { Type = UserType + 3 };
 	int type() const override { return Type; };
 
 	void setPixmap(const QPixmap &p);
+
+	// finds a reasonable starting size and position
+	void initSize();
 
 protected:
 	void onResize(QSizeF size) override;
@@ -261,14 +304,5 @@ private:
 	QGraphicsPixmapItem *m_pixmap;
 };
 
-
-class DocumentEditWrapperCommand : public QUndoCommand {
-public:
-	DocumentEditWrapperCommand(QTextDocument *doc, QUndoCommand *parent = nullptr);
-	void undo();
-	void redo();
-private:
-	QTextDocument *m_doc;
-};
 
 #endif
