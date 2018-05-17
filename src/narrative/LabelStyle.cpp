@@ -1,13 +1,55 @@
 #include "LabelStyle.h"
 #include <QTextFrame>
 #include <QTextCursor>
-#include "Util.h"
-#include "narrative/NarrativeSlideLabel.h"
 #include <QDebug>
+#include <algorithm>
+
+static QString stringRGB(QColor c) {
+	return QString().sprintf("rgb(%d, %d, %d)",
+		c.red(), c.green(), c.blue()
+	);
+}
+static QString stringRGBA(QColor c) {
+	return QString().sprintf("rgb(%d, %d, %d, %d)",
+		c.red(), c.green(), c.blue(), c.alpha()
+	);
+}
+
+FrameStyle::FrameStyle()
+	: m_bg_color(QColor(0, 0, 0)),
+	m_frame_color(QColor(0, 0, 0)),
+	m_frame_width(0),
+	m_has_frame(false)
+{
+}
+
+FrameStyle::FrameStyle(QColor background, QColor frame_color, int frame_width, bool has_frame)
+	: m_bg_color(background),
+	m_frame_color(frame_color),
+	m_frame_width(frame_width),
+	m_has_frame(has_frame)
+{
+}
+
+FrameStyle::~FrameStyle()
+{
+}
+
+void FrameStyle::applyToWidget(QWidget * w) const
+{
+	w->setStyleSheet(styleText());
+}
+
+QString FrameStyle::styleText() const
+{
+	QString str =
+		"background:" + stringRGBA(m_bg_color) + ";"
+		"border:" + "1px solid " + stringRGB(m_frame_color) + ";";
+	return str;
+}
 
 LabelStyle::LabelStyle()
 	: m_type(NONE),
-	m_bg_color(255, 255, 255),
 	m_align(Qt::AlignTop | Qt::AlignLeft),
 	m_fg_color(0, 0, 0),
 	m_point_size(12),
@@ -26,7 +68,7 @@ LabelStyle::LabelStyle(LabelType type, std::string font, int size, QColor fg, QC
 	// rect
 	m_align = al;
 	m_margin = m;
-	m_bg_color = bg;
+	m_frame.m_bg_color = bg;
 
 	// text
 	m_font_family = font;
@@ -38,13 +80,12 @@ LabelStyle::LabelStyle(LabelType type, std::string font, int size, QColor fg, QC
 
 LabelStyle::~LabelStyle()
 {
-
 }
 
 void LabelStyle::copy(const LabelStyle *other)
 {
 	m_type = other->m_type;
-	m_bg_color = other->m_bg_color;
+	m_frame = other->m_frame;
 	m_align = other->m_align;
 	m_margin = other->m_margin;
 	m_fg_color = other->m_fg_color;
@@ -67,14 +108,9 @@ void LabelStyle::applyToWidget(QWidget * widget, bool font_size)
 	//widget->setPalette(p);
 
 	// color stylesheet
-	auto bg = m_bg_color;
-	auto fg = m_fg_color;
-	QString str = QString().sprintf(
-		"background:rgba(%d, %d, %d, %d);"
-		"color:rgb(%d, %d, %d);",
-		bg.red(), bg.green(), bg.blue(), bg.alpha(),
-		fg.red(), fg.green(), fg.blue());
-	widget->setStyleSheet(str);
+	QString ss = "color:" + stringRGB(m_fg_color) + ";";
+	ss += m_frame.styleText();
+	widget->setStyleSheet(ss);
 
 	QFont f = widget->font();
 	f.setFamily(m_font_family.c_str());
@@ -88,22 +124,14 @@ void LabelStyle::applyToWidget(QWidget * widget, bool font_size)
 	// widget->setMargin(m_margin); // QLabel only
 }
 
-void LabelStyle::applyToNarrativeLabel(NarrativeSlideLabel *label)
+void LabelStyle::applyToDocument(QTextDocument * doc)
 {
-	QColor m_bg_color;
-	label->setBackground(backgroundColor());
-	label->setVAlignInt(getAlign());
-
 	QTextFrameFormat tff;
 	tff.setMargin(getMargin());
 	tff.setBackground(QBrush(QColor(0, 0, 0, 0)));
 
 	QTextBlockFormat tbf;
-	Qt::Alignment hal = static_cast<Qt::Alignment>(getAlign());
-	// check alignment validity
-	if (hal & Qt::AlignHorizontal_Mask) {
-		tbf.setAlignment(hal & Qt::AlignHorizontal_Mask);
-	}
+	tbf.setAlignment(m_align & Qt::AlignHorizontal_Mask);
 
 	QTextCharFormat tcf;
 	QString ff = QString::fromStdString(getFontFamily());
@@ -115,7 +143,6 @@ void LabelStyle::applyToNarrativeLabel(NarrativeSlideLabel *label)
 	tcf.setFontUnderline(getUnderline());
 
 	// assign formats to document
-	QTextDocument *doc = label->getDocument();
 	QTextCursor cursor = QTextCursor(doc);
 	cursor.select(QTextCursor::Document);
 	cursor.mergeCharFormat(tcf);
@@ -124,14 +151,8 @@ void LabelStyle::applyToNarrativeLabel(NarrativeSlideLabel *label)
 	QTextFrameFormat tff_merged = doc->rootFrame()->frameFormat();
 	tff_merged.merge(tff);
 	doc->rootFrame()->setFrameFormat(tff_merged);
-
-	label->setType(m_type);
 }
 
-QColor LabelStyle::backgroundColor() const
-{
-	return m_bg_color;
-}
 LabelType LabelStyle::getType() const
 {
 	return m_type;
@@ -148,15 +169,10 @@ void LabelStyle::setTypeInt(int t)
 {
 	m_type = static_cast<LabelType>(t);
 }
-const osg::Vec4 &LabelStyle::getBackgroundColor() const
-{
-	m_bg_color_vec = Util::colorToVec(m_bg_color);
-	return m_bg_color_vec;
-}
 
-void LabelStyle::setBackgroundColor(const osg::Vec4 &color)
+FrameStyle * LabelStyle::frameStyle()
 {
-	m_bg_color = Util::vecToColor(color);
+	return &m_frame;
 }
 
 int LabelStyle::getAlign() const
@@ -181,6 +197,11 @@ void LabelStyle::setHAlign(Qt::Alignment al)
 	m_align = (m_align & Qt::AlignVertical_Mask) | (al & Qt::AlignHorizontal_Mask);
 }
 
+Qt::Alignment LabelStyle::valign() const
+{
+	return m_align & Qt::AlignVertical_Mask;
+}
+
 int LabelStyle::getMargin() const
 {
 	return m_margin;
@@ -194,17 +215,6 @@ void LabelStyle::setMargin(int m)
 QColor LabelStyle::foregroundColor() const
 {
 	return m_fg_color;
-}
-
-const osg::Vec4 & LabelStyle::getForegroundColor() const
-{
-	m_fg_color_vec = Util::colorToVec(m_fg_color);
-	return m_fg_color_vec;
-}
-
-void LabelStyle::setForegroundColor(const osg::Vec4 & color)
-{
-	m_fg_color = Util::vecToColor(color);
 }
 
 const std::string & LabelStyle::getFontFamily() const
@@ -234,7 +244,7 @@ int LabelStyle::getWeight() const
 
 void LabelStyle::setWeight(int w)
 {
-	m_weight = Util::clamp(w, 0, 99);
+	m_weight = std::clamp(w, 0, 99);
 }
 
 bool LabelStyle::getItalicized() const

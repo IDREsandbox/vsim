@@ -8,7 +8,6 @@ set(Canvas_src
   ${CMAKE_SOURCE_DIR}/src/narrative/CanvasControl.cpp
   ${CMAKE_SOURCE_DIR}/src/narrative/CanvasContainer.cpp
   ${CMAKE_SOURCE_DIR}/src/narrative/CanvasScene.cpp
-  ${CMAKE_SOURCE_DIR}/src/narrative/TextEdit.cpp
   Canvas_experiment.cpp
 )
 add_executable(Canvas_experiment

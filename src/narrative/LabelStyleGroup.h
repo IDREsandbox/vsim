@@ -3,27 +3,27 @@
 
 #include <QObject>
 #include <QUndoCommand>
-#include <osg/Group>
 #include <memory>
-#include "GroupTemplate.h"
 #include "LabelType.h"
 
-
+class FrameStyle;
 class LabelStyle;
 
-class LabelStyleGroup : public TGroup<LabelStyle> {
+class LabelStyleGroup : public QObject {
 	Q_OBJECT;
 public:
 	LabelStyleGroup(QObject *parent = nullptr);
 	~LabelStyleGroup();
 
 	LabelStyle *getStyle(LabelType style) const;
+	FrameStyle *getImageStyle() const;
 
 private:
 	std::unique_ptr<LabelStyle> m_h1;
 	std::unique_ptr<LabelStyle> m_h2;
 	std::unique_ptr<LabelStyle> m_bod;
 	std::unique_ptr<LabelStyle> m_lab;
+	std::unique_ptr<FrameStyle> m_image;
 };
 
 #endif // LABELSTYLEGROUP_H

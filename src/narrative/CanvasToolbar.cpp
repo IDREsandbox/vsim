@@ -2,6 +2,31 @@
 
 #include <QPaintEvent>
 #include <QPainter>
+#include <QDebug>
+
+class ComboBoxLimiter : public QObject {
+public:
+	ComboBoxLimiter(QObject *parent = nullptr)
+		: QObject(parent) {
+	}
+	static ComboBoxLimiter *install(QObject *target) {
+		auto *cbl = new ComboBoxLimiter(target);
+		target->installEventFilter(cbl);
+		return cbl;
+	}
+
+	bool eventFilter(QObject *obj, QEvent *e) override
+	{
+		QEvent::Type type = e->type();
+
+		switch (type) {
+		case QEvent::Wheel:
+			return true;
+		// case QEvent::QKeyEvent:
+		}
+		return false;
+	}
+};
 
 ToolBox::ToolBox(QWidget *parent)
 	: QWidget(parent) {
@@ -26,6 +51,7 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	// all icons
 	QIcon i_fill("assets/icons/canvas/format_color_fill.png");
 	QIcon i_pen("assets/icons/canvas/border_color.png");
+	QIcon i_clear("assets/icons/canvas/format_color_reset.png");
 	QIcon i_color_text("assets/icons/canvas/format_color_text.png");
 	QIcon i_bold("assets/icons/canvas/format_bold.png");
 	QIcon i_ital("assets/icons/canvas/format_italic.png");
@@ -72,21 +98,42 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 
 	// color box
 	m_color_box = new ToolBox(this);
+	QVBoxLayout *color_rows = new QVBoxLayout(m_color_box);
+	setMargins(color_rows);
 
-	QHBoxLayout *color_row = new QHBoxLayout(m_color_box);
-	setMargins(color_row);
+	QHBoxLayout *color_row = new QHBoxLayout();
+	color_rows->addLayout(color_row);
 
 	m_background = new QToolButton(m_color_box);
 	m_background->setIcon(i_fill);
 	color_row->addWidget(m_background, 0, Qt::AlignLeft);
+	m_clear_background = new QToolButton(m_color_box);
+	m_clear_background->setIcon(i_clear);
+	color_row->addWidget(m_clear_background, 0, Qt::AlignLeft);
+	m_foreground = new QToolButton(m_color_box);
+	m_foreground->setIcon(i_color_text);
+	color_row->addWidget(m_foreground, 0, Qt::AlignLeft);
+	color_row->addStretch(1);
+
+	// border row
+	QHBoxLayout *border_row = new QHBoxLayout();
+	color_rows->addLayout(border_row);
+
 	m_border = new QToolButton(m_color_box);
 	m_border->setIcon(i_pen);
-	color_row->addWidget(m_border, 0, Qt::AlignLeft);
+	border_row->addWidget(m_border, 0, Qt::AlignLeft);
+	m_clear_border = new QToolButton(m_color_box);
+	m_clear_border->setIcon(i_clear);
+	border_row->addWidget(m_clear_border, 0, Qt::AlignLeft);
+
 	m_border_width = new QSpinBox(m_color_box);
 	m_border_width->setMinimum(0);
 	m_border_width->setMaximum(100);
-	color_row->addWidget(m_border_width, 0, Qt::AlignLeft);
-	color_row->addStretch(1);
+	m_border_width->setFixedWidth(20);
+	m_border_width->setMaximumWidth(20);
+	m_border_width->resize(20, 10);
+	border_row->addWidget(m_border_width, 0, Qt::AlignLeft);
+	border_row->addStretch(1);
 
 	// font box
 	m_font_box = new ToolBox(this);
@@ -94,19 +141,20 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	setMargins(font_rows);
 
 	m_font = new QFontComboBox(m_font_box);
+	ComboBoxLimiter::install(m_font);
+	m_font->setFocusPolicy(Qt::NoFocus); 
 	font_rows->addWidget(m_font);
 
 	QHBoxLayout *font_size_row = new QHBoxLayout();
 	font_rows->addLayout(font_size_row);
 
-	m_foreground = new QToolButton(m_color_box);
-	m_foreground->setIcon(i_color_text);
-	font_size_row->addWidget(m_foreground, 0, Qt::AlignLeft);
 	m_font_size = new QComboBox(m_font_box);
 	for (int size : QFontDatabase::standardSizes()) {
 		m_font_size->addItem(QString::number(size));
 	}
 	m_font_size->setMinimumWidth(40);
+	ComboBoxLimiter::install(m_font_size);
+	m_font_size->setFocusPolicy(Qt::NoFocus);
 	font_size_row->addWidget(m_font_size, 0, Qt::AlignLeft);
 	font_size_row->addStretch(1);
 
@@ -136,13 +184,15 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	bullet_row->addWidget(m_bullet, 0, Qt::AlignLeft);
 	bullet_row->addStretch(1);
 
-	QComboBox *m_style = new QComboBox(m_font_box);
-	m_style->addItem("None");
+	m_style = new QComboBox(m_font_box);
+	ComboBoxLimiter::install(m_style);
+	m_style->setFocusPolicy(Qt::NoFocus);
+	//m_style->addItem("None");
 	m_style->addItem("Header 1");
 	m_style->addItem("Header 2");
 	m_style->addItem("Body");
 	m_style->addItem("Label");
-	m_style->addItem("Image");
+	//m_style->addItem("Image");
 	font_rows->addWidget(m_style);
 
 	QHBoxLayout *styles_row = new QHBoxLayout();

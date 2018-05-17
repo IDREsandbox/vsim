@@ -1,5 +1,31 @@
 Like a changelog but with more details.
 
+# 5/16/2018
+
+I'm making a toolbar for canvas editing.
+
+One thing came up - how to allow previewing of fonts, font size, border size
+
+It's kind of a lot of work. I came up with some stuff but I don't think it's worth it.
+
+You need mergable commands. See QUndoCommand::mergeWith()
+ This means means selection wrapping doesn't work because the types have to be clean.
+
+Gets really complicated for text wrappers
+When you change the font for multiple text boxes you call beginEditBlock() on each, then when you undo you have to avoid accepting the undoCommandAdded() signal, call endEditBlock(), and undo each.
+
+When is a command mergable?
+- edit widget has focus
+- run a timer (~2 sec)
+- command is at the top
+- same command type, same selection involved
+
+Have to add a MergeTracker() to track stack changes and run a timer
+
+Add a ComboBoxWrapper() to add sPreview and sSubmit signals.
+
+I opened up Google Slides and they don't have font previewing, so I'm just going to leave it as it is.
+
 # 4/13/2018
 
 I'm fixing filter sort proxy and I don't know if I should use qt chunk signals or my own.

@@ -25,7 +25,7 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 	m_view->setDragMode(QGraphicsView::RubberBandDrag);
 	m_view->setDragMode(QGraphicsView::DragMode::NoDrag);
 	m_view->setObjectName("canvasView");
-	m_view->setStyleSheet("#canvasView{background:rgba(0, 0, 0, 0);}");
+	m_view->setStyleSheet("#canvasView{background:transparent;}");
 	m_view->setFrameShape(QFrame::NoFrame);
 
 	m_view->installEventFilter(this);
@@ -37,8 +37,7 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 void CanvasContainer::setEditable(bool editable)
 {
 	m_editable = editable;
-
-	m_scene->setEditable(editable);
+	if (m_scene) m_scene->setEditable(editable);
 
 	m_manipulator->setEnabled(editable);
 	m_view->setDragMode(editable ? QGraphicsView::RubberBandDrag : QGraphicsView::NoDrag);
@@ -55,14 +54,31 @@ void CanvasContainer::resizeEvent(QResizeEvent * event)
 	// then our view matrix is out of date (not centered 0,0)
 	m_view->viewport()->setGeometry(m_view->rect());
 
-	QSize new_size = event->size();
+	rescale();
+	m_manipulator->reposition();
+}
 
-	double factor = new_size.height();
+void CanvasContainer::debug() {
+	qDebug() << "debugging container";
+	qDebug() << "view";
+	qDebug() << "viewsr" << m_view->sceneRect();
+	qDebug() << m_view->transform();
+	qDebug() << "scene item count" << m_scene->items().size();
+	qDebug() << "ssr" << m_scene->sceneRect();
+	auto items = m_scene->items();
+	for (auto item : items) {
+		qDebug() << "i" << item->rect();
+	}
+}
+
+void CanvasContainer::rescale()
+{
+	double factor = m_view->viewport()->size().height();
 	m_view->resetMatrix();
 	m_view->scale(factor, factor);
 
 	m_view->centerOn(0, 0);
-	m_manipulator->reposition();
+	//m_manipulator->reposition();
 }
 
 bool CanvasContainer::eventFilter(QObject * obj, QEvent * e)
@@ -74,7 +90,13 @@ bool CanvasContainer::eventFilter(QObject * obj, QEvent * e)
 	case QEvent::KeyPress:
 	case QEvent::ShortcutOverride:
 		ke = static_cast<QKeyEvent*>(e);
+		// filter undo redo
 		if (ke->matches(QKeySequence::Redo) || ke->matches(QKeySequence::Undo)) {
+			return true;
+		}
+		// filter arrow scrolling
+		int key = ke->key();
+		if (key == Qt::Key_Left || key == Qt::Key_Right) {
 			return true;
 		}
 		break;
@@ -100,12 +122,13 @@ void CanvasContainer::setScene(CanvasScene * scene)
 	connect(scene, &QObject::destroyed, this, [this]() {
 		m_scene = nullptr;
 	});
-	connect(m_scene, &QGraphicsScene::changed, this,
-		[this]() {
+	connect(m_scene, &QGraphicsScene::changed,
+		this, [this]() {
 		m_view->centerOn(0, 0);
 	});
-	// these have to be directly connect to the manipulator otherwise
-	// it crashes on destruction
+
+	// other connections in TransformManipulator::setScene
+	rescale();
 }
 
 TransformManipulator::TransformManipulator(CanvasScene * scene, QGraphicsView *view, QWidget * parent)

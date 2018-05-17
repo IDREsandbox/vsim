@@ -29,8 +29,13 @@ public:
 
 	void setEditable(bool editable);
 
+	void debug();
+
 protected:
 	void resizeEvent(QResizeEvent* event) override;
+
+private:
+	void rescale();
 
 public:
 	CanvasScene *m_scene;

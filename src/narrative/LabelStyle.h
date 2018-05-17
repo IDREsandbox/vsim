@@ -13,7 +13,22 @@
 
 #include "LabelType.h"
 
-class NarrativeSlideLabel;
+class FrameStyle {
+public:
+	FrameStyle();
+	FrameStyle(QColor background, QColor frame_color, int frame_width, bool has_frame);
+	~FrameStyle();
+
+	void applyToWidget(QWidget *w) const;
+	QString styleText() const;
+
+public:
+	QColor m_bg_color;
+	QColor m_frame_color;
+	int m_frame_width;
+	bool m_has_frame;
+};
+
 class LabelStyle {
 public:
 	LabelStyle();
@@ -24,7 +39,9 @@ public:
 	void copy(const LabelStyle *other);
 
 	void applyToWidget(QWidget *widget, bool font_size = true);
-	void applyToNarrativeLabel(NarrativeSlideLabel *label);
+	void applyToDocument(QTextDocument *doc); // doesn't apply valign, or frame
+	// implementation in CanvasControl
+	//void applyToCanvasLabel(CanvasLabel *label);
 
 	// serializer
 	LabelType getType() const;
@@ -32,14 +49,17 @@ public:
 	int getTypeInt() const;
 	void setTypeInt(int t);
 
-	QColor backgroundColor() const;
-	const osg::Vec4 &getBackgroundColor() const;
-	void setBackgroundColor(const osg::Vec4 &color);
+	FrameStyle *frameStyle(); // FIXME: better style than raw pointer?
+
+	//QColor backgroundColor() const;
+	//const osg::Vec4 &getBackgroundColor() const;
+	//void setBackgroundColor(const osg::Vec4 &color);
 
 	int getAlign() const;
 	void setAlign(int);
 	void setVAlign(Qt::Alignment al);
 	void setHAlign(Qt::Alignment al);
+	Qt::Alignment valign() const;
 	int getMargin() const;
 	void setMargin(int);
 
@@ -66,11 +86,7 @@ public:
 	// box properties
 	//int m_width;
 	//int m_height;
-	QColor m_bg_color;
-	mutable osg::Vec4 m_bg_color_vec;
-	// border width
-	// border color
-	// border style
+	FrameStyle m_frame;
 
 	// text box properties
 	Qt::Alignment m_align; // v align doesn't work on text documents, need to manually impl

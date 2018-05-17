@@ -268,13 +268,20 @@ CanvasItem::CanvasItem(QGraphicsItem * parent)
 	: QAbstractGraphicsShapeItem(parent),
 	m_prefers_fixed(false),
 	m_border_around(false),
-	m_debug_paint(false)
+	m_debug_paint(false),
+	m_base_height(600.0)
 {
 	setEditable(false);
 
 	setRect(0, 0, 1, 1);
 	setBrush(QBrush(QColor(0, 0, 0, 0)));
-	setPen(QPen(QBrush(), 0, Qt::NoPen));
+
+	QPen p = pen();
+	p.setBrush(QColor(0, 0, 0));
+	p.setStyle(Qt::NoPen);
+	p.setJoinStyle(Qt::RoundJoin);
+	p.setWidthF(0.0);
+	setPen(p);
 }
 
 QSizeF CanvasItem::size() const
@@ -415,7 +422,6 @@ int CanvasItem::borderWidthPixels() const
 void CanvasItem::setBorderWidthPixels(int px)
 {
 	QPen p = pen();
-	p.setStyle(Qt::SolidLine);
 	qreal w = px / m_base_height;
 	p.setWidthF(w);
 	setPen(p);
@@ -426,16 +432,22 @@ QColor CanvasItem::borderColor() const
 	return pen().color();
 }
 
+void CanvasItem::setHasBorder(bool has)
+{
+	QPen p = pen();
+	p.setStyle(has ? Qt::SolidLine : Qt::NoPen);
+	setPen(p);
+}
+
+bool CanvasItem::hasBorder() const
+{
+	return pen().style() != Qt::NoPen;
+}
+
 void CanvasItem::setBorderColor(const QColor & color)
 {
 	QPen p = pen();
-	if (color.alpha() == 0) {
-		p.setStyle(Qt::NoPen);
-	}
-	else {
-		p.setStyle(Qt::SolidLine);
-		p.setColor(color);
-	}
+	p.setColor(color);
 	setPen(p);
 }
 
@@ -447,18 +459,24 @@ QColor CanvasItem::background() const
 void CanvasItem::setBackground(const QColor & color)
 {
 	QBrush b = brush();
-	if (b.color().alpha() == 0) {
-		b.setStyle(Qt::NoBrush);
-	}
-	else {
-		b.setColor(color);
-		b.setStyle(Qt::BrushStyle::SolidPattern);
-	}
+	b.setColor(color);
+	//if (b.color().alpha() == 0) {
+	//	b.setStyle(Qt::NoBrush);
+	//}
+	//else {
+	//	b.setColor(color);
+	//	b.setStyle(Qt::BrushStyle::SolidPattern);
+	//}
 	setBrush(b);
 }
 
 QRectF CanvasItem::boundingRect() const
 {
+	// no border
+	if (!hasBorder()) {
+		return QRectF(0, 0, m_w, m_h);
+	}
+
 	QRectF r;
 	double pw = pen().widthF();
 	double w = size().width();
@@ -476,25 +494,35 @@ void CanvasItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * opti
 {
 	if (m_debug_paint) {
 		painter->setPen(Qt::NoPen);
-		painter->setBrush(Qt::yellow);
+		painter->setBrush(QColor(255,255,0,150));
 		painter->drawRect(boundingRect());
 	}
-	QRectF r;
+	painter->setRenderHint(QPainter::Antialiasing);
+
+	QRectF border_rect;
 	double pw = pen().widthF();
 	double w = size().width();
 	double h = size().height();
-	if (!m_border_around) {
-		r = QRectF(QPointF(0, 0), size());
+	if (!m_border_around || !hasBorder()) {
+		// normal rect paint
+		border_rect = QRectF(0, 0, w, h);
 	}
 	else {
+		// expanded rect paint
+		// so that the border is around the original rect
 		// +1/2pw on each side
-		r = QRectF(-pw / 2.0, -pw / 2.0, w + pw, h + pw);
+		border_rect = QRectF(-pw / 2.0, -pw / 2.0, w + pw, h + pw);
 	}
 	painter->setPen(pen());
 	painter->setBrush(brush());
-	painter->drawRect(r);
-	// if you want a rounded border
-	//painter->drawRoundedRect(r, pw, pw);
+	painter->drawRect(border_rect);
+
+	// paint a dashed selection line
+	if (isSelected()) {
+		painter->setPen(QPen(Qt::lightGray, 0, Qt::PenStyle::DashLine));
+		painter->setBrush(Qt::NoBrush);
+		painter->drawRect(QRectF(0, 0, w, h));
+	}
 }
 
 void CanvasItem::mouseEventSelection(QGraphicsSceneMouseEvent * event)
@@ -546,7 +574,8 @@ double CanvasItem::toScene(double pixels) const {
 
 CanvasLabel::CanvasLabel(QGraphicsItem * parent)
 	: CanvasItem(parent),
-	m_valign(Qt::AlignTop)
+	m_valign(Qt::AlignTop),
+	m_style_type(LabelType::LABEL)
 {
 	m_text = new TextItem(this);
 	m_text->show();
@@ -787,16 +816,19 @@ void CanvasImage::initSize()
 	}
 
 	double ratio;
-	if (p.height() == 0 || p.width() == 0) {
-		ratio = 1.0;
-	}
-	else {
-		ratio = p.width() / (float)p.height();
-	}
+	ratio = p.width() / (float)p.height();
 
 	// convert to small units and set
 	double h = set_h / bh;
 	double w = ratio * h;
+
+	// bad number checking
+	if (w <= 0.0 || w >= 1.0
+		|| h <= 0.0 || h >= 1.0) {
+		qWarning() << "size init image w/ invalid dimensions" << w << h;
+		w = .2;
+		h = .2;
+	}
 	resize(w, h);
 	move(-w / 2, -h / 2);
 }

@@ -39,7 +39,9 @@ public:
 	ToolBox *m_color_box;
 
 	QToolButton *m_background;
+	QToolButton *m_clear_background;
 	QToolButton *m_border;
+	QToolButton *m_clear_border;
 	QSpinBox *m_border_width;
 
 	// font box

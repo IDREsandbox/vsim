@@ -17,6 +17,8 @@ class SimpleCommandStack;
 class CanvasLabel;
 class CanvasItem;
 class CanvasScene;
+class LabelStyle;
+class FrameStyle;
 
 //namespace Canvas {
 //	void setBorderWidth(const std::vector<RectItem*> &items,
@@ -36,21 +38,24 @@ public:
 
 public: // command wrappers
 	//
-	void createLabel(LabelType type);
-	void createImage(QPixmap pixmap);
+	void createLabel(LabelStyle *styles);
+	void createImage(QPixmap pixmap, FrameStyle *style = nullptr);
 	void removeItems();
 
 	// all
 	void setBorderWidth(int width);
 	void setBorderColor(const QColor &color);
+	void clearBorder();
 	void setBackgroundColor(const QColor &color);
+	void clearBackground();
 
 	// text only
-	void setVAlign(Qt::Alignment al);
 	void setFont(const QString &family);
-	void setHAlign(Qt::Alignment al);
-	void setStyle(LabelType type);
 	void setSize(qreal size);
+	void setVAlign(Qt::Alignment al);
+	void setHAlign(Qt::Alignment al);
+	void setStyle(LabelStyle *style);
+	void setTextColor(QColor c);
 
 	void toggleBold();
 	void toggleUnderline();
@@ -65,23 +70,39 @@ public: // queries
 	// can perform text operations
 	bool anyText() const;
 	// selecting 1+ text items
-	std::set<CanvasLabel*> multiText() const;
+	std::set<CanvasLabel*> selectedLabels() const;
 	// selecting text within a single item
 	CanvasLabel *subText() const;
+
+	//
+	QColor allBackgroundColor() const;
+	QColor allBorderColor() const;
+	int allBorderSize() const; // < 0 if different
+	QColor allTextColor() const;
 
 	// is the selection allX?
 	bool allBold() const;
 	bool allUnderline() const;
 	bool allStrikeOut() const;
 	bool allItalic() const;
-	qreal allSize() const; //
+	int allFontSize() const; // < 0 if different
+	QString allFont() const; // "" if different
+	LabelType allLabelType() const; // NONE if different
 
 signals: // change signals
 	//qreal allSizeChanged();
+	void sAnyChange();
 
 public: // misc, internal stuff
-	void beginWrapTextCommands(); // delays edit commands for bundling
-	void endWrapTextCommands(); // pushes command
+	void applyFrameStyle(CanvasItem *item, FrameStyle *style);
+	void applyLabelStyle(CanvasLabel *label, LabelStyle *style);
+	QUndoCommand *createApplyLabelStyleCommand(CanvasLabel *label, LabelStyle *style,
+		QUndoCommand *parent = nullptr);
+
+	// delays edit commands and bundles them together
+	// returns the allocated command
+	void beginWrapTextCommands(QUndoCommand *parent = nullptr);
+	QUndoCommand *endWrapTextCommands();
 
 	//void onTextCommandAdded(CanvasLabel *label);
 
@@ -100,7 +121,7 @@ public: // misc, internal stuff
 		if (label) {
 			return fmt_test(label->textCursor().charFormat());
 		}
-		auto labels = multiText();
+		auto labels = selectedLabels();
 		for (auto *label : labels) {
 			bool ok = fmt_test(label->textCursor().charFormat());
 			if (!ok) return false;
@@ -110,16 +131,17 @@ public: // misc, internal stuff
 
 	// Performs a textCursor operation on relevant selected text
 	// Wraps changes with wrapTextCommand
-	// signature: void(*)(QTextCursor cursor)
+	// signature: void(*)(QTextCursor &cursor)
 	template <typename T>
 	void mergeCursorOp(T func) {
 		CanvasLabel *label = subText();
 		if (label) {
 			QTextCursor c = label->textCursor();
 			func(c);
+			label->setTextCursor(c);
 			return;
 		}
-		std::set<CanvasLabel*> labels = multiText();
+		std::set<CanvasLabel*> labels = selectedLabels();
 		if (labels.size() > 0) {
 			beginWrapTextCommands();
 			for (CanvasLabel *label : labels) {
@@ -127,7 +149,7 @@ public: // misc, internal stuff
 				c.select(QTextCursor::SelectionType::Document);
 				func(c);
 			}
-			endWrapTextCommands();
+			m_stack->push(endWrapTextCommands());
 		}
 	}
 
@@ -143,15 +165,6 @@ public: // misc, internal stuff
 		m_stack->push(sc);
 	}
 
-public:
-	QAction *a_delete;
-
-	QAction *a_header1;
-	QAction *a_header2;
-	QAction *a_label;
-	QAction *a_body;
-	QAction *a_image;
-
 private:
 	CanvasScene *m_scene;
 	SimpleCommandStack *m_default_stack;
@@ -159,6 +172,7 @@ private:
 	bool m_wrapping_text_commands;
 	QUndoCommand *m_text_command_bundle;
 };
+
 
 class TransformCanvasItemsCommand : public QUndoCommand {
 public:

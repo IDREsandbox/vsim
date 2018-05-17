@@ -612,24 +612,24 @@ QComboBox::down-arrow:focus {
 }
 
 QAbstractSpinBox {
-    padding: 5px;
+    padding: 3px;
     border: 1px solid #76797C;
     background-color: #232629;
     color: #eff0f1;
     border-radius: 2px;
-    min-width: 75px;
+    min-width: 40px;
 }
 
 QAbstractSpinBox:up-button {
     background-color: transparent;
     subcontrol-origin: border;
-    subcontrol-position: center right;
+    subcontrol-position: top right;
 }
 
 QAbstractSpinBox:down-button {
     background-color: transparent;
     subcontrol-origin: border;
-    subcontrol-position: center left;
+    subcontrol-position: bottom right;
 }
 
 QAbstractSpinBox::up-arrow,
@@ -1011,12 +1011,14 @@ QToolButton::menu-button:hover {
 	margin: 5px; */
 }
 
-QToolButton:checked,
 QToolButton:pressed,
 QToolButton::menu-button:pressed {
     background-color: #3daee9;
     border: 1px solid #3daee9;
     /* padding: 5px; */
+}
+
+QToolButton:checked {
 }
 
 

@@ -184,10 +184,10 @@ public:
 
 	void setBorderWidthPixels(int px);
 	int borderWidthPixels() const;
-	
-	// alpha 0 for no border
 	void setBorderColor(const QColor &color);
 	QColor borderColor() const;
+	void setHasBorder(bool has);
+	bool hasBorder() const;
 
 	// alpha 0 for no background
 	void setBackground(const QColor &color);
@@ -204,6 +204,8 @@ public: // commands
 		ModifyCommand2<CanvasItem, int, &borderWidthPixels, &setBorderWidthPixels>;
 	using SetBorderColorCommand =
 		ModifyCommand2<CanvasItem, const QColor&, &borderColor, &setBorderColor>;
+	using SetHasBorderCommand =
+		ModifyCommand2<CanvasItem, bool, &hasBorder, &setHasBorder>;
 	using SetBackgroundCommand =
 		ModifyCommand2<CanvasItem, const QColor&, &background, &setBackground>;
 
