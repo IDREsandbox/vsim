@@ -97,7 +97,7 @@ void NarrativeSlide::loadOld(const NarrativeNode * old, const NarrativeTransitio
 	}
 }
 
-const osg::Matrixd & NarrativeSlide::getCameraMatrix() const
+osg::Matrixd NarrativeSlide::getCameraMatrix() const
 {
 	return m_camera_matrix;
 }

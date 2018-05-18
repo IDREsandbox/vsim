@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-#include "LabelType.h"
+#include "Canvas/LabelType.h"
 
 class CanvasScene;
 class CanvasControl;

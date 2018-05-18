@@ -5,9 +5,9 @@
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeSlideItem.h"
 #include "narrative/NarrativeSlideLabel.h"
-#include "LabelStyleGroup.h"
-#include "LabelStyle.h"
-#include "TypesSerializer.h"
+#include "Canvas/LabelStyleGroup.h"
+#include "Canvas/LabelStyle.h"
+#include "Core/TypesSerializer.h"
 
 #include <QDebug>
 

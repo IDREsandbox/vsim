@@ -1,0 +1,108 @@
+include "../Core/types.fbs";
+
+namespace VSim.FlatBuffers;
+
+table StyleTable {
+  header1:LabelStyle;
+  header2:LabelStyle;
+  body:LabelStyle;
+  label:LabelStyle;
+  image:ImageStyle;
+}
+
+union CanvasItem {
+  CanvasLabel,
+  CanvasImage
+}
+
+table Canvas {
+  items:[CanvasItem];
+}
+
+enum LabelType : byte {
+  None,
+  Header1,
+  Header2,
+  Body,
+  Label
+}
+
+enum VAlign : int32 {
+  Top = 0x20,
+  VCenter = 0x40,
+  Bottom = 0x80
+}
+
+enum HAlign : int32 {
+  Left = 0x1,
+  Right = 0x2,
+  HCenter = 0x4,
+  Justify = 0x8
+}
+
+// border
+table LineStyle {
+  color:Color;
+  width:int;
+  visible:bool;
+}
+
+table FillStyle {
+  color:Color;
+  // 
+}
+
+table BorderStyle {
+  color:Color;
+  width:int;
+  visible:bool;
+}
+
+table TextStyle {
+  foreground:Color;
+  halign:HAlign;
+  valign:VAlign;
+  margin:int;
+  font_family:string;
+  point_size:int;
+  weight:int; // bold
+  italicized:bool;
+  underlined:bool;
+}
+
+// kept in StyleTable
+table LabelStyle {
+  type:LabelType;
+  fill_style:FillStyle;
+  text_style:TextStyle;
+  line_style:LineStyle;
+}
+// kept in StyleTable
+table ImageStyle {
+  line_style:LineStyle;
+}
+
+struct Rect {
+  x:float;
+  y:float;
+  w:float;
+  h:float;
+}
+
+table CanvasLabel {
+  rect:Rect;
+  type:LabelType;
+  html:string;
+  fill_style:FillStyle;
+  line_style:LineStyle;
+  valign:VAlign;
+  //text_style:TextStyle; // the other text stuff is kept in the html
+}
+
+table CanvasImage {
+  rect:Rect;
+  line_style:LineStyle;
+  style:ImageStyle;
+}
+
+root_type NarrativeTable;

@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <osg/ValueObject>
 
-#include "Util.h"
+#include "Core/Util.h"
 #include "Model.h"
 #include "ModelGroup.h"
 #include "OSGNodeWrapper.h"

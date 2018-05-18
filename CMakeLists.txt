@@ -6,7 +6,7 @@ set (VSim_VERSION_MAJOR 2)
 set (VSim_VERSION_MINOR 0)
 set (VSim_VERSION_REVISION 0)
 
-message("source directory " ${PROJECT_SOURCE_DIR})
+set (CMAKE_CXX_STANDARD 17)
 
 enable_testing()
 # set(CTEST_OUTPUT_ON_FAILURE ON) # doesn't do anything
@@ -74,17 +74,16 @@ if (NOT flatcExec)
 endif()
 message("flatc found: ${flatcExec}")
 
-file(GLOB_RECURSE fbs_src
-  src/*.fbs
-  )
-message("FBS SRC:\n" "${fbs_src}")
-set(fbs_header_list "")
-foreach(fbs_full ${fbs_src})
-  # set(fbs_full ${CMAKE_CURRENT_SOURCE_DIR}/src/${fbs})
+include_directories (${CMAKE_BINARY_DIR}/generated)
+
+# input: foo.fbs (caller relative path, uses CMAKE_CURRENT_SOURCE_DIR)
+# output: var is set to output header absolute path (foo_generated.h)
+function(vsim_add_flatbuffer var fbs_src)
+  set(fbs_full ${CMAKE_CURRENT_SOURCE_DIR}/${fbs_src})
   get_filename_component(fbs ${fbs_full} NAME)
   string(REGEX REPLACE "\\.fbs$" "_generated.h" fbs_header ${fbs})
   set(fbs_header_full ${CMAKE_BINARY_DIR}/generated/${fbs_header})
-  list(APPEND fbs_header_list ${fbs_header_full})
+  #list(APPEND fbs_header_list ${fbs_header_full})
   # some annoying qt stuff
   set_property(SOURCE ${fbs_header_full} PROPERTY SKIP_AUTOGEN ON)
   add_custom_command(
@@ -96,369 +95,167 @@ foreach(fbs_full ${fbs_src})
             -I ${CMAKE_CURRENT_SOURCE_DIR}/src
             ${fbs_full}
     DEPENDS flatc ${fbs_full})
-endforeach()
-message("FBS HEADERS:\n" "${fbs_header_list}")
-include_directories (${CMAKE_BINARY_DIR}/generated)
-#add_custom_target(FBSHeaders ALL DEPENDS ${fbs_header_list})
+  set(${var} ${fbs_header_full} PARENT_SCOPE)
+endfunction()
+
+function(vsim_add_test name src libs)
+  message("adding test: ${name}")
+  add_executable(${name} ${src})
+  # message("name?" "${name}" "\nsrc?" "${src}")
+  add_test(NAME ${name} COMMAND ${name})
+  # message("libraries?" "${libs}")
+  target_link_libraries(${name} ${libs})
+endfunction()
+
+function(vsim_add_experiment name src libs)
+  message("adding experiment: ${name}")
+  add_executable(${name}
+    EXCLUDE_FROM_ALL
+    ${src})
+  target_link_libraries(${name} ${libs})
+  set_target_properties(${name} PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+endfunction()
+
+# puts all the tests and things in build/Debug
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-# source
-set(Util_src
-  src/Util.cpp
-  src/Util.h
-  src/VecUtil.cpp
-  src/VecUtil.h
-  # src/Group.cpp
-  # src/Group.h
-  src/GroupTemplate.inl
-  src/GroupTemplate.h
-  src/GroupCommands.h
-  src/GroupEnums.h
-  src/GroupModelTemplate.inl
-  src/GroupModelTemplate.h
-  src/TypesSerializer.cpp
-  src/TypesSerializer.h
-  ${CMAKE_BINARY_DIR}/generated/types_generated.h
-  src/Command.h
-)
-add_library(Util_obj ${Util_src})
-
-file(GLOB_RECURSE Deprecated_src
-  src/deprecated/*.h
-  src/deprecated/*.cpp
-  )
-add_library(Deprecated_obj ${Deprecated_src})
-
-set(ERModel_src
-  src/ERSerializer.cpp
-  src/ERSerializer.h
-  ${CMAKE_BINARY_DIR}/generated/eresources_generated.h
-  src/resources/ERFilterSortProxy.h
-  src/resources/ERFilterSortProxy.cpp
-  src/resources/ECategory.h
-  src/resources/ECategory.cpp
-  src/resources/ECategoryGroup.h
-  src/resources/ECategoryGroup.cpp
-  src/resources/ECategoryModel.h
-  src/resources/ECategoryModel.cpp
-  src/resources/EResource.h
-  src/resources/EResource.cpp
-  src/resources/EResourceGroup.h
-  src/resources/EResourceGroup.cpp
-  src/CheckableListProxy.h
-  src/CheckableListProxy.cpp
-  src/resources/EREnums.h
-)
-add_library(ERModel_obj ${ERModel_src})
-target_link_libraries(ERModel_obj Util_obj Deprecated_obj)
-
-set(NarrativeModel_src
-  src/NarrativeSerializer.cpp
-  src/NarrativeSerializer.h
-  ${CMAKE_BINARY_DIR}/generated/narratives_generated.h
-  src/narrative/NarrativeGroup.cpp
-  src/narrative/NarrativeGroup.h
-  src/narrative/Narrative.cpp
-  src/narrative/Narrative.h
-  src/narrative/NarrativeSlide.cpp
-  src/narrative/NarrativeSlide.h
-  src/narrative/NarrativeSlideItem.cpp
-  src/narrative/NarrativeSlideItem.h
-  src/narrative/NarrativeSlideLabel.cpp
-  src/narrative/NarrativeSlideLabel.h
-  src/narrative/LabelStyle.cpp
-  src/narrative/LabelStyle.h
-  src/narrative/LabelStyleGroup.cpp
-  src/narrative/LabelStyleGroup.h
-  src/narrative/LabelType.h
-)
-add_library(NarrativeModel_obj ${NarrativeModel_src})
-target_link_libraries(NarrativeModel_obj Util_obj Deprecated_obj)
-
-set(VSimRoot_src
-  src/VSimRoot.cpp
-  src/VSimRoot.h
-  src/VSimSerializer.cpp
-  src/VSimSerializer.h
-  src/Model.cpp
-  src/Model.h
-  src/ModelGroup.cpp
-  src/ModelGroup.h
-  src/OSGGroupModel.cpp
-  src/OSGGroupModel.h
-  src/OSGYearModel.cpp
-  src/OSGYearModel.h
-  src/FileUtil.cpp
-  src/FileUtil.h
-  ${CMAKE_BINARY_DIR}/generated/vsim_generated.h
-  ${CMAKE_BINARY_DIR}/generated/settings_generated.h
-)
-add_library(VSimRoot_obj ${VSimRoot_src})
-target_link_libraries(VSimRoot_obj Util_obj Deprecated_obj NarrativeModel_obj ERModel_obj)
-
-set(VSim_src
-  src/resources/ECategoryControl.cpp
-  src/resources/ECategoryControl.h
-  src/resources/ERControl.cpp
-  src/resources/ERControl.h
-  src/resources/ERDialog.cpp
-  src/resources/ERDialog.h
-  src/resources/ERDisplay.cpp
-  src/resources/ERDisplay.h
-  src/resources/ERFilterArea.ui
-  src/resources/ERFilterArea.cpp
-  src/resources/ERFilterArea.h
-  src/resources/ERScrollBox.cpp
-  src/resources/ERScrollBox.h
-  src/resources/ERScrollItem.cpp
-  src/resources/ERScrollItem.h
-  src/resources/NewCatDialog.cpp
-  src/resources/NewCatDialog.h
-
-  src/narrative/CanvasContainer.h
-  src/narrative/CanvasContainer.cpp
-  src/narrative/NarrativeCanvas.h
-  src/narrative/NarrativeCanvas.cpp
-  src/narrative/NarrativeControl.h
-  src/narrative/NarrativeControl.cpp
-  src/narrative/NarrativeInfoDialog.h
-  src/narrative/NarrativeInfoDialog.cpp
-  src/narrative/NarrativePlayer.cpp
-  src/narrative/NarrativePlayer.h
-  src/narrative/NarrativeScrollBox.cpp
-  src/narrative/NarrativeScrollBox.h
-  src/narrative/NarrativeScrollItem.cpp
-  src/narrative/NarrativeScrollItem.h
-  src/narrative/NarrativeSlideDurationDialog.cpp
-  src/narrative/NarrativeSlideDurationDialog.h
-  src/narrative/SlideScrollBox.cpp
-  src/narrative/SlideScrollBox.h
-  src/narrative/SlideScrollItem.cpp
-  src/narrative/SlideScrollItem.h
-
-  src/AboutDialog.cpp
-  src/AboutDialog.h
-  src/AboutDialog.ui
-  src/BaseFirstPersonManipulator.cpp
-  src/BaseFirstPersonManipulator.h
-  src/editButtons.cpp
-  src/editButtons.h
-  src/EditDeleteDelegate.cpp
-  src/EditDeleteDelegate.h
-  src/ERBar.cpp
-  src/ERBar.h
-  src/ERBar.ui
-  src/FastScrollBox.cpp
-  src/FastScrollBox.h
-  src/FileUtil.cpp
-  src/FileUtil.h
-  src/FirstPersonManipulator.cpp
-  src/FirstPersonManipulator.h
-  src/FlightManipulator.cpp
-  src/FlightManipulator.h
-  src/FocusFilter.cpp
-  src/FocusFilter.h
-  src/FutureDialog.cpp
-  src/FutureDialog.h
-  src/FutureDialog.ui
-  src/GroupScrollBox.inl
-  src/GroupScrollBox.h
-  src/HorizontalScrollBox.cpp
-  src/HorizontalScrollBox.h
-  src/KeyTracker.cpp
-  src/KeyTracker.h
-  src/MainWindow.cpp
-  src/MainWindow.h
-  src/MainWindowTopBar.cpp
-  src/MainWindowTopBar.h
-  src/ModelInformationDialog.cpp
-  src/ModelInformationDialog.h
-  src/ModelOutliner.cpp
-  src/ModelOutliner.h
-  src/mrichtextedit.cpp
-  src/mrichtextedit.h
-  src/mtextedit.cpp
-  src/mtextedit.h
-  src/Navigation.h
-  src/NavigationControl.cpp
-  src/NavigationControl.h
-  src/NumberSlider.cpp
-  src/NumberSlider.h
-  src/ObjectManipulator.cpp
-  src/ObjectManipulator.h
-  src/OSGViewerWidget.cpp
-  src/OSGViewerWidget.h
-  src/ScrollBoxItem.cpp
-  src/ScrollBoxItem.h
-  src/Selection.cpp
-  src/Selection.h
-  src/SelectionStack.cpp
-  src/SelectionStack.h
-  src/SimpleCameraManipulator.cpp
-  src/SimpleCameraManipulator.h
-  src/StackObject.inl
-  src/StackObject.h
-  src/StatsWindow.cpp
-  src/StatsWindow.h
-  src/StatsWindow.ui
-  src/StyleSettingsDialog.cpp
-  src/StyleSettingsDialog.h
-  src/StyleSettingsWidget.cpp
-  src/StyleSettingsWidget.h
-  src/TickSlider.cpp
-  src/TickSlider.h
-  src/TimeManager.cpp
-  src/TimeManager.h
-  src/TimeSlider.cpp
-  src/TimeSlider.h
-  src/VSimApp.cpp
-  src/VSimApp.h
-)
-add_library(VSim_obj ${VSim_src})
-message("SOURCES:\n" "${VSim_src}")
-target_link_libraries(VSim_obj VSimRoot_obj)
-
-# message(${PROJECT_SOURCE_DIR})
-# message("binary dir " ${PROJECT_BINARY_DIR})
-# file(GLOB_RECURSE VSim_src
-#   src/*.h
-#   src/*.cpp
-#   )
-# list(FILTER VSim_src EXCLUDE REGEX ".*src/windows/*")
-# list(FILTER VSim_src EXCLUDE REGEX ".*src/main.cpp")
-# file(GLOB_RECURSE VSim_headers
-#   src/*.h
-#   )
-file(GLOB_RECURSE oldSerializers
-  src/*/Serializer*.cpp
-  )
-
-message("SERIALIZERS:\n" "${oldSerializers}")
-
-add_executable(VSim src/main.cpp ${oldSerializers})
+add_subdirectory(src)
 
 # linking
-target_link_libraries(VSim VSim_obj Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
 
 # gui tests (experiments) ##################
 # add_subdirectory("experiments")
 
-set(NumberSlider_src
-  src/NumberSlider.cpp
-  experiments/NumberSlider_experiment/NumberSlider_experiment.cpp
-)
-add_executable(NumberSlider_experiment ${NumberSlider_src})
-target_link_libraries(NumberSlider_experiment Qt5::Widgets)
+# set(NumberSlider_src
+#   src/NumberSlider.cpp
+#   experiments/NumberSlider_experiment/NumberSlider_experiment.cpp
+# )
+# add_executable(NumberSlider_experiment ${NumberSlider_src})
+# target_link_libraries(NumberSlider_experiment Qt5::Widgets)
 
-set(TextEdit_src
-  src/mtextedit.h
-  src/mtextedit.cpp
-  src/mrichtextedit.h
-  src/mrichtextedit.cpp
-  experiments/TextEdit_experiment.cpp
-)
-add_executable(TextEdit_experiment ${TextEdit_src})
-target_link_libraries(TextEdit_experiment Qt5::Widgets)
+# set(TextEdit_src
+#   src/mtextedit.h
+#   src/mtextedit.cpp
+#   src/mrichtextedit.h
+#   src/mrichtextedit.cpp
+#   experiments/TextEdit_experiment.cpp
+# )
+# add_executable(TextEdit_experiment ${TextEdit_src})
+# target_link_libraries(TextEdit_experiment Qt5::Widgets)
 
-set(HorizontalScrollBox_src
-  src/HorizontalScrollBox.h
-  src/HorizontalScrollBox.cpp
-  src/ScrollBoxItem.h
-  src/ScrollBoxItem.cpp
-  src/Selection.h
-  src/Selection.cpp
-  src/SelectionStack.h
-  src/SelectionStack.cpp
-  src/Util.h
-  src/Util.cpp
-)
+# set(HorizontalScrollBox_src
+#   src/HorizontalScrollBox.h
+#   src/HorizontalScrollBox.cpp
+#   src/ScrollBoxItem.h
+#   src/ScrollBoxItem.cpp
+#   src/Selection.h
+#   src/Selection.cpp
+#   src/SelectionStack.h
+#   src/SelectionStack.cpp
+#   src/Util.h
+#   src/Util.cpp
+# )
 
-add_executable(HorizontalScrollBox_experiment ${HorizontalScrollBox_src}
-  experiments/HorizontalScrollBox_experiment/HorizontalScrollBox_experiment.cpp)
-target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
+# add_executable(HorizontalScrollBox_experiment ${HorizontalScrollBox_src}
+#   experiments/HorizontalScrollBox_experiment/HorizontalScrollBox_experiment.cpp)
+# target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
 
-add_executable(HSBSpeed_experiment ${HorizontalScrollBox_src}
-  experiments/HSBSpeed/HSBSpeed.cpp)
-target_link_libraries(HSBSpeed_experiment Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
+# add_executable(HSBSpeed_experiment ${HorizontalScrollBox_src}
+#   experiments/HSBSpeed/HSBSpeed.cpp)
+# target_link_libraries(HSBSpeed_experiment Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
 
-add_subdirectory(experiments/FutureDialog_experiment)
+# add_subdirectory(experiments/FutureDialog_experiment)
 
-add_subdirectory(experiments/Canvas_experiment)
-
-add_subdirectory(experiments/CanvasEditor_experiment)
+# add_subdirectory(experiments/Canvas_experiment)
+# add_subdirectory(experiments/CanvasEditor_experiment)
 
 # tests ####################################
 
 # util test & dependencies
-set(Util_src
-  tests/Util_test.cpp
-  src/Util.cpp
-  src/Util.h
-  src/VecUtil.cpp
-  src/VecUtil.h)
-add_executable(Util_test ${Util_src})
-add_test(NAME Util_test COMMAND Util_test)
-target_link_libraries(Util_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+# set(Util_src
+#   tests/Util_test.cpp
+#   src/Util.cpp
+#   src/Util.h
+#   src/VecUtil.cpp
+#   src/VecUtil.h)
+# add_executable(Util_test ${Util_src})
+# add_test(NAME Util_test COMMAND Util_test)
+# target_link_libraries(Util_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 # group test
-set(Group_src
-  tests/Group_test.cpp
-  )
-add_executable(Group_test ${Group_src})
-add_test(NAME Group_test COMMAND Group_test)
-target_link_libraries(Group_test Util_obj)
-target_link_libraries(Group_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+# set(Group_src
+#   tests/Group_test.cpp
+# )
+# set(Group_libs
+#   Core_obj Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES}
+# )
+# vsim_add_test(
+#   Group_test
+#   ${Group_src}
+#   ${Group_libs}
+# )
+
+# compact form?
+
+
+
+# add_executable(Group_test ${Group_src})
+# add_test(NAME Group_test COMMAND Group_test)
+# target_link_libraries(Group_test Core_obj)
+# target_link_libraries(Group_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 # er filter proxy test
-set(ERFilterSortProxy_src
-  tests/ERFilterSortProxy_test.cpp
-  )
-add_executable(ERFilterSortProxy_test ${ERFilterSortProxy_src})
-add_test(NAME ERFilterSortProxy_test COMMAND ERFilterSortProxy_test)
-target_link_libraries(ERFilterSortProxy_test ERModel_obj)
-target_link_libraries(ERFilterSortProxy_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+# set(ERFilterSortProxy_src
+#   tests/ERFilterSortProxy_test.cpp
+#   )
+# add_executable(ERFilterSortProxy_test ${ERFilterSortProxy_src})
+# add_test(NAME ERFilterSortProxy_test COMMAND ERFilterSortProxy_test)
+# target_link_libraries(ERFilterSortProxy_test ERModel_obj)
+# target_link_libraries(ERFilterSortProxy_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
-set(ERSerializer_src
-  tests/ERSerializer_test.cpp
-)
-add_executable(ERSerializer_test ${ERSerializer_src})
-add_test(NAME ERSerializer_test COMMAND ERSerializer_test)
-target_link_libraries(ERSerializer_test ERModel_obj Util_obj Deprecated_obj)
-target_link_libraries(ERSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+# set(ERSerializer_src
+#   tests/ERSerializer_test.cpp
+# )
+# add_executable(ERSerializer_test ${ERSerializer_src})
+# add_test(NAME ERSerializer_test COMMAND ERSerializer_test)
+# target_link_libraries(ERSerializer_test ERModel_obj Core_obj Deprecated_obj)
+# target_link_libraries(ERSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
-set(EResource_test
-  tests/EResource_test.cpp
-)
-add_executable(EResource_test ${ERSerializer_src})
-add_test(NAME EResource_test COMMAND EResource_test)
-target_link_libraries(EResource_test ERModel_obj)
-target_link_libraries(EResource_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+# set(EResource_test
+#   tests/EResource_test.cpp
+# )
+# add_executable(EResource_test ${ERSerializer_src})
+# add_test(NAME EResource_test COMMAND EResource_test)
+# target_link_libraries(EResource_test ERModel_obj)
+# target_link_libraries(EResource_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
-set(NarrativeSerializer_src
-  tests/NarrativeSerializer_test.cpp
-)
-add_executable(NarrativeSerializer_test ${NarrativeSerializer_src})
-add_test(NAME NarrativeSerializer_test COMMAND NarrativeSerializer_test)
-target_link_libraries(NarrativeSerializer_test NarrativeModel_obj)
-target_link_libraries(NarrativeSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+# set(NarrativeSerializer_src
+#   tests/NarrativeSerializer_test.cpp
+# )
+# add_executable(NarrativeSerializer_test ${NarrativeSerializer_src})
+# add_test(NAME NarrativeSerializer_test COMMAND NarrativeSerializer_test)
+# target_link_libraries(NarrativeSerializer_test NarrativeModel_obj)
+# target_link_libraries(NarrativeSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
-set(ModelGroup_test_src
-  tests/ModelGroup_test.cpp
-)
-add_executable(ModelGroup_test ${ModelGroup_test_src})
-add_test(NAME ModelGroup_test COMMAND ModelGroup_test)
-target_link_libraries(ModelGroup_test VSimRoot_obj)
-target_link_libraries(ModelGroup_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+# set(ModelGroup_test_src
+#   tests/ModelGroup_test.cpp
+# )
+# add_executable(ModelGroup_test ${ModelGroup_test_src})
+# add_test(NAME ModelGroup_test COMMAND ModelGroup_test)
+# target_link_libraries(ModelGroup_test VSimRoot_obj)
+# target_link_libraries(ModelGroup_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
-set(VSimSerializer_src
-  tests/VSimSerializer_test.cpp
-  ${oldSerializers}
-)
-add_executable(VSimSerializer_test ${VSimSerializer_src} ${oldSerializers})
-add_test(NAME VSimSerializer_test COMMAND VSimSerializer_test)
-target_link_libraries(VSimSerializer_test VSimRoot_obj)
-target_link_libraries(VSimSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
+# set(VSimSerializer_src
+#   tests/VSimSerializer_test.cpp
+#   ${oldSerializers}
+# )
+# add_executable(VSimSerializer_test ${VSimSerializer_src} ${oldSerializers})
+# add_test(NAME VSimSerializer_test COMMAND VSimSerializer_test)
+# target_link_libraries(VSimSerializer_test VSimRoot_obj)
+# target_link_libraries(VSimSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
 # function(add_vsim_test testName testSrc)
 #   add_executable(${testName} ${testSrc})
@@ -471,32 +268,31 @@ target_link_libraries(VSimSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAP
 
 
 
-# tests that involve everything
-set(testList
-  Selection_test
-  )
-# file(GLOB TEST_SEARCH tests/*.cpp)
-# foreach(TEST_SRC ${TEST_SEARCH})
-#   get_filename_component(TEST_NAME ${TEST_SRC} NAME_WE)
-#   list(APPEND TEST_LIST ${TEST_NAME})
-# endforeach(TEST_SRC)
+# # tests that involve everything
+# set(testList
+#   Selection_test
+#   )
+# # file(GLOB TEST_SEARCH tests/*.cpp)
+# # foreach(TEST_SRC ${TEST_SEARCH})
+# #   get_filename_component(TEST_NAME ${TEST_SRC} NAME_WE)
+# #   list(APPEND TEST_LIST ${TEST_NAME})
+# # endforeach(TEST_SRC)
 
-foreach(test ${testList})
-  message("add test: " ${test})
-  # EXCLUDE_FROM_ALL
-  add_executable(${test} tests/${test}.cpp)
-  add_test(NAME ${test} COMMAND ${test})
-  target_link_libraries(${test} VSim_obj)
-  target_link_libraries(${test} Qt5::Widgets Qt5::Test)
-  target_link_libraries(${test} ${OPENSCENEGRAPH_LIBRARIES})
-endforeach(test)
+# foreach(test ${testList})
+#   message("add test: " ${test})
+#   # EXCLUDE_FROM_ALL
+#   add_executable(${test} tests/${test}.cpp)
+#   add_test(NAME ${test} COMMAND ${test})
+#   target_link_libraries(${test} VSim_obj)
+#   target_link_libraries(${test} Qt5::Widgets Qt5::Test)
+#   target_link_libraries(${test} ${OPENSCENEGRAPH_LIBRARIES})
+# endforeach(test)
 
 #install
-install(TARGETS VSim DESTINATION .)
 install(FILES CHANGELOG.md COPYRIGHT LICENSE README.md THIRD-PARTY-NOTICES DESTINATION .)
 
 #assets copying
-file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}")
+# file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}")
 install(DIRECTORY assets DESTINATION .)
 
 if (WIN32)
@@ -519,7 +315,6 @@ if (WIN32)
     get_filename_component(comp ${dll} NAME_WE)
     list(APPEND osgList ${comp})
   endforeach()
-  message("OSG DLL LIST:\n" "${osgList}")
 
   # copy OSG dlls on postbuild
   add_custom_target(CopyBuildDLLs)
@@ -538,8 +333,8 @@ if (WIN32)
   # copy osg plugins
   find_file(osgPluginsDebug NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/tools/osg)
   find_file(osgPlugins NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_TOOLS_DIRS})
-  file(COPY ${osgPluginsDebug} DESTINATION "${CMAKE_BINARY_DIR}")
-  file(COPY ${osgPlugins} DESTINATION "${CMAKE_BINARY_DIR}")
+  # file(COPY ${osgPluginsDebug} DESTINATION "${CMAKE_BINARY_DIR}")
+  # file(COPY ${osgPlugins} DESTINATION "${CMAKE_BINARY_DIR}")
   install(DIRECTORY ${osgPlugins} DESTINATION .)
 
 endif()

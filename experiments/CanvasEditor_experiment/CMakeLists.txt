@@ -2,14 +2,14 @@
 set(CMAKE_CURRENT_BINARY_DIR ${CMAKE_BINARY_DIR})
 
 set(CanvasEditor_src
-  ${CMAKE_SOURCE_DIR}/src/narrative/CanvasControl.cpp
-  ${CMAKE_SOURCE_DIR}/src/narrative/CanvasContainer.cpp
-  ${CMAKE_SOURCE_DIR}/src/narrative/CanvasScene.cpp
-  ${CMAKE_SOURCE_DIR}/src/narrative/CanvasToolBar.cpp
-  ${CMAKE_SOURCE_DIR}/src/narrative/CanvasEditor.cpp
-  ${CMAKE_SOURCE_DIR}/src/narrative/LabelStyleGroup.cpp
-  ${CMAKE_SOURCE_DIR}/src/narrative/LabelStyle.cpp
-  ${CMAKE_SOURCE_DIR}/src/SimpleCommandStack.cpp
+  ${CMAKE_SOURCE_DIR}/src/Canvas/CanvasControl.cpp
+  ${CMAKE_SOURCE_DIR}/src/Canvas/CanvasContainer.cpp
+  ${CMAKE_SOURCE_DIR}/src/Canvas/CanvasScene.cpp
+  ${CMAKE_SOURCE_DIR}/src/Canvas/CanvasToolBar.cpp
+  ${CMAKE_SOURCE_DIR}/src/Canvas/CanvasEditor.cpp
+  ${CMAKE_SOURCE_DIR}/src/Canvas/LabelStyleGroup.cpp
+  ${CMAKE_SOURCE_DIR}/src/Canvas/LabelStyle.cpp
+  ${CMAKE_SOURCE_DIR}/src/Core/SimpleCommandStack.cpp
   CanvasEditor_experiment.cpp
 )
 add_executable(CanvasEditor_experiment

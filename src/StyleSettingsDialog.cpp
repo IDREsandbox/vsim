@@ -2,8 +2,8 @@
 
 #include <QColorDialog>
 #include "StyleSettingsWidget.h"
-#include "LabelStyleGroup.h"
-#include "LabelStyle.h"
+#include "Canvas/LabelStyleGroup.h"
+#include "Canvas/LabelStyle.h"
 #include <QDebug>
 
 StyleSettingsDialog::StyleSettingsDialog(QWidget *parent)

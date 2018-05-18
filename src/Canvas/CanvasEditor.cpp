@@ -1,11 +1,11 @@
 #include "CanvasEditor.h"
 
-#include "narrative/CanvasContainer.h"
-#include "narrative/CanvasScene.h"
-#include "narrative/CanvasToolBar.h"
-#include "narrative/CanvasControl.h"
-#include "narrative/LabelStyleGroup.h"
-#include "narrative/LabelStyle.h"
+#include "Canvas/CanvasContainer.h"
+#include "Canvas/CanvasScene.h"
+#include "Canvas/CanvasToolBar.h"
+#include "Canvas/CanvasControl.h"
+#include "Canvas/LabelStyleGroup.h"
+#include "Canvas/LabelStyle.h"
 #include <QDebug>
 #include <QResizeEvent>
 #include <QtGlobal>

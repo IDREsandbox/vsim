@@ -4,8 +4,8 @@
 #include <QObject>
 #include <QUndoCommand>
 #include <osg/Group>
-#include "Command.h"
-#include "GroupTemplate.h"
+#include "Core/Command.h"
+#include "Core/GroupTemplate.h"
 
 class Narrative;
 

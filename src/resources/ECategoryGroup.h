@@ -1,7 +1,7 @@
 #ifndef ECATEGORYGROUP_H
 #define ECATEGORYGROUP_H
 
-#include "GroupTemplate.h"
+#include "Core/GroupTemplate.h"
 
 class EResourcesList;
 class ECategory;

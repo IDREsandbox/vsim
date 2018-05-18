@@ -1,5 +1,5 @@
 #include "CanvasScene.h"
-#include "narrative/CanvasScene.h"
+#include "Canvas/CanvasScene.h"
 #include <QDebug>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneMouseEvent>

@@ -9,7 +9,6 @@
 #include <QPropertyAnimation>
 
 #include "SelectionStack.h"
-#include "LabelStyle.h" // for enums
 
 class VSimApp;
 class MainWindow;
@@ -21,11 +20,13 @@ class NarrativeSlideItem;
 class NarrativeSlideLabel;
 class NarrativeScrollBox;
 class SlideScrollBox;
-class NarrativeCanvas;
-class editButtons;
 class SlideScrollItem;
 class SelectionStack;
 class OSGViewerWidget;
+
+class CanvasItem;
+class CanvasEditor;
+class CanvasContainer;
 
 // Bridges osg and gui for narratives
 class NarrativeControl : public QObject
@@ -66,7 +67,7 @@ public:
 	void selectNarratives(const SelectionData &narratives);
 	void selectSlides(int narrative, const SelectionData &slides);
 	//void selectLabel(int narrative, int slide, NarrativeSlideItem *label);
-	void selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem *> &labels);
+	void selectLabels(int narrative, int slide, const std::set<CanvasItem*> &labels);
 
 	NarrativeGroup *narratives() const;
 	Narrative *getCurrentNarrative() const;
@@ -78,7 +79,7 @@ public:
 	
 	Narrative *getNarrative(int index) const;
 	NarrativeSlide *getSlide(int narrative, int slide) const;
-	NarrativeSlideLabel *getLabel(int narrative, int slide, int label) const;
+	//NarrativeSlideLabel *getLabel(int narrative, int slide, int label) const;
 
 signals:
 	//void selectionChanged(); // this should happen after any edit event, 
@@ -110,13 +111,7 @@ public: // Actions
 	void setSlideCamera();
 	void moveSlides(const std::vector<std::pair<size_t, size_t>> &);
 
-	// Labels
-	//editDlg buttons
-	void newLabel(LabelType style);
-	void deleteLabels();
-	void transformLabels(const std::map<NarrativeSlideItem *, QRectF> &rects);
-	void labelEdited(NarrativeSlideLabel *label);
-	void execEditLabel();
+	// Canvas
 
 	// Thumbnails
 	void dirtyCurrentSlide();
@@ -148,9 +143,9 @@ private:
 	SelectionStack *m_narrative_selection;
 	SlideScrollBox *m_slide_box;
 	SelectionStack *m_slide_selection;
-	NarrativeCanvas *m_canvas;
-	NarrativeCanvas *m_fade_canvas;
-	editButtons* m_label_buttons;
+
+	CanvasEditor *m_canvas;
+	CanvasContainer *m_fade_canvas;
 
 	QUndoStack *m_undo_stack;
 };
@@ -185,17 +180,17 @@ private:
 	SelectionData m_slides;
 };
 
-class SelectLabelsCommand : public QUndoCommand {
-public:
-	SelectLabelsCommand(NarrativeControl *control, int narrative, int slide, std::set<NarrativeSlideItem *> labels, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
-	void undo();
-	void redo();
-private:
-	NarrativeControl * m_control;
-	SelectionCommandWhen m_when;
-	int m_narrative;
-	int m_slide;
-	std::set<NarrativeSlideItem*> m_labels;
-};
+//class SelectLabelsCommand : public QUndoCommand {
+//public:
+//	SelectLabelsCommand(NarrativeControl *control, int narrative, int slide, std::set<NarrativeSlideItem *> labels, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+//	void undo();
+//	void redo();
+//private:
+//	NarrativeControl * m_control;
+//	SelectionCommandWhen m_when;
+//	int m_narrative;
+//	int m_slide;
+//	std::set<NarrativeSlideItem*> m_labels;
+//};
 
 #endif

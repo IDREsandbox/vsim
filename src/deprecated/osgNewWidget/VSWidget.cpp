@@ -5,11 +5,11 @@
  *	  Author: eduardo
  */
 #include <cassert>
-#include <osgWidget/Util>
-#include <osgWidget/WindowManager>
-#include <osgWidget/Frame>
-#include <osgWidget/Box>
-#include <osgWidget/EventInterface>
+//#include <osgWidget/Util>
+//#include <osgWidget/WindowManager>
+//#include <osgWidget/Frame>
+//#include <osgWidget/Box>
+//#include <osgWidget/EventInterface>
 #include "VSWidget.h"
 #include <QDebug>
 //#include "menu/Settings.h"

@@ -10,7 +10,7 @@
 #include <set>
 #include <QTimer>
 
-#include "GroupTemplate.h"
+#include "Core/GroupTemplate.h"
 #include "HorizontalScrollBox.h"
 
 // Connects a Group to a scroll box

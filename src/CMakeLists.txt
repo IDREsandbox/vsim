@@ -1,0 +1,199 @@
+
+add_subdirectory(Core)
+add_subdirectory(Canvas)
+
+file(GLOB_RECURSE Deprecated_src
+  deprecated/*.h
+  deprecated/*.cpp
+  )
+add_library(Deprecated_obj ${Deprecated_src})
+
+vsim_add_flatbuffer(erfb_h eresources.fbs)
+message("er fb result: ${erfb_h}")
+set(ERModel_src
+  ERSerializer.cpp
+  ERSerializer.h
+  ${erfb_h}
+  resources/ERFilterSortProxy.h
+  resources/ERFilterSortProxy.cpp
+  resources/ECategory.h
+  resources/ECategory.cpp
+  resources/ECategoryGroup.h
+  resources/ECategoryGroup.cpp
+  resources/ECategoryModel.h
+  resources/ECategoryModel.cpp
+  resources/EResource.h
+  resources/EResource.cpp
+  resources/EResourceGroup.h
+  resources/EResourceGroup.cpp
+  CheckableListProxy.h
+  CheckableListProxy.cpp
+  resources/EREnums.h
+)
+add_library(ERModel_obj ${ERModel_src})
+target_link_libraries(ERModel_obj Core_obj Deprecated_obj)
+
+vsim_add_flatbuffer(narfb_h narratives.fbs)
+set(NarrativeModel_src
+  NarrativeSerializer.cpp
+  NarrativeSerializer.h
+  ${narfb_h}
+  narrative/NarrativeGroup.cpp
+  narrative/NarrativeGroup.h
+  narrative/Narrative.cpp
+  narrative/Narrative.h
+  narrative/NarrativeSlide.cpp
+  narrative/NarrativeSlide.h
+)
+add_library(NarrativeModel_obj ${NarrativeModel_src})
+target_link_libraries(NarrativeModel_obj Core_obj Deprecated_obj Canvas_obj)
+
+vsim_add_flatbuffer(vsim_fb_h vsim.fbs)
+vsim_add_flatbuffer(settings_fb_h settings.fbs)
+set(VSimRoot_src
+  VSimRoot.cpp
+  VSimRoot.h
+  VSimSerializer.cpp
+  VSimSerializer.h
+  Model.cpp
+  Model.h
+  ModelGroup.cpp
+  ModelGroup.h
+  OSGGroupModel.cpp
+  OSGGroupModel.h
+  OSGYearModel.cpp
+  OSGYearModel.h
+  FileUtil.cpp
+  FileUtil.h
+  ${vsim_fb_h}
+  ${settings_fb_h}
+)
+add_library(VSimRoot_obj ${VSimRoot_src})
+target_link_libraries(VSimRoot_obj Core_obj Deprecated_obj NarrativeModel_obj ERModel_obj)
+
+set(VSim_src
+  resources/ECategoryControl.cpp
+  resources/ECategoryControl.h
+  resources/ERControl.cpp
+  resources/ERControl.h
+  resources/ERDialog.cpp
+  resources/ERDialog.h
+  resources/ERDisplay.cpp
+  resources/ERDisplay.h
+  resources/ERFilterArea.ui
+  resources/ERFilterArea.cpp
+  resources/ERFilterArea.h
+  resources/ERScrollBox.cpp
+  resources/ERScrollBox.h
+  resources/ERScrollItem.cpp
+  resources/ERScrollItem.h
+  resources/NewCatDialog.cpp
+  resources/NewCatDialog.h
+
+  narrative/NarrativeControl.h
+  narrative/NarrativeControl.cpp
+  narrative/NarrativeInfoDialog.h
+  narrative/NarrativeInfoDialog.cpp
+  narrative/NarrativePlayer.cpp
+  narrative/NarrativePlayer.h
+  narrative/NarrativeScrollBox.cpp
+  narrative/NarrativeScrollBox.h
+  narrative/NarrativeScrollItem.cpp
+  narrative/NarrativeScrollItem.h
+  narrative/NarrativeSlideDurationDialog.cpp
+  narrative/NarrativeSlideDurationDialog.h
+  narrative/SlideScrollBox.cpp
+  narrative/SlideScrollBox.h
+  narrative/SlideScrollItem.cpp
+  narrative/SlideScrollItem.h
+
+  AboutDialog.cpp
+  AboutDialog.h
+  AboutDialog.ui
+  BaseFirstPersonManipulator.cpp
+  BaseFirstPersonManipulator.h
+  editButtons.cpp
+  editButtons.h
+  EditDeleteDelegate.cpp
+  EditDeleteDelegate.h
+  ERBar.cpp
+  ERBar.h
+  ERBar.ui
+  FastScrollBox.cpp
+  FastScrollBox.h
+  FileUtil.cpp
+  FileUtil.h
+  FirstPersonManipulator.cpp
+  FirstPersonManipulator.h
+  FlightManipulator.cpp
+  FlightManipulator.h
+  FocusFilter.cpp
+  FocusFilter.h
+  FutureDialog.cpp
+  FutureDialog.h
+  FutureDialog.ui
+  GroupScrollBox.inl
+  GroupScrollBox.h
+  HorizontalScrollBox.cpp
+  HorizontalScrollBox.h
+  KeyTracker.cpp
+  KeyTracker.h
+  MainWindow.cpp
+  MainWindow.h
+  MainWindowTopBar.cpp
+  MainWindowTopBar.h
+  ModelInformationDialog.cpp
+  ModelInformationDialog.h
+  ModelOutliner.cpp
+  ModelOutliner.h
+  mrichtextedit.cpp
+  mrichtextedit.h
+  mtextedit.cpp
+  mtextedit.h
+  Navigation.h
+  NavigationControl.cpp
+  NavigationControl.h
+  NumberSlider.cpp
+  NumberSlider.h
+  ObjectManipulator.cpp
+  ObjectManipulator.h
+  OSGViewerWidget.cpp
+  OSGViewerWidget.h
+  ScrollBoxItem.cpp
+  ScrollBoxItem.h
+  Selection.cpp
+  Selection.h
+  SelectionStack.cpp
+  SelectionStack.h
+  SimpleCameraManipulator.cpp
+  SimpleCameraManipulator.h
+  StackObject.inl
+  StackObject.h
+  StatsWindow.cpp
+  StatsWindow.h
+  StatsWindow.ui
+  StyleSettingsDialog.cpp
+  StyleSettingsDialog.h
+  StyleSettingsWidget.cpp
+  StyleSettingsWidget.h
+  TickSlider.cpp
+  TickSlider.h
+  TimeManager.cpp
+  TimeManager.h
+  TimeSlider.cpp
+  TimeSlider.h
+  VSimApp.cpp
+  VSimApp.h
+)
+add_library(VSim_obj ${VSim_src})
+target_link_libraries(VSim_obj VSimRoot_obj)
+
+file(GLOB_RECURSE oldSerializers
+  */Serializer*.cpp
+  )
+
+
+add_executable(VSim main.cpp ${oldSerializers})
+target_link_libraries(VSim VSim_obj Qt5::Widgets Qt5::Core ${OPENSCENEGRAPH_LIBRARIES})
+
+install(TARGETS VSim DESTINATION .)

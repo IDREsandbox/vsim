@@ -1,5 +1,5 @@
 #include "ERSerializer.h"
-#include "TypesSerializer.h"
+#include "Core/TypesSerializer.h"
 
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"

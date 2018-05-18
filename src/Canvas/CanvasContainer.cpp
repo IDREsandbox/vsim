@@ -1,4 +1,4 @@
-#include "narrative/CanvasContainer.h"
+#include "Canvas/CanvasContainer.h"
 #include <QDebug>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -7,7 +7,7 @@
 #include <QTextDocument>
 
 #include "FocusFilter.h"
-#include "narrative/CanvasScene.h"
+#include "Canvas/CanvasScene.h"
 
 CanvasContainer::CanvasContainer(QWidget *parent)
 	: QFrame(parent),

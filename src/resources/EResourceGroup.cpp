@@ -5,8 +5,7 @@
 #include "resources/ECategoryGroup.h"
 #include "resources/EResource.h"
 #include "resources/ECategory.h"
-#include "WeakObject.h"
-#include "GroupCommands.h"
+#include "Core/GroupCommands.h"
 
 #include <QDebug>
 #include <unordered_map>

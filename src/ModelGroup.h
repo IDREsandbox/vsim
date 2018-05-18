@@ -6,7 +6,7 @@
 #include <QUndoStack>
 #include <QDebug>
 #include <set>
-#include "GroupTemplate.h"
+#include "Core/GroupTemplate.h"
 
 class Model;
 class OSGNodeWrapper;

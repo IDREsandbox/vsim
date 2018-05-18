@@ -1,7 +1,7 @@
 #ifndef ECATEGORYMODEL_H
 #define ECATEGORYMODEL_H
 
-#include "GroupModelTemplate.h"
+#include "Core/GroupModelTemplate.h"
 
 class ECategory;
 

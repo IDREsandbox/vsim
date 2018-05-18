@@ -5,7 +5,7 @@
 #include <QResizeEvent>
 #include <QGraphicsSceneMouseEvent>
 #include <QElapsedTimer>
-#include "VecUtil.h"
+#include "Core/VecUtil.h"
 
 static void execMenu(const QPoint &pos) {
 	QMenu menu;

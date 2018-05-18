@@ -4,7 +4,7 @@
 #include <string>
 #include <osg/Node>
 #include <QObject>
-#include "Command.h"
+#include "Core/Command.h"
 #include <QColor>
 
 class EResource;
@@ -13,7 +13,7 @@ class ECategory : public QObject {
 public:
 	ECategory(QObject *parent = nullptr);
 
-	const std::string& getCategoryName() const;
+	std::string getCategoryName() const;
 	void setCategoryName(const std::string& name);
 	QColor getColor() const;
 	void setColor(QColor color); // rgb, no alpha

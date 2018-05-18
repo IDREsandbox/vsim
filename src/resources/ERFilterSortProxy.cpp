@@ -7,9 +7,9 @@
 #include "resources/EResource.h"
 #include "resources/ECategoryGroup.h"
 #include "CheckableListProxy.h"
-#include "VecUtil.h"
-#include "Util.h"
-#include "GroupModelTemplate.h"
+#include "Core/VecUtil.h"
+#include "Core/Util.h"
+#include "Core/GroupModelTemplate.h"
 
 ERFilterSortProxy::ERFilterSortProxy(TGroup<EResource> *base)
 	: m_base(nullptr),

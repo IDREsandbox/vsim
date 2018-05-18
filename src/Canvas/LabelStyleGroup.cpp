@@ -1,7 +1,7 @@
-#include "LabelStyleGroup.h"
+#include "Canvas/LabelStyleGroup.h"
 #include <QDebug>
 
-#include "LabelStyle.h"
+#include "Canvas/LabelStyle.h"
 
 LabelStyleGroup::LabelStyleGroup(QObject *parent)
 	: QObject(parent)

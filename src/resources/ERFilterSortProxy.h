@@ -9,7 +9,7 @@
 #include <vector>
 #include <osg/Vec3>
 
-#include "GroupTemplate.h"
+#include "Core/GroupTemplate.h"
 #include "EREnums.h"
 
 class EResource;

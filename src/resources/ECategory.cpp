@@ -8,7 +8,7 @@ ECategory::ECategory(QObject *parent)
 
 }
 
-const std::string& ECategory::getCategoryName() const
+std::string ECategory::getCategoryName() const
 {
 	return m_cat_name;
 }

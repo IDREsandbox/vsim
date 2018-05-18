@@ -12,7 +12,6 @@
 #include "ScrollBoxItem.h"
 #include "Selection.h"
 #include "SelectionStack.h"
-#include "Util.h"
 #include "VecUtil.h"
 
 HSBScrollArea::HSBScrollArea(QWidget *parent)

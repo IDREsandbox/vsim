@@ -3,7 +3,6 @@
 #include <osg/Group>
 #include <vector>
 #include <QDebug>
-#include "Util.h"
 
 OSGGroupModel::OSGGroupModel(QObject *parent)
 	: QAbstractItemModel(parent),

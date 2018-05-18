@@ -3,12 +3,11 @@
 #include <QColorDialog>
 #include <QFontDatabase>
 
-#include "LabelStyle.h"
-#include "Util.h"
-#include "LabelStyle.h"
-#include "narrative/NarrativeCanvas.h"
-#include "narrative/NarrativeSlide.h"
-#include "narrative/NarrativeSlideLabel.h"
+#include "Canvas/LabelStyleGroup.h"
+#include "Canvas/LabelStyle.h"
+#include "Canvas/CanvasScene.h"
+#include "Core/Util.h"
+
 #include <QDebug>
 
 StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)

@@ -3,7 +3,7 @@
 
 #include <map>
 #include "FastScrollBox.h"
-#include "GroupTemplate.h"
+#include "Core/GroupTemplate.h"
 
 class EResource;
 class EResourceGroup;

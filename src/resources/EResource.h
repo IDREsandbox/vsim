@@ -6,7 +6,7 @@
 #include <memory>
 #include <osg/Matrix>
 
-#include "Command.h"
+#include "Core/Command.h"
 
 class EResourcesNode;
 class ECategoryGroup;
@@ -20,13 +20,13 @@ public:
 	// converts old resource to a new one, doesn't set category
 	void loadOld(const EResourcesNode *old);
 
-	const std::string& getResourceName() const;
+	std::string getResourceName() const;
 	void setResourceName(const std::string& name);
-	const std::string& getResourcePath() const;
+	std::string getResourcePath() const;
 	void setResourcePath(const std::string& path);
-	const std::string& getResourceDescription() const;
+	std::string getResourceDescription() const;
 	void setResourceDescription(const std::string& description);
-	const std::string& getAuthor() const;
+	std::string getAuthor() const;
 	void setAuthor(const std::string& author);
 	bool getGlobal() const;
 	void setGlobal(bool global);
@@ -74,7 +74,7 @@ public:
 	ERType getERType() const;
 	void setERType(ERType ertype);
 
-	const osg::Matrixd& getCameraMatrix() const;
+	osg::Matrixd getCameraMatrix() const;
 	void setCameraMatrix(const osg::Matrixd& matrix);
 	const osg::Vec3f &getPosition() const;
 	double getDistanceTo() const;
@@ -173,11 +173,9 @@ public: // resource commands
 		SetErTypeCommand(EResource *res, ERType er, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getERType, &setERType, er, res, parent) {}
 	};
-	class SetCameraMatrixCommand : public ModifyCommand<EResource, const osg::Matrixd&> {
-	public:
-		SetCameraMatrixCommand(EResource *res, const osg::Matrixd& mat, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getCameraMatrix, &setCameraMatrix, mat, res, parent) {}
-	};
+
+	using SetCameraMatrixCommand =
+		ModifyCommand2<EResource, const osg::Matrixd&, &getCameraMatrix, &setCameraMatrix>;
 
 	// category commands
 	class SetCategoryCommand : public ModifyCommand<EResource, std::shared_ptr<ECategory>> {

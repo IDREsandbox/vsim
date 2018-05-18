@@ -1,4 +1,4 @@
-include "types.fbs";
+include "Core/types.fbs";
 
 namespace VSim.FlatBuffers;
 

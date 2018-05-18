@@ -1,5 +1,4 @@
 ﻿#include "SlideScrollItem.h"
-#include "Util.h"
 
 SlideScrollItem::SlideScrollItem(QWidget *parent)
 	: ScrollBoxItem(parent),

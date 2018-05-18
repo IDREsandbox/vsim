@@ -45,7 +45,7 @@ void EResource::loadOld(const EResourcesNode * old)
 	m_camera_position = m_camera_matrix.getTrans();
 }
 
-const std::string& EResource::getResourceName() const
+std::string EResource::getResourceName() const
 { 
 	return m_name; 
 }
@@ -54,16 +54,7 @@ void EResource::setResourceName(const std::string& name)
 	m_name = name; 
 	emit sResourceNameChanged(name);
 }
-//const std::string& EResource::getResourceType() const 
-//{ 
-//	return m_filetype; 
-//}
-//void EResource::setResourceType(const std::string& type) 
-//{ 
-//	m_filetype = type; 
-//	emit sResourceTypeChanged(type, m_index);
-//}
-const std::string& EResource::getResourcePath() const 
+std::string EResource::getResourcePath() const 
 { 
 	return m_filepath; 
 }
@@ -72,7 +63,7 @@ void EResource::setResourcePath(const std::string& path)
 	m_filepath = path; 
 	emit sResourcePathChanged(path);
 }
-const std::string& EResource::getResourceDescription() const 
+std::string EResource::getResourceDescription() const 
 { 
 	return m_description; 
 }
@@ -81,7 +72,7 @@ void EResource::setResourceDescription(const std::string& description)
 	m_description = description; 
 	emit sResourceDescriptionChanged(description);
 }
-const std::string& EResource::getAuthor() const 
+std::string EResource::getAuthor() const 
 { 
 	return m_authors; 
 }
@@ -163,7 +154,7 @@ void EResource::setERType(ERType ertype)
 	emit sErTypeChanged(ertype);
 }
 
-const osg::Matrixd& EResource::getCameraMatrix() const 
+osg::Matrixd EResource::getCameraMatrix() const 
 { 
 	return m_camera_matrix; 
 }

@@ -20,12 +20,13 @@ class TimeSlider;
 class MainWindowTopBar;
 class ERDisplay;
 class ERFilterArea;
-class NarrativeCanvas;
 class editButtons;
 class ERBar;
 class StatsWindow;
 class HistoryWindow;
 class CoordinateWidget;
+class CanvasEditor;
+class CanvasContainer;
 
 class MainWindow : public QMainWindow
 {
@@ -42,11 +43,11 @@ public:
 	OSGViewerWidget *getViewerWidget() const;
 
 	MainWindowTopBar *topBar() const;
-	NarrativeCanvas *canvas() const;
-	NarrativeCanvas *fadeCanvas() const;
+	CanvasEditor *canvas() const;
+	CanvasContainer *fadeCanvas() const;
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
-	editButtons *labelButtons() const;
+	// editButtons *labelButtons() const;
 	// TextToolbar *textToolbar() const;
 
 	QMenu *navigationMenu() const;
@@ -109,8 +110,8 @@ private:
 	VSimApp *m_app;
 
 	OSGViewerWidget *m_osg_widget;
-	NarrativeCanvas *m_canvas;
-	NarrativeCanvas *m_fade_canvas;
+	CanvasEditor *m_canvas;
+	CanvasContainer *m_fade_canvas;
 	ERDisplay *m_er_display;
 	ERFilterArea *m_er_filter_area;
 	ModelOutliner *m_outliner;

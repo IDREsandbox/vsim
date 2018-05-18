@@ -22,6 +22,10 @@ namespace Command {
 //   for now the setters do the signalling
 // TODO description text?
 // just a little bit of C++ black magic allows us to handle const std::string&, const osg::Matrixd&, etc
+
+
+
+
 template <typename C, typename T>
 class ModifyCommand : public QUndoCommand {
 public:
@@ -42,6 +46,7 @@ public:
 	{
 		old_value = (obj->*m_getter)();
 	}
+
 	void undo() {
 		(m_obj->*m_setter)(old_value);
 	}

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CANVASTOOLBAR_H
+#define CANVASTOOLBAR_H
 
 #include <QToolBar>
 #include <QComboBox>
@@ -76,3 +77,5 @@ public:
 	QPushButton *m_done;
 
 };
+
+#endif

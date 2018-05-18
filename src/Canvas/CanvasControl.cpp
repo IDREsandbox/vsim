@@ -1,8 +1,8 @@
-#include "narrative/CanvasControl.h"
-#include "narrative/CanvasScene.h"
-#include "ICommandStack.h"
-#include "SimpleCommandStack.h"
-#include "LabelStyle.h"
+#include "Canvas/CanvasControl.h"
+#include "Canvas/CanvasScene.h"
+#include "Core/ICommandStack.h"
+#include "Core/SimpleCommandStack.h"
+#include "Canvas/LabelStyle.h"
 
 #include <QTextDocument>
 #include <QTextCursor>

@@ -4,8 +4,7 @@
 #include <QObject>
 #include <QUndoCommand>
 #include <osg/Group>
-#include "Command.h"
-#include "GroupTemplate.h"
+#include "Core/GroupTemplate.h"
 
 class ECategoryGroup;
 class EResource;

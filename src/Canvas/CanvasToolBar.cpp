@@ -1,4 +1,4 @@
-#include "CanvasToolbar.h"
+#include "Canvas/CanvasToolBar.h  "
 
 #include <QPaintEvent>
 #include <QPainter>

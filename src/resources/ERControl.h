@@ -8,7 +8,7 @@
 #include <vector>
 #include <memory>
 
-#include "Command.h"
+#include "Core/Command.h"
 
 class VSimApp;
 class MainWindow;

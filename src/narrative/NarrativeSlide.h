@@ -8,8 +8,8 @@
 #include "deprecated/narrative/NarrativeNode.h"
 
 #include <QUndoStack>
-#include "Command.h"
-#include "GroupTemplate.h"
+#include "Core/Command.h"
+#include "Core/GroupTemplate.h"
 
 class NarrativeSlideItem;
 
@@ -21,7 +21,7 @@ public:	// DATA
 	NarrativeSlide(QObject *parent = nullptr);
 	void loadOld(const NarrativeNode *old, const NarrativeTransition *old_transition);
 	
-	const osg::Matrixd& getCameraMatrix() const;
+	osg::Matrixd getCameraMatrix() const;
 	void setCameraMatrix(const osg::Matrixd& matrix);
 	
 	float getDuration() const;

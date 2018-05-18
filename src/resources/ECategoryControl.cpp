@@ -11,7 +11,7 @@
 #include "CheckableListProxy.h"
 
 #include "resources/NewCatDialog.h"
-#include "GroupCommands.h"
+#include "Core/GroupCommands.h"
 
 ECategoryControl::ECategoryControl(VSimApp *app, QObject * parent)
 	: QObject(parent),

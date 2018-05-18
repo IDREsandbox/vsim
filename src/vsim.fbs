@@ -1,4 +1,4 @@
-include "types.fbs";
+include "Core/types.fbs";
 include "eresources.fbs";
 include "narratives.fbs";
 include "settings.fbs";

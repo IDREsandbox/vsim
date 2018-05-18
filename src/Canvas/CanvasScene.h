@@ -10,8 +10,8 @@
 #include <QGraphicsTextItem>
 #include <QUndoCommand>
 
-#include "LabelType.h"
-#include "Command.h"
+#include "Canvas/LabelType.h"
+#include "Core/Command.h"
 
 class CanvasScene;
 class TransformManipulator;

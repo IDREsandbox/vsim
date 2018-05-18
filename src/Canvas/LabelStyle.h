@@ -11,7 +11,7 @@
 #include <QTextCursor>
 #include <QLabel>
 
-#include "LabelType.h"
+#include "Canvas/LabelType.h"
 
 class FrameStyle {
 public:

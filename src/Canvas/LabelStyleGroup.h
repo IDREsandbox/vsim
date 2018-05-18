@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QUndoCommand>
 #include <memory>
-#include "LabelType.h"
+#include "Canvas/LabelType.h"
 
 class FrameStyle;
 class LabelStyle;

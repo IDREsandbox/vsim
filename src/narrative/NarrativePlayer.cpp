@@ -1,15 +1,13 @@
-#include <QDebug>
-#include <Util.h>
 #include "NarrativePlayer.h"
+
+#include <QDebug>
+#include <osg/io_utils>
 
 #include "narrative/NarrativeControl.h"
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeGroup.h"
-
 #include "VSimApp.h"
 #include "MainWindowTopBar.h"
-
-#include <osg/io_utils>
 
 NarrativePlayer::NarrativePlayer(VSimApp *app,
 	NarrativeControl *narratives,

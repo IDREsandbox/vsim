@@ -2,7 +2,7 @@
 #define EDITBUTTONS_H
 
 #include "ui_editButtons.h"
-#include "LabelType.h"
+#include "Canvas/LabelType.h"
 
 class editButtons : public QFrame
 {

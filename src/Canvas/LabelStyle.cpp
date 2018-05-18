@@ -1,4 +1,4 @@
-#include "LabelStyle.h"
+#include "Canvas/LabelStyle.h"
 #include <QTextFrame>
 #include <QTextCursor>
 #include <QDebug>

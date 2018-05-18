@@ -37,13 +37,16 @@
 #include "resources/ERFilterArea.h"
 #include "resources/ERScrollItem.h"
 
+#include "Canvas/CanvasContainer.h"
+#include "Canvas/CanvasEditor.h"
+
 #include "VSimApp.h"
 #include "VSimRoot.h"
 #include "OSGYearModel.h"
 #include "ModelInformationDialog.h"
 #include "Model.h"
 #include "ModelGroup.h"
-#include "GroupCommands.h"
+//#include "GroupCommands.h"
 #include "NavigationControl.h"
 #include "AboutDialog.h"
 #include "CoordinateWidget.h"
@@ -72,12 +75,11 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->rootLayout->addWidget(m_osg_widget, 0, 0);
 
 	//m_canvas = new NarrativeCanvas(ui->root);
-	m_canvas = new NarrativeCanvas(m_osg_widget);
+	m_canvas = new CanvasEditor(m_osg_widget);
 	m_canvas->setObjectName("canvas");
 	ui->rootLayout->addWidget(m_canvas, 0, 0);
-	m_canvas->setStyleSheet("#canvas{background:rgba(0, 0, 0, 0);}");
 
-	m_fade_canvas = new NarrativeCanvas(m_osg_widget);
+	m_fade_canvas = new CanvasContainer(m_osg_widget);
 	m_canvas->setObjectName("fadeCanvas");
 	ui->rootLayout->addWidget(m_fade_canvas, 0, 0);
 	m_fade_canvas->lower();
@@ -309,12 +311,12 @@ OSGViewerWidget * MainWindow::getViewerWidget() const
 	return m_osg_widget;
 }
 
-NarrativeCanvas * MainWindow::canvas() const
+CanvasEditor * MainWindow::canvas() const
 {
 	return m_canvas;
 }
 
-NarrativeCanvas * MainWindow::fadeCanvas() const
+CanvasContainer * MainWindow::fadeCanvas() const
 {
 	return m_fade_canvas;
 }
@@ -332,11 +334,6 @@ ModelOutliner * MainWindow::outliner() const
 TimeSlider * MainWindow::timeSlider() const
 {
 	return m_time_slider;
-}
-
-editButtons * MainWindow::labelButtons() const
-{
-	return m_label_buttons;
 }
 
 QMenu * MainWindow::navigationMenu() const

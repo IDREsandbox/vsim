@@ -2,7 +2,6 @@
 #include "narrative/Narrative.h"
 #include "deprecated/narrative/NarrativeOld.h"
 #include <QDebug>
-#include "WeakObject.h"
 
 NarrativeGroup::NarrativeGroup(QObject *parent)
 	: TGroup<Narrative>(parent)

@@ -4,8 +4,8 @@
 #include <string>
 #include <osg/Node>
 #include <QObject>
-#include "GroupTemplate.h"
-#include "Command.h"
+#include "Core/GroupTemplate.h"
+#include "Core/Command.h"
 
 class LabelStyleGroup;
 class NarrativeOld;
@@ -19,11 +19,11 @@ public:
 
 	void loadOld(const NarrativeOld *old);
 
-	const std::string& getTitle() const;
+	std::string getTitle() const;
 	void setTitle(const std::string& name);
-	const std::string& getAuthor() const;
+	std::string getAuthor() const;
 	void setAuthor(const std::string& author);
-	const std::string& getDescription() const;
+	std::string getDescription() const;
 	void setDescription(const std::string& description);
 
 	bool getLock() const{return m_locked;}

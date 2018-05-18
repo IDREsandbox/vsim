@@ -4,8 +4,8 @@
 #include "deprecated/narrative/NarrativeNode.h"
 #include "deprecated/narrative/NarrativeOld.h"
 #include "narrative/NarrativeSlide.h"
-#include "LabelStyleGroup.h"
-#include "WeakObject.h"
+#include "Canvas/LabelStyleGroup.h"
+
 
 Narrative::Narrative(QObject *parent)
 	: TGroup<NarrativeSlide>(parent),
@@ -33,7 +33,7 @@ void Narrative::loadOld(const NarrativeOld * old)
 	}
 }
 
-const std::string& Narrative::getTitle() const{
+std::string Narrative::getTitle() const{
 	return m_title;
 }
 void Narrative::setTitle(const std::string & title)
@@ -41,14 +41,14 @@ void Narrative::setTitle(const std::string & title)
 	emit sTitleChanged(title);
 	m_title = title;
 }
-const std::string& Narrative::getAuthor() const {
+std::string Narrative::getAuthor() const {
 	return m_author;
 }
 void Narrative::setAuthor(const std::string& author) {
 	emit sAuthorChanged(author);
 	m_author = author;
 }
-const std::string& Narrative::getDescription() const {
+std::string Narrative::getDescription() const {
 	return m_description;
 }
 void Narrative::setDescription(const std::string& description) {

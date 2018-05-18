@@ -1,5 +1,5 @@
 #include "narrative/NarrativeControl.h"
-#include "Util.h"
+#include "Core/Util.h"
 
 #include <QObject>
 #include <QDebug>
@@ -22,13 +22,13 @@
 #include "narrative/SlideScrollBox.h"
 #include "narrative/SlideScrollItem.h"
 #include "narrative/NarrativeSlideLabel.h"
-#include "GroupCommands.h"
+#include "Core/GroupCommands.h"
 
 //style
 #include "StyleSettingsDialog.h"
-#include "LabelType.h"
-#include "LabelStyle.h"
-#include "LabelStyleGroup.h"
+#include "Canvas/LabelType.h"
+#include "Canvas/LabelStyle.h"
+#include "Canvas/LabelStyleGroup.h"
 
 //#include "dragLabel.h"
 //#include "labelCanvas.h"

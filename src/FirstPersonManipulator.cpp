@@ -1,7 +1,7 @@
 #include "FirstPersonManipulator.h"
 #include <QDebug>
 #include <algorithm>
-#include "Util.h"
+#include "Core/Util.h"
 
 FirstPersonManipulator::FirstPersonManipulator()
 {

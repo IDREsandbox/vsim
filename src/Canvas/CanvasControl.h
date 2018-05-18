@@ -9,8 +9,8 @@
 #include <QTextCharFormat>
 #include <QTextDocument>
 #include <memory>
-#include "narrative/LabelType.h"
-#include "Command.h"
+#include "Canvas/LabelType.h"
+#include "Core/Command.h"
 
 class ICommandStack;
 class SimpleCommandStack;
