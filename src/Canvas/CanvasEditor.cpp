@@ -233,6 +233,12 @@ void CanvasEditor::applyStylesToButtons() {
 	fs->applyToWidget(m_tb->m_image);
 }
 
+void CanvasEditor::setEditable(bool editable)
+{
+	m_container->setEditable(editable);
+	m_internal_window->setVisible(editable);
+}
+
 CanvasControl * CanvasEditor::control()
 {
 	return m_cc;

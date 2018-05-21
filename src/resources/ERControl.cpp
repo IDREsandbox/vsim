@@ -16,8 +16,8 @@
 #include "CheckableListProxy.h"
 #include "VSimApp.h"
 #include "SelectionStack.h"
-#include "GroupCommands.h"
-#include "Util.h"
+#include "Core/GroupCommands.h"
+#include "Core/Util.h"
 #include "TimeManager.h"
 
 #include <QDesktopServices>

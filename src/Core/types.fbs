@@ -24,9 +24,9 @@ struct Color {
   a:ubyte;
 }
 
-table SimpleImage {
-  width:int32;
-  height:int32;
-  data:[Color];
-  // format: rgba
-}
+// table SimpleImage {
+//   width:int32;
+//   height:int32;
+//   data:[Color];
+//   // format: rgba
+// }

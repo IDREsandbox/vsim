@@ -1,3 +1,4 @@
+#define FLATBUFFERS_DEBUG_VERIFICATION_FAILURE
 #include "Canvas/CanvasScene.h"
 #include "Canvas/CanvasEditor.h"
 
@@ -8,7 +9,12 @@
 #include <QMainWindow>
 #include <QFile>
 #include <QMenuBar>
+#include <QFileDialog>
+#include <sstream>
+#include <fstream>
 #include "Core/SimpleCommandStack.h"
+#include "Canvas/CanvasSerializer.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -45,11 +51,24 @@ int main(int argc, char *argv[])
 	apply_buttons->setText("restyle buttons");
 	apply_buttons->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_T));
 
+	QAction *save = new QAction(&window);
+	save->setText("save");
+	save->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+	QAction *load = new QAction(&window);
+	load->setText("open");
+	load->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+	QAction *clear = new QAction(&window);
+	clear->setText("clear");
+	clear->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));
+
 	mb->addMenu(menu);
 	menu->addAction(undo);
 	menu->addAction(redo);
 	menu->addAction(debug);
 	menu->addAction(apply_buttons);
+	menu->addAction(save);
+	menu->addAction(load);
+	menu->addAction(clear);
 
 	window.setMenuBar(mb);
 
@@ -96,6 +115,58 @@ int main(int argc, char *argv[])
 	});
 	QObject::connect(apply_buttons, &QAction::triggered, [editor]() {
 		editor->applyStylesToButtons();
+	});
+
+	namespace fb = VSim::FlatBuffers;
+	QObject::connect(save, &QAction::triggered, [&]() {
+		QString path = QFileDialog::getSaveFileName(&window, "Save As");
+
+		std::ofstream out(path.toStdString(), std::ios::binary);
+		if (!out.good()) {
+			return false;
+		}
+
+		flatbuffers::FlatBufferBuilder builder;
+		auto o_canvas = CanvasSerializer::createCanvas(&builder, scene);
+		fb::FinishCanvasBuffer(builder, o_canvas);
+
+		const char *buf = reinterpret_cast<const char*>(builder.GetBufferPointer());
+		out.write(buf, builder.GetSize());
+
+		return out.good();
+
+	});
+	QObject::connect(load, &QAction::triggered, [&]() {
+		QString path = QFileDialog::getOpenFileName(&window, "Open");
+
+
+		std::ifstream in(path.toStdString(), std::ios::binary);
+
+		if (!in.good()) {
+			qDebug() << "file open error";
+			return;
+		}
+
+		// read into buffer
+		std::stringstream ss;
+		ss << in.rdbuf();
+		std::string s = ss.str();
+		const uint8_t *buf = reinterpret_cast<const uint8_t*>(s.c_str());
+
+		bool fb_ok = fb::VerifyCanvasBuffer(flatbuffers::Verifier(buf, s.length()));
+		if (!fb_ok) {
+			qDebug() << "fb verify" << fb_ok;
+			//return;
+		}
+		auto *canvas_buf = fb::GetCanvas(buf);
+		CanvasSerializer::readCanvas(canvas_buf, scene);
+
+		qstack->clear();
+	});
+
+	QObject::connect(clear, &QAction::triggered, [&]() {
+		scene->clear();
+		qstack->clear();
 	});
 
 	return a.exec();

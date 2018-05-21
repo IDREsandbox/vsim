@@ -50,6 +50,7 @@ public:
 	void setTypeInt(int t);
 
 	FrameStyle *frameStyle(); // FIXME: better style than raw pointer?
+	const FrameStyle &cFrameStyle() const;
 
 	//QColor backgroundColor() const;
 	//const osg::Vec4 &getBackgroundColor() const;

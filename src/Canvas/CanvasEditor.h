@@ -29,6 +29,7 @@ public:
 	void setStack(ICommandStack *stack);
 	void setStyles(LabelStyleGroup *styles);
 	void applyStylesToButtons();
+	void setEditable(bool editable);
 
 	void showToolBar(bool show);
 

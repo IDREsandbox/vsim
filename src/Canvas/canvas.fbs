@@ -2,6 +2,9 @@ include "../Core/types.fbs";
 
 namespace VSim.FlatBuffers;
 
+file_extension "can";
+file_identifier "VSCN";
+
 table StyleTable {
   header1:LabelStyle;
   header2:LabelStyle;
@@ -99,10 +102,20 @@ table CanvasLabel {
   //text_style:TextStyle; // the other text stuff is kept in the html
 }
 
-table CanvasImage {
-  rect:Rect;
-  line_style:LineStyle;
-  style:ImageStyle;
+
+table CanvasImageData {
+  data:[ubyte];
+  format:string; // .png or whatever
+  // linked:bool
+  // compressed
+  // metadata? size? etc etc
 }
 
-root_type NarrativeTable;
+table CanvasImage {
+  rect:Rect;
+  fill_style:FillStyle;
+  line_style:LineStyle;
+  data:CanvasImageData;
+}
+
+root_type Canvas;

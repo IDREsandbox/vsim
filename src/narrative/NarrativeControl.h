@@ -9,6 +9,7 @@
 #include <QPropertyAnimation>
 
 #include "SelectionStack.h"
+#include "Core/Command.h"
 
 class VSimApp;
 class MainWindow;
@@ -150,44 +151,37 @@ private:
 	QUndoStack *m_undo_stack;
 };
 
-
-enum SelectionCommandWhen {
-	ON_UNDO,
-	ON_REDO,
-	ON_BOTH
-};
-
 class SelectNarrativesCommand : public QUndoCommand {
 public:
-	SelectNarrativesCommand(NarrativeControl *control, const SelectionData &narratives, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+	SelectNarrativesCommand(NarrativeControl *control, const SelectionData &narratives, Command::When when = Command::ON_BOTH, QUndoCommand *parent = nullptr);
 	void undo();
 	void redo();
 private:
 	NarrativeControl *m_control;
-	SelectionCommandWhen m_when;
+	Command::When m_when;
 	SelectionData m_narratives;
 };
 
 class SelectSlidesCommand : public QUndoCommand {
 public:
-	SelectSlidesCommand(NarrativeControl *control, int narrative, const SelectionData &slides, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+	SelectSlidesCommand(NarrativeControl *control, int narrative, const SelectionData &slides, Command::When when = Command::ON_BOTH, QUndoCommand *parent = nullptr);
 	void undo();
 	void redo();
 private:
 	NarrativeControl *m_control;
-	SelectionCommandWhen m_when;
+	Command::When m_when;
 	int m_narrative;
 	SelectionData m_slides;
 };
 
 //class SelectLabelsCommand : public QUndoCommand {
 //public:
-//	SelectLabelsCommand(NarrativeControl *control, int narrative, int slide, std::set<NarrativeSlideItem *> labels, SelectionCommandWhen when = ON_BOTH, QUndoCommand *parent = nullptr);
+//	SelectLabelsCommand(NarrativeControl *control, int narrative, int slide, std::set<NarrativeSlideItem *> labels, Command::When when = ON_BOTH, QUndoCommand *parent = nullptr);
 //	void undo();
 //	void redo();
 //private:
 //	NarrativeControl * m_control;
-//	SelectionCommandWhen m_when;
+//	Command::When m_when;
 //	int m_narrative;
 //	int m_slide;
 //	std::set<NarrativeSlideItem*> m_labels;

@@ -46,12 +46,13 @@ using SharedItemSet = std::set<SharedItem, ItemCompare>;
 class CanvasScene : public QGraphicsScene {
 	Q_OBJECT;
 public:
-	CanvasScene(QObject *parent);
+	CanvasScene(QObject *parent = nullptr);
 	~CanvasScene() override;
 
 	void addItem(std::shared_ptr<CanvasItem> item);
 	void removeItem(CanvasItem *item);
 
+	std::vector<SharedItem> itemList() const; // ordered, order doesn't change
 	SharedItemSet items() const;
 	std::set<CanvasItem*> getSelected() const;
 	void setSelected(const std::set<CanvasItem*> &items);
@@ -116,6 +117,7 @@ protected:
 private:
 	std::map<CanvasItem*, QRectF> m_saved_rects;
 	SharedItemSet m_items;
+	std::vector<SharedItem> m_item_list;
 
 	bool m_editable;
 	double m_base_height;
@@ -143,6 +145,7 @@ public:
 class CanvasItem : public QAbstractGraphicsShapeItem {
 public:
 	CanvasItem(QGraphicsItem *parent = nullptr);
+	~CanvasItem() override;
 
 	enum { Type = UserType + 1 };
 	int type() const override { return Type; };
@@ -179,6 +182,11 @@ public:
 	CanvasScene *canvasScene() const;
 
 	void debugPaint(bool debug);
+
+	// should this be a thing? would make some stuff easier
+	// contains border width, color, background
+	//const FrameStyle *frameStyle() const;
+	//void setFrameStyle(const FrameStyle *fs) const;
 
 	// properties
 
@@ -218,12 +226,18 @@ protected:
 	void mouseMoveEvent(QGraphicsSceneMouseEvent *mouse_event) override;
 
 private:
+	// border is pixels, pen is scene coordinates
+	// keep pixels constant and pen variable
+	void updateBorderWidth();
+
+private:
 	double m_w;
 	double m_h;
 	bool m_prefers_fixed;
 	bool m_border_around;
 	bool m_debug_paint;
 	double m_base_height;
+	int m_border_width;
 	//bool m_editable;
 };
 
@@ -244,13 +258,16 @@ public:
 	Qt::Alignment valign() const;
 
 	void setDocument(QTextDocument *doc);
-	QTextDocument *document();
+	QTextDocument *document() const;
 
 	void setTextCursor(const QTextCursor &cursor);
 	QTextCursor textCursor() const;
 
 	LabelType styleType() const;
 	void setStyleType(LabelType);
+
+	std::string html() const;
+	void setHtml(const std::string &s);
 
 public: // commands
 	using SetVAlignCommand =
@@ -294,6 +311,7 @@ public:
 	enum { Type = UserType + 3 };
 	int type() const override { return Type; };
 
+	QPixmap pixmap() const;
 	void setPixmap(const QPixmap &p);
 
 	// finds a reasonable starting size and position

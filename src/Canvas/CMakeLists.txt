@@ -1,21 +1,26 @@
 
+vsim_add_flatbuffer(canvas_fb_h canvas.fbs)
+
 set(Canvas_h
   CanvasControl.h
   CanvasContainer.h
+  CanvasEditor.h
   CanvasScene.h
   CanvasToolBar.h
-  CanvasEditor.h
+  CanvasSerializer.h
   LabelStyleGroup.h
   LabelStyle.h
   LabelType.h
+  ${canvas_fb_h}
 )
 
 set(Canvas_src
   CanvasControl.cpp
   CanvasContainer.cpp
-  CanvasScene.cpp
-  CanvasToolBar.cpp
   CanvasEditor.cpp
+  CanvasScene.cpp
+  CanvasSerializer.cpp
+  CanvasToolBar.cpp
   LabelStyleGroup.cpp
   LabelStyle.cpp
 )
@@ -32,6 +37,11 @@ vsim_add_experiment(
   CanvasEditor_experiment
   CanvasEditor_experiment.cpp
   Canvas_obj
+)
+vsim_add_test(
+  CanvasSerializer_test
+  CanvasSerializer_test.cpp
+  "Canvas_obj;Qt5::Test"
 )
 
 # set(Canvas_src

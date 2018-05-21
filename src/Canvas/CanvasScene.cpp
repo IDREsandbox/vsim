@@ -8,10 +8,10 @@
 #include <QPainter>
 #include "FocusFilter.h"
 
-CanvasScene::CanvasScene(QObject * parent)
+CanvasScene::CanvasScene(QObject *parent)
 	: QGraphicsScene(parent),
 	m_editable(false),
-	m_base_height(800),
+	m_base_height(600.0),
 	m_selection_in_progress(false),
 	m_moving(false)
 {
@@ -36,8 +36,10 @@ CanvasScene::~CanvasScene()
 void CanvasScene::addItem(std::shared_ptr<CanvasItem> item)
 {
 	m_items.insert(item);
+	m_item_list.push_back(item);
 	QGraphicsScene::addItem(item.get());
 	item->setBaseHeight(m_base_height);
+	item->setEditable(m_editable);
 
 	CanvasLabel *label = dynamic_cast<CanvasLabel*>(item.get());
 	if (label) {
@@ -57,11 +59,25 @@ void CanvasScene::removeItem(CanvasItem *item)
 		disconnect(label->document(), 0, this, 0);
 	}
 
+	// cleanup scene
 	QGraphicsScene::removeItem(item);
-	std::set<SharedItem, ItemCompare>::iterator it = m_items.find(item);
+
+	// cleanup set
+	auto it = m_items.find(item);
 	if (it == m_items.end()) return;
+	SharedItem shared = *it;
 	m_items.erase(it);
+
+	// cleanup list
+	auto &v = m_item_list;
+	v.erase(std::remove(v.begin(), v.end(), shared), v.end());
+
 	emit sRemoved(item);
+}
+
+std::vector<SharedItem> CanvasScene::itemList() const
+{
+	return m_item_list;
 }
 
 SharedItemSet CanvasScene::items() const
@@ -146,7 +162,16 @@ double CanvasScene::toScene(int px) const
 
 void CanvasScene::clear()
 {
+	// do we need to clear the scene? idk
+	// if stuff is still in the stack then yes
+	// remove items from this scene
+	auto items = m_items; // copy for safe iteration
+	for (auto item : items) {
+		removeItem(item.get());
+	}
+
 	m_items.clear();
+	m_item_list.clear();
 }
 
 void CanvasScene::beginTransform()
@@ -269,7 +294,8 @@ CanvasItem::CanvasItem(QGraphicsItem * parent)
 	m_prefers_fixed(false),
 	m_border_around(false),
 	m_debug_paint(false),
-	m_base_height(600.0)
+	m_base_height(600.0),
+	m_border_width(0)
 {
 	setEditable(false);
 
@@ -280,8 +306,12 @@ CanvasItem::CanvasItem(QGraphicsItem * parent)
 	p.setBrush(QColor(0, 0, 0));
 	p.setStyle(Qt::NoPen);
 	p.setJoinStyle(Qt::RoundJoin);
-	p.setWidthF(0.0);
 	setPen(p);
+	updateBorderWidth();
+}
+
+CanvasItem::~CanvasItem()
+{
 }
 
 QSizeF CanvasItem::size() const
@@ -364,6 +394,14 @@ void CanvasItem::mouseMoveEvent(QGraphicsSceneMouseEvent *e)
 	}
 }
 
+void CanvasItem::updateBorderWidth()
+{
+	QPen p = pen();
+	qreal w = m_border_width / m_base_height;
+	p.setWidthF(w);
+	setPen(p);
+}
+
 bool CanvasItem::editable() const
 {
 	return flags() & QGraphicsItem::ItemIsMovable;
@@ -414,6 +452,15 @@ void CanvasItem::debugPaint(bool debug)
 	m_debug_paint = debug;
 }
 
+//const FrameStyle & CanvasItem::frameStyle() const
+//{
+//	// TODO: insert return statement here
+//}
+//
+//void CanvasItem::setFrameStyle(const FrameStyle & fs) const
+//{
+//}
+
 int CanvasItem::borderWidthPixels() const
 {
 	return std::lround(pen().widthF() * m_base_height);
@@ -421,10 +468,8 @@ int CanvasItem::borderWidthPixels() const
 
 void CanvasItem::setBorderWidthPixels(int px)
 {
-	QPen p = pen();
-	qreal w = px / m_base_height;
-	p.setWidthF(w);
-	setPen(p);
+	m_border_width = px;
+	updateBorderWidth();
 }
 
 QColor CanvasItem::borderColor() const
@@ -556,6 +601,7 @@ double CanvasItem::baseHeight() const {
 void CanvasItem::setBaseHeight(double bh) {
 	m_base_height = bh;
 	onBaseHeightChange(bh);
+	updateBorderWidth();
 }
 
 QSizeF CanvasItem::scaledSize() const
@@ -658,7 +704,7 @@ void CanvasLabel::setDocument(QTextDocument * doc)
 	});
 }
 
-QTextDocument * CanvasLabel::document()
+QTextDocument * CanvasLabel::document() const
 {
 	return m_text->document();
 }
@@ -681,6 +727,16 @@ LabelType CanvasLabel::styleType() const
 void CanvasLabel::setStyleType(LabelType type)
 {
 	m_style_type = type;
+}
+
+std::string CanvasLabel::html() const
+{
+	return document()->toHtml().toStdString();
+}
+
+void CanvasLabel::setHtml(const std::string & s)
+{
+	document()->setHtml(QString::fromStdString(s));
 }
 
 void CanvasLabel::onResize(QSizeF size)
@@ -788,10 +844,15 @@ CanvasImage::CanvasImage()
 	m_pixmap->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
 }
 
+QPixmap CanvasImage::pixmap() const
+{
+	return m_pixmap->pixmap();
+}
+
 void CanvasImage::setPixmap(const QPixmap & p)
 {
 	m_pixmap->setPixmap(p);
-	initSize();
+	onResize(size());
 }
 
 void CanvasImage::initSize()

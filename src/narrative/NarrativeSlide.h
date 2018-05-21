@@ -11,13 +11,12 @@
 #include "Core/Command.h"
 #include "Core/GroupTemplate.h"
 
-class NarrativeSlideItem;
+class CanvasScene;
 
-class NarrativeSlide : public TGroup<NarrativeSlideItem>
+class NarrativeSlide : public QObject
 {
-	Q_OBJECT
-
-public:	// DATA
+	Q_OBJECT;
+public:
 	NarrativeSlide(QObject *parent = nullptr);
 	void loadOld(const NarrativeNode *old, const NarrativeTransition *old_transition);
 	
@@ -36,6 +35,8 @@ public:	// DATA
 	bool thumbnailDirty() const;
 	const QImage &getThumbnail() const;
 	void setThumbnail(QImage);
+
+	CanvasScene *scene() const;
 
 signals:
 	void sCameraMatrixChanged(const osg::Matrixd&);

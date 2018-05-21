@@ -170,9 +170,14 @@ void LabelStyle::setTypeInt(int t)
 	m_type = static_cast<LabelType>(t);
 }
 
-FrameStyle * LabelStyle::frameStyle()
+FrameStyle *LabelStyle::frameStyle()
 {
 	return &m_frame;
+}
+
+const FrameStyle & LabelStyle::cFrameStyle() const
+{
+	return m_frame;
 }
 
 int LabelStyle::getAlign() const
