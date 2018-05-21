@@ -163,25 +163,15 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	}
 
 	// font begin end
-	connect(m_tb->m_font, QOverload<int>::of(&QFontComboBox::activated),
-		this, [this](int index) {
-		QFont f = m_tb->m_font->currentFont();
+	connect(m_tb, &CanvasToolBar::sFont, this, [this](const QFont &f) {
 		m_cc->setFont(f.family());
-		qDebug() << "activate font" << f.family();
 	});
-
-	connect(m_tb->m_font_size, QOverload<int>::of(&QComboBox::activated),
-		this, [this](int index) {
-		auto sizes = QFontDatabase::standardSizes();
-		int size = 12;
-		if (index >= 0 && index < sizes.size()) {
-			size = sizes[index];
-		}
+	connect(m_tb, &CanvasToolBar::sTextSize, this, [this](int size) {
 		m_cc->setSize(size);
 	});
-
-	// point size begin end
-
+	connect(m_tb, &CanvasToolBar::sLabelType, this, [this](LabelType type) {
+		m_cc->setStyle(m_styles->getStyle(type));
+	});
 
 	// changes -> toolbar
 	connect(m_cc, &CanvasControl::sAnyChange, this, [this]() {

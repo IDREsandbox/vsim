@@ -67,8 +67,7 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	QIcon i_vcenter("assets/icons/canvas/vertical_align_center.png");
 	QIcon i_bottom("assets/icons/canvas/vertical_align_bottom.png");
 
-	QList<int> sizes = QFontDatabase::standardSizes();
-
+	m_text_sizes = QFontDatabase::standardSizes();
 
 	// create box
 	m_create_box = new ToolBox(this);
@@ -141,7 +140,7 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	setMargins(font_rows);
 
 	m_font = new QFontComboBox(m_font_box);
-	ComboBoxLimiter::install(m_font);
+	//ComboBoxLimiter::install(m_font);
 	m_font->setFocusPolicy(Qt::NoFocus); 
 	font_rows->addWidget(m_font);
 
@@ -149,11 +148,11 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	font_rows->addLayout(font_size_row);
 
 	m_font_size = new QComboBox(m_font_box);
-	for (int size : QFontDatabase::standardSizes()) {
+	for (int size : m_text_sizes) {
 		m_font_size->addItem(QString::number(size));
 	}
 	m_font_size->setMinimumWidth(40);
-	ComboBoxLimiter::install(m_font_size);
+	//ComboBoxLimiter::install(m_font_size);
 	m_font_size->setFocusPolicy(Qt::NoFocus);
 	font_size_row->addWidget(m_font_size, 0, Qt::AlignLeft);
 	font_size_row->addStretch(1);
@@ -185,13 +184,18 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	bullet_row->addStretch(1);
 
 	m_style = new QComboBox(m_font_box);
-	ComboBoxLimiter::install(m_style);
+	//ComboBoxLimiter::install(m_style);
 	m_style->setFocusPolicy(Qt::NoFocus);
-	//m_style->addItem("None");
 	m_style->addItem("Header 1");
+	m_styles.push_back(LabelType::HEADER1);
 	m_style->addItem("Header 2");
+	m_styles.push_back(LabelType::HEADER2);
 	m_style->addItem("Body");
+	m_styles.push_back(LabelType::BODY);
 	m_style->addItem("Label");
+	m_styles.push_back(LabelType::LABEL);
+	m_style->addItem("None");
+	m_styles.push_back(LabelType::NONE);
 	//m_style->addItem("Image");
 	font_rows->addWidget(m_style);
 
@@ -265,4 +269,26 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	//test->setText("Test Action");
 	//addAction(test);
 
+	connect(m_font, QOverload<int>::of(&QFontComboBox::activated),
+		this, [this](int index) {
+		emit sFont(m_font->currentFont());
+	});
+
+	connect(m_font_size, QOverload<int>::of(&QComboBox::activated),
+		this, [this](int index) {
+		int size = 12;
+		if (index >= 0 && index < m_text_sizes.size()) {
+			size = m_text_sizes[index];
+		}
+		emit sTextSize(size);
+	});
+
+	connect(m_style, QOverload<int>::of(&QComboBox::activated),
+		this, [this](int index) {
+		LabelType type = LabelType::NONE;
+		if (index >= 0 && index < m_styles.size()) {
+			type = m_styles[index];
+		}
+		emit sLabelType(type);
+	});
 }

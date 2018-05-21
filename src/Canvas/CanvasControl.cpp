@@ -269,21 +269,22 @@ QUndoCommand *CanvasControl::createApplyLabelStyleCommand(CanvasLabel *label,
 	auto *frame = s->frameStyle();
 
 	QUndoCommand *cmd = new QUndoCommand(parent);
+	//qDebug() << "create apply label command";
 
 	// frame
-	CanvasItem::SetBackgroundCommand(label, frame->m_bg_color, cmd);
-	CanvasItem::SetBorderWidthCommand(label, frame->m_frame_width, cmd);
-	CanvasItem::SetBorderColorCommand(label, frame->m_frame_color, cmd);
-	CanvasItem::SetHasBorderCommand(label, frame->m_has_frame, cmd);
+	new CanvasItem::SetBackgroundCommand(label, frame->m_bg_color, cmd);
+	new CanvasItem::SetBorderWidthCommand(label, frame->m_frame_width, cmd);
+	new CanvasItem::SetBorderColorCommand(label, frame->m_frame_color, cmd);
+	new CanvasItem::SetHasBorderCommand(label, frame->m_has_frame, cmd);
 
 	// label
-	CanvasLabel::SetVAlignCommand(label, s->valign(), cmd);
-	CanvasLabel::SetStyleTypeCommand(label, s->getType(), cmd);
+	new CanvasLabel::SetVAlignCommand(label, s->valign(), cmd);
+	new CanvasLabel::SetStyleTypeCommand(label, s->getType(), cmd);
 
 	// text
 	beginWrapTextCommands(cmd);
 	s->applyToDocument(label->document());
-	endWrapTextCommands();
+	auto *textcmd = endWrapTextCommands();
 
 	return cmd;
 }
@@ -551,7 +552,9 @@ void DocumentEditWrapperCommand::undo()
 }
 void DocumentEditWrapperCommand::redo()
 {
-	m_doc->redo();
+	if (m_doc->isRedoAvailable()) {
+		m_doc->redo();
+	}
 }
 
 CanvasSelectCommand::CanvasSelectCommand(CanvasScene * scene,

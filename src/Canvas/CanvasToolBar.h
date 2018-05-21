@@ -9,6 +9,8 @@
 #include <QPushButton>
 #include <QToolButton>
 
+#include "LabelType.h"
+
 class ToolBox : public QWidget {
 	Q_OBJECT
 public:
@@ -23,6 +25,12 @@ class CanvasToolBar : public QToolBar
 
 public:
 	CanvasToolBar(QWidget *parent = Q_NULLPTR);
+
+signals:
+	// for combobox consistency
+	void sTextSize(int size);
+	void sFont(const QFont &f);
+	void sLabelType(LabelType t);
 
 public:
 	// create box
@@ -76,6 +84,9 @@ public:
 
 	QPushButton *m_done;
 
+private:
+	QList<int> m_text_sizes;
+	std::vector<LabelType> m_styles;
 };
 
 #endif

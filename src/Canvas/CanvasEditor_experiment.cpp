@@ -158,10 +158,12 @@ int main(int argc, char *argv[])
 			qDebug() << "fb verify" << fb_ok;
 			//return;
 		}
+
+		scene->clear();
+		qstack->clear();
+
 		auto *canvas_buf = fb::GetCanvas(buf);
 		CanvasSerializer::readCanvas(canvas_buf, scene);
-
-		qstack->clear();
 	});
 
 	QObject::connect(clear, &QAction::triggered, [&]() {
