@@ -1,5 +1,12 @@
 # Changelog
 
+## 2018-5-24
+
+### Added
+- Canvas editor toolbar
+- Canvas images
+- Image and label borders
+
 ## 2018-5-4
 
 ### Added
