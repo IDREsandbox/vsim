@@ -40,32 +40,25 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 		res->setAutoLaunch(o_res->autolaunch());
 		res->setLocalRange(o_res->range());
 		if (o_res->camera()) res->setCameraMatrix(TypesSerializer::fb2osgCameraMatrix(*o_res->camera()));
-
-		// set category pointer
-		int cat_index = o_res->category_index();
-		if (cat_index >= 0) {
-			auto cat = cats->childShared(cat_index);
-			res->setCategory(cat);
-		}
+		res->setCategoryIndex(o_res->category_index());
 
 		group->append(std::shared_ptr<EResource>(res));
 	}
+
+	group->restoreCategories();
 }
 
-flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(flatbuffers::FlatBufferBuilder *builder, const EResourceGroup *group)
+flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(
+	flatbuffers::FlatBufferBuilder *builder,
+	const EResourceGroup *group)
 {
 	const ECategoryGroup *cats = group->categories();
 
-	std::unordered_map<ECategory*, size_t> cat_to_index;
-	for (size_t i = 0; i < cats->size(); i++) {
-		ECategory *cat = cats->category(i);
-		if (!cat) continue;
-		cat_to_index[cat] = i;
-	}
+	group->saveCategoryIndices();
 
 	// build categories
 	std::vector<flatbuffers::Offset<fb::ECategory>> categories;
-	
+
 	for (size_t i = 0; i < cats->size(); i++) {
 		ECategory *cat = dynamic_cast<ECategory*>(cats->child(i));
 
@@ -109,17 +102,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(flatbuffers::FlatBu
 		b_res.add_range(res->getLocalRange());
 		fb::CameraPosDirUp s_camera = TypesSerializer::osg2fbCameraMatrix(res->getCameraMatrix());
 		b_res.add_camera(&s_camera);
-
-		// lookup category in index table
-		ECategory *cat = res->category();
-		auto it = cat_to_index.find(cat);
-		if (it == cat_to_index.end()) {
-			b_res.add_category_index(-1);
-		}
-		else {
-			b_res.add_category_index(it->second);
-		}
-
+		b_res.add_category_index(res->getCategoryIndex());
 		auto o_res = b_res.Finish();
 		resources.push_back(o_res);
 	}

@@ -9,11 +9,12 @@
 class FrameStyle;
 class LabelStyle;
 
-class LabelStyleGroup : public QObject {
-	Q_OBJECT;
+class LabelStyleGroup {
 public:
-	LabelStyleGroup(QObject *parent = nullptr);
+	LabelStyleGroup();
 	~LabelStyleGroup();
+
+	void copy(const LabelStyleGroup &other);
 
 	LabelStyle *getStyle(LabelType style) const;
 	FrameStyle *getImageStyle() const;

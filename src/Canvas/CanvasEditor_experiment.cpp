@@ -159,11 +159,14 @@ int main(int argc, char *argv[])
 			//return;
 		}
 
-		scene->clear();
 		qstack->clear();
 
+		CanvasScene scene_buf;
+
 		auto *canvas_buf = fb::GetCanvas(buf);
-		CanvasSerializer::readCanvas(canvas_buf, scene);
+		CanvasSerializer::readCanvas(canvas_buf, &scene_buf);
+
+		scene->copy(scene_buf);
 	});
 
 	QObject::connect(clear, &QAction::triggered, [&]() {

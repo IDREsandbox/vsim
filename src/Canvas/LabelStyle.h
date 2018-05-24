@@ -19,6 +19,8 @@ public:
 	FrameStyle(QColor background, QColor frame_color, int frame_width, bool has_frame);
 	~FrameStyle();
 
+	// operator=(); // default
+
 	void applyToWidget(QWidget *w) const;
 	QString styleText() const;
 
@@ -36,6 +38,7 @@ public:
 		QFont::Weight we, bool ital, Qt::Alignment al, int m);
 	~LabelStyle();
 
+	// LabelStyle::operator=(); // default
 	void copy(const LabelStyle *other);
 
 	void applyToWidget(QWidget *widget, bool font_size = true);
@@ -65,8 +68,7 @@ public:
 	void setMargin(int);
 
 	QColor foregroundColor() const;
-	const osg::Vec4 &getForegroundColor() const;
-	void setForegroundColor(const osg::Vec4 &color);
+	void setForegroundColor(const QColor &c);
 
 	const std::string &getFontFamily() const;
 	void setFontFamily(const std::string &f);
@@ -95,7 +97,6 @@ public:
 
 	// text properties
 	QColor m_fg_color;
-	mutable osg::Vec4 m_fg_color_vec;
 	std::string m_font_family;
 	//std::string m_font_style; // font style is like a preset for weight+ital, we don't use this
 	int m_weight;

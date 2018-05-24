@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <regex>
 #include <iostream>
-#include "Util.h"
+#include <QDir>
 
 #include "Model.h"
 #include "OSGNodeWrapper.h"
@@ -44,11 +44,26 @@ ModelGroup::ModelGroup(QObject *parent)
 	});
 }
 
+void ModelGroup::copyReference(const ModelGroup & other)
+{
+	clear();
+
+	m_root = other.m_root;
+
+	m_root_wrapper->setRoot(m_root);
+
+	for (auto model : other) {
+		auto new_model = std::make_shared<Model>();
+		new_model->copyReference(*model);
+		append(model);
+	}
+}
+
 void ModelGroup::addNode(osg::Node * node, const std::string & path)
 {
 	auto model = std::make_shared<Model>();
 	model->setPath(path);
-	model->setName(Util::getFilename(path));
+	model->setName(QFileInfo(path.c_str()).fileName().toStdString());
 	model->setNode(node);
 	append(model);
 }

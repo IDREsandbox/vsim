@@ -13,6 +13,8 @@ class ECategory : public QObject {
 public:
 	ECategory(QObject *parent = nullptr);
 
+	void operator=(const ECategory &other);
+
 	std::string getCategoryName() const;
 	void setCategoryName(const std::string& name);
 	QColor getColor() const;

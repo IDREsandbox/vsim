@@ -1,6 +1,7 @@
 #include "VSimRoot.h"
+
 #include <iostream>
-#include "narrative/NarrativeSlideLabel.h"
+
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative.h"
@@ -16,16 +17,17 @@
 #include <QDate>
 #include <QThread>
 #include <QEvent>
-#include "Util.h"
+#include "Core/Util.h"
 
 // debug
-#include "LabelStyleGroup.h"
-#include "LabelStyle.h"
+#include "Canvas/LabelStyleGroup.h"
+#include "Canvas/LabelStyle.h"
 
-#include "types_generated.h" // SettingsT
 #include "settings_generated.h" // SettingsT
 
-VSimRoot::VSimRoot() {
+VSimRoot::VSimRoot(QObject *parent)
+	: QObject(parent)
+{
 	m_narratives = std::make_unique<NarrativeGroup>();
 	m_models = std::make_unique<ModelGroup>();
 	m_resources = std::make_unique<EResourceGroup>();
@@ -35,6 +37,18 @@ VSimRoot::VSimRoot() {
 
 VSimRoot::~VSimRoot()
 {
+}
+
+void VSimRoot::take(VSimRoot * other)
+{
+	m_narratives->clear();
+	m_resources->clear();
+	m_models->clear();
+	*m_narratives = *other->m_narratives;
+	*m_resources = *other->m_resources;
+	m_models->copyReference(*other->m_models);
+
+	m_settings.swap(other->m_settings);
 }
 
 NarrativeGroup * VSimRoot::narratives() const
@@ -49,6 +63,13 @@ EResourceGroup * VSimRoot::resources() const
 {
 	return m_resources.get();
 }
+
+void VSimRoot::copySettings(const VSimRoot * other)
+{
+	m_settings->graphics_settings;
+
+}
+
 VSim::FlatBuffers::SettingsT * VSimRoot::settings() const
 {
 	return m_settings.get();
@@ -67,15 +88,18 @@ void VSimRoot::debug()
 			NarrativeSlide *slide = nar->child(j);
 			qInfo() << "\tSlide" << j << "trans" << slide->getTransitionDuration() << "dur" << slide->getDuration();
 
-			for (uint k = 0; k < slide->size(); k++) {
-				NarrativeSlideLabel *label = dynamic_cast<NarrativeSlideLabel*>(slide->child(k));
-				qInfo() << "\t\tLabel" << k; //<< QString::fromStdString(label->getText());
-			}
+			//for (uint k = 0; k < slide->size(); k++) {
+			//	NarrativeSlideLabel *label = dynamic_cast<NarrativeSlideLabel*>(slide->child(k));
+			//	qInfo() << "\t\tLabel" << k; //<< QString::fromStdString(label->getText());
+			//}
 		}
 		LabelStyleGroup *labs = nar->labelStyles();
-		for (uint j = 0; j < labs->size(); j++) {
-			LabelStyle *style = labs->child(j);
-			qInfo() << "\tStyle" << j << style->m_font_family.c_str() << style->m_point_size;
+		for (uint j = 0; j < std::size(LabelTypeNames); j++) {
+			LabelStyle *style = labs->getStyle((LabelType)j);
+			if (style) qInfo()
+				<< "\tStyle" << j
+				<< style->m_font_family.c_str()
+				<< style->m_point_size;
 		}
 	}
 
@@ -187,9 +211,6 @@ void VSimRoot::moveAllToThread(QThread *t)
 		nar->moveToThread(t);
 		for (auto slide : *nar) {
 			slide->moveToThread(t);
-			for (auto item : *slide) {
-				item->moveToThread(t);
-			}
 		}
 	}
 }

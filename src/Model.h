@@ -8,6 +8,9 @@ class Model : public QObject {
 	Q_OBJECT
 public:
 	Model(QObject *parent = nullptr);
+
+	void copyReference(const Model &other);
+
 	//void loadNode(osg::Node *node); // sets name too
 	void setNode(osg::Node *node);
 	osg::Node *node() const;

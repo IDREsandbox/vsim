@@ -1,16 +1,33 @@
-#include "narrative/NarrativeSlide.h"
-#include "narrative/NarrativeSlideLabel.h"
+#include "NarrativeSlide.h"
 #include "deprecated/osgNewWidget/VSWidget.h"
+
 #include <QTextCursor>
 #include <iostream>
+#include <QTextDocument>
+
+#include "Canvas/CanvasScene.h"
+
 NarrativeSlide::NarrativeSlide(QObject *parent)
-	: TGroup<NarrativeSlideItem>(parent),
+	: QObject(parent),
 	m_camera_matrix(),
 	m_duration(4.0f),
 	m_stay_on_node(false),
 	m_transition_duration(4.0f),
 	m_thumbnail_dirty(true)
 {
+	m_scene = new CanvasScene(this);
+}
+
+NarrativeSlide &NarrativeSlide::operator=(const NarrativeSlide & other)
+{
+	m_camera_matrix = other.m_camera_matrix;
+	m_duration = other.m_duration;
+	m_stay_on_node = other.m_stay_on_node;
+	m_transition_duration = other.m_transition_duration;
+
+	m_scene->copy(*other.m_scene);
+	// TODO: insert return statement here
+	return *this;
 }
 
 void NarrativeSlide::loadOld(const NarrativeNode * old, const NarrativeTransition * old_transition)
@@ -42,7 +59,8 @@ void NarrativeSlide::loadOld(const NarrativeNode * old, const NarrativeTransitio
 			const VSLabel *const_label = dynamic_cast<const VSLabel*>(canvas_child);
 			VSLabel *old_label = const_cast<VSLabel*>(const_label); // old code didn't use const properly
 			if (const_label) {
-				NarrativeSlideLabel *new_label = new NarrativeSlideLabel();
+				auto new_label = std::make_shared<CanvasLabel>();
+
 				// The old dimensions were 
 				osg::Vec2f old_size = const_label->getSize();
 				osg::Vec2f old_pos = const_label->getPosition();
@@ -76,10 +94,10 @@ void NarrativeSlide::loadOld(const NarrativeNode * old, const NarrativeTransitio
 				float new_h = old_size[1] / old_dim.height();
 
 				new_label->setRect(QRectF(new_x, new_y, new_w, new_h));
-				new_label->getDocument()->setPlainText(old_text.c_str());
+				new_label->document()->setPlainText(old_text.c_str());
 				new_label->setBackground(bgcolor);
 
-				QTextCursor cursor(new_label->getDocument());
+				QTextCursor cursor(new_label->document());
 				cursor.select(QTextCursor::SelectionType::Document);
 				QTextCharFormat format = cursor.charFormat();
 				format.setForeground(QBrush(fontcolor));
@@ -87,7 +105,7 @@ void NarrativeSlide::loadOld(const NarrativeNode * old, const NarrativeTransitio
 				cursor.setCharFormat(format);
 				cursor.insertText(old_text.c_str());
 
-				append(std::shared_ptr<NarrativeSlideItem>(new_label));
+				m_scene->addItem(new_label);
 			}
 			// finally we can make a new label
 
@@ -170,4 +188,9 @@ void NarrativeSlide::setThumbnail(QImage thumbnail)
 	m_thumbnail = thumbnail;
 	m_thumbnail_dirty = false;
 	emit sThumbnailChanged(m_thumbnail);
+}
+
+CanvasScene * NarrativeSlide::scene() const
+{
+	return m_scene;
 }

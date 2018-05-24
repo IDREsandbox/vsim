@@ -8,6 +8,13 @@ ECategory::ECategory(QObject *parent)
 
 }
 
+void ECategory::operator=(const ECategory & other)
+{
+	m_cat_name = other.m_cat_name;
+	m_color = other.m_color;
+	m_resources.clear();
+}
+
 std::string ECategory::getCategoryName() const
 {
 	return m_cat_name;

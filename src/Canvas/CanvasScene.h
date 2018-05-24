@@ -18,6 +18,7 @@ class TransformManipulator;
 class CanvasItem;
 class CanvasLabel;
 class GiantRectItem;
+class WeakObject;
 
 typedef std::vector<std::pair<CanvasItem*, QRectF>> ItemRectList;
 
@@ -48,6 +49,8 @@ class CanvasScene : public QGraphicsScene {
 public:
 	CanvasScene(QObject *parent = nullptr);
 	~CanvasScene() override;
+
+	void copy(const CanvasScene &other);
 
 	void addItem(std::shared_ptr<CanvasItem> item);
 	void removeItem(CanvasItem *item);
@@ -97,6 +100,8 @@ public:
 	// maps pixel height count to scene size
 	double toScene(int px) const;
 
+	WeakObject *weakContainer() const;
+
 signals:
 	void sAdded(CanvasItem *item);
 	void sAboutToRemove(CanvasItem *item);
@@ -124,6 +129,7 @@ private:
 	bool m_selection_in_progress;
 	bool m_moving;
 	QPointF m_start_move;
+	WeakObject *m_weak_container; // for storing QObjects so that moveToThread() works correctly
 
 	// a giant background shape so that view can always center on (0,0)
 	GiantRectItem *m_giant_rect;
@@ -149,6 +155,10 @@ public:
 
 	enum { Type = UserType + 1 };
 	int type() const override { return Type; };
+
+	void copy(const CanvasItem &other);
+	virtual CanvasItem *clone() const; // covariant return magic
+	//SharedItem cloneShared() const; // too complicated, need template shenanigans
 
 	QSizeF size() const;
 	QRectF rect() const;
@@ -249,6 +259,9 @@ public:
 	enum { Type = UserType + 2 };
 	int type() const override { return Type; };
 
+	void copy(const CanvasLabel &other);
+	CanvasLabel *clone() const override;
+
 	QRectF boundingRect() const override;
 
 	void setEditable(bool enable) override;
@@ -268,6 +281,8 @@ public:
 
 	std::string html() const;
 	void setHtml(const std::string &s);
+
+	TextItem *textItem() const;
 
 public: // commands
 	using SetVAlignCommand =
@@ -311,6 +326,9 @@ public:
 	enum { Type = UserType + 3 };
 	int type() const override { return Type; };
 
+	void copy(const CanvasImage &other);
+	CanvasImage *clone() const override;
+
 	QPixmap pixmap() const;
 	void setPixmap(const QPixmap &p);
 
@@ -321,7 +339,7 @@ protected:
 	void onResize(QSizeF size) override;
 
 private:
-	QGraphicsPixmapItem *m_pixmap;
+	QGraphicsPixmapItem *m_pixitem;
 };
 
 

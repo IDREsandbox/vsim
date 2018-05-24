@@ -13,6 +13,7 @@ set(Core_h
   ICommandStack.h
   SimpleCommandStack.h
   TypesSerializer.h
+  WeakObject.h
   VecUtil.h
   Util.h
   ${types_h}
@@ -24,7 +25,7 @@ set(Core_src
   TypesSerializer.cpp
   Util.cpp
   VecUtil.cpp
-  ${types_h}
+  WeakObject.cpp
 )
 
 add_library(Core_obj ${Core_src} ${Core_h})

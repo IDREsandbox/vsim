@@ -4,6 +4,7 @@
 #include <string>
 #include <osg/Node>
 #include <QObject>
+#include <memory>
 #include "Core/GroupTemplate.h"
 #include "Core/Command.h"
 
@@ -16,6 +17,7 @@ class Narrative : public TGroup<NarrativeSlide> {
 
 public:
 	Narrative(QObject *parent = nullptr);
+	Narrative &operator= (const Narrative &other);
 
 	void loadOld(const NarrativeOld *old);
 
@@ -63,7 +65,7 @@ private:
 	std::string m_author;
 	bool m_locked;
 
-	LabelStyleGroup *m_styles;
+	std::unique_ptr<LabelStyleGroup> m_styles;
 };
 
 #endif /* NARRATIVE_H */

@@ -19,11 +19,11 @@
 #include <QStatusBar>
 
 #include "VSimApp.h"
-#include "Util.h"
+#include "Core/Util.h"
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative.h"
 #include "narrative/NarrativeSlide.h"
-#include "narrative/NarrativeCanvas.h"
+#include "Canvas/CanvasContainer.h"
 #include "OSGViewerWidget.h"
 #include "MainWindow.h"
 #include "TimeSlider.h"
@@ -43,10 +43,15 @@ VSimApp::VSimApp(MainWindow* window)
 	: m_window(window),
 	m_filename("")
 {
+	m_root = std::make_unique<VSimRoot>();
+
 	// undo stack
 	m_undo_stack = new QUndoStack(this);
 	m_undo_stack->setUndoLimit(50);
 
+	// have to create this early on
+	// er constructor uses this
+	// FIXME: why so circular and confusing
 	m_time_manager = new TimeManager(this, this);
 
 	// timers
@@ -67,13 +72,13 @@ VSimApp::VSimApp(MainWindow* window)
 
 	// thumbnails
 	m_thumbnail_size = QSize(288, 162);
-	m_render_canvas = new NarrativeCanvas;
+	m_render_canvas = new CanvasContainer(); // FIXME: leak?
 	m_render_canvas->resize(m_thumbnail_size);
 	m_render_canvas->move(0, 0);
-	m_render_canvas->setSlide(nullptr);
+	m_render_canvas->setScene(nullptr);
 	m_render_canvas->setEditable(false);
 
-	m_render_view = new OSGViewerWidget;
+	m_render_view = new OSGViewerWidget();
 	m_render_view->resize(m_thumbnail_size);
 	m_render_view->move(0, 0);
 	m_render_view->setCameraFrozen(true);
@@ -93,8 +98,6 @@ VSimApp::VSimApp(MainWindow* window)
 		setCameraMatrix(m_camera_target);
 		emit sArrived();
 	});
-
-	initWithVSim(new VSimRoot);
 }
 
 VSimApp::~VSimApp() {
@@ -163,34 +166,36 @@ void VSimApp::update(float dt_sec)
 
 bool VSimApp::initWithVSim(VSimRoot *root)
 {
+	std::unique_ptr<VSimRoot> generated;
 	if (!root) {
-		root = new VSimRoot();
+		generated = std::make_unique<VSimRoot>();
+		root = generated.get();
 	}
 
 	emit sAboutToReset();
 
-	// move all of the gui stuff over to the new root
-	m_narrative_control->load(root->narratives());
-	m_er_control->load(root->resources());
-	m_window->timeSlider()->setTimeManager(m_time_manager);
-	m_render_view->mainView()->setSceneData(root->models()->sceneRoot());
-	m_window->getViewerWidget()->mainView()->setSceneData(root->models()->sceneRoot());
-
-	m_render_canvas->setSlide(nullptr);
+	m_render_canvas->setScene(nullptr);
 
 	m_undo_stack->clear();
-	m_window->getViewerWidget()->reset();
 
 	// dereference the old root, apply the new one
-	m_root.reset(root);
+	// m_root.reset(root);
+
+	// keep the old root, just do a copy
+	m_root->take(root);
+
+	osg::Node *osg_root = m_root->models()->sceneRoot();
+	m_render_view->mainView()->setSceneData(osg_root);
+	m_window->getViewerWidget()->mainView()->setSceneData(osg_root);
+	m_window->getViewerWidget()->reset();
 
 	emit sReset();
 
-	m_navigation_control->a_object->trigger();
+	m_navigation_control->a_object->trigger(); // goto object mode
 	return true;
 }
 
-VSimRoot * VSimApp::getRoot() const
+VSimRoot *VSimApp::getRoot() const
 {
 	return m_root.get();
 }
@@ -280,7 +285,7 @@ QImage VSimApp::generateThumbnail(NarrativeSlide * slide)
 	//m_render_view->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), m_thumbnail_size), 0);
 
 	// render canvas
-	m_render_canvas->setSlide(slide);
+	m_render_canvas->setScene(slide->scene());
 	m_render_canvas->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), m_thumbnail_size), QWidget::DrawChildren); // | ignore mask
 
 	return img;

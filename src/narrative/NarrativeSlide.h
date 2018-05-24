@@ -18,6 +18,7 @@ class NarrativeSlide : public QObject
 	Q_OBJECT;
 public:
 	NarrativeSlide(QObject *parent = nullptr);
+	NarrativeSlide &operator=(const NarrativeSlide &other);
 	void loadOld(const NarrativeNode *old, const NarrativeTransition *old_transition);
 	
 	osg::Matrixd getCameraMatrix() const;
@@ -77,6 +78,8 @@ private:
 
 	QImage m_thumbnail;
 	bool m_thumbnail_dirty;
+
+	CanvasScene *m_scene;
 };
 
 #endif /* NARRATIVESLIDE_H */

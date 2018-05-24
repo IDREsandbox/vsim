@@ -17,6 +17,7 @@ class EResource : public QObject {
 public:
 	EResource(QObject *parent = nullptr);
 
+	void operator=(const EResource &other);
 	// converts old resource to a new one, doesn't set category
 	void loadOld(const EResourcesNode *old);
 

@@ -7,6 +7,7 @@
 #include <QTextDocument>
 #include <QPainter>
 #include "FocusFilter.h"
+#include "Core/WeakObject.h"
 
 CanvasScene::CanvasScene(QObject *parent)
 	: QGraphicsScene(parent),
@@ -15,6 +16,7 @@ CanvasScene::CanvasScene(QObject *parent)
 	m_selection_in_progress(false),
 	m_moving(false)
 {
+	m_weak_container = new WeakObject(this);
 	m_giant_rect = new GiantRectItem(QRectF(-10, -10, 20, 20));
 	QGraphicsScene::addItem(m_giant_rect);
 
@@ -30,6 +32,16 @@ CanvasScene::~CanvasScene()
 	// ensures we don't double delete
 	for (auto item : m_items) {
 		QGraphicsScene::removeItem(item.get());
+	}
+}
+
+void CanvasScene::copy(const CanvasScene &other)
+{
+	clear();
+	for (const auto item : other.m_item_list) {
+		CanvasItem *copy = item->clone();
+		SharedItem new_item = std::shared_ptr<CanvasItem>(copy);
+		addItem(new_item);
 	}
 }
 
@@ -160,6 +172,11 @@ double CanvasScene::toScene(int px) const
 	return px / (double)m_base_height;
 }
 
+WeakObject * CanvasScene::weakContainer() const
+{
+	return m_weak_container;
+}
+
 void CanvasScene::clear()
 {
 	// do we need to clear the scene? idk
@@ -260,6 +277,9 @@ void CanvasScene::setEditable(bool editable)
 	for (auto item : m_items) {
 		item->setEditable(editable);
 	}
+	if (!editable) {
+		setSelected({});
+	}
 }
 
 void CanvasScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) {
@@ -312,6 +332,22 @@ CanvasItem::CanvasItem(QGraphicsItem * parent)
 
 CanvasItem::~CanvasItem()
 {
+}
+
+void CanvasItem::copy(const CanvasItem & other)
+{
+	setBackground(other.background());
+	m_border_around = other.m_border_around;
+	m_border_width = other.m_border_width;
+	setHasBorder(other.hasBorder());
+	setRect(other.rect());
+}
+
+CanvasItem *CanvasItem::clone() const
+{
+	auto *n = new CanvasItem();
+	n->copy(*this);
+	return n;
 }
 
 QSizeF CanvasItem::size() const
@@ -452,15 +488,6 @@ void CanvasItem::debugPaint(bool debug)
 	m_debug_paint = debug;
 }
 
-//const FrameStyle & CanvasItem::frameStyle() const
-//{
-//	// TODO: insert return statement here
-//}
-//
-//void CanvasItem::setFrameStyle(const FrameStyle & fs) const
-//{
-//}
-
 int CanvasItem::borderWidthPixels() const
 {
 	return std::lround(pen().widthF() * m_base_height);
@@ -505,13 +532,6 @@ void CanvasItem::setBackground(const QColor & color)
 {
 	QBrush b = brush();
 	b.setColor(color);
-	//if (b.color().alpha() == 0) {
-	//	b.setStyle(Qt::NoBrush);
-	//}
-	//else {
-	//	b.setColor(color);
-	//	b.setStyle(Qt::BrushStyle::SolidPattern);
-	//}
 	setBrush(b);
 }
 
@@ -633,6 +653,21 @@ CanvasLabel::CanvasLabel(QGraphicsItem * parent)
 	setDocument(m_text->document());
 }
 
+void CanvasLabel::copy(const CanvasLabel & other)
+{
+	CanvasItem::copy(other);
+	m_valign = other.m_valign;
+	m_style_type = other.m_style_type;
+	setHtml(other.html());
+}
+
+CanvasLabel * CanvasLabel::clone() const
+{
+	auto *n = new CanvasLabel;
+	n->copy(*this);
+	return n;
+}
+
 QRectF CanvasLabel::boundingRect() const
 {
 	// There was a bug where text that stuck out rendered
@@ -739,6 +774,11 @@ void CanvasLabel::setHtml(const std::string & s)
 	document()->setHtml(QString::fromStdString(s));
 }
 
+TextItem * CanvasLabel::textItem() const
+{
+	return m_text;
+}
+
 void CanvasLabel::onResize(QSizeF size)
 {
 	m_text->setTextWidth(size.width() * baseHeight());
@@ -766,6 +806,10 @@ QVariant CanvasLabel::itemChange(GraphicsItemChange change, const QVariant & val
 			cursor.setPosition(cursor.selectionEnd());
 			m_text->setTextCursor(cursor);
 		}
+	}
+	else if (change == GraphicsItemChange::ItemSceneHasChanged) {
+		auto *scene = canvasScene();
+		if (scene) m_text->setParent(scene->weakContainer());
 	}
 	return CanvasItem::itemChange(change, value);
 }
@@ -840,24 +884,37 @@ CanvasImage::CanvasImage()
 {
 	setPrefersFixedRatio(true);
 	setBorderAround(true);
-	m_pixmap = new QGraphicsPixmapItem(this);
-	m_pixmap->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+	m_pixitem = new QGraphicsPixmapItem(this);
+	m_pixitem->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+}
+
+void CanvasImage::copy(const CanvasImage & other)
+{
+	CanvasItem::copy(other);
+	setPixmap(other.pixmap());
+}
+
+CanvasImage * CanvasImage::clone() const
+{
+	auto *n = new CanvasImage;
+	n->copy(*this);
+	return n;
 }
 
 QPixmap CanvasImage::pixmap() const
 {
-	return m_pixmap->pixmap();
+	return m_pixitem->pixmap();
 }
 
 void CanvasImage::setPixmap(const QPixmap & p)
 {
-	m_pixmap->setPixmap(p);
+	m_pixitem->setPixmap(p);
 	onResize(size());
 }
 
 void CanvasImage::initSize()
 {
-	QPixmap p = m_pixmap->pixmap();
+	QPixmap p = m_pixitem->pixmap();
 	if (p.isNull()) return;
 
 	double bh = baseHeight();
@@ -899,11 +956,11 @@ void CanvasImage::onResize(QSizeF size)
 	// pixels -> canvas ratio -> item ratio
 	// (300) -> .5 -> .3
 
-	if (m_pixmap->pixmap().isNull()) {
+	if (m_pixitem->pixmap().isNull()) {
 		return;
 	}
 
-	QPixmap p = m_pixmap->pixmap();
+	QPixmap p = m_pixitem->pixmap();
 
 	// scale
 	double sx = size.width() / p.width();
@@ -911,5 +968,5 @@ void CanvasImage::onResize(QSizeF size)
 
 	QTransform t;
 	t.scale(sx, sy);
-	m_pixmap->setTransform(t);
+	m_pixitem->setTransform(t);
 }

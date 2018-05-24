@@ -19,6 +19,7 @@
 #include "Core/GroupCommands.h"
 #include "Core/Util.h"
 #include "TimeManager.h"
+#include "VSimRoot.h"
 
 #include <QDesktopServices>
 #include <QPushButton>
@@ -92,6 +93,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 
 	a_close_all = new QAction("Close All", this);
 	connect(a_close_all, &QAction::triggered, this, &ERControl::closeAll);
+
+	load(m_app->getRoot()->resources());
 
 	// box menus
 	QList<QAction*> actions = {
@@ -208,8 +211,6 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		m_filter_area, &ERFilterArea::enableRange);
 
 	resetFilters();
-
-	load(nullptr);
 }
 
 void ERControl::load(EResourceGroup *ers)
@@ -221,7 +222,6 @@ void ERControl::load(EResourceGroup *ers)
 		m_category_control->load(nullptr);
 		return;
 	}
-
 	m_ers = ers;
 	m_categories = ers->categories();
 

@@ -1,9 +1,11 @@
 #ifndef FUTUREDIALOG_H
 #define FUTUREDIALOG_H
 
-#include <QtWidgets/QMainWindow>
+#include <QMainWindow>
 #include <QtConcurrent>
 #include "ui_FutureDialog.h"
+
+class SimpleWorker;
 
 class FutureDialog : public QDialog
 {
@@ -30,6 +32,8 @@ public:
 	}
 
 	void watchThread(QThread *thread);
+
+	void watchWorker(SimpleWorker *worker);
 
 	void setText(const QString &text);
 

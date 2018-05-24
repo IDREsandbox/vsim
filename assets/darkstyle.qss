@@ -6,6 +6,10 @@ QToolTip {
     opacity: 200;
 }
 
+#transparent {
+    background: transparent;
+}
+
 QWidget {
     color: #eff0f1;
     background-color: #31363b;

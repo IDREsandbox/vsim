@@ -1,6 +1,6 @@
 #include "OSGNodeWrapper.h"
 
-#include "Util.h"
+#include "Core/Util.h"
 #include <iostream>
 #include <osg/Group>
 #include <QDebug>

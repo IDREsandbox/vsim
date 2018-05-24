@@ -6,7 +6,6 @@
 #include "narrative/NarrativeSlide.h"
 #include "Canvas/LabelStyleGroup.h"
 
-
 Narrative::Narrative(QObject *parent)
 	: TGroup<NarrativeSlide>(parent),
 	m_title("Untitled"),
@@ -14,7 +13,18 @@ Narrative::Narrative(QObject *parent)
 	m_author(""),
 	m_locked(false)
 {
-	m_styles = new LabelStyleGroup(this);
+	m_styles = std::make_unique<LabelStyleGroup>();
+}
+
+Narrative & Narrative::operator=(const Narrative & other)
+{
+	TGroup<NarrativeSlide>::operator=(other); // copy slides
+	m_author = other.m_author;
+	m_description = other.m_description;
+	m_title = other.m_title;
+	m_locked = other.m_locked;
+	m_styles->copy(*other.m_styles.get());
+	return *this;
 }
 
 void Narrative::loadOld(const NarrativeOld * old)
@@ -57,5 +67,5 @@ void Narrative::setDescription(const std::string& description) {
 }
 LabelStyleGroup * Narrative::labelStyles() const
 {
-	return m_styles;
+	return m_styles.get();
 }

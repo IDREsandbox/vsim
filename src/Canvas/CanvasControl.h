@@ -16,6 +16,7 @@ class ICommandStack;
 class SimpleCommandStack;
 class CanvasLabel;
 class CanvasItem;
+class CanvasImage;
 class CanvasScene;
 class LabelStyle;
 class FrameStyle;
@@ -38,8 +39,10 @@ public:
 
 public: // command wrappers
 	//
-	void createLabel(LabelStyle *styles);
-	void createImage(QPixmap pixmap, FrameStyle *style = nullptr);
+	std::shared_ptr<CanvasLabel> createLabel(LabelStyle *styles);
+	std::shared_ptr<CanvasLabel> createLabelCommand(LabelStyle *styles);
+	std::shared_ptr<CanvasImage> createImage(QPixmap pixmap, FrameStyle *style = nullptr);
+	std::shared_ptr<CanvasImage> createImageCommand(QPixmap pixmap, FrameStyle *style = nullptr);
 	void removeItems();
 
 	// all
@@ -143,26 +146,31 @@ public: // misc, internal stuff
 		}
 		std::set<CanvasLabel*> labels = selectedLabels();
 		if (labels.size() > 0) {
-			beginWrapTextCommands();
+			auto *cmd = m_stack->begin();
+			cmd->setText("Edit Text");
+			beginWrapTextCommands(cmd);
 			for (CanvasLabel *label : labels) {
 				QTextCursor c = label->textCursor();
 				c.select(QTextCursor::SelectionType::Document);
 				func(c);
 			}
-			m_stack->push(endWrapTextCommands());
+			endWrapTextCommands();
+			m_stack->end();
 		}
 	}
 
 	// Pushes a multi command, saves selection
 	// signature: void(*)(CanvasItem *item, QUndoCommand *parent)
 	template <typename T>
-	void multiEdit(T func) {
+	void multiEdit(T func, const QString &name = "") {
 		auto sel = m_scene->getSelected();
-		auto *sc = new CanvasSelectCommand(m_scene, sel);
+		auto *cmd = m_stack->begin();
+		cmd->setText(name);
+		auto *sc = new CanvasSelectCommand(m_scene, sel, Command::ON_BOTH, cmd);
 		for (CanvasItem *item : sel) {
-			func(item, sc);
+			func(item, cmd);
 		}
-		m_stack->push(sc);
+		m_stack->end();
 	}
 
 private:

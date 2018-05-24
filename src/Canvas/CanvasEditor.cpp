@@ -12,44 +12,10 @@
 #include <QApplication>
 #include <QLineEdit>
 #include <QColorDialog>
+#include <QFileDialog>
+#include <QMessageBox>
 
-class InternalMainWindow : public QMainWindow {
-public:
-	InternalMainWindow(QWidget *parent = nullptr)
-		: QMainWindow(parent) {
-		setWindowFlags(0);
-		//setAttribute(Qt::WA_NoBackground);
-		setContextMenuPolicy(
-			Qt::NoContextMenu
-		);
-		setObjectName("window");
-		setStyleSheet("#window{background: transparent;}");
-	}
-
-	void calcMask() {
-		auto cr = childrenRegion();
-		if (cr.isNull()) {
-			setAttribute(Qt::WA_TransparentForMouseEvents);
-		}
-		else {
-			setAttribute(Qt::WA_TransparentForMouseEvents, false);
-			setMask(cr);
-		}
-	}
-
-protected:
-	void resizeEvent(QResizeEvent *e) {
-		QMainWindow::resizeEvent(e);
-		calcMask();
-	}
-	bool event(QEvent *e) {
-		QEvent::Type type = e->type();
-		if (type == QEvent::LayoutRequest) {
-			calcMask();
-		}
-		return QMainWindow::event(e);
-	}
-};
+#include "Canvas/ChildMaskFilter.h"
 
 CanvasEditor::CanvasEditor(QWidget * parent)
 	: QWidget(parent),
@@ -71,14 +37,21 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	// 2. use a mask, whenever children change, update mask
 	//    this is what MainWindow.cpp does
 
-	m_internal_window = new InternalMainWindow(this);
+	auto *mask_filter = new ChildMaskFilter(this);
+	m_internal_window = new CanvasWindow(this);
 	layout->addWidget(m_internal_window, 0, 0);
 	m_internal_window->show();
+	m_internal_window->installEventFilter(mask_filter);
 
 	m_tb = new CanvasToolBar(m_internal_window);
 	m_internal_window->addToolBar(Qt::ToolBarArea::LeftToolBarArea, m_tb);
 
 	m_cc = new CanvasControl(this);
+
+	a_delete = new QAction(this);
+	a_delete->setText("Delete");
+	a_delete->setShortcut(QKeySequence(Qt::Key_Delete));
+	m_tb->m_delete->setDefaultAction(a_delete);
 	//cc->setScene(canvas);
 	//cc->setStack(stack);
 
@@ -91,14 +64,33 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	};
 	for (auto &pair : m_button_type_map) {
 		connect(pair.first, &QAbstractButton::clicked, [this, pair]() {
-			m_cc->createLabel(m_styles->getStyle(pair.second));
+			m_cc->createLabelCommand(m_styles->getStyle(pair.second));
 		});
 	}
 	connect(m_tb->m_image, &QAbstractButton::clicked, [this]() {
 		// open up a file dialog
-		m_cc->createImage(QPixmap("assets/karnak.jpg"));
+		QString result = QFileDialog::getOpenFileName(nullptr,
+			"Open Image", m_last_image_dir,
+			"Image Files (*.png;*.jpg;*.bmp);;All Files (*)");
+		if (result.isNull()) return;
+
+		QFileInfo info(result);
+		m_last_image_dir = info.absoluteDir().path();
+
+		// try to read image
+		QPixmap pm(result);
+		if (pm.isNull()) {
+			// error
+			QMessageBox::critical(nullptr,
+				"Image Load Error",
+				"Image failed to load.",
+				QMessageBox::Ok);
+			return;
+		}
+
+		m_cc->createImageCommand(pm, m_styles->getImageStyle());
 	});
-	connect(m_tb->m_delete, &QAbstractButton::clicked, [this]() {
+	connect(a_delete, &QAction::triggered, [this]() {
 		m_cc->removeItems();
 	});
 
@@ -178,18 +170,27 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 		updateToolBar();
 	});
 
+	connect(m_tb->m_done, &QAbstractButton::clicked, this, &CanvasEditor::sDone);
+	connect(m_tb->m_edit_styles, &QAbstractButton::clicked, this, &CanvasEditor::sEditStyles);
 
 	setStyles(m_default_styles.get()); // stuff needs to exist
 }
 
+CanvasScene *CanvasEditor::scene() const
+{
+	return m_container->scene();
+}
+
 void CanvasEditor::setScene(CanvasScene * scene)
 {
+	m_scene = scene;
 	m_container->setScene(scene);
 	m_cc->setScene(scene);
 	if (scene == nullptr) {
 		hide();
 	}
 	else {
+		m_scene->setEditable(m_editing_enabled);
 		show();
 		updateToolBar();
 	}
@@ -198,11 +199,6 @@ void CanvasEditor::setScene(CanvasScene * scene)
 void CanvasEditor::setStack(ICommandStack * stack)
 {
 	m_cc->setStack(stack);
-}
-
-void CanvasEditor::showToolBar(bool show)
-{
-	m_internal_window->setVisible(show);
 }
 
 void CanvasEditor::setStyles(LabelStyleGroup *styles)
@@ -225,8 +221,18 @@ void CanvasEditor::applyStylesToButtons() {
 
 void CanvasEditor::setEditable(bool editable)
 {
+	m_editing_enabled = editable;
+	if (m_scene) {
+		m_scene->setEditable(editable);
+	}
 	m_container->setEditable(editable);
 	m_internal_window->setVisible(editable);
+	updateToolBar();
+}
+
+bool CanvasEditor::isEditable() const
+{
+	return m_editing_enabled;
 }
 
 CanvasControl * CanvasEditor::control()
@@ -239,7 +245,7 @@ CanvasContainer * CanvasEditor::container()
 	return m_container;
 }
 
-QMainWindow * CanvasEditor::internalWindow()
+CanvasWindow *CanvasEditor::internalWindow()
 {
 	return m_internal_window;
 }
@@ -249,8 +255,25 @@ void CanvasEditor::debug()
 	m_container->debug();
 }
 
+void CanvasEditor::hideEvent(QHideEvent *e) {
+	// hide toolbar
+	//toolbar
+	updateToolBar();
+}
+
+void CanvasEditor::showEvent(QShowEvent *e) {
+	//m_tb->show();
+	updateToolBar();
+}
+
 void CanvasEditor::updateToolBar()
 {
+	// if we're hidden or not editable then hide
+	if (!isVisible() || !isEditable()) {
+		m_tb->hide();
+		return;
+	}
+	m_tb->show();
 	// font
 	QFont f;
 	QString ff = m_cc->allFont();
@@ -275,4 +298,53 @@ void CanvasEditor::updateToolBar()
 	// border width
 	int border = m_cc->allBorderSize();
 	m_tb->m_border_width->setValue(border);
+}
+
+CanvasWindow::CanvasWindow(QWidget *parent)
+	: QMainWindow(parent)
+{
+	setWindowFlags(0);
+	setAttribute(Qt::WA_NoBackground);
+	setContextMenuPolicy(
+		Qt::NoContextMenu
+	);
+	setObjectName("transparent");
+	setStyleSheet("#transparent{background: transparent;}");
+	// this style gets overriden by darkstyle
+	// #transparent is also defined in darkstyle
+
+	// manual filtering?
+	//auto *filter = new ChildMaskFilter(this);
+	//installEventFilter(filter);
+}
+
+void CanvasWindow::calcMask() {
+	auto cr = childrenRegion();
+	if (cr.isNull()) {
+		setAttribute(Qt::WA_TransparentForMouseEvents);
+		//hide();
+	}
+	else {
+		setAttribute(Qt::WA_TransparentForMouseEvents, false);
+		setMask(cr);
+		//show();
+	}
+	//emit sMaskChanged(cr);
+}
+
+
+bool CanvasWindow::event(QEvent *e) {
+	QEvent::Type type = e->type();
+	switch (type) {
+	case QEvent::LayoutRequest:
+	case QEvent::Show:
+	case QEvent::Hide:
+		calcMask();
+	}
+	return QMainWindow::event(e);
+}
+
+void CanvasWindow::resizeEvent(QResizeEvent *e) {
+	QMainWindow::resizeEvent(e);
+	calcMask();
 }

@@ -53,6 +53,8 @@ find_package(Qt5 REQUIRED Core Gui Widgets Test Concurrent)
 # find_package(Qt5Test REQUIRED)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
+include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(${Qt5Concurrent_INCLUDE_DIRS})
 
 # # if you want to print everything
 # get_cmake_property(_variableNames VARIABLES)
@@ -89,10 +91,10 @@ function(vsim_add_flatbuffer var fbs_src)
   add_custom_command(
     OUTPUT ${fbs_header_full}
     COMMAND echo "Compiling flatbuffer - ${fbs}"
-    COMMAND ${flatcExec} -c --no-includes
+    COMMAND ${flatcExec} -c
             --gen-object-api
             -o ${CMAKE_BINARY_DIR}/generated
-            -I ${CMAKE_CURRENT_SOURCE_DIR}/src
+            -I ${CMAKE_SOURCE_DIR}/src
             ${fbs_full}
     DEPENDS flatc ${fbs_full})
   set(${var} ${fbs_header_full} PARENT_SCOPE)
@@ -292,7 +294,7 @@ add_subdirectory(src)
 install(FILES CHANGELOG.md COPYRIGHT LICENSE README.md THIRD-PARTY-NOTICES DESTINATION .)
 
 #assets copying
-# file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}")
 install(DIRECTORY assets DESTINATION .)
 
 if (WIN32)
@@ -333,8 +335,8 @@ if (WIN32)
   # copy osg plugins
   find_file(osgPluginsDebug NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/tools/osg)
   find_file(osgPlugins NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_TOOLS_DIRS})
-  # file(COPY ${osgPluginsDebug} DESTINATION "${CMAKE_BINARY_DIR}")
-  # file(COPY ${osgPlugins} DESTINATION "${CMAKE_BINARY_DIR}")
+  file(COPY ${osgPluginsDebug} DESTINATION "${CMAKE_BINARY_DIR}")
+  file(COPY ${osgPlugins} DESTINATION "${CMAKE_BINARY_DIR}")
   install(DIRECTORY ${osgPlugins} DESTINATION .)
 
 endif()

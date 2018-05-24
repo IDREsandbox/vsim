@@ -59,15 +59,15 @@ void CanvasContainer::resizeEvent(QResizeEvent * event)
 }
 
 void CanvasContainer::debug() {
-	qDebug() << "debugging container";
-	qDebug() << "view";
-	qDebug() << "viewsr" << m_view->sceneRect();
-	qDebug() << m_view->transform();
-	qDebug() << "scene item count" << m_scene->items().size();
-	qDebug() << "ssr" << m_scene->sceneRect();
+	qInfo() << "debugging container";
+	qInfo() << "view";
+	qInfo() << "viewsr" << m_view->sceneRect();
+	qInfo() << m_view->transform();
+	qInfo() << "scene item count" << m_scene->items().size();
+	qInfo() << "ssr" << m_scene->sceneRect();
 	auto items = m_scene->items();
 	for (auto item : items) {
-		qDebug() << "i" << item->rect();
+		qInfo() << "i" << item->rect();
 	}
 }
 
@@ -111,7 +111,7 @@ CanvasScene *CanvasContainer::scene() const
 
 void CanvasContainer::setScene(CanvasScene * scene)
 {
-	if (!scene) disconnect(m_scene, 0, this, 0);
+	if (m_scene) disconnect(m_scene, 0, this, 0);
 
 	m_scene = scene;
 	m_view->setScene(scene);
@@ -234,11 +234,13 @@ void TransformManipulator::setScene(CanvasScene * scene)
 	if (m_scene != nullptr) disconnect(m_scene, 0, this, 0);
 	m_scene = scene;
 	recalculate();
+	if (!scene) return;
+	connect(m_scene, &QObject::destroyed, this, [this]() {
+		m_scene = nullptr;
+	});
 
-	if (scene) {
-		connect(m_scene, &QGraphicsScene::changed, this, &TransformManipulator::recalculate);
-		connect(m_scene, &QGraphicsScene::selectionChanged, this, &TransformManipulator::recalculate);
-	}
+	connect(m_scene, &QGraphicsScene::changed, this, &TransformManipulator::recalculate);
+	connect(m_scene, &QGraphicsScene::selectionChanged, this, &TransformManipulator::recalculate);
 }
 
 QRectF TransformManipulator::baseRectF() const

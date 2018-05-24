@@ -20,6 +20,17 @@ EResourceGroup::~EResourceGroup()
 {
 }
 
+void EResourceGroup::operator=(const EResourceGroup & other)
+{
+	other.saveCategoryIndices();
+	TGroup<EResource>::operator=(other); // group assignment
+	// deep copy, pointer copy would be bad
+	*m_categories = *other.m_categories;
+
+	// EResources copy category indices, so we can restore them
+	restoreCategories();
+}
+
 void EResourceGroup::loadOld(const EResourcesList * old_ers)
 {
 	std::map<std::string, std::shared_ptr<ECategory>> name_map;
@@ -61,6 +72,42 @@ ECategoryGroup * EResourceGroup::categories() const
 EResource * EResourceGroup::getResource(int i) const
 {
 	return child(i);
+}
+
+void EResourceGroup::restoreCategories() const
+{
+	int i = 0;
+	for (auto er : *this) {
+		int cat_index = er->getCategoryIndex();
+		auto c = m_categories->childShared(cat_index);
+		QString cn = "";
+		if (c) cn = c->getCategoryName().c_str();
+		er->setCategory(c);
+		i++;
+	}
+}
+
+void EResourceGroup::saveCategoryIndices() const
+{
+	// this really shouldn't be const...
+	// but we need it for serializer
+	std::unordered_map<ECategory*, size_t> cat_to_index;
+	for (size_t i = 0; i < m_categories->size(); i++) {
+		ECategory *cat = m_categories->category(i);
+		if (!cat) continue;
+		cat_to_index[cat] = i;
+	}
+
+	for (auto er : *this) {
+		ECategory *cat = er->category();
+		auto it = cat_to_index.find(cat);
+		if (it == cat_to_index.end()) {
+			er->setCategoryIndex(-1);
+		}
+		else {
+			er->setCategoryIndex(it->second);
+		}
+	}
 }
 
 void EResourceGroup::debug() {

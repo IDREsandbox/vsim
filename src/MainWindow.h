@@ -27,6 +27,7 @@ class HistoryWindow;
 class CoordinateWidget;
 class CanvasEditor;
 class CanvasContainer;
+class WidgetStack;
 
 class MainWindow : public QMainWindow
 {
@@ -38,6 +39,8 @@ public:
 	// app connection
 	void setApp(VSimApp *vsim);
 	void onReset();
+
+	void reloadStyle();
 
 	// linking
 	OSGViewerWidget *getViewerWidget() const;
@@ -59,7 +62,7 @@ public:
 	ERDisplay *erDisplay() const;
 	ERFilterArea *erFilterArea() const;
 
-	// event stuff
+protected: // event stuff
 	virtual void dragEnterEvent(QDragEnterEvent *event) override;
 	virtual void dropEvent(QDropEvent *event) override;
 	virtual void resizeEvent(QResizeEvent *event) override;
@@ -120,6 +123,7 @@ private:
 	StatsWindow *m_stats_window;
 	HistoryWindow *m_history_window;
 	CoordinateWidget *m_coordinate_widget;
+	WidgetStack *m_widget_stack;
 
 	QActionGroup *m_navigation_action_group;
 	QAction *m_action_first_person;

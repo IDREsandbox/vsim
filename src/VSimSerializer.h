@@ -33,6 +33,8 @@ namespace VSimSerializer {
 	size_t writeOSGB(std::ostream &out, osg::Node *node, bool ascii, bool zlib);
 
 	// read in models from stream after reading table
+	// ModelTable has the metadata
+	// istream has the raw data
 	void readModels(const VSim::FlatBuffers::ModelTable *buffer,
 		ModelGroup *models, std::istream &in);
 

@@ -8,6 +8,15 @@ Model::Model(QObject *parent)
 {
 }
 
+void Model::copyReference(const Model &other)
+{
+	m_node = other.m_node; // reference copy
+
+	m_external = other.m_external;
+	m_path = other.m_path;
+	m_name = other.m_name;
+}
+
 void Model::setNode(osg::Node * node)
 {
 	m_node = node;

@@ -8,6 +8,7 @@ set(Canvas_h
   CanvasScene.h
   CanvasToolBar.h
   CanvasSerializer.h
+  ChildMaskFilter.h
   LabelStyleGroup.h
   LabelStyle.h
   LabelType.h
@@ -21,6 +22,7 @@ set(Canvas_src
   CanvasScene.cpp
   CanvasSerializer.cpp
   CanvasToolBar.cpp
+  ChildMaskFilter.cpp
   LabelStyleGroup.cpp
   LabelStyle.cpp
 )
@@ -43,16 +45,3 @@ vsim_add_test(
   CanvasSerializer_test.cpp
   "Canvas_obj;Qt5::Test"
 )
-
-# set(Canvas_src
-#   ${CMAKE_SOURCE_DIR}/src/Canvas/CanvasControl.cpp
-#   ${CMAKE_SOURCE_DIR}/src/Canvas/CanvasContainer.cpp
-#   ${CMAKE_SOURCE_DIR}/src/Canvas/CanvasScene.cpp
-#   Canvas_experiment.cpp
-# )
-# add_executable(Canvas_experiment
-#   EXCLUDE_FROM_ALL
-#   ${Canvas_src})
-# target_link_libraries(Canvas_experiment Qt5::Widgets Qt5::Test)
-# set_target_properties(Canvas_experiment PROPERTIES
-#   VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

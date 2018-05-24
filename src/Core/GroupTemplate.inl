@@ -1,6 +1,18 @@
 #include "GroupTemplate.h" // doesn't actually do anything, just for intellisense
 #include "VecUtil.h"
 
+template<class T>
+inline TGroup<T>& TGroup<T>::operator=(const TGroup & other)
+{
+	clear();
+	for (auto sp : other) {
+		auto nsp = std::make_shared<T>();
+		*nsp = *sp;
+		append(nsp);
+	}
+	return *this;
+}
+
 template <class T>
 T *TGroup<T>::child(size_t i) const
 {
@@ -46,15 +58,27 @@ size_t TGroup<T>::size() const
 }
 
 template<class T>
-typename TGroup<T>::iterator TGroup<T>::begin()
+inline typename TGroup<T>::iterator TGroup<T>::begin()
 {
 	return m_children.begin();
 }
 
 template<class T>
-typename TGroup<T>::iterator TGroup<T>::end()
+inline typename TGroup<T>::iterator TGroup<T>::end()
 {
 	return m_children.end();
+}
+
+template<class T>
+inline typename TGroup<T>::citerator TGroup<T>::begin() const
+{
+	return m_children.cbegin();
+}
+
+template<class T>
+inline typename TGroup<T>::citerator TGroup<T>::end() const
+{
+	return m_children.cend();
 }
 
 template<class T>

@@ -77,7 +77,7 @@ bool VSimSerializer::readStream(std::istream & in, VSimRoot *root)
 	readRoot(fb_root, root);
 
 	// read models
-	if (fb_root->models()) readModels(fb_root->models(), root->models(), in);
+	readModels(fb_root->models(), root->models(), in);
 
 	return true;
 }
@@ -168,6 +168,7 @@ size_t VSimSerializer::writeOSGB(std::ostream & out, osg::Node * node, bool asci
 void VSimSerializer::readModels(const VSim::FlatBuffers::ModelTable *buffer,
 	ModelGroup *models, std::istream &in)
 {
+	if (!buffer) return;
 	auto v_models = buffer->models();
 	if (!v_models) return;
 	for (auto fb_model : *v_models) {

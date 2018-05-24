@@ -18,6 +18,7 @@ template <class T>
 class TGroup : public GroupSignals {
 public:
 	TGroup(QObject *parent = nullptr) : GroupSignals(parent) {};
+	TGroup &operator= (const TGroup &other);
 
 	// Use this instead of the osg one. For some reason the osg one isn't virtual or const
 	virtual T *child(size_t index) const;
@@ -27,9 +28,12 @@ public:
 	virtual void clear();
 	virtual size_t size() const;
 
-	typedef typename std::vector<std::shared_ptr<T>>::iterator iterator;
+	using iterator = typename std::vector<std::shared_ptr<T>>::iterator;
+	using citerator = typename std::vector<std::shared_ptr<T>>::const_iterator;
 	iterator begin();
 	iterator end();
+	citerator begin() const;
+	citerator end() const;
 
 	// simple
 	virtual void append(std::shared_ptr<T> node);

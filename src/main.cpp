@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 		startup = argv[1];
 		qInfo() << "startup set to" << QString::fromStdString(startup);
 	}
-
+	//qputenv("QT_FATAL_WARNINGS", "1"); // for debugging bad connections
 	QApplication a(argc, argv);
 	a.addLibraryPath("plugins");
 	a.setWindowIcon(QIcon("assets/vsim.png"));
@@ -25,11 +25,12 @@ int main(int argc, char *argv[])
 	QString style = QLatin1String(File.readAll());
 	window.setStyleSheet(style);
 
-	window.show();
-
-	// TODO: remove circular dependency
+	// FIXME: remove circular dependency
+	// TODO:
+	// 
 	window.setApp(&vsim);
-	//vsim.setWindow(&window);
+
+	window.show();
 
 	window.execOpen(startup.c_str());
 	return a.exec();

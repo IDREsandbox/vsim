@@ -6,19 +6,20 @@
 #include "Core/TypesSerializer.h"
 
 #include <QBuffer>
+#include <QDebug>
 
 namespace fb = VSim::FlatBuffers;
 
-fb::VAlign qt2fbVAlign(Qt::Alignment al) {
+static fb::VAlign qt2fbVAlign(Qt::Alignment al) {
 	int i = al & Qt::AlignVertical_Mask;
 	return static_cast<fb::VAlign>(i);
 }
 
-Qt::Alignment fb2qtVAlign(fb::HAlign al) {
+static Qt::Alignment fb2qtVAlign(fb::HAlign al) {
 	return static_cast<int>(al);
 }
 
-flatbuffers::Offset<fb::FillStyle>
+static flatbuffers::Offset<fb::FillStyle>
 	createFillStyle(flatbuffers::FlatBufferBuilder *builder, const QColor &bgcolor)
 {
 	fb::FillStyleBuilder b_fill(*builder);
@@ -27,7 +28,7 @@ flatbuffers::Offset<fb::FillStyle>
 	return b_fill.Finish();
 }
 
-void readLineStyle(const fb::LineStyle *ls, CanvasItem *item)
+static void readLineStyle(const fb::LineStyle *ls, CanvasItem *item)
 {
 	if (!ls) return;
 	if (ls->color()) item->setBorderColor(TypesSerializer::fb2qtColor(*ls->color()));
@@ -35,7 +36,7 @@ void readLineStyle(const fb::LineStyle *ls, CanvasItem *item)
 	item->setHasBorder(ls->visible());
 }
 
-void readLineStyle(const fb::LineStyle *ls, FrameStyle *style)
+static void readLineStyle(const fb::LineStyle *ls, FrameStyle *style)
 {
 	if (!ls) return;
 	if (ls->color()) style->m_frame_color = TypesSerializer::fb2qtColor(*ls->color());
@@ -43,7 +44,7 @@ void readLineStyle(const fb::LineStyle *ls, FrameStyle *style)
 	style->m_has_frame = ls->visible();
 }
 
-flatbuffers::Offset<fb::LineStyle>
+static flatbuffers::Offset<fb::LineStyle>
 	createLineStyle(flatbuffers::FlatBufferBuilder *builder, const CanvasItem *item)
 {
 	auto fline_color = TypesSerializer::qt2fbColor(item->borderColor());
@@ -55,7 +56,7 @@ flatbuffers::Offset<fb::LineStyle>
 	return o_line;
 }
 
-flatbuffers::Offset<fb::LineStyle>
+static flatbuffers::Offset<fb::LineStyle>
 	createLineStyle(flatbuffers::FlatBufferBuilder *builder, const FrameStyle *style)
 {
 	auto fline_color = TypesSerializer::qt2fbColor(style->m_frame_color);
@@ -68,19 +69,19 @@ flatbuffers::Offset<fb::LineStyle>
 }
 
 
-void readFillStyle(const fb::FillStyle *fs, CanvasItem *item)
+static void readFillStyle(const fb::FillStyle *fs, CanvasItem *item)
 {
 	if (!fs) return;
 	if (fs->color()) item->setBackground(TypesSerializer::fb2qtColor(*fs->color()));
 }
 
-void readFillStyle(const fb::FillStyle *fs, FrameStyle *style)
+static void readFillStyle(const fb::FillStyle *fs, FrameStyle *style)
 {
 	if (!fs) return;
 	if (fs->color()) style->m_bg_color = TypesSerializer::fb2qtColor(*fs->color());
 }
 
-QPixmap readPixmap(const VSim::FlatBuffers::CanvasImageData *d)
+static QPixmap readPixmap(const VSim::FlatBuffers::CanvasImageData *d)
 {
 	if (!d) return QPixmap();
 	QPixmap p;
@@ -95,7 +96,7 @@ QPixmap readPixmap(const VSim::FlatBuffers::CanvasImageData *d)
 	return p;
 }
 
-flatbuffers::Offset<fb::CanvasImageData> createImageData(
+static flatbuffers::Offset<fb::CanvasImageData> createImageData(
 	flatbuffers::FlatBufferBuilder *builder, QPixmap p)
 {
 	const char *fmt = "PNG";
@@ -236,6 +237,7 @@ void CanvasSerializer::readCanvasItems(
 
 void CanvasSerializer::readCanvas(const VSim::FlatBuffers::Canvas * buffer, CanvasScene *scene)
 {
+	if (!buffer) return;
 	readCanvasItems(buffer->items(), buffer->items_type(), scene);
 }
 
@@ -257,7 +259,6 @@ flatbuffers::Offset<VSim::FlatBuffers::Canvas> CanvasSerializer::createCanvas(
 	} // end items
 	auto o_item_types = builder->CreateVector(v_item_types);
 	auto o_items = builder->CreateVector(v_items);
-
 
 	// build canvas
 	fb::CanvasBuilder b_canvas(*builder);

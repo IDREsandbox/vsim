@@ -10,6 +10,7 @@ class ECategoryGroup : public TGroup<ECategory> {
 	Q_OBJECT
 public:
 	ECategoryGroup(QObject *parent = nullptr);
+	// operator=() // default
 
 	ECategory *category(int index) const;
 };

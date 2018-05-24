@@ -3,6 +3,7 @@
 
 #include <flatbuffers/flatbuffers.h>
 #include "types_generated.h"
+#include "canvas_generated.h"
 #include "narratives_generated.h"
 
 class NarrativeGroup;
@@ -31,18 +32,6 @@ namespace NarrativeSerializer {
 	flatbuffers::Offset<VSim::FlatBuffers::Slide>
 		createNarrativeSlide(flatbuffers::FlatBufferBuilder *builder,
 			const NarrativeSlide *slide);
-
-	void readLabelStyle(const VSim::FlatBuffers::LabelStyle *buffer,
-		LabelStyle *style);
-	flatbuffers::Offset<VSim::FlatBuffers::LabelStyle>
-		createLabelStyle(flatbuffers::FlatBufferBuilder *builder,
-			const LabelStyle *style);
-
-	void readStyleTable(const VSim::FlatBuffers::StyleTable *buffer,
-		LabelStyleGroup *group);
-	flatbuffers::Offset<VSim::FlatBuffers::StyleTable>
-		createStyleTable(flatbuffers::FlatBufferBuilder *builder,
-			const LabelStyleGroup *group);
 }
 
 #endif

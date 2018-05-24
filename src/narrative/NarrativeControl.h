@@ -10,6 +10,7 @@
 
 #include "SelectionStack.h"
 #include "Core/Command.h"
+#include "Core/ICommandStack.h"
 
 class VSimApp;
 class MainWindow;
@@ -32,7 +33,7 @@ class CanvasContainer;
 // Bridges osg and gui for narratives
 class NarrativeControl : public QObject
 {
-	Q_OBJECT
+	Q_OBJECT;
 public:
 	NarrativeControl(VSimApp *app, MainWindow *window, QObject *parent = nullptr);
 
@@ -66,9 +67,9 @@ public:
 	bool advanceSlide(bool forward, bool instant = true);
 
 	void selectNarratives(const SelectionData &narratives);
-	void selectSlides(int narrative, const SelectionData &slides);
+	void selectSlides(int narrative, const SelectionData &slides, bool edit);
 	//void selectLabel(int narrative, int slide, NarrativeSlideItem *label);
-	void selectLabels(int narrative, int slide, const std::set<CanvasItem*> &labels);
+	//void selectLabels(int narrative, int slide, const std::set<CanvasItem*> &labels);
 
 	NarrativeGroup *narratives() const;
 	Narrative *getCurrentNarrative() const;
@@ -77,6 +78,7 @@ public:
 
 	NarrativeSlide *getCurrentSlide() const;
 	int getCurrentSlideIndex() const;
+	SelectionData getSelectedSlides() const;
 	
 	Narrative *getNarrative(int index) const;
 	NarrativeSlide *getSlide(int narrative, int slide) const;
@@ -149,42 +151,49 @@ private:
 	CanvasContainer *m_fade_canvas;
 
 	QUndoStack *m_undo_stack;
-};
+	class CanvasStackWrapper;
+	CanvasStackWrapper *m_canvas_stack_wrapper;
 
-class SelectNarrativesCommand : public QUndoCommand {
-public:
-	SelectNarrativesCommand(NarrativeControl *control, const SelectionData &narratives, Command::When when = Command::ON_BOTH, QUndoCommand *parent = nullptr);
-	void undo();
-	void redo();
 private:
-	NarrativeControl *m_control;
-	Command::When m_when;
-	SelectionData m_narratives;
-};
+	class SelectNarrativesCommand : public QUndoCommand {
+	public:
+		SelectNarrativesCommand(NarrativeControl *control, const SelectionData &narratives, Command::When when = Command::ON_BOTH, QUndoCommand *parent = nullptr);
+		void undo();
+		void redo();
+	private:
+		NarrativeControl * m_control;
+		Command::When m_when;
+		SelectionData m_narratives;
+	};
 
-class SelectSlidesCommand : public QUndoCommand {
-public:
-	SelectSlidesCommand(NarrativeControl *control, int narrative, const SelectionData &slides, Command::When when = Command::ON_BOTH, QUndoCommand *parent = nullptr);
-	void undo();
-	void redo();
-private:
-	NarrativeControl *m_control;
-	Command::When m_when;
-	int m_narrative;
-	SelectionData m_slides;
-};
+	class SelectSlidesCommand : public QUndoCommand {
+	public:
+		SelectSlidesCommand(NarrativeControl *control,
+			int narrative, const SelectionData &slides,
+			Command::When when = Command::ON_BOTH,
+			bool edit = false,
+			QUndoCommand *parent = nullptr);
+		void undo();
+		void redo();
+	private:
+		NarrativeControl * m_control;
+		Command::When m_when;
+		int m_narrative;
+		SelectionData m_slides;
+		bool m_edit;
+	};
 
-//class SelectLabelsCommand : public QUndoCommand {
-//public:
-//	SelectLabelsCommand(NarrativeControl *control, int narrative, int slide, std::set<NarrativeSlideItem *> labels, Command::When when = ON_BOTH, QUndoCommand *parent = nullptr);
-//	void undo();
-//	void redo();
-//private:
-//	NarrativeControl * m_control;
-//	Command::When m_when;
-//	int m_narrative;
-//	int m_slide;
-//	std::set<NarrativeSlideItem*> m_labels;
-//};
+	class CanvasStackWrapper : public ICommandStack {
+	public:
+		CanvasStackWrapper(NarrativeControl *control);
+		// overrides
+		QUndoCommand *begin() override;
+		void end() override;
+	private:
+		NarrativeControl * m_control;
+		QUndoStack *m_stack;
+		SelectSlidesCommand *m_cmd;
+	};
+};
 
 #endif

@@ -18,6 +18,12 @@ public:
 	// merge another model group
 	// void merge(const ModelGroup *other);
 
+	// copy data (deep)
+	// reference osg (shallow)
+	// osg stuff isn't bound by QThread the way QObjects are, so
+	// we don't have to copy them between threads
+	void copyReference(const ModelGroup &other);
+
 	// node edit
 	// void setNodeYear(osg::Node *node, int year, bool begin);
 	void addNode(osg::Node *node, const std::string &path);

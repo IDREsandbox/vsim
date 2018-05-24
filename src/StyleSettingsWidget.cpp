@@ -6,6 +6,8 @@
 #include "Canvas/LabelStyleGroup.h"
 #include "Canvas/LabelStyle.h"
 #include "Canvas/CanvasScene.h"
+#include "Canvas/CanvasContainer.h"
+#include "Canvas/CanvasControl.h"
 #include "Core/Util.h"
 
 #include <QDebug>
@@ -19,24 +21,27 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	// style
 	m_style = std::make_unique<LabelStyle>();
 
+	m_scene = new CanvasScene(this);
+	m_control = new CanvasControl(this);
+	m_control->setScene(m_scene);
+
 	// create a canvas, fullscreen it
-	m_canvas = new NarrativeCanvas(ui.previewFrame);
+	m_canvas = new CanvasContainer(ui.previewFrame);
 	QVBoxLayout *layout = new QVBoxLayout;
 	ui.previewFrame->setLayout(layout);
 	layout->addWidget(m_canvas);
 	layout->setMargin(0);
 	m_canvas->setEditable(true);
-	m_canvas->setBaseHeight(300);
+	//m_canvas->setBaseHeight(300);
+
+	m_scene->setBaseHeight(300);
+	m_canvas->setScene(m_scene);
 
 	m_canvas->setStyleSheet("NarrativeCanvas { background: rgb(50,50,50); }");
 
 	// create a slide
-	m_slide = std::make_shared<NarrativeSlide>();
-	m_label = std::make_shared<NarrativeSlideLabel>();
-	m_slide->append(m_label);
+	m_label = m_control->createLabel(m_style.get());
 	m_label->setRect(QRectF(-.5, -.25, 1, .5));
-
-	m_canvas->setSlide(m_slide.get());
 
 	m_font_sizes = QFontDatabase::standardSizes();
 	QStringList size_strings;
@@ -70,14 +75,14 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 		[this]() {
 		QColorDialog dlg;
 		dlg.setOption(QColorDialog::ShowAlphaChannel, true);
-		dlg.setCurrentColor(m_style->m_bg_color);
+		dlg.setCurrentColor(m_style->m_frame.m_bg_color);
 		int result = dlg.exec();
 		if (result == QDialog::Rejected) {
 			return;
 		}
 		QColor color = dlg.selectedColor();
 		ui.colorPicker_bg->setStyleSheet(Util::colorToStylesheet(color));
-		m_style->m_bg_color = color;
+		m_style->m_frame.m_bg_color = color;
 		refresh();
 	});
 	connect(ui.fontBox, &QFontComboBox::currentFontChanged, this,
@@ -157,7 +162,8 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 
 void StyleSettingsWidget::refresh()
 {
-	m_style->applyToNarrativeLabel(m_label.get());
+	//m_style->applyToNarrativeLabel(m_label.get());
+	m_control->applyLabelStyle(m_label.get(), m_style.get());
 }
 
 void StyleSettingsWidget::setStyle(const LabelStyle * style)
@@ -167,7 +173,7 @@ void StyleSettingsWidget::setStyle(const LabelStyle * style)
 	// update all the ui stuff
 
 	ui.colorPicker->setStyleSheet(Util::colorToStylesheet(style->m_fg_color));
-	ui.colorPicker_bg->setStyleSheet(Util::colorToStylesheet(style->m_bg_color));
+	ui.colorPicker_bg->setStyleSheet(Util::colorToStylesheet(style->m_frame.m_bg_color));
 
 	ui.margin->setValue(style->m_margin);
 	//ui.width->setValue();

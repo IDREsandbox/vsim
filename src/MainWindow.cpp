@@ -24,9 +24,7 @@
 #include "FutureDialog.h"
 #include "SimpleWorker.h"
 
-#include "editButtons.h"
 #include "narrative/NarrativeGroup.h"
-#include "narrative/NarrativeCanvas.h"
 #include "narrative/NarrativePlayer.h"
 #include "narrative/NarrativeControl.h"
 
@@ -50,6 +48,7 @@
 #include "NavigationControl.h"
 #include "AboutDialog.h"
 #include "CoordinateWidget.h"
+#include "WidgetStack.h"
 
 #include "FileUtil.h"
 #include <fstream>
@@ -74,13 +73,15 @@ MainWindow::MainWindow(QWidget *parent)
 	m_osg_widget = new OSGViewerWidget(ui->root);
 	ui->rootLayout->addWidget(m_osg_widget, 0, 0);
 
-	//m_canvas = new NarrativeCanvas(ui->root);
-	m_canvas = new CanvasEditor(m_osg_widget);
+	m_canvas = new CanvasEditor(ui->root);
 	m_canvas->setObjectName("canvas");
 	ui->rootLayout->addWidget(m_canvas, 0, 0);
 
-	m_fade_canvas = new CanvasContainer(m_osg_widget);
-	m_canvas->setObjectName("fadeCanvas");
+	QMainWindow *canvas_window = m_canvas->internalWindow();
+	canvas_window->setParent(ui->root);
+
+	m_fade_canvas = new CanvasContainer();
+	m_fade_canvas->setObjectName("fadeCanvas");
 	ui->rootLayout->addWidget(m_fade_canvas, 0, 0);
 	m_fade_canvas->lower();
 	m_fade_canvas->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -88,16 +89,13 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// splitter on top of osg viewer
 	// mask allows events to get to the canvas
-	ui->mainSplitter->setParent(m_osg_widget);
-	ui->rootLayout->addWidget(ui->mainSplitter, 0, 0);
+	//ui->mainSplitter->setParent(m_osg_widget);
+	//ui->rootLayout->addWidget(ui->mainSplitter, 0, 0);
 
 	ui->mainSplitter->setMouseTracking(true);
 
 	// splitter mask
 	connect(ui->mainSplitter, &QSplitter::splitterMoved, this, &MainWindow::updatePositions);
-
-	// label buttons
-	m_label_buttons = new editButtons(ui->root);
 
 	// er display
 	m_er_display = new ERDisplay(ui->root);
@@ -113,9 +111,16 @@ MainWindow::MainWindow(QWidget *parent)
 	m_er_filter_area->hide();
 
 	// layering
+	canvas_window->lower();
 	m_canvas->lower();
 	m_fade_canvas->lower();
 	m_osg_widget->lower();
+
+	// layering
+	//m_widget_stack->push(m_osg_widget);
+	//m_widget_stack->push(m_fade_canvas);
+	//m_widget_stack->push(m_canvas);
+	//m_widget_stack->push(ui->mainSplitter);
 
 	// vsimapp file stuff
 	connect(ui->actionNew, &QAction::triggered, this, &MainWindow::actionNew);
@@ -137,12 +142,8 @@ MainWindow::MainWindow(QWidget *parent)
 	});
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
 	connect(ui->actionControl_Debug, &QAction::triggered, this, &MainWindow::sDebugControl);
-	connect(ui->actionReload_Style, &QAction::triggered, this, [this]() {
-		QFile File("assets/style.qss");
-		File.open(QFile::ReadOnly);
-		QString style = QLatin1String(File.readAll());
-		setStyleSheet(style);
-	});
+	connect(ui->actionReload_Style, &QAction::triggered, this, &MainWindow::reloadStyle);
+	reloadStyle();
 	connect(ui->actionEditor_Debug, &QAction::triggered, this, [this]() {
 		qInfo() << "Editor debug";
 		qInfo() << "focus object" << QApplication::focusObject();
@@ -232,6 +233,8 @@ void MainWindow::setApp(VSimApp * vsim)
 {
 	m_app = vsim;
 
+	m_time_slider->setTimeManager(m_app->timeManager());
+
 	QUndoStack *stack = m_app->getUndoStack();
 	QAction *undo_action = stack->createUndoAction(this, tr("&Undo"));
 	QAction *redo_action = stack->createRedoAction(this, tr("&Redo"));
@@ -304,6 +307,20 @@ void MainWindow::onReset()
 	updatePositions();
 	m_outliner->setModelGroup(m_app->getRoot()->models());
 	m_outliner->expandAll();
+}
+
+void MainWindow::reloadStyle()
+{
+	qDebug() << "reload style";
+	QFile file("assets/style.qss");
+	file.open(QFile::ReadOnly);
+	QString style = QLatin1String(file.readAll());
+	setStyleSheet(style);
+
+	QFile file2("assets/darkstyle.qss");
+	file2.open(QFile::ReadOnly);
+	QString dark_style = QLatin1String(file2.readAll());
+	m_canvas->internalWindow()->setStyleSheet(dark_style);
 }
 
 OSGViewerWidget * MainWindow::getViewerWidget() const
@@ -389,7 +406,6 @@ void MainWindow::updatePositions()
 {
 	// Place edit buttons
 	int top = ui->middleSpacer->y();
-	m_label_buttons->move(20, top + 30);
 
 	// Place the tool bar area
 
@@ -410,11 +426,27 @@ void MainWindow::updatePositions()
 	int popup_top = mid - m_er_display->height() / 2;
 	m_er_display->move(10, popup_top);
 
+	// place the toolbar where the middle spacer is
+	QWidget *middle = ui->middleSpacer;
+	auto *canvas_window = m_canvas->internalWindow();
+	//qDebug() << "middle geom" << middle->geometry();
+	//qDebug() << "middle x" << middle->x() << middle->y();
+	//canvas_window->setGeometry(middle->x(), middle->y(),
+	//	middle->width(), middle->height());
+	canvas_window->setGeometry(middle->geometry());
+
 	// Update the splitter mask
 	QSplitter *splitter = ui->mainSplitter;
-	QWidget *spacer = ui->middleSpacer;
 	QRegion full = QRegion(0, 0, splitter->width(), splitter->height());
-	QRegion center = QRegion(spacer->geometry());
+	QRegion center = QRegion(middle->geometry());
+	QRegion toolbar;
+
+	//auto *canvas_window = m_canvas->internalWindow();
+	//canvas_window->isVisible();
+	//auto r = canvas_window->mask();
+	//r.map
+	//if (m_canvas->internalWindow());
+
 	splitter->setMask(full - center);
 }
 
@@ -449,61 +481,66 @@ void MainWindow::execOpen(const QString & filename)
 	QFileInfo file_info(filename);
 	bool read_vsim = (file_info.suffix() == "vsim");
 
-	QFuture<VSimRoot*> open_future;
-	std::unique_ptr<VSimRoot> open_result;
-	QFuture<osg::ref_ptr<osg::Node>> import_future;
-	osg::ref_ptr<osg::Node> import_result;
 	FutureDialog dlg;
 	dlg.setText("Loading " + filename);
 	dlg.setWindowTitle("Open");
 
 	// run in thread
 	if (read_vsim) {
-		// read vsim file
-		open_future = QtConcurrent::run([filename]() -> VSimRoot* {
-			VSimRoot *root = new VSimRoot;
-			bool ok = FileUtil::readVSimFile(filename.toStdString(), root);
-			if (!ok) return nullptr;
-			root->moveAllToThread(QApplication::instance()->thread());
-			return root;
+
+		VSimRoot *root_buf;
+
+		SimpleWorker w;
+		dlg.watchWorker(&w);
+		// move the root over, this is needed because QTextDocument
+		// allocates QObjects and causes crash
+		// edit: moving the root is a pain so try to avoid it
+		//root->moveAllToThread(w.thread());
+
+		w.setFunc([filename, &root_buf, &w]() -> bool {
+			root_buf = new VSimRoot(w.slave());
+			bool ok = FileUtil::readVSimFile(filename.toStdString(), root_buf);
+			return ok;
 		});
+		w.start();
+		dlg.exec(); // spins gui
+		bool ok = w.result(); // spins
+
+		if (dlg.canceled()) {
+			return;
+		}
+		else if (ok) {
+			m_app->setFileName(filename.toStdString());
+			m_app->initWithVSim(root_buf);
+		}
+		else {
+			QMessageBox::warning(this, "Load Error", "Failed to load model " + filename);
+		}
 	}
 	else {
+		std::unique_ptr<VSimRoot> root_buf;
 		// read some osg node, import it
-		import_future = QtConcurrent::run([&]() -> osg::ref_ptr<osg::Node> {
-			osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile(filename.toStdString());
-			return loadedModel;
+		osg::ref_ptr<osg::Node> loaded_model;
+		auto import_future = QtConcurrent::run([&]() -> bool {
+			loaded_model = osgDB::readNodeFile(filename.toStdString());
+			return (loaded_model != nullptr);
 		});
-	}
 
-	// spin
-	if (read_vsim) {
-		dlg.spin(open_future); // spin until future is done
-							   // capture in unique here
-		open_result = std::unique_ptr<VSimRoot>(open_future.result());
-	}
-	else {
 		dlg.spin(import_future);
-		import_result = import_future.result();
-	}
+		bool result = import_future.result();
 
-	if (dlg.canceled()) {
-		return;
-	}
-	else if (read_vsim && open_result) {
-		qInfo() << "done loading vsim file for open";
-		m_app->setFileName(filename.toStdString());
-		m_app->initWithVSim(open_result.release());
-	}
-	else if (!read_vsim && import_result) {
-		VSimRoot *root = new VSimRoot;
-		root->models()->addNode(import_result, filename.toStdString());
-		m_app->setLastDirectory(filename.toStdString());
-		m_app->setFileName("");
-		m_app->initWithVSim(root);
-	}
-	else { // error
-		QMessageBox::warning(this, "Load Error", "Failed to load model " + filename);
+		if (dlg.canceled()) {
+			return;
+		}
+		else if (result) {
+			root_buf = std::make_unique<VSimRoot>();
+			root_buf->models()->addNode(loaded_model, filename.toStdString());
+			m_app->setFileName("");
+			m_app->initWithVSim(root_buf.get());
+		}
+		else {
+			QMessageBox::warning(this, "Load Error", "Failed to load model " + filename);
+		}
 	}
 }
 
@@ -543,14 +580,16 @@ void MainWindow::execSave(const QString & filename)
 	VSimRoot *root = m_app->getRoot();
 
 	SimpleWorker w;
-	dlg.watchThread(w.thread());
+	dlg.watchWorker(&w);
 	// move the root over, this is needed because QTextDocument
 	// allocates QObjects and causes crash
-	root->moveAllToThread(w.thread());
+	//root->moveAllToThread(w.thread());
 	w.setFunc([path, root]() -> bool {
+		//VSimRoot root_copy;
+		//root_copy.copy(root);
 		bool ok = FileUtil::writeVSimFile(path, root);
 		// move the root back to the main thread
-		root->moveAllToThread(QApplication::instance()->thread());
+		//root->moveAllToThread(QApplication::instance()->thread());
 		return ok;
 	});
 	w.start();

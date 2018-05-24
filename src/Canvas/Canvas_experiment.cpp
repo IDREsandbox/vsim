@@ -9,6 +9,7 @@
 #include <QTextDocument>
 #include <QDebug>
 #include <QDir>
+#include <QThread>
 
 int main(int argc, char *argv[])
 {
@@ -77,6 +78,16 @@ int main(int argc, char *argv[])
 	container->show();
 
 	window.show();
+
+	// threading experiment
+	//QThread thread;
+	//CanvasScene scene;
+	//auto label = std::make_shared<CanvasLabel>();
+	//QGraphicsTextItem *text2 = label->textItem();
+	//scene.addItem(label);
+	//qDebug() << "before thread move:" << scene.thread() << text2->thread();
+	//scene.moveToThread(&thread);
+	//qDebug() << "after thread move:" << scene.thread() << text2->thread();
 
 	qDebug() << "current dir?" << QDir::currentPath();
 	return a.exec();

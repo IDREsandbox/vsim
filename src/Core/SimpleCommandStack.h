@@ -7,10 +7,15 @@
 class SimpleCommandStack : public QObject, public ICommandStack {
 public:
     SimpleCommandStack(QObject *parent = nullptr);
-    void push(QUndoCommand *cmd) override;
-    QUndoStack *stack() const override;
+    //void push(QUndoCommand *cmd) override;
+
+	QUndoCommand *begin() override;
+	void end() override;
+
+    QUndoStack *stack() const;
 private:
     QUndoStack *m_stack;
+	QUndoCommand *m_cmd;
 };
 
 #endif

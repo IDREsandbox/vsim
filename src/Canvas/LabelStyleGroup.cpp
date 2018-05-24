@@ -3,8 +3,7 @@
 
 #include "Canvas/LabelStyle.h"
 
-LabelStyleGroup::LabelStyleGroup(QObject *parent)
-	: QObject(parent)
+LabelStyleGroup::LabelStyleGroup()
 {
 	m_h1 = std::make_unique<LabelStyle>(LabelType::HEADER1, "Arial", 36, QColor(255, 255, 255, 255), QColor(0, 0, 0, 178),
 		QFont::Bold, false, Qt::AlignCenter, 13);
@@ -38,6 +37,15 @@ LabelStyleGroup::LabelStyleGroup(QObject *parent)
 
 LabelStyleGroup::~LabelStyleGroup()
 {
+}
+
+void LabelStyleGroup::copy(const LabelStyleGroup & other)
+{
+	m_h1->copy(other.m_h1.get());
+	m_h2->copy(other.m_h2.get());
+	m_bod->copy(other.m_bod.get());
+	m_lab->copy(other.m_lab.get());
+	*m_image = *other.m_image;
 }
 
 LabelStyle * LabelStyleGroup::getStyle(LabelType style) const

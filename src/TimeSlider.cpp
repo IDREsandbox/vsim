@@ -1,7 +1,7 @@
 ﻿#include "TimeSlider.h"
 #include "ui_timeslider.h"
 #include <QDebug>
-#include "Util.h"
+#include "Core/Util.h"
 #include "TimeManager.h"
 
 TimeSlider::TimeSlider(QWidget *parent)

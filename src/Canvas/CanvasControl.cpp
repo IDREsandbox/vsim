@@ -24,9 +24,8 @@ CanvasControl::CanvasControl(QObject *parent)
 void CanvasControl::setScene(CanvasScene * scene)
 {
 	if (m_scene) disconnect(m_scene, 0, this, 0);
-
 	m_scene = scene;
-
+	if (scene == nullptr) return;
 	connect(m_scene, &QObject::destroyed, this, [this]() {
 		m_scene = nullptr;
 	});
@@ -40,9 +39,11 @@ void CanvasControl::setScene(CanvasScene * scene)
 		}
 		else {
 			// TODO: does this need a selection wrapper?
-			auto *sc = new CanvasSelectCommand(m_scene, { label });
+			auto *cmd = m_stack->begin();
+			cmd->setText("Edit Text");
+			auto *sc = new CanvasSelectCommand(m_scene, { label }, Command::ON_BOTH, cmd);
 			auto *dc = new DocumentEditWrapperCommand(label->document(), sc);
-			m_stack->push(sc);
+			m_stack->end();
 		}
 	});
 
@@ -53,9 +54,11 @@ void CanvasControl::setScene(CanvasScene * scene)
 		for (const auto &pair : old_rects) {
 			items.insert(pair.first);
 		}
-		auto *sc = new CanvasSelectCommand(m_scene, items);
+		auto *cmd = m_stack->begin();
+		cmd->setText("Transform Items");
+		auto *sc = new CanvasSelectCommand(m_scene, items, Command::ON_BOTH, cmd);
 		auto *tc = new TransformCanvasItemsCommand(old_rects, new_rects, sc);
-		m_stack->push(sc);
+		m_stack->end();
 	});
 
 	connect(m_scene, &CanvasScene::changed, this,
@@ -70,7 +73,7 @@ void CanvasControl::setStack(ICommandStack * stack)
 	m_stack = stack;
 }
 
-void CanvasControl::createLabel(LabelStyle *style)
+std::shared_ptr<CanvasLabel> CanvasControl::createLabel(LabelStyle *style)
 {
 	auto item = std::make_shared<CanvasLabel>();
 	item->setVAlign(Qt::AlignCenter);
@@ -82,24 +85,43 @@ void CanvasControl::createLabel(LabelStyle *style)
 
 	applyLabelStyle(item.get(), style);
 
-	auto *sc = new CanvasSelectCommand(m_scene, { item.get() }, Command::ON_REDO);
-	auto *cc = new AddRemoveItemCommand(m_scene, item, true, sc);
-	m_stack->push(sc);
+	return item;
 }
 
-void CanvasControl::createImage(QPixmap pixmap, FrameStyle *style)
+std::shared_ptr<CanvasLabel> CanvasControl::createLabelCommand(LabelStyle * style)
+{
+	auto item = createLabel(style);
+
+	auto *cmd = m_stack->begin();
+	cmd->setText("Create Label");
+	auto *sc = new CanvasSelectCommand(m_scene, { item.get() }, Command::ON_REDO, cmd);
+	auto *cc = new AddRemoveItemCommand(m_scene, item, true, sc);
+	m_stack->end();
+
+	return item;
+}
+
+std::shared_ptr<CanvasImage> CanvasControl::createImage(QPixmap pixmap, FrameStyle *style)
 {
 	auto item = std::make_shared<CanvasImage>();
 	item->setPixmap(pixmap);
 	item->setEditable(true);
-
 	applyFrameStyle(item.get(), style);
+	return item;
+}
 
-	auto *sc = new CanvasSelectCommand(m_scene, { item.get() }, Command::ON_REDO);
+std::shared_ptr<CanvasImage> CanvasControl::createImageCommand(QPixmap pixmap, FrameStyle * style)
+{
+	auto item = createImage(pixmap, style);
+
+	auto *cmd = m_stack->begin();
+	cmd->setText("Create Image");
+	auto *sc = new CanvasSelectCommand(m_scene, { item.get() }, Command::ON_REDO, cmd);
 	auto *cc = new AddRemoveItemCommand(m_scene, item, true, sc);
-	m_stack->push(sc);
+	m_stack->end();
 
 	item->initSize();
+	return item;
 }
 
 void CanvasControl::removeItems()
@@ -107,7 +129,7 @@ void CanvasControl::removeItems()
 	multiEdit([scene = m_scene](CanvasItem *item, QUndoCommand *parent) {
 		auto shared = scene->toShared(item);
 		new AddRemoveItemCommand(scene, shared, false, parent);
-	});
+	}, "Remove Items");
 }
 
 void CanvasControl::setBorderWidth(int width)
@@ -115,7 +137,7 @@ void CanvasControl::setBorderWidth(int width)
 	multiEdit([width](CanvasItem *item, QUndoCommand *parent) {
 		new CanvasItem::SetHasBorderCommand(item, true, parent);
 		new CanvasItem::SetBorderWidthCommand(item, width, parent);
-	});
+	}, "Set Border Thickness");
 }
 
 void CanvasControl::setBorderColor(const QColor & color)
@@ -123,28 +145,28 @@ void CanvasControl::setBorderColor(const QColor & color)
 	multiEdit([color](CanvasItem *item, QUndoCommand *parent) {
 		new CanvasItem::SetHasBorderCommand(item, true, parent);
 		new CanvasItem::SetBorderColorCommand(item, color, parent);
-	});
+	}, "Set Border Color");
 }
 
 void CanvasControl::clearBorder()
 {
 	multiEdit([](CanvasItem *item, QUndoCommand *parent) {
 		new CanvasItem::SetHasBorderCommand(item, false, parent);
-	});
+	}, "Clear Border");
 }
 
 void CanvasControl::setBackgroundColor(const QColor & color)
 {
 	multiEdit([color](CanvasItem *item, QUndoCommand *parent) {
 		new CanvasLabel::SetBackgroundCommand(item, color, parent);
-	});
+	}, "Set Background");
 }
 
 void CanvasControl::clearBackground()
 {
 	multiEdit([](CanvasItem *item, QUndoCommand *parent) {
 		new CanvasLabel::SetBackgroundCommand(item, QColor(0,0,0,0), parent);
-	});
+	}, "Clear Background");
 }
 
 void CanvasControl::setVAlign(Qt::Alignment al)
@@ -155,7 +177,7 @@ void CanvasControl::setVAlign(Qt::Alignment al)
 		auto *label = dynamic_cast<CanvasLabel*>(item);
 		if (!label) return;
 		new CanvasLabel::SetVAlignCommand(label, al, parent);
-	});
+	}, "Set VAlign");
 }
 
 void CanvasControl::setStyle(LabelStyle *style)
@@ -166,7 +188,7 @@ void CanvasControl::setStyle(LabelStyle *style)
 		auto *label = dynamic_cast<CanvasLabel*>(item);
 		if (!label) return;
 		createApplyLabelStyleCommand(label, style, parent);
-	});
+	}, "Set Style");
 }
 
 void CanvasControl::setTextColor(QColor c)
@@ -266,10 +288,15 @@ void CanvasControl::applyLabelStyle(CanvasLabel * label, LabelStyle *style)
 QUndoCommand *CanvasControl::createApplyLabelStyleCommand(CanvasLabel *label,
 	LabelStyle *s, QUndoCommand * parent)
 {
-	auto *frame = s->frameStyle();
-
 	QUndoCommand *cmd = new QUndoCommand(parent);
 	//qDebug() << "create apply label command";
+
+	new CanvasLabel::SetStyleTypeCommand(label, s->getType(), cmd);
+
+	// NONE type -> style is nullptr -> return here after setting type
+	if (s == nullptr) return cmd;
+
+	auto *frame = s->frameStyle();
 
 	// frame
 	new CanvasItem::SetBackgroundCommand(label, frame->m_bg_color, cmd);
@@ -279,7 +306,6 @@ QUndoCommand *CanvasControl::createApplyLabelStyleCommand(CanvasLabel *label,
 
 	// label
 	new CanvasLabel::SetVAlignCommand(label, s->valign(), cmd);
-	new CanvasLabel::SetStyleTypeCommand(label, s->getType(), cmd);
 
 	// text
 	beginWrapTextCommands(cmd);

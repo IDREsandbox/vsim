@@ -19,7 +19,7 @@ typedef std::vector<std::pair<CanvasItem*, QRectF>> ItemRectList;
 class CanvasContainer : public QFrame {
 	Q_OBJECT;
 public:
-	CanvasContainer(QWidget *parent);
+	CanvasContainer(QWidget *parent = nullptr);
 
 	// undo redo filter on view, prevents
 	bool eventFilter(QObject *obj, QEvent *e) override;

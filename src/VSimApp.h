@@ -28,7 +28,7 @@ class OSGYearModel;
 class Narrative;
 class NavigationControl;
 class NarrativeSlide;
-class NarrativeCanvas;
+class CanvasContainer;
 class OSGViewerWidget;
 class TimeManager;
 
@@ -40,6 +40,8 @@ public:
 	~VSimApp();
 	void setWindow(MainWindow*);
 
+	// takes() from root
+	// doesn't reassign our current m_root
 	// this is called on every new, reset, etc
 	bool initWithVSim(VSimRoot *root = nullptr);
 
@@ -155,7 +157,7 @@ private:
 
 	// thumbnails
 	osg::ref_ptr<osgViewer::CompositeViewer> m_viewer;
-	NarrativeCanvas *m_render_canvas;
+	CanvasContainer *m_render_canvas;
 	OSGViewerWidget *m_render_view;
 	OSGViewerWidget *m_main_view;
 	QSize m_thumbnail_size;

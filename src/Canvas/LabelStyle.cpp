@@ -84,16 +84,7 @@ LabelStyle::~LabelStyle()
 
 void LabelStyle::copy(const LabelStyle *other)
 {
-	m_type = other->m_type;
-	m_frame = other->m_frame;
-	m_align = other->m_align;
-	m_margin = other->m_margin;
-	m_fg_color = other->m_fg_color;
-	m_font_family = other->m_font_family;
-	m_weight = other->m_weight;
-	m_point_size = other->m_point_size;
-	m_ital = other->m_ital;
-	m_underline = other->m_underline;
+	*this = *other;
 }
 
 void LabelStyle::applyToWidget(QWidget * widget, bool font_size)
@@ -220,6 +211,11 @@ void LabelStyle::setMargin(int m)
 QColor LabelStyle::foregroundColor() const
 {
 	return m_fg_color;
+}
+
+void LabelStyle::setForegroundColor(const QColor & c)
+{
+	m_fg_color = c;
 }
 
 const std::string & LabelStyle::getFontFamily() const

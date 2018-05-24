@@ -18,11 +18,21 @@ public:
 	EResourceGroup(QObject *parent = nullptr);
 	~EResourceGroup();
 
+	void operator=(const EResourceGroup &other);
+
 	void loadOld(const EResourcesList *old_ers);
 
 	ECategoryGroup *categories() const;
 
 	EResource *getResource(int) const;
+
+	// assigns categories based on indices
+	// stored by saveCategoryIndices()
+	void restoreCategories() const;
+
+	// stores category indices in resources
+	// allows you to use EResource::getCategoryIndex()
+	void saveCategoryIndices() const;
 
 	void debug();
 

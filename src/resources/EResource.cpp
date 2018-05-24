@@ -27,6 +27,25 @@ EResource::EResource(QObject *parent)
 {
 }
 
+void EResource::operator=(const EResource & other)
+{
+	m_name			  = other.m_name			;
+	m_filepath		  = other.m_filepath		;
+	m_description	  = other.m_description	 	;
+	m_authors		  = other.m_authors		 	;
+	m_global		  = other.m_global		 	;
+	m_reposition	  = other.m_reposition	 	;
+	m_launch		  = other.m_launch		 	;
+	m_copyright		  = other.m_copyright		;
+	m_min_year		  = other.m_min_year		;
+	m_max_year		  = other.m_max_year		;
+	m_local_range	  = other.m_local_range	 	;
+	m_ertype		  = other.m_ertype		 	;
+	m_camera_matrix	  = other.m_camera_matrix	;
+	m_camera_position = other.m_camera_position ;
+	m_category_index  = other.m_category_index  ;
+}
+
 void EResource::loadOld(const EResourcesNode * old)
 {
 	m_name = old->getResourceName();

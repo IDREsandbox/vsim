@@ -13,6 +13,7 @@ class NarrativeGroup : public TGroup<Narrative> {
 	Q_OBJECT
 public:
 	NarrativeGroup(QObject *parent = nullptr);
+	// operator= // default
 
 	Narrative *narrative(int index) const;
 };

@@ -8,6 +8,8 @@
 #include <QPushButton>
 #include <QCloseEvent>
 
+#include "SimpleWorker.h"
+
 FutureDialog::FutureDialog(QWidget *parent)
 	: QDialog(parent),
 	m_will_accept(true),
@@ -37,6 +39,12 @@ void FutureDialog::watchThread(QThread * thread)
 {
 	m_waiting = true;
 	connect(thread, &QThread::finished, this, &FutureDialog::onFinish);
+}
+
+void FutureDialog::watchWorker(SimpleWorker *worker)
+{
+	m_waiting = true;
+	connect(worker, &SimpleWorker::sDone, this, &FutureDialog::onFinish);
 }
 
 void FutureDialog::setText(const QString &text)

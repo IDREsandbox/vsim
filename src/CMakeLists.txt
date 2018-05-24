@@ -9,7 +9,6 @@ file(GLOB_RECURSE Deprecated_src
 add_library(Deprecated_obj ${Deprecated_src})
 
 vsim_add_flatbuffer(erfb_h eresources.fbs)
-message("er fb result: ${erfb_h}")
 set(ERModel_src
   ERSerializer.cpp
   ERSerializer.h
@@ -61,6 +60,8 @@ set(VSimRoot_src
   ModelGroup.h
   OSGGroupModel.cpp
   OSGGroupModel.h
+  OSGNodeWrapper.cpp
+  OSGNodeWrapper.h
   OSGYearModel.cpp
   OSGYearModel.h
   FileUtil.cpp
@@ -112,6 +113,8 @@ set(VSim_src
   AboutDialog.ui
   BaseFirstPersonManipulator.cpp
   BaseFirstPersonManipulator.h
+  CoordinateWidget.cpp
+  CoordinateWidget.h
   editButtons.cpp
   editButtons.h
   EditDeleteDelegate.cpp
@@ -134,6 +137,8 @@ set(VSim_src
   FutureDialog.ui
   GroupScrollBox.inl
   GroupScrollBox.h
+  HistoryWindow.cpp
+  HistoryWindow.h
   HorizontalScrollBox.cpp
   HorizontalScrollBox.h
   KeyTracker.cpp
@@ -167,6 +172,8 @@ set(VSim_src
   SelectionStack.h
   SimpleCameraManipulator.cpp
   SimpleCameraManipulator.h
+  SimpleWorker.cpp
+  SimpleWorker.h
   StackObject.inl
   StackObject.h
   StatsWindow.cpp
@@ -184,6 +191,8 @@ set(VSim_src
   TimeSlider.h
   VSimApp.cpp
   VSimApp.h
+  WidgetStack.cpp
+  WidgetStack.h
 )
 add_library(VSim_obj ${VSim_src})
 target_link_libraries(VSim_obj VSimRoot_obj)
@@ -192,8 +201,9 @@ file(GLOB_RECURSE oldSerializers
   */Serializer*.cpp
   )
 
-
 add_executable(VSim main.cpp ${oldSerializers})
-target_link_libraries(VSim VSim_obj Qt5::Widgets Qt5::Core ${OPENSCENEGRAPH_LIBRARIES})
+set_target_properties(VSim PROPERTIES
+  VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+target_link_libraries(VSim VSim_obj Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Concurrent ${OPENSCENEGRAPH_LIBRARIES})
 
 install(TARGETS VSim DESTINATION .)
