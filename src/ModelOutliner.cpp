@@ -11,7 +11,8 @@
 #include "OSGYearModel.h"
 
 ModelOutliner::ModelOutliner(QWidget *parent)
-	: QTreeView(parent)
+	: QTreeView(parent),
+	m_models(nullptr)
 {
 	setWindowTitle("Models");
 	setWindowFlags(Qt::Dialog);
@@ -36,13 +37,22 @@ ModelOutliner::ModelOutliner(QWidget *parent)
 
 void ModelOutliner::setModelGroup(ModelGroup * models)
 {
+	if (m_models != nullptr) disconnect(m_models, 0, this, 0);
+	m_models = models;
+	if (!models) return;
+	connect(m_models, &QObject::destroyed, this, [this]() {m_models = nullptr; });
+
 	m_year_model->setBase(models->rootWrapper());
+	connect(models, &ModelGroup::sReset, this, [this]() {
+		m_year_model->setBase(m_models->rootWrapper());
+	});
 }
 
 OutlinerTimeDelegate::OutlinerTimeDelegate(QObject *parent)
 	: QStyledItemDelegate(parent)
 {
 }
+
 void OutlinerTimeDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
 	QStyledItemDelegate::paint(painter, option, index);

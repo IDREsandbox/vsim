@@ -48,15 +48,16 @@ void ModelGroup::copyReference(const ModelGroup & other)
 {
 	clear();
 
-	m_root = other.m_root;
+	m_root = new osg::Group;
 
 	m_root_wrapper->setRoot(m_root);
 
 	for (auto model : other) {
 		auto new_model = std::make_shared<Model>();
 		new_model->copyReference(*model);
-		append(model);
+		append(model); // connections on sInserted callback
 	}
+	emit sReset();
 }
 
 void ModelGroup::addNode(osg::Node * node, const std::string & path)

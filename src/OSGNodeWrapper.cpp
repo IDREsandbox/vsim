@@ -30,7 +30,9 @@ void OSGNodeWrapper::setNodeYear(osg::Node *node, int year, bool begin)
 
 	if (year == 0) {
 		osg::UserDataContainer *cont = node->getUserDataContainer();
-		cont->removeUserObject(cont->getUserObjectIndex(prop));
+		if (cont) {
+			cont->removeUserObject(cont->getUserObjectIndex(prop));
+		}
 	}
 	else {
 		node->setUserValue(prop, year);

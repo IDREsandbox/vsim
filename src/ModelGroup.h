@@ -43,6 +43,7 @@ public:
 	void debugScene() const;
 
 signals:
+	void sReset();
 	void sKeysChanged();
 
 	// model can be null if unknown
