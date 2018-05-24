@@ -50,8 +50,8 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 
 find_package(Qt5 REQUIRED Core Gui Widgets Test Concurrent)
-# find_package(Qt5Test REQUIRED)
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
+find_package(Qt5Concurrent REQUIRED)
+include_directories(${Qt5Widgets_INCLUDE_DIRS} ${Qt5Concurrent_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Concurrent_INCLUDE_DIRS})

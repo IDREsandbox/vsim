@@ -1,5 +1,18 @@
 # Changelog
 
+## 2018-5-4
+
+### Added
+- Status bar shows navigation mode changes, freeze/unfreeze
+- Status bar shows current coordinate
+- Create label buttons are styled
+- Loading/saving doesn't freeze the screen
+- Current coordinate shows in status
+
+### Fixed
+- Launching ERs with absolute file paths
+- Fixed model outliner
+
 ## 2018-4-26
 
 ### Embedded resources
