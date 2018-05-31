@@ -1,7 +1,18 @@
 # vcpkg
 
-Make sure you have at least 30GB before doing this
+Make sure you have at least 30GB before doing this. These build trees are kind of enormous, and can take several hours to build. You can delete the big buildtrees folder afterwards.
 
+intalling vcpkg
+you probably have to switch to powershell to run the bat
+```
+git clone https://github.com/Microsoft/vcpkg
+cd vcpkg
+
+./bootstrap-vcpkg.bat
+./vcpkg integrate install
+```
+
+building
 ```
 ./vcpkg install flatbuffers:x64-windows osg:x64-windows qt5-base:x64-windows
 ```
@@ -12,12 +23,10 @@ packaging
 ```
 
 
-### CMake (option 1)
+# The old way
 
 Download CMake and add it to PATH https://cmake.org/download/
 CMake is used to build releases from the command prompt.
-
-```
 
 
 # Building OpenSceneGraph
