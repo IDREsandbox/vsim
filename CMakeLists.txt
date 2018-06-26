@@ -102,7 +102,9 @@ endfunction()
 
 function(vsim_add_test name src libs)
   message("adding test: ${name}")
-  add_executable(${name} ${src})
+  add_executable(${name}
+    EXCLUDE_FROM_ALL # do we exclude from all?
+    ${src})
   # message("name?" "${name}" "\nsrc?" "${src}")
   add_test(NAME ${name} COMMAND ${name})
   # message("libraries?" "${libs}")

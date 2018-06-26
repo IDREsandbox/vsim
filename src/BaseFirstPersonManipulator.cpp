@@ -88,12 +88,7 @@ void BaseFirstPersonManipulator::rotateByPixels(double dx, double dy)
 
 	pitch = Util::clamp(pitch, -M_PI_2 + .01, M_PI_2 - .01);
 
-	// why doesnt this work...? how is this even supposed to work?
-	//rotateYawPitch(osg::Quat(), y*180/M_PI, p*180/M_PI, osg::Vec3d(0, 0, 1));
-	// nvm let's just do it by hand
-	osg::Quat rot = Util::YPRToQuat(yaw, pitch, 0);
-	osg::Vec3d pos = m.getTrans();
-	setByMatrix(osg::Matrix::rotate(rot) * osg::Matrix::translate(pos));
+	setByMatrix(Util::yprToMat(yaw, pitch, 0) * osg::Matrix::translate(m.getTrans()));
 }
 
 void BaseFirstPersonManipulator::moveForward(double dist)

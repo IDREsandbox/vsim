@@ -49,6 +49,7 @@
 #include "AboutDialog.h"
 #include "CoordinateWidget.h"
 #include "WidgetStack.h"
+#include "Core/Util.h"
 
 #include "FileUtil.h"
 #include <fstream>
@@ -258,10 +259,15 @@ void MainWindow::setApp(VSimApp * vsim)
 		qInfo() << "redo" << text;
 	});
 
-	// coordinate widget
-	connect(m_app, &VSimApp::sPositionChanged, this,
-		[this](const osg::Vec3 &vec) {
-		m_coordinate_widget->setCoordinate({vec.x(), vec.y(), vec.z()});
+	// coordinate widget on every frame
+	connect(m_app, &VSimApp::sTick, this,
+		[this]() {
+		auto mat = m_app->getCameraMatrix();
+		auto pos = mat.getTrans();
+		double y, p, r;
+		Util::matToYPR(mat, &y, &p, &r);
+		m_coordinate_widget->setCoordinate(QVector3D(pos.x(), pos.y(), pos.z()),
+			QVector3D(Util::deg(y), Util::deg(p), Util::deg(r)));
 	});
 
 	m_outliner->header()->resizeSection(0, 200);

@@ -64,26 +64,39 @@ namespace Util
 		return std::min(std::max(value, min), max);
 	}
 
-	// forces an angle between 0 and 180
+	// forces an angle between [0, 2PI)
 	double angleWrap(double x);
 
-	// gives the closer version of angle y with respect to angle x
-	// plz give me wrapped angles
-	// x: 10, y: 350 -> returns y: -10 (but all in radians)
+	// gives the closest version of angle y with respect to angle x
+	// x: 10, y: 350 -> returns y': -10 (but in radians)
+	// x: 370, y: 5 -> returns y': 365
 	double closestAngle(double x, double y);
 
+	// shortest difference between two angles
+	// returns [-PI, PI]
+	double angleDiff(double x, double y);
+
+	double rad(double degrees);
+	double deg(double radians);
+
+	// returns a north facing camera matrix
+	osg::Matrix baseCamera();
+
 	// Converts the quaternion quat to yaw, pitch, and roll
-	// assumes z up, x right, y fwd
-	// yaw is rotation ccw about world z, so facing left (w/ respect to x fwd) is +90
+	// based on a north facing camera:
+	//  z up, x east, y north
+	// yaw is rotation ccw about world z, so west is +90
 	// pitch is rotation ccw about world x, so tilted down is -45 pitch
 	// roll is ccw about world y, so facing +y and rolling right is positive
-	// yaw and roll are [0,2PI]
+	// yaw and roll are [0,2PI)
 	// pitch is [-PI/2, PI/2]
 	void quatToYPR(const osg::Quat& quat, double *yaw, double *pitch, double *roll);
+	void matToYPR(const osg::Matrix &mat, double *yaw, double *pitch, double *roll);
 
 	// Converts yaw, pitch, and roll to a quaternion
 	// assumes world z up, x right, y fwd
-	osg::Quat YPRToQuat(double yaw, double pitch, double roll);
+	osg::Quat yprToQuat(double yaw, double pitch, double roll);
+	osg::Matrix yprToMat(double yaw, double pitch, double roll);
 
 	// linear interpolation, t:[0,1]
 	template <typename T>
@@ -106,8 +119,10 @@ namespace Util
 
 	// 
 	QString osgMatrixToQString(osg::Matrix);
-	osg::Vec4d mult_vec(osg::Matrixd M, osg::Vec4d v);
+	//osg::Vec4d multVec(osg::Matrixd M, osg::Vec4d v);
 	bool osgMatrixEq(const osg::Matrix m1, const osg::Matrix m2, double epsilon = .001);
+
+	bool doubleEq(double x, double y, double epsilon = .00001);
 
 	//4x4 transpose
 	osg::Matrixd transpose(osg::Matrixd m);
@@ -122,7 +137,7 @@ namespace Util
 	// a dumb version of hermite curve
 	double simpleCubic(double x0, double x1, double t);
 
-	Util::endPt hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl = .0001);
+	//Util::endPt hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl = .0001);
 
 	bool spheresOverlap(const osg::Vec3f &p1, float r1, const osg::Vec3f &p2, float r2);
 

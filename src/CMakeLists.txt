@@ -145,6 +145,7 @@ set(VSim_src
   KeyTracker.h
   MainWindow.cpp
   MainWindow.h
+  MainWindow.ui
   MainWindowTopBar.cpp
   MainWindowTopBar.h
   ModelInformationDialog.cpp

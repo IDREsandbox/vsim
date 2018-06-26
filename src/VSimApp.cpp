@@ -308,19 +308,6 @@ void VSimApp::debugCamera()
 	std::cout << "matrix " << matrix << "\ntranslation " << trans << "\nscale " << scale << "\nrotation " << rot << "\n";
 	qInfo() << "ypr" << y * 180 / M_PI << p * 180 / M_PI << r * 180 / M_PI;
 
-	std::cout << "zero everything\n";
-	auto q = Util::YPRToQuat(0, 0, 0);
-	std::cout << osg::Matrixd::rotate(q);
-
-	osg::Matrix base(
-		1, 0, 0, 0,
-		0, 0, 1, 0,
-		0, -1, 0, 0,
-		0, 0, 0, 1);
-	double yaw, pitch, roll;
-	Util::quatToYPR(base.getRotate(), &yaw, &pitch, &roll);
-	qInfo() << yaw * M_PI/180 << pitch * M_PI / 180 << roll * M_PI / 180;
-
 }
 
 //OSGYearModel *VSimApp::modelTable() const

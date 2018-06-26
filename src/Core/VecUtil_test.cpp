@@ -1,6 +1,5 @@
 #include <QTest>
 #include <QDebug>
-#include "Util.h"
 #include "VecUtil.h"
 #include <string>
 #include <vector>
@@ -13,27 +12,9 @@ struct NameYearTuple {
 	int end;
 };
 
-class Util_test : public QObject {
+class VecUtil_test : public QObject {
 	Q_OBJECT
 private slots:
-	void mxdxyyDateTest() {
-		QDate date;
-		bool hit;
-		hit = Util::mxdxyyToQDate("1/2/94", &date);
-		QVERIFY(hit);
-		QCOMPARE(date, QDate(1994, 1, 2));
-
-		hit = Util::mxdxyyToQDate("111/2/1994", &date);
-		QVERIFY(!hit);
-
-		hit = Util::mxdxyyToQDate("11/2/80", &date);
-		QVERIFY(hit);
-		QCOMPARE(date, QDate(1980, 11, 2));
-		
-		hit = Util::mxdxyyToQDate("12/30/79", &date);
-		QVERIFY(hit);
-		QCOMPARE(date, QDate(2079, 12, 30));
-	}
 	void fixIndicesTest() {
 		std::vector<size_t> mini, mini_ans, mini_result;
 		std::set<size_t> mini_ins, mini_rem;
@@ -108,24 +89,6 @@ private slots:
 		//big_result = VecUtil::fixIndices(big, { 0 });
 		//qDebug() << "big 1 insert, map" << Util::toc();
 
-	}
-
-	void timeRegexTest() {
-		std::vector<NameYearTuple> list = {
-			{ "T:g466 -1450 -1349", -1450, -1349},
-			{ "T:III -1369 -1349", -1369, -1349 },
-			{ "T:flagstaff_20 -1369 -1349", -1369, -1349 },
-			{ "T:01-middlekingdom -1523 -1466", -1523, -1466 },
-			{ "T:02-Hatshepsut -1465 -1349", -1465, -1349 }
-		};
-
-		for (auto &tuple : list) {
-			int begin = 0;
-			int end = 0;
-			Util::nodeTimeInName(tuple.name, &begin, &end);
-			QCOMPARE(begin, tuple.begin);
-			QCOMPARE(end, tuple.end);
-		}
 	}
 
 	void multiInsertTest() {
@@ -291,38 +254,8 @@ private slots:
 		result = VecUtil::clumpify2(list);
 		QCOMPARE(result, expected);
 	}
-	void spheresTest() {
-		QCOMPARE(Util::spheresOverlap({ 0, 0, 0 }, 3.0f, { 4, 0, 0 }, 2.0f), true);
-		QCOMPARE(Util::spheresOverlap({ 0, 0, 0 }, 3.0f, { 4, 0, 0 }, .999f), false);
-		QCOMPARE(Util::spheresOverlap({ 0, 0, 0 }, 3.0f, { 4, 0, 0 }, 1.01f), true);
-	}
-	void matrixEqTest(){
-		double d1[16] = {
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0
-		};
-		osg::Matrix m1(d1);
-		double d2[16] = {
-			0, 0, 0, 6.8,
-			1.2, 0, 0, 0,
-			0, 0, 4.5, 0,
-			0, 0, 0, 0
-		};
-		osg::Matrix m2(d2);
-		double d3[16] = {
-			0, 0, 0, .0001,
-			.0008, 0, 0, 0,
-			0, -.0001, 0, 0,
-			0, 0, 0, 0
-		};
-		osg::Matrix m3(d3);
-		QVERIFY(Util::osgMatrixEq(m1, m1) == true);
-		QVERIFY(Util::osgMatrixEq(m1, m2) == false);
-		QVERIFY(Util::osgMatrixEq(m1, m3, .001) == true);
-	}
+
 };
 
-QTEST_MAIN(Util_test)
-#include "Util_test.moc"
+QTEST_MAIN(VecUtil_test)
+#include "VecUtil_test.moc"

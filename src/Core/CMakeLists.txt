@@ -37,6 +37,18 @@ vsim_add_test(
   "Core_obj;Qt5::Widgets;Qt5::Test;${OPENSCENEGRAPH_LIBRARIES}"
 )
 
+vsim_add_test(
+  Util_test
+  Util_test.cpp
+  "Core_obj;Qt5::Test;${OPENSCENEGRAPH_LIBRARIES}"
+)
+
+vsim_add_test(
+  VecUtil_test
+  VecUtil_test.cpp
+  "Core_obj;Qt5::Test;${OPENSCENEGRAPH_LIBRARIES}"
+)
+
 # is this needed?
 # target_include_directories(Core_obj
 #   PUBLIC ${CMAKE_SOURCE_DIR})

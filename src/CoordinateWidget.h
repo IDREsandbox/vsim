@@ -7,7 +7,7 @@
 class CoordinateWidget : public QLabel {
 public:
 	CoordinateWidget(QWidget *parent = nullptr);
-	void setCoordinate(const QVector3D &vec);
+	void setCoordinate(const QVector3D &vec, const QVector3D &hpr);
 };
 
 #endif

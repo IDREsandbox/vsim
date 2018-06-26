@@ -240,7 +240,7 @@
     <string>Camera Debug</string>
    </property>
    <property name="shortcut">
-    <string>F10</string>
+    <string>F7</string>
    </property>
   </action>
   <action name="actionFirst_Person_Navigation">
