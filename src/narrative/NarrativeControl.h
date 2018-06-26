@@ -50,6 +50,8 @@ public:
 	// - forces selection, shows canvas
 	// - hides on -1 or no narrative
 	// - returns true if open, false if failed
+	// - doesn't change state
+	// go: move camera to position
 	bool openSlide(int index, bool go = true);
 
 	void showNarrativeBox();
@@ -66,10 +68,13 @@ public:
 	//bool advance(bool forward);
 	bool advanceSlide(bool forward, bool instant = true);
 
+	// change state
 	void selectNarratives(const SelectionData &narratives);
 	void selectSlides(int narrative, const SelectionData &slides, bool edit);
 	//void selectLabel(int narrative, int slide, NarrativeSlideItem *label);
 	//void selectLabels(int narrative, int slide, const std::set<CanvasItem*> &labels);
+
+	void singleSelectOpenSlide();
 
 	NarrativeGroup *narratives() const;
 	Narrative *getCurrentNarrative() const;

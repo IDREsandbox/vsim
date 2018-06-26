@@ -104,9 +104,8 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 			// open if possible
 			int last = m_slide_selection->last();
 			if (last >= 0) {
-				openSlide(last);
-				// single select slides
-				m_slide_selection->set({ last });
+				openSlide(last, true);
+				singleSelectOpenSlide();
 			}
 			m_canvas->setEditable(true);
 		}
@@ -660,6 +659,13 @@ void NarrativeControl::selectSlides(int narrative, const SelectionData &slides, 
 //	m_canvas->setSelection(labels);
 //	m_app->setState(VSimApp::EDIT_CANVAS);
 //}
+
+void NarrativeControl::singleSelectOpenSlide()
+{
+	int index = getCurrentSlideIndex();
+	if (index < 0) return;
+	m_slide_selection->set({index});
+}
 
 NarrativeGroup * NarrativeControl::narratives() const
 {

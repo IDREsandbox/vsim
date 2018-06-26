@@ -87,6 +87,8 @@ void NarrativePlayer::play()
 		if (!slide) {
 			m_narratives->openSlide(0);
 		}
+
+		m_narratives->singleSelectOpenSlide();
 		toAtNode();
 	}
 }
