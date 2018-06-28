@@ -40,8 +40,10 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_enabled(true)
 {
 	m_undo_stack = m_app->getUndoStack();
-	m_global_box = m_window->erBar()->ui.global;
-	m_local_box = m_window->erBar()->ui.local;
+	m_bar = m_window->erBar();
+	m_global_box = m_bar->ui.global;
+	m_local_box = m_bar->ui.local;
+	m_all_box = m_bar->ui.all;
 	m_last_touched = m_local_box;
 	m_display = m_window->erDisplay();
 	m_filter_area = m_window->erFilterArea();
@@ -105,14 +107,14 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		a_position_er,
 		a_goto_er
 	};
-	QMenu *local_menu = new QMenu(m_local_box);
-	local_menu->addActions(actions);
-	m_local_box->setMenu(local_menu);
-	m_local_box->setItemMenu(local_menu);
-	QMenu *global_menu = new QMenu(m_global_box);
-	global_menu->addActions(actions);
-	m_global_box->setMenu(global_menu);
-	m_global_box->setItemMenu(global_menu);
+	QMenu *box_menu = new QMenu(window->erBar());
+	box_menu->addActions(actions);
+	m_local_box->setMenu(box_menu);
+	m_local_box->setItemMenu(box_menu);
+	m_global_box->setMenu(box_menu);
+	m_global_box->setItemMenu(box_menu);
+	m_all_box->setMenu(box_menu);
+	m_all_box->setItemMenu(box_menu);
 
 	// ui connect
 	ERBar *bar = m_window->erBar();
@@ -122,6 +124,11 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	bar->ui.deleteERButton->setDefaultAction(a_delete_er);
 	// edit
 	bar->ui.editERButton->setDefaultAction(a_edit_er);
+	// show all
+	connect(bar->ui.showAll, &QAbstractButton::pressed, this, [this]() {
+		showAll(!showingAll());
+	});
+
 	// goto and open
 	auto goto_open = [this]() {
 		gotoPosition();
@@ -129,15 +136,19 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	};
 	connect(m_local_box, &ERScrollBox::sDoubleClick, this, goto_open);
 	connect(m_global_box, &ERScrollBox::sDoubleClick, this, goto_open);
+	connect(m_all_box, &ERScrollBox::sDoubleClick, this, goto_open);
 
 	connect(m_local_box, &FastScrollBox::sTouch, this, &ERControl::onTouch);
 	connect(m_global_box, &FastScrollBox::sTouch, this, &ERControl::onTouch);
+	connect(m_all_box, &FastScrollBox::sTouch, this, &ERControl::onTouch);
 
 	connect(m_local_box, &ERScrollBox::sTopChanged, this, &ERControl::onTopChange);
 	connect(m_global_box, &ERScrollBox::sTopChanged, this, &ERControl::onTopChange);
+	connect(m_all_box, &ERScrollBox::sTopChanged, this, &ERControl::onTopChange);
 
 	connect(m_local_box, &ERScrollBox::sSelectionChanged, this, &ERControl::onSelectionChange);
 	connect(m_global_box, &ERScrollBox::sSelectionChanged, this, &ERControl::onSelectionChange);
+	connect(m_all_box, &ERScrollBox::sSelectionChanged, this, &ERControl::onSelectionChange);
 
 
 	// mash the two selections together
@@ -211,6 +222,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		m_filter_area, &ERFilterArea::enableRange);
 
 	resetFilters();
+	showAll(false);
 }
 
 void ERControl::load(EResourceGroup *ers)
@@ -229,6 +241,7 @@ void ERControl::load(EResourceGroup *ers)
 
 	m_global_box->setGroup(m_global_proxy.get());
 	m_local_box->setGroup(m_local_proxy.get());
+	m_all_box->setGroup(m_filter_proxy.get());
 
 	m_category_control->load(m_categories);
 
@@ -471,12 +484,25 @@ void ERControl::closeER()
 
 	m_local_box->deselect(m_displayed);
 	m_global_box->deselect(m_displayed);
+	m_all_box->deselect(m_displayed);
 }
 
 void ERControl::closeAll()
 {
 	m_local_box->setSelection({});
 	m_global_box->setSelection({});
+	m_all_box->setSelection({});
+}
+
+void ERControl::showAll(bool all)
+{
+	m_bar->ui.showAll->setText(all ? "Show Local/Global" : "Show All");
+	m_bar->ui.stackedWidget->setCurrentIndex(all ? 0 : 1);
+}
+
+bool ERControl::showingAll() const
+{
+	return m_bar->ui.stackedWidget->currentIndex() == 0;
 }
 
 void ERControl::onTouch()
@@ -487,6 +513,9 @@ void ERControl::onTouch()
 	}
 	else if (sender == m_global_box) {
 		m_last_touched = m_global_box;
+	}
+	else if (sender == m_all_box) {
+		m_last_touched = m_all_box;
 	}
 
 	EResource *resource = getCombinedLastSelectedP();
@@ -502,22 +531,14 @@ void ERControl::onTouch()
 
 void ERControl::onTopChange()
 {
-	// this stuff happens when moving around
-	// and there is no er touching
+	// this happens when moving around
+	// ex. moving out of range
 
-	// null out the current thing?
-	//if (!isSelectable(m_displayed)) {
-	//	setDisplay(nullptr);
-	//}
-
-	// only go here if
+	// we want to change the display but not goto
 	EResource *res = getCombinedLastSelectedP();
 	if (res != m_displayed) {
 		setDisplay(res, false);
 	}
-	//EResource *res = getCombinedLastSelectedP();
-	//bool go = (res && res->getReposition());
-	//setDisplay(res, go);
 }
 
 void ERControl::onSelectionChange()
@@ -530,12 +551,14 @@ void ERControl::addToSelection(EResource * res, bool top)
 {
 	m_global_box->addToSelection(res, top);
 	m_local_box->addToSelection(res, top);
+	m_all_box->addToSelection(res, top);
 }
 
 void ERControl::selectERs(const std::vector<EResource*> &res)
 {
 	m_global_box->setSelection(res);
 	m_local_box->setSelection(res);
+	m_all_box->setSelection(res);
 
 	m_app->setState(VSimApp::EDIT_ERS);
 	setDisplay(getCombinedLastSelectedP());
@@ -628,20 +651,11 @@ void ERControl::debug()
 
 std::set<size_t> ERControl::getCombinedSelection() const
 {
-	// remap selection to nodes
-	std::set<EResource*> nodes;
+	auto stack = getCombinedSelectionP();
 
-	auto ls = m_local_box->getSelection();
-	auto gs = m_global_box->getSelection();
-	nodes.insert(ls.begin(), ls.end());
-	nodes.insert(gs.begin(), gs.end());
-
-	// map nodes to indices
 	std::set<size_t> indices;
-	for (size_t i = 0; i < m_ers->size(); i++) {
-		if (nodes.count(m_ers->child(i)) > 0) {
-			indices.insert(i);
-		}
+	for (EResource *res : stack) {
+		indices.insert(res->index());
 	}
 	return indices;
 }
@@ -650,22 +664,28 @@ std::vector<EResource*> ERControl::getCombinedSelectionP() const
 {
 	std::vector<EResource*> out;
 
-	auto ls = m_local_box->getSelection();
-	auto gs = m_global_box->getSelection();
-	decltype(ls) *first, *second;
-
-	if (m_last_touched == m_global_box) {
-		// insert global on top
-		first = &ls;
-		second = &gs;
+	if (showingAll()) {
+		out = m_all_box->getSelection();
 	}
 	else {
-		first = &gs;
-		second = &ls;
-	}
+		auto ls = m_local_box->getSelection();
+		auto gs = m_global_box->getSelection();
+		decltype(ls) *first, *second;
 
-	out.insert(out.end(), first->begin(), first->end());
-	out.insert(out.end(), second->begin(), second->end());
+		// tape the two stacks together,
+		// the last touched one on top
+		if (m_last_touched == m_global_box) {
+			first = &ls;
+			second = &gs;
+		}
+		else {
+			first = &gs;
+			second = &ls;
+		}
+
+		out.insert(out.end(), first->begin(), first->end());
+		out.insert(out.end(), second->begin(), second->end());
+	}
 
 	return out;
 }
@@ -683,6 +703,9 @@ EResource *ERControl::getCombinedLastSelectedP() const
 
 bool ERControl::isSelectable(EResource *res) const
 {
+	if (showingAll()) {
+		return m_all_box->has(res);
+	}
 	return m_global_box->has(res) || m_local_box->has(res);
 }
 

@@ -23,6 +23,7 @@ class ERFilterSortProxy;
 class ERFilterArea;
 class CheckableListProxy;
 class SelectionStack;
+class ERBar;
 
 // manages which ER is active
 // slots for creating a new ER, editing, etc
@@ -37,6 +38,7 @@ public:
 	// used for er distance checking
 	void update(double dt_sec);
 
+	// actions
 	void newER();
 	void deleteER();
 	void editERInfo();
@@ -53,6 +55,9 @@ public:
 	void closeER();
 	void closeAll();
 
+	void showAll(bool all);
+	bool showingAll() const;
+
 	// show and goto resource
 	void onTouch();
 	void onTopChange();
@@ -64,7 +69,9 @@ public:
 	std::set<size_t> getCombinedSelection() const;
 	std::vector<EResource*> getCombinedSelectionP() const;
 	EResource *getCombinedLastSelectedP() const;
-	bool isSelectable(EResource *res) const; // checks both boxes if resource exists
+
+	// only selectable if visible in a visible box
+	bool isSelectable(EResource *res) const;
 	void clearSelection();
 
 	// filters
@@ -91,6 +98,7 @@ public: // actions
 private:
 	VSimApp *m_app;
 	MainWindow *m_window;
+	ERBar *m_bar;
 
 	EResourceGroup *m_ers;
 	ECategoryGroup *m_categories;
@@ -102,6 +110,7 @@ private:
 
 	ERScrollBox *m_global_box;
 	ERScrollBox *m_local_box;
+	ERScrollBox *m_all_box;
 	ERScrollBox *m_last_touched;
 
 	QUndoStack *m_undo_stack;

@@ -211,6 +211,11 @@ FastScrollItem * FastScrollBox::item(size_t index) const
 	return m_items[index];
 }
 
+void FastScrollBox::showEvent(QShowEvent * event)
+{
+	refresh();
+}
+
 void FastScrollBox::resizeEvent(QResizeEvent * event)
 {
 	QFrame::resizeEvent(event);

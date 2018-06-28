@@ -151,54 +151,87 @@
     </layout>
    </item>
    <item>
-    <widget class="QSplitter" name="splitter">
-     <property name="styleSheet">
-      <string notr="true">QSplitter {
-	background: rgba(0,0,0,0);
-}</string>
+    <widget class="QStackedWidget" name="stackedWidget">
+     <property name="currentIndex">
+      <number>1</number>
      </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
-       <property name="spacing">
-        <number>2</number>
+     <widget class="QWidget" name="page_all">
+      <layout class="QGridLayout" name="gridLayout">
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Local</string>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,1">
+         <property name="spacing">
+          <number>2</number>
          </property>
-         <property name="indent">
-          <number>8</number>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="ERScrollBox" name="local" native="true"/>
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>All Resources</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="ERScrollBox" name="all" native="true"/>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="layoutWidget_2">
-      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
-       <property name="spacing">
-        <number>2</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Global</string>
-         </property>
-         <property name="indent">
-          <number>8</number>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="ERScrollBox" name="global" native="true"/>
-       </item>
-      </layout>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Local</string>
+          </property>
+          <property name="indent">
+           <number>8</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ERScrollBox" name="local" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget_2">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Global</string>
+          </property>
+          <property name="indent">
+           <number>8</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ERScrollBox" name="global" native="true"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
    </item>

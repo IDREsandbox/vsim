@@ -3,6 +3,8 @@
 #include <QFrame>
 #include "ui_ERBar.h"
 
+class ERScrollBox;
+
 class ERBar : public QFrame {
 	Q_OBJECT
 public:

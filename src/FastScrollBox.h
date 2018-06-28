@@ -40,6 +40,7 @@ signals:
 	void sSelectionCleared();
 
 protected:
+	void showEvent(QShowEvent *event) override;
 	void resizeEvent(QResizeEvent *event) override;
 
 	//virtual void sceneMouseEvent(QGraphicsSceneMouseEvent *event);
