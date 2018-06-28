@@ -328,6 +328,7 @@ void ERDialog::checkAutoLaunch()
 	auto al = getAutoLaunch();
 	if (type == EResource::ANNOTATION) {
 		ui.autolaunch_on->setEnabled(false);
+		// invalid combination -> force off
 		if (al == EResource::ON) {
 			ui.autolaunch_off->setChecked(true);
 		}
@@ -337,6 +338,17 @@ void ERDialog::checkAutoLaunch()
 	}
 	bool local = !getGlobal();
 	ui.autolaunch_zone->setEnabled(local);
+}
+
+void ERDialog::setGlobal(bool global)
+{
+	if (global) {
+		ui.global->setChecked(true);
+	}
+	else {
+		ui.local->setChecked(true);
+	}
+	onActivationChange();
 }
 
 void ERDialog::onTypeChange()

@@ -242,8 +242,12 @@ void ERControl::update(double dt_sec)
 
 void ERControl::newER()
 {
-	qDebug() << "app current dir:" << m_app->getCurrentDirectory().c_str();
+	// start with global selected if we picked global
+	QWidget *focus = QApplication::focusWidget();
+	bool start_global = Util::isDescendant(m_global_box, focus);
+
 	ERDialog dlg(m_category_control, m_app->getCurrentDirectory().c_str());
+	dlg.setGlobal(start_global);
 
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {

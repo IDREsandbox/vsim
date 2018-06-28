@@ -127,6 +127,15 @@ QRect Util::rectFit(QRect container, float whratio)
 	return QRect(left, top, width, height);
 }
 
+bool Util::isDescendant(QWidget *widget, QWidget *child)
+{
+	while (child != nullptr) {
+		if (widget == child) return true;
+		child = child->parentWidget();
+	}
+	return false;
+}
+
 osg::Image *Util::imageQtToOsg(const QImage & qimg)
 {
 	QImage img_rgba8 = qimg.convertToFormat(QImage::Format_RGBA8888);

@@ -11,6 +11,7 @@
 #include <osg/Matrix>
 #include <algorithm>
 #include <QDate>
+#include <QWidget>
 
 namespace Util
 {
@@ -28,6 +29,9 @@ namespace Util
 
 	// Fits the largest possible rectangle with given aspect ratio into another rectangle
 	QRect rectFit(QRect container, float whratio);
+
+	// checks if child is parent or descendant of parent
+	bool isDescendant(QWidget *parent, QWidget *child);
 
 	// QImage to osg::Image, allocates memory
 	osg::Image *imageQtToOsg(const QImage& qimg);

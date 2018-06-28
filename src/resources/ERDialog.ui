@@ -96,7 +96,11 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="title"/>
+    <widget class="QLineEdit" name="title">
+     <property name="maxLength">
+      <number>40</number>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QLabel" name="label_description">

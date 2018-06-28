@@ -49,6 +49,8 @@ public:
 	void checkRelative();
 	void checkAutoLaunch();
 
+	void setGlobal(bool global);
+
 	// Choose button depends on type
 	// URL bar depends on type
 	void onTypeChange();

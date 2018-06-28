@@ -52,6 +52,20 @@ private slots:
 		}
 	}
 
+	void isDescendantTest() {
+		QWidget w1;
+		QWidget *w2 = new QWidget(&w1);
+		QWidget *w3 = new QWidget(w2);
+		QWidget w4;
+		QCOMPARE(Util::isDescendant(&w1, &w1), true);
+		QCOMPARE(Util::isDescendant(&w1, w2), true);
+		QCOMPARE(Util::isDescendant(&w1, w3), true);
+		QCOMPARE(Util::isDescendant(w2, w3), true);
+		QCOMPARE(Util::isDescendant(&w1, &w4), false);
+		QCOMPARE(Util::isDescendant(w2, &w1), false);
+		QCOMPARE(Util::isDescendant(w3, &w4), false);
+	}
+
 	void spheresTest() {
 		QCOMPARE(Util::spheresOverlap({ 0, 0, 0 }, 3.0f, { 4, 0, 0 }, 2.0f), true);
 		QCOMPARE(Util::spheresOverlap({ 0, 0, 0 }, 3.0f, { 4, 0, 0 }, .999f), false);

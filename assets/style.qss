@@ -30,7 +30,7 @@ QToolButton:disabled {
 }
 
 #bottomBar QSplitter::handle {
-	background: rgba(0,0,255,100);
+	background: rgba(0,0,0,100);
 }
 
 #mainSplitter QScrollBar::horizontal {
