@@ -1,5 +1,6 @@
 #include "resources/ERDisplay.h"
 #include <QDebug>
+#include <QMouseEvent>
 
 ERDisplay::ERDisplay(QWidget *parent)
 	: QFrame(parent), m_er(nullptr)
@@ -45,4 +46,11 @@ void ERDisplay::setCount(int n)
 {
 	QString s = QString("Close All (%1)").arg(QString::number(n));
 	ui.close_all->setText(s);
+}
+
+void ERDisplay::mousePressEvent(QMouseEvent * event)
+{
+	if (event->button() == Qt::RightButton) {
+		emit sCloseAll();
+	}
 }

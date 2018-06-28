@@ -24,6 +24,9 @@ signals:
 	void sOpen();
 	void sGoto();
 
+protected:
+	void mousePressEvent(QMouseEvent *event) override;
+
 private:
 	Ui::ERDisplay ui;
 	EResource* m_er;

@@ -34,7 +34,7 @@ border-color: rgb(238, 238, 238);</string>
       <set>Qt::AlignCenter</set>
      </property>
      <property name="textInteractionFlags">
-      <set>Qt::TextBrowserInteraction</set>
+      <set>Qt::NoTextInteraction</set>
      </property>
     </widget>
    </item>
@@ -74,7 +74,7 @@ p, li { white-space: pre-wrap; }
       <set>Qt::AlignCenter</set>
      </property>
      <property name="textInteractionFlags">
-      <set>Qt::TextBrowserInteraction</set>
+      <set>Qt::NoTextInteraction</set>
      </property>
     </widget>
    </item>
