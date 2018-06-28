@@ -3,6 +3,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QDebug>
+#include <QCoreApplication>
 
 class ComboBoxLimiter : public QObject {
 public:
@@ -48,24 +49,25 @@ void setMargins(QLayout *layout) {
 CanvasToolBar::CanvasToolBar(QWidget *parent)
 	: QToolBar(parent)
 {
+	QString dir = QCoreApplication::applicationDirPath();
 	// all icons
-	QIcon i_fill("assets/icons/canvas/format_color_fill.png");
-	QIcon i_pen("assets/icons/canvas/border_color.png");
-	QIcon i_clear("assets/icons/canvas/format_color_reset.png");
-	QIcon i_color_text("assets/icons/canvas/format_color_text.png");
-	QIcon i_bold("assets/icons/canvas/format_bold.png");
-	QIcon i_ital("assets/icons/canvas/format_italic.png");
-	QIcon i_uline("assets/icons/canvas/format_underlined.png");
-	QIcon i_strike("assets/icons/canvas/format_strikethrough.png");
-	QIcon i_number("assets/icons/canvas/format_list_numbered.png");
-	QIcon i_bullet("assets/icons/canvas/format_list_bulleted.png");
-	QIcon i_left("assets/icons/canvas/format_align_left.png");
-	QIcon i_center("assets/icons/canvas/format_align_center.png");
-	QIcon i_right("assets/icons/canvas/format_align_right.png");
-	QIcon i_justify("assets/icons/canvas/format_align_justify.png");
-	QIcon i_top("assets/icons/canvas/vertical_align_top.png");
-	QIcon i_vcenter("assets/icons/canvas/vertical_align_center.png");
-	QIcon i_bottom("assets/icons/canvas/vertical_align_bottom.png");
+	QIcon i_fill(dir + "/assets/icons/canvas/format_color_fill.png");
+	QIcon i_pen(dir + "/assets/icons/canvas/border_color.png");
+	QIcon i_clear(dir + "/assets/icons/canvas/format_color_reset.png");
+	QIcon i_color_text(dir + "/assets/icons/canvas/format_color_text.png");
+	QIcon i_bold(dir + "/assets/icons/canvas/format_bold.png");
+	QIcon i_ital(dir + "/assets/icons/canvas/format_italic.png");
+	QIcon i_uline(dir + "/assets/icons/canvas/format_underlined.png");
+	QIcon i_strike(dir + "/assets/icons/canvas/format_strikethrough.png");
+	QIcon i_number(dir + "/assets/icons/canvas/format_list_numbered.png");
+	QIcon i_bullet(dir + "/assets/icons/canvas/format_list_bulleted.png");
+	QIcon i_left(dir + "/assets/icons/canvas/format_align_left.png");
+	QIcon i_center(dir + "/assets/icons/canvas/format_align_center.png");
+	QIcon i_right(dir + "/assets/icons/canvas/format_align_right.png");
+	QIcon i_justify(dir + "/assets/icons/canvas/format_align_justify.png");
+	QIcon i_top(dir + "/assets/icons/canvas/vertical_align_top.png");
+	QIcon i_vcenter(dir + "/assets/icons/canvas/vertical_align_center.png");
+	QIcon i_bottom(dir + "/assets/icons/canvas/vertical_align_bottom.png");
 
 	m_text_sizes = QFontDatabase::standardSizes();
 
