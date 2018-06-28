@@ -1,12 +1,15 @@
 #include "EditDeleteDelegate.h"
 
+#include <QCoreApplication>
+
 EditDeleteDelegate::EditDeleteDelegate(QObject * parent)
 	: QStyledItemDelegate(parent)
 {
-	m_edit_icon.addFile("assets/editIcon.png");
-	m_edit_icon.addFile("assets/editIconHover.png", QSize(), QIcon::Active);
-	m_delete_icon.addFile("assets/deleteIcon.png");
-	m_delete_icon.addFile("assets/deleteIconHover.png", QSize(), QIcon::Active);
+	auto dir = QCoreApplication::applicationDirPath();
+	m_edit_icon.addFile(dir + "/assets/editIcon.png");
+	m_edit_icon.addFile(dir + "/assets/editIconHover.png", QSize(), QIcon::Active);
+	m_delete_icon.addFile(dir + "/assets/deleteIcon.png");
+	m_delete_icon.addFile(dir + "/assets/deleteIconHover.png", QSize(), QIcon::Active);
 }
 
 void EditDeleteDelegate::paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const

@@ -12,7 +12,7 @@ EResource::EResource(QObject *parent)
 	m_authors(" "),
 	m_global(true),
 	m_reposition(false),
-	m_launch(false),
+	m_launch(OFF),
 	m_copyright(UNSPECIFIED),
 	m_min_year(0),
 	m_max_year(0),
@@ -44,6 +44,7 @@ void EResource::operator=(const EResource & other)
 	m_camera_matrix	  = other.m_camera_matrix	;
 	m_camera_position = other.m_camera_position ;
 	m_category_index  = other.m_category_index  ;
+	m_index           = other.m_index           ;
 }
 
 void EResource::loadOld(const EResourcesNode * old)
@@ -54,7 +55,7 @@ void EResource::loadOld(const EResourcesNode * old)
 	m_authors = old->getAuthor();
 	m_global = !old->getGlobal();
 	m_reposition = old->getReposition();
-	m_launch = old->getAutoLaunch();
+	m_launch = (AutoLaunch)old->getAutoLaunch();
 	m_copyright = (Copyright)old->getCopyRight();
 	m_min_year = old->getMinYear();
 	m_max_year = old->getMaxYear();
@@ -145,11 +146,11 @@ void EResource::setReposition(bool reposition)
 	m_reposition = reposition;
 	emit sRepositionChanged(reposition);
 }
-bool EResource::getAutoLaunch() const
+EResource::AutoLaunch EResource::getAutoLaunch() const
 { 
 	return m_launch; 
 }
-void EResource::setAutoLaunch(bool launch) 
+void EResource::setAutoLaunch(EResource::AutoLaunch launch)
 { 
 	m_launch = launch; 
 	emit sAutoLaunchChanged(launch);
@@ -211,6 +212,18 @@ bool EResource::setInRange(bool in)
 	m_in_range = in;
 	emit sInRangeChanged(in);
 	return true;
+}
+
+int EResource::index() const
+{
+	return m_index;
+}
+
+void EResource::setIndex(int index)
+{
+	if (index == m_index) return;
+	m_index = index;
+	emit sIndexChanged(index);
 }
 
 ECategory * EResource::category() const

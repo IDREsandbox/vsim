@@ -62,8 +62,17 @@ public:
 
 	bool getReposition() const;
 	void setReposition(bool reposition);
-	bool getAutoLaunch() const;
-	void setAutoLaunch(bool launch);
+
+	enum AutoLaunch {
+		OFF,
+		ON,
+		TEXT
+	};
+	AutoLaunch getAutoLaunch() const;
+	void setAutoLaunch(AutoLaunch launch);
+	//bool autoLaunchText() const;
+	//void setAutoLaunchText();
+
 	float getLocalRange() const;
 	void setLocalRange(float lrange);
 
@@ -82,6 +91,9 @@ public:
 	void setDistanceTo(double dist);
 	bool inRange() const;
 	bool setInRange(bool in); // returns true if changed
+
+	int index() const;
+	void setIndex(int index);
 
 	ECategory *category() const;
 	std::shared_ptr<ECategory> categoryShared() const;
@@ -110,6 +122,7 @@ signals:
 	void sViewMatrixChanged(const osg::Matrixd&);
 	void sDistanceToChanged(double dist);
 	void sInRangeChanged(bool entered);
+	void sIndexChanged(int index);
 
 	void sCategoryChanged(ECategory *old_category, ECategory *new_category);
 
@@ -159,11 +172,8 @@ public: // resource commands
 		SetRepositionCommand(EResource *res, bool re, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&getReposition, &setReposition, re, res, parent) {}
 	};
-	class SetAutoLaunchCommand : public ModifyCommand<EResource, bool> {
-	public:
-		SetAutoLaunchCommand(EResource *res, bool al, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getAutoLaunch, &setAutoLaunch, al, res, parent) {}
-	};
+	using SetAutoLaunchCommand =
+		ModifyCommand2<EResource, AutoLaunch, &getAutoLaunch, &setAutoLaunch>;
 	class SetLocalRangeCommand : public ModifyCommand<EResource, float> {
 	public:
 		SetLocalRangeCommand(EResource *res, float lr, QUndoCommand *parent = nullptr)
@@ -193,7 +203,7 @@ private:
 	std::string m_authors;
 	bool m_global;
 	bool m_reposition;
-	int m_launch; // 0 off, 1 on, 2 text
+	AutoLaunch m_launch; // 0 off, 1 on, 2 text
 	Copyright m_copyright;
 	int m_min_year; // default 0
 	int m_max_year; // default 0

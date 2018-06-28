@@ -79,8 +79,10 @@ set(VSim_src
   resources/ERControl.h
   resources/ERDialog.cpp
   resources/ERDialog.h
+  resources/ERDialog.ui
   resources/ERDisplay.cpp
   resources/ERDisplay.h
+  resources/ERDisplay.ui
   resources/ERFilterArea.ui
   resources/ERFilterArea.cpp
   resources/ERFilterArea.h
@@ -203,8 +205,11 @@ file(GLOB_RECURSE oldSerializers
   )
 
 add_executable(VSim main.cpp ${oldSerializers})
-set_target_properties(VSim PROPERTIES
-  VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+# set_target_properties(VSim PROPERTIES
+#   VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 target_link_libraries(VSim VSim_obj Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Concurrent ${OPENSCENEGRAPH_LIBRARIES})
+
+add_dependencies(VSim CopyAssets)
+add_dependencies(VSim CopyOSGPlugins)
 
 install(TARGETS VSim DESTINATION .)

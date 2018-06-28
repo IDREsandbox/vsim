@@ -6,17 +6,19 @@
 #include <QDebug>
 #include <QGraphicsItem>
 #include <QElapsedTimer>
+#include <QCoreApplication>
 
 ERScrollItem::ERScrollItem()
 	: FastScrollItem(),
 	m_er(nullptr),
 	m_cat(nullptr)
 {
-	m_text_icon = QPixmap("assets/icons/Text_16xMD.png");
-	m_file_icon = QPixmap("assets/icons/Document_16xMD.png");
-	m_url_icon = QPixmap("assets/icons/Link_16xMD.png");
-	m_goto_icon = QPixmap("assets/icons/View_16xMD.png");
-	m_launch_icon = QPixmap("assets/icons/Effects_16xMD.png");
+	auto dir = QCoreApplication::applicationDirPath();
+	m_text_icon = QPixmap(dir + "/assets/icons/Text_16xMD.png");
+	m_file_icon = QPixmap(dir + "/assets/icons/Document_16xMD.png");
+	m_url_icon = QPixmap(dir + "/assets/icons/Link_16xMD.png");
+	m_goto_icon = QPixmap(dir + "/assets/icons/View_16xMD.png");
+	m_launch_icon = QPixmap(dir + "/assets/icons/Effects_16xMD.png");
 }
 
 EResource * ERScrollItem::resource() const
@@ -135,16 +137,20 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 	opt.setAlignment(Qt::AlignCenter);
 	painter->setPen(use_text_color);
 	QString name_string = "Invalid";
-	if (m_er) name_string = m_er->getResourceName().c_str();
+	name_string = m_er->getResourceName().c_str();
 	painter->drawText(text_rect, name_string, opt);
 
 	// paint distance
-	opt.setAlignment(Qt::AlignBottom);
-	QString distance_string;
-	if (m_er) {
+	if (false) {
+		opt.setAlignment(Qt::AlignBottom);
+		QString distance_string;
 		distance_string = QString::number(m_er->getDistanceTo(), 'f', 2);
+		painter->drawText(text_rect, distance_string, opt);
 	}
-	painter->drawText(text_rect, distance_string, opt);
+
+	// paint index
+	opt.setAlignment(Qt::AlignBottom | Qt::AlignRight);
+	painter->drawText(text_rect, QString::number(m_er->index()), opt);
 
 	// paint icons, right to left
 	// [repo] [auto] [type]
@@ -182,7 +188,7 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 		icon_rect.setX(left);
 	}
 
-	if (m_er->getAutoLaunch()) {
-		painter->drawPixmap(icon_rect, m_launch_icon);
-	}
+	//if (m_er->getAutoLaunch()) {
+	//	painter->drawPixmap(icon_rect, m_launch_icon);
+	//}
 }

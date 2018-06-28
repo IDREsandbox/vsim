@@ -318,12 +318,12 @@ void MainWindow::onReset()
 void MainWindow::reloadStyle()
 {
 	qDebug() << "reload style";
-	QFile file("assets/style.qss");
+	QFile file(QCoreApplication::applicationDirPath() + "/assets/style.qss");
 	file.open(QFile::ReadOnly);
 	QString style = QLatin1String(file.readAll());
 	setStyleSheet(style);
 
-	QFile file2("assets/darkstyle.qss");
+	QFile file2(QCoreApplication::applicationDirPath() + "/assets/darkstyle.qss");
 	file2.open(QFile::ReadOnly);
 	QString dark_style = QLatin1String(file2.readAll());
 	m_canvas->internalWindow()->setStyleSheet(dark_style);
@@ -362,6 +362,11 @@ TimeSlider * MainWindow::timeSlider() const
 QMenu * MainWindow::navigationMenu() const
 {
 	return ui->menuNavigation;
+}
+
+HistoryWindow * MainWindow::historyWindow() const
+{
+	return m_history_window;
 }
 
 ERDisplay * MainWindow::erDisplay() const

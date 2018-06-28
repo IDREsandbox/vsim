@@ -99,8 +99,10 @@ public:
 	void setLastDirectory(const std::string &dir, bool isFile = false);
 
 	// current vsim working directory, based on the .vsim file location
+	// always absolute
 	std::string getCurrentDirectory() const;
 	
+	// absolute path to current file, or none
 	std::string getFileName() const;
 	void setFileName(const std::string &);
 

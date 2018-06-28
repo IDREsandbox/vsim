@@ -297,6 +297,11 @@ install(FILES CHANGELOG.md COPYRIGHT LICENSE README.md THIRD-PARTY-NOTICES DESTI
 
 #assets copying
 file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}")
+add_custom_target(CopyAssets
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assets)
+
 install(DIRECTORY assets DESTINATION .)
 
 if (WIN32)
@@ -335,11 +340,17 @@ if (WIN32)
   endforeach(dll)
 
   # copy osg plugins
-  find_file(osgPluginsDebug NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/tools/osg)
-  find_file(osgPlugins NAMES osgPlugins-${OPENSCENEGRAPH_VERSION} PATHS ${_VCPKG_TOOLS_DIRS})
-  file(COPY ${osgPluginsDebug} DESTINATION "${CMAKE_BINARY_DIR}")
-  file(COPY ${osgPlugins} DESTINATION "${CMAKE_BINARY_DIR}")
+  set(pluginsFolder osgPlugins-${OPENSCENEGRAPH_VERSION}) # "osgPlugins-3.4.0" or something
+  find_file(osgPluginsDebug NAMES ${pluginsFolder} PATHS ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/tools/osg)
+  find_file(osgPlugins NAMES ${pluginsFolder} PATHS ${_VCPKG_TOOLS_DIRS})
+  file(COPY ${osgPlugins} DESTINATION "${CMAKE_BINARY_DIR}/osgPlugins")
+  file(COPY ${osgPluginsDebug} DESTINATION "${CMAKE_BINARY_DIR}/osgPlugins_debug")
   install(DIRECTORY ${osgPlugins} DESTINATION .)
+
+  add_custom_target(CopyOSGPlugins
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_BINARY_DIR}/osgPlugins$<$<CONFIG:Debug>:_debug>
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR})
 
 endif()
 

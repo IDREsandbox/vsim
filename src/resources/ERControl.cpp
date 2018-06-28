@@ -79,7 +79,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 
 	a_open_er = new QAction("Open Resource", this);
 	a_open_er->setIconText("Open");
-	connect(a_open_er, &QAction::triggered, this, &ERControl::openResource);
+	connect(a_open_er, &QAction::triggered, this, &ERControl::openTopResource);
 
 	a_position_er = new QAction("Set Resource Positions", this);
 	a_position_er->setIconText("Set Position");
@@ -125,7 +125,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	// goto and open
 	auto goto_open = [this]() {
 		gotoPosition();
-		openResource();
+		openTopResource();
 	};
 	connect(m_local_box, &ERScrollBox::sDoubleClick, this, goto_open);
 	connect(m_global_box, &ERScrollBox::sDoubleClick, this, goto_open);
@@ -176,7 +176,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 
 	connect(m_display, &ERDisplay::sClose, this, &ERControl::closeER);
 	connect(m_display, &ERDisplay::sCloseAll, this, &ERControl::closeAll);
-	connect(m_display, &ERDisplay::sOpen, this, &ERControl::openResource);
+	connect(m_display, &ERDisplay::sOpen, this, &ERControl::openTopResource);
 	connect(m_display, &ERDisplay::sGoto, this, &ERControl::gotoPosition);
 
 	// filter area -> this
@@ -242,6 +242,7 @@ void ERControl::update(double dt_sec)
 
 void ERControl::newER()
 {
+	qDebug() << "app current dir:" << m_app->getCurrentDirectory().c_str();
 	ERDialog dlg(m_category_control, m_app->getCurrentDirectory().c_str());
 
 	int result = dlg.exec();
@@ -348,12 +349,17 @@ void ERControl::editERInfo()
 	m_undo_stack->endMacro();
 }
 
-void ERControl::openResource()
+void ERControl::openTopResource()
 {
 	EResource *res = getCombinedLastSelectedP();
 	if (!res) return;
-	auto type = res->getERType();
 	gotoPosition();
+	openResource(res);
+}
+
+void ERControl::openResource(const EResource *res) {
+	if (!res) return;
+	auto type = res->getERType();
 	if (type == EResource::FILE) {
 		QString abs;
 		QString path = res->getResourcePath().c_str();
@@ -364,7 +370,7 @@ void ERControl::openResource()
 			abs = path;
 		}
 		qInfo() << "Attempting to open file:" << abs;
-		QDesktopServices::openUrl(QUrl(abs));
+		QDesktopServices::openUrl(QUrl::fromLocalFile(abs));
 	}
 	else if (type == EResource::URL) {
 		qInfo() << "Attempting to open url:" << res->getResourcePath().c_str();
@@ -565,18 +571,21 @@ void ERControl::onUpdate()
 		res->setDistanceTo((pos - res_pos).length());
 
 		bool overlap = Util::spheresOverlap(pos, m_radius, res_pos, res->getLocalRange());
-		bool changed = res->setInRange(overlap);
+		bool changed = (res->inRange() != overlap);
+		bool do_popup = !res->getGlobal()
+			&& (res->getAutoLaunch() != EResource::AutoLaunch::OFF);
+		res->setInRange(overlap);
 		if (changed) {
 			change_list.insert(i);
 		}
-		if (changed && overlap && res->getAutoLaunch()) {
+		if (changed && overlap && do_popup) {
 			trigger_list.insert(res);
 		}
 		if (changed && !overlap) {
 		}
 	}
-	//m_ers->sEdited(change_list);
-	// ... proxy stuff propagates to scroll boxes
+	// send updates to proxies
+	m_ers->sEdited(change_list);
 
 	// add to selection if possible
 	for (auto *res : trigger_list) {
@@ -585,8 +594,14 @@ void ERControl::onUpdate()
 			// if just moving around then stack (want to change target)
 			addToSelection(res, !m_going_to);
 		}
+
+		if (res->getAutoLaunch() == EResource::ON) {
+			// try to open this thing
+			openResource(res);
+		}
 	}
 
+	// sort by distance
 	m_local_proxy->positionChangePoke();
 	m_global_proxy->positionChangePoke();
 }

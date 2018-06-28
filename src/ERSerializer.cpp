@@ -37,7 +37,7 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 		res->setMinYear(o_res->year_min());
 		res->setMaxYear(o_res->year_max());
 		res->setReposition(o_res->reposition());
-		res->setAutoLaunch(o_res->autolaunch());
+		res->setAutoLaunch(static_cast<EResource::AutoLaunch>(o_res->auto_launch()));
 		res->setLocalRange(o_res->range());
 		if (o_res->camera()) res->setCameraMatrix(TypesSerializer::fb2osgCameraMatrix(*o_res->camera()));
 		res->setCategoryIndex(o_res->category_index());
@@ -98,7 +98,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(
 		b_res.add_year_min(res->getMinYear());
 		b_res.add_year_max(res->getMaxYear());
 		b_res.add_reposition(res->getReposition());
-		b_res.add_autolaunch(res->getAutoLaunch());
+		b_res.add_auto_launch(static_cast<fb::AutoLaunch>(res->getAutoLaunch()));
 		b_res.add_range(res->getLocalRange());
 		fb::CameraPosDirUp s_camera = TypesSerializer::osg2fbCameraMatrix(res->getCameraMatrix());
 		b_res.add_camera(&s_camera);

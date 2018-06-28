@@ -27,6 +27,12 @@ enum ERType : byte {
   File
 }
 
+enum AutoLaunch : byte {
+  Off,
+  On,
+  Text
+}
+
 table EResource {
   type:ERType;
   name:string;
@@ -38,11 +44,12 @@ table EResource {
   year_min:int32;
   year_max:int32;
   reposition:bool;
-  autolaunch:bool;
+  autolaunch:bool; // deprecated
   range:float32;
   camera:CameraPosDirUp;
 
   category_index:int32;
+  auto_launch:AutoLaunch;
 }
 
 table ECategory {

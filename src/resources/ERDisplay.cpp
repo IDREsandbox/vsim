@@ -6,8 +6,6 @@ ERDisplay::ERDisplay(QWidget *parent)
 {
 	ui.setupUi(this);
 
-	ui.text->setWordWrap(true);
-
 	connect(ui.open, &QAbstractButton::pressed, this, &ERDisplay::sOpen);
 	connect(ui.goto_button, &QAbstractButton::pressed, this, &ERDisplay::sGoto);
 	connect(ui.close, &QAbstractButton::pressed, this, &ERDisplay::sClose);
@@ -37,7 +35,7 @@ void ERDisplay::reload()
 {
 	if (!m_er) return;
 	ui.title->setText(QString::fromStdString(m_er->getResourceName()));
-	ui.text->setText(QString::fromStdString(m_er->getResourceDescription()));
+	ui.description->setText(QString::fromStdString(m_er->getResourceDescription()));
 	ui.authors->setText(QString::fromStdString(m_er->getAuthor()));
 	bool can_open = m_er->getERType() != EResource::ERType::ANNOTATION;
 	ui.open->setEnabled(can_open);

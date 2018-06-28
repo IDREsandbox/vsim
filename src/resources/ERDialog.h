@@ -31,7 +31,8 @@ public:
 	int getMaxYear() const;
 	bool getGlobal() const;
 	bool getReposition() const;
-	bool getAutoLaunch() const;
+	//bool getAutoLaunch() const;
+	EResource::AutoLaunch getAutoLaunch() const;
 	float getLocalRange() const;
 	EResource::ERType getERType() const;
 
@@ -46,6 +47,7 @@ public:
 	void setPath(const QString &s); // use on load, or text edit
 	void setRelative(bool relative); // use on checkbox change
 	void checkRelative();
+	void checkAutoLaunch();
 
 	// Choose button depends on type
 	// URL bar depends on type

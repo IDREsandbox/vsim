@@ -35,6 +35,7 @@ ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWi
 	connect(ui.url, &QRadioButton::toggled, this, ontoggletype);
 	connect(ui.file, &QRadioButton::toggled, this, ontoggletype);
 	connect(ui.annotation, &QRadioButton::toggled, this, ontoggletype);
+
 	connect(ui.relative, &QAbstractButton::toggled, this, &ERDialog::setRelative);
 	connect(ui.path, &QLineEdit::textEdited, this, &ERDialog::setPath);
 
@@ -76,7 +77,7 @@ void ERDialog::init(const EResource * er)
 {
 	if (er == nullptr) { // Defaults
 		ui.title->setText("Untitled");
-		ui.description->setText("");
+		ui.description->setPlainText("");
 		ui.authors->setText("");
 		ui.authors->setText("");
 		// make all of the other fields just copy the previous?
@@ -84,7 +85,7 @@ void ERDialog::init(const EResource * er)
 	}
 
 	ui.title->setText(QString::fromStdString(er->getResourceName()));
-	ui.description->setText(QString::fromStdString(er->getResourceDescription()));
+	ui.description->setPlainText(QString::fromStdString(er->getResourceDescription()));
 	ui.authors->setText(QString::fromStdString(er->getAuthor()));
 	ui.year_lower->setValue(er->getMinYear());
 	ui.year_upper->setValue(er->getMaxYear());
@@ -94,7 +95,17 @@ void ERDialog::init(const EResource * er)
 	if (er->getGlobal()) ui.global->setChecked(true);
 	else ui.local->setChecked(true);
 
-	ui.autolaunch->setChecked(er->getAutoLaunch());
+	switch (er->getAutoLaunch()) {
+	case EResource::OFF:
+		ui.autolaunch_off->setChecked(true);
+		break;
+	case EResource::ON:
+		ui.autolaunch_on->setChecked(true);
+		break;
+	case EResource::TEXT:
+		ui.autolaunch_text->setChecked(true);
+		break;
+	}
 	ui.autoreposition->setChecked(er->getReposition());
 
 	switch (er->getERType()) {
@@ -110,6 +121,7 @@ void ERDialog::init(const EResource * er)
 	}
 	ui.path->setText(QString::fromStdString(er->getResourcePath()));
 	checkRelative();
+	checkAutoLaunch();
 	
 	// setup the category selection
 	setCategory(er->category());
@@ -161,9 +173,21 @@ bool ERDialog::getReposition() const
 	return ui.autoreposition->isChecked();
 }
 
-bool ERDialog::getAutoLaunch() const
+EResource::AutoLaunch ERDialog::getAutoLaunch() const
 {
-	return ui.autolaunch->isChecked();
+	EResource::AutoLaunch value;
+	if (ui.autolaunch_off->isChecked()) {
+		value = EResource::OFF;
+	}
+	else if (ui.autolaunch_on->isChecked()) {
+		value = EResource::ON;
+	}
+	else if (ui.autolaunch_text->isChecked()) {
+		value = EResource::TEXT;
+	}
+
+	return value;
+	//return ui.autolaunch->isChecked();
 	//return ui.autolaunch->isChecked() && getERType() != EResource::ANNOTATION;
 }
 
@@ -268,9 +292,12 @@ void ERDialog::setRelative(bool relative)
 
 	// is the path already relative/absolute?
 	if (QDir::isRelativePath(path) == relative) {
+		qDebug() << "already relative";
 		// don't do anything
 		return;
 	}
+
+	qDebug() << "current dir?" << m_current_dir;
 
 	QString new_path;
 	if (relative) {
@@ -295,6 +322,23 @@ void ERDialog::checkRelative()
 	}
 }
 
+void ERDialog::checkAutoLaunch()
+{
+	auto type = getERType();
+	auto al = getAutoLaunch();
+	if (type == EResource::ANNOTATION) {
+		ui.autolaunch_on->setEnabled(false);
+		if (al == EResource::ON) {
+			ui.autolaunch_off->setChecked(true);
+		}
+	}
+	else {
+		ui.autolaunch_on->setEnabled(true);
+	}
+	bool local = !getGlobal();
+	ui.autolaunch_zone->setEnabled(local);
+}
+
 void ERDialog::onTypeChange()
 {
 	if (ui.file->isChecked()) {
@@ -313,6 +357,7 @@ void ERDialog::onTypeChange()
 		ui.choose->setEnabled(false);
 		ui.relative->setEnabled(false);
 	}
+	checkAutoLaunch();
 }
 
 void ERDialog::onActivationChange()
@@ -323,4 +368,5 @@ void ERDialog::onActivationChange()
 	else if (ui.local->isChecked()) {
 		ui.radius->setEnabled(true);
 	}
+	checkAutoLaunch();
 }

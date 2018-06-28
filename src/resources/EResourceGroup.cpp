@@ -14,6 +14,17 @@ EResourceGroup::EResourceGroup(QObject *parent)
 	: TGroup<EResource>(parent)
 {
 	m_categories = new ECategoryGroup(this);
+
+	connect(this, &GroupSignals::sInsertedMulti, this, [this]() {
+		for (size_t i = 0; i < size(); i++) {
+			child(i)->setIndex(i);
+		}
+	});
+	connect(this, &GroupSignals::sRemovedMulti, this, [this]() {
+		for (size_t i = 0; i < size(); i++) {
+			child(i)->setIndex(i);
+		}
+	});
 }
 
 EResourceGroup::~EResourceGroup()

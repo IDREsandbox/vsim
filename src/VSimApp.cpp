@@ -229,8 +229,13 @@ std::string VSimApp::getFileName() const
 
 void VSimApp::setFileName(const std::string &str)
 {
-	m_filename = str;
-	m_window->setWindowTitle("VSim - " + QString::fromStdString(str));
+	std::string s = str;
+	if (!str.empty()) {
+		// force to be absolute path
+		s = QDir(str.c_str()).absolutePath().toStdString();
+	}
+	m_filename = s;
+	m_window->setWindowTitle("VSim - " + QString::fromStdString(s));
 }
 
 void VSimApp::setStatusMessage(const QString & message, int timeout)
