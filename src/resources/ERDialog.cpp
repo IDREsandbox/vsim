@@ -71,6 +71,10 @@ ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWi
 		ui.categories->setCurrentIndex(index.row());
 	});
 	connect(m_category_delegate, &EditDeleteDelegate::sDelete, m_control, &ECategoryControl::execDeleteCategory);
+
+	m_position_button =
+		ui.buttonBox->addButton("Set Position", QDialogButtonBox::ActionRole);
+	connect(m_position_button, &QPushButton::pressed, this, &ERDialog::sSetPosition);
 }
 
 void ERDialog::init(const EResource * er)
@@ -125,6 +129,11 @@ void ERDialog::init(const EResource * er)
 	
 	// setup the category selection
 	setCategory(er->category());
+}
+
+void ERDialog::showPositionButton(bool show)
+{
+	m_position_button->setVisible(show);
 }
 
 std::string ERDialog::getTitle() const

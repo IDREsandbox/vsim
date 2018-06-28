@@ -321,6 +321,10 @@ void ERControl::editERInfo()
 	ERDialog dlg(m_category_control, m_app->getCurrentDirectory().c_str());
 
 	dlg.init(resource);
+
+	dlg.showPositionButton();
+	connect(&dlg, &ERDialog::sSetPosition, this, &ERControl::setPosition);
+
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		qInfo() << "resource list - cancelled edit on" << resource;

@@ -21,6 +21,7 @@ public:
 	ERDialog(ECategoryControl *category_control, QString current_dir, QWidget *parent = nullptr);
 
 	void init(const EResource *er);
+	void showPositionButton(bool show = true); // default is off
 
 	std::string getTitle() const;
 	std::string getDescription() const;
@@ -62,6 +63,7 @@ signals:
 	void sNewCategory();
 	void sEditCategory(ECategory *category);
 	void sDeleteCategory(ECategory *category);
+	void sSetPosition();
 
 private:
 	Ui::ERDialog ui;
@@ -71,6 +73,7 @@ private:
 
 	QListView *m_category_view;
 	EditDeleteDelegate *m_category_delegate;
+	QPushButton *m_position_button;
 
 	ECategoryControl *m_control;
 };
