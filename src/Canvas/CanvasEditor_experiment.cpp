@@ -14,6 +14,7 @@
 #include <fstream>
 #include "Core/SimpleCommandStack.h"
 #include "Canvas/CanvasSerializer.h"
+#include "Canvas/CanvasControl.h"
 
 
 int main(int argc, char *argv[])
@@ -62,6 +63,20 @@ int main(int argc, char *argv[])
 	clear->setText("clear");
 	clear->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));
 
+	QAction *edit = new QAction(&window);
+	edit->setText("edit");
+	edit->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
+	QAction *noedit = new QAction(&window);
+	noedit->setText("stop edit");
+	noedit->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
+
+	QAction *select_link = new QAction(&window);
+	select_link->setText("select link");
+	select_link->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_L));
+	QAction *cursor_pos = new QAction(&window);
+	cursor_pos->setText("cursor pos");
+	cursor_pos->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
+
 	mb->addMenu(menu);
 	menu->addAction(undo);
 	menu->addAction(redo);
@@ -70,6 +85,10 @@ int main(int argc, char *argv[])
 	menu->addAction(save);
 	menu->addAction(load);
 	menu->addAction(clear);
+	menu->addAction(edit);
+	menu->addAction(noedit);
+	menu->addAction(select_link);
+	menu->addAction(cursor_pos);
 
 	window.setMenuBar(mb);
 
@@ -95,8 +114,10 @@ int main(int argc, char *argv[])
 
 	auto text = std::make_shared<CanvasLabel>();
 	text->setVAlign(Qt::AlignCenter);
-	text->document()->setPlainText("helloooo\nWORLd");
-	text->setRect(QRectF(0, 0, .2, .2));
+	text->document()->setHtml("helloooo<br/>"
+		"WORLd<br/>"
+		"test link: <a href=\"http://google.com\">google</a>");
+	text->setRect(QRectF(0, 0, .3, .2));
 	text->setBrush(QBrush(QColor(255, 0, 0, 100)));
 	text->setEditable(true);
 	scene->addItem(text);
@@ -173,6 +194,23 @@ int main(int argc, char *argv[])
 	QObject::connect(clear, &QAction::triggered, [&]() {
 		scene->clear();
 		qstack->clear();
+	});
+
+	QObject::connect(edit, &QAction::triggered, [&]() {
+		scene->setEditable(true);
+		qDebug() << "edit on";
+	});
+	QObject::connect(noedit, &QAction::triggered, [&]() {
+		scene->setEditable(false);
+		qDebug() << "edit off";
+	});
+	QObject::connect(select_link, &QAction::triggered, [&]() {
+		qDebug() << "select link";
+		editor->control()->selectLink();
+	});
+	QObject::connect(cursor_pos, &QAction::triggered, [&]() {
+		auto c = editor->control()->currentCursor();
+		qDebug() << "cursor pos" << c.position() << c.anchor();
 	});
 
 	return a.exec();

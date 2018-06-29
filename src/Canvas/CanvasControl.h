@@ -8,7 +8,9 @@
 #include <QUndoStack>
 #include <QTextCharFormat>
 #include <QTextDocument>
+#include <QTextCursor>
 #include <memory>
+
 #include "Canvas/LabelType.h"
 #include "Core/Command.h"
 
@@ -60,6 +62,13 @@ public: // command wrappers
 	void setStyle(LabelStyle *style);
 	void setTextColor(QColor c);
 
+	// possible operations
+	// 1. insert link (url, no selection)
+	// 2. remove link (no url, selection)
+	// 3. set link (url, selection)
+	// 4. remove link no command (no url, no selection)
+	void setLink(QString url);
+
 	void toggleBold();
 	void toggleUnderline();
 	void toggleStrikeOut();
@@ -76,6 +85,19 @@ public: // queries
 	std::set<CanvasLabel*> selectedLabels() const;
 	// selecting text within a single item
 	CanvasLabel *subText() const;
+
+	bool selectionEmpty() const;
+	QTextCursor currentCursor() const;
+
+	bool canSetLink() const;
+	QString currentLink() const;
+
+	// if text cursor has a link, expands the cursor's
+	// selection across the whole link
+	void selectLink() const;
+	static void cursorSelectLink(QTextCursor *c);
+	// if single select cursor is on the edge, beginning or end
+	bool linkEdge() const;
 
 	//
 	QColor allBackgroundColor() const;

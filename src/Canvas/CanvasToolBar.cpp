@@ -64,6 +64,8 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	QIcon i_strike(dir + "/assets/icons/canvas/format_strikethrough.png");
 	QIcon i_number(dir + "/assets/icons/canvas/format_list_numbered.png");
 	QIcon i_bullet(dir + "/assets/icons/canvas/format_list_bulleted.png");
+	QIcon i_link(dir + "/assets/icons/canvas/link.png");
+	QIcon i_link_off(dir + "/assets/icons/canvas/link_off.png");
 	QIcon i_left(dir + "/assets/icons/canvas/format_align_left.png");
 	QIcon i_center(dir + "/assets/icons/canvas/format_align_center.png");
 	QIcon i_right(dir + "/assets/icons/canvas/format_align_right.png");
@@ -186,6 +188,12 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	m_bullet = new QToolButton(this);
 	m_bullet->setIcon(i_bullet);
 	bullet_row->addWidget(m_bullet, 0, Qt::AlignLeft);
+	m_link = new QToolButton(this);
+	m_link->setIcon(i_link);
+	bullet_row->addWidget(m_link, 0, Qt::AlignLeft);
+	m_link_off = new QToolButton(this);
+	m_link_off->setIcon(i_link_off);
+	bullet_row->addWidget(m_link_off, 0, Qt::AlignLeft);
 	bullet_row->addStretch(1);
 
 	m_style = new QComboBox(m_font_box);
@@ -253,6 +261,7 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	ToolBox *spacer_box = new ToolBox(this);
 	spacer_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	QHBoxLayout *spacer_layout = new QHBoxLayout(spacer_box);
+	setMargins(spacer_layout);
 
 	m_done = new QPushButton(spacer_box);
 	m_done->setText("Done");

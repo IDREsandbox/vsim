@@ -10,6 +10,7 @@
 #include <QColorDialog>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QInputDialog>
 
 #include "Canvas/CanvasContainer.h"
 #include "Canvas/CanvasScene.h"
@@ -54,11 +55,10 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	a_delete = new QAction(this);
 	a_delete->setText("Delete");
 	a_delete->setShortcut(QKeySequence(Qt::Key_Delete));
-	m_tb->m_delete->setDefaultAction(a_delete);
-	//cc->setScene(canvas);
-	//cc->setStack(stack);
+	m_tb->m_delete->setDefaultAction(a_delete);;
 
-	// connecting toolbar to control
+	// toolbar -> control
+
 	m_button_type_map = {
 		{ m_tb->m_header1, LabelType::HEADER1 },
 		{ m_tb->m_header2, LabelType::HEADER2 },
@@ -101,6 +101,33 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	connect(m_tb->m_italicize, &QAbstractButton::clicked, m_cc, &CanvasControl::toggleItalic);
 	connect(m_tb->m_strikeout, &QAbstractButton::clicked, m_cc, &CanvasControl::toggleStrikeOut);
 	connect(m_tb->m_underline, &QAbstractButton::clicked, m_cc, &CanvasControl::toggleUnderline);
+
+	connect(m_tb->m_link, &QAbstractButton::clicked, this, [this]() {
+		// must be selecting a label
+		if (!m_cc->canSetLink()) return;
+
+		m_cc->selectLink();
+		bool edit_link = !m_cc->currentLink().isNull();
+
+		bool ok;
+		QString result = QInputDialog::getText(this,
+			edit_link ? "Edit Link" : "Insert Link",
+			"url",
+			QLineEdit::Normal,
+			edit_link ? m_cc->currentLink() : "",
+			&ok);
+
+		if (!ok) return;
+		m_cc->setLink(result);
+	});
+	connect(m_tb->m_link_off, &QAbstractButton::clicked, this, [this]() {
+		// try to select full link, unless its the edge
+		bool edge = m_cc->linkEdge();
+		if (!edge) {
+			m_cc->selectLink();
+		}
+		m_cc->setLink("");
+	});
 
 	connect(m_tb->m_bullet, &QAbstractButton::clicked, m_cc, &CanvasControl::listBullet);
 	connect(m_tb->m_number, &QAbstractButton::clicked, m_cc, &CanvasControl::listOrdered);

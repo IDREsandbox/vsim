@@ -664,6 +664,7 @@ CanvasLabel::CanvasLabel(QGraphicsItem * parent)
 	m_text = new TextItem(this);
 	m_text->show();
 	m_text->setTextInteractionFlags(Qt::TextEditorInteraction);
+	m_text->setOpenExternalLinks(true);
 
 	setBaseHeight(600);
 	setFocusProxy(m_text);

@@ -9,6 +9,7 @@
 #include <QTextFrame>
 #include <QDebug>
 #include <numeric>
+#include <QApplication>
 
 CanvasControl::CanvasControl(QObject *parent)
 	: QObject(parent),
@@ -199,6 +200,83 @@ void CanvasControl::setTextColor(QColor c)
 	mergeCharFormat(fmt);
 }
 
+void CanvasControl::setLink(QString url)
+{
+	CanvasLabel *label = subText();
+	if (!label) return;
+
+	// full behavior spec
+
+	// cursor inside a link
+	// -> edit the link (call selectLink() first)
+	// cursor inside no link
+	// -> insert the link as text
+	// selecting no link
+	// -> set link for selection
+	// selecting yes link
+	// -> edit the link
+
+	bool has_selection = !selectionEmpty();
+	bool url_ok = !url.isEmpty();
+
+	bool insert = !has_selection && url_ok;
+	bool remove = has_selection && !url_ok;
+	bool set = has_selection && url_ok;
+	bool remove_simple = !has_selection && !url_ok;
+
+	QTextCursor c = label->textCursor();
+
+	if (remove_simple) {
+		QTextCharFormat fmt = c.charFormat();
+		fmt.setAnchor(false);
+		fmt.setAnchorHref("");
+		fmt.clearForeground();
+		fmt.clearProperty(QTextFormat::TextUnderlineStyle);
+		c.setCharFormat(fmt);
+		label->setTextCursor(c);
+		return;
+	}
+
+	auto *cmd = m_stack->begin();
+	if (insert) cmd->setText("Insert Link");
+	if (remove) cmd->setText("Remove Link");
+	if (set) cmd->setText("Set Link");
+
+	beginWrapTextCommands(cmd);
+
+	if (insert || set) {
+		QTextCharFormat new_fmt;
+		new_fmt.setAnchor(true);
+		new_fmt.setAnchorHref(url);
+		new_fmt.setForeground(QApplication::palette().color(QPalette::Link));
+		new_fmt.setFontUnderline(true);
+		c.mergeCharFormat(new_fmt);
+	}
+
+	if (insert) {
+		// insert new link
+		c.insertText(url);
+	}
+
+	if (remove) {
+		// clear old link
+		// try to clear foreground, underline
+		QTextCharFormat fmt = c.charFormat();
+		fmt.setAnchor(false);
+		fmt.setAnchorHref("");
+		fmt.clearForeground();
+		fmt.clearProperty(QTextFormat::TextUnderlineStyle);
+
+		c.setCharFormat(fmt);
+	}
+
+	label->setTextCursor(c); // is this necessary?
+	endWrapTextCommands();
+	m_stack->end();
+
+	return;
+}
+
 void CanvasControl::setFont(const QString & family)
 {
 	QTextCharFormat fmt;
@@ -289,7 +367,6 @@ QUndoCommand *CanvasControl::createApplyLabelStyleCommand(CanvasLabel *label,
 	LabelStyle *s, QUndoCommand * parent)
 {
 	QUndoCommand *cmd = new QUndoCommand(parent);
-	//qDebug() << "create apply label command";
 
 	// NONE type -> style is nullptr -> return here after setting type
 	if (s == nullptr) {
@@ -376,6 +453,69 @@ CanvasLabel *CanvasControl::subText() const
 	return label;
 }
 
+bool CanvasControl::selectionEmpty() const
+{
+	CanvasLabel *label = subText();
+	if (!label) return true;
+	return label->textCursor().selectedText().isEmpty();
+}
+
+bool CanvasControl::canSetLink() const
+{
+	return (subText() != nullptr);
+}
+
+QString CanvasControl::currentLink() const
+{
+	CanvasLabel *label = subText();
+	if (!label) return QString();
+
+	auto fmt = label->textCursor().charFormat();
+	return fmt.anchorHref();
+}
+
+QTextCursor CanvasControl::currentCursor() const
+{
+	CanvasLabel *label = subText();
+	if (!label) return QTextCursor();
+
+	return label->textCursor();
+}
+
+void CanvasControl::selectLink() const
+{
+	CanvasLabel *label = subText();
+	if (!label) return;
+
+	QTextCursor c = label->textCursor();
+	cursorSelectLink(&c);
+	label->setTextCursor(c);
+}
+
+bool CanvasControl::linkEdge() const
+{
+	CanvasLabel *label = subText();
+	if (!label) return true;
+
+	QTextCursor c = label->textCursor();
+
+	// if beginning or end the true
+	if (c.atStart() || c.atEnd()) return true;
+
+	auto fmt = c.charFormat();
+
+	// check left edge:
+	if (!fmt.isAnchor()) return true;
+
+	// check right edge:
+	//  move right one
+	c.movePosition(QTextCursor::MoveOperation::Right, QTextCursor::MoveMode::MoveAnchor, 1);
+	fmt = c.charFormat();
+	if (!fmt.isAnchor()) return true;
+
+	return false;
+}
+
 bool CanvasControl::allBold() const
 {
 	return formatTest([](const QTextCharFormat &fmt)->bool {
@@ -449,6 +589,58 @@ QString CanvasControl::allFont() const
 		}
 	});
 	return s;
+}
+
+void CanvasControl::cursorSelectLink(QTextCursor *cursor)
+{
+	if (cursor->isNull()) return;
+	QTextCursor c = *cursor;
+
+	int start = c.selectionStart();
+	int end = c.selectionEnd();
+
+	// if already selecting range then quit
+	if (start != end) return;
+
+	auto fmt = c.charFormat();
+	bool is_anchor = fmt.isAnchor();
+	QString href = fmt.anchorHref();
+
+	// not a link, so nothing to select
+	if (!is_anchor) return;
+	if (href.isNull()) return;
+
+	// does this character match links?
+	auto acceptChar = [&](int pos) -> bool {
+		QTextCursor tester(c.document());
+		tester.setPosition(pos + 1);
+		auto tfmt = tester.charFormat();
+		if (!tfmt.isAnchor()) return false;
+		if (tfmt.anchorHref() != href) return false;
+		return true;
+	};
+
+	QTextDocument *doc = c.document();
+
+	// scan left then right, accept if anchor and same href
+
+	// (left - 1) tests the character to the left
+	int left;
+	for (left = start; left > 0; left--) {
+		if (!acceptChar(left - 1)) break;
+	}
+
+	// QTextDocument::characterCount() is +1 for some reason
+	// ex: "abc" -> 4, a text cursor at 4 is the end
+	int right;
+	for (right = end; right < doc->characterCount() - 1; right++) {
+		if (!acceptChar(right)) break;
+	}
+
+	// select the range
+	c.setPosition(left);
+	c.setPosition(right, QTextCursor::MoveMode::KeepAnchor);
+	*cursor = c;
 }
 
 QColor CanvasControl::allBackgroundColor() const

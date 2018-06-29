@@ -66,6 +66,8 @@ public:
 	QToolButton *m_strikeout;
 	QToolButton *m_number;
 	QToolButton *m_bullet;
+	QToolButton *m_link;
+	QToolButton *m_link_off;
 
 	QComboBox *m_style;
 	//QToolButton *m_apply_style;
