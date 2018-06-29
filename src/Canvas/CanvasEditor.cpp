@@ -305,13 +305,7 @@ void CanvasEditor::updateToolBar()
 
 	// label type
 	LabelType type = m_cc->allLabelType();
-	QString type_text;
-	if (type == LabelType::NONE) {
-		type_text = "";
-	} else {
-		type_text = LabelTypeNames[type];
-	}
-	m_tb->m_style->setCurrentText(type_text);
+	m_tb->m_style->setCurrentText(LabelTypeNames[type]);
 
 	// border width
 	int border = m_cc->allBorderSize();

@@ -291,10 +291,13 @@ QUndoCommand *CanvasControl::createApplyLabelStyleCommand(CanvasLabel *label,
 	QUndoCommand *cmd = new QUndoCommand(parent);
 	//qDebug() << "create apply label command";
 
-	new CanvasLabel::SetStyleTypeCommand(label, s->getType(), cmd);
-
 	// NONE type -> style is nullptr -> return here after setting type
-	if (s == nullptr) return cmd;
+	if (s == nullptr) {
+		new CanvasLabel::SetStyleTypeCommand(label, LabelType::NONE, cmd);
+		return cmd;
+	}
+
+	new CanvasLabel::SetStyleTypeCommand(label, s->getType(), cmd);
 
 	auto *frame = s->frameStyle();
 
