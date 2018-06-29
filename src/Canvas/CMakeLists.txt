@@ -25,6 +25,12 @@ set(Canvas_src
   ChildMaskFilter.cpp
   LabelStyleGroup.cpp
   LabelStyle.cpp
+  StyleSettingsDialog.cpp
+  StyleSettingsDialog.h
+  StyleSettingsDialog.ui
+  StyleSettingsWidget.cpp
+  StyleSettingsWidget.h
+  StyleSettingsWidget.ui
 )
 
 add_library(Canvas_obj ${Canvas_src} ${Canvas_h})

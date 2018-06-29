@@ -1,11 +1,7 @@
 #include "CanvasEditor.h"
+#include "CanvasEditor.h"
+#include "CanvasEditor.h"
 
-#include "Canvas/CanvasContainer.h"
-#include "Canvas/CanvasScene.h"
-#include "Canvas/CanvasToolBar.h"
-#include "Canvas/CanvasControl.h"
-#include "Canvas/LabelStyleGroup.h"
-#include "Canvas/LabelStyle.h"
 #include <QDebug>
 #include <QResizeEvent>
 #include <QtGlobal>
@@ -15,7 +11,14 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include "Canvas/CanvasContainer.h"
+#include "Canvas/CanvasScene.h"
+#include "Canvas/CanvasToolBar.h"
+#include "Canvas/CanvasControl.h"
+#include "Canvas/LabelStyleGroup.h"
+#include "Canvas/LabelStyle.h"
 #include "Canvas/ChildMaskFilter.h"
+#include "Canvas/StyleSettingsDialog.h"
 
 CanvasEditor::CanvasEditor(QWidget * parent)
 	: QWidget(parent),
@@ -171,7 +174,10 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	});
 
 	connect(m_tb->m_done, &QAbstractButton::clicked, this, &CanvasEditor::sDone);
-	connect(m_tb->m_edit_styles, &QAbstractButton::clicked, this, &CanvasEditor::sEditStyles);
+
+	// styles button
+	connect(m_tb->m_edit_styles, &QAbstractButton::clicked, this, &CanvasEditor::editStyles);
+	//connect(m_tb->m_edit_styles, &QAbstractButton::clicked, this, &CanvasEditor::sEditStyles);
 
 	setStyles(m_default_styles.get()); // stuff needs to exist
 }
@@ -233,6 +239,18 @@ void CanvasEditor::setEditable(bool editable)
 bool CanvasEditor::isEditable() const
 {
 	return m_editing_enabled;
+}
+
+void CanvasEditor::editStyles()
+{
+	StyleSettingsDialog dlg;
+	dlg.setStyles(m_styles);
+	connect(&dlg, &StyleSettingsDialog::sApplied, this,
+		&CanvasEditor::onStylesChanged);
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) {
+		return;
+	}
 }
 
 CanvasControl * CanvasEditor::control()
@@ -298,6 +316,11 @@ void CanvasEditor::updateToolBar()
 	// border width
 	int border = m_cc->allBorderSize();
 	m_tb->m_border_width->setValue(border);
+}
+
+void CanvasEditor::onStylesChanged()
+{
+	applyStylesToButtons();
 }
 
 CanvasWindow::CanvasWindow(QWidget *parent)

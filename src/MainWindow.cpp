@@ -48,7 +48,6 @@
 #include "NavigationControl.h"
 #include "AboutDialog.h"
 #include "CoordinateWidget.h"
-#include "WidgetStack.h"
 #include "Core/Util.h"
 
 #include "FileUtil.h"

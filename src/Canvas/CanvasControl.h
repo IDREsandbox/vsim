@@ -39,7 +39,7 @@ public:
 
 public: // command wrappers
 	//
-	std::shared_ptr<CanvasLabel> createLabel(LabelStyle *styles);
+	std::shared_ptr<CanvasLabel> createLabel(LabelStyle *);
 	std::shared_ptr<CanvasLabel> createLabelCommand(LabelStyle *styles);
 	std::shared_ptr<CanvasImage> createImage(QPixmap pixmap, FrameStyle *style = nullptr);
 	std::shared_ptr<CanvasImage> createImageCommand(QPixmap pixmap, FrameStyle *style = nullptr);

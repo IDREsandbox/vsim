@@ -109,6 +109,12 @@ set(VSim_src
   narrative/SlideScrollBox.h
   narrative/SlideScrollItem.cpp
   narrative/SlideScrollItem.h
+  # narrative/StyleSettingsDialog.cpp
+  # narrative/StyleSettingsDialog.h
+  # narrative/StyleSettingsDialog.ui
+  # narrative/StyleSettingsWidget.cpp
+  # narrative/StyleSettingsWidget.h
+  # narrative/StyleSettingsWidget.ui
 
   AboutDialog.cpp
   AboutDialog.h
@@ -182,10 +188,6 @@ set(VSim_src
   StatsWindow.cpp
   StatsWindow.h
   StatsWindow.ui
-  StyleSettingsDialog.cpp
-  StyleSettingsDialog.h
-  StyleSettingsWidget.cpp
-  StyleSettingsWidget.h
   TickSlider.cpp
   TickSlider.h
   TimeManager.cpp
@@ -194,8 +196,6 @@ set(VSim_src
   TimeSlider.h
   VSimApp.cpp
   VSimApp.h
-  WidgetStack.cpp
-  WidgetStack.h
 )
 add_library(VSim_obj ${VSim_src})
 target_link_libraries(VSim_obj VSimRoot_obj)

@@ -31,7 +31,8 @@ int main(int argc, char *argv[])
 	QAction *reload = menu->addAction("Reload style");
 	reload->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
 	auto reloadStyle = [&window]() {
-		QFile File("assets/darkstyle.qss");
+		QFile File(QCoreApplication::applicationDirPath()
+			+ "/assets/darkstyle.qss");
 		File.open(QFile::ReadOnly);
 		QString StyleSheet = QLatin1String(File.readAll());
 		window.setStyleSheet(StyleSheet);

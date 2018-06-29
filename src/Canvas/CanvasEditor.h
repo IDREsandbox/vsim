@@ -34,6 +34,8 @@ public:
 	void setEditable(bool editable);
 	bool isEditable() const;
 
+	void editStyles();
+
 	CanvasControl *control();
 	CanvasContainer *container();
 	CanvasWindow *internalWindow();
@@ -52,7 +54,9 @@ protected:
 	void showEvent(QShowEvent *e) override;
 
 private:
+	// internal callbacks
 	void updateToolBar();
+	void onStylesChanged();
 
 private:
 	// gui

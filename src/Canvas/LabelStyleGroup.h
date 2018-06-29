@@ -1,8 +1,6 @@
 #ifndef LABELSTYLEGROUP_H
 #define LABELSTYLEGROUP_H
 
-#include <QObject>
-#include <QUndoCommand>
 #include <memory>
 #include "Canvas/LabelType.h"
 

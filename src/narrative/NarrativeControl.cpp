@@ -24,7 +24,6 @@
 #include "VSimRoot.h"
 #include "Core/GroupCommands.h"
 
-#include "StyleSettingsDialog.h"
 #include "Canvas/LabelType.h"
 #include "Canvas/LabelStyle.h"
 #include "Canvas/LabelStyleGroup.h"
@@ -80,7 +79,13 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	//m_label_buttons->hide();
 	load(app->getRoot()->narratives());
 
-	connect(m_window, &MainWindow::sEditStyleSettings, this, &NarrativeControl::editStyleSettings);
+	connect(m_window, &MainWindow::sEditStyleSettings, this, [this]() {
+		if (getCurrentNarrativeIndex() < 0) {
+			qWarning() << "Can't edit styles: no active narrative";
+			return;
+		}
+		m_canvas->editStyles();
+	});
 
 	// app state
 	connect(m_app, &VSimApp::sReset, this, [this]() {
@@ -237,7 +242,6 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	});
 
 	connect(m_canvas, &CanvasEditor::sDone, this, &NarrativeControl::exitEdit);
-	connect(m_canvas, &CanvasEditor::sEditStyles, this, &NarrativeControl::editStyleSettings);
 
 	// dirty slide thumbnails
 	connect(m_slide_box, &SlideScrollBox::sThumbnailsDirty, this, 
@@ -246,42 +250,6 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	});
 
 	connect(window, &MainWindow::sDebugControl, this, &NarrativeControl::debug);
-}
-
-void NarrativeControl::editStyleSettings()
-{
-	Narrative *narrative = getCurrentNarrative();
-	if (!narrative) return;
-
-	StyleSettingsDialog dlg;
-	dlg.setStyles(narrative->labelStyles());
-	connect(&dlg, &StyleSettingsDialog::sApplied, this,
-		&NarrativeControl::onStylesChanged);
-	int result = dlg.exec();
-	if (result == QDialog::Rejected) {
-		return;
-	}
-}
-
-void NarrativeControl::onStylesChanged()
-{
-	Narrative *nar = getCurrentNarrative();
-	if (!nar) return;
-	LabelStyleGroup *g = nar->labelStyles();
-	m_canvas->setStyles(g);
-
-	//std::vector<LabelType> types = {
-	//	LabelType::BODY,
-	//	LabelType::HEADER1,
-	//	LabelType::HEADER2,
-	//	LabelType::LABEL,
-	//};
-	//for (auto type : types) {
-	//	QPushButton *button = m_label_buttons->button(type);
-	//	LabelStyle *style = g->getStyle(type);
-	//	style->applyToWidget(button, false);
-	//}
-	//m_label_buttons->adjustSize();
 }
 
 void NarrativeControl::newNarrative()
@@ -436,7 +404,7 @@ void NarrativeControl::openNarrative(int index)
 	m_current_narrative = index;
 	m_bar->setSlidesHeader(nar->getTitle());
 	m_slide_box->setGroup(nar);
-	onStylesChanged();
+	m_canvas->setStyles(nar->labelStyles());
 }
 
 bool NarrativeControl::openSlide(int index, bool go)

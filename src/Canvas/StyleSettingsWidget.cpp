@@ -1,4 +1,4 @@
-#include "StyleSettingsWidget.h"
+#include "Canvas/StyleSettingsWidget.h"
 
 #include <QColorDialog>
 #include <QFontDatabase>
@@ -22,6 +22,9 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	m_style = std::make_unique<LabelStyle>();
 
 	m_scene = new CanvasScene(this);
+	m_scene->setBaseHeight(300);
+	m_scene->setEditable(true);
+
 	m_control = new CanvasControl(this);
 	m_control->setScene(m_scene);
 
@@ -32,16 +35,17 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	layout->addWidget(m_canvas);
 	layout->setMargin(0);
 	m_canvas->setEditable(true);
-	//m_canvas->setBaseHeight(300);
 
-	m_scene->setBaseHeight(300);
 	m_canvas->setScene(m_scene);
 
-	m_canvas->setStyleSheet("NarrativeCanvas { background: rgb(50,50,50); }");
+	m_canvas->setObjectName("Canvas");
+	m_canvas->setStyleSheet("#Canvas { background: rgb(50,50,50); }");
 
 	// create a slide
 	m_label = m_control->createLabel(m_style.get());
-	m_label->setRect(QRectF(-.5, -.25, 1, .5));
+	m_label->setHtml("Sample Label");
+	m_label->setRect(-.5, -.3, 1, .6);
+	m_scene->addItem(m_label);
 
 	m_font_sizes = QFontDatabase::standardSizes();
 	QStringList size_strings;
@@ -58,7 +62,7 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	valign << "Top" << "Center" << "Bottom";
 	ui.valign->addItems(valign);
 
-	connect(ui.colorPicker, &QPushButton::clicked, this,
+	connect(ui.text_color, &QPushButton::clicked, this,
 		[this]() {
 		QColorDialog dlg;
 		dlg.setCurrentColor(m_style->m_fg_color);
@@ -67,11 +71,11 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 			return;
 		}
 		QColor color = dlg.selectedColor();
-		ui.colorPicker->setStyleSheet(Util::colorToStylesheet(color));
+		ui.text_color->setStyleSheet(Util::colorToStylesheet(color));
 		m_style->m_fg_color = color;
 		refresh();
 	});
-	connect(ui.colorPicker_bg, &QPushButton::clicked, this,
+	connect(ui.bg_color, &QPushButton::clicked, this,
 		[this]() {
 		QColorDialog dlg;
 		dlg.setOption(QColorDialog::ShowAlphaChannel, true);
@@ -81,8 +85,33 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 			return;
 		}
 		QColor color = dlg.selectedColor();
-		ui.colorPicker_bg->setStyleSheet(Util::colorToStylesheet(color));
+		ui.bg_color->setStyleSheet(Util::colorToStylesheet(color));
 		m_style->m_frame.m_bg_color = color;
+		refresh();
+	});
+	connect(ui.border_color, &QPushButton::clicked, this,
+		[this]() {
+		QColorDialog dlg;
+		dlg.setCurrentColor(m_style->m_frame.m_frame_color);
+		int result = dlg.exec();
+		if (result == QDialog::Rejected) {
+			return;
+		}
+		QColor color = dlg.selectedColor();
+		ui.border_color->setStyleSheet(Util::colorToStylesheet(color));
+		m_style->m_frame.m_has_frame = true;
+		m_style->m_frame.m_frame_color = color;
+		refresh();
+	});
+	connect(ui.border_width, QOverload<int>::of(&QSpinBox::valueChanged), this,
+		[this](int width) {
+		m_style->m_frame.m_has_frame = true;
+		m_style->m_frame.m_frame_width = width;
+		refresh();
+	});
+	connect(ui.border_clear, &QAbstractButton::pressed, this,
+		[this]() {
+		m_style->m_frame.m_has_frame = false;
 		refresh();
 	});
 	connect(ui.fontBox, &QFontComboBox::currentFontChanged, this,
@@ -172,8 +201,10 @@ void StyleSettingsWidget::setStyle(const LabelStyle * style)
 
 	// update all the ui stuff
 
-	ui.colorPicker->setStyleSheet(Util::colorToStylesheet(style->m_fg_color));
-	ui.colorPicker_bg->setStyleSheet(Util::colorToStylesheet(style->m_frame.m_bg_color));
+	ui.text_color->setStyleSheet(Util::colorToStylesheet(style->m_fg_color));
+	ui.bg_color->setStyleSheet(Util::colorToStylesheet(style->m_frame.m_bg_color));
+	ui.border_color->setStyleSheet(Util::colorToStylesheet(style->m_frame.m_frame_color));
+	ui.border_width->setValue(style->m_frame.m_frame_width);
 
 	ui.margin->setValue(style->m_margin);
 	//ui.width->setValue();

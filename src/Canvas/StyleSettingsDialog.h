@@ -19,6 +19,10 @@ public:
 	// uses the last set m_styles if null
 	void takeStyles(LabelStyleGroup *group = nullptr);
 
+	// use sApplied for ok and accept signal,
+	// the dialog already calls takeStyles
+	// int exec();
+
 signals:
 	void sApplied();
 
