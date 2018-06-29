@@ -297,10 +297,15 @@ install(FILES CHANGELOG.md COPYRIGHT LICENSE README.md THIRD-PARTY-NOTICES DESTI
 
 #assets copying
 file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}")
-add_custom_target(CopyAssets
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
+
+add_custom_command(
+  OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assets
+  COMMAND echo "Copying assets"
+  COMMAND COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/assets
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assets)
+add_custom_target(CopyAssets
+  DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assets)
 
 install(DIRECTORY assets DESTINATION .)
 
@@ -347,10 +352,14 @@ if (WIN32)
   file(COPY ${osgPluginsDebug} DESTINATION "${CMAKE_BINARY_DIR}/osgPlugins_debug")
   install(DIRECTORY ${osgPlugins} DESTINATION .)
 
+  add_custom_command(
+    OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${pluginsFolder}
+    COMMAND echo "Copying osg plugins"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_BINARY_DIR}/osgPlugins$<$<CONFIG:Debug>:_debug>/${pluginsFolder}
+      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${pluginsFolder})
   add_custom_target(CopyOSGPlugins
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_BINARY_DIR}/osgPlugins$<$<CONFIG:Debug>:_debug>
-    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR})
+    DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${pluginsFolder})
 
 endif()
 

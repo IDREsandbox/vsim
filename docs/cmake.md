@@ -116,6 +116,37 @@ NarrativeModel_objects - gui independent Narrative stuff, depends on Util, Depre
 VSim_objects - everything else
 VSim - main executable
 
+# Writing CMake
+
+Yeah yeah cmake is a big pain.
+
+## How to copy a folder
+
+ex: assets
+
+Copy a folder into working directory /build.
+
+`file(COPY assets DESTINATION "${CMAKE_BINARY_DIR}")`
+
+Copy a folder into executable directory. add_custom_target is run on every
+recompile, so to prevent re-copying files all the time you use
+add_custom_command, then make the target a dependency.
+
+```
+add_custom_command(
+  OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assets
+  COMMAND echo "Copying assets"
+  COMMAND COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assets)
+add_custom_target(CopyAssets
+  DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assets)
+```
+
+Copy a folder into install directory.
+
+`install(DIRECTORY assets DESTINATION .)`
+
 ## Styling
 
 Everything is case insensitive in cmake.
