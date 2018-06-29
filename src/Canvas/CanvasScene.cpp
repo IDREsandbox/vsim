@@ -6,6 +6,7 @@
 #include <QTextCursor>
 #include <QTextDocument>
 #include <QPainter>
+#include <QKeyEvent>
 #include "FocusFilter.h"
 #include "Core/WeakObject.h"
 
@@ -294,6 +295,23 @@ void CanvasScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
 {
 	QGraphicsScene::mouseReleaseEvent(mouseEvent);
 	//endTransform();
+}
+
+void CanvasScene::keyPressEvent(QKeyEvent * e)
+{
+	QGraphicsScene::keyPressEvent(e);
+
+	// This prevents arrow keys from shifting the viewport around
+	// It's a really indirect place to put it. Why here? because it works...
+	// If you filter out on QGraphicsView::keyPressEvent() or install an event
+	// filter then it prevents the presses from reaching CanvasLabels.
+	int key = e->key();
+	if (key == Qt::Key_Left
+		|| key == Qt::Key_Right
+		|| key == Qt::Key_Down
+		|| key == Qt::Key_Up) {
+		e->accept();
+	}
 }
 
 GiantRectItem::GiantRectItem(QRectF rect)

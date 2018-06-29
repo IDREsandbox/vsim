@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QCoreApplication>
 
+// ComboBoxLimiter filters out scroll wheel events
+// this is because scrolling dumps undo commands on every change
+// TODO: find solution, need a previewChanges kind of thing
 class ComboBoxLimiter : public QObject {
 public:
 	ComboBoxLimiter(QObject *parent = nullptr)

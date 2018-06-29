@@ -94,11 +94,6 @@ bool CanvasContainer::eventFilter(QObject * obj, QEvent * e)
 		if (ke->matches(QKeySequence::Redo) || ke->matches(QKeySequence::Undo)) {
 			return true;
 		}
-		// filter arrow scrolling
-		int key = ke->key();
-		if (key == Qt::Key_Left || key == Qt::Key_Right) {
-			return true;
-		}
 		break;
 	}
 	return false;

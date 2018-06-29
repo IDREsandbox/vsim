@@ -17,18 +17,52 @@ Events start at the children and propagate down. Calling ignore() or ::event ret
 makes a widget pass on the event to children.
  ignore and accept are opposites
 
+Indentation implies you get control back afterwards, it uses the stack.
+You can't get control back inside of a filter.
+
 Typical:
  1. filter
  2. ::event()
- 3. virtual mousePressEvent
+  3. virtual mousePressEvent
+(stop if accepted, continue if ignored)
+ 1. parent filter
+ 2. parent ::event()
+  3. parent virtual mousePressEvent
+(continue propagation...)
+
+Scroll Areas are a little funky
+What is this?
+ 0. QAbstractScrollArea::viewportEvent ?
 
 QGraphicsView is all messed up
- 0. QAbstractScrollArea::viewportEvent
- 1. view mousePressEvent
-  2. scene ::event()
-   3. scene mousePressEvent
-    4. item event
+ 1. view filter
+ 2. view ::event()
+  3. view mousePressEvent
+   4. scene ::event()
+    5. scene mousePressEvent
+     6. item filter
+     7. item event
+      8. item mousePressEvent
  (quit if view accept, continue if ignore)
- 5. view filter
- 6. view ::event()
 
+
+# Tricky situations
+
+## Canvas arrow keys
+
+Two goals:
+1. Send arrow key events to selected labels for cursor navigation
+2. Prevent default behavior of scrolling the viewport
+
+Problem:
+Solving #2 the typical way of eventFilter or keyPressEvent breaks #1.
+
+Where does this arrow key business even occur? I did some tests
+ dont call QGraphicsView::mousePressEvent()
+  -> no shifting, so it must be in here right? or after
+ dont call, and ignore()
+  -> no shifting still, so it can't be after, it really must be ^^
+
+Solution:
+Accept arrow key presses after calling QGraphicsScene::keyPressEvent.
+It seems wrong but it works. See CanvasScene::keyPressEvent.

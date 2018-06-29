@@ -118,6 +118,7 @@ signals:
 protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
+	void keyPressEvent(QKeyEvent *e) override;
 
 private:
 	std::map<CanvasItem*, QRectF> m_saved_rects;
