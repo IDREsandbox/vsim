@@ -1,5 +1,32 @@
 # Changelog
 
+## 2018-6-29
+
+### Embedded resources
+- Added "All Resources" scroll box
+- Added index number to ERs
+- Added auto launching, this might cause old files to lose their auto launch settings
+- Disabled auto launching for global resources
+- ER display: right click closes display
+- ER display: scroll bar added to description area
+- Edit ER dialog: initial global/local depends on which box you clicked on
+- Edit ER dialog: 40 character limit to ER edit dialog
+- Edit ER dialog: added set position button
+- ER scroll box: fx icon hidden
+- ER scroll box: distance hidden
+- Fixed launching ER files with spaces
+
+### Narratives
+- Hyperlinks
+- Borders around slide editor buttons
+- Arrow keys work when editing labels
+- Fixed 'None' style related crash
+- Added border color and border width to style settings dialog
+- Fixed preview in style settings dialog
+
+### Misc
+- Added hpr to the status bar
+
 ## 2018-5-24
 
 ### Added
