@@ -620,11 +620,11 @@ void ERControl::onUpdate()
 
 	// add to selection if possible
 	for (auto *res : trigger_list) {
-		if (isSelectable(res)) {
-			// if we're going somewhere then queue (want to keep target on top)
-			// if just moving around then stack (want to change target)
-			addToSelection(res, !m_going_to);
-		}
+		if (!isSelectable(res)) continue;
+
+		// if we're going somewhere then queue (want to keep target on top)
+		// if just moving around then stack (want to change target)
+		addToSelection(res, !m_going_to);
 
 		if (res->getAutoLaunch() == EResource::ON) {
 			// try to open this thing
