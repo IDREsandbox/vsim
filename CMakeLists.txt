@@ -311,16 +311,11 @@ install(DIRECTORY assets DESTINATION .)
 
 if (WIN32)
 
-  # installs dll's using vcpkg applocal tool
-  add_custom_target(InstallDLLs
-      COMMAND powershell -noprofile -executionpolicy Bypass -file ${_VCPKG_TOOLCHAIN_DIR}/msbuild/applocal.ps1
-      -targetBinary ${CMAKE_INSTALL_PREFIX}/VSim.exe
-      -installedDir "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin"
-      -OutVariable out
-  )
-  set_target_properties(InstallDLLs PROPERTIES EXCLUDE_FROM_ALL TRUE)
-  # runs this target after installation
-  install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build . --target InstallDLLs --config RELEASE)")
+  # install dlls
+  # hmm, well I guess it works...
+  install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/
+    DESTINATION .
+    FILES_MATCHING PATTERN "*.dll")
 
   set(vcpkgBin ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin)  
   file(GLOB osgSearch ${vcpkgBin}/osg*.dll) # osgSearch: /stuff/bin/osg148-osg.dll
