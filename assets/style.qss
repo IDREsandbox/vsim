@@ -1,6 +1,7 @@
 /* #mainSplitter, */
 #mainSplitter QPushButton,
 #mainSplitter QLabel,
+#mainSplitter ElidedLabel,
 #mainSplitter QCheckBox,
 #mainSplitter QGroupBox,
 #topBar,

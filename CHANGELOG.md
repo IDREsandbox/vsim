@@ -23,6 +23,7 @@
 - Fixed 'None' style related crash
 - Added border color and border width to style settings dialog
 - Fixed preview in style settings dialog
+- Narrative titles shrink to fit, narrative description ellipses
 
 ### Misc
 - Added hpr to the status bar
