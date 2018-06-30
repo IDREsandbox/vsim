@@ -103,6 +103,7 @@ set(VSim_src
   narrative/NarrativeScrollBox.h
   narrative/NarrativeScrollItem.cpp
   narrative/NarrativeScrollItem.h
+  narrative/NarrativeScrollItem.ui
   narrative/NarrativeSlideDurationDialog.cpp
   narrative/NarrativeSlideDurationDialog.h
   narrative/SlideScrollBox.cpp
@@ -127,6 +128,8 @@ set(VSim_src
   editButtons.h
   EditDeleteDelegate.cpp
   EditDeleteDelegate.h
+  ElidedLabel.cpp
+  ElidedLabel.h
   ERBar.cpp
   ERBar.h
   ERBar.ui

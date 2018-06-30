@@ -5,6 +5,7 @@ NarrativeScrollItem::NarrativeScrollItem(QWidget *parent)
 	m_narrative(nullptr)
 {
 	ui.setupUi(this);
+	ui.description->setHAlign(Qt::AlignHCenter);
 }
 
 void NarrativeScrollItem::setNarrative(Narrative *narrative)
@@ -20,7 +21,10 @@ void NarrativeScrollItem::setNarrative(Narrative *narrative)
 	
 	// connections
 	connect(narrative, &Narrative::sTitleChanged, this,
-		[this](const std::string &text) {ui.title->setText(QString::fromStdString(text)); });
+		[this](const std::string &text) {
+		ui.title->setText(QString::fromStdString(text));
+		fitTitle();
+	});
 	connect(narrative, &Narrative::sDescriptionChanged, this,
 		[this](const std::string &text) {ui.description->setText(QString::fromStdString(text)); });
 	connect(narrative, &Narrative::sAuthorChanged, this,
@@ -30,5 +34,39 @@ void NarrativeScrollItem::setNarrative(Narrative *narrative)
 int NarrativeScrollItem::widthFromHeight(int height) const
 {
 	return 16.0/9.0 * height;
+}
+
+void NarrativeScrollItem::fitTitle()
+{
+	auto *label = ui.title;
+
+	int base_size = 12;
+	int small_size = 9;
+
+	label->setWordWrap(true);
+
+	QFont font = label->font();
+	font.setPointSize(base_size);
+
+	QString text = m_narrative->getTitle().c_str();
+	QFontMetrics metrics(font);
+
+	QSize bound(label->width(), label->height());
+
+	QRect br = label->rect();
+
+	QRect tr = metrics.boundingRect(0, 0, label->width(), label->height(), Qt::TextWordWrap, text);
+
+	if (tr.height() > br.height()
+		|| tr.width() > br.width()) {
+		// use the smaller font size
+		font.setPointSize(small_size);
+	}
+	label->setFont(font);
+}
+
+void NarrativeScrollItem::resizeEvent(QResizeEvent * e)
+{
+	fitTitle();
 }
 

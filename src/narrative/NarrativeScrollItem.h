@@ -14,6 +14,12 @@ public:
 
 	virtual int widthFromHeight(int height) const;
 
+	// scales the title to fit
+	void fitTitle();
+
+protected:
+	void resizeEvent(QResizeEvent *e) override;
+
 private:
 	Ui::NarrativeScrollItem ui;
 	Narrative *m_narrative;
