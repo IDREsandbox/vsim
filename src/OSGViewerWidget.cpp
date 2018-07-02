@@ -279,8 +279,9 @@ void OSGViewerWidget::setManipulator(Manipulator manipulator)
 
 void OSGViewerWidget::adjustSpeed(int tick)
 {
+	int speed_limit = 40;
 	m_speed_tick += tick;
-	m_speed_tick = std::max(std::min(m_speed_tick, 28), -28);
+	m_speed_tick = std::clamp(m_speed_tick, -speed_limit, speed_limit);
 	m_first_person_manipulator->setSpeedTick(m_speed_tick);
 	m_flight_manipulator->setSpeedTick(m_speed_tick);
 }
