@@ -131,7 +131,8 @@ void NarrativePlayer::prev()
 void NarrativePlayer::toTransitioning()
 {
 	// get the next slide matrix & transition
-	int next_index = m_narratives->getCurrentSlideIndex() + 1;
+	int next_index = m_narratives->getTopSlide() + 1;
+
 	NarrativeSlide *next = m_narratives->getSlide(m_narratives->getCurrentNarrativeIndex(),
 		next_index);
 

@@ -660,6 +660,12 @@ SelectionData NarrativeControl::getSelectedSlides() const
 	return m_slide_selection->data();
 }
 
+int NarrativeControl::getTopSlide() const
+{
+	if (m_current_narrative < 0) return -1;
+	return m_slide_selection->last();
+}
+
 Narrative * NarrativeControl::getCurrentNarrative() const
 {
 	if (m_current_narrative < 0) return nullptr;

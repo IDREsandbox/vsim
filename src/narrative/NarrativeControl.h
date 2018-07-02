@@ -81,9 +81,12 @@ public:
 	int getCurrentNarrativeIndex() const;
 	std::set<size_t> getSelectedNarratives() const;
 
+	// current slide is an opened slide
+	// top slide is the last selected
 	NarrativeSlide *getCurrentSlide() const;
 	int getCurrentSlideIndex() const;
 	SelectionData getSelectedSlides() const;
+	int getTopSlide() const;
 	
 	Narrative *getNarrative(int index) const;
 	NarrativeSlide *getSlide(int narrative, int slide) const;
