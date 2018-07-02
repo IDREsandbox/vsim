@@ -31,22 +31,27 @@ public:
 
 	void enableGravity(bool enable);
 	void enableCollisions(bool enable);
+	void clearGravity(); // resets gravity velocity to 0
 
 private:
 	double m_sensitivity;
 
 	int m_speed_tick;
 
+	// delta position to be applied on next frame, from move up/right/forward
 	// stored relative to current position, 
 	// [right up -fwd]
 	osg::Vec3d m_position_delta;
 
-	double m_gravity_acceleration; // m/s^2
+	double m_gravity_acceleration; // m/s^2, negative
+	double m_gravity_max_speed;
 	bool m_gravity_on;
 	double m_gravity_velocity;
 
 	bool m_collision_on;
 	double m_collision_radius;
+
+	double m_collision_height;
 };
 
 #endif

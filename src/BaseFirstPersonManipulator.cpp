@@ -5,10 +5,12 @@
 BaseFirstPersonManipulator::BaseFirstPersonManipulator()
 	: m_sensitivity(.25),
 	m_position_delta(),
-	m_gravity_acceleration(-4.0),
+	m_gravity_acceleration(-6.0),
+	m_gravity_max_speed(6.0),
 	m_gravity_on(false),
 	m_collision_on(false),
-	m_collision_radius(1.0)
+	m_collision_radius(.5),
+	m_collision_height(2.0)
 {
 	stop();
 }
@@ -30,41 +32,52 @@ void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::No
 
 	if (m_gravity_on) {
 		// update velocity
-		m_gravity_velocity -= m_gravity_acceleration;
-		m_gravity_velocity = std::max(m_gravity_velocity, -20.0);
+		m_gravity_velocity += m_gravity_acceleration * dt_sec;
+		m_gravity_velocity = std::max(m_gravity_velocity, -m_gravity_max_speed);
 
 		// gravity speed limit
 		// not moving up/down relative to person, going relative to world
 		//moveUp(-m_gravity_velocity * dt_sec);
-		new_pos[2] -= m_gravity_velocity * dt_sec;
+		new_pos[2] += m_gravity_velocity * dt_sec;
 	}
 
 	// physics
 	if (m_collision_on && new_pos != pos) {
 
+		// ground collision test
+		osg::Vec3d up = osg::Vec3d(0, 0, m_collision_height);
+		osg::Vec3d new_pos_down = new_pos - up;
+
+		osg::ref_ptr<osgUtil::LineSegmentIntersector> gline =
+			new osgUtil::LineSegmentIntersector(new_pos, new_pos_down);
+
+		osgUtil::IntersectionVisitor giv(gline.get());
+		world->accept(giv);
+
+		if (gline->containsIntersections()) {
+			osg::Vec3d point = gline->getIntersections().begin()->getWorldIntersectPoint();
+			// perform a step upward from the ground
+			new_pos = point + up;
+		}
+
+		// forward collision test
 		// extend the movement vector by 1m or so forward to make up for the near clip
 		osg::Vec3d dir = new_pos - pos;
 		dir.normalize();
 		osg::Vec3d new_pos_plus = new_pos + dir * m_collision_radius;
 
-		osg::ref_ptr<osgUtil::LineSegmentIntersector> lsi = new osgUtil::LineSegmentIntersector(pos, new_pos_plus);
+		osg::ref_ptr<osgUtil::LineSegmentIntersector> vline = new osgUtil::LineSegmentIntersector(pos, new_pos_plus);
 
-		osgUtil::IntersectionVisitor iv(lsi.get());
-		iv.setTraversalMask(0xffffffff);
+		osgUtil::IntersectionVisitor iv(vline.get());
 		world->accept(iv);
 
-		if (lsi->containsIntersections()) {
-			osg::Vec3d point = lsi->getIntersections().begin()->getWorldIntersectPoint();
-			osg::Vec3d normal = lsi->getIntersections().begin()->getWorldIntersectNormal();
+		if (vline->containsIntersections()) {
+			osg::Vec3d point = vline->getIntersections().begin()->getWorldIntersectPoint();
+			osg::Vec3d normal = vline->getIntersections().begin()->getWorldIntersectNormal();
 			// if intersection then don't move
 			new_pos = pos;
 		}
 	}
-	
-	// delta z becomes the new gravity velocity
-	// limit it to less than 0
-	osg::Vec3d delta = new_pos - pos;
-	m_gravity_velocity = std::min(delta[2] / dt_sec, 0.0);
 
 	mat.setTrans(new_pos);
 	setByMatrix(mat);
@@ -145,4 +158,9 @@ void BaseFirstPersonManipulator::enableGravity(bool enable)
 void BaseFirstPersonManipulator::enableCollisions(bool enable)
 {
 	m_collision_on = enable;
+}
+
+void BaseFirstPersonManipulator::clearGravity()
+{
+	m_gravity_velocity = 0;
 }
