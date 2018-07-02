@@ -1,4 +1,5 @@
 include "Core/types.fbs";
+include "Canvas/canvas.fbs";
 include "eresources.fbs";
 include "narratives.fbs";
 include "settings.fbs";
@@ -34,6 +35,7 @@ table Root {
   models:ModelTable;
 
   settings:Settings;
+  branding:Canvas;
 }
 
 root_type Root;

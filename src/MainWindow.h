@@ -27,7 +27,7 @@ class HistoryWindow;
 class CoordinateWidget;
 class CanvasEditor;
 class CanvasContainer;
-class WidgetStack;
+class BrandingOverlay;
 
 class MainWindow : public QMainWindow
 {
@@ -50,8 +50,7 @@ public:
 	CanvasContainer *fadeCanvas() const;
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
-	// editButtons *labelButtons() const;
-	// TextToolbar *textToolbar() const;
+	BrandingOverlay *brandingOverlay() const;
 
 	QMenu *navigationMenu() const;
 
@@ -123,7 +122,7 @@ private:
 	StatsWindow *m_stats_window;
 	HistoryWindow *m_history_window;
 	CoordinateWidget *m_coordinate_widget;
-	WidgetStack *m_widget_stack;
+	BrandingOverlay *m_branding_overlay;
 
 	QActionGroup *m_navigation_action_group;
 	QAction *m_action_first_person;

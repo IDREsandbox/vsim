@@ -42,7 +42,8 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_window(window), 
 	m_current_narrative(-1),
 	m_narrative_group(nullptr),
-	m_canvas_enabled(true)
+	m_canvas_enabled(true),
+	m_canvas_stack_wrapper(this)
 {
 	m_bar = window->topBar();
 	m_narrative_box = window->topBar()->ui.narratives;
@@ -53,8 +54,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_fade_canvas = window->fadeCanvas();
 	m_undo_stack = m_app->getUndoStack();
 
-	m_canvas_stack_wrapper = new CanvasStackWrapper(this);
-	m_canvas->setStack(m_canvas_stack_wrapper);
+	m_canvas->setStack(&m_canvas_stack_wrapper);
 
 	m_fade_in = new QGraphicsOpacityEffect(m_canvas);
 	m_fade_in->setOpacity(1.0);

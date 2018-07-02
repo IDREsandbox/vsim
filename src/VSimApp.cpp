@@ -36,6 +36,7 @@
 #include "FileUtil.h"
 #include "ModelGroup.h"
 #include "TimeManager.h"
+#include "BrandingControl.h"
 
 #include <QMenuBar>
 
@@ -69,6 +70,7 @@ VSimApp::VSimApp(MainWindow* window)
 	m_narrative_control = new NarrativeControl(this, m_window, this);
 	m_er_control = new ERControl(this, m_window, this);
 	m_navigation_control = new NavigationControl(this, m_window->getViewerWidget(), this);
+	m_branding_control = new BrandingControl(this, m_root->branding(), m_window->brandingOverlay(), this);
 
 	// thumbnails
 	m_thumbnail_size = QSize(288, 162);
@@ -338,4 +340,9 @@ NavigationControl * VSimApp::navigationControl() const
 TimeManager * VSimApp::timeManager() const
 {
 	return m_time_manager;
+}
+
+BrandingControl * VSimApp::brandingControl() const
+{
+	return m_branding_control;
 }

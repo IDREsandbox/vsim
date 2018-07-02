@@ -31,6 +31,7 @@ class NarrativeSlide;
 class CanvasContainer;
 class OSGViewerWidget;
 class TimeManager;
+class BrandingControl;
 
 class VSimApp : public QObject
 {
@@ -52,6 +53,7 @@ public:
 		EDIT_CANVAS,
 		EDIT_ERS,
 		EDIT_FLYING,
+		EDIT_BRANDING,
 		PLAY_WAIT_CLICK,
 		PLAY_WAIT_TIME,
 		PLAY_TRANSITION,
@@ -64,6 +66,7 @@ public:
 		"Edit Canvas",
 		"Edit ERs",
 		"Edit Flying",
+		"Edit Branding",
 		"Play Wait Click",
 		"Play Wait Time",
 		"Play Transition",
@@ -112,6 +115,7 @@ public:
 	ERControl *erControl() const;
 	NavigationControl *navigationControl() const;
 	TimeManager *timeManager() const;
+	BrandingControl *brandingControl() const;
 
 	void debugCamera();
 
@@ -146,6 +150,7 @@ private:
 	NarrativePlayer *m_narrative_player;
 	NavigationControl *m_navigation_control;
 	TimeManager *m_time_manager;
+	BrandingControl *m_branding_control;
 
 	osg::Matrixd m_camera_start;
 	osg::Matrixd m_camera_target;

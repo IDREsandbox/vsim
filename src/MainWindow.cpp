@@ -23,6 +23,7 @@
 #include "HistoryWindow.h"
 #include "FutureDialog.h"
 #include "SimpleWorker.h"
+#include "BrandingOverlay.h"
 
 #include "narrative/NarrativeGroup.h"
 #include "narrative/NarrativePlayer.h"
@@ -48,6 +49,7 @@
 #include "NavigationControl.h"
 #include "AboutDialog.h"
 #include "CoordinateWidget.h"
+#include "BrandingControl.h"
 #include "Core/Util.h"
 
 #include "FileUtil.h"
@@ -87,6 +89,14 @@ MainWindow::MainWindow(QWidget *parent)
 	m_fade_canvas->setAttribute(Qt::WA_TransparentForMouseEvents);
 	m_fade_canvas->setStyleSheet("#canvas{background:rgba(0, 0, 0, 0);}");
 
+	m_branding_overlay = new BrandingOverlay(ui->root);
+	m_branding_overlay->setObjectName("branding");
+	ui->rootLayout->addWidget(m_branding_overlay, 0, 0);
+	// put the toolbar on top over everything
+	auto *branding_window = m_branding_overlay->m_editor->internalWindow();
+	branding_window->setParent(ui->root);
+	ui->rootLayout->addWidget(branding_window, 0, 0);
+
 	// splitter on top of osg viewer
 	// mask allows events to get to the canvas
 	//ui->mainSplitter->setParent(m_osg_widget);
@@ -111,16 +121,11 @@ MainWindow::MainWindow(QWidget *parent)
 	m_er_filter_area->hide();
 
 	// layering
+	m_branding_overlay->lower();
 	canvas_window->lower();
 	m_canvas->lower();
 	m_fade_canvas->lower();
 	m_osg_widget->lower();
-
-	// layering
-	//m_widget_stack->push(m_osg_widget);
-	//m_widget_stack->push(m_fade_canvas);
-	//m_widget_stack->push(m_canvas);
-	//m_widget_stack->push(ui->mainSplitter);
 
 	// vsimapp file stuff
 	connect(ui->actionNew, &QAction::triggered, this, &MainWindow::actionNew);
@@ -305,6 +310,9 @@ void MainWindow::setApp(VSimApp * vsim)
 	rmenu->addSeparator();
 	rmenu->addAction(nav->a_cycle_mode);
 	rmenu->addActions(nav->m_mode_group->actions());
+
+	QMenu *smenu = ui->menuSettings;
+	smenu->addAction(m_app->brandingControl()->a_edit);
 }
 
 void MainWindow::onReset()
@@ -356,6 +364,11 @@ ModelOutliner * MainWindow::outliner() const
 TimeSlider * MainWindow::timeSlider() const
 {
 	return m_time_slider;
+}
+
+BrandingOverlay * MainWindow::brandingOverlay() const
+{
+	return m_branding_overlay;
 }
 
 QMenu * MainWindow::navigationMenu() const

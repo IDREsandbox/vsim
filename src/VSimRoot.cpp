@@ -1,6 +1,9 @@
 #include "VSimRoot.h"
 
 #include <iostream>
+#include <QDate>
+#include <QThread>
+#include <QEvent>
 
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeGroup.h"
@@ -14,10 +17,8 @@
 #include "deprecated/resources/EResourcesList.h"
 #include "deprecated/ModelInformationOld.h"
 #include "deprecated/narrative/NarrativeOld.h"
-#include <QDate>
-#include <QThread>
-#include <QEvent>
 #include "Core/Util.h"
+#include "Canvas/CanvasScene.h"
 
 // debug
 #include "Canvas/LabelStyleGroup.h"
@@ -33,6 +34,7 @@ VSimRoot::VSimRoot(QObject *parent)
 	m_resources = std::make_unique<EResourceGroup>();
 
 	m_settings = std::make_unique<VSim::FlatBuffers::SettingsT>();
+	m_branding_canvas = std::make_unique<CanvasScene>();
 }
 
 VSimRoot::~VSimRoot()
@@ -49,6 +51,7 @@ void VSimRoot::take(VSimRoot * other)
 	m_models->copyReference(*other->m_models);
 
 	m_settings.swap(other->m_settings);
+	m_branding_canvas->copy(*other->m_branding_canvas);
 }
 
 NarrativeGroup * VSimRoot::narratives() const
@@ -58,6 +61,10 @@ NarrativeGroup * VSimRoot::narratives() const
 ModelGroup * VSimRoot::models() const
 {
 	return m_models.get();
+}
+CanvasScene * VSimRoot::branding() const
+{
+	return m_branding_canvas.get();
 }
 EResourceGroup * VSimRoot::resources() const
 {

@@ -265,6 +265,7 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 
 	m_done = new QPushButton(spacer_box);
 	m_done->setText("Done");
+	m_done->setShortcut(QKeySequence(Qt::Key_Escape));
 	spacer_layout->addWidget(m_done, 0, Qt::AlignBottom);
 
 	// add boxes to toolbar

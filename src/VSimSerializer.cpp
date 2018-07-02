@@ -1,14 +1,17 @@
 #include "VSimSerializer.h"
-#include "NarrativeSerializer.h"
-#include "ERSerializer.h"
-#include "VSimRoot.h"
-#include "ModelGroup.h"
-#include "Model.h"
+
 #include <flatbuffers/flatbuffers.h>
 #include <sstream>
 #include <iterator>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
+
+#include "Canvas/CanvasSerializer.h"
+#include "NarrativeSerializer.h"
+#include "ERSerializer.h"
+#include "VSimRoot.h"
+#include "ModelGroup.h"
+#include "Model.h"
 
 namespace fb = VSim::FlatBuffers;
 
@@ -253,6 +256,9 @@ void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer, VSimRoot *r
 	if (buffer->settings()) {
 		buffer->settings()->UnPackTo(root->settings());
 	}
+	if (buffer->branding()) {
+		CanvasSerializer::readCanvas(buffer->branding(), root->branding());
+	}
 }
 
 flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
@@ -264,6 +270,7 @@ flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
 	auto o_ers = ERSerializer::createERTable(builder, root->resources());
 	auto o_models = createModels(builder, root->models(), model_data);
 	auto o_settings = fb::CreateSettings(*builder, root->settings());
+	auto o_branding = CanvasSerializer::createCanvas(builder, root->branding());
 
 	fb::RootBuilder b_root(*builder);
 	b_root.add_version(o_version);
@@ -271,6 +278,7 @@ flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
 	b_root.add_eresources(o_ers);
 	b_root.add_models(o_models);
 	b_root.add_settings(o_settings);
+	b_root.add_branding(o_branding);
 	auto o_root = b_root.Finish();
 
 	return o_root;

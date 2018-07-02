@@ -133,6 +133,47 @@ public: // Actions
 private:
 	void enableEditing(bool enable);
 
+private: // classes
+	class SelectNarrativesCommand : public QUndoCommand {
+	public:
+		SelectNarrativesCommand(NarrativeControl *control, const SelectionData &narratives, Command::When when = Command::ON_BOTH, QUndoCommand *parent = nullptr);
+		void undo() override;
+		void redo() override;
+	private:
+		NarrativeControl * m_control;
+		Command::When m_when;
+		SelectionData m_narratives;
+	};
+
+	class SelectSlidesCommand : public QUndoCommand {
+	public:
+		SelectSlidesCommand(NarrativeControl *control,
+			int narrative, const SelectionData &slides,
+			Command::When when = Command::ON_BOTH,
+			bool edit = false,
+			QUndoCommand *parent = nullptr);
+		void undo() override;
+		void redo() override;
+	private:
+		NarrativeControl * m_control;
+		Command::When m_when;
+		int m_narrative;
+		SelectionData m_slides;
+		bool m_edit;
+	};
+
+	class CanvasStackWrapper : public ICommandStack {
+	public:
+		CanvasStackWrapper(NarrativeControl *control);
+		// overrides
+		QUndoCommand *begin() override;
+		void end() override;
+	private:
+		NarrativeControl * m_control;
+		QUndoStack *m_stack;
+		SelectSlidesCommand *m_cmd;
+	};
+
 private:
 	VSimApp *m_app;
 	int m_current_narrative; // opened narrative
@@ -159,49 +200,7 @@ private:
 	CanvasContainer *m_fade_canvas;
 
 	QUndoStack *m_undo_stack;
-	class CanvasStackWrapper;
-	CanvasStackWrapper *m_canvas_stack_wrapper;
-
-private:
-	class SelectNarrativesCommand : public QUndoCommand {
-	public:
-		SelectNarrativesCommand(NarrativeControl *control, const SelectionData &narratives, Command::When when = Command::ON_BOTH, QUndoCommand *parent = nullptr);
-		void undo();
-		void redo();
-	private:
-		NarrativeControl * m_control;
-		Command::When m_when;
-		SelectionData m_narratives;
-	};
-
-	class SelectSlidesCommand : public QUndoCommand {
-	public:
-		SelectSlidesCommand(NarrativeControl *control,
-			int narrative, const SelectionData &slides,
-			Command::When when = Command::ON_BOTH,
-			bool edit = false,
-			QUndoCommand *parent = nullptr);
-		void undo();
-		void redo();
-	private:
-		NarrativeControl * m_control;
-		Command::When m_when;
-		int m_narrative;
-		SelectionData m_slides;
-		bool m_edit;
-	};
-
-	class CanvasStackWrapper : public ICommandStack {
-	public:
-		CanvasStackWrapper(NarrativeControl *control);
-		// overrides
-		QUndoCommand *begin() override;
-		void end() override;
-	private:
-		NarrativeControl * m_control;
-		QUndoStack *m_stack;
-		SelectSlidesCommand *m_cmd;
-	};
+	CanvasStackWrapper m_canvas_stack_wrapper;
 };
 
 #endif

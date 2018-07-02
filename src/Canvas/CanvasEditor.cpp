@@ -57,6 +57,12 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	a_delete->setShortcut(QKeySequence(Qt::Key_Delete));
 	m_tb->m_delete->setDefaultAction(a_delete);;
 
+	// styling
+	QFile file(QCoreApplication::applicationDirPath() + "/assets/darkstyle.qss");
+	file.open(QFile::ReadOnly);
+	QString dark_style = QLatin1String(file.readAll());
+	internalWindow()->setStyleSheet(dark_style);
+
 	// toolbar -> control
 
 	m_button_type_map = {

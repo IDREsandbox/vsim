@@ -122,6 +122,10 @@ set(VSim_src
   AboutDialog.ui
   BaseFirstPersonManipulator.cpp
   BaseFirstPersonManipulator.h
+  BrandingOverlay.cpp
+  BrandingOverlay.h
+  BrandingControl.cpp
+  BrandingControl.h
   CoordinateWidget.cpp
   CoordinateWidget.h
   editButtons.cpp

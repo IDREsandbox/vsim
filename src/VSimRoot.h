@@ -9,7 +9,7 @@ class NarrativeGroup;
 class ModelGroup;
 class EResourceGroup;
 class ECategoryGroup;
-class QThread;
+class CanvasScene;
 namespace VSim { namespace FlatBuffers {
 	struct SettingsT;
 }}
@@ -30,6 +30,7 @@ public:
 	NarrativeGroup *narratives() const;
 	EResourceGroup *resources() const;
 	ModelGroup *models() const;
+	CanvasScene *branding() const;
 
 	// settings stuff, there is no settings class yet
 	void copySettings(const VSimRoot *other);
@@ -45,6 +46,7 @@ private:
 	std::unique_ptr<ModelGroup> m_models;
 	std::unique_ptr<EResourceGroup> m_resources;
 	std::unique_ptr<VSim::FlatBuffers::SettingsT> m_settings;
+	std::unique_ptr<CanvasScene> m_branding_canvas;
 };
 
 #endif
