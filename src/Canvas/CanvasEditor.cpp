@@ -23,7 +23,8 @@
 
 CanvasEditor::CanvasEditor(QWidget * parent)
 	: QWidget(parent),
-	m_styles(nullptr)
+	m_styles(nullptr),
+	m_scene(nullptr)
 {
 	QGridLayout *layout = new QGridLayout(this);
 	layout->setMargin(0);

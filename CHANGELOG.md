@@ -1,5 +1,12 @@
 # Changelog
 
+## 2018-7-2
+
+- Added branding, see Settings > Edit Branding
+- Made gravity smoother
+- Added height based collision, walking through scenes is more natural
+- Narrative player resumes on the correct slide after flying around
+
 ## 2018-6-29
 
 ### Embedded resources
