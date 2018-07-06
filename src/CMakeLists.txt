@@ -110,6 +110,7 @@ set(VSim_src
   narrative/SlideScrollBox.h
   narrative/SlideScrollItem.cpp
   narrative/SlideScrollItem.h
+  narrative/SlideScrollItem.ui
   # narrative/StyleSettingsDialog.cpp
   # narrative/StyleSettingsDialog.h
   # narrative/StyleSettingsDialog.ui

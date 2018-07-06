@@ -6,7 +6,6 @@ NarrativeScrollItem::NarrativeScrollItem(QWidget *parent)
 {
 	ui.setupUi(this);
 	ui.description->setHAlign(Qt::AlignHCenter);
-	setAttribute(Qt::WA_OpaquePaintEvent); // optimization?
 }
 
 void NarrativeScrollItem::setNarrative(Narrative *narrative)

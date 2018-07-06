@@ -28,6 +28,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_item_menu(nullptr),
 	m_drag(nullptr),
 	m_mouse_down(false),
+	m_dragging_enabled(true),
 	m_minimum_drag_dist(10),
 	m_spacing(10)
 {
@@ -285,6 +286,7 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 {
 	// If mouse down & beyond drag threshold then start dragging
 	QPoint diff = event->globalPos() - m_mouse_down_pos;
+
 	if (m_mime_type != ""
 		&& diff.manhattanLength() > m_minimum_drag_dist
 		&& m_drag == nullptr

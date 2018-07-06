@@ -23,10 +23,10 @@ public:
 	//void setThumbnailDirty(bool dirty);
 
 	// overrides 
-	virtual void setIndex(int index);
-	virtual int widthFromHeight(int height) const;
-	virtual void colorFocus(bool color);
-	virtual void colorSelect(bool color);
+	virtual void setIndex(int index) override;
+	virtual int widthFromHeight(int height) const override;
+	//virtual void colorFocus(bool color);
+	//virtual void colorSelect(bool color);
 
 	// for filtering double clicks
 	bool eventFilter(QObject * obj, QEvent * ev);

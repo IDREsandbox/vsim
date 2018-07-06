@@ -1,11 +1,14 @@
 #include "ScrollBoxItem.h"
 
+#include <QPainter>
+
 ScrollBoxItem::ScrollBoxItem(QWidget *parent)
 	: QFrame(parent),
 	m_selected(false)
 {
-	setDeselectStyle("ScrollBoxItem { background: rgb(60, 60, 60); }");
-	setSelectStyle("ScrollBoxItem { background: rgb(0, 100, 255); }");
+	m_select_color = QColor(0, 100, 255);
+	m_color = QColor(60, 60, 60);
+	setAttribute(Qt::WA_OpaquePaintEvent); // optimization?
 }
 
 void ScrollBoxItem::setIndex(int index)
@@ -22,12 +25,7 @@ void ScrollBoxItem::select(bool s)
 {
 	if (m_selected == s) return;
 	m_selected = s;
-	if (s) {
-		setStyleSheet(m_select_style);
-	}
-	else {
-		setStyleSheet(m_style);
-	}
+	update();
 }
 
 int ScrollBoxItem::widthFromHeight(int height) const
@@ -42,7 +40,11 @@ bool ScrollBoxItem::event(QEvent * e)
 }
 void ScrollBoxItem::paintEvent(QPaintEvent * e)
 {
-	//qDebug() << "pe" << m_index << e;
+	QPainter p(this);
+
+	QColor c = m_selected ? m_select_color : m_color;
+	p.setBrush(QBrush(QColor(c)));
+	p.drawRect(0, 0, width(), height());
 }
 
 void ScrollBoxItem::mousePressEvent(QMouseEvent * event)
@@ -58,20 +60,4 @@ void ScrollBoxItem::mouseDoubleClickEvent(QMouseEvent * event)
 void ScrollBoxItem::mouseReleaseEvent(QMouseEvent * event)
 {
 	emit sMouseReleaseEvent(event, m_index);
-}
-
-void ScrollBoxItem::setDeselectStyle(QString style)
-{
-	m_style = style;
-	if (!m_selected) {
-		setStyleSheet(style);
-	}
-}
-
-void ScrollBoxItem::setSelectStyle(QString style)
-{
-	m_select_style = style;
-	if (m_selected) {
-		setStyleSheet(style);
-	}
 }

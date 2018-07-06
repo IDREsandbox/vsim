@@ -21,8 +21,8 @@ public:
 
 	void select(bool s);
 
-	void setDeselectStyle(QString style);
-	void setSelectStyle(QString style);
+	//void setDeselectStyle(QString style);
+	//void setSelectStyle(QString style);
 
 	// Palette is a pain
 	//void setColor(QColor c);
@@ -47,10 +47,10 @@ private:
 
 	bool m_selected;
 
-	QString m_style;
-	QString m_select_style;
-	//QColor m_color;
-	//QColor m_select_color;
+	//QString m_style;
+	//QString m_select_style;
+	QColor m_color;
+	QColor m_select_color;
 
 };
 

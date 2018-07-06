@@ -65,6 +65,7 @@ void SlideScrollItem::setIndex(int index)
 
 int SlideScrollItem::widthFromHeight(int height) const
 {
+	//return 2*height;
 	// Force a 16x9 after subtracting out the label sizes
 	QMargins slide_margin = ui.slide_layout->contentsMargins();
 	int extra_height = ui.number_label->minimumSizeHint().height() + ui.duration_label->minimumSizeHint().height()
@@ -82,19 +83,6 @@ int SlideScrollItem::widthFromHeight(int height) const
 		return image_width; // just for the first item where there is no transition time
 	}
 	return image_width + extra_width;
-}
-
-void SlideScrollItem::colorFocus(bool color)
-{
-}
-void SlideScrollItem::colorSelect(bool color)
-{
-	if (color) {
-		this->setStyleSheet("background-color: rgba(0,100,255,200);");
-	}
-	else {
-		this->setStyleSheet("background-color: rgba(0,0,0,0);");
-	}
 }
 
 bool SlideScrollItem::eventFilter(QObject * obj, QEvent * event)
