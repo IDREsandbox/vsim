@@ -16,6 +16,8 @@
 #include <osg/Camera>
 #include <osgGA/StateSetManipulator>
 #include <QElapsedTimer>
+#include <QOpenGLFramebufferObject>
+#include <memory>
 
 class SimpleCameraManipulator;
 class FirstPersonManipulator;
@@ -104,6 +106,7 @@ signals:
 
 protected:
 	virtual void paintEvent(QPaintEvent* paintEvent) override;
+	void initializeGL() override;
 	virtual void paintGL() override;
 	virtual void resizeGL(int width, int height) override;
 
@@ -129,12 +132,17 @@ private:
 	void releaseCursor();
 	void centerCursor();
 
+	void recreateFramebuffer();
+
+private:
 	osgGA::EventQueue* getEventQueue() const;
 
 	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> graphicsWindow_;
 	osg::ref_ptr<osgViewer::CompositeViewer> m_viewer;
 
 	osg::ref_ptr<osgViewer::View> m_main_view;
+
+	std::unique_ptr<QOpenGLFramebufferObject> m_fbo;
 
 	// camera and viewer stuff
 	// camera manipulators

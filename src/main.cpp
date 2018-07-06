@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 		qInfo() << "startup set to" << startup;
 	}
 	//qputenv("QT_FATAL_WARNINGS", "1"); // for debugging bad connections
+	//qputenv("OSG_GL_ERROR_CHECKING", "ON");
 	
 	a.setWindowIcon(QIcon(dir + "/assets/vsim.png"));
 

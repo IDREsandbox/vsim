@@ -23,6 +23,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <QOpenGLFunctions_2_0>
+
 #include <QDebug>
 #include <QKeyEvent>
 #include <QPainter>
@@ -41,14 +43,14 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	: QOpenGLWidget(parent,	f),
 	m_rendering_enabled(true)
 {
+	// Qt Stuff
+	// Anti aliasing (QOpenGLWidget)
+	QSurfaceFormat fmt;
+	fmt.setSamples(0);
+	setFormat(fmt);
+
 	// Create viewer, graphics context, and link them together
-
 	m_main_view = new osgViewer::View();
-
-	//m_viewer->setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
-	//osg::ref_ptr<osg::DisplaySettings> display_settings = new osg::DisplaySettings;
-	//display_settings->setNumMultiSamples(8);
-	//m_viewer->setDisplaySettings(display_settings);
 
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits(osg::DisplaySettings::instance());
 	traits->x = x();
@@ -92,11 +94,6 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	// Lighting
 	m_main_view->setLightingMode(osg::View::SKY_LIGHT);
-	
-	// Anti aliasing (QOpenGLWidget)
-	QSurfaceFormat fmt = this->format();
-	fmt.setSamples(4);
-	this->setFormat(fmt);
 
 	// Camera Manipulator and Navigation
 	//osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
@@ -437,8 +434,15 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 	QOpenGLWidget::paintEvent(e);
 }
 
+void OSGViewerWidget::initializeGL()
+{
+
+}
+
 void OSGViewerWidget::paintGL()
 {
+	m_fbo->bind();
+
 	QElapsedTimer t; t.start();
 	if (!m_viewer) return;
 	//qDebug() << "paint gl" << this << m_viewer->getNumViews();
@@ -480,6 +484,9 @@ void OSGViewerWidget::paintGL()
 
 	m_full_frame_time = t.nsecsElapsed() / 1000000.0;
 	m_between_timer.start();
+
+	QOpenGLFramebufferObject::blitFramebuffer(nullptr, m_fbo.get(),
+		GL_COLOR_BUFFER_BIT, GL_NEAREST);
 }
 
 void OSGViewerWidget::resizeGL(int width, int height)
@@ -492,6 +499,8 @@ void OSGViewerWidget::resizeGL(int width, int height)
 	m_viewer->getCameras(cameras);
 
 	m_main_view->getCamera()->setViewport(0, 0, width, height);
+
+	recreateFramebuffer();
 }
 
 void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
@@ -701,6 +710,17 @@ void OSGViewerWidget::centerCursor()
 	QCursor new_cursor = cursor();
 	new_cursor.setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 	setCursor(new_cursor);
+}
+
+void OSGViewerWidget::recreateFramebuffer()
+{
+	makeCurrent();
+
+	QOpenGLFramebufferObjectFormat fmt;
+	fmt.setSamples(8);
+	fmt.setAttachment(QOpenGLFramebufferObject::Depth);
+
+	m_fbo = std::make_unique<QOpenGLFramebufferObject>(size(), fmt);
 }
 
 void OSGViewerWidget::takeCursor()
