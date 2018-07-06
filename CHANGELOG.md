@@ -1,7 +1,9 @@
 # Changelog
 
-## 2018-7-2
+## 2018-7-6
+- Basic anti aliasing
 
+## 2018-7-2
 - Added branding, see Settings > Edit Branding
 - Made gravity smoother
 - Added height based collision, walking through scenes is more natural

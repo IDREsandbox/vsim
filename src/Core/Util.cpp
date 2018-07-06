@@ -85,9 +85,10 @@ bool Util::mxdxyyToQDate(const std::string & str, QDate *out)
 	return true;
 }
 
+static const std::regex g_node_time_regex(".*T:.*?(-?\\d+) (-?\\d+)");
 bool Util::nodeTimeInName(const std::string & name, int * begin, int * end)
 {
-	const std::regex g_node_time_regex(".*T:.*?(-?\\d+) (-?\\d+)");
+	//const std::regex g_node_time_regex(".*T:.*?(-?\\d+) (-?\\d+)");
 	//std::regex r(".*T:.*?(-?\\d+)(-?\\d+)");
 	std::smatch match;
 	if (std::regex_match(name, match, g_node_time_regex)) {

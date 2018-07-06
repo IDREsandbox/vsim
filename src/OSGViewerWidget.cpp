@@ -49,6 +49,8 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	fmt.setSamples(0);
 	setFormat(fmt);
 
+	//recreateFramebuffer();
+
 	// Create viewer, graphics context, and link them together
 	m_main_view = new osgViewer::View();
 
@@ -441,7 +443,9 @@ void OSGViewerWidget::initializeGL()
 
 void OSGViewerWidget::paintGL()
 {
-	m_fbo->bind();
+	if (m_fbo) {
+		m_fbo->bind();
+	}
 
 	QElapsedTimer t; t.start();
 	if (!m_viewer) return;
@@ -485,12 +489,16 @@ void OSGViewerWidget::paintGL()
 	m_full_frame_time = t.nsecsElapsed() / 1000000.0;
 	m_between_timer.start();
 
-	QOpenGLFramebufferObject::blitFramebuffer(nullptr, m_fbo.get(),
-		GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	if (m_fbo) {
+		QOpenGLFramebufferObject::blitFramebuffer(nullptr, m_fbo.get(),
+			GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
 }
 
 void OSGViewerWidget::resizeGL(int width, int height)
 {
+	recreateFramebuffer();
+
 	this->getEventQueue()->windowResize(this->x(), this->y(), width, height);
 	graphicsWindow_->resized(this->x(), this->y(), width, height);
 
@@ -499,8 +507,6 @@ void OSGViewerWidget::resizeGL(int width, int height)
 	m_viewer->getCameras(cameras);
 
 	m_main_view->getCamera()->setViewport(0, 0, width, height);
-
-	recreateFramebuffer();
 }
 
 void OSGViewerWidget::keyPressEvent(QKeyEvent* event)

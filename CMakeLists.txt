@@ -331,7 +331,7 @@ if (WIN32)
     set(PREFIX ${OSG_BIN}/${DLL})
     add_custom_command(
       TARGET CopyBuildDLLs
-      PRE_BUILD
+      COMMAND echo "Copying osg dll ${dll}"
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:Debug>:/debug>/bin/${dll}$<$<CONFIG:Debug>:d>.dll
         $<CONFIG>

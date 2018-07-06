@@ -216,7 +216,10 @@ add_executable(VSim main.cpp ${oldSerializers})
 #   VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 target_link_libraries(VSim VSim_obj Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Concurrent ${OPENSCENEGRAPH_LIBRARIES})
 
-add_dependencies(VSim CopyAssets)
-add_dependencies(VSim CopyOSGPlugins)
+if (WIN32)
+  add_dependencies(VSim CopyAssets)
+  add_dependencies(VSim CopyOSGPlugins)
+  add_dependencies(VSim CopyBuildDLLs)
+endif()
 
 install(TARGETS VSim DESTINATION .)
