@@ -35,6 +35,9 @@ public:
 	size_t itemCount() const;
 	FastScrollItem *item(size_t index) const;
 
+public:
+	QAction *a_select_all;
+
 signals:
 	void sTouch();
 	void sSelectionCleared();

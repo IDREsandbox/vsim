@@ -36,6 +36,14 @@ FastScrollBox::FastScrollBox(QWidget * parent)
 	layout->addWidget(m_view);
 	layout->setMargin(0);
 
+	a_select_all = new QAction(this);
+	a_select_all->setShortcutContext(Qt::ShortcutContext::WidgetWithChildrenShortcut);
+	a_select_all->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
+	connect(a_select_all, &QAction::triggered, this, [this]() {
+		selectAll(true);
+	});
+	this->addAction(a_select_all);
+
 	m_selection = new StackObject<FastScrollItem*>;
 	connect(m_selection, &StackSignals::sRemoved, this, [this]() {
 		m_selection->removed()->setSelected(false);
