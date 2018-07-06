@@ -48,6 +48,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	QSurfaceFormat fmt;
 	fmt.setSamples(0);
 	setFormat(fmt);
+	m_samples = 4;
 
 	//recreateFramebuffer();
 
@@ -344,6 +345,17 @@ void OSGViewerWidget::enableCollisions(bool enable)
 	m_collisions_on = enable;
 	m_flight_manipulator->enableCollisions(enable);
 	m_first_person_manipulator->enableCollisions(enable);
+}
+
+int OSGViewerWidget::samples()
+{
+	return m_samples;
+}
+
+void OSGViewerWidget::setSamples(int samples)
+{
+	m_samples = samples;
+	recreateFramebuffer();
 }
 
 void OSGViewerWidget::enableRendering(bool enable)
@@ -720,10 +732,11 @@ void OSGViewerWidget::centerCursor()
 
 void OSGViewerWidget::recreateFramebuffer()
 {
+	if (!context()) return;
 	makeCurrent();
 
 	QOpenGLFramebufferObjectFormat fmt;
-	fmt.setSamples(8);
+	fmt.setSamples(m_samples);
 	fmt.setAttachment(QOpenGLFramebufferObject::Depth);
 
 	m_fbo = std::make_unique<QOpenGLFramebufferObject>(size(), fmt);

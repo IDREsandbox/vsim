@@ -139,33 +139,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionImport_Resources, &QAction::triggered, this, &MainWindow::actionImportERs);
 	connect(ui->actionExport_Resources, &QAction::triggered, this, &MainWindow::actionExportERs);
 
-	connect(ui->actionOSG_Debug, &QAction::triggered, this, [this]() {
-		m_app->getRoot()->models()->debugScene();
-	});
-	connect(ui->actionRoot_Debug, &QAction::triggered, this, [this]() {
-		m_app->getRoot()->debug();
-	});
-	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
-	connect(ui->actionControl_Debug, &QAction::triggered, this, &MainWindow::sDebugControl);
-	connect(ui->actionReload_Style, &QAction::triggered, this, &MainWindow::reloadStyle);
-	reloadStyle();
-	connect(ui->actionEditor_Debug, &QAction::triggered, this, [this]() {
-		qInfo() << "Editor debug";
-		qInfo() << "focus object" << QApplication::focusObject();
-		qInfo() << "focus widget" << QApplication::focusWidget();
-		qInfo() << "updating osg viewer";
-		m_osg_widget->update();
-		qInfo() << "nav" << m_osg_widget->getNavigationMode();
-		qInfo() << "freeze" << m_osg_widget->getCameraFrozen();
-		qInfo() << "app state" << VSimApp::StateStrings[m_app->state()];
-	});
-	connect(ui->actionOptimize_Scene, &QAction::triggered, this, [this]() {
-		auto *root = m_app->getRoot()->models()->sceneRoot();
-		osgUtil::Optimizer optimizer;
-		optimizer.optimize(root);
-	});
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
-	connect(ui->actionModel_Information, &QAction::triggered, this, &MainWindow::execModelInformation);
 
 	// player
 
@@ -199,6 +173,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_coordinate_widget = new CoordinateWidget(this);
 	ui->statusbar->addPermanentWidget(m_coordinate_widget);
 
+	// debug stuff
 	QAction *a_test = new QAction("Debug Menu", this);
 	a_test->setShortcut(QKeySequence(Qt::Key_F11));
 	addAction(a_test);
@@ -231,6 +206,31 @@ MainWindow::MainWindow(QWidget *parent)
 		m_stats_window->ui.frame_time->setText(QString::number(m_osg_widget->getFrameTime()));
 		m_stats_window->ui.full_frame_time->setText(QString::number(m_osg_widget->getFullFrameTime()));
 		m_stats_window->ui.time_between->setText(QString::number(m_osg_widget->getTimeBetween()));
+	});
+	connect(ui->actionOSG_Debug, &QAction::triggered, this, [this]() {
+		m_app->getRoot()->models()->debugScene();
+	});
+	connect(ui->actionRoot_Debug, &QAction::triggered, this, [this]() {
+		m_app->getRoot()->debug();
+	});
+	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
+	connect(ui->actionControl_Debug, &QAction::triggered, this, &MainWindow::sDebugControl);
+	connect(ui->actionReload_Style, &QAction::triggered, this, &MainWindow::reloadStyle);
+	reloadStyle();
+	connect(ui->actionEditor_Debug, &QAction::triggered, this, [this]() {
+		qInfo() << "Editor debug";
+		qInfo() << "focus object" << QApplication::focusObject();
+		qInfo() << "focus widget" << QApplication::focusWidget();
+		qInfo() << "updating osg viewer";
+		m_osg_widget->update();
+		qInfo() << "nav" << m_osg_widget->getNavigationMode();
+		qInfo() << "freeze" << m_osg_widget->getCameraFrozen();
+		qInfo() << "app state" << VSimApp::StateStrings[m_app->state()];
+	});
+	connect(ui->actionOptimize_Scene, &QAction::triggered, this, [this]() {
+		auto *root = m_app->getRoot()->models()->sceneRoot();
+		osgUtil::Optimizer optimizer;
+		optimizer.optimize(root);
 	});
 }
 
@@ -310,9 +310,37 @@ void MainWindow::setApp(VSimApp * vsim)
 	rmenu->addSeparator();
 	rmenu->addAction(nav->a_cycle_mode);
 	rmenu->addActions(nav->m_mode_group->actions());
+	rmenu->addSeparator();
 
-	QMenu *smenu = ui->menuSettings;
-	smenu->addAction(m_app->brandingControl()->a_edit);
+	QMenu *aa_menu = rmenu->addMenu("Anti Aliasing");
+	QActionGroup *aa_group = new QActionGroup(this);
+	std::vector<std::pair<const char*, int>> aa_map = {
+		{"None", 0},
+		{"2x", 2},
+		{"4x", 4},
+		{"8x", 8}
+	};
+	for (auto &pair : aa_map) {
+		const char *text = pair.first;
+		int samples = pair.second;
+		QAction *aa = aa_menu->addAction(text);
+		aa->setCheckable(true);
+		aa_group->addAction(aa);
+		if (samples == m_osg_widget->samples()) {
+			aa->setChecked(true);
+		}
+		connect(aa, &QAction::triggered, this, [this, samples]() {
+			m_osg_widget->setSamples(samples);
+		});
+	}
+
+	// model menu
+	QMenu *model_menu = ui->menuModel;
+	model_menu->addAction(m_app->brandingControl()->a_edit);
+
+	connect(ui->actionModel_Information, &QAction::triggered, this, &MainWindow::execModelInformation);
+	connect(ui->actionModel_Settings, &QAction::triggered, this, []() {});
+
 }
 
 void MainWindow::onReset()

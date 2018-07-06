@@ -79,6 +79,9 @@ public:
 	void enableGravity(bool enable);
 	void enableCollisions(bool enable);
 
+	int samples();
+	void setSamples(int samples);
+
 	void enableRendering(bool enable);
 	void setViewer(osgViewer::CompositeViewer *viewer);
 
@@ -172,5 +175,7 @@ private:
 	float m_frame_time;
 	float m_full_frame_time;
 	float m_time_between;
+
+	int m_samples;
 };
 #endif

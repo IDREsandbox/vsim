@@ -144,13 +144,20 @@
      <string>About</string>
     </property>
     <addaction name="actionAbout_VSim"/>
+   </widget>
+   <widget class="QMenu" name="menuModel">
+    <property name="title">
+     <string>Model</string>
+    </property>
     <addaction name="actionModel_Information"/>
+    <addaction name="actionModel_Settings"/>
    </widget>
    <addaction name="menuhello_to_the_world"/>
    <addaction name="menuEdit"/>
    <addaction name="menuNavigation"/>
-   <addaction name="menuRender"/>
+   <addaction name="menuModel"/>
    <addaction name="menuWindows"/>
+   <addaction name="menuRender"/>
    <addaction name="menuSettings"/>
    <addaction name="menuAbout"/>
    <addaction name="menuTest"/>
@@ -485,6 +492,11 @@
   <action name="actionAbout_VSim">
    <property name="text">
     <string>About VSim</string>
+   </property>
+  </action>
+  <action name="actionModel_Settings">
+   <property name="text">
+    <string>Model Settings</string>
    </property>
   </action>
  </widget>
