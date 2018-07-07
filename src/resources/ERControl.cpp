@@ -37,7 +37,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_local_proxy(nullptr),
 	m_last_touched(nullptr),
 	m_radius(1.0f),
-	m_enabled(true)
+	m_enabled(true),
+	m_auto_launch(true)
 {
 	m_undo_stack = m_app->getUndoStack();
 	m_bar = m_window->erBar();
@@ -203,6 +204,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		m_local_proxy.get(), &ERFilterSortProxy::sortBy);
 	connect(m_filter_area, &ERFilterArea::sSortGlobal,
 		m_global_proxy.get(), &ERFilterSortProxy::sortBy);
+	connect(m_filter_area, &ERFilterArea::sEnableAutoLaunch,
+		this, &ERControl::enableAutoLaunch);
 
 	connect(m_window->erBar()->ui.filter, &QPushButton::pressed, this,
 		[this]() {
@@ -579,6 +582,7 @@ void ERControl::resetFilters()
 	m_filter_proxy->showLocal(true);
 	m_filter_proxy->appTimeEnable(m_app->timeManager()->timeEnabled());
 	setRadius(5.0f);
+	enableAutoLaunch(true);
 	if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
 }
 
@@ -586,6 +590,13 @@ void ERControl::setRadius(float radius)
 {
 	m_radius = radius;
 	emit sRadiusChanged(radius);
+}
+
+void ERControl::enableAutoLaunch(bool enable)
+{
+	if (m_auto_launch == enable) return;
+	m_auto_launch = enable;
+	m_filter_area->enableAutoLaunch(enable);
 }
 
 void ERControl::onUpdate()
@@ -626,7 +637,7 @@ void ERControl::onUpdate()
 		// if just moving around then stack (want to change target)
 		addToSelection(res, !m_going_to);
 
-		if (res->getAutoLaunch() == EResource::ON) {
+		if (res->getAutoLaunch() == EResource::ON && m_auto_launch) {
 			// try to open this thing
 			openResource(res);
 		}

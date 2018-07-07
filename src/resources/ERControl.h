@@ -58,7 +58,7 @@ public:
 	void showAll(bool all);
 	bool showingAll() const;
 
-	// show and goto resource
+	// callbacks, show and goto resource
 	void onTouch();
 	void onTopChange();
 	void onSelectionChange();
@@ -77,6 +77,8 @@ public:
 	// filters
 	void resetFilters();
 	void setRadius(float radius);
+	void enableAutoLaunch(bool enable);
+
 	void onPositionChange(const osg::Vec3 &pos);
 	void onUpdate();
 
@@ -126,6 +128,7 @@ private:
 
 	float m_radius;
 	bool m_enabled;
+	bool m_auto_launch;
 	//osg::Vec3 m_prev_position;
 	//bool m_pos_dirty;
 };

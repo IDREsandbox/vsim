@@ -25,6 +25,7 @@ public:
 	void enableRange(bool enable);
 	void setRadius(float radius);
 	void enableYears(bool enable);
+	void enableAutoLaunch(bool enable);
 
 signals:
 	void sSortGlobal(ER::SortBy sort);
@@ -32,6 +33,7 @@ signals:
 	void sEnableRange(bool enable);
 	void sSetRadius(float radius);
 	void sEnableYears(bool enable);
+	void sEnableAutoLaunch(bool enable);
 	void sClear();
 
 private:

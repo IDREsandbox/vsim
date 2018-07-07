@@ -66,10 +66,8 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 		[this](bool checked) {
 		emit sEnableRange(!checked);
 	});
-	connect(ui->yearsCheckBox, &QAbstractButton::clicked, this,
-		[this](bool checked) {
-		emit sEnableYears(checked);
-	});
+	connect(ui->yearsCheckBox, &QAbstractButton::clicked, this, &ERFilterArea::sEnableYears);
+	connect(ui->enableAutoLaunchCheckBox, &QAbstractButton::clicked, this, &ERFilterArea::sEnableAutoLaunch);
 	connect(ui->radiusSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
 		this, [this](double value) {
 		emit sSetRadius(value);
@@ -121,4 +119,9 @@ void ERFilterArea::setRadius(float radius)
 void ERFilterArea::enableYears(bool enable)
 {
 	ui->yearsCheckBox->setChecked(enable);
+}
+
+void ERFilterArea::enableAutoLaunch(bool enable)
+{
+	ui->enableAutoLaunchCheckBox->setChecked(enable);
 }
