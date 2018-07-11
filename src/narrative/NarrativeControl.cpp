@@ -29,6 +29,7 @@
 #include "Canvas/LabelStyleGroup.h"
 #include "Canvas/CanvasContainer.h"
 #include "Canvas/CanvasEditor.h"
+#include "Canvas/CanvasControl.h"
 
 #include "SelectionStack.h"
 #include "Selection.h"
@@ -53,6 +54,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_canvas = window->canvas();
 	m_fade_canvas = window->fadeCanvas();
 	m_undo_stack = m_app->getUndoStack();
+	m_viewer = m_window->getViewerWidget();
 
 	m_canvas->setStack(&m_canvas_stack_wrapper);
 
@@ -72,6 +74,14 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_fade_out_anim->setStartValue(1.0);
 	m_fade_out_anim->setEndValue(0.0);
 
+	m_thumbnail_size = QSize(288, 162);
+	m_thumbnail_canvas = std::make_unique<CanvasContainer>();
+	m_thumbnail_canvas->resize(m_thumbnail_size);
+	m_thumbnail_canvas->move(0, 0);
+	m_thumbnail_canvas->setScene(nullptr);
+	m_thumbnail_canvas->setEditable(false);
+	m_viewer->setThumbnailSize(m_thumbnail_size);
+
 	showCanvas(false);
 
 	//m_label_buttons = m_window->labelButtons();
@@ -90,7 +100,9 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	// app state
 	connect(m_app, &VSimApp::sReset, this, [this]() {
 		showNarrativeBox();
+		openNarrative(-1);
 	});
+	connect(m_app, &VSimApp::sTick, this, &NarrativeControl::update);
 	connect(m_app, &VSimApp::sStateChanged, this, [this](auto old, auto current) {
 		VSimApp::State state = m_app->state();
 		if (m_app->isFlying()
@@ -241,13 +253,16 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 		}
 	});
 
+	// Canvas control
 	connect(m_canvas, &CanvasEditor::sDone, this, &NarrativeControl::exitEdit);
-
-	// dirty slide thumbnails
-	connect(m_slide_box, &SlideScrollBox::sThumbnailsDirty, this, 
-		[this]() {
-		redrawThumbnails(m_slide_box->getDirtySlides());
+	connect(m_canvas->control(), &CanvasControl::sAnyChange, this, [this]() {
+		NarrativeSlide *slide = getCurrentSlide();
+		if (!slide) return;
+		slide->setForegroundDirty();
 	});
+
+
+	connect(m_viewer, &OSGViewerWidget::sThumbnailFinished, this, &NarrativeControl::onThumbnailReady);
 
 	connect(window, &MainWindow::sDebugControl, this, &NarrativeControl::debug);
 }
@@ -382,6 +397,60 @@ void NarrativeControl::load(NarrativeGroup *narratives)
 
 	//connect(narratives, &QObject::destroyed, this, []() {
 	//});
+}
+
+void NarrativeControl::update(double dt)
+{
+	//// 800x600, 4x3
+
+	// paint thumbnails?
+	if (getCurrentSlide() != nullptr && !showingNarrativeBox()) {
+
+		std::vector<size_t> indices = m_slide_box->visibleItems();
+
+		// search for background to paint if not already busy
+		if (m_thumbnail_slide.expired()) {
+			for (size_t i : indices) {
+				// get appropriate slide
+				Narrative *nar = getCurrentNarrative();
+				auto slide = nar->childShared(i);
+
+				if (!slide) continue;
+
+				if (slide->thumbnailBackgroundDirty()) {
+					// queue up for painting
+					bool ok = m_viewer->paintThumbnail(slide->getCameraMatrix());
+					if (ok) {
+						m_thumbnail_slide = slide;
+						break;
+					}
+				}
+			}
+		}
+
+		// scan for a dirty foregrounds
+		// paint them all on invisible canvas
+		for (size_t i : indices) {
+			// get appropriate slide
+
+			NarrativeSlide *slide = getSlide(m_current_narrative, i);
+			if (!slide) continue;
+
+			if (slide->thumbnailForegroundDirty()) {
+				// render and assign scene
+
+				m_thumbnail_canvas->setScene(slide->scene());
+
+				QPixmap pixmap(m_thumbnail_size);
+				pixmap.fill(Qt::transparent);
+				QPainter painter(&pixmap);
+
+				m_thumbnail_canvas->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), m_thumbnail_size),
+					QWidget::DrawChildren); // | ignore mask
+				slide->setThumbnailForeground(pixmap);
+			}
+		}
+	}
 }
 
 void NarrativeControl::openNarrative(int index)
@@ -543,6 +612,11 @@ void NarrativeControl::showSlideBox()
 	if (nar) m_bar->setSlidesHeader(nar->getTitle());
 }
 
+bool NarrativeControl::showingNarrativeBox() const
+{
+	return m_bar->showingNarratives();
+}
+
 void NarrativeControl::editSlide()
 {
 	if (m_editing_slide) {
@@ -617,17 +691,6 @@ void NarrativeControl::selectSlides(int narrative, const SelectionData &slides, 
 	emit sEditEvent();
 }
 
-//void NarrativeControl::selectLabels(int narrative, int slide, const std::set<NarrativeSlideItem *> &labels)
-//{
-//	openNarrative(narrative);
-//	m_narrative_selection->select(narrative);
-//	m_slide_selection->select(slide);
-//	enableEditing(true);
-//	openSlide(slide);
-//	m_canvas->setSelection(labels);
-//	m_app->setState(VSimApp::EDIT_CANVAS);
-//}
-
 void NarrativeControl::singleSelectOpenSlide()
 {
 	int index = getCurrentSlideIndex();
@@ -690,14 +753,6 @@ NarrativeSlide * NarrativeControl::getSlide(int narrative, int slide) const
 	if (!nar) return nullptr;
 	return nar->child(slide);
 }
-
-//NarrativeSlideLabel * NarrativeControl::getLabel(int narrative, int slide, int label) const
-//{
-//	NarrativeSlide *s = getSlide(narrative, slide);
-//	if (!s) return nullptr;
-//	if (label < 0 || (uint)label >= s->size()) return nullptr;
-//	return dynamic_cast<NarrativeSlideLabel*>(s->child(label));
-//}
 
 void NarrativeControl::newSlide()
 {
@@ -838,25 +893,18 @@ void NarrativeControl::moveSlides(const std::vector<std::pair<size_t, size_t>> &
 	m_undo_stack->endMacro();
 }
 
-void NarrativeControl::dirtyCurrentSlide()
+void NarrativeControl::onThumbnailReady(QImage img)
 {
-	NarrativeSlide *slide = getCurrentSlide();
-	if (slide) slide->dirtyThumbnail();
-}
+	auto slide = m_thumbnail_slide.lock();
+	if (!slide) return;
 
-void NarrativeControl::redrawThumbnails(const std::vector<NarrativeSlide*> slides)
-{
-	//qInfo() << "redraw thumbnails";
-	for (auto slide : slides) {
-		//qInfo() << "redrawing thumbnail" << slide;
-		QImage thumbnail;
+	//QLabel *label = new QLabel(m_window);
+	//label->setWindowFlags(Qt::Window);
+	//label->setPixmap(QPixmap::fromImage(img));
+	//label->show();
 
-		thumbnail = m_app->generateThumbnail(slide);
-		
-		slide->setThumbnail(thumbnail);
-		//item->setImage(thumbnail);
-		//item->setThumbnailDirty(false);
-	}
+	slide->setThumbnailBackground(QPixmap::fromImage(img));
+	m_thumbnail_slide.reset();
 }
 
 NarrativeControl::SelectNarrativesCommand::SelectNarrativesCommand(

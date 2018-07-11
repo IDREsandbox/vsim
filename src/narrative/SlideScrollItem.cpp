@@ -1,5 +1,7 @@
 ﻿#include "SlideScrollItem.h"
 
+#include <QPainter>
+
 SlideScrollItem::SlideScrollItem(QWidget *parent)
 	: ScrollBoxItem(parent),
 	m_slide(nullptr)
@@ -12,19 +14,11 @@ SlideScrollItem::SlideScrollItem(QWidget *parent)
 	m_thumbnail_dirty = true;
 }
 
-void SlideScrollItem::setImage(const QImage & img)
+void SlideScrollItem::setPixmap(QPixmap pixmap)
 {
-	ui.image_label->setPixmap(QPixmap::fromImage(img));
+	ui.image_label->setPixmap(pixmap);
 }
 
-//float SlideScrollItem::getTransition()
-//{
-//	return m_transition_duration;
-//}
-//float SlideScrollItem::getDuration()
-//{
-//	return m_duration;
-//}
 void SlideScrollItem::setTransition(float duration)
 {
 	ui.transition_label->setText(QString::number(duration, 'f', 1) + "s");
@@ -39,17 +33,6 @@ void SlideScrollItem::setDuration(bool stay, float duration)
 		ui.duration_label->setText(QString::number(duration, 'f', 1) + "s");
 	}
 }
-
-//bool SlideScrollItem::thumbnailDirty()
-//{
-//	return m_thumbnail_dirty;
-//}
-//
-//void SlideScrollItem::setThumbnailDirty(bool dirty)
-//{
-//	m_thumbnail_dirty = dirty;
-//	if (dirty) emit sThumbnailDirty();
-//}
 
 void SlideScrollItem::setIndex(int index)
 {
@@ -120,28 +103,15 @@ void SlideScrollItem::setSlide(NarrativeSlide *slide)
 
 	setDuration(slide->getStayOnNode(), slide->getDuration());
 	setTransition(slide->getTransitionDuration());
-	setImage(slide->getThumbnail());
+	setPixmap(slide->thumbnail());
 
 	connect(slide, &NarrativeSlide::sStayOnNodeChanged, this, [this](bool stay) {setDuration(m_slide->getStayOnNode(), m_slide->getDuration());});
 	connect(slide, &NarrativeSlide::sDurationChanged, this, [this](float duration) {setDuration(m_slide->getStayOnNode(), m_slide->getDuration());});
 	connect(slide, &NarrativeSlide::sTransitionDurationChanged, this, &SlideScrollItem::setTransition);
-
-	// TODO: how should this thumbnail stuff work?
-	//connect(slide, &NarrativeSlide::sCameraMatrixChanged, this, [this]() {
-	//	setThumbnailDirty(true);
-	//});
-
-	connect(slide, &NarrativeSlide::sThumbnailChanged, this, &SlideScrollItem::setImage);
-	//connect(slide, &NarrativeSlide::sThumbnailDirty, this, &SlideScrollItem::sThumbnailDirty);
-	connect(slide, &NarrativeSlide::sThumbnailDirty, this, [this]() {
-		emit sThumbnailDirty();
-	});
-
+	connect(slide, &NarrativeSlide::sThumbnailChanged, this, &SlideScrollItem::setPixmap);
 }
 
 NarrativeSlide *SlideScrollItem::getSlide()
 {
 	return m_slide;
 }
-
-

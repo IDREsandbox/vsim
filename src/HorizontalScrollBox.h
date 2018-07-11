@@ -59,6 +59,9 @@ public:
 	//Selection *selection() const;
 	SelectionStack *selectionStack() const;
 
+	// returns indices of visible items
+	std::vector<size_t> visibleItems() const;
+
 	// positioning
 	void setSpacing(int);
 

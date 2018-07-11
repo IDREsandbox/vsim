@@ -150,23 +150,6 @@ add_subdirectory(src)
 # add_executable(TextEdit_experiment ${TextEdit_src})
 # target_link_libraries(TextEdit_experiment Qt5::Widgets)
 
-# set(HorizontalScrollBox_src
-#   src/HorizontalScrollBox.h
-#   src/HorizontalScrollBox.cpp
-#   src/ScrollBoxItem.h
-#   src/ScrollBoxItem.cpp
-#   src/Selection.h
-#   src/Selection.cpp
-#   src/SelectionStack.h
-#   src/SelectionStack.cpp
-#   src/Util.h
-#   src/Util.cpp
-# )
-
-# add_executable(HorizontalScrollBox_experiment ${HorizontalScrollBox_src}
-#   experiments/HorizontalScrollBox_experiment/HorizontalScrollBox_experiment.cpp)
-# target_link_libraries(HorizontalScrollBox_experiment Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
-
 # add_executable(HSBSpeed_experiment ${HorizontalScrollBox_src}
 #   experiments/HSBSpeed/HSBSpeed.cpp)
 # target_link_libraries(HSBSpeed_experiment Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})

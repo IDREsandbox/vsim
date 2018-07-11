@@ -7,6 +7,7 @@
 #define OSGVIEWERWIDGET_H
 
 #include <QOpenGLWidget>
+#include <QAction>
 
 #include <osg/ref_ptr>
 #include <osgViewer/GraphicsWindow>
@@ -18,15 +19,16 @@
 #include <QElapsedTimer>
 #include <QOpenGLFramebufferObject>
 #include <memory>
+#include <queue>
+
+#include "Navigation.h"
 
 class SimpleCameraManipulator;
 class FirstPersonManipulator;
 class FlightManipulator;
 class ObjectManipulator;
 class KeyTracker;
-class QAction;
-
-#include "Navigation.h"
+class FBOGraphicsWindow;
 
 enum Manipulator {
 	MANIPULATOR_SIMPLE, // does nothing
@@ -41,10 +43,13 @@ class OSGViewerWidget : public QOpenGLWidget
 
 public:
 	OSGViewerWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
+	~OSGViewerWidget() override;
 
 	// osgViewer::Viewer* setViewer(osgViewer::Viewer*); // can't change the viewer
 	osgViewer::ViewerBase *getViewer() const;
 	osgViewer::View *mainView() const;
+
+	void setSceneData(osg::Node *scene);
 
 	osgGA::StateSetManipulator *getStateSetManipulator();
 	void cycleStats();
@@ -79,11 +84,18 @@ public:
 	void enableGravity(bool enable);
 	void enableCollisions(bool enable);
 
+	// thumbnails
+	// Queues up a thumbnail to be painted.
+	// When it's ready sThumbnailFinished(QImage img) is emitted
+	// Can only paint one thumbnail at a time, returns false if rejected
+	bool paintThumbnail(const osg::Matrix &camera);
+	void setThumbnailSize(QSize size);
+
 	int samples();
 	void setSamples(int samples);
 
 	void enableRendering(bool enable);
-	void setViewer(osgViewer::CompositeViewer *viewer);
+	//void setViewer(osgViewer::CompositeViewer *viewer);
 
 	void reset();
 
@@ -92,8 +104,6 @@ public:
 
 	// filter out ctrl-s when in wasd
 	bool eventFilter(QObject *obj, QEvent *e);
-
-	QImage renderView(QSize size, const osg::Matrixd &matrix);
 
 	float getFrameTime() const;
 	float getTimeBetween() const;
@@ -106,6 +116,8 @@ signals:
 	void sCameraFrozen(bool);
 
 	void sSpeedActivelyChanged(int tick, double multiplier);
+
+	void sThumbnailFinished(QImage img);
 
 protected:
 	virtual void paintEvent(QPaintEvent* paintEvent) override;
@@ -140,12 +152,21 @@ private:
 private:
 	osgGA::EventQueue* getEventQueue() const;
 
-	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> graphicsWindow_;
+	osg::ref_ptr<osgViewer::GraphicsWindow> m_shared_graphics_window;
+	osg::ref_ptr<FBOGraphicsWindow> m_graphics_window;
+	osg::ref_ptr<FBOGraphicsWindow> m_thumb_graphics_window;
+
+	//osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> graphicsWindow_;
 	osg::ref_ptr<osgViewer::CompositeViewer> m_viewer;
 
 	osg::ref_ptr<osgViewer::View> m_main_view;
+	osg::ref_ptr<osgViewer::View> m_thumb_view;
 
-	std::unique_ptr<QOpenGLFramebufferObject> m_fbo;
+	std::shared_ptr<QOpenGLFramebufferObject> m_fbo;
+	std::shared_ptr<QOpenGLFramebufferObject> m_thumb_fbo;
+
+	QSize m_thumb_size;
+	bool m_paint_thumb;
 
 	// camera and viewer stuff
 	// camera manipulators

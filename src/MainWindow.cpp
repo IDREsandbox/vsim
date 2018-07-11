@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// window stuff
 	//setMinimumSize(800, 600);
-	resize(1280, 800);
+	resize(1280, 900);
 	setWindowTitle("VSim");
 	setAcceptDrops(true);
 

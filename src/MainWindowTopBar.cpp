@@ -27,6 +27,11 @@ MainWindowTopBar::~MainWindowTopBar() {
 	
 }
 
+bool MainWindowTopBar::showingNarratives() const
+{
+	return ui.stackedWidget->currentIndex() == 0;
+}
+
 void MainWindowTopBar::showNarratives()
 {
 	ui.stackedWidget->setCurrentIndex(0);

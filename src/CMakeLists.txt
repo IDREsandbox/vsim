@@ -224,3 +224,23 @@ if (WIN32)
 endif()
 
 install(TARGETS VSim DESTINATION .)
+
+
+# horizontal scroll box experiment
+
+set(HorizontalScrollBox_src
+  HorizontalScrollBox_experiment.cpp
+  HorizontalScrollBox.h
+  HorizontalScrollBox.cpp
+  ScrollBoxItem.h
+  ScrollBoxItem.cpp
+  Selection.h
+  Selection.cpp
+  SelectionStack.h
+  SelectionStack.cpp
+)
+vsim_add_experiment(
+  HorizontalScrollBox_experiment
+  "${HorizontalScrollBox_src}"
+  "Core_obj;Qt5::Widgets"
+)

@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2018-7-6
+
 - Basic anti aliasing, anti aliasing settings
 - Moved menus around, added Model dropdown
 - Added checkbox to disable auto launching ers
@@ -11,7 +12,7 @@
 - Pressing space after editing/playing unfreezes rather than refreezes
 - Changed speed tick limit to +/- 40 (x1000 to 1/1000)
 
-## Fixes
+### Fixes
 - Narrative player resumes on the correct slide after flying around
 - Fixed slide drag and drop getting stuck
 - Fixed some random crashes

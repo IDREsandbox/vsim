@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
 	File.open(QFile::ReadOnly);
 	QString style = QLatin1String(File.readAll());
 	window.setStyleSheet(style);
+	QDir::setCurrent(QCoreApplication::applicationDirPath());
 
 	// FIXME: remove circular dependency
 	// TODO:

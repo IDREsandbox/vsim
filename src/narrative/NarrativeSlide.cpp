@@ -1,11 +1,12 @@
 #include "NarrativeSlide.h"
-#include "deprecated/osgNewWidget/VSWidget.h"
 
 #include <QTextCursor>
 #include <iostream>
 #include <QTextDocument>
+#include <QPainter>
 
 #include "Canvas/CanvasScene.h"
+#include "deprecated/osgNewWidget/VSWidget.h"
 
 NarrativeSlide::NarrativeSlide(QObject *parent)
 	: QObject(parent),
@@ -123,7 +124,8 @@ void NarrativeSlide::setCameraMatrix(const osg::Matrixd & matrix)
 {
 	m_camera_matrix = matrix;
 	emit sCameraMatrixChanged(matrix);
-	dirtyThumbnail();
+	setBackgroundDirty();
+	//dirtyThumbnail();
 }
 
 float NarrativeSlide::getDuration() const
@@ -166,31 +168,63 @@ void NarrativeSlide::setTransitionDuration(float tduration)
 	emit sTransitionDurationChanged(tduration);
 }
 
-void NarrativeSlide::dirtyThumbnail()
+QPixmap NarrativeSlide::thumbnail() const
 {
-	m_thumbnail_dirty = true;
-	emit sThumbnailDirty();
-}
-
-bool NarrativeSlide::thumbnailDirty() const
-{
-	return m_thumbnail_dirty;
-}
-
-const QImage & NarrativeSlide::getThumbnail() const
-{
-	// TODO: insert return statement here
 	return m_thumbnail;
 }
 
-void NarrativeSlide::setThumbnail(QImage thumbnail)
+bool NarrativeSlide::thumbnailForegroundDirty() const
 {
-	m_thumbnail = thumbnail;
-	m_thumbnail_dirty = false;
-	emit sThumbnailChanged(m_thumbnail);
+	return m_thumbnail_foreground.isNull();
 }
 
-CanvasScene * NarrativeSlide::scene() const
+bool NarrativeSlide::thumbnailBackgroundDirty() const
+{
+	return m_thumbnail_background.isNull();
+}
+
+void NarrativeSlide::setThumbnailForeground(QPixmap pixmap)
+{
+	m_thumbnail_foreground = pixmap;
+	compositeThumbnail();
+}
+
+void NarrativeSlide::setThumbnailBackground(QPixmap pixmap)
+{
+	m_thumbnail_background = pixmap;
+	compositeThumbnail();
+}
+
+void NarrativeSlide::setForegroundDirty()
+{
+	m_thumbnail_foreground = QPixmap();
+	m_thumbnail = QPixmap();
+}
+
+void NarrativeSlide::setBackgroundDirty()
+{
+	m_thumbnail_background = QPixmap();
+	m_thumbnail = QPixmap();
+}
+
+CanvasScene *NarrativeSlide::scene() const
 {
 	return m_scene;
+}
+
+void NarrativeSlide::compositeThumbnail() {
+	// paint the images together, stick on a pixmap
+
+	if (m_thumbnail_background.isNull()
+		|| m_thumbnail_foreground.isNull()) {
+		m_thumbnail = QPixmap();
+		return;
+	}
+
+	m_thumbnail = QPixmap(m_thumbnail_background);
+	QPainter painter(&m_thumbnail);
+
+	painter.drawPixmap(0, 0, m_thumbnail_foreground);
+
+	emit sThumbnailChanged(m_thumbnail);
 }

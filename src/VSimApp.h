@@ -92,7 +92,6 @@ public:
 	void setCameraMatrixSmooth(const osg::Matrixd &matrix, float time);
 	bool goingSomewhere() const;
 	void stopGoingSomewhere();
-	QImage generateThumbnail(NarrativeSlide *slide);
 
 	// undo/redo
 	QUndoStack *getUndoStack() const;
@@ -145,6 +144,7 @@ private:
 	std::unique_ptr<VSimRoot> m_root;
 	//ModelGroupModel *m_model_table_model;
 
+	OSGViewerWidget *m_viewer;
 	NarrativeControl *m_narrative_control;
 	ERControl *m_er_control;
 	NarrativePlayer *m_narrative_player;
@@ -161,13 +161,6 @@ private:
 	QTimer *m_slide_timer;
 
 	State m_state;
-
-	// thumbnails
-	osg::ref_ptr<osgViewer::CompositeViewer> m_viewer;
-	CanvasContainer *m_render_canvas;
-	OSGViewerWidget *m_render_view;
-	OSGViewerWidget *m_main_view;
-	QSize m_thumbnail_size;
 };
 
 //extern VSimApp* g_vsimapp;

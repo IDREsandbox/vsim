@@ -39,9 +39,59 @@
 #include "ObjectManipulator.h"
 #include "KeyTracker.h"
 
+
+class DummyGraphicsWindow : public osgViewer::GraphicsWindowEmbedded
+{
+public:
+
+	DummyGraphicsWindow(int x, int y, int width, int height)
+		: GraphicsWindowEmbedded(x, y, width, height)
+	{
+	}
+
+	bool makeCurrentImplementation() override {
+		return osgViewer::GraphicsWindowEmbedded::makeCurrentImplementation();
+	}
+	bool releaseContextImplementation() override {
+		return osgViewer::GraphicsWindowEmbedded::releaseContextImplementation();
+	}
+};
+
+
+class FBOGraphicsWindow : public osgViewer::GraphicsWindowEmbedded
+{
+public:
+
+	FBOGraphicsWindow(osg::GraphicsContext::Traits *traits)
+		: GraphicsWindowEmbedded(traits)
+	{
+	}
+
+	void setFramebuffer(std::weak_ptr<QOpenGLFramebufferObject> fbo) {
+		m_fbo = fbo;
+	}
+
+	bool makeCurrentImplementation() override {
+		auto fbo = m_fbo.lock();
+		if (fbo) {
+			fbo->bind();
+		}
+		return osgViewer::GraphicsWindowEmbedded::makeCurrentImplementation();
+	}
+	bool releaseContextImplementation() override {
+		return osgViewer::GraphicsWindowEmbedded::releaseContextImplementation();
+	}
+
+private:
+	std::weak_ptr<QOpenGLFramebufferObject> m_fbo;
+};
+
+
 OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	: QOpenGLWidget(parent,	f),
-	m_rendering_enabled(true)
+	m_rendering_enabled(true),
+	m_paint_thumb(false),
+	m_thumb_size(100, 100)
 {
 	// Qt Stuff
 	// Anti aliasing (QOpenGLWidget)
@@ -50,31 +100,58 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	setFormat(fmt);
 	m_samples = 4;
 
+	// need a context for this, do it later
 	//recreateFramebuffer();
 
 	// Create viewer, graphics context, and link them together
+
+	m_viewer = new osgViewer::CompositeViewer();
+	m_viewer->setThreadingModel(osgViewer::ViewerBase::ThreadingModel::SingleThreaded);
+
 	m_main_view = new osgViewer::View();
+	m_viewer->addView(m_main_view);
+	m_thumb_view = new osgViewer::View();
+
+	m_shared_graphics_window = new DummyGraphicsWindow(100, 100, 100, 100);
 
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits(osg::DisplaySettings::instance());
 	traits->x = x();
 	traits->y = y();
 	traits->width = width();
 	traits->height = height();
-	graphicsWindow_ = new osgViewer::GraphicsWindowEmbedded(traits);
+	traits->sharedContext = m_shared_graphics_window.get();
+	m_graphics_window = new FBOGraphicsWindow(traits);
+	m_graphics_window->setName("main_context");
 
-	float aspectRatio = this->width() / (float)this->height();
+	osg::ref_ptr<osg::GraphicsContext::Traits> traits2 = new osg::GraphicsContext::Traits(osg::DisplaySettings::instance());
+	traits2->x = 0;
+	traits2->y = 0;
+	traits2->width = m_thumb_size.width();
+	traits2->height = m_thumb_size.height();
+	traits2->sharedContext = m_shared_graphics_window.get();
+	m_thumb_graphics_window = new FBOGraphicsWindow(traits2);
+	m_thumb_graphics_window->setName("thumb_context");
+
+	float aspect_ratio = this->width() / (float)this->height();
 
 	// Create an empty scene
 	osg::Group* group = new osg::Group();
-	m_main_view->setSceneData(group);
+	setSceneData(group);
 
 	// Use default camera
 	osg::Camera* camera = m_main_view->getCamera();
 	camera->setViewport(0, 0, this->width(), this->height());
 	camera->setClearColor(osg::Vec4(51/255.f, 51/255.f, 102/255.f, 1.f));
-	camera->setProjectionMatrixAsPerspective(55.f, aspectRatio, 1.f, 7500.f);
-	camera->setGraphicsContext(graphicsWindow_); // set the context, connects the viewer and graphics context
+	camera->setProjectionMatrixAsPerspective(55.f, aspect_ratio, 1.f, 7500.f);
+	camera->setGraphicsContext(m_graphics_window); // set the context, connects the viewer and graphics context
 	//camera->setCullingMode(osg::Camera::NO_CULLING);
+
+	osg::Camera* camera2 = m_thumb_view->getCamera();
+	camera2->setViewport(0, 0, 100, 100);
+	camera2->setClearColor(osg::Vec4(51 / 255.f, 51 / 255.f, 102 / 255.f, 1.f));
+	camera2->setProjectionMatrixAsPerspective(55.f, m_thumb_size.width() / m_thumb_size.height(), 1.f, 7500.f);
+	camera2->setGraphicsContext(m_thumb_graphics_window);
+	m_thumb_view->setCamera(camera2);
 
 	// Stats Handler
 	m_stats = new osgViewer::StatsHandler;
@@ -83,7 +160,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_main_view->addEventHandler(m_stats);
 
 	// Camera State Handler
-	m_ssm = new osgGA::StateSetManipulator(m_main_view->getCamera()->getOrCreateStateSet());
+	m_ssm = new osgGA::StateSetManipulator(camera->getOrCreateStateSet());
 	//ssm->setKeyEventToggleBackfaceCulling('B');
 	//ssm->setKeyEventToggleLighting('L');
 	//ssm->setKeyEventToggleTexturing('X');
@@ -95,8 +172,16 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	//m_main_view->addEventHandler(ssm);
 	//auto ss = m_main_view->getCamera()->getStateSet();
 
+	// thumbnail stateset
+	auto *thumb_ssm = new osgGA::StateSetManipulator(camera2->getOrCreateStateSet());
+	thumb_ssm->setLightingEnabled(true);
+	thumb_ssm->setBackfaceEnabled(true);
+	thumb_ssm->setTextureEnabled(true);
+	thumb_ssm->setPolygonMode(osg::PolygonMode::FILL);
+
 	// Lighting
-	m_main_view->setLightingMode(osg::View::SKY_LIGHT);
+	m_main_view->setLightingMode(osg::View::LightingMode::SKY_LIGHT);
+	m_thumb_view->setLightingMode(osg::View::LightingMode::SKY_LIGHT);
 
 	// Camera Manipulator and Navigation
 	//osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
@@ -160,6 +245,21 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	t->setInterval(0);
 	t->start();
 	connect(t, &QTimer::timeout, this, [this]() {update();});
+
+	//
+	connect(this, &QOpenGLWidget::frameSwapped, this, [this]() {
+		if (m_paint_thumb) {
+			m_paint_thumb = false;
+			QImage img = m_thumb_fbo->toImage();
+			m_viewer->removeView(m_thumb_view);
+			// grab the thumbnail
+			emit sThumbnailFinished(img);
+		}
+	});
+}
+
+OSGViewerWidget::~OSGViewerWidget()
+{
 }
 
 osgViewer::ViewerBase* OSGViewerWidget::getViewer() const
@@ -170,6 +270,12 @@ osgViewer::ViewerBase* OSGViewerWidget::getViewer() const
 osgViewer::View * OSGViewerWidget::mainView() const
 {
 	return m_main_view;
+}
+
+void OSGViewerWidget::setSceneData(osg::Node * scene)
+{
+	m_main_view->setSceneData(scene);
+	m_thumb_view->setSceneData(scene);
 }
 
 osgGA::StateSetManipulator * OSGViewerWidget::getStateSetManipulator()
@@ -347,6 +453,20 @@ void OSGViewerWidget::enableCollisions(bool enable)
 	m_first_person_manipulator->enableCollisions(enable);
 }
 
+bool OSGViewerWidget::paintThumbnail(const osg::Matrix & camera)
+{
+	if (m_paint_thumb) {
+		qWarning() << "Can only paint one thumbnail at a time";
+		return false;
+	}
+	m_paint_thumb = true;
+	m_viewer->addView(m_thumb_view);
+
+	osg::Matrix view_matrix = osg::Matrix::inverse(camera);
+	m_thumb_view->getCamera()->setViewMatrix(view_matrix);
+	return true;
+}
+
 int OSGViewerWidget::samples()
 {
 	return m_samples;
@@ -362,12 +482,6 @@ void OSGViewerWidget::enableRendering(bool enable)
 {
 	m_rendering_enabled = enable;
 	if (enable) update();
-}
-
-void OSGViewerWidget::setViewer(osgViewer::CompositeViewer * viewer)
-{
-	m_viewer = viewer;
-	m_viewer->addView(m_main_view);
 }
 
 void OSGViewerWidget::reset()
@@ -394,7 +508,6 @@ bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)
 	// this is in the key tracker
 	//if (e->type() == QEvent::ShortcutOverride) {
 	//	if (getActualNavigationMode() == MANIPULATOR_FIRST_PERSON) {
-	//		qDebug() << "shortcut override wasd";
 	//		QKeyEvent *keyEvent = static_cast<QKeyEvent*>(e);
 	//		int key = keyEvent->key();
 	//		if (key == 'W' || key == 'A' || key == 'S' || key == 'D') {
@@ -404,27 +517,6 @@ bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)
 	//	}
 	//}
 	return false;
-}
-
-QImage OSGViewerWidget::renderView(QSize size, const osg::Matrixd & matrix)
-{
-	// copy main view
-	osg::ref_ptr<osgViewer::View> view(m_main_view);
-	m_main_view->setCameraManipulator(nullptr);
-
-	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits(osg::DisplaySettings::instance());
-	traits->x = 0;
-	traits->y = 0;
-	traits->width = 300;
-	traits->height = 300;
-	graphicsWindow_ = new osgViewer::GraphicsWindowEmbedded(traits);
-
-	osg::Camera* camera = m_main_view->getCamera();
-	camera->setGraphicsContext(graphicsWindow_);
-
-	//m_viewer->addView(view);
-
-	return QImage();
 }
 
 float OSGViewerWidget::getFrameTime() const
@@ -450,18 +542,13 @@ void OSGViewerWidget::paintEvent(QPaintEvent *e)
 
 void OSGViewerWidget::initializeGL()
 {
-
+	recreateFramebuffer();
 }
 
 void OSGViewerWidget::paintGL()
 {
-	if (m_fbo) {
-		m_fbo->bind();
-	}
-
 	QElapsedTimer t; t.start();
 	if (!m_viewer) return;
-	//qDebug() << "paint gl" << this << m_viewer->getNumViews();
 	qint64 dt = m_frame_timer.nsecsElapsed();
 	m_frame_timer.restart();
 	double dt_sec = (double)dt / 1.0e9;
@@ -487,14 +574,11 @@ void OSGViewerWidget::paintGL()
 
 	}
 
-	// hacky way that lets us have multiple OSGViewerWidgets sharing one CompositeViewer
-	//m_viewer->addView(m_main_view);
-	//frame()
-	//m_viewer->removeView(m_main_view);
-	// this is really slow for some reason
+	// osg rendering
 	if (m_rendering_enabled) {
 		QElapsedTimer ft; ft.start();
 		m_viewer->frame(dt);
+		// we get control back on GraphicsWindowEmbedded::makeCurrentImplementation
 		m_frame_time = ft.nsecsElapsed() / 1000000.0;
 	}
 
@@ -509,16 +593,21 @@ void OSGViewerWidget::paintGL()
 
 void OSGViewerWidget::resizeGL(int width, int height)
 {
+	this->getEventQueue()->windowResize(this->x(), this->y(), width, height);
+	m_graphics_window->resized(this->x(), this->y(), width, height);
+	// ^ this also fixes camera aspect ratio and viewport
+	// no need to do it manually
+
 	recreateFramebuffer();
 
-	this->getEventQueue()->windowResize(this->x(), this->y(), width, height);
-	graphicsWindow_->resized(this->x(), this->y(), width, height);
+}
 
-	std::vector<osg::Camera*> cameras;
-	if (!m_viewer) return;
-	m_viewer->getCameras(cameras);
+void OSGViewerWidget::setThumbnailSize(QSize size)
+{
+	m_thumb_graphics_window->resized(0, 0, size.width(), size.height());
+	m_thumb_size = size;
 
-	m_main_view->getCamera()->setViewport(0, 0, width, height);
+	recreateFramebuffer();
 }
 
 void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
@@ -529,11 +618,6 @@ void OSGViewerWidget::keyPressEvent(QKeyEvent* event)
 		}
 	}
 
-	// This guy's code is a little wonky, notice that toLocal8Bit() returns a temporary array, but data
-	// is a pointer to memory. This led to a bug where calling qDebug() after this line would override
-	// keyData (since it's just an arbitrary place in memory)
-	// const char* keyData = keyString.toLocal8Bit().data();
-	// Safer code
 	QString keyString = event->text();
 	QByteArray keyData = keyString.toLocal8Bit();
 	this->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData.data()));
@@ -739,7 +823,15 @@ void OSGViewerWidget::recreateFramebuffer()
 	fmt.setSamples(m_samples);
 	fmt.setAttachment(QOpenGLFramebufferObject::Depth);
 
-	m_fbo = std::make_unique<QOpenGLFramebufferObject>(size(), fmt);
+	m_fbo = std::make_shared<QOpenGLFramebufferObject>(size(), fmt);
+	m_graphics_window->setFramebuffer(m_fbo);
+
+	QOpenGLFramebufferObjectFormat thumb_fmt;
+	thumb_fmt.setSamples(0);
+	thumb_fmt.setAttachment(QOpenGLFramebufferObject::Depth);
+
+	m_thumb_fbo = std::make_shared<QOpenGLFramebufferObject>(m_thumb_size, thumb_fmt);
+	m_thumb_graphics_window->setFramebuffer(m_thumb_fbo);
 }
 
 void OSGViewerWidget::takeCursor()
@@ -758,7 +850,7 @@ void OSGViewerWidget::releaseCursor()
 
 osgGA::EventQueue* OSGViewerWidget::getEventQueue() const
 {
-	osgGA::EventQueue* eventQueue = graphicsWindow_->getEventQueue();
+	osgGA::EventQueue* eventQueue = m_graphics_window->getEventQueue();
 
 	if (eventQueue)
 		return eventQueue;

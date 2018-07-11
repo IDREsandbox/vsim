@@ -17,7 +17,7 @@ public:
 
 	ScrollBoxItem *createItem(NarrativeSlide *slide) override;
 
-	std::vector<NarrativeSlide*> getDirtySlides(); // slides whose thumbnails need to be drawn
+	//std::vector<NarrativeSlide*> getDirtySlides(); // slides whose thumbnails need to be drawn
 
 signals:
 	void sSetTransitionDuration();
@@ -25,7 +25,7 @@ signals:
 	void sGoto(int);
 	//void sTransitionTo(int);
 
-	void sThumbnailsDirty();
+	//void sThumbnailsDirty();
 
 protected:
 	void paintEvent(QPaintEvent *event);

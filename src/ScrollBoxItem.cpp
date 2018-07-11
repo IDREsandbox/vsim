@@ -1,6 +1,7 @@
 #include "ScrollBoxItem.h"
 
 #include <QPainter>
+#include <QPaintEvent>
 
 ScrollBoxItem::ScrollBoxItem(QWidget *parent)
 	: QFrame(parent),
@@ -8,7 +9,6 @@ ScrollBoxItem::ScrollBoxItem(QWidget *parent)
 {
 	m_select_color = QColor(0, 100, 255);
 	m_color = QColor(60, 60, 60);
-	setAttribute(Qt::WA_OpaquePaintEvent); // optimization?
 }
 
 void ScrollBoxItem::setIndex(int index)
@@ -35,7 +35,6 @@ int ScrollBoxItem::widthFromHeight(int height) const
 
 bool ScrollBoxItem::event(QEvent * e)
 {
-	//qDebug() << "e" << m_index << e;
 	return QWidget::event(e);
 }
 void ScrollBoxItem::paintEvent(QPaintEvent * e)

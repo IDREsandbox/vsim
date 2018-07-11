@@ -10,6 +10,7 @@ public:
 	MainWindowTopBar(QWidget * parent = nullptr);
 	~MainWindowTopBar();
 
+	bool showingNarratives() const;
 	void showNarratives();
 	void showSlides();
 

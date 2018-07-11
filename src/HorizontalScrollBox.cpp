@@ -118,6 +118,32 @@ SelectionStack * HorizontalScrollBox::selectionStack() const
 	return m_selection_stack;
 }
 
+std::vector<size_t> HorizontalScrollBox::visibleItems() const
+{
+	std::vector<size_t> out;
+	//view
+	QRegion region = m_scroll_area_widget->visibleRegion();
+	QRect rect = region.boundingRect();
+
+	int a1 = rect.left();
+	int a2 = rect.right();
+
+	for (size_t i = 0; i < m_items.size(); i++) {
+		m_items[i]->x();
+
+		int b1 = m_items[i]->x();
+		int b2 = m_items[i]->x() + m_items[i]->width();
+
+		// don't overlap if start is past the beginning
+		// do overlap otherwise
+		bool overlap = (a1 <= b2 && a2 >= b1);
+
+		if (overlap) out.push_back(i);
+	}
+
+	return out;
+}
+
 void HorizontalScrollBox::setMenu(QMenu * menu)
 {
 	m_menu = menu;

@@ -40,6 +40,9 @@ public:
 	// initializes gui from osg data
 	void load(NarrativeGroup *narratives);
 
+	// poll thumbnails
+	void update(double dt);
+
 	// Opens narrative in slide box
 	// - closes slide if not already open
 	// - hide on -1
@@ -56,6 +59,7 @@ public:
 
 	void showNarrativeBox();
 	void showSlideBox();
+	bool showingNarrativeBox() const;
 	void showCanvas(bool show, bool fade = false);
 	bool canvasVisible() const;
 	void showCanvasEditor(bool show);
@@ -127,6 +131,7 @@ public: // Actions
 	// Thumbnails
 	void dirtyCurrentSlide();
 	void redrawThumbnails(const std::vector<NarrativeSlide*> slides);
+	void onThumbnailReady(QImage img);
 
 	void debug();
 
@@ -201,6 +206,14 @@ private:
 
 	QUndoStack *m_undo_stack;
 	CanvasStackWrapper m_canvas_stack_wrapper;
+
+	// thumbnails
+	std::unique_ptr<CanvasContainer> m_thumbnail_canvas;
+	OSGViewerWidget *m_viewer;
+	QSize m_thumbnail_size;
+
+	// slide currently being painted
+	std::weak_ptr<NarrativeSlide> m_thumbnail_slide;
 };
 
 #endif

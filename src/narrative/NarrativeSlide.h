@@ -4,7 +4,7 @@
 #include <osg/Group>
 #include <osg/Image>
 #include <QDebug>
-#include <QImage>
+#include <QPixmap>
 #include "deprecated/narrative/NarrativeNode.h"
 
 #include <QUndoStack>
@@ -32,10 +32,16 @@ public:
 	void setTransitionDuration(float tduration);
 
 	// thumbnail cache
-	void dirtyThumbnail();
-	bool thumbnailDirty() const;
-	const QImage &getThumbnail() const;
-	void setThumbnail(QImage);
+	QPixmap thumbnail() const;
+
+	bool thumbnailForegroundDirty() const;
+	bool thumbnailBackgroundDirty() const;
+
+	void setThumbnailForeground(QPixmap img);
+	void setThumbnailBackground(QPixmap img);
+
+	void setForegroundDirty();
+	void setBackgroundDirty();
 
 	CanvasScene *scene() const;
 
@@ -44,8 +50,12 @@ signals:
 	void sDurationChanged(float);
 	void sStayOnNodeChanged(bool);
 	void sTransitionDurationChanged(float);
-	void sThumbnailChanged(const QImage &image);
+	//void sThumbnailChanged(const QImage &image);
 	void sThumbnailDirty();
+
+	void sThumbnailChanged(QPixmap pixmap);
+	//void sThumbnailForegroundChanged(QPixmap image);
+	//void sThumbnailBackgroundChanged(QPixmap image);
 
 public: // COMMANDS
 
@@ -71,13 +81,21 @@ public: // COMMANDS
 	};
 
 private:
+	void compositeThumbnail();
+
+private:
 	osg::Matrixd m_camera_matrix;
 	float m_duration;
 	bool m_stay_on_node;
 	float m_transition_duration;
 
-	QImage m_thumbnail;
+	//QImage m_thumbnail;
 	bool m_thumbnail_dirty;
+
+	QPixmap m_thumbnail_foreground;
+	QPixmap m_thumbnail_background;
+
+	QPixmap m_thumbnail;
 
 	CanvasScene *m_scene;
 };

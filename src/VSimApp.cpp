@@ -72,25 +72,7 @@ VSimApp::VSimApp(MainWindow* window)
 	m_navigation_control = new NavigationControl(this, m_window->getViewerWidget(), this);
 	m_branding_control = new BrandingControl(this, m_root->branding(), m_window->brandingOverlay(), this);
 
-	// thumbnails
-	m_thumbnail_size = QSize(288, 162);
-	m_render_canvas = new CanvasContainer(); // FIXME: leak?
-	m_render_canvas->resize(m_thumbnail_size);
-	m_render_canvas->move(0, 0);
-	m_render_canvas->setScene(nullptr);
-	m_render_canvas->setEditable(false);
-
-	m_render_view = new OSGViewerWidget();
-	m_render_view->resize(m_thumbnail_size);
-	m_render_view->move(0, 0);
-	m_render_view->setCameraFrozen(true);
-	m_render_view->hide();
-	m_render_view->enableRendering(false);
-
-	m_viewer = new osgViewer::CompositeViewer;
-	m_main_view = m_window->getViewerWidget();
-	//m_viewer->addView(m_main_view->mainView());
-	m_main_view->setViewer(m_viewer);
+	m_viewer = m_window->getViewerWidget();
 
 	// Narrative player
 	m_narrative_player = new NarrativePlayer(this, m_narrative_control, m_window->topBar(), this);
@@ -176,8 +158,6 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 
 	emit sAboutToReset();
 
-	m_render_canvas->setScene(nullptr);
-
 	m_undo_stack->clear();
 
 	// dereference the old root, apply the new one
@@ -187,9 +167,8 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 	m_root->take(root);
 
 	osg::Node *osg_root = m_root->models()->sceneRoot();
-	m_render_view->mainView()->setSceneData(osg_root);
-	m_window->getViewerWidget()->mainView()->setSceneData(osg_root);
-	m_window->getViewerWidget()->reset();
+	m_viewer->setSceneData(osg_root);
+	m_viewer->reset();
 
 	emit sReset();
 
@@ -280,22 +259,6 @@ void VSimApp::stopGoingSomewhere()
 {
 	m_camera_timer->stop();
 	emit sInterrupted();
-}
-
-QImage VSimApp::generateThumbnail(NarrativeSlide * slide)
-{
-	QImage img(m_thumbnail_size, QImage::Format_ARGB32);
-	QPainter painter(&img);
-
-	// render osg
-	m_render_view->setCameraMatrix(slide->getCameraMatrix());
-	//m_render_view->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), m_thumbnail_size), 0);
-
-	// render canvas
-	m_render_canvas->setScene(slide->scene());
-	m_render_canvas->render(&painter, QPoint(0, 0), QRect(QPoint(0, 0), m_thumbnail_size), QWidget::DrawChildren); // | ignore mask
-
-	return img;
 }
 
 QUndoStack *VSimApp::getUndoStack() const

@@ -14,9 +14,9 @@ GroupScrollBox<T>::GroupScrollBox(QWidget* parent)
 template <class T>
 void GroupScrollBox<T>::reload()
 {
-	if (!m_group) return;
-
 	clear();
+
+	if (!m_group) return;
 
 	std::vector<std::pair<size_t, ScrollBoxItem*>> insertions;
 	for (size_t i = 0; i < m_group->size(); i++) {
@@ -41,7 +41,7 @@ void GroupScrollBox<T>::setGroup(TGroup<T> *group)
 		connect(m_group, &GroupSignals::destroyed, this,
 			[this]() {
 			m_group = nullptr;
-			setGroup(nullptr); // clear stuff
+			clear();
 		});
 		connect(m_group, &GroupSignals::sInsertedMulti, this,
 			[this](std::vector<size_t> list) {

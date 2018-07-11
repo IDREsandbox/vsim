@@ -14,19 +14,13 @@ public:
 	NarrativeSlide *getSlide();
 
 	// set gui
-	void setImage(const QImage &img);
+	void setPixmap(QPixmap pixmap);
 	void setTransition(float duration);
 	void setDuration(bool stay, float duration); // 0 for stay, >0 for timed
-
-	// thumbnail stuff
-	//bool thumbnailDirty();
-	//void setThumbnailDirty(bool dirty);
 
 	// overrides 
 	virtual void setIndex(int index) override;
 	virtual int widthFromHeight(int height) const override;
-	//virtual void colorFocus(bool color);
-	//virtual void colorSelect(bool color);
 
 	// for filtering double clicks
 	bool eventFilter(QObject * obj, QEvent * ev);

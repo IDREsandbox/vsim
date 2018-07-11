@@ -77,11 +77,21 @@ int main(int argc, char *argv[])
 	////	slide_box->addItem();
 	////}
 
-	////QTimer timer;
-	////timer.setInterval(0);
-	////int x = 0;
-	////QObject::connect(&timer, &QTimer::timeout, [&x]() {qDebug() << "cat" << x; x++; });
-	////timer.start();
+	QTimer timer;
+	timer.setInterval(0);
+	QObject::connect(&timer, &QTimer::timeout, [&]() {
+		//normal_box->update();
+		//qDebug() << "cat" << x; x++;
+	});
+	timer.start();
+
+	QAction *a_visible = new QAction(&window);
+	a_visible->setShortcut(QKeySequence(Qt::Key_O));
+	window.addAction(a_visible);
+	QObject::connect(a_visible, &QAction::triggered, [&]() {
+		auto items = normal_box->visibleItems();
+		qDebug() << "overlap" << QVector<size_t>::fromStdVector(items);
+	});
 
 	window.show();
 
