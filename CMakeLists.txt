@@ -203,14 +203,6 @@ add_subdirectory(src)
 # target_link_libraries(ERFilterSortProxy_test ERModel_obj)
 # target_link_libraries(ERFilterSortProxy_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
 
-# set(ERSerializer_src
-#   tests/ERSerializer_test.cpp
-# )
-# add_executable(ERSerializer_test ${ERSerializer_src})
-# add_test(NAME ERSerializer_test COMMAND ERSerializer_test)
-# target_link_libraries(ERSerializer_test ERModel_obj Core_obj Deprecated_obj)
-# target_link_libraries(ERSerializer_test Qt5::Widgets Qt5::Test ${OPENSCENEGRAPH_LIBRARIES})
-
 # set(EResource_test
 #   tests/EResource_test.cpp
 # )

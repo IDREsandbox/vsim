@@ -242,3 +242,10 @@ vsim_add_experiment(
   "${HorizontalScrollBox_src}"
   "Core_obj;Qt5::Widgets"
 )
+
+# ER serializer test
+vsim_add_test(
+  ERSerializer_test
+  ERSerializer_test.cpp
+  "ERModel_obj;Core_obj;Deprecated_obj;Qt5::Test"
+)

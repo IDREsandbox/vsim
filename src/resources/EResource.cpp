@@ -55,7 +55,14 @@ void EResource::loadOld(const EResourcesNode * old)
 	m_authors = old->getAuthor();
 	m_global = !old->getGlobal();
 	m_reposition = old->getReposition();
-	m_launch = (AutoLaunch)old->getAutoLaunch();
+	switch (old->getAutoLaunch()) {
+	case 0:
+		m_launch = ON;
+	case 1:
+		m_launch = OFF;
+	case 2:
+		m_launch = TEXT;
+	}
 	m_copyright = (Copyright)old->getCopyRight();
 	m_min_year = old->getMinYear();
 	m_max_year = old->getMaxYear();

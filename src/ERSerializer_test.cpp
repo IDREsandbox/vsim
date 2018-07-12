@@ -8,7 +8,7 @@
 #include "resources/EResource.h"
 #include "resources/ECategoryGroup.h"
 #include "resources/ECategory.h"
-#include "Util.h"
+#include "Core/Util.h"
 #include <QMatrix4x4>
 
 namespace fb = VSim::FlatBuffers;
@@ -42,7 +42,7 @@ void writeReadTest() {
 	res->setMinYear(1994);
 	res->setMaxYear(2004);
 	res->setReposition(true);
-	res->setAutoLaunch(false);
+	res->setAutoLaunch(EResource::OFF);
 	res->setLocalRange(15.0f);
 	res->setCategory(cat1);
 
@@ -99,7 +99,7 @@ void writeReadTest() {
 	QCOMPARE(nres->getMinYear(), 1994);
 	QCOMPARE(nres->getMaxYear(), 2004);
 	QCOMPARE(nres->getReposition(), true);
-	QCOMPARE(nres->getAutoLaunch(), false);
+	QCOMPARE(nres->getAutoLaunch(), EResource::OFF);
 	QCOMPARE(nres->getLocalRange(), 15.0f);
 	QCOMPARE(nres->category(), ncat1);
 
