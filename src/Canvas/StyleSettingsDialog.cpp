@@ -49,6 +49,12 @@ void StyleSettingsDialog::setStyles(LabelStyleGroup *styles)
 	ui.tabs->addTab(tab, "Label");
 	tab->setStyle(styles->getStyle(LabelType::LABEL));
 	m_label_widget = tab;
+
+	tab = new StyleSettingsWidget(ui.tabs);
+	ui.tabs->addTab(tab, "Image");
+	tab->setMode(StyleSettingsWidget::Mode::IMAGE);
+	tab->setFrameStyle(styles->getImageStyle());
+	m_image_widget = tab;
 }
 
 void StyleSettingsDialog::takeStyles(LabelStyleGroup *styles)
@@ -67,6 +73,9 @@ void StyleSettingsDialog::takeStyles(LabelStyleGroup *styles)
 
 	LabelStyle *label = styles->getStyle(LabelType::LABEL);
 	label->copy(m_label_widget->getStyle());
+
+	FrameStyle *image = styles->getImageStyle();
+	*image = *m_image_widget->getFrameStyle();
 
 	emit sApplied();
 }

@@ -933,47 +933,52 @@ void CanvasImage::setPixmap(const QPixmap & p)
 
 void CanvasImage::initSize()
 {
+	// the image probably doesn't fit into 800x600, so find a reasonable fit
+	// max height: .5
+	// max width: .5
+	// resize accordingly
 	QPixmap p = m_pixitem->pixmap();
 	if (p.isNull()) return;
 
 	double bh = baseHeight();
-	double max_hr = .8; // max height ratio w/ respect to canvas
-	double max_h = bh * max_hr;
+	double max_h = .5; // max height ratio w/ respect to canvas
 
 	// find reasonable starting height
-	double set_h; // big units
-	if (p.height() < 50) {
-		set_h = 50;
+	double set_h; // ratio units
+	double p_h = p.height() / bh;
+	// too big?
+	if (p_h > max_h) {
+		set_h = max_h;
 	}
-	else if (p.height() < max_h) {
-		set_h = p.height();
+	else if (p_h < .05) {
+		set_h = .05;
 	}
 	else {
-		set_h = max_h;
+		set_h = p_h;
 	}
 
 	double ratio;
 	ratio = p.width() / (float)p.height();
 
-	// convert to small units and set
-	double h = set_h / bh;
-	double w = ratio * h;
+	double set_w = ratio * set_h;
 
 	// bad number checking
-	if (w <= 0.0 || w >= 1.0
-		|| h <= 0.0 || h >= 1.0) {
-		qWarning() << "size init image w/ invalid dimensions" << w << h;
-		w = .2;
-		h = .2;
+	if (set_w <= 0.0
+		|| set_h <= 0.0 || set_h >= 1.0) {
+		qWarning() << "size init image w/ invalid dimensions" << set_w << set_h;
+		set_w = .2;
+		set_h = .2;
 	}
-	resize(w, h);
-	move(-w / 2, -h / 2);
+	resize(set_w, set_h);
+	move(-set_w / 2, -set_h / 2);
 }
 
 void CanvasImage::onResize(QSizeF size)
 {
-	// pixels -> canvas ratio -> item ratio
-	// (300) -> .5 -> .3
+	// pixmap should fit perfectly into the item rect
+	// pixmap width (300)
+	// item width (.3)
+	// to convert: divide by 1000, (scale by .3/300 = 1/1000)
 
 	if (m_pixitem->pixmap().isNull()) {
 		return;

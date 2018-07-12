@@ -102,7 +102,7 @@ std::shared_ptr<CanvasLabel> CanvasControl::createLabelCommand(LabelStyle * styl
 	return item;
 }
 
-std::shared_ptr<CanvasImage> CanvasControl::createImage(QPixmap pixmap, FrameStyle *style)
+std::shared_ptr<CanvasImage> CanvasControl::createImage(QPixmap pixmap, const FrameStyle *style)
 {
 	auto item = std::make_shared<CanvasImage>();
 	item->setPixmap(pixmap);
@@ -111,7 +111,7 @@ std::shared_ptr<CanvasImage> CanvasControl::createImage(QPixmap pixmap, FrameSty
 	return item;
 }
 
-std::shared_ptr<CanvasImage> CanvasControl::createImageCommand(QPixmap pixmap, FrameStyle * style)
+std::shared_ptr<CanvasImage> CanvasControl::createImageCommand(QPixmap pixmap, const FrameStyle * style)
 {
 	auto item = createImage(pixmap, style);
 
@@ -340,7 +340,7 @@ void CanvasControl::listOrdered()
 	insertList(label->textCursor(), QTextListFormat::Style::ListDecimal);
 }
 
-void CanvasControl::applyFrameStyle(CanvasItem * item, FrameStyle * fs)
+void CanvasControl::applyFrameStyle(CanvasItem * item, const FrameStyle * fs)
 {
 	if (fs == nullptr) return;
 	QColor m_bg_color;

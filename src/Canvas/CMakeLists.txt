@@ -12,6 +12,8 @@ set(Canvas_h
   LabelStyleGroup.h
   LabelStyle.h
   LabelType.h
+  StyleSettingsWidget.h
+  StyleSettingsDialog.h
   ${canvas_fb_h}
 )
 
@@ -26,10 +28,8 @@ set(Canvas_src
   LabelStyleGroup.cpp
   LabelStyle.cpp
   StyleSettingsDialog.cpp
-  StyleSettingsDialog.h
   StyleSettingsDialog.ui
   StyleSettingsWidget.cpp
-  StyleSettingsWidget.h
   StyleSettingsWidget.ui
 )
 

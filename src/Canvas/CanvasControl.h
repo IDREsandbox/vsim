@@ -43,8 +43,8 @@ public: // command wrappers
 	//
 	std::shared_ptr<CanvasLabel> createLabel(LabelStyle *);
 	std::shared_ptr<CanvasLabel> createLabelCommand(LabelStyle *styles);
-	std::shared_ptr<CanvasImage> createImage(QPixmap pixmap, FrameStyle *style = nullptr);
-	std::shared_ptr<CanvasImage> createImageCommand(QPixmap pixmap, FrameStyle *style = nullptr);
+	std::shared_ptr<CanvasImage> createImage(QPixmap pixmap, const FrameStyle *style = nullptr);
+	std::shared_ptr<CanvasImage> createImageCommand(QPixmap pixmap, const FrameStyle *style = nullptr);
 	void removeItems();
 
 	// all
@@ -119,7 +119,7 @@ signals: // change signals
 	void sAnyChange();
 
 public: // misc, internal stuff
-	void applyFrameStyle(CanvasItem *item, FrameStyle *style);
+	void applyFrameStyle(CanvasItem *item, const FrameStyle *style);
 	void applyLabelStyle(CanvasLabel *label, LabelStyle *style);
 	QUndoCommand *createApplyLabelStyleCommand(CanvasLabel *label, LabelStyle *style,
 		QUndoCommand *parent = nullptr);

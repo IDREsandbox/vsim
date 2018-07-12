@@ -13,7 +13,8 @@
 #include <QDebug>
 
 StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
-	: QDialog(parent)
+	: QDialog(parent),
+	m_mode(Mode::LABEL)
 {
 	ui.setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -29,9 +30,9 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	m_control->setScene(m_scene);
 
 	// create a canvas, fullscreen it
-	m_canvas = new CanvasContainer(ui.previewFrame);
+	m_canvas = new CanvasContainer(ui.preview_frame);
 	QVBoxLayout *layout = new QVBoxLayout;
-	ui.previewFrame->setLayout(layout);
+	ui.preview_frame->setLayout(layout);
 	layout->addWidget(m_canvas);
 	layout->setMargin(0);
 	m_canvas->setEditable(true);
@@ -41,11 +42,7 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	m_canvas->setObjectName("Canvas");
 	m_canvas->setStyleSheet("#Canvas { background: rgb(50,50,50); }");
 
-	// create a slide
-	m_label = m_control->createLabel(m_style.get());
-	m_label->setHtml("Sample Label");
-	m_label->setRect(-.5, -.3, 1, .6);
-	m_scene->addItem(m_label);
+	setMode(Mode::LABEL);
 
 	m_font_sizes = QFontDatabase::standardSizes();
 	QStringList size_strings;
@@ -87,6 +84,11 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 		QColor color = dlg.selectedColor();
 		ui.bg_color->setStyleSheet(Util::colorToStylesheet(color));
 		m_style->m_frame.m_bg_color = color;
+		refresh();
+	});
+	connect(ui.bg_clear, &QAbstractButton::pressed, this,
+		[this]() {
+		m_style->m_frame.m_bg_color.setAlpha(0);
 		refresh();
 	});
 	connect(ui.border_color, &QPushButton::clicked, this,
@@ -189,22 +191,50 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	refresh();
 }
 
-void StyleSettingsWidget::refresh()
+void StyleSettingsWidget::setMode(Mode mode)
 {
-	//m_style->applyToNarrativeLabel(m_label.get());
-	m_control->applyLabelStyle(m_label.get(), m_style.get());
+	// remove everything from scene
+	m_scene->clear();
+	m_label.reset();
+	m_image.reset();
+
+	m_mode = mode;
+
+	if (mode == Mode::LABEL) {
+		ui.text_editor->show();
+
+		// create a slide
+		m_label = m_control->createLabel(m_style.get());
+		m_label->setHtml("Sample Label");
+		m_label->setRect(-.5, -.3, 1, .6);
+		m_scene->addItem(m_label);
+
+	}
+	if (mode == Mode::IMAGE) {
+		ui.text_editor->hide();
+
+		QPixmap pm(QGuiApplication::applicationDirPath() + "/assets/vsim.png");
+
+		// create a slide
+		m_image = m_control->createImage(pm, m_style->frameStyle());
+		m_scene->addItem(m_image);
+		m_image->initSize();
+	}
+
+	refresh();
 }
 
 void StyleSettingsWidget::setStyle(const LabelStyle * style)
 {
+	if (m_mode != Mode::LABEL) {
+		qWarning() << "attempting to set label style when StyleSettingsWidget is displaying images";
+		return;
+	}
 	if (style != m_style.get()) m_style->copy(style);
 
 	// update all the ui stuff
 
 	ui.text_color->setStyleSheet(Util::colorToStylesheet(style->m_fg_color));
-	ui.bg_color->setStyleSheet(Util::colorToStylesheet(style->m_frame.m_bg_color));
-	ui.border_color->setStyleSheet(Util::colorToStylesheet(style->m_frame.m_frame_color));
-	ui.border_width->setValue(style->m_frame.m_frame_width);
 
 	ui.margin->setValue(style->m_margin);
 	//ui.width->setValue();
@@ -250,10 +280,43 @@ void StyleSettingsWidget::setStyle(const LabelStyle * style)
 	ui.italicize->setChecked(m_style->m_ital);
 	ui.underline->setChecked(m_style->m_underline);
 
+	setFrameStyleInternal(&style->cFrameStyle());
+
 	refresh();
 }
 
-LabelStyle * StyleSettingsWidget::getStyle() const
+LabelStyle *StyleSettingsWidget::getStyle() const
 {
 	return m_style.get();
+}
+
+void StyleSettingsWidget::setFrameStyle(const FrameStyle *fstyle)
+{
+	m_style->m_frame = *fstyle;
+
+	setFrameStyleInternal(fstyle);
+
+	refresh();
+}
+
+const FrameStyle *StyleSettingsWidget::getFrameStyle() const
+{
+	return &m_style->cFrameStyle();
+}
+
+void StyleSettingsWidget::refresh()
+{
+	if (m_mode == Mode::LABEL) {
+		m_control->applyLabelStyle(m_label.get(), m_style.get());
+	}
+	else if (m_mode == Mode::IMAGE) {
+		m_control->applyFrameStyle(m_image.get(), m_style->frameStyle());
+	}
+}
+
+void StyleSettingsWidget::setFrameStyleInternal(const FrameStyle *fstyle)
+{
+	ui.bg_color->setStyleSheet(Util::colorToStylesheet(fstyle->m_bg_color));
+	ui.border_color->setStyleSheet(Util::colorToStylesheet(fstyle->m_frame_color));
+	ui.border_width->setValue(fstyle->m_frame_width);
 }

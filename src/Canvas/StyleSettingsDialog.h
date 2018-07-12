@@ -33,6 +33,7 @@ private:
 	StyleSettingsWidget *m_header2_widget;
 	StyleSettingsWidget *m_body_widget;
 	StyleSettingsWidget *m_label_widget;
+	StyleSettingsWidget *m_image_widget;
 	
 	LabelStyleGroup *m_styles;
 };

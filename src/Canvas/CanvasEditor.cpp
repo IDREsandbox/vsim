@@ -81,7 +81,7 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 		// open up a file dialog
 		QString result = QFileDialog::getOpenFileName(nullptr,
 			"Open Image", m_last_image_dir,
-			"Image Files (*.png;*.jpg;*.bmp);;All Files (*)");
+			"Image Files (*.png;*.jpg;*.bmp;*.gif);;All Files (*)");
 		if (result.isNull()) return;
 
 		QFileInfo info(result);

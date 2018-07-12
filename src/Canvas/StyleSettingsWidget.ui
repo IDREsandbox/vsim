@@ -13,9 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="Header1">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="text_editor">
      <property name="minimumSize">
       <size>
        <width>430</width>
@@ -188,6 +188,32 @@
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
+     <widget class="QLabel" name="label_8">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>90</y>
+        <width>36</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Margin:</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="margin">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>90</y>
+        <width>41</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>200</number>
+      </property>
+     </widget>
      <zorder>label_2</zorder>
      <zorder>fontLabel</zorder>
      <zorder>fontBox</zorder>
@@ -201,30 +227,16 @@
      <zorder>label</zorder>
      <zorder>valign</zorder>
      <zorder>label_5</zorder>
+     <zorder>label_8</zorder>
+     <zorder>margin</zorder>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QFrame" name="previewFrame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>1</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="bod">
+   <item>
+    <widget class="QGroupBox" name="frame_editor">
      <property name="minimumSize">
       <size>
        <width>430</width>
-       <height>110</height>
+       <height>100</height>
       </size>
      </property>
      <property name="title">
@@ -243,51 +255,6 @@
        <string/>
       </property>
      </widget>
-     <widget class="QSpinBox" name="width">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>70</y>
-        <width>43</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="maximum">
-       <number>500</number>
-      </property>
-     </widget>
-     <widget class="QSpinBox" name="height">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>160</x>
-        <y>70</y>
-        <width>43</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="maximum">
-       <number>500</number>
-      </property>
-     </widget>
-     <widget class="QSpinBox" name="margin">
-      <property name="geometry">
-       <rect>
-        <x>190</x>
-        <y>30</y>
-        <width>41</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="maximum">
-       <number>200</number>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
@@ -299,51 +266,6 @@
       </property>
       <property name="text">
        <string>Background Color:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_6">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>11</x>
-        <y>70</y>
-        <width>31</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Width:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_7">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>120</x>
-        <y>70</y>
-        <width>35</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Height:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_8">
-      <property name="geometry">
-       <rect>
-        <x>150</x>
-        <y>30</y>
-        <width>36</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Margin:</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_9">
@@ -376,7 +298,7 @@
       <property name="geometry">
        <rect>
         <x>250</x>
-        <y>70</y>
+        <y>60</y>
         <width>91</width>
         <height>20</height>
        </rect>
@@ -389,7 +311,7 @@
       <property name="geometry">
        <rect>
         <x>360</x>
-        <y>70</y>
+        <y>60</y>
         <width>41</width>
         <height>20</height>
        </rect>
@@ -411,6 +333,35 @@
        <string>clear</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="bg_clear">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>30</y>
+        <width>31</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>clear</string>
+      </property>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="preview_frame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
     </widget>
    </item>
   </layout>

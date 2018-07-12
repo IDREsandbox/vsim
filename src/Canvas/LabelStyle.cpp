@@ -10,7 +10,7 @@ static QString stringRGB(QColor c) {
 	);
 }
 static QString stringRGBA(QColor c) {
-	return QString().sprintf("rgb(%d, %d, %d, %d)",
+	return QString().sprintf("rgba(%d, %d, %d, %d)",
 		c.red(), c.green(), c.blue(), c.alpha()
 	);
 }
