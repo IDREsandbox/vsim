@@ -404,7 +404,7 @@ void NarrativeControl::update(double dt)
 	//// 800x600, 4x3
 
 	// paint thumbnails?
-	if (getCurrentSlide() != nullptr && !showingNarrativeBox()) {
+	if (getCurrentNarrative() != nullptr && !showingNarrativeBox()) {
 
 		std::vector<size_t> indices = m_slide_box->visibleItems();
 
@@ -891,6 +891,16 @@ void NarrativeControl::moveSlides(const std::vector<std::pair<size_t, size_t>> &
 	m_undo_stack->push(new MoveNodesCommand<NarrativeSlide>(narrative, mapping));
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, sto, Command::ON_REDO));
 	m_undo_stack->endMacro();
+}
+
+void NarrativeControl::clearAllThumbnails()
+{
+	for (std::shared_ptr<Narrative> nar : *m_narrative_group) {
+		for (std::shared_ptr<NarrativeSlide> slide : *nar) {
+			slide->setBackgroundDirty();
+			slide->setForegroundDirty();
+		}
+	}
 }
 
 void NarrativeControl::onThumbnailReady(QImage img)

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2018-7-10
+
+- Reworked thumbnails
+- OSG rendering docs
+
+### Fixes
+
+- Fixed crash involving slides not updating after opening a file
+
 ## 2018-7-6
 
 - Basic anti aliasing, anti aliasing settings

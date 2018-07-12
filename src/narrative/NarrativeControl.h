@@ -129,8 +129,7 @@ public: // Actions
 	// Canvas
 
 	// Thumbnails
-	void dirtyCurrentSlide();
-	void redrawThumbnails(const std::vector<NarrativeSlide*> slides);
+	void clearAllThumbnails();
 	void onThumbnailReady(QImage img);
 
 	void debug();

@@ -108,6 +108,7 @@
     <addaction name="actionReload_Style"/>
     <addaction name="actionEditor_Debug"/>
     <addaction name="actionOptimize_Scene"/>
+    <addaction name="actionClear_Thumbnails"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -497,6 +498,14 @@
   <action name="actionModel_Settings">
    <property name="text">
     <string>Model Settings</string>
+   </property>
+  </action>
+  <action name="actionClear_Thumbnails">
+   <property name="text">
+    <string>Clear Thumbnails</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+T</string>
    </property>
   </action>
  </widget>

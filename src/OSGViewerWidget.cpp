@@ -140,10 +140,14 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	// Use default camera
 	osg::Camera* camera = m_main_view->getCamera();
+	float cfar = 7500.0f;
+	float cnear = 1.0f;
 	camera->setViewport(0, 0, this->width(), this->height());
 	camera->setClearColor(osg::Vec4(51/255.f, 51/255.f, 102/255.f, 1.f));
-	camera->setProjectionMatrixAsPerspective(55.f, aspect_ratio, 1.f, 7500.f);
+	camera->setProjectionMatrixAsPerspective(55.f, aspect_ratio, cnear, cfar);
 	camera->setGraphicsContext(m_graphics_window); // set the context, connects the viewer and graphics context
+	//camera->setComputeNearFarMode(osg::CullSettings::ComputeNearFarMode::DO_NOT_COMPUTE_NEAR_FAR);
+	camera->setComputeNearFarMode(osg::CullSettings::ComputeNearFarMode::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
 	//camera->setCullingMode(osg::Camera::NO_CULLING);
 
 	osg::Camera* camera2 = m_thumb_view->getCamera();
@@ -532,6 +536,18 @@ float OSGViewerWidget::getTimeBetween() const
 float OSGViewerWidget::getFullFrameTime() const
 {
 	return m_full_frame_time;
+}
+
+QString OSGViewerWidget::debugString()
+{
+	QString str;
+
+	auto *cam = m_main_view->getCamera();
+	double fovy, aspect, n, f;
+	cam->getProjectionMatrixAsPerspective(fovy, aspect, n, f);
+	str += QString().sprintf("camera near: %f, far %f\n", n, f);
+
+	return str;
 }
 
 void OSGViewerWidget::paintEvent(QPaintEvent *e)

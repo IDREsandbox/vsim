@@ -206,6 +206,7 @@ MainWindow::MainWindow(QWidget *parent)
 		m_stats_window->ui.frame_time->setText(QString::number(m_osg_widget->getFrameTime()));
 		m_stats_window->ui.full_frame_time->setText(QString::number(m_osg_widget->getFullFrameTime()));
 		m_stats_window->ui.time_between->setText(QString::number(m_osg_widget->getTimeBetween()));
+		m_stats_window->ui.debug_dump->setText(m_osg_widget->debugString());
 	});
 	connect(ui->actionOSG_Debug, &QAction::triggered, this, [this]() {
 		m_app->getRoot()->models()->debugScene();
@@ -216,6 +217,9 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionCamera_Debug, &QAction::triggered, this, &MainWindow::sDebugCamera);
 	connect(ui->actionControl_Debug, &QAction::triggered, this, &MainWindow::sDebugControl);
 	connect(ui->actionReload_Style, &QAction::triggered, this, &MainWindow::reloadStyle);
+	connect(ui->actionClear_Thumbnails, &QAction::triggered, this, [this]() {
+		m_app->narrativeControl()->clearAllThumbnails();
+	});
 	reloadStyle();
 	connect(ui->actionEditor_Debug, &QAction::triggered, this, [this]() {
 		qInfo() << "Editor debug";

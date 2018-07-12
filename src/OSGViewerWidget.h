@@ -108,6 +108,7 @@ public:
 	float getFrameTime() const;
 	float getTimeBetween() const;
 	float getFullFrameTime() const;
+	QString debugString();
 
 signals:
 	void frame(double dt_sec);
