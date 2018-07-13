@@ -72,6 +72,7 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 		this, [this](double value) {
 		emit sSetRadius(value);
 	});
+	connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &ERFilterArea::sSearch);
 
 	reset();
 }
@@ -94,6 +95,11 @@ void ERFilterArea::reset()
 	//if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
 	//if (m_type_checkbox_model) m_type_checkbox_model->setCheckAll(true);
 	//ui->filetypesBox->setCurrentText("");
+}
+
+void ERFilterArea::setSearch(const QString & s)
+{
+	ui->searchLineEdit->setText(s);
 }
 
 void ERFilterArea::setSortGlobal(ER::SortBy sort)

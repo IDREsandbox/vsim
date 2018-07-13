@@ -75,7 +75,7 @@ public:
 	void appTimeEnable(bool enable); // this is for the global
 	//void setSearchRadius(float radius);
 
-	void setTitleSearch(const std::string &title);
+	void setSearch(const QString &search);
 	void setYear(int year);
 	//void setPosition(osg::Vec3 pos);
 
@@ -94,6 +94,7 @@ signals:
 	void sUseYearsChanged(bool use);
 	void sShowLocalChanged(bool show);
 	void sShowGlobalChanged(bool show);
+	void sSearchChanged(const QString &s);
 	//void sTextSearchChanged(const std::string &text);
 	//void sFileTypesChanged();
 
@@ -126,7 +127,7 @@ protected:
 private:
 	// adds/remove from m_categories_enabled based on model
 	void updateCategorySet(int model_row);
-	bool checkTitle(const std::string &s) const;
+	bool checkSearch(const EResource *res, const QString &s) const;
 
 private:
 	// filter sort proxy
@@ -147,7 +148,7 @@ private:
 	bool m_enable_years;
 	bool m_time_enabled;
 
-	std::string m_title_search;
+	QString m_search;
 	int m_year;
 	
 	bool m_show_all;

@@ -35,9 +35,6 @@ public:
 
 	void load(EResourceGroup *ers);
 
-	// used for er distance checking
-	void update(double dt_sec);
-
 	// actions
 	void newER();
 	void deleteER();
@@ -79,9 +76,9 @@ public:
 	void setRadius(float radius);
 	void enableAutoLaunch(bool enable);
 
-	void onPositionChange(const osg::Vec3 &pos);
 	void onUpdate();
 
+	QString debugString();
 	void debug();
 
 signals:
@@ -129,8 +126,8 @@ private:
 	float m_radius;
 	bool m_enabled;
 	bool m_auto_launch;
-	//osg::Vec3 m_prev_position;
-	//bool m_pos_dirty;
+
+	double m_update_time_sec;
 };
 
 class SelectERCommand : public QUndoCommand {

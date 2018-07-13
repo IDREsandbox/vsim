@@ -221,6 +221,12 @@ bool ERFilterSortProxy::accept(EResource *res)
 	}
 
 	// check title
+	// just substring search the title, to lower
+	if (!m_search.isEmpty()) {
+		if (!checkSearch(res, m_search)) {
+			return false;
+		}
+	}
 
 	// check distance
 	// check enable range
@@ -359,6 +365,9 @@ std::set<size_t> ERFilterSortProxy::baseToLocal(const std::set<size_t> base_indi
 
 void ERFilterSortProxy::recheck(const std::set<size_t>& base_indices)
 {
+	//reload2();
+	// resort()
+
 	checkAndRemoveSet(base_indices);
 	checkAndInsertSet(base_indices);
 }
@@ -475,10 +484,11 @@ void ERFilterSortProxy::appTimeEnable(bool enable)
 //	emit sRadiusChanged(radius);
 //}
 
-void ERFilterSortProxy::setTitleSearch(const std::string & title)
+void ERFilterSortProxy::setSearch(const QString &search)
 {
-	m_title_search = title;
+	m_search = search;
 	reload2();
+	emit sSearchChanged(search);
 }
 
 void ERFilterSortProxy::setYear(int year)
@@ -734,13 +744,30 @@ void ERFilterSortProxy::updateCategorySet(int model_row)
 	}
 }
 
-bool ERFilterSortProxy::checkTitle(const std::string & s) const
+bool ERFilterSortProxy::checkSearch(const EResource * res, const QString & search) const
 {
-	if (!m_type_filters) return true;
+	if (search.isEmpty()) return true;
+	// tolower everything
+	// then a basic search
 
-	// do some regex
+	bool hit;
 
-	return true;
+	// search title
+	QString title = QString(res->getResourceName().c_str());
+	hit = title.contains(search, Qt::CaseSensitivity::CaseInsensitive);
+	if (hit) return true;
+
+	// search description
+	QString desc = QString(res->getResourceDescription().c_str());
+	hit = desc.contains(search, Qt::CaseSensitivity::CaseInsensitive);
+	if (hit) return true;
+
+	// search authors/source
+	QString source = QString(res->getAuthor().c_str());
+	hit = desc.contains(search, Qt::CaseSensitivity::CaseInsensitive);
+	if (hit) return true;
+
+	return false;
 }
 
 int ERFilterSortProxy::indexOf(const EResource *node) const

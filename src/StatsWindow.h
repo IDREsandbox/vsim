@@ -8,6 +8,10 @@ class StatsWindow : public QWidget {
 public:
 	StatsWindow(QWidget *parent = nullptr);
 
+	// general purpose
+	void clear();
+	void addLine(QString str);
+
 public:
 	Ui::StatsWindow ui;
 };

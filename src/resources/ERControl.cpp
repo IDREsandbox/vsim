@@ -206,6 +206,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		m_global_proxy.get(), &ERFilterSortProxy::sortBy);
 	connect(m_filter_area, &ERFilterArea::sEnableAutoLaunch,
 		this, &ERControl::enableAutoLaunch);
+	connect(m_filter_area, &ERFilterArea::sSearch,
+		m_filter_proxy.get(), &ERFilterSortProxy::setSearch);
 
 	connect(m_window->erBar()->ui.filter, &QPushButton::pressed, this,
 		[this]() {
@@ -223,6 +225,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		m_filter_area, &ERFilterArea::enableYears);
 	connect(m_local_proxy.get(), &ERFilterSortProxy::sUseRangeChanged,
 		m_filter_area, &ERFilterArea::enableRange);
+	connect(m_filter_proxy.get(), &ERFilterSortProxy::sSearchChanged,
+		m_filter_area, &ERFilterArea::setSearch);
 
 	resetFilters();
 	showAll(false);
@@ -249,11 +253,6 @@ void ERControl::load(EResourceGroup *ers)
 	m_category_control->load(m_categories);
 
 	m_filter_area->reset();
-}
-
-void ERControl::update(double dt_sec)
-{
-
 }
 
 void ERControl::newER()
@@ -577,7 +576,7 @@ void ERControl::resetFilters()
 	m_filter_proxy->sortBy(ER::SortBy::NONE);
 	m_local_proxy->sortBy(ER::SortBy::DISTANCE);
 	m_global_proxy->sortBy(ER::SortBy::TITLE);
-	m_filter_proxy->setTitleSearch("");
+	m_filter_proxy->setSearch("");
 	m_filter_proxy->showGlobal(true);
 	m_filter_proxy->showLocal(true);
 	m_filter_proxy->appTimeEnable(m_app->timeManager()->timeEnabled());
@@ -601,6 +600,9 @@ void ERControl::enableAutoLaunch(bool enable)
 
 void ERControl::onUpdate()
 {
+	QElapsedTimer timer;
+	timer.start();
+
 	// update all positions
 	const osg::Vec3 &pos = m_app->getPosition();
 
@@ -626,6 +628,11 @@ void ERControl::onUpdate()
 		if (changed && !overlap) {
 		}
 	}
+	// sort by distance
+	m_local_proxy->positionChangePoke();
+	m_global_proxy->positionChangePoke();
+	m_filter_proxy->positionChangePoke();
+
 	// send updates to proxies
 	m_ers->sEdited(change_list);
 
@@ -643,9 +650,12 @@ void ERControl::onUpdate()
 		}
 	}
 
-	// sort by distance
-	m_local_proxy->positionChangePoke();
-	m_global_proxy->positionChangePoke();
+	m_update_time_sec = timer.nsecsElapsed() / 1.0e9;
+}
+
+QString ERControl::debugString()
+{
+	return QString().sprintf("frame ms: %.2f", m_update_time_sec * 1000);
 }
 
 void ERControl::debug()

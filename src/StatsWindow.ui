@@ -149,6 +149,29 @@
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>10</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Other dump:</string>
+   </property>
+  </widget>
+  <widget class="QTextBrowser" name="other">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>30</y>
+     <width>111</width>
+     <height>301</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

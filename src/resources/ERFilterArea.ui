@@ -122,7 +122,7 @@
      <item>
       <widget class="QLabel" name="label_4">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
         <string>Search</string>
@@ -132,7 +132,7 @@
      <item>
       <widget class="QLineEdit" name="searchLineEdit">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
         <string/>
@@ -145,7 +145,7 @@
      <item>
       <widget class="QPushButton" name="searchClearButton">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
         <string>Clear</string>

@@ -194,7 +194,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_stats_window = new StatsWindow(this);
 	QAction *stats = new QAction("Stats", this);
 	ui->menuTest->addAction(stats);
-	stats->setShortcut(QKeySequence(Qt::Key_F10));
+	stats->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F10));
 	connect(stats, &QAction::triggered, this, [this]() {
 		m_stats_window->show();
 	});
@@ -203,10 +203,12 @@ MainWindow::MainWindow(QWidget *parent)
 	stats_timer->start();
 	connect(stats_timer, &QTimer::timeout, this, [this]() {
 		// stats timer update
+		m_stats_window->clear();
 		m_stats_window->ui.frame_time->setText(QString::number(m_osg_widget->getFrameTime()));
 		m_stats_window->ui.full_frame_time->setText(QString::number(m_osg_widget->getFullFrameTime()));
 		m_stats_window->ui.time_between->setText(QString::number(m_osg_widget->getTimeBetween()));
 		m_stats_window->ui.debug_dump->setText(m_osg_widget->debugString());
+		m_stats_window->addLine("ers:" + m_app->erControl()->debugString());
 	});
 	connect(ui->actionOSG_Debug, &QAction::triggered, this, [this]() {
 		m_app->getRoot()->models()->debugScene();

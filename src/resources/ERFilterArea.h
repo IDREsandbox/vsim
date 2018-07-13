@@ -26,6 +26,7 @@ public:
 	void setRadius(float radius);
 	void enableYears(bool enable);
 	void enableAutoLaunch(bool enable);
+	void setSearch(const QString &s);
 
 signals:
 	void sSortGlobal(ER::SortBy sort);
@@ -34,6 +35,7 @@ signals:
 	void sSetRadius(float radius);
 	void sEnableYears(bool enable);
 	void sEnableAutoLaunch(bool enable);
+	void sSearch(const QString &search);
 	void sClear();
 
 private:
