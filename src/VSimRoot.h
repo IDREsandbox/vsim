@@ -34,11 +34,13 @@ public:
 
 	// settings stuff, there is no settings class yet
 	void copySettings(const VSimRoot *other);
-	VSim::FlatBuffers::SettingsT *settings() const; // not optional
+
+	// never null
+	VSim::FlatBuffers::SettingsT *settings() const;
 
 	void debug();
 
-	// only kind-of works
+	// only kind of works
 	void moveAllToThread(QThread *thread);
 
 private:

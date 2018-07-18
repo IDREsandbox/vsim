@@ -1,4 +1,5 @@
 #include "VSimRoot.h"
+#include "VSimRoot.h"
 
 #include <iostream>
 #include <QDate>

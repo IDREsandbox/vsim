@@ -57,6 +57,7 @@
 #include "FileUtil.h"
 #include <fstream>
 
+#include "Core/TypesSerializer.h"
 #include "types_generated.h"
 #include "settings_generated.h"
 
@@ -643,6 +644,7 @@ void MainWindow::execSave(const QString & filename)
 	dlg.setWindowTitle("Save");
 	dlg.setCancellable(false);
 
+	m_app->prepareSave();
 	VSimRoot *root = m_app->getRoot();
 
 	SimpleWorker w;

@@ -46,6 +46,8 @@ public:
 	// this is called on every new, reset, etc
 	bool initWithVSim(VSimRoot *root = nullptr);
 
+	void prepareSave();
+
 	// state
 	enum State {
 		EDIT_NARS,
@@ -121,6 +123,7 @@ public:
 
 signals:
 	void sTick(double sec);
+	void sAboutToSave();
 	void sAboutToReset();
 	void sReset();
 	void sStateChanged(VSimApp::State old, VSimApp::State current);

@@ -175,6 +175,11 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 	return true;
 }
 
+void VSimApp::prepareSave()
+{
+	emit sAboutToSave();
+}
+
 VSimRoot *VSimApp::getRoot() const
 {
 	return m_root.get();

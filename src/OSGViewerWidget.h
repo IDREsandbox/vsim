@@ -150,6 +150,7 @@ public:
 	osg::Matrix homePosition() const;
 	void setHomePosition(const osg::Matrix &camera_matrix);
 	void resetHomePosition();
+	bool usingDefaultHomePosition();
 
 public:
 

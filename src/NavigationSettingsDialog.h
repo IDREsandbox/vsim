@@ -4,6 +4,7 @@
 #include "ui_NavigationSettingsDialog.h"
 
 class VSimApp;
+class OSGViewerWidget;
 
 class NavigationSettingsDialog : public QDialog {
 	Q_OBJECT;
@@ -14,6 +15,7 @@ private:
 	void load(VSimApp *app);
 	void apply(VSimApp *app);
 	void defaults();
+	void updateTickMultipliers();
 
 private:
 	struct Preset {
@@ -32,6 +34,7 @@ private:
 	Ui::NavigationSettingsDialog ui;
 	std::vector<Preset> m_presets;
 	Preset m_default;
+	OSGViewerWidget *m_viewer;
 };
 
 #endif

@@ -23,6 +23,9 @@ public:
 
 	void activate(); // sets vsim state
 
+	void gatherSettings();
+	void extractSettings();
+
 	void onModeChange(Navigation::Mode mode);
 
 public: // actions

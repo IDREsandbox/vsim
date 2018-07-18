@@ -85,14 +85,6 @@ public slots:
 
 	void execModelInformation();
 
-	// TODO
-	// void narListForward();
-	// void narListAdd();
-	// void narListDelete();
-	// void narListPause();
-	// void narListOpen();
-	// void narListInfo();
-
 signals:
 	void sImportModel(const std::string&);
 	void sImportNarratives();

@@ -1,8 +1,14 @@
 #include "NavigationControl.h"
+
 #include <QMenu>
+#include <QDebug>
+
 #include "VSimApp.h"
 #include "OSGViewerWidget.h"
-#include <QDebug>
+#include "VSimRoot.h"
+#include "Core/TypesSerializer.h"
+#include "types_generated.h"
+#include "settings_generated.h"
 
 NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObject *parent)
 	: QObject(parent),
@@ -88,6 +94,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	connect(a_ground_mode, &QAction::triggered, this,
 		[this]() {
 		bool enable = !m_viewer->groundModeEnabled();
+		qInfo() << "Ground mode" << enable;
 		m_viewer->enableGroundMode(enable);
 		activate();
 		QString onoff = enable ? "On" : "Off";
@@ -96,6 +103,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	connect(a_collisions, &QAction::triggered, this,
 		[this]() {
 		bool enable = !m_viewer->collisionsEnabled();
+		qInfo() << "Collisions" << enable;
 		m_viewer->enableCollisions(enable);
 		activate();
 		QString onoff = enable ? "On" : "Off";
@@ -215,8 +223,14 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 			m_viewer->setFocus();
 		}
 	});
+	connect(m_app, &VSimApp::sAboutToSave, this,
+		[this]() {
+		gatherSettings();
+	});
 	connect(m_app, &VSimApp::sReset, this,
 		[this]() {
+		extractSettings();
+
 		m_viewer->startup();
 
 		// init render stuff
@@ -246,6 +260,102 @@ void NavigationControl::activate()
 	else {
 		m_app->setState(VSimApp::EDIT_FLYING);
 	}
+}
+
+void NavigationControl::gatherSettings()
+{
+	auto *settings = m_app->getRoot()->settings();
+	namespace fbs = VSim::FlatBuffers;
+
+
+	// navigation settings
+	auto ns = std::make_unique<fbs::NavigationSettingsT>();
+
+	auto home = TypesSerializer::osg2fbCameraMatrix(m_viewer->homePosition());
+	ns->start_camera = std::make_unique<fbs::CameraPosDirUp>(home);
+	ns->default_start_camera = m_viewer->usingDefaultHomePosition();
+
+	ns->base_speed = m_viewer->baseSpeed();
+	ns->flight_speed_tick = m_viewer->startupSpeedTick();
+
+	ns->collisions_on = m_viewer->collisionOnStartup();
+	ns->collision_radius = m_viewer->collisionRadius();
+
+	ns->ground_mode_on = m_viewer->groundOnStartup();
+	ns->gravity_acceleration = -m_viewer->gravityAcceleration();
+	ns->gravity_fall_speed = m_viewer->gravitySpeed();
+	ns->eye_height = m_viewer->eyeHeight();
+
+	settings->navigation_settings = std::move(ns);
+
+
+	// graphics settings
+	auto gs = std::make_unique<fbs::GraphicsSettingsT>();
+	{
+		// camera setings
+		auto cs = std::make_unique<fbs::CameraSettingsT>();
+		cs->auto_clip = m_viewer->autoClip();
+		cs->near_clip = m_viewer->nearClip();
+		cs->far_clip = m_viewer->farClip();
+		cs->fovy = m_viewer->fovy();
+
+		gs->camera_settings = std::move(cs);
+	}
+
+	settings->graphics_settings = std::move(gs);
+}
+
+void NavigationControl::extractSettings()
+{
+	auto *settings = m_app->getRoot()->settings();
+	namespace fbs = VSim::FlatBuffers;
+
+	// navigation settings
+	auto &ns = settings->navigation_settings;
+	if (!ns) ns = std::make_unique<fbs::NavigationSettingsT>();
+
+	// start camera
+	if (ns->default_start_camera) {
+		m_viewer->resetHomePosition();
+	}
+	else {
+		auto *start_camera = ns->start_camera.get();
+		if (start_camera) {
+			m_viewer->setHomePosition(
+				TypesSerializer::fb2osgCameraMatrix(*start_camera));
+		}
+		else {
+			m_viewer->resetHomePosition();
+		}
+	}
+
+	m_viewer->setBaseSpeed(ns->base_speed);
+	m_viewer->setStartupSpeedTick(ns->flight_speed_tick);
+
+	m_viewer->setCollisionOnStartup(ns->collisions_on);
+	m_viewer->enableCollisions(ns->collisions_on);
+	m_viewer->setCollisionRadius(ns->collision_radius);
+
+	m_viewer->setGroundOnStartup(ns->ground_mode_on);
+	m_viewer->enableGroundMode(ns->ground_mode_on);
+	m_viewer->setGravityAcceleration(-ns->gravity_acceleration);
+	m_viewer->setGravitySpeed(ns->gravity_fall_speed);
+
+	m_viewer->setEyeHeight(ns->eye_height);
+
+
+	// graphics settings
+	auto &gs = settings->graphics_settings;
+	if (!gs) gs = std::make_unique<fbs::GraphicsSettingsT>();
+
+	// camera settings
+	auto &cs = gs->camera_settings;
+	if (!cs) cs = std::make_unique<fbs::CameraSettingsT>();
+
+	m_viewer->setFovy(cs->fovy);
+	m_viewer->setNearClip(cs->near_clip);
+	m_viewer->setFarClip(cs->far_clip);
+	m_viewer->setAutoClip(cs->auto_clip);
 }
 
 void NavigationControl::onModeChange(Navigation::Mode mode)

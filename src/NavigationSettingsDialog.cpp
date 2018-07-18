@@ -11,17 +11,10 @@ NavigationSettingsDialog::NavigationSettingsDialog(VSimApp *app, QWidget *parent
 {
 	ui.setupUi(this);
 
-	// connect tick spinboxes to labels
-	auto connectTickLabel = [this](QSpinBox *spinbox, QLabel *label) {
-		connect(spinbox, QOverload<int>::of(&QSpinBox::valueChanged),
-			this, [spinbox, label](int tick) {
-			QString text;
-			text.sprintf("x%f", OSGViewerWidget::speedMultiplier(tick));
-			label->setText(text);
-		});
-	};
-	connectTickLabel(ui.tick_spinbox, ui.tick_multiplier_label);
-	connectTickLabel(ui.tick_startup_spinbox, ui.tick_startup_multiplier_label);
+	connect(ui.tick_spinbox, QOverload<int>::of(&QSpinBox::valueChanged), this,
+		&NavigationSettingsDialog::updateTickMultipliers);
+	connect(ui.tick_startup_spinbox, QOverload<int>::of(&QSpinBox::valueChanged), this,
+		&NavigationSettingsDialog::updateTickMultipliers);
 
 	// tick limits
 	int tick_limit = OSGViewerWidget::k_tick_limit;
@@ -103,11 +96,13 @@ NavigationSettingsDialog::NavigationSettingsDialog(VSimApp *app, QWidget *parent
 void NavigationSettingsDialog::load(VSimApp * app)
 {
 	OSGViewerWidget *viewer = app->viewer();
+	m_viewer = viewer;
 
 	// first person
 	ui.speed_spinbox->setValue(viewer->baseSpeed());
 	ui.tick_spinbox->setValue(viewer->speedTick());
 	ui.tick_startup_spinbox->setValue(viewer->startupSpeedTick());
+	updateTickMultipliers();
 
 	// collisions
 	ui.collision_checkbox->setChecked(viewer->collisionsEnabled());
@@ -169,4 +164,17 @@ void NavigationSettingsDialog::applyPreset(const Preset & preset)
 	ui.height_spinbox->setValue(preset.eye_height);
 	ui.gravity_acceleration_spinbox->setValue(preset.gravity_acceleration);
 	ui.gravity_speed_spinbox->setValue(preset.gravity_fall_speed);
+}
+
+void NavigationSettingsDialog::updateTickMultipliers()
+{
+	QString text;
+	text.sprintf("x%f", OSGViewerWidget::speedMultiplier(
+		ui.tick_spinbox->value()));
+	ui.tick_multiplier_label->setText(text);
+
+	QString text2;
+	text2.sprintf("x%f", OSGViewerWidget::speedMultiplier(
+		ui.tick_startup_spinbox->value()));
+	ui.tick_startup_multiplier_label->setText(text);
 }

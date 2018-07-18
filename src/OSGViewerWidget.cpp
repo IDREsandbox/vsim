@@ -440,7 +440,6 @@ bool OSGViewerWidget::groundModeEnabled() const
 
 void OSGViewerWidget::enableGroundMode(bool enable)
 {
-	qInfo() << "Ground mode" << enable;
 	m_flight_manipulator->enableGravity(enable);
 	m_first_person_manipulator->enableGravity(enable);
 	m_flight_manipulator->enableHeight(enable);
@@ -455,7 +454,6 @@ bool OSGViewerWidget::collisionsEnabled() const
 
 void OSGViewerWidget::enableCollisions(bool enable)
 {
-	qInfo() << "Collision" << enable;
 	m_flight_manipulator->enableCollisions(enable);
 	m_first_person_manipulator->enableCollisions(enable);
 	emit sCollisionsChanged(enable);
@@ -734,6 +732,11 @@ void OSGViewerWidget::setHomePosition(const osg::Matrix & camera_matrix)
 void OSGViewerWidget::resetHomePosition()
 {
 	m_default_home_position = true;
+}
+
+bool OSGViewerWidget::usingDefaultHomePosition()
+{
+	return m_default_home_position;
 }
 
 bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)
