@@ -129,6 +129,9 @@ set(VSim_src
   BrandingControl.h
   CoordinateWidget.cpp
   CoordinateWidget.h
+  DisplaySettingsDialog.cpp
+  DisplaySettingsDialog.h
+  DisplaySettingsDialog.ui
   EditDeleteDelegate.cpp
   EditDeleteDelegate.h
   ElidedLabel.cpp

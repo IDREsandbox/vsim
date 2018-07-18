@@ -580,8 +580,8 @@ void OSGViewerWidget::setNearClip(float near_clip_2)
 	m_main_view->getCamera()->getProjectionMatrixAsPerspective(a, b, near_clip, far_clip);
 
 	// make sure far > near > min
-	double near_min = .001;
-	double diff_min = .001;
+	double near_min = .01;
+	double diff_min = .01;
 
 	near_clip_2 = std::max({ (double)near_clip_2, near_min });
 	double far_clip_2 = std::max({ far_clip, near_clip_2 + diff_min, near_min });
@@ -610,7 +610,8 @@ void OSGViewerWidget::setFarClip(float far_clip_2)
 	far_clip_2 = std::max({ (double)far_clip_2, near_min + diff_min });
 
 	// keep near < far, near > min
-	double near_clip_2 = std::max(std::min((double)far_clip_2, near_clip), near_min);
+	// near < far
+	double near_clip_2 = std::clamp(near_clip, near_min, (double)far_clip_2 - diff_min);
 
 	m_main_view->getCamera()->setProjectionMatrixAsPerspective(a, b, near_clip_2, far_clip_2);
 	m_thumb_view->getCamera()->setProjectionMatrixAsPerspective(a, b, near_clip_2, far_clip_2);

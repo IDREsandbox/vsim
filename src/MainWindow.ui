@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>676</height>
+    <height>652</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -133,7 +133,9 @@
     <property name="title">
      <string>Settings</string>
     </property>
+    <addaction name="display_settings"/>
     <addaction name="navigation_settings"/>
+    <addaction name="other_settings"/>
     <addaction name="actionFont_Color_Styles"/>
    </widget>
    <widget class="QMenu" name="menuRender">
@@ -506,6 +508,16 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+T</string>
+   </property>
+  </action>
+  <action name="display_settings">
+   <property name="text">
+    <string>Display Settings</string>
+   </property>
+  </action>
+  <action name="other_settings">
+   <property name="text">
+    <string>Other Settings</string>
    </property>
   </action>
  </widget>

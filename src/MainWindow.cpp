@@ -25,6 +25,7 @@
 #include "SimpleWorker.h"
 #include "BrandingOverlay.h"
 #include "NavigationSettingsDialog.h"
+#include "DisplaySettingsDialog.h"
 
 #include "narrative/NarrativeGroup.h"
 #include "narrative/NarrativePlayer.h"
@@ -348,6 +349,10 @@ void MainWindow::setApp(VSimApp * vsim)
 	connect(ui->actionModel_Information, &QAction::triggered, this, &MainWindow::execModelInformation);
 	connect(ui->navigation_settings, &QAction::triggered, this, [this]() {
 		NavigationSettingsDialog dlg(m_app, this);
+		dlg.exec();
+	});
+	connect(ui->display_settings, &QAction::triggered, this, [this]() {
+		DisplaySettingsDialog dlg(m_app, this);
 		dlg.exec();
 	});
 
