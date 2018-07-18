@@ -33,26 +33,13 @@
       </item>
       <item row="1" column="2" colspan="3">
        <widget class="QSlider" name="fov_slider">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>179</number>
-        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item row="1" column="6">
-       <widget class="QDoubleSpinBox" name="fov_spinbox">
-        <property name="minimum">
-         <double>0.010000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>179.900000000000006</double>
-        </property>
-       </widget>
+       <widget class="QDoubleSpinBox" name="fov_spinbox"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="clip_label">
@@ -76,14 +63,7 @@
        </widget>
       </item>
       <item row="2" column="4">
-       <widget class="QDoubleSpinBox" name="clip_near_spinbox">
-        <property name="minimum">
-         <double>0.010000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>100000.000000000000000</double>
-        </property>
-       </widget>
+       <widget class="QDoubleSpinBox" name="clip_near_spinbox"/>
       </item>
       <item row="2" column="5">
        <widget class="QLabel" name="clip_far_label">
@@ -93,11 +73,7 @@
        </widget>
       </item>
       <item row="2" column="6">
-       <widget class="QDoubleSpinBox" name="clip_far_spinbox">
-        <property name="maximum">
-         <double>100000.000000000000000</double>
-        </property>
-       </widget>
+       <widget class="QDoubleSpinBox" name="clip_far_spinbox"/>
       </item>
       <item row="3" column="3">
        <spacer name="verticalSpacer">

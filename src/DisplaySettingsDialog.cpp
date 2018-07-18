@@ -12,8 +12,10 @@ DisplaySettingsDialog::DisplaySettingsDialog(VSimApp *app, QWidget *parent)
 
 	m_viewer = app->viewer();
 
-	// camera settings
-	// live connection
+	ui.fov_slider->setRange(1, 179);
+	ui.fov_spinbox->setRange(.1, 179.9);
+	ui.clip_near_spinbox->setRange(.001, 100000);
+	ui.clip_far_spinbox->setRange(.001, 1000000);
 
 	// fov - connect spinbox to slider
 	connect(ui.fov_slider, &QAbstractSlider::valueChanged, this,
