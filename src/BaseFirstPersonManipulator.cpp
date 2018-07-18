@@ -5,8 +5,8 @@
 BaseFirstPersonManipulator::BaseFirstPersonManipulator()
 	: m_sensitivity(.25),
 	m_position_delta(),
-	m_gravity_acceleration(-6.0),
-	m_gravity_max_speed(6.0),
+	m_gravity_acceleration(-10.0),
+	m_gravity_max_speed(40.0),
 	m_gravity_on(false),
 	m_collision_on(false),
 	m_collision_radius(.5),
@@ -33,6 +33,7 @@ void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::No
 	if (m_gravity_on) {
 		// update velocity
 		m_gravity_velocity += m_gravity_acceleration * dt_sec;
+		// since negative it's like min(abs, abs)
 		m_gravity_velocity = std::max(m_gravity_velocity, -m_gravity_max_speed);
 
 		// gravity speed limit
@@ -44,21 +45,31 @@ void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::No
 	// physics
 	if (m_collision_on && new_pos != pos) {
 
-		// ground collision test
-		osg::Vec3d up = osg::Vec3d(0, 0, m_collision_height);
-		osg::Vec3d new_pos_down = new_pos - up;
+		if (m_height_enabled) {
+			// ground collision test
+			osg::Vec3d up = osg::Vec3d(0, 0, m_collision_height);
+			osg::Vec3d new_pos_down = new_pos - up;
 
-		osg::ref_ptr<osgUtil::LineSegmentIntersector> gline =
-			new osgUtil::LineSegmentIntersector(new_pos, new_pos_down);
+			osg::ref_ptr<osgUtil::LineSegmentIntersector> gline =
+				new osgUtil::LineSegmentIntersector(new_pos, new_pos_down);
+			gline->setIntersectionLimit(osgUtil::Intersector::IntersectionLimit::LIMIT_NEAREST);
 
-		osgUtil::IntersectionVisitor giv(gline.get());
-		world->accept(giv);
+			osgUtil::IntersectionVisitor giv(gline.get());
+			world->accept(giv);
 
-		if (gline->containsIntersections()) {
-			osg::Vec3d point = gline->getIntersections().begin()->getWorldIntersectPoint();
-			// perform a step upward from the ground
-			new_pos = point + up;
+			// if the height is exactly equal to the step height, then it gets confused
+			if (gline->containsIntersections()) {
+				auto intersections = gline->getIntersections();
+
+				osg::Vec3d point = gline->getIntersections().begin()->getWorldIntersectPoint();
+				// perform a step upward from the ground
+
+				new_pos = point + up;
+
+				m_gravity_velocity = 0;
+			}
 		}
+
 
 		// forward collision test
 		// extend the movement vector by 1m or so forward to make up for the near clip
@@ -67,7 +78,7 @@ void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::No
 		osg::Vec3d new_pos_plus = new_pos + dir * m_collision_radius;
 
 		osg::ref_ptr<osgUtil::LineSegmentIntersector> vline = new osgUtil::LineSegmentIntersector(pos, new_pos_plus);
-
+		vline->setIntersectionLimit(osgUtil::Intersector::IntersectionLimit::LIMIT_NEAREST);
 		osgUtil::IntersectionVisitor iv(vline.get());
 		world->accept(iv);
 
@@ -146,13 +157,63 @@ void BaseFirstPersonManipulator::changeSpeed(int ticks)
 
 double BaseFirstPersonManipulator::getSpeedMultiplier() const
 {
-	return std::pow(std::pow(2, .25), m_speed_tick);
+	return speedMultiplierForTick(m_speed_tick);
+}
+
+double BaseFirstPersonManipulator::speedMultiplierForTick(int tick)
+{
+	return std::pow(std::pow(2, .25), tick);
+}
+
+float BaseFirstPersonManipulator::eyeHeight() const
+{
+	return m_collision_height;
+}
+
+void BaseFirstPersonManipulator::setEyeHeight(float height)
+{
+	m_collision_height = height;
+}
+
+bool BaseFirstPersonManipulator::gravityEnabled() const
+{
+	return m_gravity_on;
 }
 
 void BaseFirstPersonManipulator::enableGravity(bool enable)
 {
 	m_gravity_velocity = 0;
 	m_gravity_on = enable;
+}
+
+float BaseFirstPersonManipulator::gravityAcceleration() const
+{
+	return m_gravity_acceleration;
+}
+
+void BaseFirstPersonManipulator::setGravityAcceleration(float accel)
+{
+	m_gravity_acceleration = accel;
+}
+
+float BaseFirstPersonManipulator::gravitySpeed() const
+{
+	return m_gravity_max_speed;
+}
+
+void BaseFirstPersonManipulator::setGravitySpeed(float speed)
+{
+	m_gravity_max_speed = speed;
+}
+
+void BaseFirstPersonManipulator::enableHeight(bool enable)
+{
+	m_height_enabled = enable;
+}
+
+bool BaseFirstPersonManipulator::collisionsEnabled() const
+{
+	return m_collision_on;
 }
 
 void BaseFirstPersonManipulator::enableCollisions(bool enable)
@@ -163,4 +224,14 @@ void BaseFirstPersonManipulator::enableCollisions(bool enable)
 void BaseFirstPersonManipulator::clearGravity()
 {
 	m_gravity_velocity = 0;
+}
+
+float BaseFirstPersonManipulator::collisionRadius() const
+{
+	return m_collision_radius;
+}
+
+void BaseFirstPersonManipulator::setCollisionRadius(float radius)
+{
+	m_collision_radius = radius;
 }

@@ -68,10 +68,6 @@ public:
 	static Navigation::Mode manipulatorToNavigation(Manipulator);
 	static Manipulator navigationToManipulator(Navigation::Mode);
 
-	QAction *a_speed_up;
-	QAction *a_slow_down;
-	void adjustSpeed(int tick);
-
 	void setCameraFrozen(bool freeze);
 	bool getCameraFrozen() const;
 	void figureOutNavigation();
@@ -81,13 +77,12 @@ public:
 	void flightStartStrafe();
 	void flightStopStrafe();
 
-	void enableGravity(bool enable);
-	void enableCollisions(bool enable);
-
 	// thumbnails
 	// Queues up a thumbnail to be painted.
 	// When it's ready sThumbnailFinished(QImage img) is emitted
 	// Can only paint one thumbnail at a time, returns false if rejected
+	// TODO: awkward design, only one can use this at a time,
+	//       refactor with a done callback? add queue?
 	bool paintThumbnail(const osg::Matrix &camera);
 	void setThumbnailSize(QSize size);
 
@@ -97,10 +92,66 @@ public:
 	void enableRendering(bool enable);
 	//void setViewer(osgViewer::CompositeViewer *viewer);
 
-	void reset();
+	// resets camera
+	// applies startups (groundOnStartup)
+	void startup();
 
-	// TODO? Just use QWidget::Render
-	// QImage takePictureAt(osg::Camera*);
+	// properties
+
+	void enableGroundMode(bool enable);
+	bool groundModeEnabled() const;
+	bool groundOnStartup() const;
+	void setGroundOnStartup(bool ground);
+
+	bool collisionsEnabled() const;
+	void enableCollisions(bool enable);
+	bool collisionOnStartup() const;
+	void setCollisionOnStartup(bool ground);
+
+	QAction *a_speed_up;
+	QAction *a_slow_down;
+	static const int k_tick_limit = 40;
+	void adjustSpeed(int tick);
+	int speedTick() const;
+	void setSpeedTick(int tick);
+	int startupSpeedTick() const;
+	void setStartupSpeedTick(int tick);
+	static float speedMultiplier(int tick);
+
+	float fovy() const;
+	void setFovy(float fovy);
+
+	bool autoClip() const;
+	void setAutoClip(bool auto_clip);
+
+	float nearClip() const;
+	void setNearClip(float near_clip);
+
+	float farClip() const;
+	void setFarClip(float far_clip);
+
+	float eyeHeight() const;
+	void setEyeHeight(float height) const;
+
+	float gravityAcceleration() const;
+	void setGravityAcceleration(float accel);
+
+	float gravitySpeed() const;
+	void setGravitySpeed(float speed);
+
+	float baseSpeed() const;
+	void setBaseSpeed(float speed);
+
+	float collisionRadius() const;
+	void setCollisionRadius(float radius);
+
+	void goHome();
+	osg::Matrix defaultHomePosition() const;
+	osg::Matrix homePosition() const;
+	void setHomePosition(const osg::Matrix &camera_matrix);
+	void resetHomePosition();
+
+public:
 
 	// filter out ctrl-s when in wasd
 	bool eventFilter(QObject *obj, QEvent *e);
@@ -116,9 +167,12 @@ signals:
 	void sNavigationModeChanged(Navigation::Mode);
 	void sCameraFrozen(bool);
 
-	void sSpeedActivelyChanged(int tick, double multiplier);
-
 	void sThumbnailFinished(QImage img);
+
+	// properties
+	void sSpeedActivelyChanged(int tick, double multiplier);
+	void sCollisionsChanged(bool collisions);
+	void sGroundModeChanged(bool ground);
 
 protected:
 	virtual void paintEvent(QPaintEvent* paintEvent) override;
@@ -140,7 +194,7 @@ protected:
 	virtual bool event(QEvent* event) override;
 
 private:
-	virtual void onHome();
+	//virtual void onHome(); // osg event, ignore it
 	//virtual void onResize(int width, int height);
 	
 	// used for first person mode
@@ -183,11 +237,14 @@ private:
 	osg::ref_ptr<osgViewer::StatsHandler> m_stats;
 
 	bool m_camera_frozen;
-	bool m_gravity_on;
-	bool m_collisions_on;
 	int m_speed_tick;
-
+	int m_startup_speed_tick;
 	bool m_rendering_enabled;
+	osg::Matrix m_home_position;
+	bool m_default_home_position;
+
+	bool m_collision_on_startup;
+	bool m_ground_on_startup;
 
 	// key press tracker
 	KeyTracker *m_key_tracker;

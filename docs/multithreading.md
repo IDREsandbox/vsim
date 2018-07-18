@@ -43,6 +43,9 @@ Apparently we're not supposed manage QObject like this. Shared objects have null
 
 ## Solutions:
 
+- Current solution: VSimRoot::copy() copies the everything from one root to another
+    - on load: create a new root, copy it from thread to main
+    - on save: save main root
 - Rewrite everything without QObject
     - have a signalling layer between data and gui NarrativeSignals : GroupSignals, SlideSignals, etc
     - too much work just to support threaded loading
@@ -54,7 +57,7 @@ Apparently we're not supposed manage QObject like this. Shared objects have null
     - Safest solution
 - Manually move all shared objects to thread
     - see VSimRoot::moveAllToThread(QThread*)
-    - least amount of work
+    - I thought this would work, but I was having trouble with QTextDocument
 
 Adding shared objects to the hierarchy is a lot of work...
 - give everything a (QObject *parent) constructor (I ended up doing this)

@@ -173,6 +173,9 @@ set(VSim_src
   Navigation.h
   NavigationControl.cpp
   NavigationControl.h
+  NavigationSettingsDialog.cpp
+  NavigationSettingsDialog.h
+  NavigationSettingsDialog.ui
   NumberSlider.cpp
   NumberSlider.h
   ObjectManipulator.cpp

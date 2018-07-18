@@ -36,13 +36,15 @@ class FirstPersonManipulator : public BaseFirstPersonManipulator
 	// meters per second
 	double getMaxSpeed();
 
+	double baseSpeed() const;
+	void setBaseSpeed(double speed);
+
 private:
 	// x fwd (w/s), y left (a/d), z up (shift/ctrl)
 	osg::Vec3d m_pos_target;
 	osg::Vec3d m_pos_current;
 	double m_movement_smoothing;
 	double m_base_speed; // meters per second (TODO)
-	int m_speed_click; // speed limiter
 
 	// rotation control
 	// x fwd, y left, z up

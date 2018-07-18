@@ -133,6 +133,7 @@
     <property name="title">
      <string>Settings</string>
     </property>
+    <addaction name="navigation_settings"/>
     <addaction name="actionFont_Color_Styles"/>
    </widget>
    <widget class="QMenu" name="menuRender">
@@ -151,7 +152,6 @@
      <string>Model</string>
     </property>
     <addaction name="actionModel_Information"/>
-    <addaction name="actionModel_Settings"/>
    </widget>
    <addaction name="menuhello_to_the_world"/>
    <addaction name="menuEdit"/>
@@ -495,9 +495,9 @@
     <string>About VSim</string>
    </property>
   </action>
-  <action name="actionModel_Settings">
+  <action name="navigation_settings">
    <property name="text">
-    <string>Model Settings</string>
+    <string>Navigation Settings</string>
    </property>
   </action>
   <action name="actionClear_Thumbnails">

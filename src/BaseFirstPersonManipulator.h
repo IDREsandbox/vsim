@@ -20,6 +20,7 @@ public:
 	void moveRight(double dist);
 	void moveUp(double dist);
 
+	// degrees per pixel rotation
 	double getSensitivity() const;
 	void setSensitivity(double);
 
@@ -29,9 +30,28 @@ public:
 	int getSpeedTick(int ticks) const;
 	double getSpeedMultiplier() const;
 
+	static double speedMultiplierForTick(int tick);
+
+	float eyeHeight() const;
+	void setEyeHeight(float height);
+
+	bool gravityEnabled() const;
 	void enableGravity(bool enable);
+
+	// negative
+	float gravityAcceleration() const;
+	void setGravityAcceleration(float accel);
+
+	float gravitySpeed() const;
+	void setGravitySpeed(float speed);
+	void enableHeight(bool enable); // enables eye height collision
+
+	bool collisionsEnabled() const;
 	void enableCollisions(bool enable);
 	void clearGravity(); // resets gravity velocity to 0
+
+	float collisionRadius() const;
+	void setCollisionRadius(float radius);
 
 private:
 	double m_sensitivity;
@@ -51,6 +71,7 @@ private:
 	bool m_collision_on;
 	double m_collision_radius;
 
+	bool m_height_enabled;
 	double m_collision_height;
 };
 

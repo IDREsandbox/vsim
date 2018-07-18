@@ -97,7 +97,7 @@ public:
 	QUndoStack *getUndoStack() const;
 
 	// last directory used by a file dialog
-	std::string getLastDiretory() const;
+	std::string getLastDirectory() const;
 	void setLastDirectory(const std::string &dir, bool isFile = false);
 
 	// current vsim working directory, based on the .vsim file location
@@ -115,6 +115,7 @@ public:
 	NavigationControl *navigationControl() const;
 	TimeManager *timeManager() const;
 	BrandingControl *brandingControl() const;
+	OSGViewerWidget *viewer() const;
 
 	void debugCamera();
 

@@ -26,6 +26,9 @@ public:
 	//  strafe speed is in distance per pixel
 	//void strafe(int dx, int dy);
 
+	void setStrafeSpeed(double speed);
+	void setAcceleration(double accel);
+
 private:
 	// current speed moving fwd, can be negative
 	double m_speed;

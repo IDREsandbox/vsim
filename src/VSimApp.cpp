@@ -168,7 +168,6 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 
 	osg::Node *osg_root = m_root->models()->sceneRoot();
 	m_viewer->setSceneData(osg_root);
-	m_viewer->reset();
 
 	emit sReset();
 
@@ -181,7 +180,7 @@ VSimRoot *VSimApp::getRoot() const
 	return m_root.get();
 }
 
-std::string VSimApp::getLastDiretory() const
+std::string VSimApp::getLastDirectory() const
 {
 	return m_last_directory;
 }
@@ -308,4 +307,9 @@ TimeManager * VSimApp::timeManager() const
 BrandingControl * VSimApp::brandingControl() const
 {
 	return m_branding_control;
+}
+
+OSGViewerWidget *VSimApp::viewer() const
+{
+	return m_viewer;
 }

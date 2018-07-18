@@ -12,8 +12,8 @@ FlightManipulator::FlightManipulator()
 {
 	// parameters
 	setSensitivity(45.0);
-	m_acceleration = 4.0;
-	m_strafe_speed = 2.0;
+	m_acceleration = 5.0;
+	m_strafe_speed = 10.0;
 	//m_strafe_sensitivity = .01;
 	//m_strafe_smoothing = .01;
 }
@@ -60,6 +60,17 @@ void FlightManipulator::setMousePosition(double posx, double posy)
 	m_mouse_x = posx;
 	m_mouse_y = posy;
 }
+
+void FlightManipulator::setStrafeSpeed(double speed)
+{
+	m_strafe_speed = speed;
+}
+
+void FlightManipulator::setAcceleration(double accel)
+{
+	m_acceleration = accel;
+}
+
 //
 //void FlightManipulator::strafe(int dx, int dy)
 //{

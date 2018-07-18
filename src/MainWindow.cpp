@@ -24,6 +24,7 @@
 #include "FutureDialog.h"
 #include "SimpleWorker.h"
 #include "BrandingOverlay.h"
+#include "NavigationSettingsDialog.h"
 
 #include "narrative/NarrativeGroup.h"
 #include "narrative/NarrativePlayer.h"
@@ -300,7 +301,7 @@ void MainWindow::setApp(VSimApp * vsim)
 	nmenu->addAction(nav->a_freeze);
 	nmenu->addAction(nav->a_home);
 	nmenu->addSeparator();
-	nmenu->addAction(nav->a_gravity);
+	nmenu->addAction(nav->a_ground_mode);
 	nmenu->addAction(nav->a_collisions);
 	nmenu->addSeparator();
 	nmenu->addAction(nav->a_speed_up);
@@ -345,7 +346,10 @@ void MainWindow::setApp(VSimApp * vsim)
 	model_menu->addAction(m_app->brandingControl()->a_edit);
 
 	connect(ui->actionModel_Information, &QAction::triggered, this, &MainWindow::execModelInformation);
-	connect(ui->actionModel_Settings, &QAction::triggered, this, []() {});
+	connect(ui->navigation_settings, &QAction::triggered, this, [this]() {
+		NavigationSettingsDialog dlg(m_app, this);
+		dlg.exec();
+	});
 
 }
 
@@ -662,7 +666,7 @@ void MainWindow::execSave(const QString & filename)
 void MainWindow::actionImportModel()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Import Model",
-		m_app->getLastDiretory().c_str(),
+		m_app->getLastDirectory().c_str(),
 		"Model files (*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
 	if (filename == "") {
@@ -700,7 +704,7 @@ void MainWindow::actionImportNarratives()
 	// Open dialog
 	qInfo("Importing narratives");
 	QStringList list = QFileDialog::getOpenFileNames(this, "Import Narratives",
-		m_app->getLastDiretory().c_str(), "Narrative files (*.nar);;All types (*.*)");
+		m_app->getLastDirectory().c_str(), "Narrative files (*.nar);;All types (*.*)");
 	if (list.empty()) {
 		qInfo() << "import cancel";
 		return;
@@ -739,7 +743,7 @@ void MainWindow::actionExportNarratives()
 	// Open dialog
 	qInfo("Exporting narratives");
 	QString filename = QFileDialog::getSaveFileName(this, "Export Narratives",
-		m_app->getLastDiretory().c_str(), "Narrative files (*.nar);;All types (*.*)");
+		m_app->getLastDirectory().c_str(), "Narrative files (*.nar);;All types (*.*)");
 	if (filename == "") {
 		qInfo() << "export cancel";
 		return;
@@ -757,7 +761,7 @@ void MainWindow::actionImportERs()
 {
 	qInfo("Importing resources");
 	QString path = QFileDialog::getOpenFileName(this, "Import Resources",
-		m_app->getLastDiretory().c_str(), "Narrative files (*.ere);;All types (*.*)");
+		m_app->getLastDirectory().c_str(), "Narrative files (*.ere);;All types (*.*)");
 	if (path.isEmpty()) {
 		qInfo() << "import cancel";
 		return;
@@ -781,7 +785,7 @@ void MainWindow::actionExportERs()
 	// Open dialog
 	qInfo("Exporting resources");
 	QString filename = QFileDialog::getSaveFileName(this, "Export Resources",
-		m_app->getLastDiretory().c_str(), "Resources (*.ere);;All types (*.*)");
+		m_app->getLastDirectory().c_str(), "Resources (*.ere);;All types (*.*)");
 	if (filename == "") {
 		qInfo() << "export cancel";
 		return;

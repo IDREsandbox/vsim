@@ -9,7 +9,6 @@ FirstPersonManipulator::FirstPersonManipulator()
 
 	m_movement_smoothing = .01;
 	m_base_speed = 10.0;
-	m_speed_click = 0;
 	m_smoothing = .003;
 }
 
@@ -92,4 +91,14 @@ void FirstPersonManipulator::mouseMove(int dx, int dy)
 double FirstPersonManipulator::getMaxSpeed()
 {
 	return m_base_speed * getSpeedMultiplier();
+}
+
+double FirstPersonManipulator::baseSpeed() const
+{
+	return m_base_speed;
+}
+
+void FirstPersonManipulator::setBaseSpeed(double speed)
+{
+	m_base_speed = speed;
 }

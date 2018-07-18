@@ -36,10 +36,10 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	a_home->setText("Reset");
 	a_home->setShortcut(Qt::Key_H);
 
-	a_gravity = new QAction(this);
-	a_gravity->setCheckable(true);
-	a_gravity->setText("Gravity");
-	a_gravity->setShortcut(Qt::Key_G);
+	a_ground_mode = new QAction(this);
+	a_ground_mode->setCheckable(true);
+	a_ground_mode->setText("Ground Mode");
+	a_ground_mode->setShortcut(Qt::Key_G);
 
 	a_collisions = new QAction(this);
 	a_collisions->setCheckable(true);
@@ -80,21 +80,22 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	});
 	connect(a_home, &QAction::triggered, this,
 		[this]() {
-		m_viewer->reset();
+		qInfo() << "Home";
+		m_viewer->goHome();
 		activate();
 		m_app->setStatusMessage("Home");
 	});
-	connect(a_gravity, &QAction::triggered, this,
+	connect(a_ground_mode, &QAction::triggered, this,
 		[this]() {
-		bool enable = a_gravity->isChecked();
-		m_viewer->enableGravity(enable);
+		bool enable = !m_viewer->groundModeEnabled();
+		m_viewer->enableGroundMode(enable);
 		activate();
 		QString onoff = enable ? "On" : "Off";
-		m_app->setStatusMessage("Gravity " + onoff);
+		m_app->setStatusMessage("Ground Mode " + onoff);
 	});
 	connect(a_collisions, &QAction::triggered, this,
 		[this]() {
-		bool enable = a_collisions->isChecked();
+		bool enable = !m_viewer->collisionsEnabled();
 		m_viewer->enableCollisions(enable);
 		activate();
 		QString onoff = enable ? "On" : "Off";
@@ -104,6 +105,9 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	// osg -> gui
 	connect(m_viewer, &OSGViewerWidget::sCameraFrozen, a_freeze, &QAction::setChecked);
 	connect(m_viewer, &OSGViewerWidget::sNavigationModeChanged, this, &NavigationControl::onModeChange);
+	connect(m_viewer, &OSGViewerWidget::sGroundModeChanged, a_ground_mode, &QAction::setChecked);
+	connect(m_viewer, &OSGViewerWidget::sCollisionsChanged, a_collisions, &QAction::setChecked);
+
 
 	a_lighting = new QAction(this);
 	a_lighting->setCheckable(true);
@@ -213,7 +217,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	});
 	connect(m_app, &VSimApp::sReset, this,
 		[this]() {
-		m_viewer->setNavigationMode(Navigation::OBJECT);
+		m_viewer->startup();
 
 		// init render stuff
 		a_lighting->setChecked(m_ssm->getLightingEnabled());
@@ -258,3 +262,4 @@ void NavigationControl::onModeChange(Navigation::Mode mode)
 	m_app->setStatusMessage(
 		QString(Navigation::ModeStrings[mode]) + " Mode");
 }
+

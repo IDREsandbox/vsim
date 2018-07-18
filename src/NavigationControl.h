@@ -32,7 +32,7 @@ public: // actions
 	QAction *a_object;
 	QAction *a_freeze;
 	QAction *a_home;
-	QAction *a_gravity;
+	QAction *a_ground_mode;
 	QAction *a_collisions;
 
 	QAction *a_lighting;

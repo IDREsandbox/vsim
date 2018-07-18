@@ -91,7 +91,11 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	: QOpenGLWidget(parent,	f),
 	m_rendering_enabled(true),
 	m_paint_thumb(false),
-	m_thumb_size(100, 100)
+	m_thumb_size(100, 100),
+	m_collision_on_startup(true),
+	m_ground_on_startup(false),
+	m_default_home_position(true),
+	m_startup_speed_tick(0)
 {
 	// Qt Stuff
 	// Anti aliasing (QOpenGLWidget)
@@ -198,9 +202,6 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_main_view->setCameraManipulator(m_object_manipulator);
 	m_manipulator = MANIPULATOR_OBJECT;
 	m_navigation_mode = Navigation::OBJECT;
-
-	m_collisions_on = false;
-	m_gravity_on = false;
 
 	// speed
 	a_speed_up = new QAction(this);
@@ -387,15 +388,6 @@ void OSGViewerWidget::setManipulator(Manipulator manipulator)
 	setCameraMatrix(old_matrix);
 }
 
-void OSGViewerWidget::adjustSpeed(int tick)
-{
-	int speed_limit = 40;
-	m_speed_tick += tick;
-	m_speed_tick = std::clamp(m_speed_tick, -speed_limit, speed_limit);
-	m_first_person_manipulator->setSpeedTick(m_speed_tick);
-	m_flight_manipulator->setSpeedTick(m_speed_tick);
-}
-
 void OSGViewerWidget::setCameraFrozen(bool freeze)
 {
 	m_camera_frozen = freeze;
@@ -441,20 +433,32 @@ void OSGViewerWidget::flightStopStrafe()
 	centerCursor();
 }
 
-void OSGViewerWidget::enableGravity(bool enable)
+bool OSGViewerWidget::groundModeEnabled() const
 {
-	qInfo() << "Gravity" << enable;
-	m_gravity_on = enable;
+	return m_first_person_manipulator->gravityEnabled();
+}
+
+void OSGViewerWidget::enableGroundMode(bool enable)
+{
+	qInfo() << "Ground mode" << enable;
 	m_flight_manipulator->enableGravity(enable);
 	m_first_person_manipulator->enableGravity(enable);
+	m_flight_manipulator->enableHeight(enable);
+	m_first_person_manipulator->enableHeight(enable);
+	emit sGroundModeChanged(enable);
+}
+
+bool OSGViewerWidget::collisionsEnabled() const
+{
+	return m_first_person_manipulator->collisionsEnabled();
 }
 
 void OSGViewerWidget::enableCollisions(bool enable)
 {
 	qInfo() << "Collision" << enable;
-	m_collisions_on = enable;
 	m_flight_manipulator->enableCollisions(enable);
 	m_first_person_manipulator->enableCollisions(enable);
+	emit sCollisionsChanged(enable);
 }
 
 bool OSGViewerWidget::paintThumbnail(const osg::Matrix & camera)
@@ -488,10 +492,214 @@ void OSGViewerWidget::enableRendering(bool enable)
 	if (enable) update();
 }
 
-void OSGViewerWidget::reset()
+void OSGViewerWidget::startup()
+{
+	setNavigationMode(Navigation::OBJECT);
+	enableCollisions(m_collision_on_startup);
+	enableGroundMode(m_ground_on_startup);
+	goHome();
+}
+
+void OSGViewerWidget::adjustSpeed(int tick)
+{
+	int speed_limit = k_tick_limit;
+	m_speed_tick += tick;
+	m_speed_tick = std::clamp(m_speed_tick, -speed_limit, speed_limit);
+	m_first_person_manipulator->setSpeedTick(m_speed_tick);
+	m_flight_manipulator->setSpeedTick(m_speed_tick);
+}
+
+int OSGViewerWidget::speedTick() const
+{
+	return m_speed_tick;
+}
+
+void OSGViewerWidget::setSpeedTick(int tick)
+{
+	m_speed_tick = tick;
+}
+
+int OSGViewerWidget::startupSpeedTick() const
+{
+	return m_startup_speed_tick;
+}
+
+void OSGViewerWidget::setStartupSpeedTick(int tick)
+{
+	m_startup_speed_tick = tick;
+}
+
+float OSGViewerWidget::speedMultiplier(int tick)
+{
+	return BaseFirstPersonManipulator::speedMultiplierForTick(tick);
+}
+
+float OSGViewerWidget::fovy() const
+{
+	double fovy, aspect, near_clip, far_clip;
+	m_main_view->getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, near_clip, far_clip);
+	return fovy;
+}
+
+void OSGViewerWidget::setFovy(float fovy2)
+{
+	double fovy, aspect, near_clip, far_clip;
+	m_main_view->getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, near_clip, far_clip);
+	m_main_view->getCamera()->setProjectionMatrixAsPerspective(fovy2, aspect, near_clip, far_clip);
+}
+
+bool OSGViewerWidget::autoClip() const
+{
+	auto setting = m_main_view->getCamera()->getComputeNearFarMode();
+	if (setting == osg::CullSettings::ComputeNearFarMode::DO_NOT_COMPUTE_NEAR_FAR) {
+		return false;
+	}
+	return true;
+}
+
+void OSGViewerWidget::setAutoClip(bool auto_clip)
+{
+	auto setting = auto_clip ?
+		osg::CullSettings::ComputeNearFarMode::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES
+		: osg::CullSettings::ComputeNearFarMode::DO_NOT_COMPUTE_NEAR_FAR;
+
+	m_main_view->getCamera()->setComputeNearFarMode(setting);
+	m_thumb_view->getCamera()->setComputeNearFarMode(setting);
+}
+
+float OSGViewerWidget::nearClip() const
+{
+	double a, b, near_clip, far_clip;
+	m_main_view->getCamera()->getProjectionMatrixAsPerspective(a, b, near_clip, far_clip);
+	return near_clip;
+}
+
+void OSGViewerWidget::setNearClip(float near_clip_2)
+{
+	double a, b, near_clip, far_clip;
+	m_main_view->getCamera()->getProjectionMatrixAsPerspective(a, b, near_clip, far_clip);
+
+	// make sure far > near > min
+	double near_min = .001;
+	double diff_min = .001;
+
+	near_clip_2 = std::max({ (double)near_clip_2, near_min });
+	double far_clip_2 = std::max({ far_clip, near_clip_2 + diff_min, near_min });
+
+	m_main_view->getCamera()->setProjectionMatrixAsPerspective(a, b, near_clip_2, far_clip_2);
+	m_thumb_view->getCamera()->setProjectionMatrixAsPerspective(a, b, near_clip_2, far_clip_2);
+}
+
+float OSGViewerWidget::farClip() const
+{
+	double a, b, near_clip, far_clip;
+	m_main_view->getCamera()->getProjectionMatrixAsPerspective(a, b, near_clip, far_clip);
+	return far_clip;
+}
+
+void OSGViewerWidget::setFarClip(float far_clip_2)
+{
+	double a, b, near_clip, far_clip;
+	m_main_view->getCamera()->getProjectionMatrixAsPerspective(a, b, near_clip, far_clip);
+
+	// make sure far > near > min
+	double near_min = .001;
+	double diff_min = .001;
+
+	// far clip too small?
+	far_clip_2 = std::max({ (double)far_clip_2, near_min + diff_min });
+
+	// keep near < far, near > min
+	double near_clip_2 = std::max(std::min((double)far_clip_2, near_clip), near_min);
+
+	m_main_view->getCamera()->setProjectionMatrixAsPerspective(a, b, near_clip_2, far_clip_2);
+	m_thumb_view->getCamera()->setProjectionMatrixAsPerspective(a, b, near_clip_2, far_clip_2);
+}
+
+float OSGViewerWidget::eyeHeight() const
+{
+	return m_first_person_manipulator->eyeHeight();
+}
+
+void OSGViewerWidget::setEyeHeight(float height) const
+{
+	m_first_person_manipulator->setEyeHeight(height);
+	m_flight_manipulator->setEyeHeight(height);
+}
+
+float OSGViewerWidget::gravityAcceleration() const
+{
+	return m_first_person_manipulator->gravityAcceleration();
+}
+
+void OSGViewerWidget::setGravityAcceleration(float accel)
+{
+	m_first_person_manipulator->setGravityAcceleration(accel);
+	m_flight_manipulator->setGravityAcceleration(accel);
+}
+
+float OSGViewerWidget::gravitySpeed() const
+{
+	return m_first_person_manipulator->gravitySpeed();
+}
+
+void OSGViewerWidget::setGravitySpeed(float speed)
+{
+	m_first_person_manipulator->setGravitySpeed(speed);
+	m_flight_manipulator->setGravitySpeed(speed);
+}
+
+float OSGViewerWidget::baseSpeed() const
+{
+	return m_first_person_manipulator->baseSpeed();
+}
+
+void OSGViewerWidget::setBaseSpeed(float speed)
+{
+	m_first_person_manipulator->setBaseSpeed(speed);
+	m_flight_manipulator->setStrafeSpeed(speed);
+	m_flight_manipulator->setAcceleration(speed / 2);
+}
+
+float OSGViewerWidget::collisionRadius() const
+{
+	return m_first_person_manipulator->collisionRadius();
+}
+
+void OSGViewerWidget::setCollisionRadius(float radius)
+{
+	m_first_person_manipulator->setCollisionRadius(radius);
+	m_flight_manipulator->setCollisionRadius(radius);
+}
+
+bool OSGViewerWidget::groundOnStartup() const
+{
+	return m_ground_on_startup;
+}
+
+void OSGViewerWidget::setGroundOnStartup(bool ground)
+{
+	m_ground_on_startup = ground;
+}
+
+bool OSGViewerWidget::collisionOnStartup() const
+{
+	return m_collision_on_startup;
+}
+
+void OSGViewerWidget::setCollisionOnStartup(bool ground)
+{
+	m_collision_on_startup = ground;
+}
+
+void OSGViewerWidget::goHome()
+{
+	setCameraMatrix(homePosition());
+}
+
+osg::Matrix OSGViewerWidget::defaultHomePosition() const
 {
 	// pretty much copied from osgGA::CameraManipulator::computeHomePosition
-	qInfo() << "Home";
 	osg::BoundingSphere bound = m_main_view->getSceneData()->getBound();
 
 	double left, right, bottom, top, zNear, zFar, dist;
@@ -504,7 +712,27 @@ void OSGViewerWidget::reset()
 
 	// for some reason osg::lookAt gives the inverse...
 	osg::Matrixd mat = osg::Matrix::lookAt(bound.center() + osg::Vec3d(0.0, -dist, 0.0f), bound.center(), osg::Vec3(0, 0, 1));
-	setCameraMatrix(osg::Matrix::inverse(mat));
+
+	return osg::Matrix::inverse(mat);
+}
+
+osg::Matrix OSGViewerWidget::homePosition() const
+{
+	if (m_default_home_position) {
+		return defaultHomePosition();
+	}
+	else return m_home_position;
+}
+
+void OSGViewerWidget::setHomePosition(const osg::Matrix & camera_matrix)
+{
+	m_home_position = camera_matrix;
+	m_default_home_position = false;
+}
+
+void OSGViewerWidget::resetHomePosition()
+{
+	m_default_home_position = true;
 }
 
 bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)
@@ -809,18 +1037,6 @@ bool OSGViewerWidget::event(QEvent* event)
 	}
 
 	return handled;
-}
-
-void OSGViewerWidget::onHome()
-{
-	osgViewer::ViewerBase::Views views;
-	m_viewer->getViews(views);
-
-	for (std::size_t i = 0; i < views.size(); i++)
-	{
-		osgViewer::View* view = views.at(i);
-		view->home();
-	}
 }
 
 void OSGViewerWidget::centerCursor()
