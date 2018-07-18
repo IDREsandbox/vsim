@@ -67,6 +67,12 @@ bool KeyTracker::mouseButton(Qt::MouseButton button)
 	return m_mouse_buttons & button;
 }
 
+void KeyTracker::releaseAll()
+{
+	m_keymap.clear();
+	m_mouse_buttons = 0;
+}
+
 void KeyTracker::stealKeys(const QList<int>& list)
 {
 	m_key_steal.clear();

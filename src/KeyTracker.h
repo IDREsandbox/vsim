@@ -18,11 +18,16 @@ public:
 	bool eventFilter(QObject *obj, QEvent *e);
 
 	// check if a key is pressed
-	bool keyPressed(int);
+	bool keyPressed(int key);
 
 	// check if a mouse key is pressed
 	Qt::MouseButtons mouseButtons();
 	bool mouseButton(Qt::MouseButton);
+
+	// release all keys/mouse buttons
+	// when a widget loses focus it doesn't necessarily get a release event,
+	// allowing you to hang
+	void releaseAll();
 
 	void stealKeys(const QList<int> &list);
 

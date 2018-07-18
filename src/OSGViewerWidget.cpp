@@ -1010,6 +1010,7 @@ void OSGViewerWidget::focusOutEvent(QFocusEvent * event)
 {
 	releaseMouse();
 	figureOutNavigation();
+	m_key_tracker->releaseAll();
 }
 
 void OSGViewerWidget::focusInEvent(QFocusEvent * event)
