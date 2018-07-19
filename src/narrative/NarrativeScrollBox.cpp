@@ -18,3 +18,11 @@ void NarrativeScrollBox::itemMouseDoubleClickEvent(QMouseEvent * event, int inde
 {
 	emit sOpen();
 }
+
+static int i = 0;
+void NarrativeScrollBox::paintEvent(QPaintEvent * e)
+{
+	qDebug() << "nar paint event" << i;
+	i++;
+	HorizontalScrollBox::paintEvent(e);
+}

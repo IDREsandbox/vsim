@@ -18,22 +18,22 @@ ERScrollBox::ERScrollBox(QWidget * parent)
 	m_view->setStyleSheet("#view {background:transparent;}");
 	//m_view->setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
 	//m_view->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-	m_view->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
+	m_view->setViewportUpdateMode(QGraphicsView::ViewportUpdateMode::SmartViewportUpdate);
 	// put updates on a timer?
 
-	QTimer *t = new QTimer(this);
-	t->setInterval(15);
-	t->start();
-	connect(t, &QTimer::timeout, this, [this]() {
-		//m_view->updateSceneRect(m_view->rect);
-		////m_view->updateScene();
-		//m_view->SmartViewportUpdate;
-		// visible rect
-		QRect vr = m_view->viewport()->geometry();
-		QRectF sr = m_view->mapToScene(vr).boundingRect();
-		m_view->updateScene({ sr });
-		m_view->update();
-	});
+	//QTimer *t = new QTimer(this);
+	//t->setInterval(15);
+	////t->start();
+	//connect(t, &QTimer::timeout, this, [this]() {
+	//	//m_view->updateSceneRect(m_view->rect);
+	//	////m_view->updateScene();
+	//	//m_view->SmartViewportUpdate;
+	//	// visible rect
+	//	QRect vr = m_view->viewport()->geometry();
+	//	QRectF sr = m_view->mapToScene(vr).boundingRect();
+	//	m_view->updateScene({ sr });
+	//	m_view->update();
+	//});
 
 	// top changed signal
 	connect(selection(), &StackObject<FastScrollItem*>::sChanged, this, [this]() {
@@ -180,6 +180,14 @@ void ERScrollBox::itemMouseDoubleClickEvent(FastScrollItem * item, QGraphicsScen
 		event->accept();
 		emit sDoubleClick();
 	}
+}
+
+static int i = 0;
+void ERScrollBox::paintEvent(QPaintEvent * e)
+{
+	qDebug() << "er paint event" << i;
+	i++;
+	FastScrollBox::paintEvent(e);
 }
 
 ERScrollItem * ERScrollBox::remap(EResource * res) const

@@ -160,6 +160,8 @@ set(VSim_src
   HorizontalScrollBox.h
   KeyTracker.cpp
   KeyTracker.h
+  LayerWidget.cpp
+  LayerWidget.h
   MainWindow.cpp
   MainWindow.h
   MainWindow.ui
@@ -247,6 +249,17 @@ vsim_add_experiment(
   HorizontalScrollBox_experiment
   "${HorizontalScrollBox_src}"
   "Core_obj;Qt5::Widgets"
+)
+
+set(LayerWidget_src
+  LayerWidget_experiment.cpp
+  LayerWidget.cpp
+  LayerWidget.h
+)
+vsim_add_experiment(
+  LayerWidget_experiment
+  "${LayerWidget_src}"
+  "Core_obj;Qt5::Widgets;Qt5::OpenGL;${OPENGL_LIBRARIES}"
 )
 
 # ER serializer test

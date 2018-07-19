@@ -14,6 +14,7 @@
 namespace Ui { class MainWindow; }
 
 class VSimApp;
+class LayerWidget;
 class OSGViewerWidget;
 class ModelOutliner;
 class TimeSlider;
@@ -103,6 +104,7 @@ public:
 private:
 	VSimApp *m_app;
 
+	LayerWidget *m_layer_widget;
 	OSGViewerWidget *m_osg_widget;
 	CanvasEditor *m_canvas;
 	CanvasContainer *m_fade_canvas;

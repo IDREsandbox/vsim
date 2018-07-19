@@ -15,7 +15,7 @@ namespace Ui { class ERFilterArea; };
 class ERFilterArea : public QFrame {
 	Q_OBJECT
 public:
-	ERFilterArea(QWidget *parent);
+	ERFilterArea(QWidget *parent = nullptr);
 	void setCategoryModel(CheckableListProxy *categories);
 
 	void reset();

@@ -70,6 +70,7 @@ void ERScrollItem::updateAlias()
 
 void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
+	qDebug() << "item paint" << this;
 	QElapsedTimer t; t.start();
 
 	// base color

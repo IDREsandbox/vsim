@@ -142,10 +142,10 @@ void VSimApp::update(float dt_sec)
 	osg::Vec3 old_position = m_position;
 	m_position = mat.getTrans();
 	if (old_position != m_position) {
-		emit sPositionChanged(m_position);
+		//emit sPositionChanged(m_position);
 	}
 
-	emit sTick(dt_sec);
+	//emit sTick(dt_sec);
 }
 
 bool VSimApp::initWithVSim(VSimRoot *root)

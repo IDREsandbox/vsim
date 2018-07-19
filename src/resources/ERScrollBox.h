@@ -35,6 +35,8 @@ protected:
 	void itemMouseDoubleClickEvent(FastScrollItem *item,
 		QGraphicsSceneMouseEvent *event) override;
 
+	void paintEvent(QPaintEvent *e) override;
+
 private:
 	ERScrollItem *remap(EResource *res) const;
 	void insertForIndices(const std::vector<size_t> &ind);

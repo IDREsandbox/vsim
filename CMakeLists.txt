@@ -48,13 +48,15 @@ set(osgComponents
 find_package(OpenSceneGraph 3.4.0 REQUIRED ${osgComponents})
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
-
-find_package(Qt5 REQUIRED Core Gui Widgets Test Concurrent)
+find_package(Qt5 REQUIRED Core Gui Widgets Test Concurrent OpenGL)
 find_package(Qt5Concurrent REQUIRED)
 include_directories(${Qt5Widgets_INCLUDE_DIRS} ${Qt5Concurrent_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Concurrent_INCLUDE_DIRS})
+
+find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR})
 
 # # if you want to print everything
 # get_cmake_property(_variableNames VARIABLES)

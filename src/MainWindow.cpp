@@ -10,13 +10,14 @@
 
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
+#include <osgUtil/Optimizer>
 
 #include "MainWindow.h"
 
 #include "ui_MainWindow.h"
 
+#include "LayerWidget.h"
 #include "OSGViewerWidget.h"
-#include <osgUtil/Optimizer>
 #include "TimeSlider.h"
 #include "ModelOutliner.h"
 #include "StatsWindow.h"
@@ -78,40 +79,44 @@ MainWindow::MainWindow(QWidget *parent)
 	m_osg_widget = new OSGViewerWidget(ui->root);
 	ui->rootLayout->addWidget(m_osg_widget, 0, 0);
 
-	m_canvas = new CanvasEditor(ui->root);
+	//m_layer_widget = new LayerWidget(ui->root);
+	//ui->rootLayout->addWidget(m_layer_widget, 0, 0);
+
+	m_canvas = new CanvasEditor();
 	m_canvas->setObjectName("canvas");
-	ui->rootLayout->addWidget(m_canvas, 0, 0);
+	//ui->rootLayout->addWidget(m_canvas, 0, 0);
 
 	QMainWindow *canvas_window = m_canvas->internalWindow();
-	canvas_window->setParent(ui->root);
+	canvas_window->setParent(nullptr);
 
 	m_fade_canvas = new CanvasContainer();
 	m_fade_canvas->setObjectName("fadeCanvas");
-	ui->rootLayout->addWidget(m_fade_canvas, 0, 0);
+	//ui->rootLayout->addWidget(m_fade_canvas, 0, 0);
 	m_fade_canvas->lower();
 	m_fade_canvas->setAttribute(Qt::WA_TransparentForMouseEvents);
 	m_fade_canvas->setStyleSheet("#canvas{background:rgba(0, 0, 0, 0);}");
 
-	m_branding_overlay = new BrandingOverlay(ui->root);
+	m_branding_overlay = new BrandingOverlay();
 	m_branding_overlay->setObjectName("branding");
-	ui->rootLayout->addWidget(m_branding_overlay, 0, 0);
+	//ui->rootLayout->addWidget(m_branding_overlay, 0, 0);
 	// put the toolbar on top over everything
 	auto *branding_window = m_branding_overlay->m_editor->internalWindow();
-	branding_window->setParent(ui->root);
-	ui->rootLayout->addWidget(branding_window, 0, 0);
+	branding_window->setParent(nullptr);
+	//ui->rootLayout->addWidget(branding_window, 0, 0);
 
 	// splitter on top of osg viewer
 	// mask allows events to get to the canvas
 	//ui->mainSplitter->setParent(m_osg_widget);
 	//ui->rootLayout->addWidget(ui->mainSplitter, 0, 0);
 
-	ui->mainSplitter->setMouseTracking(true);
+	//ui->mainSplitter->setParent(nullptr);
+	//ui->mainSplitter->setMouseTracking(true);
 
 	// splitter mask
 	connect(ui->mainSplitter, &QSplitter::splitterMoved, this, &MainWindow::updatePositions);
 
 	// er display
-	m_er_display = new ERDisplay(ui->root);
+	m_er_display = new ERDisplay();
 	//m_er_display->setGeometry(10, 10, 265, 251);
 	m_er_display->setObjectName("erDisplay");
 	m_er_display->hide();
@@ -119,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent)
 	// er filter widget
 	//QWidget *filter_area_padding_layout = new QGridLayout();
 	//middle_layout->addLayout(filter_area_padding_layout, 0, 0);
-	m_er_filter_area = new ERFilterArea(ui->root);
+	m_er_filter_area = new ERFilterArea();
 	m_er_filter_area->setObjectName("erFilterArea");
 	m_er_filter_area->hide();
 
@@ -129,6 +134,43 @@ MainWindow::MainWindow(QWidget *parent)
 	m_canvas->lower();
 	m_fade_canvas->lower();
 	m_osg_widget->lower();
+	ui->mainSplitter->raise();
+
+	// hide everything
+	m_fade_canvas->hide();
+	m_canvas->hide();
+	canvas_window->hide();
+	m_branding_overlay->hide();
+	branding_window->hide();
+	//ui->mainSplitter->hide();
+	m_er_display->hide();
+	m_er_filter_area->hide();
+
+
+	for (auto *hide : {
+		(QWidget*)m_fade_canvas,
+		(QWidget*)m_canvas,
+		(QWidget*)canvas_window,
+		(QWidget*)m_branding_overlay,
+		(QWidget*)branding_window,
+		(QWidget*)m_er_display,
+		(QWidget*)m_er_filter_area}) {
+
+		hide->hide();
+		hide->setAttribute(Qt::WA_ForceDisabled);
+		hide->setAttribute(Qt::WA_DontShowOnScreen);
+	}
+
+
+
+	//m_layer_widget->addLayer(m_fade_canvas, true);
+	//m_layer_widget->addLayer(m_canvas, true);
+	//m_layer_widget->addLayer(canvas_window);
+	//m_layer_widget->addLayer(m_branding_overlay, true);
+	//m_layer_widget->addLayer(branding_window);
+	//m_layer_widget->addLayer(ui->mainSplitter, true);
+	//m_layer_widget->addLayer(m_er_display);
+	//m_layer_widget->addLayer(m_er_filter_area);
 
 	// vsimapp file stuff
 	connect(ui->actionNew, &QAction::triggered, this, &MainWindow::actionNew);
@@ -471,6 +513,8 @@ void MainWindow::resizeEvent(QResizeEvent * event)
 
 void MainWindow::updatePositions()
 {
+	qDebug() << "update positions";
+
 	// Place edit buttons
 	int top = ui->middleSpacer->y();
 

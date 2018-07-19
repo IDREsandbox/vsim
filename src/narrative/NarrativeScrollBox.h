@@ -16,6 +16,8 @@ public:
 protected:
 	void itemMouseDoubleClickEvent(QMouseEvent *event, int index) override;
 
+	void paintEvent(QPaintEvent *e) override;
+
 signals:
 	void sOpen();
 };
