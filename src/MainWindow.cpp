@@ -79,17 +79,17 @@ MainWindow::MainWindow(QWidget *parent)
 	m_osg_widget = new OSGViewerWidget(ui->root);
 	ui->rootLayout->addWidget(m_osg_widget, 0, 0);
 
-	//m_layer_widget = new LayerWidget(ui->root);
-	//ui->rootLayout->addWidget(m_layer_widget, 0, 0);
+	m_layer_widget = new LayerWidget(m_osg_widget);
+	ui->rootLayout->addWidget(m_layer_widget, 0, 0);
 
-	m_canvas = new CanvasEditor();
+	m_canvas = new CanvasEditor(ui->root);
 	m_canvas->setObjectName("canvas");
 	//ui->rootLayout->addWidget(m_canvas, 0, 0);
 
 	QMainWindow *canvas_window = m_canvas->internalWindow();
 	canvas_window->setParent(nullptr);
 
-	m_fade_canvas = new CanvasContainer();
+	m_fade_canvas = new CanvasContainer(ui->root);
 	m_fade_canvas->setObjectName("fadeCanvas");
 	//ui->rootLayout->addWidget(m_fade_canvas, 0, 0);
 	m_fade_canvas->lower();
@@ -116,7 +116,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->mainSplitter, &QSplitter::splitterMoved, this, &MainWindow::updatePositions);
 
 	// er display
-	m_er_display = new ERDisplay();
+	m_er_display = new ERDisplay(ui->root);
 	//m_er_display->setGeometry(10, 10, 265, 251);
 	m_er_display->setObjectName("erDisplay");
 	m_er_display->hide();
@@ -124,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent)
 	// er filter widget
 	//QWidget *filter_area_padding_layout = new QGridLayout();
 	//middle_layout->addLayout(filter_area_padding_layout, 0, 0);
-	m_er_filter_area = new ERFilterArea();
+	m_er_filter_area = new ERFilterArea(ui->root);
 	m_er_filter_area->setObjectName("erFilterArea");
 	m_er_filter_area->hide();
 
@@ -137,14 +137,14 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->mainSplitter->raise();
 
 	// hide everything
-	m_fade_canvas->hide();
-	m_canvas->hide();
-	canvas_window->hide();
-	m_branding_overlay->hide();
-	branding_window->hide();
-	//ui->mainSplitter->hide();
-	m_er_display->hide();
-	m_er_filter_area->hide();
+	//m_fade_canvas->hide();
+	//m_canvas->hide();
+	//canvas_window->hide();
+	//m_branding_overlay->hide();
+	//branding_window->hide();
+	////ui->mainSplitter->hide();
+	//m_er_display->hide();
+	//m_er_filter_area->hide();
 
 
 	for (auto *hide : {
@@ -161,14 +161,12 @@ MainWindow::MainWindow(QWidget *parent)
 		hide->setAttribute(Qt::WA_DontShowOnScreen);
 	}
 
-
-
 	//m_layer_widget->addLayer(m_fade_canvas, true);
 	//m_layer_widget->addLayer(m_canvas, true);
 	//m_layer_widget->addLayer(canvas_window);
 	//m_layer_widget->addLayer(m_branding_overlay, true);
 	//m_layer_widget->addLayer(branding_window);
-	//m_layer_widget->addLayer(ui->mainSplitter, true);
+	m_layer_widget->addLayer(ui->mainSplitter, true);
 	//m_layer_widget->addLayer(m_er_display);
 	//m_layer_widget->addLayer(m_er_filter_area);
 

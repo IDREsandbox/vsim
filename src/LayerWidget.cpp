@@ -37,7 +37,13 @@ LayerWidget::LayerWidget(QWidget * parent)
 
 	m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
 	m_view->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-	m_view->setStyleSheet("background: transparent;");
+	m_view->setObjectName("layer_view");
+	m_view->setStyleSheet("#layer_view { background:transparent;}");
+	m_view->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+	//m_view->setStyleSheet("background: transparent;");
+
+	//m_view->viewport()->setStyleSheet("background:none;");
+	//m_view->set
 }
 
 void LayerWidget::setBase(QWidget *widget)
@@ -48,11 +54,12 @@ void LayerWidget::setBase(QWidget *widget)
 QGraphicsProxyWidget *LayerWidget::addLayer(QWidget *widget, bool fill)
 {
 	auto *proxy = new LayerProxyItem;
+	if (widget->parent() != nullptr) widget->setParent(nullptr);
 	proxy->setWidget(widget);
 
 	proxy->setCacheMode(QGraphicsItem::CacheMode::DeviceCoordinateCache);
 
-	widget->setAutoFillBackground(false);
+	//widget->setAutoFillBackground(false);
 	widget->setAttribute(Qt::WA_NoSystemBackground);
 
 	m_scene->addItem(proxy);

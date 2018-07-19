@@ -618,7 +618,7 @@ void ERControl::onUpdate()
 		bool changed = (res->inRange() != overlap);
 		bool do_popup = !res->getGlobal()
 			&& (res->getAutoLaunch() != EResource::AutoLaunch::OFF);
-		res->setInRange(overlap);
+		//res->setInRange(overlap);
 		if (changed) {
 			change_list.insert(i);
 		}
@@ -629,26 +629,26 @@ void ERControl::onUpdate()
 		}
 	}
 	// sort by distance
-	m_local_proxy->positionChangePoke();
-	m_global_proxy->positionChangePoke();
-	m_filter_proxy->positionChangePoke();
+	//m_local_proxy->positionChangePoke();
+	//m_global_proxy->positionChangePoke();
+	//m_filter_proxy->positionChangePoke();
 
-	// send updates to proxies
-	m_ers->sEdited(change_list);
+	//// send updates to proxies
+	//m_ers->sEdited(change_list);
 
-	// add to selection if possible
-	for (auto *res : trigger_list) {
-		if (!isSelectable(res)) continue;
+	//// add to selection if possible
+	//for (auto *res : trigger_list) {
+	//	if (!isSelectable(res)) continue;
 
-		// if we're going somewhere then queue (want to keep target on top)
-		// if just moving around then stack (want to change target)
-		addToSelection(res, !m_going_to);
+	//	// if we're going somewhere then queue (want to keep target on top)
+	//	// if just moving around then stack (want to change target)
+	//	addToSelection(res, !m_going_to);
 
-		if (res->getAutoLaunch() == EResource::ON && m_auto_launch) {
-			// try to open this thing
-			openResource(res);
-		}
-	}
+	//	if (res->getAutoLaunch() == EResource::ON && m_auto_launch) {
+	//		// try to open this thing
+	//		openResource(res);
+	//	}
+	//}
 
 	m_update_time_sec = timer.nsecsElapsed() / 1.0e9;
 }

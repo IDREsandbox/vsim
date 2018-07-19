@@ -260,6 +260,7 @@ void NavigationControl::activate()
 	else {
 		m_app->setState(VSimApp::EDIT_FLYING);
 	}
+	m_viewer->setFocus();
 }
 
 void NavigationControl::gatherSettings()

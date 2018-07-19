@@ -43,10 +43,10 @@ void ERScrollItem::setER(EResource *er)
 		//setDistance(er->getDistanceTo());
 		//connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::setDistance);
 
-		//connect(er, &EResource::sErTypeChanged, this, &ERScrollItem::updateAlias);
-		//connect(er, &EResource::sRepositionChanged, this, &ERScrollItem::updateAlias);
-		//connect(er, &EResource::sAutoLaunchChanged, this, &ERScrollItem::updateAlias);
-		connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::updateAlias);
+		connect(er, &EResource::sErTypeChanged, this, &ERScrollItem::updateAlias);
+		connect(er, &EResource::sRepositionChanged, this, &ERScrollItem::updateAlias);
+		connect(er, &EResource::sAutoLaunchChanged, this, &ERScrollItem::updateAlias);
+		//connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::updateAlias);
 	}
 	update();
 }
