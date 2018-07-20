@@ -1,13 +1,19 @@
 # Changelog
 
-## 2018-7-10
+## 2018-7-20
 
 - Reworked thumbnails
 - OSG rendering docs
+- Style settings has image tab
+- Added navigation settings, save with file
+- Added camera settings, save with file
+- Window size saves with file
+- Narrative and ER bars save with file
 
 ### Fixes
 
 - Fixed crash involving slides not updating after opening a file
+- Loads old ER auto launch properly
 
 ## 2018-7-6
 
