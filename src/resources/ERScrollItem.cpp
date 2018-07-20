@@ -19,6 +19,8 @@ ERScrollItem::ERScrollItem()
 	m_url_icon = QPixmap(dir + "/assets/icons/Link_16xMD.png");
 	m_goto_icon = QPixmap(dir + "/assets/icons/View_16xMD.png");
 	m_launch_icon = QPixmap(dir + "/assets/icons/Effects_16xMD.png");
+
+	setCacheMode(QGraphicsItem::CacheMode::DeviceCoordinateCache);
 }
 
 EResource * ERScrollItem::resource() const
@@ -40,13 +42,10 @@ void ERScrollItem::setER(EResource *er)
 			setCat(cat);
 		});
 
-		//setDistance(er->getDistanceTo());
-		//connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::setDistance);
-
-		//connect(er, &EResource::sErTypeChanged, this, &ERScrollItem::updateAlias);
-		//connect(er, &EResource::sRepositionChanged, this, &ERScrollItem::updateAlias);
-		//connect(er, &EResource::sAutoLaunchChanged, this, &ERScrollItem::updateAlias);
-		connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::updateAlias);
+		connect(er, &EResource::sErTypeChanged, this, &ERScrollItem::updateAlias);
+		connect(er, &EResource::sRepositionChanged, this, &ERScrollItem::updateAlias);
+		connect(er, &EResource::sAutoLaunchChanged, this, &ERScrollItem::updateAlias);
+		//connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::updateAlias);
 	}
 	update();
 }

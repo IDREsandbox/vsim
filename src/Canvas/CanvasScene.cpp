@@ -346,6 +346,8 @@ CanvasItem::CanvasItem(QGraphicsItem * parent)
 	p.setJoinStyle(Qt::RoundJoin);
 	setPen(p);
 	updateBorderWidth();
+
+	setCacheMode(QGraphicsItem::CacheMode::DeviceCoordinateCache);
 }
 
 CanvasItem::~CanvasItem()
