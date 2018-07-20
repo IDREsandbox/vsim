@@ -105,6 +105,8 @@ protected:
 	//
 	//void checkAndAddSet(std::set<int> base_index);
 
+	void connectResource(EResource *res);
+	void disconnectResource(EResource *res);
 
 	void recheck(const std::set<size_t> &base_indices);
 	void checkAndInsertSet(const std::set<size_t> &base_indices);
@@ -122,12 +124,19 @@ protected:
 	//void remap(int base_index);
 	//bool inMap(EResource *res);
 
-
+private:
+	struct ERMetadata {
+		bool search_cached = false;
+		bool search_hit;
+	};
 
 private:
 	// adds/remove from m_categories_enabled based on model
 	void updateCategorySet(int model_row);
 	bool checkSearch(const EResource *res, const QString &s) const;
+
+	void clearMetadata(EResource *res);
+	ERMetadata *getMetadata(EResource *res);
 
 private:
 	// filter sort proxy
@@ -148,6 +157,8 @@ private:
 	bool m_enable_years;
 	bool m_time_enabled;
 
+	std::unordered_map<EResource*, ERMetadata> m_metadata;
+	bool m_search_changed; // cache search
 	QString m_search;
 	int m_year;
 	

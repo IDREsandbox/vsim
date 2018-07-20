@@ -22,7 +22,8 @@ ERFilterSortProxy::ERFilterSortProxy(TGroup<EResource> *base)
 	m_enable_years(true),
 	m_show_all(false),
 	m_year(0),
-	m_time_enabled(true)
+	m_time_enabled(true),
+	m_search_changed(false)
 {
 	setBase(base);
 	sortBy(ER::SortBy::NONE);
@@ -49,12 +50,21 @@ void ERFilterSortProxy::setBase(TGroup<EResource> *base)
 		std::set<size_t> set(ins.begin(), ins.end());
 		m_map_to_base = VecUtil::fixIndicesAfterInsert(m_map_to_base, set);
 
+		for (int i : ins) {
+			connectResource(m_base->child(i));
+		}
+
 		checkAndInsertSet(set);
 	});
 	connect(base, &GroupSignals::sAboutToRemoveMulti, this,
 		[this](const std::vector<size_t> &base_removals) {
 		auto removals = mapFromBase(base_removals);
 		emit sAboutToRemoveMulti(removals);
+
+		// disconnect
+		for (int i : base_removals) {
+			disconnectResource(m_base->child(i));
+		}
 	});
 	// listen to delete
 	connect(base, &GroupSignals::sRemovedMulti, this,
@@ -69,9 +79,20 @@ void ERFilterSortProxy::setBase(TGroup<EResource> *base)
 		VecUtil::multiRemove(&m_map_to_base, removals);
 		emit sRemovedMulti(removals);
 	});
+	connect(base, &GroupSignals::sAboutToReset, this,
+		[this]() {
+		// disconnect all
+		for (auto res : *m_base) {
+			disconnectResource(res.get());
+		}
+	});
 	connect(base, &GroupSignals::sReset, this,
 		[this]() {
 		reload();
+		// connect all
+		for (auto res : *m_base) {
+			connectResource(res.get());
+		}
 	});
 	connect(base, &GroupSignals::sEdited, this,
 		[this](const std::set<size_t> &indices) {
@@ -206,6 +227,8 @@ bool ERFilterSortProxy::accept(EResource *res)
 {
 	if (!res) return false;
 
+	ERMetadata *md = getMetadata(res);
+
 	// check all
 	if (m_show_all) return true;
 
@@ -220,12 +243,16 @@ bool ERFilterSortProxy::accept(EResource *res)
 		//if (!checkTitle(res->getResourceName())) return false;
 	}
 
-	// check title
-	// just substring search the title, to lower
-	if (!m_search.isEmpty()) {
-		if (!checkSearch(res, m_search)) {
-			return false;
-		}
+	// check title/author/description
+	// cached result
+	if (!m_search_changed && md->search_cached) {
+		if (!md->search_hit) return false;
+	}
+	else {
+		bool ok = checkSearch(res, m_search);
+		md->search_hit = ok;
+		md->search_cached = true;
+		if (!ok) return false;
 	}
 
 	// check distance
@@ -363,6 +390,30 @@ std::set<size_t> ERFilterSortProxy::baseToLocal(const std::set<size_t> base_indi
 	return local;
 }
 
+void ERFilterSortProxy::connectResource(EResource * res)
+{
+	connect(res, &QObject::destroyed, this, [this, res]() {
+		// clear metadata
+		m_metadata.erase(res);
+	});
+
+	auto dirtySearch = [this, res]() {
+		auto *md = getMetadata(res);
+		md->search_cached = false;
+	};
+	connect(res, &EResource::sResourceNameChanged, this, dirtySearch);
+	connect(res, &EResource::sResourceAuthorChanged, this, dirtySearch);
+	connect(res, &EResource::sResourceDescriptionChanged, this, dirtySearch);
+
+	// add metadata
+}
+
+void ERFilterSortProxy::disconnectResource(EResource * res)
+{
+	disconnect(res, 0, this, 0);
+	clearMetadata(res);
+}
+
 void ERFilterSortProxy::recheck(const std::set<size_t>& base_indices)
 {
 	//reload2();
@@ -486,8 +537,11 @@ void ERFilterSortProxy::appTimeEnable(bool enable)
 
 void ERFilterSortProxy::setSearch(const QString &search)
 {
+	if (m_search == search) return;
+	m_search_changed = true;
 	m_search = search;
 	reload2();
+	m_search_changed = false;
 	emit sSearchChanged(search);
 }
 
@@ -768,6 +822,17 @@ bool ERFilterSortProxy::checkSearch(const EResource * res, const QString & searc
 	if (hit) return true;
 
 	return false;
+}
+
+void ERFilterSortProxy::clearMetadata(EResource * res)
+{
+	m_metadata.erase(res);
+}
+
+ERFilterSortProxy::ERMetadata *ERFilterSortProxy::getMetadata(EResource * res)
+{
+	auto result = m_metadata.insert({ res, ERMetadata() });
+	return &result.first->second;
 }
 
 int ERFilterSortProxy::indexOf(const EResource *node) const
