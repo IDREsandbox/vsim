@@ -1,4 +1,5 @@
-#include <osgViewer/Viewer>
+#include "MainWindow.h"
+
 #include <iostream>
 #include <QFileDialog>
 #include <QDebug>
@@ -7,11 +8,9 @@
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <QDir>
-
+#include <QScreen>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
-
-#include "MainWindow.h"
 
 #include "ui_MainWindow.h"
 
@@ -194,6 +193,13 @@ MainWindow::MainWindow(QWidget *parent)
 		ui->bottomBar->ui.horizontalLayout->addWidget(fsb);
 	});
 
+	QAction *debug_frame = new QAction("Debug frame size", this);
+	ui->menuTest->addAction(debug_frame);
+	debug_frame->setShortcut(Qt::CTRL + Qt::Key_F1);
+	connect(debug_frame, &QAction::triggered, this, [this]() {
+		qInfo() << "debug frame" << "geom:" << geometry() << "frame" << frameGeometry();
+	});
+
 	m_stats_window = new StatsWindow(this);
 	QAction *stats = new QAction("Stats", this);
 	ui->menuTest->addAction(stats);
@@ -357,6 +363,19 @@ void MainWindow::setApp(VSimApp * vsim)
 		dlg.exec();
 	});
 
+	connect(m_app, &VSimApp::sAboutToSave, this, [this]() {
+		// gather settings
+		auto *settings = m_app->getRoot()->settings();
+		auto &ws = settings->window_settings;
+		if (!ws) ws = std::make_unique<VSim::FlatBuffers::WindowSettingsT>();
+
+		int x = ui->bottomBar->height();
+		ws->window_width = width();
+		ws->window_height = height();
+		auto sizes = ui->mainSplitter->sizes();
+		ws->nbar_size = sizes.at(0);
+		ws->ebar_size = sizes.at(2);
+	});
 }
 
 void MainWindow::onReset()
@@ -364,11 +383,59 @@ void MainWindow::onReset()
 	updatePositions();
 	m_outliner->setModelGroup(m_app->getRoot()->models());
 	m_outliner->expandAll();
+
+	// extract settings
+	auto *settings = m_app->getRoot()->settings();
+	auto &ws = settings->window_settings;
+	if (ws) {
+		// best fit the rectangle
+		resize(ws->window_width, ws->window_height);
+
+		QScreen *screen = QGuiApplication::primaryScreen();
+		QRect srect = screen->availableGeometry();
+		QRect wrect(0, 0, ws->window_width, ws->window_height);
+
+		double max_width_ratio = 1.0;
+		double max_height_ratio = 1.0;
+
+		QRect mrect(0, 0, srect.width() * max_width_ratio, srect.height() * max_height_ratio);
+		mrect.moveCenter(srect.center());
+
+		// center the rect
+		wrect.moveCenter(mrect.center());
+		// clip the rect
+		wrect = wrect.intersected(mrect);
+
+		int top_diff = geometry().top() - frameGeometry().top();
+
+
+		// try to center based on frame size
+		resize(wrect.size());
+		QSize frame_size = frameGeometry().size();
+		move(srect.center() - QPoint(frame_size.width() / 2, frame_size.height() / 2));
+
+		// we could also use QWidget::saveState() and QWidget::saveGeometry()
+
+		// Windows 10:
+		// Frame top left corner when perfectly aligned: (-8,0)
+		// Geometry when perfectly aligned: (0,31)
+		// it's hard to make this perfect
+
+		int top = ws->nbar_size;
+		int bottom = ws->nbar_size;
+		int middle = ui->mainSplitter->height() - top - bottom;
+		ui->mainSplitter->setSizes({ top, middle, bottom });
+	}
+
+	// the splitter moved signal is funky
+	// and the correct sizes don't get to updatePositions()
+	// call again just because
+	updatePositions();
 }
 
 void MainWindow::reloadStyle()
 {
-	qDebug() << "reload style";
+	qInfo() << "reload style";
 	QFile file(QCoreApplication::applicationDirPath() + "/assets/style.qss");
 	file.open(QFile::ReadOnly);
 	QString style = QLatin1String(file.readAll());
@@ -496,10 +563,6 @@ void MainWindow::updatePositions()
 	// place the toolbar where the middle spacer is
 	QWidget *middle = ui->middleSpacer;
 	auto *canvas_window = m_canvas->internalWindow();
-	//qDebug() << "middle geom" << middle->geometry();
-	//qDebug() << "middle x" << middle->x() << middle->y();
-	//canvas_window->setGeometry(middle->x(), middle->y(),
-	//	middle->width(), middle->height());
 	canvas_window->setGeometry(middle->geometry());
 
 	// Update the splitter mask

@@ -267,7 +267,6 @@ void NavigationControl::gatherSettings()
 	auto *settings = m_app->getRoot()->settings();
 	namespace fbs = VSim::FlatBuffers;
 
-
 	// navigation settings
 	auto ns = std::make_unique<fbs::NavigationSettingsT>();
 

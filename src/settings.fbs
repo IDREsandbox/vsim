@@ -6,7 +6,8 @@ table Settings {
   model_information:ModelInformation;
   other_settings:OtherSettings;
   navigation_settings:NavigationSettings;
-  graphics_settings:GraphicsSettings; 
+  graphics_settings:GraphicsSettings;
+  window_settings:WindowSettings;
 }
 
 table ModelInformation {
@@ -52,7 +53,16 @@ table NavigationSettings {
   //collisions on
 }
 
+table WindowSettings {
+  window_width:int = 800;
+  window_height:int = 600;
+  nbar_size:int = 100;
+  ebar_size:int = 100;
+}
+
 table OtherSettings {
+  //year:int = 2000;
+  //years_enabled:bool = false;
   //nbar:bool = true;
   //ebar:bool = true;
   //branding:bool = false;
