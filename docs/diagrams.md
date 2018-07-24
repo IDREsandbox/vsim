@@ -7,3 +7,5 @@
 [embedded resources](https://drive.google.com/file/d/1Xp8H5fiNRlCFlpdBbqbmOZdcxKpqly4w/view?usp=sharing)
 
 [canvas](https://drive.google.com/file/d/1g5Rr720rCyHToxGFe9p_99YP1o-jjLra/view?usp=sharing)
+
+[osg stuff - navigation, rendering, time slider, switches](https://drive.google.com/open?id=1sZQx_mAbFJS4o4p1nj9x4Sim-sQiRILR)

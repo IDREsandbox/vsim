@@ -1,6 +1,7 @@
 
 add_subdirectory(Core)
 add_subdirectory(Canvas)
+add_subdirectory(Switch)
 
 file(GLOB_RECURSE Deprecated_src
   deprecated/*.h
