@@ -38,12 +38,10 @@ public:
 
 	void clear();
 	void addSwitch(osg::Switch *sw);
-	void addMultiSwitch(osgSim::MultiSwitch *sw);
+	void addMultiSwitch(osgSim::MultiSwitch *msw);
+	void addGeneric(osg::Switch *sw, osgSim::MultiSwitch *msw);
 	void removeSwitch(osg::Switch *sw);
-
-	bool isValid(const QModelIndex &index) const;
-
-	osg::Switch *switchForIndex(const QModelIndex &index) const;
+	void removeNode(osg::Node *node);
 
 	// what section is this index in?
 	Section sectionForIndex(const QModelIndex &index) const;
@@ -64,11 +62,16 @@ public:
 	QVariant data(const QModelIndex &index, int role) const override;
 	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
+private:
+	struct SwitchNode;
+
+	// given an index in NODES or SETS get the parent switch node
+	SwitchNode *switchNode(const QModelIndex &index) const;
 
 private:
 	// TODO: for multiple types, metadata, check all?
 
-	struct SwitchNode;
+
 
 	// used for internal pointers, so we can distinguish indices
 	struct ParentPtrNode {
@@ -77,10 +80,18 @@ private:
 	};
 
 	// root nodes
+	// also wraps Switch and MultiSwitch into one interface
 	struct SwitchNode {
 	public:
+		osg::Group *group() const;
+		QString name() const;
+		int getNumChildren() const;
+		QString childName(int index) const;
+
 		bool isChecked(int index) const;
 		void setChecked(int index, bool value);
+
+		void setAll(bool value);
 
 	public:
 		SwitchType m_type;
@@ -92,38 +103,11 @@ private:
 		std::unique_ptr<ParentPtrNode> m_set_head;
 	};
 
-	//struct SwitchListItem;
-	//struct NodeListHead;
-	//struct SetListHead;
-	//struct NodeListHead {
-	//	SwitchListItem *m_parent;
-	//};
-	//struct SetListHead {
-	//	SwitchListItem *m_parent;
-	//};
-
-	//struct InternalId {
-	//	InternalId(quint64 x);
-	//	quint64 toInt() const;
-	//	uint32_t m_parent_row; // 
-	//	bool m_is_nodes;
-	//};
-
-
 private:
 	//std::vector<osg::Switch*> m_list;
 
-	std::vector<std::unique_ptr<SwitchNode>> m_list2;
+	std::vector<std::unique_ptr<SwitchNode>> m_nodes;
 };
 
-//class SwitchModel : public QAbstractItemModel {
-//	Q_OBJECT;
-//public:
-//};
-
-//class SwitchSetModel : public QAbstractItemModel {
-//	Q_OBJECT;
-//public:
-//};
 
 #endif

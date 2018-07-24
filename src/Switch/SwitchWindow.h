@@ -2,8 +2,29 @@
 #define SWITCHWINDOW_H
 
 #include <QListView>
+#include <QStyledItemDelegate>
 
 class SwitchListModel;
+
+class SwitchColorDelegate : public QStyledItemDelegate {
+
+public:
+
+	SwitchColorDelegate(QObject *parent = 0);
+
+	void paint(QPainter *painter, const QStyleOptionViewItem &option,
+		const QModelIndex &index) const override;
+	bool editorEvent(QEvent *event, QAbstractItemModel *model,
+		const QStyleOptionViewItem &option, const QModelIndex &index) override;
+
+	//QSize sizeHint(const QStyleOptionViewItem &option,
+	//	const QModelIndex &index) const override;
+	//QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+	//	const QModelIndex &index) const override;
+	//void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+	//void setModelData(QWidget *editor, QAbstractItemModel *model,
+	//	const QModelIndex &index) const override;
+};
 
 class SwitchWindow : public QFrame {
 	Q_OBJECT;

@@ -1,6 +1,7 @@
 #include "SwitchModel.h"
 
 #include <QDebug>
+#include <QColor>
 
 SwitchListModel::SwitchListModel(QObject * parent)
 	: QAbstractItemModel(parent)
@@ -10,38 +11,49 @@ SwitchListModel::SwitchListModel(QObject * parent)
 void SwitchListModel::clear()
 {
 	beginResetModel();
-	m_list2.clear();
+	m_nodes.clear();
 	endResetModel();
 }
 
-void SwitchListModel::addSwitch(osg::Switch * sw)
+void SwitchListModel::addSwitch(osg::Switch *sw)
 {
-	int index = m_list2.size();
+	addGeneric(sw, nullptr);
+}
+
+void SwitchListModel::addMultiSwitch(osgSim::MultiSwitch * msw)
+{
+	addGeneric(nullptr, msw);
+}
+
+void SwitchListModel::addGeneric(osg::Switch * sw, osgSim::MultiSwitch * msw)
+{
+	int index = m_nodes.size();
 
 	beginInsertRows(QModelIndex(), index, index);
 
-	auto node = std::make_unique<Node>();
-	node->m_parent = nullptr;
-	node->m_section = SWITCHES;
-	node->m_switch = sw;
+	auto node = std::make_unique<SwitchNode>();
+	if (sw) {
+		node->m_switch = sw;
+		node->m_type = BASIC;
+	}
+	else {
+		node->m_multi_switch = msw;
+		node->m_type = MULTISWITCH;
+	}
 
-	auto node_head = std::make_unique<Node>();
+	auto node_head = std::make_unique<ParentPtrNode>();
 	node_head->m_parent = node.get();
 	node_head->m_section = NODES;
 	node->m_node_head = std::move(node_head);
 
-	auto set_head = std::make_unique<Node>();
+	auto set_head = std::make_unique<ParentPtrNode>();
 	set_head->m_parent = node.get();
-	set_head->m_section = NODES;
+	set_head->m_section = SETS;
 	node->m_set_head = std::move(set_head);
 
-	m_list2.push_back(std::move(node));
+	m_nodes.push_back(std::move(node));
 
 	endInsertRows();
-}
-
-void SwitchListModel::addMultiSwitch(osgSim::MultiSwitch * sw)
-{
 }
 
 void SwitchListModel::removeSwitch(osg::Switch *sw)
@@ -49,61 +61,36 @@ void SwitchListModel::removeSwitch(osg::Switch *sw)
 	// FIXME: breaks if there are duplicates
 
 	// find switch
+	removeNode(sw);
+}
 
-	auto it2 = std::find_if(m_list2.begin(), m_list2.end(),
-		[this, sw](const std::unique_ptr<Node> &item) -> bool {
-		return item->m_switch == sw;
+void SwitchListModel::removeNode(osg::Node *node)
+{
+	auto it = std::find_if(m_nodes.begin(), m_nodes.end(),
+		[this, node](const std::unique_ptr<SwitchNode> &item) -> bool {
+		return item->group() == node;
 	});
-	if (it2 == m_list2.end()) return;
-	int index = std::distance(m_list2.begin(), it2);
+	if (it == m_nodes.end()) return;
+	int index = std::distance(m_nodes.begin(), it);
 
 
 	beginRemoveRows(QModelIndex(), index, index);
-	m_list2.erase(it2);
+	m_nodes.erase(it);
 	endRemoveRows();
 }
 
-bool SwitchListModel::isValid(const QModelIndex & index) const
+SwitchListModel::SwitchNode *SwitchListModel::switchNode(const QModelIndex & index) const
 {
-	// TODO
-	switch (sectionForIndex(index)) {
-
-	case SWITCHES:
-		if (!index.isValid()
-			|| index.column() > 2
-			|| index.row() >= m_list2.size()) {
-			return false;
-		}
-		return true;
-		break;
-	case NODES:
-		if (!index.isValid()) return false;
-
-
-		return true;
-		break;
-	case SETS:
-		return false;
-		break;
-	}
-
-	return false;
-}
-
-osg::Switch *SwitchListModel::switchForIndex(const QModelIndex & index) const
-{
-	Node *node = static_cast<Node*>(index.internalPointer());
+	ParentPtrNode *node = static_cast<ParentPtrNode*>(index.internalPointer());
 	if (node == nullptr) {
-		// stuff
-
-		return m_list2[index.row()].get()->m_switch;
+		return m_nodes[index.row()].get();
 	}
-	return node->m_parent->m_switch;
+	return node->m_parent;
 }
 
 SwitchListModel::Section SwitchListModel::sectionForIndex(const QModelIndex & index) const
 {
-	Node *node = static_cast<Node*>(index.internalPointer());
+	ParentPtrNode *node = static_cast<ParentPtrNode*>(index.internalPointer());
 	if (node == nullptr) return SWITCHES;
 
 	return node->m_section;
@@ -146,7 +133,7 @@ QModelIndex SwitchListModel::index(int row, int column, const QModelIndex &paren
 	// switch 2, node 6
 	// row 6, internal pointer is Node(switch 2, nodes)
 	Section ps = sectionForColumn(parent.column());
-	Node *pnode = m_list2[parent.row()].get();
+	SwitchNode *pnode = m_nodes[parent.row()].get();
 
 	if (ps == NODES) {
 		return createIndex(row, column, pnode->m_node_head.get());
@@ -169,12 +156,12 @@ QModelIndex SwitchListModel::parent(const QModelIndex &index) const
 	SwitchNode *parent = node->m_parent;
 
 	// get index of parent
-	auto pit = std::find_if(m_list2.begin(), m_list2.end(),
+	auto pit = std::find_if(m_nodes.begin(), m_nodes.end(),
 		[parent](const std::unique_ptr<SwitchNode> &x) -> bool {
 		return x.get() == parent;
 	});
-	if (pit == m_list2.end()) return QModelIndex();
-	int row = std::distance(m_list2.begin(), pit);
+	if (pit == m_nodes.end()) return QModelIndex();
+	int row = std::distance(m_nodes.begin(), pit);
 
 	return createIndex(row, columnForSection(node->m_section));
 }
@@ -184,15 +171,19 @@ int SwitchListModel::rowCount(const QModelIndex &parent) const
 	auto s = sectionFromParent(parent);
 
 	if (s == SWITCHES) {
-		return m_list2.size();
+		return m_nodes.size();
 	}
 	else if (s == NODES) {
-		int count = m_list2[parent.row()]->m_switch->getNumChildren();
-		qDebug() << "nodes row count" << count;
+		int count = m_nodes[parent.row()]->getNumChildren();
 		return count;
 	}
 	else if (s == SETS) {
-		return 0;
+		SwitchNode *sn = m_nodes[parent.row()].get();
+
+		if (sn->m_type != MULTISWITCH) return 0;
+
+		int count = sn->m_multi_switch->getSwitchSetList().size();
+		return count;
 	}
 
 	return 0;
@@ -217,21 +208,40 @@ int SwitchListModel::columnCount(const QModelIndex &parent) const
 Qt::ItemFlags SwitchListModel::flags(const QModelIndex &index) const
 {
 	Section sec = sectionForIndex(index);
+	bool multi = (switchNode(index)->m_type == MULTISWITCH);
+
+	Qt::ItemFlags flags;
 
 	if (sec == SWITCHES) {
-		if (index.column() == 0) {
-			return Qt::ItemFlag::ItemIsSelectable
-				| Qt::ItemFlag::ItemIsAutoTristate
-				| Qt::ItemFlag::ItemIsUserCheckable
-				| Qt::ItemFlag::ItemIsEnabled;
+		if (index.column() != 0) return flags;
+		flags |= Qt::ItemFlag::ItemIsSelectable
+			| Qt::ItemFlag::ItemIsEnabled
+			| Qt::ItemFlag::ItemIsAutoTristate;
+
+		// not checkable if multiswitch
+		if (!multi) {
+			flags |= Qt::ItemIsUserCheckable;
 		}
+
+		return flags;
 	}
 	else if (sec == NODES) {
-		if (index.column() == 0) {
-			return Qt::ItemFlag::ItemIsSelectable
-				| Qt::ItemFlag::ItemIsUserCheckable
-				| Qt::ItemFlag::ItemIsEnabled;
+		if (index.column() != 0) return flags;
+		flags |= Qt::ItemFlag::ItemIsSelectable
+			| Qt::ItemFlag::ItemIsEnabled;
+
+		// not checkable if multiswitch
+		if (!multi) {
+			flags |= Qt::ItemIsUserCheckable;
 		}
+
+		return flags;
+	}
+	else if (sec == SETS) {
+		if (index.column() != 0) return flags;
+
+		return Qt::ItemFlag::ItemIsUserCheckable
+			| Qt::ItemFlag::ItemIsEnabled;
 	}
 
 	return Qt::NoItemFlags;
@@ -243,15 +253,19 @@ QVariant SwitchListModel::data(const QModelIndex &index, int role) const
 
 	Section sec = sectionForIndex(index);
 
+	SwitchNode *sn = switchNode(index);
+
 	if (sec == SWITCHES) {
 		if (index.column() == 0) {
-			osg::Switch *sw = switchForIndex(index);
 
 			if (role == Qt::DisplayRole) {
-				return QVariant(QString::fromStdString(sw->getName()));
+				return sn->name();
 			}
 			else if (role == Qt::CheckStateRole) {
-				// scan all children of switch, check on/off
+				if (sn->m_type == MULTISWITCH) return QVariant();
+				osg::Switch *sw = sn->m_switch;
+
+				// scan all children of switch, check if on/off
 				bool all_on = true;
 				bool all_off = true;
 				auto list = sw->getValueList();
@@ -264,7 +278,7 @@ QVariant SwitchListModel::data(const QModelIndex &index, int role) const
 					}
 				}
 
-				if (sw->getNumChildren() == 0
+				if (sn->getNumChildren() == 0
 					|| all_on) {
 					return QVariant(Qt::CheckState::Checked);
 				}
@@ -280,21 +294,34 @@ QVariant SwitchListModel::data(const QModelIndex &index, int role) const
 	else if (sec == NODES) {
 		if (index.column() != 0) return QVariant();
 
-		osg::Switch *sw = switchForIndex(index);
+		sn->isChecked(index.row());
+
+		int row = index.row();
 
 		if (role == Qt::ItemDataRole::DisplayRole) {
-			return QString::fromStdString(sw->getChild(index.row())->getName());
+			return sn->childName(row);
 		}
 		else if (role == Qt::ItemDataRole::CheckStateRole) {
-			Qt::CheckState state;
-			if (sw->getValue(index.row())) {
-				state = Qt::CheckState::Checked;
-			}
-			else {
-				state = Qt::CheckState::Unchecked;
-			}
-			return state;
+			return sn->isChecked(row) ? Qt::Checked : Qt::Unchecked;
 		}
+	}
+	else if (sec == SETS) {
+		if (index.column() != 0) return QVariant();
+
+		osgSim::MultiSwitch *ms = sn->m_multi_switch;
+		int row = index.row();
+		bool checked = ms->getActiveSwitchSet() == row;
+
+		if (role == Qt::ItemDataRole::DisplayRole) {
+			return QString::fromStdString(ms->getValueName(row));
+		}
+		else if (role == Qt::ItemDataRole::CheckStateRole) {
+			return checked ? Qt::Checked : Qt::Unchecked;
+		}
+		//else if (role == Qt::ItemDataRole::BackgroundRole) {
+		//	return checked ? QColor(150, 150, 255) : QColor();
+		//}
+
 	}
 
 	return QVariant();
@@ -306,40 +333,133 @@ bool SwitchListModel::setData(const QModelIndex &index, const QVariant &value, i
 
 	Section sec = sectionForIndex(index);
 
+	SwitchNode *sn = switchNode(index);
+
 	// switches
 	if (sec == SWITCHES) {
-		if (index.column() == 0 && role == Qt::CheckStateRole) {
-			osg::Switch *sw = switchForIndex(index);
+		if (index.column() == 0
+			&& role == Qt::CheckStateRole
+			&& sn->m_type == BASIC) {
 
-			Qt::CheckState state = (Qt::CheckState)value.toInt();
+			bool check = ((Qt::CheckState)value.toInt()) == Qt::CheckState::Checked;
 
-			if (state == Qt::CheckState::Checked) {
-				sw->setAllChildrenOn();
-			}
-			else {
-				sw->setAllChildrenOff();
-			}
+			sn->setAll(check);
+
 			// signal all children
 			QModelIndex node_parent = this->index(index.row(), columnForSection(NODES));
-			emit dataChanged(node_parent, node_parent);
+			QModelIndex set_parent = this->index(index.row(), columnForSection(SETS));
+			emit dataChanged(node_parent, set_parent);
 			return true;
 		}
 		return false;
 	}
 
 	else if (sec == NODES) {
-		//
-		auto *sw = switchForIndex(index);
-		sw->getValue(index.row());
 
 		if (index.column() == 0 && role == Qt::CheckStateRole) {
 			bool check = ((Qt::CheckState)value.toInt()) == Qt::CheckState::Checked;
-			sw->setValue(index.row(), check);
+			sn->setChecked(index.row(), check);
+			emit dataChanged(index, index);
+
+			// prod the parent's check state
+			int switch_row = index.parent().row();
+			QModelIndex switch_parent = this->index(switch_row, 0);
+			emit dataChanged(switch_parent, switch_parent, {Qt::CheckStateRole});
 			return true;
 		}
 	}
-	else if (sec == SWITCHES) {
+	else if (sec == SETS) {
+
+		if (index.column() == 0
+			&& role == Qt::CheckStateRole
+			&& ((Qt::CheckState)value.toInt()) == Qt::CheckState::Checked)
+		{
+			// only allow check ons, no check offs
+
+			auto *ms = sn->m_multi_switch;
+			ms->setActiveSwitchSet(index.row());
+
+			// poke the nodes
+			QModelIndex node_parent = this->index(index.row(), columnForSection(NODES));
+			emit dataChanged(node_parent, node_parent);
+
+			return true;
+		}
 	}
 
 	return false;
+}
+
+osg::Group * SwitchListModel::SwitchNode::group() const
+{
+	if (m_type == BASIC) {
+		return m_switch;
+	}
+	else {
+		return m_multi_switch;
+	}
+}
+
+QString SwitchListModel::SwitchNode::name() const
+{
+	switch (m_type) {
+	case BASIC:
+		return QString::fromStdString(m_switch->getName());
+		break;
+	case MULTISWITCH:
+		return QString::fromStdString(m_multi_switch->getName());
+		break;
+	}
+	return QString();
+}
+
+int SwitchListModel::SwitchNode::getNumChildren() const
+{
+	return group()->getNumChildren();
+}
+
+QString SwitchListModel::SwitchNode::childName(int index) const
+{
+	return QString::fromStdString(group()->getChild(index)->getName());
+}
+
+bool SwitchListModel::SwitchNode::isChecked(int index) const
+{
+	if (m_type == BASIC) {
+		return m_switch->getValue(index);
+	}
+	else {
+		return m_multi_switch->getValue(m_multi_switch->getActiveSwitchSet(), index);
+	}
+	return false;
+}
+
+void SwitchListModel::SwitchNode::setChecked(int index, bool value)
+{
+	if (m_type == BASIC) {
+		return m_switch->setValue(index, value);
+	}
+	else {
+
+	}
+}
+
+void SwitchListModel::SwitchNode::setAll(bool value)
+{
+	if (value) {
+		if (m_switch) {
+			m_switch->setAllChildrenOn();
+		}
+		if (m_multi_switch) {
+			//m_multi_switch->setAllChildrenOn();
+		}
+	}
+	else {
+		if (m_switch) {
+			m_switch->setAllChildrenOff();
+		}
+		if (m_multi_switch) {
+			//m_multi_switch->setAllChildrenOff();
+		}
+	}
 }

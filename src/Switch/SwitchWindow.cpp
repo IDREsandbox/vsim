@@ -3,6 +3,8 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QDebug>
+#include <QPainter>
+#include <QEvent>
 
 #include "SwitchModel.h"
 
@@ -25,12 +27,15 @@ SwitchWindow::SwitchWindow(QWidget * parent)
 	m_nodes_view = new QListView(this);
 	m_sets_view = new QListView(this);
 
+	SwitchColorDelegate *delegate = new SwitchColorDelegate(this);
+	m_sets_view->setItemDelegate(delegate);
+
 	layout->addWidget(switch_label, 0, 0);
-	layout->addWidget(nodes_label, 0, 1);
-	layout->addWidget(sets_label, 0, 2);
+	layout->addWidget(sets_label, 0, 1);
+	layout->addWidget(nodes_label, 0, 2);
 	layout->addWidget(m_switch_view, 1, 0);
-	layout->addWidget(m_nodes_view, 1, 1);
-	layout->addWidget(m_sets_view, 1, 2);
+	layout->addWidget(m_sets_view, 1, 1);
+	layout->addWidget(m_nodes_view, 1, 2);
 
 	// connect switch selection to this other guy
 }
@@ -61,7 +66,10 @@ void SwitchWindow::onSwitchChanged(const QModelIndex & current)
 	if (!current.isValid()) {
 		// how to clear a view?
 		m_nodes_view->setRootIndex(QModelIndex());
-		m_nodes_view->setModelColumn(1);
+		m_nodes_view->setModelColumn(0);
+
+		m_sets_view->setRootIndex(QModelIndex());
+		m_sets_view->setModelColumn(0);
 		return;
 	}
 
@@ -69,6 +77,10 @@ void SwitchWindow::onSwitchChanged(const QModelIndex & current)
 		SwitchListModel::columnForSection(SwitchListModel::NODES));
 	qDebug() << "setting to special root index" << index;
 	m_nodes_view->setRootIndex(index);
+
+	auto index2 = m_model->index(current.row(),
+		SwitchListModel::columnForSection(SwitchListModel::SETS));
+	m_sets_view->setRootIndex(index2);
 }
 
 SwitchWindow::SwitchListView::SwitchListView(SwitchWindow * window)
@@ -81,4 +93,45 @@ void SwitchWindow::SwitchListView::currentChanged(const QModelIndex & current, c
 {
 	QListView::currentChanged(current, previous);
 	m_window->onSwitchChanged(current);
+}
+
+SwitchColorDelegate::SwitchColorDelegate(QObject * parent)
+	: QStyledItemDelegate(parent) {
+}
+
+void SwitchColorDelegate::paint(QPainter *painter,
+	const QStyleOptionViewItem &option,
+	const QModelIndex &index) const
+{
+	//option.
+	QRect r = option.rect;
+
+	// get the check state role
+	bool checked =
+		index.model()->data(index, Qt::ItemDataRole::CheckStateRole) == Qt::Checked;
+
+	if (checked) {
+		painter->setBrush(QColor(200, 200, 255));
+		painter->setPen(Qt::NoPen);
+		painter->drawRect(r.x(), r.y(), r.width(), r.height());
+	}
+
+	QStyledItemDelegate::paint(painter, option, index);
+}
+
+bool SwitchColorDelegate::editorEvent(QEvent *event, QAbstractItemModel * model, const QStyleOptionViewItem & option, const QModelIndex & index)
+{
+	QEvent::Type type = event->type();
+
+	if (type == QEvent::MouseButtonPress) {
+		QMouseEvent *me = (QMouseEvent*)event;
+
+		Qt::CheckState state = Qt::CheckState::Checked;
+
+		model->setData(index, state, Qt::ItemDataRole::CheckStateRole);
+
+		return true;
+	}
+
+	return QStyledItemDelegate::editorEvent(event, model, option, index);
 }

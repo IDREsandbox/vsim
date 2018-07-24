@@ -65,6 +65,42 @@ int main(int argc, char *argv[])
 		model->addSwitch(sw.get());
 	}
 
+	std::vector<std::string> multi_names = {
+		"m node 1",
+		"m node 2",
+		"m node 3",
+		"m node 4",
+		"m node 5",
+	};
+	osg::ref_ptr<osgSim::MultiSwitch> multi_switch(new osgSim::MultiSwitch);
+	multi_switch->setName("multiswitch");
+
+	for (std::string &s : multi_names) {
+		osg::ref_ptr<osg::Node> child(new osg::Node);
+		child->setName(s);
+		multi_switch->addChild(child);
+	}
+
+	std::vector<std::pair<std::string, std::vector<bool>>> multi_init =
+	{
+		{ "ms set 1", { true, true, false, false, true } },
+		{ "ms set 2", { true, true, true, true, true } },
+		{ "ms set 3", { false, false, false, false, false } },
+		{ "ms set 4", { false, false, true, false, true } }
+	};
+
+	// add switches
+	osgSim::MultiSwitch::SwitchSetList multi_list;
+	for (auto &pair : multi_init) {
+		multi_list.push_back(pair.second);
+	}
+	// set switch names
+	multi_switch->setSwitchSetList(multi_list);
+	for (int i = 0; i < multi_init.size(); i++) {
+		multi_switch->setValueName(i, multi_init[i].first);
+	}
+	model->addMultiSwitch(multi_switch);
+
 	window.show();
 
 	return a.exec();
