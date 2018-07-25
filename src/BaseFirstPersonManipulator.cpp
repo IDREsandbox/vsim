@@ -40,10 +40,6 @@ void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::No
 		// not moving up/down relative to person, going relative to world
 		//moveUp(-m_gravity_velocity * dt_sec);
 		new_pos[2] += m_gravity_velocity * dt_sec;
-	}
-
-	// physics
-	if (m_collision_on && new_pos != pos) {
 
 		if (m_height_enabled) {
 			// ground collision test
@@ -69,7 +65,10 @@ void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::No
 				m_gravity_velocity = 0;
 			}
 		}
+	}
 
+	// physics
+	if (m_collision_on && new_pos != pos) {
 
 		// forward collision test
 		// extend the movement vector by 1m or so forward to make up for the near clip
