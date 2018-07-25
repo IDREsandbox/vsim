@@ -1,12 +1,9 @@
-#ifndef SWITCHMODEL_H
-#define SWITCHMODEL_H
+#ifndef SWITCHLISTMODEL_H
+#define SWITCHLISTMODEL_H
 
 #include <QAbstractItemModel>
 #include <osg/Switch>
 #include <osgSim/MultiSwitch>
-
-class SwitchModel;
-class SwitchSetModel;
 
 // Multiple osg::Switch-related QAbstractItemModels taped together
 
@@ -72,15 +69,16 @@ private:
 	// TODO: for multiple types, metadata, check all?
 
 
-
-	// used for internal pointers, so we can distinguish indices
+	// QModelIndex metainformation
+	// used for internal pointers, so we that can distinguish indices
 	struct ParentPtrNode {
 		Section m_section = NONE;
 		SwitchNode *m_parent = nullptr;
 	};
 
-	// root nodes
-	// also wraps Switch and MultiSwitch into one interface
+	// root nodes of model
+	// - has stubs for QModelIndex metainformation
+	// - wraps Switch and MultiSwitch into one interface
 	struct SwitchNode {
 	public:
 		osg::Group *group() const;

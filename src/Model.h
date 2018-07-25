@@ -14,6 +14,7 @@ public:
 	//void loadNode(osg::Node *node); // sets name too
 	void setNode(osg::Node *node);
 	osg::Node *node() const;
+	osg::ref_ptr<osg::Node> nodeRef() const;
 
 	std::string name() const;
 	void setName(const std::string &path);

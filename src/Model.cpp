@@ -27,6 +27,11 @@ osg::Node *Model::node() const
 	return m_node.get();
 }
 
+osg::ref_ptr<osg::Node> Model::nodeRef() const
+{
+	return m_node;
+}
+
 std::string Model::name() const
 {
 	return m_name;

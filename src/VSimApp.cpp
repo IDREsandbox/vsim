@@ -37,6 +37,8 @@
 #include "ModelGroup.h"
 #include "TimeManager.h"
 #include "BrandingControl.h"
+#include "Switch/SwitchManager.h"
+#include "Model.h"
 
 #include <QMenuBar>
 
@@ -71,6 +73,8 @@ VSimApp::VSimApp(MainWindow* window)
 	m_er_control = new ERControl(this, m_window, this);
 	m_navigation_control = new NavigationControl(this, m_window->getViewerWidget(), this);
 	m_branding_control = new BrandingControl(this, m_root->branding(), m_window->brandingOverlay(), this);
+	m_switch_manager = new SwitchManager(this);
+	connectSwitchManager();
 
 	m_viewer = m_window->getViewerWidget();
 
@@ -317,4 +321,35 @@ BrandingControl * VSimApp::brandingControl() const
 OSGViewerWidget *VSimApp::viewer() const
 {
 	return m_viewer;
+}
+
+SwitchManager * VSimApp::switchManager() const
+{
+	return m_switch_manager;
+}
+
+void VSimApp::connectSwitchManager()
+{
+	ModelGroup *models = m_root->models();
+
+	//added
+	connect(models, &ModelGroup::sInserted, [this, models](size_t index, size_t count) {
+		for (size_t i = index; i < index + count; i++) {
+			Model *m = models->child(i);
+			m_switch_manager->addNodeRecursive(m->nodeRef());
+		}
+	});
+
+	//removed
+	connect(models, &ModelGroup::sAboutToRemove, [this, models](size_t index, size_t count) {
+		for (size_t i = index; i < index + count; i++) {
+			Model *m = models->child(i);
+			m_switch_manager->removeNodeRecursive(m->nodeRef());
+		}
+	});
+
+	//reset
+	connect(m_root->models(), &ModelGroup::sAboutToReset, [this]() {
+		m_switch_manager->clear();
+	});
 }

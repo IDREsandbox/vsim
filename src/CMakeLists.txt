@@ -211,7 +211,7 @@ set(VSim_src
   VSimApp.h
 )
 add_library(VSim_obj ${VSim_src})
-target_link_libraries(VSim_obj VSimRoot_obj)
+target_link_libraries(VSim_obj VSimRoot_obj Switch_obj)
 
 file(GLOB_RECURSE oldSerializers
   */Serializer*.cpp

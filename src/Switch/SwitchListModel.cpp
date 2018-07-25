@@ -1,4 +1,4 @@
-#include "SwitchModel.h"
+#include "SwitchListModel.h"
 
 #include <QDebug>
 #include <QColor>
@@ -27,6 +27,11 @@ void SwitchListModel::addMultiSwitch(osgSim::MultiSwitch * msw)
 
 void SwitchListModel::addGeneric(osg::Switch * sw, osgSim::MultiSwitch * msw)
 {
+	// both null?
+	if (!sw && !msw) {
+		return;
+	}
+
 	int index = m_nodes.size();
 
 	beginInsertRows(QModelIndex(), index, index);
@@ -66,13 +71,16 @@ void SwitchListModel::removeSwitch(osg::Switch *sw)
 
 void SwitchListModel::removeNode(osg::Node *node)
 {
+	// FIXME:
+	// beginRemoveRows() requires valid node state
+	// but oberserver erases too quickly
+
 	auto it = std::find_if(m_nodes.begin(), m_nodes.end(),
 		[this, node](const std::unique_ptr<SwitchNode> &item) -> bool {
 		return item->group() == node;
 	});
 	if (it == m_nodes.end()) return;
 	int index = std::distance(m_nodes.begin(), it);
-
 
 	beginRemoveRows(QModelIndex(), index, index);
 	m_nodes.erase(it);
@@ -83,6 +91,10 @@ SwitchListModel::SwitchNode *SwitchListModel::switchNode(const QModelIndex & ind
 {
 	ParentPtrNode *node = static_cast<ParentPtrNode*>(index.internalPointer());
 	if (node == nullptr) {
+		if (index.row() >= m_nodes.size()) {
+			qWarning() << "bad switch node" << index << m_nodes.size();
+			return nullptr;
+		}
 		return m_nodes[index.row()].get();
 	}
 	return node->m_parent;
@@ -127,6 +139,8 @@ QModelIndex SwitchListModel::index(int row, int column, const QModelIndex &paren
 	// no parent -> switches
 	// return (row, column, nullptr)
 	if (!parent.isValid()) {
+		if (row >= m_nodes.size()) return QModelIndex();
+
 		return createIndex(row, column);
 	}
 
@@ -174,10 +188,18 @@ int SwitchListModel::rowCount(const QModelIndex &parent) const
 		return m_nodes.size();
 	}
 	else if (s == NODES) {
+		if (parent.row() >= m_nodes.size()) {
+			return 0;
+		}
+
 		int count = m_nodes[parent.row()]->getNumChildren();
 		return count;
 	}
 	else if (s == SETS) {
+		if (parent.row() >= m_nodes.size()) {
+			return 0;
+		}
+
 		SwitchNode *sn = m_nodes[parent.row()].get();
 
 		if (sn->m_type != MULTISWITCH) return 0;
@@ -425,7 +447,7 @@ QString SwitchListModel::SwitchNode::childName(int index) const
 
 bool SwitchListModel::SwitchNode::isChecked(int index) const
 {
-	if (m_type == BASIC) {
+  	if (m_type == BASIC) {
 		return m_switch->getValue(index);
 	}
 	else {

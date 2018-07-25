@@ -11,6 +11,7 @@ set(Core_h
   GroupTemplate.inl
   GroupTemplate.h
   ICommandStack.h
+  OSGObserver.h
   SimpleCommandStack.h
   TypesSerializer.h
   WeakObject.h
@@ -21,6 +22,7 @@ set(Core_h
 
 set(Core_src
   GroupSignals.cpp
+  OSGObserver.cpp
   SimpleCommandStack.cpp
   TypesSerializer.cpp
   Util.cpp
@@ -35,6 +37,12 @@ vsim_add_test(
   Group_test
   Group_test.cpp
   "Core_obj;Qt5::Widgets;Qt5::Test;${OPENSCENEGRAPH_LIBRARIES}"
+)
+
+vsim_add_test(
+  OSGObserver_test
+  OSGObserver_test.cpp
+  "Core_obj;Qt5::Test;${OPENSCENEGRAPH_LIBRARIES}"
 )
 
 vsim_add_test(

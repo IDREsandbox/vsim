@@ -12,6 +12,7 @@ public:
 	GroupSignals(QObject *parent = nullptr);
 
 signals:
+	// emitted when cleared
 	void sAboutToReset();
 	void sReset();
 

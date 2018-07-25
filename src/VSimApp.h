@@ -32,6 +32,7 @@ class CanvasContainer;
 class OSGViewerWidget;
 class TimeManager;
 class BrandingControl;
+class SwitchManager;
 
 class VSimApp : public QObject
 {
@@ -118,6 +119,7 @@ public:
 	TimeManager *timeManager() const;
 	BrandingControl *brandingControl() const;
 	OSGViewerWidget *viewer() const;
+	SwitchManager *switchManager() const;
 
 	void debugCamera();
 
@@ -132,6 +134,9 @@ signals:
 	void sGoingSomewhere();
 	void sArrived();
 	void sInterrupted();
+
+private:
+	void connectSwitchManager();
 
 private:
 	MainWindow *m_window;
@@ -155,6 +160,7 @@ private:
 	NavigationControl *m_navigation_control;
 	TimeManager *m_time_manager;
 	BrandingControl *m_branding_control;
+	SwitchManager *m_switch_manager;
 
 	osg::Matrixd m_camera_start;
 	osg::Matrixd m_camera_target;

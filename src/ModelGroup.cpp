@@ -46,7 +46,7 @@ ModelGroup::ModelGroup(QObject *parent)
 
 void ModelGroup::copyReference(const ModelGroup & other)
 {
-	clear();
+	clear(); // emits reset
 
 	m_root = new osg::Group;
 
@@ -57,7 +57,6 @@ void ModelGroup::copyReference(const ModelGroup & other)
 		new_model->copyReference(*model);
 		append(model); // connections on sInserted callback
 	}
-	emit sReset();
 }
 
 void ModelGroup::addNode(osg::Node * node, const std::string & path)

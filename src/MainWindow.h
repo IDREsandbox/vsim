@@ -28,6 +28,7 @@ class CoordinateWidget;
 class CanvasEditor;
 class CanvasContainer;
 class BrandingOverlay;
+class SwitchWindow;
 
 class MainWindow : public QMainWindow
 {
@@ -115,6 +116,7 @@ private:
 	HistoryWindow *m_history_window;
 	CoordinateWidget *m_coordinate_widget;
 	BrandingOverlay *m_branding_overlay;
+	SwitchWindow *m_switch_window;
 
 	QActionGroup *m_navigation_action_group;
 	QAction *m_action_first_person;

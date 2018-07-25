@@ -121,6 +121,7 @@
     </property>
     <addaction name="actionModel_Outliner"/>
     <addaction name="actionTime_Slider"/>
+    <addaction name="switches"/>
     <addaction name="separator"/>
     <addaction name="actionHistory"/>
    </widget>
@@ -518,6 +519,20 @@
   <action name="other_settings">
    <property name="text">
     <string>Other Settings</string>
+   </property>
+  </action>
+  <action name="switches">
+   <property name="text">
+    <string>Switches</string>
+   </property>
+   <property name="shortcut">
+    <string>E</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
    </property>
   </action>
  </widget>

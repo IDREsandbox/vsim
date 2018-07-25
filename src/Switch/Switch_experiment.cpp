@@ -1,34 +1,82 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QMenuBar>
+#include <QFileDialog>
+#include <osgDB/ReadFile>
+#include <QDebug>
 
 #include "SwitchManager.h"
 #include "SwitchWindow.h"
-#include "SwitchModel.h"
+#include "SwitchListModel.h"
+
+
+osg::ref_ptr<osg::Node> loaded;
+
+class NoisyObs : public osg::Observer {
+
+	void objectDeleted(void *obj) {
+		qDebug() << "obs deleted" << obj;
+	}
+};
 
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
+	QString path = "C:/Users/David/Google Drive/vsim/work/switches/MultipleSwitches.flt";
+
 	QMainWindow window;
+
+	loaded = osgDB::readRefNodeFile(path.toStdString());
+
+	qDebug() << "loaded ok?" << (bool)loaded;
+
 	auto *mb = new QMenuBar(&window);
 	window.setMenuBar(mb);
 	auto *menu = mb->addMenu("stuff");
 
-	auto *a_open = menu->addAction("open");
-	QObject::connect(a_open, &QAction::triggered, []() {
+	SwitchManager *manager = new SwitchManager(&window);
+	if (loaded) {
+		manager->addNodeRecursive(loaded);
+	}
 
+	auto *a_open = menu->addAction("open");
+	QObject::connect(a_open, &QAction::triggered, [&]() {
+		QString path = QFileDialog::getOpenFileName(&window);
+		auto node = osgDB::readRefNodeFile(path.toStdString());
+		qDebug() << "opening" << path;
+		if (!node) {
+			qDebug() << "failed to load" << path;
+			return;
+		}
+		loaded = node;
+		manager->addNodeRecursive(node);
+	});
+
+	auto *a_clear = menu->addAction("clear");
+	QObject::connect(a_clear, &QAction::triggered, [&]() {
+		loaded = nullptr;
+	});
+
+	auto *a_clear2 = menu->addAction("clear manager");
+	QObject::connect(a_clear2, &QAction::triggered, [&]() {
+		manager->clear();
+	});
+
+	auto *a_clear3 = menu->addAction("remove rec");
+	QObject::connect(a_clear3, &QAction::triggered, [&]() {
+		manager->removeNodeRecursive(loaded);
 	});
 
 
 	SwitchWindow *view = new SwitchWindow(&window);
 	window.setCentralWidget(view);
 
-	SwitchListModel *model = new SwitchListModel(&window);
+	SwitchListModel *model = manager->listModel();
 
 	view->setModel(model);
+	view->setWindowFlags(0);
 
-	
 	std::vector<std::pair<std::string, std::vector<std::string>>> init =
 	{
 		{

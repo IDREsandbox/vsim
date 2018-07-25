@@ -1,13 +1,13 @@
 
 set(Switch_h
   SwitchManager.h
-  SwitchModel.h
+  SwitchListModel.h
   SwitchWindow.h
 )
 
 set(Switch_src
   SwitchManager.cpp
-  SwitchModel.cpp
+  SwitchListModel.cpp
   SwitchWindow.cpp
 )
 
@@ -19,8 +19,8 @@ vsim_add_experiment(
   Switch_experiment.cpp
   Switch_obj
 )
-vsim_add_test(
-  Switch_test
-  Switch_test.cpp
-  "Switch_obj;Qt5::Test"
-)
+# vsim_add_test(
+#   Switch_test
+#   Switch_test.cpp
+#   "Switch_obj;Qt5::Test"
+# )

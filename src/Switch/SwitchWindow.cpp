@@ -6,11 +6,13 @@
 #include <QPainter>
 #include <QEvent>
 
-#include "SwitchModel.h"
+#include "SwitchListModel.h"
 
 SwitchWindow::SwitchWindow(QWidget * parent)
 	: QFrame(parent)
 {
+	resize(350, 250);
+	setWindowFlags(Qt::WindowType::Window);
 	QGridLayout *layout = new QGridLayout(this);
 
 
@@ -59,8 +61,6 @@ void SwitchWindow::setModel(SwitchListModel *model)
 
 void SwitchWindow::onSwitchChanged(const QModelIndex & current)
 {
-	qDebug() << "switch changed" << current;
-
 	if (!m_model) return;
 
 	if (!current.isValid()) {
@@ -75,7 +75,6 @@ void SwitchWindow::onSwitchChanged(const QModelIndex & current)
 
 	auto index = m_model->index(current.row(),
 		SwitchListModel::columnForSection(SwitchListModel::NODES));
-	qDebug() << "setting to special root index" << index;
 	m_nodes_view->setRootIndex(index);
 
 	auto index2 = m_model->index(current.row(),

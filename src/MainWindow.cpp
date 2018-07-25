@@ -25,6 +25,8 @@
 #include "BrandingOverlay.h"
 #include "NavigationSettingsDialog.h"
 #include "DisplaySettingsDialog.h"
+#include "Switch/SwitchWindow.h"
+#include "Switch/SwitchManager.h"
 
 #include "narrative/NarrativeGroup.h"
 #include "narrative/NarrativePlayer.h"
@@ -169,6 +171,12 @@ MainWindow::MainWindow(QWidget *parent)
 	m_history_window->resize(250, 500);
 	connect(ui->actionHistory, &QAction::triggered, this, [this]() {
 		m_history_window->setVisible(!m_history_window->isVisible());
+	});
+
+	// switches
+	m_switch_window = new SwitchWindow(this);
+	connect(ui->switches, &QAction::triggered, this, [this]() {
+		m_switch_window->setVisible(!m_switch_window->isVisible());
 	});
 
 	// coordinate
@@ -348,6 +356,9 @@ void MainWindow::setApp(VSimApp * vsim)
 			m_osg_widget->setSamples(samples);
 		});
 	}
+
+	// switches
+	m_switch_window->setModel(m_app->switchManager()->listModel());
 
 	// model menu
 	QMenu *model_menu = ui->menuModel;
