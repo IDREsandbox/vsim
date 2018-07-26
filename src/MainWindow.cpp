@@ -145,9 +145,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
 
-	// player
-
-
 	// model outliner
 	m_outliner = new ModelOutliner(this);
 	connect(ui->actionModel_Outliner, &QAction::triggered, this, [this]() {
