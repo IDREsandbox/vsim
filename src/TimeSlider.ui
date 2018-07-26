@@ -89,7 +89,7 @@
   <customwidget>
    <class>TickSlider</class>
    <extends>QSlider</extends>
-   <header>TickSlider.h</header>
+   <header>Gui/TickSlider.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

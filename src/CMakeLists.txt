@@ -1,5 +1,6 @@
 
 add_subdirectory(Core)
+add_subdirectory(Gui)
 add_subdirectory(Canvas)
 add_subdirectory(Switch)
 
@@ -135,8 +136,6 @@ set(VSim_src
   DisplaySettingsDialog.ui
   EditDeleteDelegate.cpp
   EditDeleteDelegate.h
-  ElidedLabel.cpp
-  ElidedLabel.h
   ERBar.cpp
   ERBar.h
   ERBar.ui
@@ -180,8 +179,6 @@ set(VSim_src
   NavigationSettingsDialog.cpp
   NavigationSettingsDialog.h
   NavigationSettingsDialog.ui
-  NumberSlider.cpp
-  NumberSlider.h
   ObjectManipulator.cpp
   ObjectManipulator.h
   OSGViewerWidget.cpp
@@ -201,8 +198,6 @@ set(VSim_src
   StatsWindow.cpp
   StatsWindow.h
   StatsWindow.ui
-  TickSlider.cpp
-  TickSlider.h
   TimeManager.cpp
   TimeManager.h
   TimeSlider.cpp
@@ -211,7 +206,7 @@ set(VSim_src
   VSimApp.h
 )
 add_library(VSim_obj ${VSim_src})
-target_link_libraries(VSim_obj VSimRoot_obj Switch_obj)
+target_link_libraries(VSim_obj VSimRoot_obj Switch_obj Gui_obj)
 
 file(GLOB_RECURSE oldSerializers
   */Serializer*.cpp

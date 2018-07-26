@@ -34,7 +34,7 @@ set(Canvas_src
 )
 
 add_library(Canvas_obj ${Canvas_src} ${Canvas_h})
-target_link_libraries(Canvas_obj Core_obj Qt5::Widgets)
+target_link_libraries(Canvas_obj Core_obj Gui_obj Qt5::Widgets)
 
 vsim_add_experiment(
   Canvas_experiment
