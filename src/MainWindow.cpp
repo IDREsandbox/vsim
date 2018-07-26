@@ -95,11 +95,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 	m_branding_overlay = new BrandingOverlay(ui->root);
 	m_branding_overlay->setObjectName("branding");
-	ui->rootLayout->addWidget(m_branding_overlay, 0, 0);
+	m_branding_overlay->show();
+	//ui->rootLayout->addWidget(m_branding_overlay, 0, 0);
 	// put the toolbar on top over everything
-	auto *branding_window = m_branding_overlay->m_editor->internalWindow();
-	branding_window->setParent(ui->root);
-	ui->rootLayout->addWidget(branding_window, 0, 0);
+	//auto *branding_window = m_branding_overlay->m_editor->internalWindow();
+	//branding_window->setParent(ui->root);
+	//ui->rootLayout->addWidget(branding_window, 0, 0);
 
 	// splitter on top of osg viewer
 	// mask allows events to get to the canvas
@@ -572,6 +573,8 @@ void MainWindow::updatePositions()
 	QWidget *middle = ui->middleSpacer;
 	auto *canvas_window = m_canvas->internalWindow();
 	canvas_window->setGeometry(middle->geometry());
+
+	m_branding_overlay->setGeometry(middle->geometry());
 
 	// Update the splitter mask
 	QSplitter *splitter = ui->mainSplitter;

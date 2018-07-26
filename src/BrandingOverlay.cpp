@@ -6,6 +6,7 @@
 #include "Canvas/CanvasEditor.h"
 
 BrandingOverlay::BrandingOverlay(QWidget * parent)
+	: QFrame(parent)
 {
 	QGridLayout *layout = new QGridLayout(this);
 	layout->setMargin(0);

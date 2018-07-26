@@ -47,6 +47,7 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	layout->addWidget(m_internal_window, 0, 0);
 	m_internal_window->show();
 	m_internal_window->installEventFilter(mask_filter);
+	m_internal_window->setWindowFlags(0);
 
 	m_tb = new CanvasToolBar(m_internal_window);
 	m_internal_window->addToolBar(Qt::ToolBarArea::LeftToolBarArea, m_tb);
