@@ -11,6 +11,8 @@
 
 #include "LabelType.h"
 
+class TitledComboBox;
+
 class ToolBox : public QWidget {
 	Q_OBJECT
 public:
@@ -69,7 +71,7 @@ public:
 	QToolButton *m_link;
 	QToolButton *m_link_off;
 
-	QComboBox *m_style;
+	TitledComboBox *m_style;
 	//QToolButton *m_apply_style;
 	QToolButton *m_edit_styles;
 

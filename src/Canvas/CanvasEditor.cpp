@@ -255,8 +255,6 @@ void CanvasEditor::applyStylesToButtons() {
 		LabelStyle *style = m_styles->getStyle(pair.second);
 		style->applyToWidget(button, false);
 	}
-	FrameStyle *fs = m_styles->getImageStyle();
-	fs->applyToWidget(m_tb->m_image);
 }
 
 void CanvasEditor::setEditable(bool editable)
@@ -338,8 +336,8 @@ void CanvasEditor::updateToolBar()
 	m_tb->m_font_size->setCurrentText(size_text);
 
 	// label type
-	LabelType type = m_cc->allLabelType();
-	m_tb->m_style->setCurrentText(LabelTypeNames[type]);
+	//LabelType type = m_cc->allLabelType();
+	//m_tb->m_style->setCurrentText(LabelTypeNames[type]);
 
 	// border width
 	int border = m_cc->allBorderSize();

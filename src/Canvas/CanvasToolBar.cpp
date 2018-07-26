@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QCoreApplication>
 
+#include "Gui/TitledComboBox.h"
+
 // ComboBoxLimiter filters out scroll wheel events
 // this is because scrolling dumps undo commands on every change
 // TODO: find solution, need a previewChanges kind of thing
@@ -81,26 +83,34 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	QVBoxLayout *create_layout = new QVBoxLayout(m_create_box);
 	setMargins(create_layout);
 
+	QHBoxLayout *create_row = new QHBoxLayout();
+	create_layout->addLayout(create_row);
 	m_header1 = new QToolButton(m_create_box);
 	m_header1->setText("Header 1");
-	create_layout->addWidget(m_header1);
+	create_row->addWidget(m_header1);
 	m_header2 = new QToolButton(m_create_box);
 	m_header2->setText("Header 2");
 	m_header2->setContentsMargins(0, 0, 0, 0);
-	create_layout->addWidget(m_header2);
+	create_row->addWidget(m_header2);
+	create_row->addStretch(1);
+
+	create_row = new QHBoxLayout();
+	create_layout->addLayout(create_row);
 	m_body = new QToolButton(m_create_box);
 	m_body->setText("Body");
-	create_layout->addWidget(m_body);
+	create_row->addWidget(m_body);
 	m_label = new QToolButton(m_create_box);
 	m_label->setText("Label");
-	create_layout->addWidget(m_label);
-	m_image = new QToolButton(m_create_box);
-	m_image->setText("Image");
-	create_layout->addWidget(m_image);
+	create_row->addWidget(m_label);
+	create_row->addStretch(1);
 
-	m_delete = new QToolButton(this);
-	m_delete->setText("Delete");
-	create_layout->addWidget(m_delete);
+	m_edit_styles = new QToolButton(this);
+	m_edit_styles->setText("Edit Styles");
+	create_layout->addWidget(m_edit_styles, 0, Qt::AlignLeft);
+
+	m_image = new QToolButton(m_create_box);
+	m_image->setText("Add Image");
+	create_layout->addWidget(m_image);
 
 	// color box
 	m_color_box = new ToolBox(this);
@@ -116,12 +126,8 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	m_clear_background = new QToolButton(m_color_box);
 	m_clear_background->setIcon(i_clear);
 	color_row->addWidget(m_clear_background, 0, Qt::AlignLeft);
-	m_foreground = new QToolButton(m_color_box);
-	m_foreground->setIcon(i_color_text);
-	color_row->addWidget(m_foreground, 0, Qt::AlignLeft);
 	color_row->addStretch(1);
 
-	// border row
 	QHBoxLayout *border_row = new QHBoxLayout();
 	color_rows->addLayout(border_row);
 
@@ -140,6 +146,26 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	m_border_width->resize(20, 10);
 	border_row->addWidget(m_border_width, 0, Qt::AlignLeft);
 	border_row->addStretch(1);
+
+	m_style = new TitledComboBox(m_color_box);
+	m_style->setTitle("Revert to Label Style");
+	//ComboBoxLimiter::install(m_style);
+	m_style->setFocusPolicy(Qt::NoFocus);
+	m_style->addItem("Header 1");
+	m_styles.push_back(LabelType::HEADER1);
+	m_style->addItem("Header 2");
+	m_styles.push_back(LabelType::HEADER2);
+	m_style->addItem("Body");
+	m_styles.push_back(LabelType::BODY);
+	m_style->addItem("Label");
+	m_styles.push_back(LabelType::LABEL);
+	m_style->addItem("None");
+	m_styles.push_back(LabelType::NONE);
+	color_rows->addWidget(m_style);
+
+	m_delete = new QToolButton(this);
+	m_delete->setText("Delete");
+	color_rows->addWidget(m_delete, 0, Qt::AlignLeft);
 
 	// font box
 	m_font_box = new ToolBox(this);
@@ -178,6 +204,9 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	m_strikeout = new QToolButton(this);
 	m_strikeout->setIcon(i_strike);
 	mod_row->addWidget(m_strikeout, 0, Qt::AlignLeft);
+	m_foreground = new QToolButton(this);
+	m_foreground->setIcon(i_color_text);
+	mod_row->addWidget(m_foreground, 0, Qt::AlignLeft);
 	mod_row->addStretch(1);
 
 	QHBoxLayout *bullet_row = new QHBoxLayout();
@@ -195,32 +224,6 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	m_link_off->setIcon(i_link_off);
 	bullet_row->addWidget(m_link_off, 0, Qt::AlignLeft);
 	bullet_row->addStretch(1);
-
-	m_style = new QComboBox(m_font_box);
-	//ComboBoxLimiter::install(m_style);
-	m_style->setFocusPolicy(Qt::NoFocus);
-	m_style->addItem("Header 1");
-	m_styles.push_back(LabelType::HEADER1);
-	m_style->addItem("Header 2");
-	m_styles.push_back(LabelType::HEADER2);
-	m_style->addItem("Body");
-	m_styles.push_back(LabelType::BODY);
-	m_style->addItem("Label");
-	m_styles.push_back(LabelType::LABEL);
-	m_style->addItem("None");
-	m_styles.push_back(LabelType::NONE);
-	//m_style->addItem("Image");
-	font_rows->addWidget(m_style);
-
-	QHBoxLayout *styles_row = new QHBoxLayout();
-	font_rows->addLayout(styles_row);
-
-	//m_apply_style = new QToolButton(this);
-	//m_apply_style->setText("Apply");
-	//styles_row->addWidget(m_apply_style);
-	m_edit_styles = new QToolButton(this);
-	m_edit_styles->setText("Edit Styles");
-	styles_row->addWidget(m_edit_styles, 0, Qt::AlignLeft);
 
 	// align box
 	m_align_box = new ToolBox(this);
