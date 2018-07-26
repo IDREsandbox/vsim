@@ -246,6 +246,11 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 		if (last < 0) {
 			m_app->setState(VSimApp::EDIT_FLYING);
 		}
+		else if (m_app->isPlaying()) {
+			m_app->setState(VSimApp::PLAY_WAIT_CLICK);
+			openSlide(m_slide_selection->last());
+			showCanvas(true);
+		}
 		else {
 			m_app->setState(VSimApp::EDIT_SLIDES);
 			openSlide(m_slide_selection->last());
@@ -599,6 +604,20 @@ void NarrativeControl::showCanvasEditor(bool show)
 	m_canvas->setEditable(show);
 }
 
+void NarrativeControl::fadeOutSlide(NarrativeSlide *slide)
+{
+	if (!slide) {
+		m_fade_out_anim->stop();
+		m_fade_canvas->hide();
+		m_fade_canvas->setScene(nullptr);
+	}
+	else {
+		m_fade_canvas->show();
+		m_fade_canvas->setScene(slide->scene());
+		m_fade_out_anim->start();
+	}
+}
+
 void NarrativeControl::showNarrativeBox()
 {
 	m_bar->showNarratives();
@@ -739,6 +758,14 @@ NarrativeSlide * NarrativeControl::getCurrentSlide() const
 {
 	if (m_current_narrative < 0) return nullptr;
 	return getSlide(m_current_narrative, m_current_slide);
+}
+
+NarrativeSlide * NarrativeControl::slideAtIndex(int index) const
+{
+	Narrative *nar = getCurrentNarrative();
+	if (!nar) return nullptr;
+	if (index < 0 || index >= nar->size()) return nullptr;
+	return nar->child(index);
 }
 
 Narrative *NarrativeControl::getNarrative(int index) const

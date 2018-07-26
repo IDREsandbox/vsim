@@ -63,6 +63,7 @@ public:
 	void showCanvas(bool show, bool fade = false);
 	bool canvasVisible() const;
 	void showCanvasEditor(bool show);
+	void fadeOutSlide(NarrativeSlide *slide);
 
 	void editSlide();
 	void exitEdit();
@@ -88,6 +89,7 @@ public:
 	// current slide is an opened slide
 	// top slide is the last selected
 	NarrativeSlide *getCurrentSlide() const;
+	NarrativeSlide *slideAtIndex(int index) const;
 	int getCurrentSlideIndex() const;
 	SelectionData getSelectedSlides() const;
 	int getTopSlide() const;
