@@ -992,6 +992,10 @@ QToolButton {
     padding: 1px;
 }
 
+QToolButton:checked {
+    border: 1px solid rgb(206, 206, 206);
+}
+
 QToolButton[popupMode="1"] {
     /* only for MenuButtonPopup */
     padding-right: 8px;
