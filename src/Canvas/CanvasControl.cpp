@@ -135,6 +135,11 @@ void CanvasControl::removeItems()
 
 void CanvasControl::setBorderWidth(int width)
 {
+	if (width <= 0) {
+		clearBorder();
+		return;
+	}
+
 	multiEdit([width](CanvasItem *item, QUndoCommand *parent) {
 		new CanvasItem::SetHasBorderCommand(item, true, parent);
 		new CanvasItem::SetBorderWidthCommand(item, width, parent);
@@ -671,16 +676,15 @@ int CanvasControl::allBorderSize() const
 	return std::accumulate(items.begin(), items.end(), -1,
 		[&first](int acc, CanvasItem *item) -> int {
 		int border = item->borderWidthPixels();
+		if (!item->hasBorder()) border = 0;
 		if (first) { // initial
 			first = false;
 			return border;
 		}
-		else if (acc == border) {
+		if (acc == border) {
 			return acc;
 		}
-		else {
-			return -1;
-		}
+		return -1;
 	});
 }
 

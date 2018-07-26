@@ -126,11 +126,10 @@ int main(int argc, char *argv[])
 	window.setCentralWidget(editor);
 	editor->setScene(scene);
 	editor->setStack(stack);
+	editor->setEditable(true);
 
 	reloadStyle();
 	window.show();
-
-	//editor->showToolBar(false);
 
 	QObject::connect(debug, &QAction::triggered, [editor]() {
 		editor->debug();
