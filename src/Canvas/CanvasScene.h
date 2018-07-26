@@ -298,7 +298,7 @@ protected:
 	QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
 private:
-	TextItem * m_text;
+	TextItem *m_text;
 	Qt::Alignment m_valign;
 	LabelType m_style_type;
 };
@@ -317,6 +317,8 @@ protected:
 	void focusOutEvent(QFocusEvent *event) override;
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+
+	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
 	CanvasLabel *m_rect;
 };

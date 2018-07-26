@@ -901,6 +901,12 @@ void TextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event)
 	QGraphicsTextItem::mouseDoubleClickEvent(event);
 }
 
+void TextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
+{
+	// TODO: how to add paste plain text?
+	QGraphicsTextItem::contextMenuEvent(event);
+}
+
 CanvasImage::CanvasImage()
 {
 	setPrefersFixedRatio(true);

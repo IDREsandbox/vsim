@@ -147,11 +147,14 @@ public: // misc, internal stuff
 			return fmt_test(label->textCursor().charFormat());
 		}
 		auto labels = selectedLabels();
-		for (auto *label : labels) {
-			bool ok = fmt_test(label->textCursor().charFormat());
-			if (!ok) return false;
+		if (labels.size() > 0) {
+			for (auto *label : labels) {
+				bool ok = fmt_test(label->textCursor().charFormat());
+				if (!ok) return false;
+			}
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	// Performs a textCursor operation on relevant selected text

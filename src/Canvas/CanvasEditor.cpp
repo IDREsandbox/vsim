@@ -342,6 +342,12 @@ void CanvasEditor::updateToolBar()
 	// border width
 	int border = m_cc->allBorderSize();
 	m_tb->m_border_width->setValue(border);
+
+	// button highlighting
+	m_tb->m_bold->setChecked(m_cc->allBold());
+	m_tb->m_italicize->setChecked(m_cc->allItalic());
+	m_tb->m_underline->setChecked(m_cc->allUnderline());
+	m_tb->m_strikeout->setChecked(m_cc->allStrikeOut());
 }
 
 void CanvasEditor::onStylesChanged()
@@ -358,7 +364,7 @@ CanvasWindow::CanvasWindow(QWidget *parent)
 		Qt::NoContextMenu
 	);
 	setObjectName("transparent");
-	setStyleSheet("#transparent{background: transparent;}");
+	//setStyleSheet("#transparent{background: transparent;}");
 	// this style gets overriden by darkstyle
 	// #transparent is also defined in darkstyle
 

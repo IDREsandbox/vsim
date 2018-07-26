@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <sstream>
 #include <fstream>
+#include <QToolButton>
 #include "Core/SimpleCommandStack.h"
 #include "Canvas/CanvasSerializer.h"
 #include "Canvas/CanvasControl.h"
@@ -24,6 +25,8 @@ int main(int argc, char *argv[])
 	QMainWindow window;
 	window.resize(800, 600);
 
+	QMainWindow *internal_window;
+
 	QMenuBar *mb = new QMenuBar(&window);
 	window.setMenuBar(mb);
 
@@ -31,12 +34,14 @@ int main(int argc, char *argv[])
 	QMenu *menu = new QMenu("stuff", mb);
 	QAction *reload = menu->addAction("Reload style");
 	reload->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
-	auto reloadStyle = [&window]() {
+	auto reloadStyle = [&]() {
+		qDebug() << "reload style";
 		QFile File(QCoreApplication::applicationDirPath()
 			+ "/assets/darkstyle.qss");
 		File.open(QFile::ReadOnly);
-		QString StyleSheet = QLatin1String(File.readAll());
-		window.setStyleSheet(StyleSheet);
+		QString data = QLatin1String(File.readAll());
+		window.setStyleSheet(data);
+		internal_window->setStyleSheet(data);
 	};
 	QObject::connect(reload, &QAction::triggered, reloadStyle);
 
@@ -127,6 +132,7 @@ int main(int argc, char *argv[])
 	editor->setScene(scene);
 	editor->setStack(stack);
 	editor->setEditable(true);
+	internal_window = editor->internalWindow();
 
 	reloadStyle();
 	window.show();

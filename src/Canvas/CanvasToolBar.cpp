@@ -159,8 +159,8 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	m_styles.push_back(LabelType::BODY);
 	m_style->addItem("Label");
 	m_styles.push_back(LabelType::LABEL);
-	m_style->addItem("None");
-	m_styles.push_back(LabelType::NONE);
+	//m_style->addItem("None");
+	//m_styles.push_back(LabelType::NONE);
 	color_rows->addWidget(m_style);
 
 	m_delete = new QToolButton(this);
@@ -194,15 +194,19 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	font_rows->addLayout(mod_row);
 	m_bold = new QToolButton(this);
 	m_bold->setIcon(i_bold);
+	m_bold->setCheckable(true);
 	mod_row->addWidget(m_bold, 0, Qt::AlignLeft);
 	m_italicize = new QToolButton(this);
 	m_italicize->setIcon(i_ital);
+	m_italicize->setCheckable(true);
 	mod_row->addWidget(m_italicize, 0, Qt::AlignLeft);
 	m_underline = new QToolButton(this);
 	m_underline->setIcon(i_uline);
+	m_underline->setCheckable(true);
 	mod_row->addWidget(m_underline, 0, Qt::AlignLeft);
 	m_strikeout = new QToolButton(this);
 	m_strikeout->setIcon(i_strike);
+	m_strikeout->setCheckable(true);
 	mod_row->addWidget(m_strikeout, 0, Qt::AlignLeft);
 	m_foreground = new QToolButton(this);
 	m_foreground->setIcon(i_color_text);
