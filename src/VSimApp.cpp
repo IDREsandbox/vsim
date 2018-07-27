@@ -298,6 +298,11 @@ NarrativeControl * VSimApp::narrativeControl() const
 	return m_narrative_control;
 }
 
+NarrativePlayer * VSimApp::narrativePlayer() const
+{
+	return m_narrative_player;
+}
+
 ERControl * VSimApp::erControl() const
 {
 	return m_er_control;

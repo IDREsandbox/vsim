@@ -114,6 +114,7 @@ public:
 	VSimRoot *getRoot() const;
 	//OSGYearModel *modelTable() const;
 	NarrativeControl *narrativeControl() const;
+	NarrativePlayer *narrativePlayer() const;
 	ERControl *erControl() const;
 	NavigationControl *navigationControl() const;
 	TimeManager *timeManager() const;

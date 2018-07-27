@@ -66,6 +66,7 @@ protected: // event stuff
 	virtual void dragEnterEvent(QDragEnterEvent *event) override;
 	virtual void dropEvent(QDropEvent *event) override;
 	virtual void resizeEvent(QResizeEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
 
 	void updatePositions();
 

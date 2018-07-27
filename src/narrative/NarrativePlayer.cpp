@@ -64,6 +64,14 @@ NarrativePlayer::NarrativePlayer(VSimApp *app,
 			m_paused = false;
 		}
 
+		if (state == VSimApp::PLAY_WAIT_CLICK) {
+			// set status?
+			m_app->setStatusMessage("Click to continue");
+		}
+		if (state == VSimApp::PLAY_END) {
+			m_app->setStatusMessage("Narrative finished");
+		}
+
 		// stop events
 		if (VSimApp::isPlaying(old) && !VSimApp::isPlaying(state)) {
 			stop();
@@ -87,12 +95,19 @@ void NarrativePlayer::play()
 		return;
 	}
 
-	// advance
-	if (m_app->isPlaying()) {
-		//next();
+	if (m_app->state() == VSimApp::PLAY_FLYING) {
+		// go to the currently selected node
 		toAtNode();
 		return;
 	}
+
+	if (m_app->state() == VSimApp::PLAY_WAIT_CLICK) {
+		// advance
+		next();
+		return;
+	}
+
+	// not playing -> playing
 
 	// try to start playing something
 

@@ -567,6 +567,23 @@ void MainWindow::resizeEvent(QResizeEvent * event)
 	updatePositions();
 }
 
+void MainWindow::mousePressEvent(QMouseEvent * event)
+{
+	if (event->button() == Qt::MouseButton::RightButton
+		&& m_app->isFlying()
+		|| m_app->state() == VSimApp::State::EDIT_ERS) {
+		m_app->erControl()->closeAll();
+	}
+	else if (event->button() == Qt::MouseButton::LeftButton
+		&&
+		(m_app->state() == VSimApp::PLAY_WAIT_CLICK)
+		//|| m_app->state() == VSimApp::PLAY_TRANSITION
+		//|| m_app->state() == VSimApp::PLAY_WAIT_TIME
+		){
+		m_app->narrativePlayer()->next();
+	}
+}
+
 void MainWindow::updatePositions()
 {
 	// Place edit buttons
