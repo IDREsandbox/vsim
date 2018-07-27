@@ -44,6 +44,9 @@ namespace Util
 
 	// convert QColor to "background:rgba(r, g, b, a);"
 	QString colorToStylesheet(QColor);
+	// convert QColor to "background:rgba(r, g, b, a); color:rgb(r, g, b);"
+	// where the text color is chosen to contrast the background
+	QString colorToContrastStyleSheet(QColor);
 
 	QString setToString(std::set<int> set);
 
@@ -145,6 +148,21 @@ namespace Util
 
 	bool spheresOverlap(const osg::Vec3f &p1, float r1, const osg::Vec3f &p2, float r2);
 
+	// disconnects current connection old_watched, reconnects with new_watched
+	// add destroyed safety
+	// returns the new category
+	template <class T>
+	T *reconnect(QObject *listener, T **old_watched, T *new_watched) {
+		if (*old_watched) QObject::disconnect(*old_watched, 0, listener, 0);
+
+		*old_watched = new_watched;
+		if (new_watched == nullptr) return new_watched;
+
+		QObject::connect(new_watched, &QObject::destroyed, listener, [listener, old_watched]() {
+			*old_watched = nullptr;
+		});
+		return new_watched;
+	}
 }
 
 #endif

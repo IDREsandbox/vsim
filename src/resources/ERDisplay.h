@@ -10,6 +10,7 @@ class ERDisplay : public QFrame {
 public:
 	ERDisplay(QWidget *parent = nullptr);
 	void setInfo(EResource* er);
+	void setCategory(ECategory *cat);
 	void setCount(int n);
 
 	//public slots:
@@ -30,6 +31,7 @@ protected:
 private:
 	Ui::ERDisplay ui;
 	EResource* m_er;
+	ECategory *m_cat;
 };
 
 #endif // ERDISPLAY_H

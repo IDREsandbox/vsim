@@ -34,20 +34,26 @@ QToolButton:disabled {
 	background: rgba(0,0,0,100);
 }
 
+#erDisplay QScrollBar::horizontal,
 #mainSplitter QScrollBar::horizontal {
     background: rgb(50, 50, 50);
     height: 15px;
 	margin: 0px;
 }
+#erDisplay QScrollBar::handle:horizontal,
 #mainSplitter QScrollBar::handle:horizontal {
     background: #777777;
     min-width: 20px;
 	margin: 3px;
 }
+#erDisplay QScrollBar::add-page:horizontal,
+#erDisplay QScrollBar::sub-page:horizontal,
 #mainSplitter QScrollBar::add-line:horizontal,
 #mainSplitter QScrollBar::sub-line:horizontal {
 width: 0px;
 }
+#erDisplay QScrollBar::add-page:horizontal,
+#erDisplay QScrollBar::sub-page:horizontal,
 #mainSplitter QScrollBar::add-page:horizontal,
 #mainSplitter QScrollBar::sub-page:horizontal {
 	background: none;

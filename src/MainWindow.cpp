@@ -109,14 +109,36 @@ MainWindow::MainWindow(QWidget *parent)
 
 	ui->mainSplitter->setMouseTracking(true);
 
+	QGridLayout *middle_layout = new QGridLayout(ui->middleSpacer);
+
 	// splitter mask
 	connect(ui->mainSplitter, &QSplitter::splitterMoved, this, &MainWindow::updatePositions);
 
 	// er display
+
 	m_er_display = new ERDisplay(ui->root);
 	//m_er_display->setGeometry(10, 10, 265, 251);
 	m_er_display->setObjectName("erDisplay");
 	m_er_display->hide();
+
+	// Using layouts would be perfect. unfortunately it blocks out mouse events
+	// it also sets parent, so things like hidden break it too
+
+	//QVBoxLayout *er_display_layout = new QVBoxLayout();
+	//middle_layout->addLayout(er_display_layout, 0, 0);
+	//er_display_layout->addSpacing(100);
+	//er_display_layout->addWidget(m_er_display, 1, Qt::AlignLeft);
+	//m_er_display->setMaximumWidth(260);
+	//er_display_layout->setMargin(20);
+	//er_display_layout->addSpacing(100);
+
+	// tests:
+	// WA_TransparentForMouseEvents - blocks mouse events for er display
+	// hidden - hidden
+	//ui->middleSpacer->setAttribute(Qt::WA_TransparentForMouseEvents);
+	//ui->middleSpacer->show();
+	//ui->middleSpacer->setStyleSheet("background-color:rgba(255, 0, 0, 100);");
+
 
 	// er filter widget
 	//QWidget *filter_area_padding_layout = new QGridLayout();
@@ -559,15 +581,25 @@ void MainWindow::updatePositions()
 	// space (290,300)
 	// bottom top (300)
 	int space = 10;
-	int bottom_top = ui->bottomBar->y();
+	int bottom_top = ui->middleSpacer->height() + top;
 	int filter_top = bottom_top - m_er_filter_area->height() - space;
 	m_er_filter_area->move(space, filter_top);
 
 	// Place the ER popup area
 	// vertical center
-	int mid = m_osg_widget->height() / 2;
-	int popup_top = mid - m_er_display->height() / 2;
-	m_er_display->move(10, popup_top);
+	//int mid = m_osg_widget->height() / 2;
+	//int popup_top = mid - m_er_display->height() / 2;
+	//m_er_display->move(10, popup_top);
+
+	int er_margin_left = 35;
+	int er_margin = 50;
+	int er_width = 270;
+	QRect er_rect = QRect();
+	er_rect.setLeft(er_margin_left);
+	er_rect.setWidth(er_width);
+	er_rect.setTop(top + er_margin);
+	er_rect.setBottom(bottom_top - er_margin);
+	m_er_display->setGeometry(er_rect);
 
 	// place the toolbar where the middle spacer is
 	QWidget *middle = ui->middleSpacer;

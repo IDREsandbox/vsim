@@ -184,6 +184,11 @@ QString Util::colorToStylesheet(QColor color)
 	return style;
 }
 
+QString Util::colorToContrastStyleSheet(QColor)
+{
+	return QString();
+}
+
 QString Util::setToString(std::set<int> set)
 {
 	QString str = "";
