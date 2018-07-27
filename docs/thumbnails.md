@@ -1,3 +1,5 @@
+This is old garbage. Thumbnails are rendered more tightly with OSG now and are based on framebuffers.
+
 For some reason rendering thumbnails is harder and slower than I thought
 
 issues:

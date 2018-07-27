@@ -1,5 +1,25 @@
 # Changelog
 
+## 2018-7-27
+
+### Added
+
+- Switches
+
+### Touchups
+
+- ER display bigger
+- ER display shows category, removed author
+- Right click anywhere clears all ERs
+- Branding resizes with top/bottom bars (experiment)
+- Ground mode enables height collision test, added ground mode
+- Canvas editing text button highlighting (bold, italic, etc)
+- Rearranged canvas toolbar
+- Canvas item minimum border width 1, 0 means no border
+- Narrative author shows elipses if too long
+- Added narrative player pausing (p)
+- Left click works with narrative player "click to continue"
+
 ## 2018-7-20
 
 - Reworked thumbnails

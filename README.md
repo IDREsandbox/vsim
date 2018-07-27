@@ -10,4 +10,4 @@
 
 [code notes](docs/code.md)
 
-[pretty graphs](docs/diagrams.md)
+[diagrams](docs/diagrams.md)
