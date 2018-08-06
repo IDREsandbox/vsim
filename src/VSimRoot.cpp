@@ -9,8 +9,8 @@
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative.h"
-#include "ModelGroup.h"
-#include "Model.h"
+#include "Model/ModelGroup.h"
+#include "Model/Model.h"
 #include "resources/EResourceGroup.h"
 #include "resources/EResource.h"
 #include "resources/ECategoryGroup.h"
@@ -131,9 +131,9 @@ void VSimRoot::debug()
 		qInfo() << "Category" << i << QString::fromStdString(cat->getCategoryName());
 	}
 
-	qInfo() << "Models:" << m_models->size();
-	for (uint i = 0; i < m_models->size(); i++) {
-		qInfo() << "Model" << QString::fromStdString(m_models->child(i)->name());
+	qInfo() << "Models:" << m_models->group()->size();
+	for (uint i = 0; i < m_models->group()->size(); i++) {
+		qInfo() << "Model" << QString::fromStdString(m_models->group()->child(i)->name());
 	}
 }
 
@@ -188,9 +188,9 @@ void VSimRoot::loadOld(osg::Group * old_group)
 
 		// whatever's left just add to model
 		auto new_model = std::make_shared<Model>();
-		new_model->setNode(node);
 		new_model->setName(node->getName());
-		m_models->append(new_model);
+		new_model->embedModel(node);
+		m_models->addModel(new_model);
 	}
 }
 

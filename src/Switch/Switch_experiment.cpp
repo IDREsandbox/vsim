@@ -23,13 +23,7 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
-	QString path = "C:/Users/David/Google Drive/vsim/work/switches/MultipleSwitches.flt";
-
 	QMainWindow window;
-
-	loaded = osgDB::readRefNodeFile(path.toStdString());
-
-	qDebug() << "loaded ok?" << (bool)loaded;
 
 	auto *mb = new QMenuBar(&window);
 	window.setMenuBar(mb);

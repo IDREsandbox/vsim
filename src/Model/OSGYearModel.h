@@ -14,9 +14,6 @@ class OSGYearModel : public OSGGroupModel {
 	Q_OBJECT
 public:
 	OSGYearModel(QObject *parent = nullptr);
-	//virtual void setGroup(Group *group) override;
-
-	//void setModel(Model *model);
 
 	enum Column {
 		NAME,

@@ -5,7 +5,7 @@
 
 //#include "resources/ERFilterSortProxy.h"
 #include "CheckableListProxy.h"
-#include "EditDeleteDelegate.h"
+#include "Gui/EditDeleteDelegate.h"
 
 ERFilterArea::ERFilterArea(QWidget *parent)
 	: QFrame(parent),

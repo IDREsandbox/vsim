@@ -23,20 +23,23 @@ public:
 	void applyTime(osg::Node *node = nullptr);
 
 	// TODO:
-	//void addChild(osg::Group *group, osg::Node *node, size_t index);
-	//void removeChild(osg::Group *group, size_t index);
+	void addChild(osg::Group *group, osg::Node *node, size_t index);
+	void removeChild(osg::Group *group, size_t index);
+	void notifyChanged(osg::Node *node);
 
 signals:
 	void sNodeYearChanged(osg::Node *node, int year, bool begin);
 
-	//void sAboutToInsertChild(osg::Group *group, size_t index);
-	//void sInsertedChild(osg::Group *group, size_t index);
-	//void sAboutToRemoveChildren(osg::Group *group, size_t index, size_t count);
-	//void sRemovedChildren(osg::Group *group, size_t index, size_t count);
+	void sAboutToInsertChild(osg::Group *group, size_t index);
+	void sInsertedChild(osg::Group *group, size_t index);
+	void sAboutToRemoveChild(osg::Group *group, size_t index);
+	void sRemovedChild(osg::Group *group, size_t index);
 
 	// just use reset for now
 	void sAboutToReset();
 	void sReset();
+
+	void sChanged(osg::Node *node);
 
 private:
 	osg::ref_ptr<osg::Node> m_root;

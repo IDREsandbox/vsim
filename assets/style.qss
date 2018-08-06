@@ -15,8 +15,9 @@ HorizontalScrollBox
     background: rgba(0, 0, 0, 90);
 	color: rgb(255, 255, 255);
 }
-QSplitter::handle {
-	background: rgba(0,0,0,140);
+#mainSplitter::handle,
+#bottomBar QSplitter::handle {
+	background: rgb(4, 0, 39);
 }
 
 #mainSplitter

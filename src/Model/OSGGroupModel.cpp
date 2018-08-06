@@ -123,6 +123,11 @@ bool OSGGroupModel::setData(const QModelIndex & index, const QVariant & value, i
 	return false;
 }
 
+void OSGGroupModel::setNodeInternal(osg::Node * node)
+{
+	m_node = node;
+}
+
 void OSGGroupModel::setNode(osg::Node * group)
 {
 	beginResetModel();

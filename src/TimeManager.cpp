@@ -1,10 +1,10 @@
 ﻿#include "TimeManager.h"
 
-#include "ModelGroup.h"
-#include "Model.h"
+#include "Model/ModelGroup.h"
+#include "Model/Model.h"
+#include "Model/OSGNodeWrapper.h"
 #include "VSimApp.h"
 #include "VSimRoot.h"
-#include "OSGNodeWrapper.h"
 
 TimeManager::TimeManager(VSimApp *app, QObject *parent)
 	: QObject(parent),

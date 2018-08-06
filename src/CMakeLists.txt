@@ -2,6 +2,7 @@
 add_subdirectory(Core)
 add_subdirectory(Gui)
 add_subdirectory(Canvas)
+add_subdirectory(Model)
 add_subdirectory(Switch)
 
 file(GLOB_RECURSE Deprecated_src
@@ -56,23 +57,11 @@ set(VSimRoot_src
   VSimRoot.h
   VSimSerializer.cpp
   VSimSerializer.h
-  Model.cpp
-  Model.h
-  ModelGroup.cpp
-  ModelGroup.h
-  OSGGroupModel.cpp
-  OSGGroupModel.h
-  OSGNodeWrapper.cpp
-  OSGNodeWrapper.h
-  OSGYearModel.cpp
-  OSGYearModel.h
-  FileUtil.cpp
-  FileUtil.h
   ${vsim_fb_h}
   ${settings_fb_h}
 )
 add_library(VSimRoot_obj ${VSimRoot_src})
-target_link_libraries(VSimRoot_obj Core_obj Deprecated_obj NarrativeModel_obj ERModel_obj)
+target_link_libraries(VSimRoot_obj Core_obj Deprecated_obj NarrativeModel_obj ERModel_obj Model_obj)
 
 set(VSim_src
   resources/ECategoryControl.cpp
@@ -134,24 +123,17 @@ set(VSim_src
   DisplaySettingsDialog.cpp
   DisplaySettingsDialog.h
   DisplaySettingsDialog.ui
-  EditDeleteDelegate.cpp
-  EditDeleteDelegate.h
   ERBar.cpp
   ERBar.h
   ERBar.ui
   FastScrollBox.cpp
   FastScrollBox.h
-  FileUtil.cpp
-  FileUtil.h
   FirstPersonManipulator.cpp
   FirstPersonManipulator.h
   FlightManipulator.cpp
   FlightManipulator.h
   FocusFilter.cpp
   FocusFilter.h
-  FutureDialog.cpp
-  FutureDialog.h
-  FutureDialog.ui
   GroupScrollBox.inl
   GroupScrollBox.h
   HistoryWindow.cpp
@@ -165,10 +147,6 @@ set(VSim_src
   MainWindow.ui
   MainWindowTopBar.cpp
   MainWindowTopBar.h
-  ModelInformationDialog.cpp
-  ModelInformationDialog.h
-  ModelOutliner.cpp
-  ModelOutliner.h
   mrichtextedit.cpp
   mrichtextedit.h
   mtextedit.cpp
@@ -191,8 +169,6 @@ set(VSim_src
   SelectionStack.h
   SimpleCameraManipulator.cpp
   SimpleCameraManipulator.h
-  SimpleWorker.cpp
-  SimpleWorker.h
   StackObject.inl
   StackObject.h
   StatsWindow.cpp
@@ -206,7 +182,7 @@ set(VSim_src
   VSimApp.h
 )
 add_library(VSim_obj ${VSim_src})
-target_link_libraries(VSim_obj VSimRoot_obj Switch_obj Gui_obj)
+target_link_libraries(VSim_obj VSimRoot_obj Switch_obj Gui_obj Model_obj)
 
 file(GLOB_RECURSE oldSerializers
   */Serializer*.cpp
@@ -215,7 +191,7 @@ file(GLOB_RECURSE oldSerializers
 add_executable(VSim main.cpp ${oldSerializers})
 # set_target_properties(VSim PROPERTIES
 #   VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
-target_link_libraries(VSim VSim_obj Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Concurrent ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(VSim VSim_obj Qt5::Widgets Qt5::Core Qt5::Gui ${OPENSCENEGRAPH_LIBRARIES})
 
 if (WIN32)
   add_dependencies(VSim CopyAssets)

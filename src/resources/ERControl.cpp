@@ -261,7 +261,7 @@ void ERControl::newER()
 	QWidget *focus = QApplication::focusWidget();
 	bool start_global = Util::isDescendant(m_global_box, focus);
 
-	ERDialog dlg(m_category_control, m_app->getCurrentDirectory().c_str());
+	ERDialog dlg(m_category_control, m_app->getCurrentDirectory());
 	dlg.setGlobal(start_global);
 
 	int result = dlg.exec();
@@ -320,7 +320,7 @@ void ERControl::editERInfo()
 		return;
 	}
 
-	ERDialog dlg(m_category_control, m_app->getCurrentDirectory().c_str());
+	ERDialog dlg(m_category_control, m_app->getCurrentDirectory());
 
 	dlg.init(resource);
 
@@ -384,14 +384,9 @@ void ERControl::openResource(const EResource *res) {
 	if (!res) return;
 	auto type = res->getERType();
 	if (type == EResource::FILE) {
-		QString abs;
 		QString path = res->getResourcePath().c_str();
-		if (QDir::isRelativePath(path)) {
-			abs = QString::fromStdString(m_app->getCurrentDirectory()) + "/" + path;
-		}
-		else {
-			abs = path;
-		}
+		QString abs = Util::resolvePath(m_app->getCurrentDirectory(), path);
+
 		qInfo() << "Attempting to open file:" << abs;
 		QDesktopServices::openUrl(QUrl::fromLocalFile(abs));
 	}

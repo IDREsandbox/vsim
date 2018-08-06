@@ -20,11 +20,6 @@ enable_testing()
 # cmake auto-linking policy with qtmain
 cmake_policy(SET CMP0020 NEW)
 
-# qt flags
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-# set(CMAKE_AUTORCC ON)
-
 set(osgComponents 
   osg
   osgAnimation
@@ -55,6 +50,15 @@ include_directories(${Qt5Widgets_INCLUDE_DIRS} ${Qt5Concurrent_INCLUDE_DIRS})
 include_directories(${Qt5Test_INCLUDE_DIRS})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Concurrent_INCLUDE_DIRS})
+
+# qt flags
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+# set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+# set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "autouic")
+set_property(GLOBAL PROPERTY AUTOGEN_BUILD_DIR "autogen")
+#message("GAUTOGEN:\n" ${gautogen})
+# set(CMAKE_AUTORCC ON)
 
 # # if you want to print everything
 # get_cmake_property(_variableNames VARIABLES)
@@ -119,6 +123,12 @@ function(vsim_add_experiment name src libs)
   target_link_libraries(${name} ${libs})
   set_target_properties(${name} PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+endfunction()
+
+# if you have .ui files in a library
+# then use this to propagate the include dirs
+function(vsim_include_uic target)
+  target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/${target}_autogen/include_$<CONFIG>")
 endfunction()
 
 # puts all the tests and things in build/Debug

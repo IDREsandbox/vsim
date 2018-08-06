@@ -16,13 +16,12 @@ OSGYearModel::OSGYearModel(QObject *parent)
 
 void OSGYearModel::setBase(OSGNodeWrapper *base)
 {
-	// TODO: disconnect old base
-	m_base = base;
-
-	setNode(m_base->getRoot());
-
 	beginResetModel();
+	Util::reconnect(this, &m_base, base);
+	setNodeInternal(m_base->getRoot());
 	endResetModel();
+
+	if (!m_base) return;
 
 	// TODO: connect insertions
 	// TODO: connect removals
@@ -33,6 +32,7 @@ void OSGYearModel::setBase(OSGNodeWrapper *base)
 	});
 	connect(m_base, &OSGNodeWrapper::sReset, this,
 		[this]() {
+		setNodeInternal(m_base->getRoot());
 		endResetModel();
 	});
 	connect(m_base, &OSGNodeWrapper::sNodeYearChanged, this,
@@ -41,6 +41,29 @@ void OSGYearModel::setBase(OSGNodeWrapper *base)
 		QModelIndex index = indexOf(node, c);
 		if (!index.isValid()) return;
 		emit dataChanged(index, index, { Qt::DisplayRole, Qt::EditRole });
+	});
+	connect(m_base, &OSGNodeWrapper::sChanged, this,
+		[this](osg::Node *node) {
+		QModelIndex index = indexOf(node);
+		if (!index.isValid()) return;
+		emit dataChanged(index, index);
+	});
+	connect(m_base, &OSGNodeWrapper::sAboutToInsertChild, this,
+		[this](osg::Group *group, size_t i) {
+		beginInsertRows(indexOf(group), i, i);
+	});
+	connect(m_base, &OSGNodeWrapper::sInsertedChild, this,
+		[this]() {
+		endInsertRows();
+	});
+	connect(m_base, &OSGNodeWrapper::sAboutToRemoveChild, this,
+		[this](osg::Group *group, size_t i) {
+		QModelIndex idx = indexOf(group);
+		beginRemoveRows(indexOf(group), i, i);
+	});
+	connect(m_base, &OSGNodeWrapper::sRemovedChild, this,
+		[this]() {
+		endRemoveRows();
 	});
 }
 

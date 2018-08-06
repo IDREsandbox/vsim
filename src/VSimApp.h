@@ -105,11 +105,12 @@ public:
 
 	// current vsim working directory, based on the .vsim file location
 	// always absolute
-	std::string getCurrentDirectory() const;
+	// when current file is none, it uses exe dir
+	QString getCurrentDirectory() const;
 	
 	// absolute path to current file, or none
-	std::string getFileName() const;
-	void setFileName(const std::string &);
+	QString getCurrentFile() const;
+	void setCurrentFile(const QString &);
 
 	VSimRoot *getRoot() const;
 	//OSGYearModel *modelTable() const;
@@ -136,6 +137,8 @@ signals:
 	void sArrived();
 	void sInterrupted();
 
+	void sCurrentDirChanged(const QString &old_dir, const QString &new_dir);
+
 private:
 	void connectSwitchManager();
 
@@ -145,7 +148,7 @@ private:
 	QUndoStack *m_undo_stack;
 
 	std::string m_last_directory;
-	std::string m_filename;
+	QString m_current_file;
 	bool m_model_loaded;
 
 	QTimer *m_timer;

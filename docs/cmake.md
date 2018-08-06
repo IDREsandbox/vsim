@@ -118,8 +118,6 @@ VSim - main executable
 
 # Writing CMake
 
-Yeah yeah cmake is a big pain.
-
 ## How to copy a folder
 
 ex: assets

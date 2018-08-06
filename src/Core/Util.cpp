@@ -1,7 +1,7 @@
-#include <algorithm>
-#include <QDebug>
 #include "Util.h"
 
+#include <algorithm>
+#include <QDebug>
 #include <osg/Matrix>
 #include <osg/io_utils>
 #include <iostream>
@@ -9,6 +9,8 @@
 #include <regex>
 #include <unordered_set>
 #include <unordered_map>
+#include <QDir>
+#include <QUrl>
 
 // ext must be of the form "txt".
 std::string Util::addExtensionIfNotExist(const std::string& filename, const std::string& ext)
@@ -61,6 +63,29 @@ std::string Util::getFilename(const std::string & path)
 {
 	int endpath = path.find_last_of("\\/");
 	return path.substr(endpath + 1);
+}
+
+QString Util::resolvePath(const QString & path, const QString & base)
+{
+	QUrl pu(path);
+	if (pu.isRelative()) {
+		return QDir::cleanPath(QDir(base).filePath(path));
+	}
+
+	return path;
+}
+
+QString Util::fixRelativePath(const QString &path, const QString &old_base, const QString &new_base)
+{
+	if (!QUrl(path).isRelative()) return path;
+	QString full_path = Util::resolvePath(path, old_base);
+	QString new_path = QDir(new_base).relativeFilePath(full_path);
+	return new_path;
+}
+
+QString Util::absoluteDirOf(const QString & path)
+{
+	return QFileInfo(path).absoluteDir().absolutePath();
 }
 
 bool Util::mxdxyyToQDate(const std::string & str, QDate *out)
@@ -561,4 +586,13 @@ QString Util::osgMatrixToQString(osg::Matrix m)
 		if (i < 3) s.append("| ");
 	}
 	return s;
+}
+
+void Util::appendn(std::istream &in, std::string &buff, size_t n) {
+	// doesn't work
+	// buff.reserve(buff.size() + n);
+	// std::copy_n(std::istreambuf_iterator<char>(in), n, std::back_inserter(buff));
+	std::string s(n, '\0');
+	in.read(&s[0], n);
+	buff.append(s);
 }

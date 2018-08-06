@@ -14,7 +14,9 @@ OSGNodeWrapper::OSGNodeWrapper(QObject * parent)
 
 void OSGNodeWrapper::setRoot(osg::ref_ptr<osg::Node> node)
 {
+	emit sAboutToReset();
 	m_root = node;
+	emit sReset();
 }
 
 osg::Node *OSGNodeWrapper::getRoot() const
@@ -76,6 +78,29 @@ void OSGNodeWrapper::applyTime(osg::Node *node)
 	int year = 0;
 	if (m_time_enabled) year = m_year;
 	TimeMaskVisitor::touchRecursive(*m_root, year);
+}
+
+void OSGNodeWrapper::addChild(osg::Group * group, osg::Node * node, size_t index)
+{
+	//emit sAboutToReset();
+	emit sAboutToInsertChild(group, index);
+	group->insertChild(index, node);
+	TimeInitVisitor v(this); // check for T: start end
+	m_root->accept(v);
+	emit sInsertedChild(group, index);
+	//emit sReset();
+}
+
+void OSGNodeWrapper::removeChild(osg::Group * group, size_t index)
+{
+	emit sAboutToRemoveChild(group, index);
+	group->removeChild(index);
+	emit sRemovedChild(group, index);
+}
+
+void OSGNodeWrapper::notifyChanged(osg::Node * node)
+{
+	emit sChanged(node);
 }
 
 //void OSGNodeWrapper::addChild(osg::Group * group, osg::Node *node, index)

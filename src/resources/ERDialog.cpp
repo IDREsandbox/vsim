@@ -10,7 +10,7 @@
 #include "resources/ECategoryGroup.h"
 #include "resources/ECategoryControl.h"
 #include "resources/ECategoryModel.h"
-#include "EditDeleteDelegate.h"
+#include "Gui/EditDeleteDelegate.h"
 #include "Core/GroupModelTemplate.h"
 
 ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWidget * parent)

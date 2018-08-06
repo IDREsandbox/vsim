@@ -10,7 +10,7 @@
 
 class Model;
 class OSGNodeWrapper;
-class ModelGroup : public TGroup<Model> {
+class ModelGroup : public QObject {
 	Q_OBJECT
 public:
 	ModelGroup(QObject *parent = nullptr);
@@ -24,9 +24,16 @@ public:
 	// we don't have to copy them between threads
 	void copyReference(const ModelGroup &other);
 
+	void addModel(std::shared_ptr<Model> m);
+	void removeModel(Model *m);
+	void clear();
+
+	TGroup<Model> *group();
+	const TGroup<Model> *cgroup() const;
+
 	// node edit
 	// void setNodeYear(osg::Node *node, int year, bool begin);
-	void addNode(osg::Node *node, const std::string &path);
+	// void addNode(osg::Node *node, const std::string &path);
 
 	// applies node visitor to all models
 	void accept(osg::NodeVisitor &visitor);
@@ -52,6 +59,8 @@ signals:
 private:
 	osg::ref_ptr<osg::Group> m_root;
 	OSGNodeWrapper *m_root_wrapper;
+
+	TGroup<Model> *m_group;
 };
 
 //

@@ -43,6 +43,10 @@ public:
 	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
 protected:
+	// without the begin end
+	void setNodeInternal(osg::Node *node);
+
+protected:
 	osg::ref_ptr<osg::Node> m_node;
 	bool m_include_root;
 };

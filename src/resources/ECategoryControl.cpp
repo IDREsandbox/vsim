@@ -7,7 +7,7 @@
 #include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
 #include "resources/ECategoryModel.h"
-#include "EditDeleteDelegate.h"
+#include "Gui/EditDeleteDelegate.h"
 #include "CheckableListProxy.h"
 
 #include "resources/NewCatDialog.h"

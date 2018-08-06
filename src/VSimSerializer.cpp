@@ -5,28 +5,33 @@
 #include <iterator>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
+#include <unordered_set>
 
 #include "Canvas/CanvasSerializer.h"
 #include "NarrativeSerializer.h"
 #include "ERSerializer.h"
 #include "VSimRoot.h"
-#include "ModelGroup.h"
-#include "Model.h"
+#include "Model/ModelGroup.h"
+#include "Model/Model.h"
+#include "Model/ModelSerializer.h"
+#include "Core/Util.h"
+
+#include "narrative/NarrativeGroup.h"
+#include "narrative/Narrative.h"
+#include "resources/EResourceGroup.h"
+#include "resources/EResource.h"
+#include "resources/ECategoryGroup.h"
+#include "resources/ECategory.h"
+#include "resources/ERControl.h"
+#include "deprecated/narrative/NarrativeOld.h"
+#include "deprecated/resources/EResourcesList.h"
+#include "deprecated/resources/EResourcesCategory.h"
 
 namespace fb = VSim::FlatBuffers;
 
-void appendn(std::istream &in, std::string &buff, size_t n) {
-	// doesn't work
-	// buff.reserve(buff.size() + n);
-	// std::copy_n(std::istreambuf_iterator<char>(in), n, std::back_inserter(buff));
-	std::string s(n, '\0');
-	in.read(&s[0], n);
-	buff.append(s);
-}
-
-bool VSimSerializer::readStreamRobust(std::istream & in, VSimRoot *root)
+bool VSimSerializer::readStreamRobust(std::istream & in, VSimRoot *root, const Params &p)
 {
-	bool ok = readStream(in, root);
+	bool ok = readStream(in, root, p);
 	if (ok) return true; // new version success
 
 	// rewind
@@ -34,7 +39,7 @@ bool VSimSerializer::readStreamRobust(std::istream & in, VSimRoot *root)
 	in.seekg(0);
 
 	// try reading osgb
-	osg::ref_ptr<osg::Node> node = readOSGB(in, false, false);
+	osg::ref_ptr<osg::Node> node = ModelSerializer::readOSGB(in, false, false);
 	if (node == nullptr) return false;
 
 	osg::ref_ptr<osg::Group> group = node->asGroup();
@@ -45,7 +50,7 @@ bool VSimSerializer::readStreamRobust(std::istream & in, VSimRoot *root)
 	return true;
 }
 
-bool VSimSerializer::readStream(std::istream & in, VSimRoot *root)
+bool VSimSerializer::readStream(std::istream & in, VSimRoot *root, const Params &p)
 {
 	// read header
 	// V S I M x x x x
@@ -60,11 +65,11 @@ bool VSimSerializer::readStream(std::istream & in, VSimRoot *root)
 
 	// read in flatbuffer size
 	flatbuffers::uoffset_t fb_size;
-	appendn(in, buffer, sizeof(fb_size));
+	Util::appendn(in, buffer, sizeof(fb_size));
 	fb_size = flatbuffers::ReadScalar<flatbuffers::uoffset_t>(buffer.c_str());
 
 	// read the rest
-	appendn(in, buffer, fb_size);
+	Util::appendn(in, buffer, fb_size);
 
 	// construct & validate flatbuffer
 	// TODO: flatbuffers should eventually have VerifySizePrefixedRoot
@@ -77,15 +82,15 @@ bool VSimSerializer::readStream(std::istream & in, VSimRoot *root)
 	if (!fb_ok) return false;
 
 	// now do business
-	readRoot(fb_root, root);
+	readRoot(fb_root, root, p);
 
 	// read models
-	readModels(fb_root->models(), root->models(), in);
+	ModelSerializer::readModels(fb_root->models(), root->models(), in, p.new_base);
 
 	return true;
 }
 
-bool VSimSerializer::writeStream(std::ostream & out, const VSimRoot * root)
+bool VSimSerializer::writeStream(std::ostream & out, const VSimRoot * root, const Params &p)
 {
 	// read header
 	// v s i m x x x x
@@ -97,7 +102,7 @@ bool VSimSerializer::writeStream(std::ostream & out, const VSimRoot * root)
 
 	// build flatbuffer
 	flatbuffers::FlatBufferBuilder builder;
-	auto o_root = createRoot(&builder, root, model_buffer);
+	auto o_root = createRoot(&builder, root, model_buffer, p);
 	builder.FinishSizePrefixed(o_root, fb::RootIdentifier());
 	// TODO: when flatbuffer updates - fb::FinishRootSizePrefixed();
 
@@ -117,128 +122,7 @@ bool VSimSerializer::writeStream(std::ostream & out, const VSimRoot * root)
 	return true;
 }
 
-osg::ref_ptr<osg::Node> VSimSerializer::readOSGB(std::istream & in, bool ascii, bool zlib)
-{
-	osgDB::ReaderWriter *rw = osgDB::Registry::instance()->getReaderWriterForExtension("osgb");
-	osg::ref_ptr<osgDB::Options> options = new osgDB::Options;
-	if (ascii) options->setPluginStringData("fileType", "Ascii");
-	if (zlib) options->setPluginStringData("Compressor", "zlib");
-	options->setPluginStringData("WriteImageHint", "IncludeData");
-
-	osg::ref_ptr<osg::Node> node;
-	if (!rw) {
-		//QMessageBox::warning(m_window, "Load Error", "Error creating osgb reader " + QString::fromStdString(filename));
-		qWarning() << "Error creating osgb reader";
-		return nullptr;
-	}
-	osgDB::ReaderWriter::ReadResult result = rw->readNode(in, options);
-	if (result.success()) {
-		node = result.takeNode();
-	}
-	else {
-		//QMessageBox::warning(m_window, "Load Error", "Error converting file to osg nodes " + QString::fromStdString(filename));
-		qWarning() << "Error reading node";
-		return nullptr;
-	}
-	return node;
-}
-
-size_t VSimSerializer::writeOSGB(std::ostream & out, osg::Node * node, bool ascii, bool zlib)
-{
-	osgDB::ReaderWriter *rw = osgDB::Registry::instance()->getReaderWriterForExtension("osgb");
-	osg::ref_ptr<osgDB::Options> options = new osgDB::Options;
-	if (ascii) options->setPluginStringData("fileType", "Ascii");
-	if (zlib) options->setPluginStringData("Compressor", "zlib");
-	options->setPluginStringData("WriteImageHint", "IncludeData");
-
-	size_t before = out.tellp();
-	if (!rw) {
-		qWarning() << "Error creating osgb writer";
-		return 0;
-	}
-	auto result = rw->writeNode(*node, out, options);
-	if (result.success()) {
-	}
-	else {
-		qWarning() << "Error writing osg nodes";
-		return 0;
-	}
-	size_t after = out.tellp();
-	size_t length = after - before;
-	return length; // apparently osg doesn't return sizes...
-}
-
-void VSimSerializer::readModels(const VSim::FlatBuffers::ModelTable *buffer,
-	ModelGroup *models, std::istream &in)
-{
-	if (!buffer) return;
-	auto v_models = buffer->models();
-	if (!v_models) return;
-	for (auto fb_model : *v_models) {
-		auto model = std::make_shared<Model>();
-
-		bool ascii = fb_model->ascii();
-		bool zlib = fb_model->zlib();
-		std::string format = fb_model->format()->str();
-		size_t size = fb_model->size();
-		// bool external = fb_model->external();
-		if (fb_model->name()) model->setName(fb_model->name()->str());
-		if (fb_model->path()) model->setPath(fb_model->path()->str());
-
-		// read in size bytes, to use as a size limit
-		std::string buffer;
-		appendn(in, buffer, size);
-		std::stringstream ss;
-		ss << buffer;
-
-		osg::ref_ptr<osg::Node> node;
-		// read vsim
-		if (format == "osgb") {
-			node = readOSGB(ss, ascii, zlib);
-		}
-		if (!node) continue;
-
-		model->setNode(node);
-		models->append(model);
-	}
-}
-
-flatbuffers::Offset<fb::ModelTable>
-	VSimSerializer::createModels(flatbuffers::FlatBufferBuilder *builder,
-		const ModelGroup *model_group, std::ostream &model_data)
-{
-	// build models
-	std::vector<flatbuffers::Offset<fb::Model>> v_models;
-	for (size_t i = 0; i < model_group->size(); i++) {
-		auto model = model_group->child(i);
-		auto o_format = builder->CreateString("osgb");
-		auto o_name = builder->CreateString(model->name());
-
-		bool ascii = false;
-		bool zlib = false;
-
-		// write osg stuff
-		osg::Node *node = model->node();
-		if (!node) continue;
-		size_t size = writeOSGB(model_data, node, ascii, zlib);
-
-		fb::ModelBuilder b_model(*builder);
-		b_model.add_ascii(ascii);
-		b_model.add_zlib(zlib);
-		b_model.add_size(size);
-		b_model.add_format(o_format);
-		//b_model.add_external();
-		auto o_model = b_model.Finish();
-		v_models.push_back(o_model);
-	}
-	auto o_models = builder->CreateVector(v_models);
-
-	fb::ModelTableBuilder b_table(*builder);
-	b_table.add_models(o_models);
-	return b_table.Finish();
-}
-
-void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer, VSimRoot *root)
+void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer, VSimRoot *root, const Params &p)
 {
 	NarrativeGroup *nars = root->narratives();
 	EResourceGroup *ers = root->resources();
@@ -263,12 +147,14 @@ void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer, VSimRoot *r
 
 flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
 	flatbuffers::FlatBufferBuilder * builder, const VSimRoot * root,
-	std::ostream &model_data)
+	std::ostream &model_data,
+	const Params &p)
 {
 	auto o_version = builder->CreateString("2.0.0");
 	auto o_nars = NarrativeSerializer::createNarrativeTable(builder, root->narratives());
 	auto o_ers = ERSerializer::createERTable(builder, root->resources());
-	auto o_models = createModels(builder, root->models(), model_data);
+	auto o_models = ModelSerializer::createModels(builder, root->models(), model_data,
+		p.old_base, p.new_base);
 	auto o_settings = fb::CreateSettings(*builder, root->settings());
 	auto o_branding = CanvasSerializer::createCanvas(builder, root->branding());
 
@@ -282,4 +168,153 @@ flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
 	auto o_root = b_root.Finish();
 
 	return o_root;
+}
+
+
+bool VSimSerializer::readVSimFile(const std::string & path, VSimRoot * root, const Params &p)
+{
+	std::ifstream in(path, std::ios::binary);
+	if (!in.good()) {
+		return false;
+	}
+	return VSimSerializer::readStreamRobust(in, root, p);
+}
+
+bool VSimSerializer::writeVSimFile(const std::string & path, const VSimRoot * root, const Params &p)
+{
+	std::ofstream out(path, std::ios::binary);
+	if (!out.good()) {
+		return false;
+	}
+	return VSimSerializer::writeStream(out, root, p);
+}
+
+bool VSimSerializer::importModel(const std::string & path, VSimRoot * root)
+{
+	return false;
+}
+
+bool VSimSerializer::importNarrativesStream(std::istream &in, NarrativeGroup *group)
+{
+	// read into buffer
+	std::stringstream ss;
+	ss << in.rdbuf();
+	std::string s = ss.str();
+	const uint8_t *buf = reinterpret_cast<const uint8_t*>(s.c_str());
+
+	bool fb_match = fb::VerifyNarrativeTableBuffer(flatbuffers::Verifier(buf, s.length()));
+	if (fb_match) {
+		// reading flatbuffers
+		const fb::NarrativeTable *fb_root = fb::GetNarrativeTable(s.c_str());
+		NarrativeSerializer::readNarrativeTable(fb_root, group);
+		return true;
+	}
+
+	// trying to read old stuff
+	osg::ref_ptr<osg::Node> node = ModelSerializer::readOSGB(ss, false, false);
+	if (!node) {
+		qWarning() << "failed to load narrative file, not flatbuffer or osg";
+		return false;
+	}
+	// try group, try narrative
+	NarrativeOld *old = dynamic_cast<NarrativeOld*>(node.get());
+	if (old) {
+		auto nar = std::make_shared<Narrative>();
+		nar->loadOld(old);
+		group->append(nar);
+		return true;
+	}
+	return false;
+}
+
+bool VSimSerializer::exportNarrativesStream(std::ostream &out, const NarrativeGroup *group,
+	const std::set<size_t> &selection)
+{
+	if (!out.good()) {
+		return false;
+	}
+
+	// make a new group w/ copy of narratives
+	NarrativeGroup g;
+	for (auto i : selection) {
+		auto nar = group->childShared(i);
+		if (!nar) continue;
+		g.append(nar);
+	}
+
+	flatbuffers::FlatBufferBuilder builder;
+	auto o_table = NarrativeSerializer::createNarrativeTable(&builder, &g);
+	fb::FinishNarrativeTableBuffer(builder, o_table);
+
+	const char *buf = reinterpret_cast<const char*>(builder.GetBufferPointer());
+	out.write(buf, builder.GetSize());
+
+	return out.good();
+}
+
+bool VSimSerializer::importEResources(std::istream &in, EResourceGroup *group)
+{
+	// read into buffer
+	std::stringstream ss;
+	ss << in.rdbuf();
+	std::string s = ss.str();
+	const uint8_t *buf = reinterpret_cast<const uint8_t*>(s.c_str());
+
+	bool fb_match = fb::VerifyERTableBuffer(flatbuffers::Verifier(buf, s.length()));
+	if (fb_match) {
+		// reading flatbuffers
+		const fb::ERTable *fb_root = fb::GetERTable(s.c_str());
+		ERSerializer::readERTable(fb_root, group);
+		return true;
+	}
+
+	// trying to read old stuff
+	osg::ref_ptr<osg::Node> node = ModelSerializer::readOSGB(ss, false, false);
+	if (!node) {
+		qWarning() << "failed to load resource file";
+		return false;
+	}
+	// try group, try narrative
+	EResourcesList *old = dynamic_cast<EResourcesList*>(node.get());
+	if (old) {
+		qInfo() << "loaded old eresourceslist";
+		group->loadOld(old);
+		return true;
+	}
+
+	// failure
+	return false;
+}
+
+bool VSimSerializer::exportEResources(std::ostream &out, const EResourceGroup * group,
+	const std::set<size_t>& selection)
+{
+	if (!out.good()) {
+		return false;
+	}
+
+	// make a new group w/ copy of narratives
+	EResourceGroup g;
+	std::unordered_set<ECategory*> cats_added; // already has 
+	for (auto i : selection) {
+		auto res = group->childShared(i);
+		if (!res) continue;
+
+		g.append(res);
+
+		auto cat = res->categoryShared();
+		if (cat && (cats_added.find(cat.get()) == cats_added.end())) {
+			cats_added.insert(cat.get());
+			g.categories()->append(cat);
+		}
+	}
+
+	flatbuffers::FlatBufferBuilder builder;
+	auto o_table = ERSerializer::createERTable(&builder, &g);
+	fb::FinishERTableBuffer(builder, o_table);
+
+	const char *buf = reinterpret_cast<const char*>(builder.GetBufferPointer());
+	out.write(buf, builder.GetSize());
+
+	return out.good();
 }

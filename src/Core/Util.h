@@ -19,6 +19,22 @@ namespace Util
 	std::string getExtension(const std::string& filename);
 	std::string getFilename(const std::string &path);
 
+	// turns a path into an absolute path
+	// base is used if the path is relative
+	QString resolvePath(const QString &path, const QString &base);
+
+	// Changes a path relative to old_base to a path relative to new_base
+	//   referring to the same file
+	// Ex. "base.vsim" references "./cat.png", move to "folder/base.vsim"
+	//   then the reference should be "../cat.png"
+	// Does nothing to absolute paths
+	QString fixRelativePath(const QString &path,
+		const QString &old_base, const QString &new_base);
+
+	// Returns the absolute path of the directory containing the file at path
+	//  ./stuff/cows -> C:/.../stuff
+	QString absoluteDirOf(const QString &path);
+
 	// converts m*/d*/yy to QDate, * means 1 or 2 chars
 	// year conversion: <80 is 20xx, >=80 is 19xx
 	bool mxdxyyToQDate(const std::string &str, QDate *out);
@@ -147,6 +163,8 @@ namespace Util
 	//Util::endPt hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl = .0001);
 
 	bool spheresOverlap(const osg::Vec3f &p1, float r1, const osg::Vec3f &p2, float r2);
+
+	void appendn(std::istream &in, std::string &buff, size_t n);
 
 	// disconnects current connection old_watched, reconnects with new_watched
 	// add destroyed safety

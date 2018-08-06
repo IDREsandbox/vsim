@@ -33,18 +33,16 @@
 #include "VSimRoot.h"
 #include "MainWindowTopBar.h"
 #include "NavigationControl.h"
-#include "FileUtil.h"
-#include "ModelGroup.h"
 #include "TimeManager.h"
 #include "BrandingControl.h"
 #include "Switch/SwitchManager.h"
-#include "Model.h"
+#include "Model/ModelGroup.h"
+#include "Model/Model.h"
 
 #include <QMenuBar>
 
 VSimApp::VSimApp(MainWindow* window)
-	: m_window(window),
-	m_filename("")
+	: m_window(window)
 {
 	m_root = std::make_unique<VSimRoot>();
 
@@ -205,26 +203,35 @@ void VSimApp::setLastDirectory(const std::string & dir, bool isFile)
 	}
 }
 
-std::string VSimApp::getCurrentDirectory() const
+QString VSimApp::getCurrentDirectory() const
 {
-	QFileInfo f(m_filename.c_str());
-	return f.dir().path().toStdString();
-}
-
-std::string VSimApp::getFileName() const
-{
-	return m_filename;
-}
-
-void VSimApp::setFileName(const std::string &str)
-{
-	std::string s = str;
-	if (!str.empty()) {
-		// force to be absolute path
-		s = QDir(str.c_str()).absolutePath().toStdString();
+	if (m_current_file.isEmpty()) {
+		return QDir::currentPath();
 	}
-	m_filename = s;
-	m_window->setWindowTitle("VSim - " + QString::fromStdString(s));
+	QFileInfo f(m_current_file);
+	return f.dir().path();
+}
+
+QString VSimApp::getCurrentFile() const
+{
+	return m_current_file;
+}
+
+void VSimApp::setCurrentFile(const QString &path)
+{
+	QString s = path;
+
+	QString old_dir = getCurrentDirectory();
+	QString new_dir = Util::absoluteDirOf(path);
+
+	if (!s.isEmpty()) {
+		// force to be absolute path
+		s = QDir(s).absolutePath();
+	}
+	m_current_file = s;
+	m_window->setWindowTitle("VSim - " + s);
+
+	emit sCurrentDirChanged(old_dir, new_dir);
 }
 
 void VSimApp::setStatusMessage(const QString & message, int timeout)
@@ -336,25 +343,30 @@ SwitchManager * VSimApp::switchManager() const
 void VSimApp::connectSwitchManager()
 {
 	ModelGroup *models = m_root->models();
+	auto *group = models->group();
+	OSGNodeWrapper *root = m_root->models()->rootWrapper();
 
-	//added
-	connect(models, &ModelGroup::sInserted, [this, models](size_t index, size_t count) {
-		for (size_t i = index; i < index + count; i++) {
-			Model *m = models->child(i);
-			m_switch_manager->addNodeRecursive(m->nodeRef());
-		}
-	});
+	// TODO: connect switch manager
 
-	//removed
-	connect(models, &ModelGroup::sAboutToRemove, [this, models](size_t index, size_t count) {
-		for (size_t i = index; i < index + count; i++) {
-			Model *m = models->child(i);
-			m_switch_manager->removeNodeRecursive(m->nodeRef());
-		}
-	});
+	////added
+	//connect(root, &OSGNodeWrapper::);
+	//connect(models, &GroupSignals::sInserted, [this, models](size_t index, size_t count) {
+	//	for (size_t i = index; i < index + count; i++) {
+	//		Model *m = models->child(i);
+	//		m_switch_manager->addNodeRecursive(m->nodeRef());
+	//	}
+	//});
 
-	//reset
-	connect(m_root->models(), &ModelGroup::sAboutToReset, [this]() {
-		m_switch_manager->clear();
-	});
+	////removed
+	//connect(models, &GroupSignals::sAboutToRemove, [this, models](size_t index, size_t count) {
+	//	for (size_t i = index; i < index + count; i++) {
+	//		Model *m = models->child(i);
+	//		m_switch_manager->removeNodeRecursive(m->nodeRef());
+	//	}
+	//});
+
+	////reset
+	//connect(m_root->models(), &GroupSignals::sAboutToReset, [this]() {
+	//	m_switch_manager->clear();
+	//});
 }

@@ -11,17 +11,17 @@
 #include <QScreen>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
+#include <osgUtil/Optimizer>
 
 #include "ui_MainWindow.h"
 
 #include "OSGViewerWidget.h"
-#include <osgUtil/Optimizer>
 #include "TimeSlider.h"
-#include "ModelOutliner.h"
+#include "Model/ModelOutliner.h"
 #include "StatsWindow.h"
 #include "HistoryWindow.h"
-#include "FutureDialog.h"
-#include "SimpleWorker.h"
+#include "Gui/FutureDialog.h"
+#include "Gui/SimpleWorker.h"
 #include "BrandingOverlay.h"
 #include "NavigationSettingsDialog.h"
 #include "DisplaySettingsDialog.h"
@@ -44,10 +44,12 @@
 
 #include "VSimApp.h"
 #include "VSimRoot.h"
-#include "OSGYearModel.h"
-#include "ModelInformationDialog.h"
-#include "Model.h"
-#include "ModelGroup.h"
+#include "VSimSerializer.h"
+#include "Model/OSGYearModel.h"
+#include "Model/ModelInformationDialog.h"
+#include "Model/Model.h"
+#include "Model/ModelGroup.h"
+#include "Model/ModelUtil.h"
 //#include "GroupCommands.h"
 #include "NavigationControl.h"
 #include "AboutDialog.h"
@@ -55,12 +57,7 @@
 #include "BrandingControl.h"
 #include "Core/Util.h"
 
-#include "FileUtil.h"
 #include <fstream>
-
-#include "Core/TypesSerializer.h"
-#include "types_generated.h"
-#include "settings_generated.h"
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent),
@@ -317,9 +314,13 @@ void MainWindow::setApp(VSimApp * vsim)
 			QVector3D(Util::deg(y), Util::deg(p), Util::deg(r)));
 	});
 
-	m_outliner->header()->resizeSection(0, 200);
+	connect(m_app, &VSimApp::sCurrentDirChanged, this,
+		[this](const QString &old_dir, const QString &new_dir) {
+		m_outliner->setCurrentDir(new_dir);
+	});
+
+	m_outliner->setModelGroup(m_app->getRoot()->models());
 	m_outliner->resize(505, 600);
-	m_outliner->expandAll();
 
 	connect(m_app, &VSimApp::sReset, this, &MainWindow::onReset);
 	connect(this, &MainWindow::sDebugCamera, m_app, &VSimApp::debugCamera);
@@ -412,8 +413,6 @@ void MainWindow::setApp(VSimApp * vsim)
 void MainWindow::onReset()
 {
 	updatePositions();
-	m_outliner->setModelGroup(m_app->getRoot()->models());
-	m_outliner->expandAll();
 
 	// extract settings
 	auto *settings = m_app->getRoot()->settings();
@@ -650,14 +649,14 @@ void MainWindow::actionNew()
 			QMessageBox::Yes | QMessageBox::No);
 
 	if (reply == QMessageBox::Yes) {
-		m_app->setFileName("");
+		m_app->setCurrentFile("");
 		m_app->initWithVSim();
 	}
 }
 void MainWindow::actionOpen()
 {
 	QString filename = QFileDialog::getOpenFileName(this, "Open .vsim",
-		m_app->getCurrentDirectory().c_str(),
+		QString(),
 		"VSim files (*.vsim);;"
 		"Model files (*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
 		"All types (*.*)");
@@ -687,9 +686,14 @@ void MainWindow::execOpen(const QString & filename)
 		// edit: moving the root is a pain so try to avoid it
 		//root->moveAllToThread(w.thread());
 
-		w.setFunc([filename, &root_buf, &w]() -> bool {
+		VSimSerializer::Params p;
+		p.new_base = Util::absoluteDirOf(filename);
+		p.old_base = m_app->getCurrentDirectory();
+
+		w.setFunc([filename, &root_buf, &w, p]() -> bool {
 			root_buf = new VSimRoot(w.slave());
-			bool ok = FileUtil::readVSimFile(filename.toStdString(), root_buf);
+
+			bool ok = VSimSerializer::readVSimFile(filename.toStdString(), root_buf, p);
 			return ok;
 		});
 		w.start();
@@ -700,7 +704,7 @@ void MainWindow::execOpen(const QString & filename)
 			return;
 		}
 		else if (ok) {
-			m_app->setFileName(filename.toStdString());
+			m_app->setCurrentFile(filename);
 			m_app->initWithVSim(root_buf);
 		}
 		else {
@@ -724,8 +728,14 @@ void MainWindow::execOpen(const QString & filename)
 		}
 		else if (result) {
 			root_buf = std::make_unique<VSimRoot>();
-			root_buf->models()->addNode(loaded_model, filename.toStdString());
-			m_app->setFileName("");
+			auto model = std::make_shared<Model>();
+			// embed or no? or dialog?
+			//model->setFile(filename.toStdString(), loaded_model);
+			model->setName(QUrl(filename).fileName().toStdString());
+			model->embedModel(loaded_model);
+
+			root_buf->models()->addModel(model);
+			m_app->setCurrentFile("");
 			m_app->initWithVSim(root_buf.get());
 		}
 		else {
@@ -736,9 +746,9 @@ void MainWindow::execOpen(const QString & filename)
 
 void MainWindow::actionSave()
 {
-	QString filename = m_app->getFileName().c_str();
+	QString filename = m_app->getCurrentFile();
 	QFileInfo info(filename);
-	if (m_app->getFileName() == "" || info.suffix() != "vsim") {
+	if (filename == "" || info.suffix() != "vsim") {
 		actionSaveAs();
 		return;
 	}
@@ -748,7 +758,7 @@ void MainWindow::actionSave()
 void MainWindow::actionSaveAs()
 {
 	QString filename = QFileDialog::getSaveFileName(this, "Save VSim",
-		m_app->getFileName().c_str(),
+		m_app->getCurrentFile(),
 		"VSim file (*.vsim);;");
 	if (filename == "") {
 		return;
@@ -770,15 +780,19 @@ void MainWindow::execSave(const QString & filename)
 	m_app->prepareSave();
 	VSimRoot *root = m_app->getRoot();
 
+	VSimSerializer::Params p;
+	p.new_base = Util::absoluteDirOf(filename);
+	p.old_base = m_app->getCurrentDirectory();
+
 	SimpleWorker w;
 	dlg.watchWorker(&w);
 	// move the root over, this is needed because QTextDocument
 	// allocates QObjects and causes crash
 	//root->moveAllToThread(w.thread());
-	w.setFunc([path, root]() -> bool {
+	w.setFunc([path, root, p]() -> bool {
 		//VSimRoot root_copy;
 		//root_copy.copy(root);
-		bool ok = FileUtil::writeVSimFile(path, root);
+		bool ok = VSimSerializer::writeVSimFile(path, root, p);
 		// move the root back to the main thread
 		//root->moveAllToThread(QApplication::instance()->thread());
 		return ok;
@@ -791,42 +805,16 @@ void MainWindow::execSave(const QString & filename)
 	if (!ok) {
 		QMessageBox::warning(this, "Save Error", "Error saving to file " + filename);
 	}
+	else {
+		m_app->setCurrentFile(filename);
+		ModelUtil::fixRelativePaths(m_app->getRoot()->models(), p.old_base, p.new_base);
+	}
 }
 
 void MainWindow::actionImportModel()
 {
-	QString filename = QFileDialog::getOpenFileName(this, "Import Model",
-		m_app->getLastDirectory().c_str(),
-		"Model files (*.flt;*.ive;*.osg;*.osgb;*.osgt;*.obj;*.3ds;*.dae);;"
-		"All types (*.*)");
-	if (filename == "") {
-		return;
-	}
-	qInfo() << "importing - " << filename;
-
-	QFuture<osg::Node*> future;
-	FutureDialog dlg;
-	dlg.setFuture(future);
-	dlg.setText("Loading " + filename);
-	dlg.setWindowTitle("Open");
-
-	osg::ref_ptr<osg::Node> loadedModel;
-
-	future = QtConcurrent::run(&osgDB::readNodeFile, filename.toStdString());
-	dlg.exec(); // spin until done loading
-	loadedModel = future.result();
-
-	if (dlg.canceled()) {
-	}
-	else if (loadedModel) {
-		m_app->getRoot()->models()->addNode(loadedModel, filename.toStdString());
-		m_app->navigationControl()->a_home->trigger(); // reset camera
-		m_app->setLastDirectory(filename.toStdString(), true);
-	}
-	else {
-		qWarning() << "Error importing" << filename;
-		QMessageBox::warning(this, "Import Error", "Error loading file " + filename);
-	}
+	ModelGroup *models = m_app->getRoot()->models();
+	ModelUtil::execImportModel(models, m_app->getCurrentDirectory(), QString(), this);
 }
 
 void MainWindow::actionImportNarratives()
@@ -834,7 +822,7 @@ void MainWindow::actionImportNarratives()
 	// Open dialog
 	qInfo("Importing narratives");
 	QStringList list = QFileDialog::getOpenFileNames(this, "Import Narratives",
-		m_app->getLastDirectory().c_str(), "Narrative files (*.nar);;All types (*.*)");
+		QString(), "Narrative files (*.nar);;All types (*.*)");
 	if (list.empty()) {
 		qInfo() << "import cancel";
 		return;
@@ -849,7 +837,7 @@ void MainWindow::actionImportNarratives()
 
 		std::ifstream in(filename.toStdString(), std::ios::binary);
 		if (in.good()) {
-			bool ok = FileUtil::importNarrativesStream(in, &group);
+			bool ok = VSimSerializer::importNarrativesStream(in, &group);
 			if (ok) {
 				count++;
 				continue;
@@ -880,7 +868,7 @@ void MainWindow::actionExportNarratives()
 	}
 	std::ofstream out(filename.toStdString(), std::ios::binary);
 	if (out.good()) {
-		bool ok = FileUtil::exportNarrativesStream(out, m_app->getRoot()->narratives(),
+		bool ok = VSimSerializer::exportNarrativesStream(out, m_app->getRoot()->narratives(),
 			m_app->narrativeControl()->getSelectedNarratives());
 		if (ok) return;
 	}
@@ -891,7 +879,7 @@ void MainWindow::actionImportERs()
 {
 	qInfo("Importing resources");
 	QString path = QFileDialog::getOpenFileName(this, "Import Resources",
-		m_app->getLastDirectory().c_str(), "Narrative files (*.ere);;All types (*.*)");
+		QString(), "Narrative files (*.ere);;All types (*.*)");
 	if (path.isEmpty()) {
 		qInfo() << "import cancel";
 		return;
@@ -902,7 +890,7 @@ void MainWindow::actionImportERs()
 	std::ifstream in(path.toStdString(), std::ios::binary);
 	if (in.good()) {
 		EResourceGroup g;
-		bool ok = FileUtil::importEResources(in, &g);
+		bool ok = VSimSerializer::importEResources(in, &g);
 		m_app->erControl()->mergeERs(&g);
 		return;
 	}
@@ -922,7 +910,7 @@ void MainWindow::actionExportERs()
 	}
 	std::ofstream out(filename.toStdString(), std::ios::binary);
 	if (out.good()) {
-		bool ok = FileUtil::exportEResources(out, m_app->getRoot()->resources(),
+		bool ok = VSimSerializer::exportEResources(out, m_app->getRoot()->resources(),
 			m_app->erControl()->getCombinedSelection());
 		if (ok) return;
 	}
