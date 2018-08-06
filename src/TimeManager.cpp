@@ -11,6 +11,8 @@ TimeManager::TimeManager(VSimApp *app, QObject *parent)
 	m_app(app),
 	m_models(nullptr)
 {
+	m_models = m_app->getRoot()->models();
+
 	connect(m_app, &VSimApp::sAboutToReset, this, [this]() {
 	});
 	connect(m_app, &VSimApp::sReset, this, [this]() {
@@ -25,12 +27,15 @@ TimeManager::TimeManager(VSimApp *app, QObject *parent)
 		}
 		enableTime(true);
 		setKeyYears(m_models->getKeyYears());
-
-		// connect
-		connect(m_models, &ModelGroup::sKeysChanged, this, [this]() {
-			setKeyYears(m_models->getKeyYears());
-		});
 	});
+
+	auto reloadKeys = [this]() {
+		setKeyYears(m_models->getKeyYears());
+	};
+	connect(m_models->rootWrapper(), &OSGNodeWrapper::sReset, this, reloadKeys);
+	connect(m_models->rootWrapper(), &OSGNodeWrapper::sInsertedChild, this, reloadKeys);
+	connect(m_models->rootWrapper(), &OSGNodeWrapper::sRemovedChild, this, reloadKeys);
+	connect(m_models->rootWrapper(), &OSGNodeWrapper::sNodeYearChanged, this, reloadKeys);
 }
 
 int TimeManager::year() const

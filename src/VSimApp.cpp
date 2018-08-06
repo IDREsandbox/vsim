@@ -38,6 +38,7 @@
 #include "Switch/SwitchManager.h"
 #include "Model/ModelGroup.h"
 #include "Model/Model.h"
+#include "Model/OSGNodeWrapper.h"
 
 #include <QMenuBar>
 
@@ -346,27 +347,22 @@ void VSimApp::connectSwitchManager()
 	auto *group = models->group();
 	OSGNodeWrapper *root = m_root->models()->rootWrapper();
 
-	// TODO: connect switch manager
-
 	////added
-	//connect(root, &OSGNodeWrapper::);
-	//connect(models, &GroupSignals::sInserted, [this, models](size_t index, size_t count) {
-	//	for (size_t i = index; i < index + count; i++) {
-	//		Model *m = models->child(i);
-	//		m_switch_manager->addNodeRecursive(m->nodeRef());
-	//	}
-	//});
+	connect(models->rootWrapper(), &OSGNodeWrapper::sInsertedChild, this,
+		[this, models] (osg::Group *g, size_t index) {
+		Model *m = models->group()->child(index);
+		m_switch_manager->addNodeRecursive(m->nodeRef());
+	});
 
-	////removed
-	//connect(models, &GroupSignals::sAboutToRemove, [this, models](size_t index, size_t count) {
-	//	for (size_t i = index; i < index + count; i++) {
-	//		Model *m = models->child(i);
-	//		m_switch_manager->removeNodeRecursive(m->nodeRef());
-	//	}
-	//});
+	//removed
+	connect(models->rootWrapper(), &OSGNodeWrapper::sAboutToRemoveChild, this,
+		[this, models](osg::Group *g, size_t index) {
+		Model *m = models->group()->child(index);
+		m_switch_manager->removeNodeRecursive(m->nodeRef());
+	});
 
-	////reset
-	//connect(m_root->models(), &GroupSignals::sAboutToReset, [this]() {
-	//	m_switch_manager->clear();
-	//});
+	//reset
+	connect(models->rootWrapper(), &OSGNodeWrapper::sAboutToReset, [this]() {
+		m_switch_manager->clear();
+	});
 }
