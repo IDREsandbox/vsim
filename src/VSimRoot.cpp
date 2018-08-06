@@ -160,7 +160,7 @@ void VSimRoot::loadOld(osg::Group * old_group)
 			bool hit = Util::mxdxyyToQDate(info->getProjectDate(), &date);
 			if (!hit) date = QDate();
 			new_info->project_date_julian_day = date.toJulianDay();
-			new_info->version = info->getReleaseDateVersion();
+			//new_info->version = info->getReleaseDateVersion();
 			new_info->url = info->getAccessInformationURL();
 			continue;
 		}

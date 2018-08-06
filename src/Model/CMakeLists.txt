@@ -5,7 +5,6 @@ set(Model_h
   ModelEditDialog.h
   ModelGroup.h
   ModelGroupModel.h
-  ModelInformationDialog.h
   ModelOutliner.h
   ModelSerializer.h
   ModelUtil.h
@@ -21,8 +20,6 @@ set(Model_src
   ModelEditDialog.ui
   ModelGroup.cpp
   ModelGroupModel.cpp
-  ModelInformationDialog.cpp
-  ModelInformationDialog.ui
   ModelOutliner.cpp
   ModelSerializer.cpp
   ModelUtil.cpp

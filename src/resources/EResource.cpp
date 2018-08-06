@@ -53,9 +53,9 @@ void EResource::loadOld(const EResourcesNode * old)
 	m_filepath = old->getResourcePath();
 	m_description = old->getResourceDiscription();
 	m_authors = old->getAuthor();
-	m_global = !old->getGlobal();
-	m_reposition = old->getReposition();
-	switch (old->getAutoLaunch()) {
+	m_global = (old->getGlobal() == 0); // old code backwards
+	m_reposition = (old->getReposition() == 0); // old code was backwards
+	switch (old->getAutoLaunch()) { // old code was all mixed up
 	case 0:
 		m_launch = ON;
 	case 1:

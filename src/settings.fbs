@@ -12,12 +12,18 @@ table Settings {
 
 table ModelInformation {
   model_name:string;
-  version:string;
+  version:string (deprecated);
   project_date_julian_day:uint64;
   authors:string;
   contributors:string;
-  place_of_publication:string;
+  place_of_publication:string; // institutional affiliation
   url:string;
+  project_date_end_julian:uint64;
+  funders:string;
+  research_objective:string;
+  technology:string;
+  release_date_julian:uint64;
+  release_notes:string;
 }
 
 table GraphicsSettings {

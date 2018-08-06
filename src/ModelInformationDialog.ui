@@ -24,6 +24,9 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLineEdit" name="model_name"/>
+      </item>
       <item row="2" column="0" colspan="2">
        <widget class="QLabel" name="release_date_label">
         <property name="text">
@@ -212,11 +215,8 @@
         </property>
        </widget>
       </item>
-      <item row="21" column="0" colspan="4">
+      <item row="21" column="0" colspan="2">
        <widget class="QLineEdit" name="website"/>
-      </item>
-      <item row="1" column="0" colspan="4">
-       <widget class="QLineEdit" name="model_name"/>
       </item>
      </layout>
     </widget>

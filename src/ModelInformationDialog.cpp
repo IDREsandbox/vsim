@@ -19,13 +19,18 @@ ModelInformationDialog::ModelInformationDialog(
 	// TODO: try to grab defaults?
 
 	// data -> ui
+	ui->model_name->setText(QString::fromStdString(data->model_name));
+	ui->release_date->setDate(QDate::fromJulianDay(data->release_date_julian));
+	ui->release_notes->setPlainText(QString::fromStdString(data->release_notes));
+	ui->project_date->setDate(QDate::fromJulianDay(data->project_date_julian_day));
+	ui->project_date_end->setDate(QDate::fromJulianDay(data->project_date_end_julian));
 	ui->authors->setPlainText(QString::fromStdString(data->authors));
 	ui->contributors->setPlainText(QString::fromStdString(data->contributors));
 	ui->place->setPlainText(QString::fromStdString(data->place_of_publication));
-	ui->modelName->setText(QString::fromStdString(data->model_name));
+	ui->funders->setPlainText(QString::fromStdString(data->funders));
+	ui->objective->setPlainText(QString::fromStdString(data->research_objective));
+	ui->technology->setPlainText(QString::fromStdString(data->technology));
 	ui->website->setText(QString::fromStdString(data->url));
-	ui->version->setText(QString::fromStdString(data->version));
-	ui->projectDate->setDate(QDate::fromJulianDay(data->project_date_julian_day));
 }
 
 ModelInformationDialog::~ModelInformationDialog()
@@ -36,14 +41,21 @@ ModelInformationDialog::~ModelInformationDialog()
 VSim::FlatBuffers::ModelInformationT ModelInformationDialog::getData()
 {
 	VSim::FlatBuffers::ModelInformationT data;
+
 	// ui -> data
+
+	data.model_name = ui->model_name->text().toStdString();
+	data.release_notes = ui->release_notes->toPlainText().toStdString();
+	data.release_date_julian = ui->release_date->date().toJulianDay();
+	data.project_date_julian_day = ui->project_date->date().toJulianDay();
+	data.project_date_end_julian = ui->project_date_end->date().toJulianDay();
 	data.authors = ui->authors->toPlainText().toStdString();
 	data.contributors = ui->contributors->toPlainText().toStdString();
 	data.place_of_publication = ui->place->toPlainText().toStdString();
-	data.model_name = ui->modelName->text().toStdString();
+	data.funders = ui->funders->toPlainText().toStdString();
+	data.research_objective = ui->objective->toPlainText().toStdString();
+	data.technology = ui->technology->toPlainText().toStdString();
 	data.url = ui->website->text().toStdString();
-	data.version = ui->version->text().toStdString();
-	data.project_date_julian_day = ui->projectDate->date().toJulianDay();
 
 	return data;
 }

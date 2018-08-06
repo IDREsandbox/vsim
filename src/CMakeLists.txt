@@ -147,6 +147,9 @@ set(VSim_src
   MainWindow.ui
   MainWindowTopBar.cpp
   MainWindowTopBar.h
+  ModelInformationDialog.cpp
+  ModelInformationDialog.h
+  ModelInformationDialog.ui
   mrichtextedit.cpp
   mrichtextedit.h
   mtextedit.cpp
