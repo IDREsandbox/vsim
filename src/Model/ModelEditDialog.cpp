@@ -20,6 +20,9 @@ ModelEditDialog::ModelEditDialog(bool importing, QString base_dir, QString last_
 
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
+	ui->embed->setToolTip("Check to embed the model into this vsim file. An unembedded model will load based on the path.");
+	ui->relative->setToolTip("Check to load the model from a path relative to this vsim file");
+
 	ui->file_edit->setReadOnly(true);
 
 	if (importing) {

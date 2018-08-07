@@ -347,18 +347,16 @@ void VSimApp::connectSwitchManager()
 	auto *group = models->group();
 	OSGNodeWrapper *root = m_root->models()->rootWrapper();
 
-	////added
+	//added
 	connect(models->rootWrapper(), &OSGNodeWrapper::sInsertedChild, this,
 		[this, models] (osg::Group *g, size_t index) {
-		Model *m = models->group()->child(index);
-		m_switch_manager->addNodeRecursive(m->nodeRef());
+		m_switch_manager->addNodeRecursive(g->getChild(index));
 	});
 
 	//removed
 	connect(models->rootWrapper(), &OSGNodeWrapper::sAboutToRemoveChild, this,
 		[this, models](osg::Group *g, size_t index) {
-		Model *m = models->group()->child(index);
-		m_switch_manager->removeNodeRecursive(m->nodeRef());
+		m_switch_manager->removeNodeRecursive(g->getChild(index));
 	});
 
 	//reset
