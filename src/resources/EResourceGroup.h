@@ -34,6 +34,8 @@ public:
 	// allows you to use EResource::getCategoryIndex()
 	void saveCategoryIndices() const;
 
+	void fixRelativePaths(const QString &old_base, const QString &new_base);
+
 	void debug();
 
 public: // commands

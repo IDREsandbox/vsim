@@ -686,9 +686,9 @@ void MainWindow::execOpen(const QString & filename)
 		// edit: moving the root is a pain so try to avoid it
 		//root->moveAllToThread(w.thread());
 
-		VSimSerializer::Params p;
+		// need new_base for model loading to work
+		TypesSerializer::Params p;
 		p.new_base = Util::absoluteDirOf(filename);
-		p.old_base = m_app->getCurrentDirectory();
 
 		w.setFunc([filename, &root_buf, &w, p]() -> bool {
 			root_buf = new VSimRoot(w.slave());
@@ -780,9 +780,7 @@ void MainWindow::execSave(const QString & filename)
 	m_app->prepareSave();
 	VSimRoot *root = m_app->getRoot();
 
-	VSimSerializer::Params p;
-	p.new_base = Util::absoluteDirOf(filename);
-	p.old_base = m_app->getCurrentDirectory();
+	auto p = saveParams(filename);
 
 	SimpleWorker w;
 	dlg.watchWorker(&w);
@@ -806,8 +804,7 @@ void MainWindow::execSave(const QString & filename)
 		QMessageBox::warning(this, "Save Error", "Error saving to file " + filename);
 	}
 	else {
-		m_app->setCurrentFile(filename);
-		ModelUtil::fixRelativePaths(m_app->getRoot()->models(), p.old_base, p.new_base);
+		m_app->setCurrentFile(filename, true);
 	}
 }
 
@@ -890,7 +887,13 @@ void MainWindow::actionImportERs()
 	std::ifstream in(path.toStdString(), std::ios::binary);
 	if (in.good()) {
 		EResourceGroup g;
-		bool ok = VSimSerializer::importEResources(in, &g);
+
+		// convert relative paths to work with this file
+		TypesSerializer::Params p;
+		p.old_base = Util::absoluteDirOf(path);
+		p.new_base = m_app->getCurrentDirectory();
+
+		bool ok = VSimSerializer::importEResources(in, &g, p);
 		m_app->erControl()->mergeERs(&g);
 		return;
 	}
@@ -910,8 +913,10 @@ void MainWindow::actionExportERs()
 	}
 	std::ofstream out(filename.toStdString(), std::ios::binary);
 	if (out.good()) {
-		bool ok = VSimSerializer::exportEResources(out, m_app->getRoot()->resources(),
-			m_app->erControl()->getCombinedSelection());
+		bool ok = VSimSerializer::exportEResources(out,
+			m_app->getRoot()->resources(),
+			m_app->erControl()->getCombinedSelection(),
+			saveParams(filename));
 		if (ok) return;
 	}
 	QMessageBox::warning(this, "Export Error", "Error exporting resources to " + filename);
@@ -934,3 +939,17 @@ void MainWindow::execModelInformation()
 			));
 	}
 }
+
+TypesSerializer::Params MainWindow::saveParams(const QString &path)
+{
+	QString from = m_app->getCurrentDirectory();
+	QString to = Util::absoluteDirOf(path);
+	return {from, to};
+}
+
+//TypesSerializer::Params MainWindow::loadParams(const QString &path)
+//{
+//	QString to = m_app->getCurrentDirectory();
+//	QString from = Util::absoluteDirOf(path);
+//	return {};
+//}

@@ -29,7 +29,7 @@
 
 namespace fb = VSim::FlatBuffers;
 
-bool VSimSerializer::readStreamRobust(std::istream & in, VSimRoot *root, const Params &p)
+bool VSimSerializer::readStreamRobust(std::istream & in, VSimRoot *root, const TypesSerializer::Params &p)
 {
 	bool ok = readStream(in, root, p);
 	if (ok) return true; // new version success
@@ -50,7 +50,7 @@ bool VSimSerializer::readStreamRobust(std::istream & in, VSimRoot *root, const P
 	return true;
 }
 
-bool VSimSerializer::readStream(std::istream & in, VSimRoot *root, const Params &p)
+bool VSimSerializer::readStream(std::istream & in, VSimRoot *root, const TypesSerializer::Params &p)
 {
 	// read header
 	// V S I M x x x x
@@ -90,7 +90,7 @@ bool VSimSerializer::readStream(std::istream & in, VSimRoot *root, const Params 
 	return true;
 }
 
-bool VSimSerializer::writeStream(std::ostream & out, const VSimRoot * root, const Params &p)
+bool VSimSerializer::writeStream(std::ostream & out, const VSimRoot * root, const TypesSerializer::Params &p)
 {
 	// read header
 	// v s i m x x x x
@@ -122,7 +122,7 @@ bool VSimSerializer::writeStream(std::ostream & out, const VSimRoot * root, cons
 	return true;
 }
 
-void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer, VSimRoot *root, const Params &p)
+void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer, VSimRoot *root, const TypesSerializer::Params &p)
 {
 	NarrativeGroup *nars = root->narratives();
 	EResourceGroup *ers = root->resources();
@@ -135,7 +135,7 @@ void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer, VSimRoot *r
 		NarrativeSerializer::readNarrativeTable(buffer->narratives(), nars);
 	}
 	if (buffer->eresources()) {
-		ERSerializer::readERTable(buffer->eresources(), ers);
+		ERSerializer::readERTable(buffer->eresources(), ers, p);
 	}
 	if (buffer->settings()) {
 		buffer->settings()->UnPackTo(root->settings());
@@ -148,13 +148,12 @@ void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer, VSimRoot *r
 flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
 	flatbuffers::FlatBufferBuilder * builder, const VSimRoot * root,
 	std::ostream &model_data,
-	const Params &p)
+	const TypesSerializer::Params &p)
 {
 	auto o_version = builder->CreateString("2.0.0");
 	auto o_nars = NarrativeSerializer::createNarrativeTable(builder, root->narratives());
-	auto o_ers = ERSerializer::createERTable(builder, root->resources());
-	auto o_models = ModelSerializer::createModels(builder, root->models(), model_data,
-		p.old_base, p.new_base);
+	auto o_ers = ERSerializer::createERTable(builder, root->resources(), p);
+	auto o_models = ModelSerializer::createModels(builder, root->models(), model_data, p);
 	auto o_settings = fb::CreateSettings(*builder, root->settings());
 	auto o_branding = CanvasSerializer::createCanvas(builder, root->branding());
 
@@ -171,7 +170,7 @@ flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
 }
 
 
-bool VSimSerializer::readVSimFile(const std::string & path, VSimRoot * root, const Params &p)
+bool VSimSerializer::readVSimFile(const std::string & path, VSimRoot * root, const TypesSerializer::Params &p)
 {
 	std::ifstream in(path, std::ios::binary);
 	if (!in.good()) {
@@ -180,7 +179,7 @@ bool VSimSerializer::readVSimFile(const std::string & path, VSimRoot * root, con
 	return VSimSerializer::readStreamRobust(in, root, p);
 }
 
-bool VSimSerializer::writeVSimFile(const std::string & path, const VSimRoot * root, const Params &p)
+bool VSimSerializer::writeVSimFile(const std::string & path, const VSimRoot * root, const TypesSerializer::Params &p)
 {
 	std::ofstream out(path, std::ios::binary);
 	if (!out.good()) {
@@ -252,7 +251,7 @@ bool VSimSerializer::exportNarrativesStream(std::ostream &out, const NarrativeGr
 	return out.good();
 }
 
-bool VSimSerializer::importEResources(std::istream &in, EResourceGroup *group)
+bool VSimSerializer::importEResources(std::istream &in, EResourceGroup *group, const TypesSerializer::Params &p)
 {
 	// read into buffer
 	std::stringstream ss;
@@ -264,7 +263,7 @@ bool VSimSerializer::importEResources(std::istream &in, EResourceGroup *group)
 	if (fb_match) {
 		// reading flatbuffers
 		const fb::ERTable *fb_root = fb::GetERTable(s.c_str());
-		ERSerializer::readERTable(fb_root, group);
+		ERSerializer::readERTable(fb_root, group, p);
 		return true;
 	}
 
@@ -287,7 +286,7 @@ bool VSimSerializer::importEResources(std::istream &in, EResourceGroup *group)
 }
 
 bool VSimSerializer::exportEResources(std::ostream &out, const EResourceGroup * group,
-	const std::set<size_t>& selection)
+	const std::set<size_t>& selection, const TypesSerializer::Params &p)
 {
 	if (!out.good()) {
 		return false;
@@ -310,7 +309,7 @@ bool VSimSerializer::exportEResources(std::ostream &out, const EResourceGroup * 
 	}
 
 	flatbuffers::FlatBufferBuilder builder;
-	auto o_table = ERSerializer::createERTable(&builder, &g);
+	auto o_table = ERSerializer::createERTable(&builder, &g, p);
 	fb::FinishERTableBuffer(builder, o_table);
 
 	const char *buf = reinterpret_cast<const char*>(builder.GetBufferPointer());

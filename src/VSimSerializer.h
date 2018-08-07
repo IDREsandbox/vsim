@@ -10,6 +10,7 @@
 #include "narratives_generated.h"
 #include "settings_generated.h"
 #include "vsim_generated.h"
+#include "Core/TypesSerializer.h"
 
 class ModelGroup;
 class VSimRoot;
@@ -21,24 +22,24 @@ class EResourceGroup;
 namespace VSimSerializer {
 	// read osg stream, binary or ascii
 
-	struct Params {
-		// for changing relative paths
-		// need both for model write
-		// need new for model read
-		QString old_base;
-		QString new_base;
-	};
+	//struct Params {
+	//	// for changing relative paths
+	//	// need both for model write
+	//	// need new for model read
+	//	QString old_base;
+	//	QString new_base;
+	//};
 
 	// full compatible version
 	// reads new and old version vsim
-	bool readStreamRobust(std::istream &in, VSimRoot *root, const Params &p);
+	bool readStreamRobust(std::istream &in, VSimRoot *root, const TypesSerializer::Params &p);
 
 	// new version
 	// attempts to read the new vsim format and initialize root
 	// returns false if root left alone (full error, header read error)
 	// returns true if root changed (success, partial error)
-	bool readStream(std::istream &in, VSimRoot *root, const Params &p);
-	bool writeStream(std::ostream &out, const VSimRoot *root, const Params &p);
+	bool readStream(std::istream &in, VSimRoot *root, const TypesSerializer::Params &p);
+	bool writeStream(std::ostream &out, const VSimRoot *root, const TypesSerializer::Params &p);
 
 	// osg stuff
 	//osg::ref_ptr<osg::Node> readOSGB(std::istream &in, bool ascii, bool zlib);
@@ -62,17 +63,17 @@ namespace VSimSerializer {
 	// read vsim flatbuffer
 	// - doesn't read model data
 	void readRoot(const VSim::FlatBuffers::Root *buffer,
-		VSimRoot *root, const Params &p);
+		VSimRoot *root, const TypesSerializer::Params &p);
 
 	// write vsim flatbuffer
 	// - also writes model_data to stream. This is needed here because
 	//   we need to write model metadata now, but don't know model sizes yet
 	flatbuffers::Offset<VSim::FlatBuffers::Root>
 		createRoot(flatbuffers::FlatBufferBuilder *builder,
-			const VSimRoot *root, std::ostream &model_data, const Params &p);
+			const VSimRoot *root, std::ostream &model_data, const TypesSerializer::Params &p);
 
-	bool readVSimFile(const std::string &path, VSimRoot *root, const Params &p);
-	bool writeVSimFile(const std::string &path, const VSimRoot *root, const Params &p);
+	bool readVSimFile(const std::string &path, VSimRoot *root, const TypesSerializer::Params &p);
+	bool writeVSimFile(const std::string &path, const VSimRoot *root, const TypesSerializer::Params &p);
 
 	bool importModel(const std::string &path, VSimRoot *root);
 
@@ -80,9 +81,9 @@ namespace VSimSerializer {
 	bool exportNarrativesStream(std::ostream &out, const NarrativeGroup *group,
 		const std::set<size_t> &selection);
 
-	bool importEResources(std::istream &in, EResourceGroup *group);
+	bool importEResources(std::istream &in, EResourceGroup *group, const TypesSerializer::Params &);
 	bool exportEResources(std::ostream &out, const EResourceGroup *group,
-		const std::set<size_t> &selection);
+		const std::set<size_t> &selection, const TypesSerializer::Params &);
 }
 
 //void readEResource();

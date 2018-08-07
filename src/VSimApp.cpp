@@ -30,6 +30,7 @@
 #include "narrative/NarrativeControl.h"
 #include "narrative/NarrativePlayer.h"
 #include "resources/ERControl.h"
+#include "resources/EResourceGroup.h"
 #include "VSimRoot.h"
 #include "MainWindowTopBar.h"
 #include "NavigationControl.h"
@@ -39,6 +40,7 @@
 #include "Model/ModelGroup.h"
 #include "Model/Model.h"
 #include "Model/OSGNodeWrapper.h"
+#include "Model/ModelUtil.h"
 
 #include <QMenuBar>
 
@@ -218,7 +220,7 @@ QString VSimApp::getCurrentFile() const
 	return m_current_file;
 }
 
-void VSimApp::setCurrentFile(const QString &path)
+void VSimApp::setCurrentFile(const QString &path, bool fix)
 {
 	QString s = path;
 
@@ -231,6 +233,11 @@ void VSimApp::setCurrentFile(const QString &path)
 	}
 	m_current_file = s;
 	m_window->setWindowTitle("VSim - " + s);
+
+	if (fix) {
+		ModelUtil::fixRelativePaths(m_root->models(), old_dir, new_dir);
+		m_root->resources()->fixRelativePaths(old_dir, new_dir);
+	}
 
 	emit sCurrentDirChanged(old_dir, new_dir);
 }

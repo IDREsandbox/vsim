@@ -7,6 +7,7 @@
 #include "Model/ModelGroup.h"
 #include "Model/Model.h"
 #include "Core/Util.h"
+#include "Core/TypesSerializer.h"
 
 namespace fb = VSim::FlatBuffers;
 
@@ -121,8 +122,7 @@ flatbuffers::Offset<fb::ModelTable>
 ModelSerializer::createModels(flatbuffers::FlatBufferBuilder *builder,
 	const ModelGroup *model_group,
 	std::ostream &model_data,
-	const QString &old_base,
-	const QString &new_base
+	const TypesSerializer::Params &p
 	)
 {
 	// build models
@@ -138,10 +138,7 @@ ModelSerializer::createModels(flatbuffers::FlatBufferBuilder *builder,
 			o_format = builder->CreateString("osgb");
 		}
 		else {
-			// convert relative path
-			std::string path = Util::fixRelativePath(
-				model->path().c_str(), old_base, new_base).toStdString();
-			o_path = builder->CreateString(path);
+			TypesSerializer::createRelativePath(builder, QString::fromStdString(model->path()), p);
 		}
 
 		bool ascii = false;

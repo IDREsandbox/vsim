@@ -1,5 +1,6 @@
 #include "ERSerializer.h"
 #include "Core/TypesSerializer.h"
+#include "Core/Util.h"
 
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"
@@ -8,7 +9,8 @@
 #include <unordered_map>
 
 namespace fb = VSim::FlatBuffers;
-void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
+void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group,
+	const TypesSerializer::Params &p)
 {
 	group->clear();
 	ECategoryGroup * cats = group->categories();
@@ -27,11 +29,13 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 	for (auto o_res : *resources) {
 		EResource *res = new EResource();
 
+		// convert the path
+
 		res->setERType(static_cast<EResource::ERType>(o_res->type()));
 		if (o_res->name()) res->setResourceName(o_res->name()->str());
 		if (o_res->author()) res->setAuthor(o_res->author()->str());
 		if (o_res->description()) res->setResourceDescription(o_res->description()->str());
-		if (o_res->path()) res->setResourcePath(o_res->path()->str());
+		res->setResourcePath(TypesSerializer::readRelativePath(o_res->path(), p).toStdString());
 		res->setGlobal(o_res->global());
 		res->setCopyright(static_cast<EResource::Copyright>(o_res->copyright()));
 		res->setMinYear(o_res->year_min());
@@ -50,7 +54,8 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group)
 
 flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(
 	flatbuffers::FlatBufferBuilder *builder,
-	const EResourceGroup *group)
+	const EResourceGroup *group,
+	const TypesSerializer::Params &p)
 {
 	const ECategoryGroup *cats = group->categories();
 
@@ -85,7 +90,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(
 		auto o_name = builder->CreateString(res->getResourceName());
 		auto o_auth = builder->CreateString(res->getAuthor());
 		auto o_desc = builder->CreateString(res->getResourceDescription());
-		auto o_path = builder->CreateString(res->getResourcePath());
+		auto o_path = TypesSerializer::createRelativePath(builder, QString::fromStdString(res->getResourcePath()), p);
 
 		fb::EResourceBuilder b_res(*builder);
 		b_res.add_type(static_cast<fb::ERType>(res->getERType()));

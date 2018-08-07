@@ -6,6 +6,7 @@
 #include "resources/EResource.h"
 #include "resources/ECategory.h"
 #include "Core/GroupCommands.h"
+#include "Core/Util.h"
 
 #include <QDebug>
 #include <unordered_map>
@@ -117,6 +118,16 @@ void EResourceGroup::saveCategoryIndices() const
 		}
 		else {
 			er->setCategoryIndex(it->second);
+		}
+	}
+}
+
+void EResourceGroup::fixRelativePaths(const QString & old_base, const QString & new_base)
+{
+	for (auto res : *this) {
+		if (res->getERType() == EResource::FILE) {
+			QString path = QString::fromStdString(res->getResourcePath());
+			res->setResourcePath(Util::fixRelativePath(path, old_base, new_base).toStdString());
 		}
 	}
 }

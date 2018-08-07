@@ -27,6 +27,19 @@ namespace TypesSerializer {
 	osg::Matrix fb2osgCameraMatrix(const VSim::FlatBuffers::CameraPosDirUp &buffer);
 	VSim::FlatBuffers::CameraPosDirUp
 		osg2fbCameraMatrix(const osg::Matrix &mat);
+
+	struct Params {
+		// for changing relative paths
+		// need both for model write
+		// need new for model read
+		QString old_base;
+		QString new_base;
+	};
+	QString readRelativePath(const flatbuffers::String *string, const Params &p);
+	flatbuffers::Offset<flatbuffers::String> createRelativePath(
+		flatbuffers::FlatBufferBuilder *builder,
+		const QString &path,
+		const Params &p);
 }
 
 //void readEResource();

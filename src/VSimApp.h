@@ -110,7 +110,8 @@ public:
 	
 	// absolute path to current file, or none
 	QString getCurrentFile() const;
-	void setCurrentFile(const QString &);
+	// fix_relative changes relative paths so that they keep pointing to the same files
+	void setCurrentFile(const QString &, bool fix_relative = false);
 
 	VSimRoot *getRoot() const;
 	//OSGYearModel *modelTable() const;

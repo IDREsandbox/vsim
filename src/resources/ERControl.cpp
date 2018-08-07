@@ -385,7 +385,9 @@ void ERControl::openResource(const EResource *res) {
 	auto type = res->getERType();
 	if (type == EResource::FILE) {
 		QString path = res->getResourcePath().c_str();
-		QString abs = Util::resolvePath(m_app->getCurrentDirectory(), path);
+		QString abs = Util::resolvePath(path, m_app->getCurrentDirectory());
+
+		qDebug() << "current dir" << m_app->getCurrentDirectory() << "res path" << path;
 
 		qInfo() << "Attempting to open file:" << abs;
 		QDesktopServices::openUrl(QUrl::fromLocalFile(abs));

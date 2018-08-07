@@ -8,6 +8,7 @@
 #include <QString>
 
 #include "model_generated.h"
+#include "Core/TypesSerializer.h"
 
 class ModelGroup;
 
@@ -20,7 +21,9 @@ namespace ModelSerializer {
 	// istream has the raw data
 	// base_dir is what relative paths are based on
 	void readModels(const VSim::FlatBuffers::ModelTable *buffer,
-		ModelGroup *models, std::istream &in, const QString &base_dir);
+		ModelGroup *models,
+		std::istream &in,
+		const QString &base_dir);
 
 	// create model options table
 	// writes out model data at the same time
@@ -29,8 +32,7 @@ namespace ModelSerializer {
 		createModels(flatbuffers::FlatBufferBuilder *builder,
 			const ModelGroup *models,
 			std::ostream &model_data,
-			const QString &old_base,
-			const QString &new_base);
+			const TypesSerializer::Params &p);
 
 	//void readEmbeddedModels(std::istream &stream, ModelGroup *group);
 	//void loadLinkedModels(ModelGroup *group);

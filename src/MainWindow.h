@@ -11,6 +11,8 @@
 #include <osgViewer/Viewer>
 #include <QActionGroup>
 
+#include "Core/TypesSerializer.h"
+
 namespace Ui { class MainWindow; }
 
 class VSimApp;
@@ -97,6 +99,10 @@ signals:
 	void sDebugControl();
 
 	void sEditStyleSettings();
+
+private:
+	TypesSerializer::Params saveParams(const QString &path);
+	//TypesSerializer::Params loadParams(const QString &path);
 
 	// ui, signal emitters
 public:

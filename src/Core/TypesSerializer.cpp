@@ -1,5 +1,5 @@
 #include "TypesSerializer.h"
-#include "Util.h"
+#include "Core/Util.h"
 
 namespace fb = VSim::FlatBuffers;
 
@@ -49,4 +49,20 @@ fb::CameraPosDirUp TypesSerializer::osg2fbCameraMatrix(const osg::Matrix &mat)
 	fb::Vec3 s_up = osg2fbVec(up);
 
 	return fb::CameraPosDirUp(s_pos, s_dir, s_up);
+}
+
+QString TypesSerializer::readRelativePath(const flatbuffers::String * string, const Params & p)
+{
+	if (string == nullptr) return QString();
+	QString path = QString::fromStdString(string->str());
+	return Util::fixRelativePath(path, p.old_base, p.new_base);
+}
+
+flatbuffers::Offset<flatbuffers::String> TypesSerializer::createRelativePath(
+	flatbuffers::FlatBufferBuilder * builder,
+	const QString & path,
+	const Params & p)
+{
+	QString qpath = Util::fixRelativePath(path, p.old_base, p.new_base);
+	return builder->CreateString(qpath.toStdString());
 }
