@@ -1,5 +1,13 @@
 # Changelog
 
+## 2018-8-7
+
+- Can remove models
+- Added option to reference an external model vs embed the model in vsim file
+- ER relative paths and model relative paths fix automatically when saving vsim file in a different folder
+- Extended model information
+- Fixed auto reposition when loading old resources
+
 ## 2018-7-27
 
 ### Added
