@@ -14,12 +14,12 @@ cd vcpkg
 
 building
 ```
-./vcpkg install flatbuffers:x64-windows osg:x64-windows qt5-base:x64-windows
+./vcpkg install flatbuffers:x64-windows osg:x64-windows qt5-base:x64-windows cryptopp:x64-windows
 ```
 
 packaging
 ```
-./vcpkg export flatbuffers:x64-windows osg:x64-windows qt5-base:x64-windows --7zip
+./vcpkg export flatbuffers:x64-windows osg:x64-windows qt5-base:x64-windows cryptopp:x64-windows --7zip
 ```
 
 

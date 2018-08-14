@@ -24,6 +24,20 @@ struct Color {
   a:ubyte;
 }
 
+table PBKDF2Hash {
+  hash:[ubyte];
+  salt:[ubyte];
+  iterations:uint32;
+}
+
+table LockTable {
+  locked:bool;
+  hash:PBKDF2Hash;
+  has_password:bool; // no password -> really locked
+  // method:string; // PBKDF2
+  // expiration date?
+}
+
 // table SimpleImage {
 //   width:int32;
 //   height:int32;

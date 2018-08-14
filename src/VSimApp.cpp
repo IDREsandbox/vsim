@@ -165,14 +165,13 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 
 	m_undo_stack->clear();
 
-	// dereference the old root, apply the new one
-	// m_root.reset(root);
-
 	// keep the old root, just do a copy
 	m_root->take(root);
 
 	osg::Node *osg_root = m_root->models()->sceneRoot();
 	m_viewer->setSceneData(osg_root);
+
+	m_root->postLoad();
 
 	emit sReset();
 
@@ -182,6 +181,7 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 
 void VSimApp::prepareSave()
 {
+	m_root->prepareSave();
 	emit sAboutToSave();
 }
 

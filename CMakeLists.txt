@@ -51,6 +51,8 @@ include_directories(${Qt5Test_INCLUDE_DIRS})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Concurrent_INCLUDE_DIRS})
 
+find_package(cryptopp CONFIG REQUIRED)
+
 # qt flags
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)

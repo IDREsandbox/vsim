@@ -8,7 +8,8 @@
 ModelInformationDialog::ModelInformationDialog(
 	const VSim::FlatBuffers::ModelInformationT *data,
 	QWidget *parent)
-	: QDialog(parent)
+	: QDialog(parent),
+	m_read_only(false)
 {
 	ui = std::make_unique<Ui::modelInformationDialog>();
 	ui->setupUi(this);
@@ -58,5 +59,26 @@ VSim::FlatBuffers::ModelInformationT ModelInformationDialog::getData()
 	data.url = ui->website->text().toStdString();
 
 	return data;
+}
+
+bool ModelInformationDialog::readOnly() const
+{
+	return m_read_only;
+}
+
+void ModelInformationDialog::setReadOnly(bool ro)
+{
+	ui->model_name->setReadOnly(ro);
+	ui->release_date->setReadOnly(ro);
+	ui->release_notes->setReadOnly(ro);
+	ui->project_date->setReadOnly(ro);
+	ui->project_date_end->setReadOnly(ro);
+	ui->authors->setReadOnly(ro);
+	ui->contributors->setReadOnly(ro);
+	ui->place->setReadOnly(ro);
+	ui->funders->setReadOnly(ro);
+	ui->objective->setReadOnly(ro);
+	ui->technology->setReadOnly(ro);
+	ui->website->setReadOnly(ro);
 }
 

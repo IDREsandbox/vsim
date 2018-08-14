@@ -10,6 +10,7 @@ set(Core_h
   GroupSignals.h
   GroupTemplate.inl
   GroupTemplate.h
+  HashLock.h
   ICommandStack.h
   OSGObserver.h
   SimpleCommandStack.h
@@ -22,6 +23,7 @@ set(Core_h
 
 set(Core_src
   GroupSignals.cpp
+  HashLock.cpp
   OSGObserver.cpp
   SimpleCommandStack.cpp
   TypesSerializer.cpp
@@ -55,6 +57,12 @@ vsim_add_test(
   VecUtil_test
   VecUtil_test.cpp
   "Core_obj;Qt5::Test;${OPENSCENEGRAPH_LIBRARIES}"
+)
+
+vsim_add_test(
+  HashLock_test
+  "HashLock.h;HashLock.cpp;HashLock_test.cpp"
+  "cryptopp-static;Qt5::Test"
 )
 
 # is this needed?

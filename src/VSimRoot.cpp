@@ -1,10 +1,13 @@
 #include "VSimRoot.h"
 #include "VSimRoot.h"
+#include "VSimRoot.h"
+#include "VSimRoot.h"
 
 #include <iostream>
 #include <QDate>
 #include <QThread>
 #include <QEvent>
+#include <QCryptographicHash>
 
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeGroup.h"
@@ -20,12 +23,14 @@
 #include "deprecated/narrative/NarrativeOld.h"
 #include "Core/Util.h"
 #include "Canvas/CanvasScene.h"
+#include "Core/HashLock.h"
 
 // debug
 #include "Canvas/LabelStyleGroup.h"
 #include "Canvas/LabelStyle.h"
 
 #include "settings_generated.h" // SettingsT
+#include "types_generated.h"
 
 VSimRoot::VSimRoot(QObject *parent)
 	: QObject(parent)
@@ -59,14 +64,17 @@ NarrativeGroup * VSimRoot::narratives() const
 {
 	return m_narratives.get();
 }
+
 ModelGroup * VSimRoot::models() const
 {
 	return m_models.get();
 }
+
 CanvasScene * VSimRoot::branding() const
 {
 	return m_branding_canvas.get();
 }
+
 EResourceGroup * VSimRoot::resources() const
 {
 	return m_resources.get();
@@ -81,6 +89,126 @@ void VSimRoot::copySettings(const VSimRoot * other)
 VSim::FlatBuffers::SettingsT * VSimRoot::settings() const
 {
 	return m_settings.get();
+}
+
+void VSimRoot::prepareSave()
+{
+	// make all the unique ptr business
+	auto &fb_lsettings = Util::getOrCreate(m_settings->lock_settings);
+	auto &fb_lock = Util::getOrCreate(fb_lsettings->lock);
+
+	fb_lsettings->lock_settings = m_lock_settings;
+	fb_lsettings->lock_add_remove = m_lock_add_remove;
+	fb_lsettings->lock_navigation = m_lock_navigation;
+
+	fb_lock->locked = m_locked;
+	fb_lock->has_password = m_has_password;
+
+	if (m_has_password) {
+		auto &fb_hash = Util::getOrCreate(fb_lock->hash);
+		fb_hash->hash = m_lock_hash.m_hash;
+		fb_hash->salt = m_lock_hash.m_salt;
+		fb_hash->iterations = m_lock_hash.m_iterations;
+	}
+}
+
+void VSimRoot::postLoad()
+{
+	auto &fb_lsettings = Util::getOrCreate(m_settings->lock_settings);
+	auto &fb_lock = Util::getOrCreate(fb_lsettings->lock);
+
+	m_lock_settings = fb_lsettings->lock_settings;
+	m_lock_add_remove = fb_lsettings->lock_add_remove;
+	m_lock_navigation = fb_lsettings->lock_navigation;
+
+	m_locked = fb_lock->locked;
+	m_has_password = fb_lock->has_password;
+
+	if (fb_lock->has_password && fb_lock->hash) {
+		m_has_password = true;
+		auto &fb_hash = fb_lock->hash;
+		m_lock_hash.m_hash = fb_hash->hash;
+		m_lock_hash.m_salt = fb_hash->salt;
+		m_lock_hash.m_iterations = fb_hash->iterations;
+	}
+	else {
+		m_has_password = false;
+	}
+}
+
+bool VSimRoot::locked() const
+{
+	return m_locked;
+}
+
+void VSimRoot::lock()
+{
+	m_locked = true; 
+	m_has_password = false;
+}
+
+bool VSimRoot::hasPassword() const
+{
+	return m_has_password;
+}
+
+bool VSimRoot::checkPassword(const std::string & password) const
+{
+	if (m_locked && !m_has_password) return false;
+	return m_lock_hash.checkPassword(password);
+}
+
+void VSimRoot::setPassword(const std::string & password)
+{
+	m_lock_hash = HashLock::generateHash(password);
+}
+
+bool VSimRoot::settingsLocked() const
+{
+	return m_lock_settings;
+}
+
+bool VSimRoot::currentLocked() const
+{
+	return m_lock_add_remove;
+}
+
+bool VSimRoot::navigationLocked() const
+{
+	return m_lock_navigation;
+}
+
+void VSimRoot::lockWithPassword(const std::string &password)
+{
+	setPassword(password);
+	m_locked = true;
+	m_has_password = true;
+}
+
+void VSimRoot::unlock()
+{
+	setSettingsLocked(false);
+	setCurrentLocked(false);
+	setNavigationLocked(false);
+	m_locked = false;
+}
+
+void VSimRoot::setSettingsLocked(bool locked)
+{
+	m_lock_settings = locked;
+	emit sSettingsLockedChanged(locked);
+}
+
+void VSimRoot::setCurrentLocked(bool restrict)
+{
+	m_lock_add_remove = restrict;
+	emit sRestrictToCurrentChanged(restrict);
+}
+
+void VSimRoot::setNavigationLocked(bool disable)
+{
+	m_lock_navigation = disable;
+	emit sDisableNavigationChanged(disable);
 }
 
 void VSimRoot::debug()

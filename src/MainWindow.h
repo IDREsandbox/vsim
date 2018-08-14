@@ -88,6 +88,7 @@ public slots:
 	void actionExportERs();
 
 	void execModelInformation();
+	void execLockDialog();
 
 signals:
 	void sImportModel(const std::string&);

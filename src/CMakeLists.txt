@@ -142,6 +142,9 @@ set(VSim_src
   HorizontalScrollBox.h
   KeyTracker.cpp
   KeyTracker.h
+  LockDialog.cpp
+  LockDialog.h
+  LockDialog.ui
   MainWindow.cpp
   MainWindow.h
   MainWindow.ui
@@ -185,7 +188,7 @@ set(VSim_src
   VSimApp.h
 )
 add_library(VSim_obj ${VSim_src})
-target_link_libraries(VSim_obj VSimRoot_obj Switch_obj Gui_obj Model_obj)
+target_link_libraries(VSim_obj VSimRoot_obj Switch_obj Gui_obj Model_obj cryptopp-static)
 
 file(GLOB_RECURSE oldSerializers
   */Serializer*.cpp
@@ -194,7 +197,9 @@ file(GLOB_RECURSE oldSerializers
 add_executable(VSim main.cpp ${oldSerializers})
 # set_target_properties(VSim PROPERTIES
 #   VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
-target_link_libraries(VSim VSim_obj Qt5::Widgets Qt5::Core Qt5::Gui ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(VSim VSim_obj
+  Qt5::Widgets Qt5::Core Qt5::Gui
+  ${OPENSCENEGRAPH_LIBRARIES})
 
 if (WIN32)
   add_dependencies(VSim CopyAssets)
@@ -230,3 +235,4 @@ vsim_add_test(
   ERSerializer_test.cpp
   "ERModel_obj;Core_obj;Deprecated_obj;Qt5::Test"
 )
+

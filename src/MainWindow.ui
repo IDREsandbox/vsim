@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>652</height>
+    <height>654</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -138,6 +138,7 @@
     <addaction name="navigation_settings"/>
     <addaction name="other_settings"/>
     <addaction name="actionFont_Color_Styles"/>
+    <addaction name="actionLock_Settings"/>
    </widget>
    <widget class="QMenu" name="menuRender">
     <property name="title">
@@ -533,6 +534,11 @@
    </property>
    <property name="autoRepeat">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionLock_Settings">
+   <property name="text">
+    <string>Lock Settings</string>
    </property>
   </action>
  </widget>

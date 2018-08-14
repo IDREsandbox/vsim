@@ -18,8 +18,12 @@ public:
 
 	VSim::FlatBuffers::ModelInformationT getData();
 
+	bool readOnly() const;
+	void setReadOnly(bool ro);
+
 private:
 	std::unique_ptr<Ui::modelInformationDialog> ui;
+	bool m_read_only;
 };
 
 #endif

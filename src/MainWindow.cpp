@@ -55,6 +55,7 @@
 #include "AboutDialog.h"
 #include "CoordinateWidget.h"
 #include "BrandingControl.h"
+#include "LockDialog.h"
 #include "Core/Util.h"
 
 #include <fstream>
@@ -164,6 +165,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionExport_Resources, &QAction::triggered, this, &MainWindow::actionExportERs);
 
 	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
+	connect(ui->actionLock_Settings, &QAction::triggered, this, &MainWindow::execLockDialog);
 
 	// model outliner
 	m_outliner = new ModelOutliner(this);
@@ -938,6 +940,12 @@ void MainWindow::execModelInformation()
 				new_data
 			));
 	}
+}
+
+void MainWindow::execLockDialog()
+{
+	LockDialog dlg;
+	dlg.execEdit(m_app->getRoot());
 }
 
 TypesSerializer::Params MainWindow::saveParams(const QString &path)

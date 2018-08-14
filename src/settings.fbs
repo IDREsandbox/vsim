@@ -8,6 +8,18 @@ table Settings {
   navigation_settings:NavigationSettings;
   graphics_settings:GraphicsSettings;
   window_settings:WindowSettings;
+  lock_settings:LockSettings;
+}
+
+table LockSettings {
+  lock:LockTable;
+  lock_settings:bool;
+  // model information
+  // models
+  // other settings (time slider, etc)
+  lock_add_remove:bool;
+  // add/remove narratives, ers
+  lock_navigation:bool;
 }
 
 table ModelInformation {

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <QDate>
 #include <QWidget>
+#include <memory>
 
 namespace Util
 {
@@ -180,6 +181,18 @@ namespace Util
 			*old_watched = nullptr;
 		});
 		return new_watched;
+	}
+
+
+	// guarantees existence of a unique_ptr
+	// useful with flatbuffers, which have a bunch of null unique_ptrs
+	template <class T>
+	std::unique_ptr<T> &getOrCreate(std::unique_ptr<T> &ptr) {
+		if (!ptr) {
+			auto created = std::make_unique<T>();
+			ptr = std::move(created);
+		}
+		return ptr;
 	}
 }
 
