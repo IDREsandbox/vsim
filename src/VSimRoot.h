@@ -51,7 +51,7 @@ public:
 	// - lock(LockParams)
 	// - lock().pw().settings().current()... named param idiom
 	bool locked() const;
-	// locks without password, you can't really change anything
+	// locks without password, you can't change anything
 	void lock();
 	// sets password
 	void lockWithPassword(const std::string &password);
@@ -65,10 +65,10 @@ public:
 	void setPassword(const std::string &password);
 
 	bool settingsLocked() const;
-	bool currentLocked() const; // restrict to current narratives
+	bool restrictedToCurrent() const; // restrict to current narratives
 	bool navigationLocked() const;
 	void setSettingsLocked(bool locked);
-	void setCurrentLocked(bool restrict);
+	void setRestrictToCurrent(bool restrict);
 	void setNavigationLocked(bool disable);
 
 	void debug();
@@ -78,9 +78,9 @@ public:
 
 signals:
 	void sLockedChanged(bool locked);
-	void sSettingsLockedChanged(bool locked);
-	void sRestrictToCurrentChanged(bool restrict);
-	void sDisableNavigationChanged(bool disable);
+	//void sSettingsLockedChanged(bool locked);
+	//void sRestrictToCurrentChanged(bool restrict);
+	//void sDisableNavigationChanged(bool disable);
 
 private:
 	std::unique_ptr<NarrativeGroup> m_narratives;

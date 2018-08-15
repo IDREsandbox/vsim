@@ -95,6 +95,9 @@ public: // actions
 	QAction *a_close_all;
 
 private:
+	void onRestrictToCurrent(bool restrict);
+
+private:
 	VSimApp *m_app;
 	MainWindow *m_window;
 	ERBar *m_bar;

@@ -139,6 +139,9 @@ public: // Actions
 private:
 	void enableEditing(bool enable);
 
+	// data -> this
+	void onRestrictToCurrent(bool restrict);
+
 private: // classes
 	class SelectNarrativesCommand : public QUndoCommand {
 	public:

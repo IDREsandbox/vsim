@@ -253,10 +253,13 @@ void ERControl::load(EResourceGroup *ers)
 	m_category_control->load(m_categories);
 
 	m_filter_area->reset();
+
+	connect(ers, &EResourceGroup::sRestrictToCurrentChanged, this, &ERControl::onRestrictToCurrent);
 }
 
 void ERControl::newER()
 {
+	if (m_ers->restrictedToCurrent()) return;
 	// start with global selected if we picked global
 	QWidget *focus = QApplication::focusWidget();
 	bool start_global = Util::isDescendant(m_global_box, focus);
@@ -295,6 +298,7 @@ void ERControl::newER()
 
 void ERControl::deleteER()
 {
+	if (m_ers->restrictedToCurrent()) return;
 	std::set<size_t> selection = getCombinedSelection();
 	if (selection.empty()) return;
 
@@ -321,11 +325,10 @@ void ERControl::editERInfo()
 	}
 
 	ERDialog dlg(m_category_control, m_app->getCurrentDirectory());
-
 	dlg.init(resource);
-
 	dlg.showPositionButton();
 	connect(&dlg, &ERDialog::sSetPosition, this, &ERControl::setPosition);
+	dlg.enableEditingCategories(!m_ers->restrictedToCurrent());
 
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
@@ -386,8 +389,6 @@ void ERControl::openResource(const EResource *res) {
 	if (type == EResource::FILE) {
 		QString path = res->getResourcePath().c_str();
 		QString abs = Util::resolvePath(path, m_app->getCurrentDirectory());
-
-		qDebug() << "current dir" << m_app->getCurrentDirectory() << "res path" << path;
 
 		qInfo() << "Attempting to open file:" << abs;
 		QDesktopServices::openUrl(QUrl::fromLocalFile(abs));
@@ -669,6 +670,17 @@ void ERControl::debug()
 		qInfo() << i << ":" << "node" << (void*)m_categories->child(i) <<
 			"cat" << (void*)cat << QString::fromStdString(cat->getCategoryName()) << cat->getColor();
 	}
+}
+
+void ERControl::onRestrictToCurrent(bool restrict)
+{
+	bool enable = !restrict;
+	a_new_er->setEnabled(enable);
+	a_delete_er->setEnabled(enable);
+	a_position_er->setEnabled(enable);
+
+	m_bar->ui.newERButton->setVisible(enable);
+	m_bar->ui.deleteERButton->setVisible(enable);
 }
 
 std::set<size_t> ERControl::getCombinedSelection() const

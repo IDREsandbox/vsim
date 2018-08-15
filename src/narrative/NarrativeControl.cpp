@@ -274,6 +274,8 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 
 void NarrativeControl::newNarrative()
 {
+	if (m_narrative_group->restrictedToCurrent()) return;
+
 	// open up the dialog
 	NarrativeInfoDialog dlg;
 	int result = dlg.exec();
@@ -324,6 +326,7 @@ void NarrativeControl::editNarrativeInfo()
 
 void NarrativeControl::deleteNarratives()
 {
+	if (m_narrative_group->restrictedToCurrent()) return;
 	if (m_narrative_selection->empty()) return;
 	auto selection = m_narrative_selection->data();
 	std::set<size_t> set(selection.begin(), selection.end());
@@ -388,8 +391,20 @@ void NarrativeControl::enableEditing(bool enable)
 	m_editing_slide = enable;
 }
 
+void NarrativeControl::onRestrictToCurrent(bool restrict)
+{
+	bool enable = !restrict;
+
+	a_new_narrative->setEnabled(enable);
+	a_delete_narratives->setEnabled(enable);
+
+	m_bar->ui.add->setVisible(enable);
+	m_bar->ui.remove->setVisible(enable);
+}
+
 void NarrativeControl::load(NarrativeGroup *narratives)
 {
+	Util::reconnect(this, &m_narrative_group, narratives);
 	m_narrative_box->clear();
 	openNarrative(-1);
 	openSlide(-1);
@@ -400,8 +415,8 @@ void NarrativeControl::load(NarrativeGroup *narratives)
 	showNarrativeBox();
 	m_narrative_box->setGroup(narratives);
 
-	//connect(narratives, &QObject::destroyed, this, []() {
-	//});
+	connect(narratives, &NarrativeGroup::sRestrictToCurrentChanged, this,
+		&NarrativeControl::onRestrictToCurrent);
 }
 
 void NarrativeControl::update(double dt)

@@ -11,6 +11,9 @@ class GroupSignals : public QObject {
 public:
 	GroupSignals(QObject *parent = nullptr);
 
+	bool restrictedToCurrent() const;
+	virtual void setRestrictToCurrent(bool restrict);
+
 signals:
 	// emitted when cleared
 	void sAboutToReset();
@@ -36,6 +39,8 @@ signals:
 	void sAboutToRemoveMulti(const std::vector<size_t> &);
 	void sRemovedMulti(const std::vector<size_t> &);
 
+	void sRestrictToCurrentChanged(bool restrict);
+
 	// cant use types because of template
 	//// arbitrary indices, used for er proxy, group
 	//void sAboutToInsertMulti(const std::vector<std::pair<size_t, T*>> &);
@@ -48,6 +53,9 @@ signals:
 	//void sInsertedMultiP(const std::set<T*> &);
 	//void sAboutToRemoveMultiP(const std::set<T*> &nodes);
 	//void sRemovedMultiP(const std::set<T*> &nodes);
+
+private:
+	bool m_restricted;
 };
 
 #endif

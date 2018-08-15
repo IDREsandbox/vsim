@@ -3,6 +3,7 @@
 #include <QListView>
 #include <QFileDialog>
 #include <QMessageBox>
+
 #include "resources/ERDialog.h"
 #include "resources/NewCatDialog.h"
 #include "resources/EResource.h"
@@ -12,6 +13,7 @@
 #include "resources/ECategoryModel.h"
 #include "Gui/EditDeleteDelegate.h"
 #include "Core/GroupModelTemplate.h"
+#include "Core/Util.h"
 
 ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWidget * parent)
 	: QDialog(parent),
@@ -54,6 +56,7 @@ ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWi
 	// category stuff
 	m_category_view = new QListView(this);
 	m_category_view->setModel(m_control->categoryModel());
+	m_default_delegate = m_category_view->itemDelegate();
 	m_category_delegate = new EditDeleteDelegate(this);
 	m_category_view->setItemDelegate(m_category_delegate);
 	ui.categories->setMouseTracking(true);
@@ -63,7 +66,7 @@ ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWi
 	connect(ui.addnew, &QPushButton::pressed, this,
 		[this]() {
 		auto cat = m_control->execNewCategory();
-		setCategory(cat.get());
+		if (cat) setCategory(cat.get());
 	});
 	connect(m_category_delegate, &EditDeleteDelegate::sEdit, this,
 		[this](QAbstractItemModel *model, const QModelIndex &index) {
@@ -301,12 +304,9 @@ void ERDialog::setRelative(bool relative)
 
 	// is the path already relative/absolute?
 	if (QDir::isRelativePath(path) == relative) {
-		qDebug() << "already relative";
 		// don't do anything
 		return;
 	}
-
-	qDebug() << "current dir?" << m_current_dir;
 
 	QString new_path;
 	if (relative) {
@@ -315,9 +315,7 @@ void ERDialog::setRelative(bool relative)
 	}
 	else {
 		// want to make this absolute
-		// canonical doesn't work for files that don't exist
-		// QFileInfo(m_current_dir + "/" + path).canonicalFilePath();
-		new_path = QDir::cleanPath(m_current_dir + "/" + path);
+		new_path = Util::resolvePath(path, m_current_dir);
 	}
 	ui.path->setText(new_path);
 	//checkRelative(); // possible infinite loop, should still work w/o this
@@ -358,6 +356,22 @@ void ERDialog::setGlobal(bool global)
 		ui.local->setChecked(true);
 	}
 	onActivationChange();
+}
+
+void ERDialog::setReadOnly(bool read_only)
+{
+}
+
+void ERDialog::enableEditingCategories(bool enable_categories)
+{
+	QAbstractItemDelegate *delegate;
+	if (enable_categories) {
+		delegate = m_category_delegate;
+	}
+	else {
+		delegate = m_default_delegate;
+	}
+	m_category_view->setItemDelegate(delegate);
 }
 
 void ERDialog::onTypeChange()

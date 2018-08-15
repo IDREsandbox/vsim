@@ -52,6 +52,9 @@ public:
 
 	void setGlobal(bool global);
 
+	void setReadOnly(bool read_only);
+	void enableEditingCategories(bool enable_categories);
+
 	// Choose button depends on type
 	// URL bar depends on type
 	void onTypeChange();
@@ -73,6 +76,7 @@ private:
 
 	QListView *m_category_view;
 	EditDeleteDelegate *m_category_delegate;
+	QAbstractItemDelegate *m_default_delegate;
 	QPushButton *m_position_button;
 
 	ECategoryControl *m_control;

@@ -12,10 +12,12 @@
 
 #include "resources/NewCatDialog.h"
 #include "Core/GroupCommands.h"
+#include "Core/Util.h"
 
 ECategoryControl::ECategoryControl(VSimApp *app, QObject * parent)
 	: QObject(parent),
-	m_app(app)
+	m_app(app),
+	m_categories(nullptr)
 {
 	m_undo_stack = app->getUndoStack();
 
@@ -47,12 +49,18 @@ ECategoryControl::ECategoryControl(VSimApp *app, QObject * parent)
 
 void ECategoryControl::load(ECategoryGroup * cats)
 {
+	Util::reconnect(this, &m_categories, cats);
 	m_category_model->setGroup(cats);
 	m_categories = cats;
+
+	if (!m_categories) return;
+	m_category_sort_proxy;
 }
 
 void ECategoryControl::execDeleteCategory(QAbstractItemModel * model, const QModelIndex & index)
 {
+	if (m_categories->restrictedToCurrent()) return;
+
 	QMessageBox::StandardButton reply =
 		QMessageBox::question(
 			nullptr,
@@ -93,6 +101,8 @@ ECategory *ECategoryControl::execEditCategory(QAbstractItemModel * model, const 
 
 std::shared_ptr<ECategory> ECategoryControl::execNewCategory()
 {
+	if (m_categories->restrictedToCurrent()) return nullptr;
+
 	NewCatDialog dlg;
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {

@@ -117,9 +117,9 @@ void VSimRoot::postLoad()
 	auto &fb_lsettings = Util::getOrCreate(m_settings->lock_settings);
 	auto &fb_lock = Util::getOrCreate(fb_lsettings->lock);
 
-	m_lock_settings = fb_lsettings->lock_settings;
-	m_lock_add_remove = fb_lsettings->lock_add_remove;
-	m_lock_navigation = fb_lsettings->lock_navigation;
+	setSettingsLocked(fb_lsettings->lock_settings);
+	setRestrictToCurrent(fb_lsettings->lock_add_remove);
+	setNavigationLocked(fb_lsettings->lock_navigation);
 
 	m_locked = fb_lock->locked;
 	m_has_password = fb_lock->has_password;
@@ -168,7 +168,7 @@ bool VSimRoot::settingsLocked() const
 	return m_lock_settings;
 }
 
-bool VSimRoot::currentLocked() const
+bool VSimRoot::restrictedToCurrent() const
 {
 	return m_lock_add_remove;
 }
@@ -188,7 +188,7 @@ void VSimRoot::lockWithPassword(const std::string &password)
 void VSimRoot::unlock()
 {
 	setSettingsLocked(false);
-	setCurrentLocked(false);
+	setRestrictToCurrent(false);
 	setNavigationLocked(false);
 	m_locked = false;
 }
@@ -196,19 +196,23 @@ void VSimRoot::unlock()
 void VSimRoot::setSettingsLocked(bool locked)
 {
 	m_lock_settings = locked;
-	emit sSettingsLockedChanged(locked);
+	//emit sSettingsLockedChanged(locked);
 }
 
-void VSimRoot::setCurrentLocked(bool restrict)
+void VSimRoot::setRestrictToCurrent(bool restrict)
 {
 	m_lock_add_remove = restrict;
-	emit sRestrictToCurrentChanged(restrict);
+	//emit sRestrictToCurrentChanged(restrict);
+
+	m_narratives->setRestrictToCurrent(restrict);
+	m_resources->setRestrictToCurrent(restrict);
+	m_resources->categories()->setRestrictToCurrent(restrict);
 }
 
 void VSimRoot::setNavigationLocked(bool disable)
 {
 	m_lock_navigation = disable;
-	emit sDisableNavigationChanged(disable);
+	//emit sDisableNavigationChanged(disable);
 }
 
 void VSimRoot::debug()

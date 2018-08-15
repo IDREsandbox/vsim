@@ -13,3 +13,7 @@ Narrative * NarrativeGroup::narrative(int index) const
 	return child(index);
 }
 
+void NarrativeGroup::lockAll(QString password)
+{
+}
+

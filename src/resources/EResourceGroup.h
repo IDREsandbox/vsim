@@ -34,6 +34,8 @@ public:
 	// allows you to use EResource::getCategoryIndex()
 	void saveCategoryIndices() const;
 
+	void lockAll(QString password);
+
 	void fixRelativePaths(const QString &old_base, const QString &new_base);
 
 	void debug();
@@ -46,6 +48,7 @@ public: // commands
 
 private:
 	ECategoryGroup *m_categories;
+	bool m_restrict_to_current;
 };
 
 #endif // ERESOURCEGROUP_H

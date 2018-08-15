@@ -91,6 +91,7 @@ template <class T>
 bool TGroup<T>::insert(size_t index, const std::vector<std::shared_ptr<T>>& nodes)
 {
 	if (index > m_children.size()) return false;
+	//if (restrictedToCurrent()) return false;
 
 	// other signal structures
 	std::set<std::shared_ptr<T>> pointers(nodes.begin(), nodes.end());
@@ -119,6 +120,7 @@ template <class T>
 bool TGroup<T>::remove(size_t index, size_t count)
 {
 	if (index + count > m_children.size()) return false;
+	//if (restrictedToCurrent()) return false;
 
 	// other signal structures
 	std::set<std::shared_ptr<T>> pointers;

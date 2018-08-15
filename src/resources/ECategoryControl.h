@@ -20,7 +20,7 @@ class ECategoryControl : public QObject
 {
 	Q_OBJECT
 public:
-	ECategoryControl(VSimApp *window, QObject *parent = nullptr);
+	ECategoryControl(VSimApp *app, QObject *parent = nullptr);
 
 	void load(ECategoryGroup *cats);
 

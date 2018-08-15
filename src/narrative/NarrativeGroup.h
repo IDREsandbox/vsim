@@ -16,6 +16,8 @@ public:
 	// operator= // default
 
 	Narrative *narrative(int index) const;
+
+	void lockAll(QString password);
 };
 
 #endif

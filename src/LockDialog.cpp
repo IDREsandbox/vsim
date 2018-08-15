@@ -79,7 +79,7 @@ void LockDialog::execEdit(VSimRoot *root)
 	if (was_locked) {
 		ui.lock_group_box->setChecked(was_locked);
 		ui.lock_settings->setChecked(root->settingsLocked());
-		ui.lock_restrict->setChecked(root->currentLocked());
+		ui.lock_restrict->setChecked(root->restrictedToCurrent());
 		ui.lock_navigation->setChecked(root->navigationLocked());
 	}
 	else {
@@ -125,18 +125,20 @@ void LockDialog::execEdit(VSimRoot *root)
 
 		if (ui.lock_group_box->isChecked()) {
 			std::string pw = ui.password->text().toStdString();
-			// password
+			// change password
+			// or lock w/ password
 			if (ui.password_checkbox->isChecked() && !pw.empty()) {
 				root->lockWithPassword(pw);
 			}
-			else {
+			// re-lock
+			else if (!was_locked) {
 				root->lock();
 			}
 
 			// other stuff
-			root->setSettingsLocked(ui.lock_settings);
-			root->setCurrentLocked(ui.lock_restrict);
-			root->setNavigationLocked(ui.lock_navigation);
+			root->setSettingsLocked(ui.lock_settings->isChecked());
+			root->setRestrictToCurrent(ui.lock_restrict->isChecked());
+			root->setNavigationLocked(ui.lock_navigation->isChecked());
 
 			// nars and resources? TODO
 		}
@@ -154,7 +156,6 @@ void LockDialog::tryAccept()
 		accept();
 		return; // TODO: model stuff
 	}
-
 
 	bool do_check = ui.lock_group_box->isChecked() && !m_root->locked();
 
