@@ -1,5 +1,7 @@
-﻿#include <QDebug>
-#include "narrative/NarrativeInfoDialog.h"
+﻿#include "narrative/NarrativeInfoDialog.h"
+
+#include <QDebug>
+#include <QPushButton>
 
 NarrativeInfoDialog::NarrativeInfoDialog(QWidget * parent) 
 	: QDialog(parent) 
@@ -34,4 +36,14 @@ std::string NarrativeInfoDialog::getDescription() const
 std::string NarrativeInfoDialog::getAuthor() const
 {
 	return ui.editContact->toPlainText().toStdString();
+}
+
+void NarrativeInfoDialog::setReadOnly(bool read_only)
+{
+	ui.editTitle->setReadOnly(read_only);
+	ui.editDescription->setReadOnly(read_only);
+	ui.editContact->setReadOnly(read_only);
+
+	QPushButton *cancel = ui.buttonBox->button(QDialogButtonBox::Cancel);
+	cancel->setVisible(!read_only);
 }

@@ -79,6 +79,10 @@ public:
 	void enableDragging(bool enable);
 	void setMIMEType(const std::string &type);
 
+	// read only
+	bool readOnly() const;
+	virtual void setReadOnly(bool read_only);
+
 	// viewport resize event filter
 	bool eventFilter(QObject *o, QEvent *e);
 
@@ -147,6 +151,8 @@ protected:
 	QPoint m_dragpos; // last known drag point
 	int m_drag_index; // last known spacer index for dropping
 	int m_drag_press_index; // last pressed item
+
+	bool m_read_only;
 
 	QTimer *m_move_timer;
 

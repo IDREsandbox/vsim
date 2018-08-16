@@ -167,9 +167,6 @@ set(VSim_src
   ObjectManipulator.h
   OSGViewerWidget.cpp
   OSGViewerWidget.h
-  PasswordDialog.cpp
-  PasswordDialog.h
-  PasswordDialog.ui
   ScrollBoxItem.cpp
   ScrollBoxItem.h
   Selection.cpp

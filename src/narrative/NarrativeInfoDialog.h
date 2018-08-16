@@ -17,8 +17,9 @@ public:
 	std::string getDescription() const;
 	std::string getAuthor() const;
 
+	void setReadOnly(bool read_only);
+
 private:
-	void setGui();
 	Ui::dialog ui;
 };
 

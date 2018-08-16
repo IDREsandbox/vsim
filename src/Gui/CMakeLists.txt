@@ -5,6 +5,7 @@ set(Gui_h
   ElidedLabel.h
   FutureDialog.h
   NumberSlider.h
+  PasswordDialog.h
   SimpleWorker.h
   TickSlider.h
   TitledComboBox.h
@@ -15,6 +16,7 @@ set(Gui_src
   ElidedLabel.cpp
   FutureDialog.cpp
   NumberSlider.cpp
+  PasswordDialog.cpp
   SimpleWorker.cpp
   TickSlider.cpp
   TitledComboBox.cpp
@@ -23,6 +25,7 @@ set(Gui_src
 set(Gui_ui
   FutureDialog.ui
   NumberSlider.ui
+  PasswordDialog.ui
 )
 
 add_library(Gui_obj ${Gui_src} ${Gui_h} ${Gui_ui})

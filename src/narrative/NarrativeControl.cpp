@@ -14,7 +14,7 @@
 
 #include "MainWindow.h"
 #include "OSGViewerWidget.h"
-#include "PasswordDialog.h"
+#include "Gui/PasswordDialog.h"
 
 #include "narrative/NarrativeInfoDialog.h"
 #include "narrative/NarrativeGroup.h"
@@ -46,7 +46,8 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	m_current_narrative(-1),
 	m_narrative_group(nullptr),
 	m_canvas_enabled(true),
-	m_canvas_stack_wrapper(this)
+	m_canvas_stack_wrapper(this),
+	m_current_lock(nullptr)
 {
 	m_bar = window->topBar();
 	m_narrative_box = window->topBar()->ui.narratives;
@@ -143,7 +144,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	a_delete_narratives->setIconText("-");
 	connect(a_delete_narratives, &QAction::triggered, this, &NarrativeControl::deleteNarratives);
 
-	a_narrative_info = new QAction("Edit Narrative Info", this);
+	a_narrative_info = new QAction("Narrative Info", this);
 	a_narrative_info->setIconText("Info");
 	connect(a_narrative_info, &QAction::triggered, this, &NarrativeControl::editNarrativeInfo);
 
@@ -213,18 +214,18 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	a_edit_slide->setIconText("Edit");
 
 	// menus
-	QMenu *slide_menu = new QMenu("Narrative menu", m_narrative_box);
-	slide_menu->addAction(a_new_slide);
+	m_slide_menu = new QMenu("Narrative menu", m_narrative_box);
+	m_slide_menu->addAction(a_new_slide);
 
-	QMenu *slide_item_menu = new QMenu("Narrative item menu", m_narrative_box);
-	slide_item_menu->addAction(a_new_slide);
-	slide_item_menu->addAction(a_delete_slides);
-	slide_item_menu->addAction(a_slide_duration);
-	slide_item_menu->addAction(a_slide_transition);
-	slide_item_menu->addAction(a_slide_camera);
+	m_slide_item_menu = new QMenu("Narrative item menu", m_narrative_box);
+	m_slide_item_menu->addAction(a_new_slide);
+	m_slide_item_menu->addAction(a_delete_slides);
+	m_slide_item_menu->addAction(a_slide_duration);
+	m_slide_item_menu->addAction(a_slide_transition);
+	m_slide_item_menu->addAction(a_slide_camera);
 
-	m_slide_box->setMenu(slide_menu);
-	m_slide_box->setItemMenu(slide_item_menu);
+	m_slide_box->setMenu(m_slide_menu);
+	m_slide_box->setItemMenu(m_slide_item_menu);
 
 	// new
 	connect(a_new_slide, &QAction::triggered, this, &NarrativeControl::newSlide);
@@ -324,6 +325,15 @@ void NarrativeControl::editNarrativeInfo()
 	Narrative *narrative = getNarrative(active_item);
 
 	NarrativeInfoDialog dlg(narrative);
+
+	// read only mode
+	if (narrative->lockTable()->isLocked()) {
+		dlg.setReadOnly(true);
+		dlg.exec();
+		return;
+	}
+
+	// edit mode
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		qInfo() << "narrative list - cancelled edit on" << active_item;
@@ -356,11 +366,10 @@ void NarrativeControl::deleteNarratives()
 void NarrativeControl::lockNarratives()
 {
 	// which can be locked?
-
 	std::vector<LockTable*> lock_me;
 	for (int i : m_narrative_selection->data()) {
 		auto *table = getNarrative(i)->lockTable();
-		if (table->isLocked()) {
+		if (!table->isLocked()) {
 			lock_me.push_back(table);
 		}
 	}
@@ -369,19 +378,13 @@ void NarrativeControl::lockNarratives()
 	
 	// warning dialog
 	auto btn = QMessageBox::warning(m_window, "Lock Narratives",
-		"Are you sure you want to lock these narratives? This is not undoable",
+		"Are you sure you want to lock these narratives? This is not undoable.",
 		QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
 	if (btn == QMessageBox::Cancel) return;
 
-	// get a password
-	QInputDialog::getText(m_window, "Lock Narratives", "Enter a password");
-
-	PasswordDialog dlg;
-	dlg.setUsePassword(true);
+	CreatePasswordDialog dlg;
 	int result = dlg.exec();
-
 	if (result == QDialog::Rejected) return;
-
 	bool use_pw = dlg.usePassword();
 	QString pw = dlg.password();
 
@@ -389,6 +392,7 @@ void NarrativeControl::lockNarratives()
 	if (use_pw) hash = HashLock::generateHash(pw.toStdString());
 
 	int bad_count = 0;
+	int good_count = 0;
 	for (int i : m_narrative_selection->data()) {
 		Narrative *nar = getNarrative(i);
 		if (!nar) return;
@@ -397,7 +401,13 @@ void NarrativeControl::lockNarratives()
 			bad_count++;
 			continue;
 		}
-		lock->lockWithPasswordHash(hash);
+		good_count++;
+		if (use_pw) {
+			lock->lockWithPasswordHash(hash);
+		}
+		else {
+			lock->lock();
+		}
 	}
 
 	if (bad_count > 0) {
@@ -406,6 +416,13 @@ void NarrativeControl::lockNarratives()
 			bad_count);
 		QMessageBox::warning(m_window, "Lock Narratives", msg);
 	}
+
+	if (good_count > 0) {
+		m_undo_stack->clear();
+	}
+
+	// update actions
+	onNarrativeSelectionChanged();
 }
 
 void NarrativeControl::unlockNarratives()
@@ -427,7 +444,7 @@ void NarrativeControl::unlockNarratives()
 		checked[i] = true;
 
 		std::vector<Narrative*> clump;
-		Narrative *nar = m_narrative_group->child(i);
+		Narrative *nar = m_narrative_group->child(indices[i]);
 		const LockTable *lt = nar->lockTable();
 
 		if (lt->isPermanent()) {
@@ -435,16 +452,16 @@ void NarrativeControl::unlockNarratives()
 			continue;
 		}
 
-		if (nar->lockTable()->isLocked()) {
+		if (!nar->lockTable()->isLocked()) {
 			continue;
 		}
 
 		HashLock hash = lt->hash();
 		clump.push_back(nar);
 
-		for (size_t j = 0; j < indices.size(); j++) {
+		for (size_t j = i; j < indices.size(); j++) {
 			if (checked[j]) continue;
-			Narrative *nar2 = m_narrative_group->child(j);
+			Narrative *nar2 = m_narrative_group->child(indices[j]);
 
 			if (!nar2->lockTable()->hasPassword()) {
 				continue;
@@ -458,7 +475,6 @@ void NarrativeControl::unlockNarratives()
 		clumps.push_back(clump);
 	}
 
-	qDebug() << "n clumps" << clumps.size();
 	for (int i = 0; i < clumps.size(); i++) {
 		auto &clump = clumps[i];
 
@@ -466,28 +482,44 @@ void NarrativeControl::unlockNarratives()
 		if (clump.size() < 0) return;
 		Narrative *first = clump[0];
 		int count = (int)clump.size();
-		QString title = QString::fromStdString(first->getTitle().c_str());
+		QString title = QString::fromStdString(first->getTitle());
 
 		QString msg;
 
-		msg.sprintf("Enter password for narratives %s, ... (%d total)",
-			title, count);
+		if (clump.size() == 1) {
+			msg = QString("Enter password for %1.")
+				.arg(title);
+		}
+		else {
+			msg = QString("Enter password for %1 narratives. (%2, ...)")
+				.arg(clump.size())
+				.arg(title);
+		}
 
 		std::vector<LockTable*> locks;
 		for (Narrative *nar : clump) {
 			locks.push_back(nar->lockTable());
 		}
 
-		bool pw_ok;
-		do {
-			//QInputDialog
-			bool ok;
-			QString pw = PasswordDialog::getPassword(&ok, "Unlock Narratives", msg);
-			if (!ok) return;
-			pw_ok = LockTable::massUnlock(locks, pw);
-
-		} while (!pw_ok);
+		TestPasswordDialog dlg;
+		dlg.setWindowTitle("Unlock Narratives");
+		dlg.setLabel(msg);
+		dlg.showSkipButton(clumps.size() > 1);
+		dlg.setTestCallback([&locks](QString pw) {
+			return LockTable::massUnlock(locks, pw);
+		});
+		int result = dlg.exec();
+		if (result == QDialog::Rejected) {
+			return;
+		}
 	}
+
+	if (perm_nars.size() > 0) {
+		QString msg = QString("Failed to unlock %1 permanently locked narratives.")
+			.arg(perm_nars.size());
+		QMessageBox::warning(nullptr, "Unlock Narratives", msg);
+	}
+	onNarrativeSelectionChanged();
 }
 
 void NarrativeControl::moveNarratives(const std::vector<std::pair<size_t, size_t>> &mapping)
@@ -557,6 +589,39 @@ void NarrativeControl::onNarrativeSelectionChanged()
 	a_lock_narratives->setEnabled(any_unlocked);
 	a_unlock_narratives->setEnabled(any_locked);
 
+}
+
+void NarrativeControl::onCurrentLockChange()
+{
+	// get current nar, get current lock
+	if (m_current_lock == nullptr) return;
+
+	// locking stuff
+	bool locked = m_current_lock->isLocked();
+	bool enable = !locked;
+	a_delete_slides->setEnabled(enable);
+	a_new_slide->setEnabled(enable);
+	a_edit_slide->setEnabled(enable);
+	a_slide_camera->setEnabled(enable);
+	a_slide_duration->setEnabled(enable);
+	a_slide_transition->setEnabled(enable);
+
+	// hide the menus
+	if (enable) {
+		m_slide_box->setMenu(m_slide_menu);
+		m_slide_box->setItemMenu(m_slide_item_menu);
+	}
+	else {
+		m_slide_box->setMenu(nullptr);
+		m_slide_box->setItemMenu(nullptr);
+	}
+
+	m_slide_box->enableDragging(enable);
+
+	m_bar->ui.add_2->setVisible(enable);
+	m_bar->ui.remove_2->setVisible(enable);
+	m_bar->ui.edit->setVisible(enable);
+	m_bar->showLockIcon(locked);
 }
 
 void NarrativeControl::enableEditing(bool enable)
@@ -669,6 +734,14 @@ void NarrativeControl::openNarrative(int index)
 	m_bar->setSlidesHeader(nar->getTitle());
 	m_slide_box->setGroup(nar);
 	m_canvas->setStyles(nar->labelStyles());
+
+	// listen to current narrative lock table
+	Util::reconnect(this, &m_current_lock, nar->lockTable());
+	if (m_current_lock == nullptr) return;
+
+	onCurrentLockChange();
+	connect(m_current_lock, &LockTable::sLockChanged, this,
+		&NarrativeControl::onCurrentLockChange);
 }
 
 bool NarrativeControl::openSlide(int index, bool go)
@@ -973,6 +1046,7 @@ NarrativeSlide * NarrativeControl::getSlide(int narrative, int slide) const
 
 void NarrativeControl::newSlide()
 {
+	if (m_current_lock && m_current_lock->isLocked()) return;
 	Narrative *nar = getNarrative(m_current_narrative);
 	auto matrix = m_app->getCameraMatrix();
 
@@ -1003,6 +1077,7 @@ void NarrativeControl::newSlide()
 
 void NarrativeControl::deleteSlides()
 {
+	if (m_current_lock && m_current_lock->isLocked()) return;
 	if (m_narrative_selection->empty()) {
 		return;
 	}
@@ -1017,6 +1092,8 @@ void NarrativeControl::deleteSlides()
 
 void NarrativeControl::setSlideDuration()
 {
+	if (m_current_lock && m_current_lock->isLocked()) return;
+
 	qInfo() << "set slide duration";
 	auto selection = m_slide_selection->data();
 	if (selection.empty()) return;
@@ -1043,6 +1120,7 @@ void NarrativeControl::setSlideDuration()
 
 void NarrativeControl::setSlideTransition()
 {
+	if (m_current_lock && m_current_lock->isLocked()) return;
 	qInfo() << "set slide transition duration";
 	auto selection = m_slide_selection->data();
 	if (selection.empty()) return;
@@ -1063,6 +1141,7 @@ void NarrativeControl::setSlideTransition()
 
 void NarrativeControl::setSlideCamera()
 {
+	if (m_current_lock && m_current_lock->isLocked()) return;
 	auto selection = m_slide_selection->data();
 	osg::Matrixd matrix = m_app->getCameraMatrix();
 
@@ -1077,6 +1156,7 @@ void NarrativeControl::setSlideCamera()
 
 void NarrativeControl::moveSlides(const std::vector<std::pair<size_t, size_t>> &mapping)
 {
+	if (m_current_lock && m_current_lock->isLocked()) return;
 	std::unordered_map<int, int> umap;
 
 	std::set<int> from;

@@ -25,10 +25,13 @@ class SlideScrollBox;
 class SlideScrollItem;
 class SelectionStack;
 class OSGViewerWidget;
+class LockTable;
 
 class CanvasItem;
 class CanvasEditor;
 class CanvasContainer;
+
+class QMenu;
 
 // Bridges osg and gui for narratives
 class NarrativeControl : public QObject
@@ -142,6 +145,7 @@ public: // Actions
 
 private:
 	void onNarrativeSelectionChanged();
+	void onCurrentLockChange();
 
 	void enableEditing(bool enable);
 
@@ -203,6 +207,7 @@ private:
 	QPropertyAnimation *m_fade_in_anim;
 
 	NarrativeGroup *m_narrative_group;
+	LockTable *m_current_lock;
 
 	MainWindow *m_window;
 	MainWindowTopBar *m_bar;
@@ -210,6 +215,8 @@ private:
 	SelectionStack *m_narrative_selection;
 	SlideScrollBox *m_slide_box;
 	SelectionStack *m_slide_selection;
+	QMenu *m_slide_menu;
+	QMenu *m_slide_item_menu;
 
 	CanvasEditor *m_canvas;
 	CanvasContainer *m_fade_canvas;

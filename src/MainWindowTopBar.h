@@ -16,6 +16,8 @@ public:
 
 	void setSlidesHeader(std::string);
 
+	void showLockIcon(bool show);
+
 	// TODO
 	//void enableEdting(bool);
 signals:

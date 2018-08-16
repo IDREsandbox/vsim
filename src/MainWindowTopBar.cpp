@@ -6,21 +6,9 @@ MainWindowTopBar::MainWindowTopBar(QWidget * parent)
 {
 	ui.setupUi(this);
 
-	FocusFilter *narff = new FocusFilter(this);
-	ui.page1->installEventFilter(narff);
-	ui.narratives->scrollArea()->installEventFilter(narff);
-	for (QObject *obj : ui.narrativeControl->children()) {
-		obj->installEventFilter(narff);
-	}
-	connect(narff, &FocusFilter::sFocusIn, this, &MainWindowTopBar::sNarrativesPoked);
-
-	FocusFilter *slideff = new FocusFilter(this);
-	ui.page2->installEventFilter(slideff);
-	ui.slides->scrollArea()->installEventFilter(slideff);
-	for (QObject *obj : ui.slideControl->children()) {
-		obj->installEventFilter(slideff);
-	}
-	connect(slideff, &FocusFilter::sFocusIn, this, &MainWindowTopBar::sSlidesPoked);
+	QString dir = QCoreApplication::applicationDirPath();
+	ui.lock_label->setPixmap(dir + "/assets/icons/vs_lock_on_16x.png");
+	ui.lock_label->setVisible(false);
 }
 
 MainWindowTopBar::~MainWindowTopBar() {
@@ -44,5 +32,10 @@ void MainWindowTopBar::showSlides()
 
 void MainWindowTopBar::setSlidesHeader(std::string header)
 {
-	ui.label_2->setText(QString::fromStdString(header));
+	ui.narrative_title->setText(QString::fromStdString(header));
+}
+
+void MainWindowTopBar::showLockIcon(bool show)
+{
+	ui.lock_label->setVisible(show);
 }

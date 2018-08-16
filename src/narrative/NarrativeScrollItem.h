@@ -1,9 +1,11 @@
 ﻿#ifndef NARRATIVESCROLLITEM_H
 #define NARRATIVESCROLLITEM_H
-#include <QWidget>
+
 #include "ui_NarrativeScrollItem.h"
 #include "ScrollBoxItem.h"
-#include "narrative/Narrative.h"
+
+class LockTable;
+class Narrative;
 
 class NarrativeScrollItem : public ScrollBoxItem {
 	Q_OBJECT
@@ -18,11 +20,14 @@ public:
 	void fitTitle();
 
 protected:
+	void paintEvent(QPaintEvent *e) override;
 	void resizeEvent(QResizeEvent *e) override;
 
 private:
 	Ui::NarrativeScrollItem ui;
 	Narrative *m_narrative;
+	LockTable *m_lock;
+	QPixmap m_lock_pixmap;
 };
 
 #endif // NARRATIVESCROLLITEM_H

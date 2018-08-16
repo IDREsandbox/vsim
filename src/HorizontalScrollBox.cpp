@@ -30,7 +30,8 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	m_mouse_down(false),
 	m_dragging_enabled(true),
 	m_minimum_drag_dist(10),
-	m_spacing(10)
+	m_spacing(10),
+	m_read_only(false)
 {
 	QGridLayout *layout = new QGridLayout(this);
 	m_scroll = new QScrollArea(this);
@@ -163,6 +164,17 @@ void HorizontalScrollBox::enableDragging(bool enable)
 void HorizontalScrollBox::setMIMEType(const std::string & type)
 {
 	m_mime_type = QString::fromStdString(type);
+}
+
+bool HorizontalScrollBox::readOnly() const
+{
+	return m_read_only;
+}
+
+void HorizontalScrollBox::setReadOnly(bool read_only)
+{
+	m_read_only = read_only;
+	enableDragging(!read_only);
 }
 
 bool HorizontalScrollBox::eventFilter(QObject * o, QEvent * e)

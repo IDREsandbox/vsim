@@ -99,6 +99,7 @@ void LockTable::lock()
 	m_locked = true;
 	m_has_password = false;
 	m_hash = {};
+	emit sLockChanged(m_locked);
 }
 
 void LockTable::lockWithPasswordHash(HashLock h)
@@ -106,6 +107,7 @@ void LockTable::lockWithPasswordHash(HashLock h)
 	m_locked = true;
 	m_has_password = true;
 	m_hash = h;
+	emit sLockChanged(m_locked);
 }
 
 bool LockTable::isLocked() const
@@ -115,9 +117,7 @@ bool LockTable::isLocked() const
 
 void LockTable::lockWithPassword(QString s)
 {
-	m_locked = true;
-	m_has_password = true;
-	m_hash = HashLock::generateHash(s.toStdString());
+	lockWithPasswordHash(HashLock::generateHash(s.toStdString()));
 }
 
 bool LockTable::checkPassword(QString s) const
