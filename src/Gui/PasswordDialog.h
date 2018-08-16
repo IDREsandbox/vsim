@@ -24,7 +24,8 @@ public:
 //	static QString getPassword(bool *ok, QString title,
 //		QString label);
 
-public:
+protected:
+	void showEvent(QShowEvent *e) override;
 
 private:
 	void onUseChange();

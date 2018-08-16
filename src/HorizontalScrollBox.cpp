@@ -335,7 +335,8 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 		) {
 
 		// Begin drag
-		m_drag = new QDrag(this);
+		QDrag drag(this);
+		m_drag = &drag;
 		ScrollBoxItem *item = getItem(m_drag_press_index);
 		QPixmap pixmap(item->width(), item->height());
 		item->render(&pixmap, QPoint(), QRegion(0, 0, item->width(), item->height()));
@@ -350,6 +351,7 @@ void HorizontalScrollBox::mouseMoveEvent(QMouseEvent * event)
 
 		Qt::DropAction result = m_drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::MoveAction);
 		m_drag = nullptr;
+		refresh();
 	}
 }
 

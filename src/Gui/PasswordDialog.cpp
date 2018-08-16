@@ -1,4 +1,5 @@
 ﻿#include "PasswordDialog.h"
+#include "PasswordDialog.h"
 
 #include <QInputDialog>
 #include <QMessageBox>
@@ -14,7 +15,7 @@ CreatePasswordDialog::CreatePasswordDialog(QWidget *parent)
 
 	onUseChange();
 
-	connect(ui.password_checkbox, &QAbstractButton::pressed, this,
+	connect(ui.password_checkbox, &QAbstractButton::clicked, this,
 		[this]() {
 		m_use = !m_use;
 		onUseChange();
@@ -55,6 +56,14 @@ void CreatePasswordDialog::setLabel(QString text)
 	adjustSize();
 }
 
+void CreatePasswordDialog::showEvent(QShowEvent * e)
+{
+	qDebug() << "test password dialog show event?";
+	QDialog::showEvent(e);
+	ui.password->setFocus();
+}
+
+
 //QString CreatePasswordDialog::getPasswordCheckable(bool *ok, bool *no_pw)
 //{
 //	PasswordDialog dlg;
@@ -93,6 +102,8 @@ TestPasswordDialog::TestPasswordDialog(QWidget * parent)
 	m_skip_button->hide();
 
 	adjustSize();
+
+	setTabOrder(ui.password, ui.password_checkbox);
 
 	connect(ui.button_box, &QDialogButtonBox::rejected,
 		this, &QDialog::reject);

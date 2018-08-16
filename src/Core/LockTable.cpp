@@ -37,7 +37,10 @@ bool LockTable::operator==(const LockTable & other) const
 
 void LockTable::readLockTable(const VSim::FlatBuffers::LockTable *fb_lock)
 {
-	if (fb_lock == nullptr) return;
+	if (fb_lock == nullptr) {
+		m_locked = false;
+		return;
+	}
 	
 	// unlocked
 	m_locked = fb_lock->locked();
@@ -136,6 +139,7 @@ bool LockTable::unlock(QString s)
 	if (ok) {
 		m_locked = false;
 		m_has_password = false;
+		emit sLockChanged(false);
 		return true;
 	}
 
@@ -166,6 +170,7 @@ bool LockTable::massUnlock(const std::vector<LockTable*> table, QString password
 		lock->m_locked = false;
 		lock->m_has_password = false;
 		lock->m_hash = {};
+		emit lock->sLockChanged(false);
 	}
 	return true;
 }

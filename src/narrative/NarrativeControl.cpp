@@ -640,6 +640,8 @@ void NarrativeControl::onRestrictToCurrent(bool restrict)
 
 	m_bar->ui.add->setVisible(enable);
 	m_bar->ui.remove->setVisible(enable);
+
+	m_narrative_box->enableDragging(enable);
 }
 
 void NarrativeControl::load(NarrativeGroup *narratives)
