@@ -16,6 +16,7 @@ table Narrative {
   title:string;
   author:string;
   description:string;
+  lock_table:LockTable;
   //locked:bool = false;
 }
 

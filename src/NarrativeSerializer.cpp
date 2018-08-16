@@ -7,6 +7,7 @@
 #include "Canvas/LabelStyle.h"
 #include "Canvas/CanvasSerializer.h"
 #include "Core/TypesSerializer.h"
+#include "Core/LockTable.h"
 
 #include <QDebug>
 
@@ -25,6 +26,8 @@ void NarrativeSerializer::readNarrativeTable(
 			if (fb_nar->title()) nar->setTitle(fb_nar->title()->str());
 			if (fb_nar->author()) nar->setAuthor(fb_nar->author()->str());
 			if (fb_nar->description()) nar->setDescription(fb_nar->description()->str());
+			nar->lockTable()->readLockTable(fb_nar->lock_table());
+
 			// slides
 			auto fb_slides = fb_nar->slides();
 			if (fb_slides) {
@@ -74,12 +77,16 @@ flatbuffers::Offset<fb::NarrativeTable>
 		auto o_auth = builder->CreateString(nar->getAuthor());
 		auto o_desc = builder->CreateString(nar->getDescription());
 
+		// lock table
+		auto o_lock = nar->lockTable()->createLockTable(builder);
+
 		fb::NarrativeBuilder b_nar(*builder);
 		b_nar.add_title(o_title);
 		b_nar.add_author(o_auth);
 		b_nar.add_description(o_desc);
 		b_nar.add_styles(o_styles);
 		b_nar.add_slides(o_slides);
+		b_nar.add_lock_table(o_lock);
 		auto o_nar = b_nar.Finish();
 
 		v_nars.push_back(o_nar);
