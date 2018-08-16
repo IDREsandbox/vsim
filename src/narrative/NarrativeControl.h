@@ -108,9 +108,13 @@ public: // Actions
 	QAction *a_narrative_info;
 	QAction *a_delete_narratives;
 	QAction *a_open_narrative;
+	QAction *a_lock_narratives;
+	QAction *a_unlock_narratives;
 	void newNarrative();
 	void editNarrativeInfo();
 	void deleteNarratives();
+	void lockNarratives();
+	void unlockNarratives();
 	void moveNarratives(const std::vector<std::pair<size_t, size_t>> &mapping);
 	void mergeNarratives(const NarrativeGroup *g);
 
@@ -137,6 +141,8 @@ public: // Actions
 	void debug();
 
 private:
+	void onNarrativeSelectionChanged();
+
 	void enableEditing(bool enable);
 
 	// data -> this

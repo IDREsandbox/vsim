@@ -12,6 +12,7 @@ set(Core_h
   GroupTemplate.h
   HashLock.h
   ICommandStack.h
+  LockTable.h
   OSGObserver.h
   SimpleCommandStack.h
   TypesSerializer.h
@@ -24,6 +25,7 @@ set(Core_h
 set(Core_src
   GroupSignals.cpp
   HashLock.cpp
+  LockTable.cpp
   OSGObserver.cpp
   SimpleCommandStack.cpp
   TypesSerializer.cpp
@@ -33,7 +35,7 @@ set(Core_src
 )
 
 add_library(Core_obj ${Core_src} ${Core_h})
-target_link_libraries(Core_obj Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(Core_obj Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES} cryptopp-static)
 
 vsim_add_test(
   Group_test
@@ -63,6 +65,12 @@ vsim_add_test(
   HashLock_test
   "HashLock.h;HashLock.cpp;HashLock_test.cpp"
   "cryptopp-static;Qt5::Test"
+)
+
+vsim_add_test(
+  LockTable_test
+  "LockTable_test.cpp"
+  "Core_obj;cryptopp-static;Qt5::Test"
 )
 
 # is this needed?

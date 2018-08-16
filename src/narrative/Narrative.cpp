@@ -1,18 +1,19 @@
-#include <assert.h>
 #include "narrative/Narrative.h"
+
 #include "narrative/NarrativeSlide.h"
 #include "deprecated/narrative/NarrativeNode.h"
 #include "deprecated/narrative/NarrativeOld.h"
 #include "narrative/NarrativeSlide.h"
 #include "Canvas/LabelStyleGroup.h"
+#include "Core/LockTable.h"
 
 Narrative::Narrative(QObject *parent)
 	: TGroup<NarrativeSlide>(parent),
 	m_title("Untitled"),
 	m_description(""),
-	m_author(""),
-	m_locked(false)
+	m_author("")
 {
+	m_lock_table = new LockTable(this);
 	m_styles = std::make_unique<LabelStyleGroup>();
 }
 
@@ -22,7 +23,7 @@ Narrative & Narrative::operator=(const Narrative & other)
 	m_author = other.m_author;
 	m_description = other.m_description;
 	m_title = other.m_title;
-	m_locked = other.m_locked;
+	*m_lock_table = *other.m_lock_table;
 	m_styles->copy(*other.m_styles.get());
 	return *this;
 }
@@ -32,7 +33,7 @@ void Narrative::loadOld(const NarrativeOld * old)
 	m_title = old->getName();
 	m_description = old->getDescription();
 	m_author = old->getAuthor();
-	m_locked = old->getLock();
+	// unlocked
 	clear();
 	for (uint i = 0; i < old->getNumNodes(); i++) {
 		NarrativeNode *node = old->getNode(i);
@@ -64,6 +65,14 @@ std::string Narrative::getDescription() const {
 void Narrative::setDescription(const std::string& description) {
 	emit sDescriptionChanged(description);
 	m_description = description;
+}
+LockTable *Narrative::lockTable()
+{
+	return m_lock_table;
+}
+const LockTable * Narrative::lockTableConst() const
+{
+	return m_lock_table;
 }
 LabelStyleGroup * Narrative::labelStyles() const
 {

@@ -33,6 +33,13 @@ HashLock HashLock::generateHashPBKDF2(std::string password,
 	return out;
 }
 
+bool HashLock::operator==(const HashLock & other) const
+{
+	return m_salt == other.m_salt
+		&& m_hash == other.m_hash
+		&& m_iterations == other.m_iterations;
+}
+
 HashLock HashLock::generateHash(std::string password)
 {
 	size_t iterations = 20000;
@@ -58,4 +65,11 @@ bool HashLock::checkPassword(const std::string & password) const
 
 	// compare hashes
 	return m_hash == hash_bytes;
+}
+
+void HashLock::debug()
+{
+	QByteArray h1h(reinterpret_cast<char*>(m_hash.data()), (int)m_hash.size());
+	QByteArray h1s(reinterpret_cast<char*>(m_salt.data()), (int)m_salt.size());
+	qDebug() << "hash - " << h1h << "\nsalt - " << h1s << "\n" << m_iterations;
 }

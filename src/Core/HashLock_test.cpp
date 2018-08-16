@@ -20,6 +20,7 @@ private:
 		qDebug() << "hash - " << h1h << "\nsalt - " << h1s << "\n" << h1.m_iterations;
 		
 		QVERIFY(h1.checkPassword(password));
+		QCOMPARE(h1.checkPassword("foo"), false);
 	}
 
 	void saltTest() {

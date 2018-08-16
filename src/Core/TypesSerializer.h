@@ -7,6 +7,7 @@
 #include <osg/Matrix>
 
 class EResourceGroup;
+class LockTable;
 
 namespace VSim {
 namespace FlatBuffers {

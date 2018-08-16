@@ -1,5 +1,7 @@
 #include "TypesSerializer.h"
+
 #include "Core/Util.h"
+#include "LockTable.h"
 
 namespace fb = VSim::FlatBuffers;
 
@@ -66,3 +68,4 @@ flatbuffers::Offset<flatbuffers::String> TypesSerializer::createRelativePath(
 	QString qpath = Util::fixRelativePath(path, p.old_base, p.new_base);
 	return builder->CreateString(qpath.toStdString());
 }
+

@@ -11,6 +11,7 @@
 class LabelStyleGroup;
 class NarrativeOld;
 class NarrativeSlide;
+class LockTable;
 
 class Narrative : public TGroup<NarrativeSlide> {
 	Q_OBJECT
@@ -28,9 +29,8 @@ public:
 	std::string getDescription() const;
 	void setDescription(const std::string& description);
 
-	bool getLock() const{return m_locked;}
-	void setLock(bool lock){ m_locked = lock;}
-
+	LockTable *lockTable();
+	const LockTable *lockTableConst() const;
 	LabelStyleGroup *labelStyles() const;
 
 signals:
@@ -63,7 +63,8 @@ private:
 	std::string m_title;
 	std::string m_description;
 	std::string m_author;
-	bool m_locked;
+
+	LockTable *m_lock_table;
 
 	std::unique_ptr<LabelStyleGroup> m_styles;
 };

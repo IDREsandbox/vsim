@@ -14,6 +14,7 @@
 
 #include "MainWindow.h"
 #include "OSGViewerWidget.h"
+#include "PasswordDialog.h"
 
 #include "narrative/NarrativeInfoDialog.h"
 #include "narrative/NarrativeGroup.h"
@@ -23,6 +24,7 @@
 #include "narrative/SlideScrollItem.h"
 #include "VSimRoot.h"
 #include "Core/GroupCommands.h"
+#include "Core/LockTable.h"
 
 #include "Canvas/LabelType.h"
 #include "Canvas/LabelStyle.h"
@@ -149,6 +151,14 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	a_open_narrative->setIconText("Open");
 	connect(a_open_narrative, &QAction::triggered, this, &NarrativeControl::showSlideBox);
 
+	a_lock_narratives = new QAction("Lock Narrative", this);
+	a_lock_narratives->setIconText("Lock");
+	connect(a_lock_narratives, &QAction::triggered, this, &NarrativeControl::lockNarratives);
+
+	a_unlock_narratives = new QAction("Unlock Narrative", this);
+	a_unlock_narratives->setIconText("Unlock");
+	connect(a_unlock_narratives, &QAction::triggered, this, &NarrativeControl::unlockNarratives);
+
 	// menus
 	QMenu *nar_menu = new QMenu("Narrative menu", m_narrative_box);
 	QMenu *nar_item_menu = new QMenu("Narrative item menu", m_narrative_box);
@@ -158,6 +168,8 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	nar_item_menu->addAction(a_delete_narratives);
 	nar_item_menu->addAction(a_narrative_info);
 	nar_item_menu->addAction(a_open_narrative);
+	nar_item_menu->addAction(a_lock_narratives);
+	nar_item_menu->addAction(a_unlock_narratives);
 
 	m_narrative_box->setMenu(nar_menu);
 	m_narrative_box->setItemMenu(nar_item_menu);
@@ -186,6 +198,8 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 			openSlide(0);
 		}
 	});
+	connect(m_narrative_selection, &SelectionStack::sChanged,
+		this, &NarrativeControl::onNarrativeSelectionChanged);
 
 	// SLIDE CONTROL
 	a_new_slide = new QAction("New Slide", this);
@@ -339,6 +353,143 @@ void NarrativeControl::deleteNarratives()
 	m_undo_stack->endMacro();
 }
 
+void NarrativeControl::lockNarratives()
+{
+	// which can be locked?
+
+	std::vector<LockTable*> lock_me;
+	for (int i : m_narrative_selection->data()) {
+		auto *table = getNarrative(i)->lockTable();
+		if (table->isLocked()) {
+			lock_me.push_back(table);
+		}
+	}
+
+	if (lock_me.size() == 0) return;
+	
+	// warning dialog
+	auto btn = QMessageBox::warning(m_window, "Lock Narratives",
+		"Are you sure you want to lock these narratives? This is not undoable",
+		QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
+	if (btn == QMessageBox::Cancel) return;
+
+	// get a password
+	QInputDialog::getText(m_window, "Lock Narratives", "Enter a password");
+
+	PasswordDialog dlg;
+	dlg.setUsePassword(true);
+	int result = dlg.exec();
+
+	if (result == QDialog::Rejected) return;
+
+	bool use_pw = dlg.usePassword();
+	QString pw = dlg.password();
+
+	HashLock hash;
+	if (use_pw) hash = HashLock::generateHash(pw.toStdString());
+
+	int bad_count = 0;
+	for (int i : m_narrative_selection->data()) {
+		Narrative *nar = getNarrative(i);
+		if (!nar) return;
+		auto *lock = nar->lockTable();
+		if (lock->isLocked()) {
+			bad_count++;
+			continue;
+		}
+		lock->lockWithPasswordHash(hash);
+	}
+
+	if (bad_count > 0) {
+		QString msg = QString().sprintf(
+			"Failed to lock %d selected narratives - were already locked.",
+			bad_count);
+		QMessageBox::warning(m_window, "Lock Narratives", msg);
+	}
+}
+
+void NarrativeControl::unlockNarratives()
+{
+	// clump narratives by same hash
+	// unlock them in groups
+
+	// just do the n^2 solution
+	std::vector<std::vector<Narrative*>> clumps;
+
+	std::set<size_t> nar_set = getSelectedNarratives();
+	std::vector<size_t> indices(nar_set.begin(), nar_set.end());
+	std::vector<Narrative*> perm_nars;
+
+	std::vector<bool> checked(indices.size(), false);
+
+	for (size_t i = 0; i < indices.size(); i++) {
+		if (checked[i]) continue;
+		checked[i] = true;
+
+		std::vector<Narrative*> clump;
+		Narrative *nar = m_narrative_group->child(i);
+		const LockTable *lt = nar->lockTable();
+
+		if (lt->isPermanent()) {
+			perm_nars.push_back(nar);
+			continue;
+		}
+
+		if (nar->lockTable()->isLocked()) {
+			continue;
+		}
+
+		HashLock hash = lt->hash();
+		clump.push_back(nar);
+
+		for (size_t j = 0; j < indices.size(); j++) {
+			if (checked[j]) continue;
+			Narrative *nar2 = m_narrative_group->child(j);
+
+			if (!nar2->lockTable()->hasPassword()) {
+				continue;
+			}
+
+			if (hash == nar2->lockTable()->hash()) {
+				checked[j] = true;
+				clump.push_back(nar2);
+			}
+		}
+		clumps.push_back(clump);
+	}
+
+	qDebug() << "n clumps" << clumps.size();
+	for (int i = 0; i < clumps.size(); i++) {
+		auto &clump = clumps[i];
+
+		// get the first narrative title
+		if (clump.size() < 0) return;
+		Narrative *first = clump[0];
+		int count = (int)clump.size();
+		QString title = QString::fromStdString(first->getTitle().c_str());
+
+		QString msg;
+
+		msg.sprintf("Enter password for narratives %s, ... (%d total)",
+			title, count);
+
+		std::vector<LockTable*> locks;
+		for (Narrative *nar : clump) {
+			locks.push_back(nar->lockTable());
+		}
+
+		bool pw_ok;
+		do {
+			//QInputDialog
+			bool ok;
+			QString pw = PasswordDialog::getPassword(&ok, "Unlock Narratives", msg);
+			if (!ok) return;
+			pw_ok = LockTable::massUnlock(locks, pw);
+
+		} while (!pw_ok);
+	}
+}
+
 void NarrativeControl::moveNarratives(const std::vector<std::pair<size_t, size_t>> &mapping)
 {
 	std::set<int> from;
@@ -382,6 +533,30 @@ void NarrativeControl::debug()
 	qInfo() << "nar box" << Util::iterToString(ns.begin(), ns.end());
 	auto ss = m_slide_selection->data();
 	qInfo() << "slide box" << Util::iterToString(ss.begin(), ss.end());
+}
+
+void NarrativeControl::onNarrativeSelectionChanged()
+{
+	// whats the selection
+	// disable/enable actions accordingly
+
+	// locked/unlocked checking
+	// any unlocked? -> enable lock
+	bool any_unlocked = false;
+	bool any_locked = false;
+	for (size_t i : getSelectedNarratives()) {
+		Narrative *nar = m_narrative_group->child(i);
+		if (!nar->lockTable()->isLocked()) {
+			any_unlocked = true;
+		}
+		else {
+			any_locked = true;
+		}
+	}
+
+	a_lock_narratives->setEnabled(any_unlocked);
+	a_unlock_narratives->setEnabled(any_locked);
+
 }
 
 void NarrativeControl::enableEditing(bool enable)

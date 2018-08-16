@@ -11,10 +11,14 @@ struct HashLock {
 		size_t hash_size,
 		size_t iterations);
 
+	bool operator==(const HashLock &other) const;
+
 	//HashLock();
 	//HashLock(std::vector<uint8_t> salt, std::vector<uint8_t> hash, uint32_t iterations);
 
 	bool checkPassword(const std::string &password) const;
+
+	void debug();
 
 	std::vector<uint8_t> m_salt;
 	std::vector<uint8_t> m_hash;
