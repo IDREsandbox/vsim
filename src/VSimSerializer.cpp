@@ -122,7 +122,9 @@ bool VSimSerializer::writeStream(std::ostream & out, const VSimRoot * root, cons
 	return true;
 }
 
-void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer, VSimRoot *root, const TypesSerializer::Params &p)
+void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer,
+	VSimRoot *root,
+	const TypesSerializer::Params &p)
 {
 	NarrativeGroup *nars = root->narratives();
 	EResourceGroup *ers = root->resources();

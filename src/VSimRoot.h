@@ -5,7 +5,7 @@
 #include <memory>
 #include <QObject>
 
-#include "Core/HashLock.h"
+#include "Core/LockTable.h"
 
 class NarrativeGroup;
 class ModelGroup;
@@ -47,22 +47,21 @@ public:
 
 	// TODO FIXME: come up with better interfaces?
 	// right now it's basically wrapped struct access
+	// there is also the question of authorization
 	// alteratives:
 	// - lock(LockParams)
 	// - lock().pw().settings().current()... named param idiom
-	bool locked() const;
-	// locks without password, you can't change anything
-	void lock();
-	// sets password
-	void lockWithPassword(const std::string &password);
-	// unlock removes all lock stuff
-	void unlock();
+	void setLockTable(const LockTable &lock);
+	const LockTable *lockTableConst() const;
+
+	//// unlock removes all lock stuff
+	//bool unlock(QString pw);
 
 	// returns true if password is successful
 	// if not locked, then always true
-	bool hasPassword() const;
-	bool checkPassword(const std::string &password) const;
-	void setPassword(const std::string &password);
+	//bool hasPassword() const;
+	//bool checkPassword(QString password) const;
+	//void setPassword(QString password);
 
 	bool settingsLocked() const;
 	bool restrictedToCurrent() const; // restrict to current narratives
@@ -89,9 +88,7 @@ private:
 	std::unique_ptr<VSim::FlatBuffers::SettingsT> m_settings;
 	std::unique_ptr<CanvasScene> m_branding_canvas;
 
-	bool m_locked;
-	bool m_has_password;
-	HashLock m_lock_hash;
+	LockTable m_lock;
 	bool m_lock_settings;
 	bool m_lock_add_remove;
 	bool m_lock_navigation;

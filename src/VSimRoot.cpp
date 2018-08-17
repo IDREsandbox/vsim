@@ -101,15 +101,7 @@ void VSimRoot::prepareSave()
 	fb_lsettings->lock_add_remove = m_lock_add_remove;
 	fb_lsettings->lock_navigation = m_lock_navigation;
 
-	fb_lock->locked = m_locked;
-	fb_lock->has_password = m_has_password;
-
-	if (m_has_password) {
-		auto &fb_hash = Util::getOrCreate(fb_lock->hash);
-		fb_hash->hash = m_lock_hash.m_hash;
-		fb_hash->salt = m_lock_hash.m_salt;
-		fb_hash->iterations = m_lock_hash.m_iterations;
-	}
+	m_lock.createLockTableT(fb_lock.get());
 }
 
 void VSimRoot::postLoad()
@@ -121,46 +113,7 @@ void VSimRoot::postLoad()
 	setRestrictToCurrent(fb_lsettings->lock_add_remove);
 	setNavigationLocked(fb_lsettings->lock_navigation);
 
-	m_locked = fb_lock->locked;
-	m_has_password = fb_lock->has_password;
-
-	if (fb_lock->has_password && fb_lock->hash) {
-		m_has_password = true;
-		auto &fb_hash = fb_lock->hash;
-		m_lock_hash.m_hash = fb_hash->hash;
-		m_lock_hash.m_salt = fb_hash->salt;
-		m_lock_hash.m_iterations = fb_hash->iterations;
-	}
-	else {
-		m_has_password = false;
-	}
-}
-
-bool VSimRoot::locked() const
-{
-	return m_locked;
-}
-
-void VSimRoot::lock()
-{
-	m_locked = true; 
-	m_has_password = false;
-}
-
-bool VSimRoot::hasPassword() const
-{
-	return m_has_password;
-}
-
-bool VSimRoot::checkPassword(const std::string & password) const
-{
-	if (m_locked && !m_has_password) return false;
-	return m_lock_hash.checkPassword(password);
-}
-
-void VSimRoot::setPassword(const std::string & password)
-{
-	m_lock_hash = HashLock::generateHash(password);
+	m_lock.readLockTableT(fb_lock.get());
 }
 
 bool VSimRoot::settingsLocked() const
@@ -178,19 +131,24 @@ bool VSimRoot::navigationLocked() const
 	return m_lock_navigation;
 }
 
-void VSimRoot::lockWithPassword(const std::string &password)
+//bool VSimRoot::unlock(QString pw)
+//{
+//	bool success = m_lock.unlock(pw);
+//	if (!success) return false;
+//	setSettingsLocked(false);
+//	setRestrictToCurrent(false);
+//	setNavigationLocked(false);
+//	return true;
+//}
+
+void VSimRoot::setLockTable(const LockTable &lock)
 {
-	setPassword(password);
-	m_locked = true;
-	m_has_password = true;
+	m_lock = lock;
 }
 
-void VSimRoot::unlock()
+const LockTable * VSimRoot::lockTableConst() const
 {
-	setSettingsLocked(false);
-	setRestrictToCurrent(false);
-	setNavigationLocked(false);
-	m_locked = false;
+	return &m_lock;
 }
 
 void VSimRoot::setSettingsLocked(bool locked)

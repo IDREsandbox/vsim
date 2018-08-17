@@ -17,7 +17,12 @@ public:
 
 	Narrative *narrative(int index) const;
 
-	void lockAll(QString password);
+	//void lockAll(QString password,
+	//	int *out_success = nullptr,
+	//	int *out_fail = nullptr);
+	//void unlockAll();
+	//void lockAllPermanent();
+	//void lockAllWithHash(HashLock lock);
 };
 
 #endif

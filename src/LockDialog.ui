@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>272</width>
-    <height>375</height>
+    <width>276</width>
+    <height>394</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,17 +44,29 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QCheckBox" name="password_checkbox">
-        <property name="text">
-         <string>Change password</string>
+       <widget class="QGroupBox" name="use_password">
+        <property name="title">
+         <string>Use password</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="password">
-        <property name="echoMode">
-         <enum>QLineEdit::Password</enum>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QCheckBox" name="change_password">
+           <property name="text">
+            <string>Change password</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="password">
+           <property name="echoMode">
+            <enum>QLineEdit::Password</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -86,25 +98,39 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="expiration_checkbox">
-        <property name="text">
+       <widget class="QGroupBox" name="expiration_checkbox">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>50</height>
+         </size>
+        </property>
+        <property name="title">
          <string>Model expires</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QLabel" name="expiration_label">
+             <property name="text">
+              <string>Expiration date</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDateEdit" name="expiration_date"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QLabel" name="expiration_label">
-          <property name="text">
-           <string>Expiration date</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDateEdit" name="expiration_date"/>
-        </item>
-       </layout>
       </item>
      </layout>
     </widget>
@@ -119,7 +145,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Notes: Adding a password doesn't encrypt file contents. The password itself is encrypted. A file locked without a password cannot be unlocked.</string>
+      <string>Notes: A file locked without a password cannot be unlocked. Adding a password doesn't encrypt file contents. The password itself is encrypted.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
