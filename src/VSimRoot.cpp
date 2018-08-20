@@ -53,6 +53,7 @@ VSimRoot::~VSimRoot()
 
 void VSimRoot::take(VSimRoot * other)
 {
+	qDebug() << "vsim root take";
 	m_narratives->clear();
 	m_resources->clear();
 	m_models->clear();
@@ -62,6 +63,8 @@ void VSimRoot::take(VSimRoot * other)
 
 	m_settings.swap(other->m_settings);
 	m_branding_canvas->copy(*other->m_branding_canvas);
+	qDebug() << "assigning lock" << other->m_lock->isLocked();
+	*m_lock = *other->m_lock;
 }
 
 NarrativeGroup * VSimRoot::narratives() const

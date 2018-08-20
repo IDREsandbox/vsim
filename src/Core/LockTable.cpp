@@ -121,6 +121,7 @@ void LockTable::readLockTableT(const VSim::FlatBuffers::LockTableT *fb_lock)
 		m_hash.m_salt = fb_hash->salt;
 		m_hash.m_iterations = fb_hash->iterations;
 	}
+	emit sLockChanged(m_locked);
 }
 
 void LockTable::createLockTableT(VSim::FlatBuffers::LockTableT *fb_lock) const

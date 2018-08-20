@@ -15,6 +15,7 @@ Flatbuffer quirks
 - there is no version number, but you can always add one
 - I made the enum values match our C++ enum values so we can just static_cast<>. This is probably dangerous... anyway if you change the code enums make sure you fix the serializer and write proper conversions.
 - there is no inheritance, use unions
+- object API: the flatbuffer object api (ex. ModelInformationT) is slightly more convenient and slightly less efficient. Note that if you use the object API to serialize a table, then all child tables probably need to use the same (ex. Settings and LockTable). Also you have to use postLoad() or something like that (see VSimRoot)
 
 flatbuffer definitions
 - types.fbs
@@ -37,6 +38,7 @@ The things you have to do to add a field (ex. slide::year)
     - add to reader/writer tests
 - app
     - actually use the thing
+    - add getters/setters
     - if undoable - add undo command to change value
     - listen to gui, use command ^
     - if qt modeled - add to some qt model
@@ -55,7 +57,7 @@ Flatbuffers is supposed to be zero-copy, so maybe we aren't using it correctly. 
 - should we use vector of unions? or use table wrapping?
     - ex. slide::items consists of images, labels, and potentially other slide item things
     - both are awkward to use
-    - C++ is the only language that supports vector of unions, is this something that might go away?
+    - C++ is the only language that supports vector of unions, is this something that might go away? (edit: support has been added to js/ts/php/c)
 
 ## Serialization options
 

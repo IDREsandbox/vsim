@@ -650,6 +650,7 @@ void NarrativeControl::enableEditing(bool enable)
 
 void NarrativeControl::onRestrictToCurrent(bool restrict)
 {
+	qDebug() << "on restrict change" << restrict << "(in n ctrl)";
 	bool enable = !restrict;
 
 	a_new_narrative->setEnabled(enable);
