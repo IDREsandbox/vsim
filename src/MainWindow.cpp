@@ -412,6 +412,10 @@ void MainWindow::setApp(VSimApp * vsim)
 		ws->nbar_size = sizes.at(0);
 		ws->ebar_size = sizes.at(2);
 	});
+
+	onReadOnlyChanged();
+	connect(m_app->getRoot()->lockTable(), &LockTable::sLockChanged, this,
+		&MainWindow::onReadOnlyChanged);
 }
 
 void MainWindow::onReset()
@@ -1010,6 +1014,12 @@ void MainWindow::execLockDialog()
 {
 	LockDialog dlg;
 	dlg.execEdit(m_app->getRoot());
+}
+
+void MainWindow::onReadOnlyChanged()
+{
+	bool locked = m_app->getRoot()->lockTable()->isLocked();
+	m_outliner->setReadOnly(locked);
 }
 
 TypesSerializer::Params MainWindow::saveParams(const QString &path)

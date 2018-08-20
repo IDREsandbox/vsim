@@ -26,6 +26,8 @@ public:
 
 	void onCurrentChanged(const QModelIndex &current_model);
 
+	void setReadOnly(bool read_only);
+
 private:
 	class ModelView : public QTreeView {
 	public:
@@ -55,6 +57,7 @@ private:
 	QPushButton *m_reload_button;
 
 	QString m_current_dir;
+	bool m_read_only;
 };
 
 class OutlinerTimeDelegate : public QStyledItemDelegate

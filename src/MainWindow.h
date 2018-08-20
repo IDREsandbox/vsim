@@ -90,6 +90,8 @@ public slots:
 	void execModelInformation();
 	void execLockDialog();
 
+	void onReadOnlyChanged();
+
 signals:
 	void sImportModel(const std::string&);
 	void sImportNarratives();

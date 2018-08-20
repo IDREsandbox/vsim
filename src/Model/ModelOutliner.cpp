@@ -25,7 +25,8 @@
 ModelOutliner::ModelOutliner(QWidget *parent)
 	: QWidget(parent),
 	m_models(nullptr),
-	m_expanded_model(nullptr)
+	m_expanded_model(nullptr),
+	m_read_only(false)
 {
 	setWindowTitle("Model Outliner");
 	setWindowFlags(Qt::Window);
@@ -95,6 +96,7 @@ ModelOutliner::ModelOutliner(QWidget *parent)
 		setExpandedModel(model);
 	});
 	connect(m_edit_button, &QAbstractButton::pressed, this, [this]() {
+		if (m_read_only) return;
 		// get shared version of selected model
 		int i = m_models->cgroup()->indexOf(m_expanded_model);
 		if (i < 0) return;
@@ -105,9 +107,11 @@ ModelOutliner::ModelOutliner(QWidget *parent)
 	connect(m_delete_button, &QAbstractButton::pressed, this, [this]() {
 		if (!m_models) return;
 		if (!m_expanded_model) return;
+		if (m_read_only) return;
 		m_models->removeModel(m_expanded_model);
 	});
 	connect(m_import_button, &QAbstractButton::pressed, this, [this]() {
+		if (m_read_only) return;
 		auto model = ModelUtil::execImportModel(m_models, m_current_dir, QString(), this);
 		if (model) setExpandedModel(model.get());
 	});
@@ -142,6 +146,22 @@ void ModelOutliner::onCurrentChanged(const QModelIndex &model_index)
 
 	Model *model = m_models->group()->child(model_index.row());
 	setExpandedModel(model);
+}
+
+void ModelOutliner::setReadOnly(bool read_only)
+{
+	m_read_only = read_only;
+	if (read_only) {
+		m_model_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
+		m_node_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	}
+	else {
+		m_model_view->setEditTriggers(QAbstractItemView::AllEditTriggers);
+		m_node_view->setEditTriggers(QAbstractItemView::AllEditTriggers);
+	}
+	m_import_button->setVisible(!read_only);
+	m_delete_button->setVisible(!read_only);
+	m_edit_button->setVisible(!read_only);
 }
 
 void ModelOutliner::setExpandedModel(Model * model)
