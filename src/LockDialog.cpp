@@ -7,6 +7,8 @@
 #include "VSimRoot.h"
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative.h"
+#include "resources/EResourceGroup.h"
+#include "resources/EResource.h"
 #include "Gui/PasswordDialog.h"
 
 
@@ -124,13 +126,22 @@ void LockDialog::execEdit(VSimRoot *root)
 		//root->narratives()->locks();
 		// mass lock with hash
 		if (ui.lock_all->isChecked()) {
-			qDebug() << "new lock with password";
+
+			// mass lock w/ password
 			for (auto nar : *root->narratives()) {
 				if (nar->lockTable()->lockWithPasswordHash(hash)) {
 					nar_lock_ok++;
 				}
 				else {
 					nar_lock_fail++;
+				}
+			}
+			for (auto er : *root->resources()) {
+				if (er->lockTable()->lockWithPasswordHash(hash)) {
+					er_lock_ok++;
+				}
+				else {
+					er_lock_fail++;
 				}
 			}
 		}
@@ -140,6 +151,7 @@ void LockDialog::execEdit(VSimRoot *root)
 		m_this_lock.lock();
 		root->setLockTable(m_this_lock);
 
+		// mass lock permanent
 		if (ui.lock_all->isChecked()) {
 			for (auto nar : *root->narratives()) {
 				if (nar->lockTable()->lock()) {
@@ -150,8 +162,14 @@ void LockDialog::execEdit(VSimRoot *root)
 				}
 			}
 		}
-
-		// mass lock permanent
+		for (auto er : *root->resources()) {
+			if (er->lockTable()->lock()) {
+				er_lock_ok++;
+			}
+			else {
+				er_lock_fail++;
+			}
+		}
 	}
 
 	if (lock) {

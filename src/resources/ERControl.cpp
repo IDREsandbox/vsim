@@ -82,8 +82,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	a_edit_er->setIconText("Edit");
 	connect(a_edit_er, &QAction::triggered, this, &ERControl::editERInfo);
 
-	a_open_er = new QAction("Open Resource", this);
-	a_open_er->setIconText("Open");
+	a_open_er = new QAction("Launch Resource", this);
+	a_open_er->setIconText("Launch");
 	connect(a_open_er, &QAction::triggered, this, &ERControl::openTopResource);
 
 	a_position_er = new QAction("Set Resource Positions", this);
@@ -334,15 +334,23 @@ void ERControl::editERInfo()
 		return;
 	}
 
+	// locked? do read only version
+	bool locked = resource->lockTableConst()->isLocked();
+
 	ERDialog dlg(m_category_control, m_app->getCurrentDirectory());
 	dlg.init(resource);
-	dlg.showPositionButton();
-	connect(&dlg, &ERDialog::sSetPosition, this, &ERControl::setPosition);
+	if (!locked) {
+		dlg.showPositionButton();
+		connect(&dlg, &ERDialog::sSetPosition, this, &ERControl::setPosition);
+	}
 	dlg.enableEditingCategories(!m_ers->restrictedToCurrent());
 
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) {
 		qInfo() << "resource list - cancelled edit on" << resource;
+		return;
+	}
+	if (locked) {
 		return;
 	}
 
@@ -389,11 +397,11 @@ void ERControl::openTopResource()
 {
 	EResource *res = getCombinedLastSelectedP();
 	if (!res) return;
-	gotoPosition();
-	openResource(res);
+	//gotoPosition();
+	launchResource(res);
 }
 
-void ERControl::openResource(const EResource *res) {
+void ERControl::launchResource(const EResource *res) {
 	if (!res) return;
 	auto type = res->getERType();
 	if (type == EResource::FILE) {
@@ -431,10 +439,14 @@ void ERControl::setPosition()
 	auto resources = getCombinedSelectionP();
 	auto cam = m_app->getCameraMatrix();
 
+	int count = 0;
 	auto cmd = new EditCommand(m_ers, indices);
 	for (auto *res : resources) {
+		if (res->lockTableConst()->isLocked()) continue;
+		count++;
 		new EResource::SetCameraMatrixCommand(res, cam, cmd);
 	}
+	if (count == 0) return;
 
 	m_undo_stack->beginMacro("Set Resource Position(s)");
 	m_undo_stack->push(cmd);
@@ -470,7 +482,6 @@ void ERControl::gotoPosition()
 
 void ERControl::lockResources()
 {
-
 	auto selected = getCombinedSelectionP();
 
 	// which can be locked?
@@ -731,7 +742,7 @@ void ERControl::onSelectionChange()
 	m_display->setCount(s.size());
 
 	// enable/disabled lock/unlock
-	bool can_lock = false;
+	bool can_lock = false; // aka any_unlocked
 	bool can_unlock = false;
 	for (auto *res : s) {
 		auto *lt = res->lockTableConst();
@@ -744,6 +755,10 @@ void ERControl::onSelectionChange()
 	}
 	a_lock_ers->setEnabled(can_lock);
 	a_unlock_ers->setEnabled(can_unlock);
+
+	// enable/disabled set res position
+	a_position_er->setEnabled(can_lock);
+
 }
 
 void ERControl::addToSelection(EResource * res, bool top)
@@ -839,7 +854,7 @@ void ERControl::onUpdate()
 
 		if (res->getAutoLaunch() == EResource::ON && m_auto_launch) {
 			// try to open this thing
-			openResource(res);
+			launchResource(res);
 		}
 	}
 

@@ -54,6 +54,7 @@ void ERDisplay::reload()
 	//ui.authors->setText(QString::fromStdString(m_er->getAuthor()));
 	bool can_open = m_er->getERType() != EResource::ERType::ANNOTATION;
 	ui.open->setEnabled(can_open);
+	ui.open->setVisible(can_open);
 
 	ui.category->setVisible(m_cat != nullptr);
 	if (m_cat) {

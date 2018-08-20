@@ -40,7 +40,7 @@ public:
 	void deleteER();
 	void editERInfo();
 	void openTopResource(); // open the file
-	void openResource(const EResource *res);
+	void launchResource(const EResource *res);
 	void setPosition();
 	void mergeERs(const EResourceGroup *ers);
 

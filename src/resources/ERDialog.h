@@ -71,6 +71,7 @@ signals:
 private:
 	Ui::ERDialog ui;
 	QString m_current_dir;
+	bool m_read_only;
 	//QString m_file_path; // relative or absolute
 	//QString m_url;
 

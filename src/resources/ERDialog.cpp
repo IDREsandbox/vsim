@@ -14,11 +14,13 @@
 #include "Gui/EditDeleteDelegate.h"
 #include "Core/GroupModelTemplate.h"
 #include "Core/Util.h"
+#include "Core/LockTable.h"
 
 ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWidget * parent)
 	: QDialog(parent),
 	m_control(category_control),
-	m_current_dir(current_dir)
+	m_current_dir(current_dir),
+	m_read_only(false)
 {
 	ui.setupUi(this);
 	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -132,6 +134,8 @@ void ERDialog::init(const EResource * er)
 	
 	// setup the category selection
 	setCategory(er->category());
+
+	setReadOnly(er->lockTableConst()->isLocked());
 }
 
 void ERDialog::showPositionButton(bool show)
@@ -341,10 +345,10 @@ void ERDialog::checkAutoLaunch()
 		}
 	}
 	else {
-		ui.autolaunch_on->setEnabled(true);
+		ui.autolaunch_on->setEnabled(true && !m_read_only);
 	}
 	bool local = !getGlobal();
-	ui.autolaunch_zone->setEnabled(local);
+	ui.autolaunch_zone->setEnabled(local && !m_read_only);
 }
 
 void ERDialog::setGlobal(bool global)
@@ -360,6 +364,28 @@ void ERDialog::setGlobal(bool global)
 
 void ERDialog::setReadOnly(bool read_only)
 {
+	m_read_only = read_only;
+	bool enable = !read_only;
+	ui.type->setEnabled(enable);
+	// the enabled versions depend on other stuff, see check
+	//ui.path->setEnabled(false);
+	//ui.relative->setEnabled(false);
+	ui.title->setReadOnly(read_only);
+	ui.description->setReadOnly(read_only);
+	ui.authors->setReadOnly(read_only);
+	ui.licensing->setEnabled(enable);
+	ui.categories->setEnabled(enable);
+	ui.addnew->setVisible(enable);
+	ui.activationzone->setEnabled(enable);
+	ui.autolaunch_zone->setEnabled(enable);
+	ui.radius->setEnabled(enable);
+	ui.autoreposition->setEnabled(enable);
+	ui.year_lower->setReadOnly(read_only);
+	ui.year_upper->setReadOnly(read_only);
+
+	auto *cancel = ui.buttonBox->button(QDialogButtonBox::Cancel);
+	cancel->setVisible(enable);
+	m_position_button->setVisible(enable);
 }
 
 void ERDialog::enableEditingCategories(bool enable_categories)
@@ -377,9 +403,9 @@ void ERDialog::enableEditingCategories(bool enable_categories)
 void ERDialog::onTypeChange()
 {
 	if (ui.file->isChecked()) {
-		ui.path->setEnabled(true);
-		ui.choose->setEnabled(true);
-		ui.relative->setEnabled(true);
+		ui.path->setEnabled(true && !m_read_only);
+		ui.choose->setEnabled(true && !m_read_only);
+		ui.relative->setEnabled(true && !m_read_only);
 		checkRelative();
 	}
 	else if (ui.annotation->isChecked()) {
@@ -388,9 +414,9 @@ void ERDialog::onTypeChange()
 		ui.relative->setEnabled(false);
 	}
 	else if (ui.url->isChecked()) {
-		ui.path->setEnabled(true);
-		ui.choose->setEnabled(false);
-		ui.relative->setEnabled(false);
+		ui.path->setEnabled(true && !m_read_only);
+		ui.choose->setEnabled(false && !m_read_only);
+		ui.relative->setEnabled(false && !m_read_only);
 	}
 	checkAutoLaunch();
 }
@@ -401,7 +427,7 @@ void ERDialog::onActivationChange()
 		ui.radius->setEnabled(false);
 	}
 	else if (ui.local->isChecked()) {
-		ui.radius->setEnabled(true);
+		ui.radius->setEnabled(true && !m_read_only);
 	}
 	checkAutoLaunch();
 }
