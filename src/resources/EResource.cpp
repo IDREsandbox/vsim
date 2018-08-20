@@ -1,8 +1,9 @@
-//#include "deprecated/resources/EResourcesNode.h"
 #include "resources/EResource.h"
+
 #include "deprecated/resources/EResourcesNode.h"
 #include "resources/ECategory.h"
 #include "ECategoryGroup.h"
+#include "Core/LockTable.h"
 
 EResource::EResource(QObject *parent)
 	: QObject(parent),
@@ -25,6 +26,7 @@ EResource::EResource(QObject *parent)
 	m_distance_to(0.0f),
 	m_in_range(false)
 {
+	m_lock = new LockTable(this);
 }
 
 void EResource::operator=(const EResource & other)
@@ -45,6 +47,7 @@ void EResource::operator=(const EResource & other)
 	m_camera_position = other.m_camera_position ;
 	m_category_index  = other.m_category_index  ;
 	m_index           = other.m_index           ;
+	*m_lock           = *other.m_lock           ;
 }
 
 void EResource::loadOld(const EResourcesNode * old)
@@ -282,5 +285,15 @@ int EResource::getCategoryIndex() const
 void EResource::setCategoryIndex(int index)
 {
 	m_category_index = index;
+}
+
+LockTable * EResource::lockTable()
+{
+	return m_lock;
+}
+
+const LockTable * EResource::lockTableConst() const
+{
+	return m_lock;
 }
 

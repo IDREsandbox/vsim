@@ -5,13 +5,12 @@
 #include <memory>
 #include <QObject>
 
-#include "Core/LockTable.h"
-
 class NarrativeGroup;
 class ModelGroup;
 class EResourceGroup;
 class ECategoryGroup;
 class CanvasScene;
+class LockTable;
 namespace VSim { namespace FlatBuffers {
 	struct SettingsT;
 	struct LockSettingsT;
@@ -88,7 +87,7 @@ private:
 	std::unique_ptr<VSim::FlatBuffers::SettingsT> m_settings;
 	std::unique_ptr<CanvasScene> m_branding_canvas;
 
-	LockTable m_lock;
+	LockTable *m_lock;
 	bool m_lock_settings;
 	bool m_lock_add_remove;
 	bool m_lock_navigation;

@@ -186,46 +186,6 @@ bool LockTable::unlock(QString s)
 	return false;
 }
 
-void LockTable::massLock(const std::vector<LockTable*> &locks, QString password,
-	int *out_success, int *out_fail)
-{
-	int success = 0;
-	int fail = 0;
-
-	HashLock hash = HashLock::generateHash(password.toStdString());
-
-	for (LockTable *lock : locks) {
-		if (lock->isLocked()) {
-			fail++;
-			continue;
-		}
-		lock->lockWithPasswordHash(hash);
-		success++;
-	}
-
-	if (out_success) *out_success = success;
-	if (out_fail) *out_fail = fail;
-}
-
-void LockTable::massLockWithHash(const std::vector<LockTable*>& locks,
-	HashLock hash, int * out_success, int *out_fail)
-{
-	int success = 0;
-	int fail = 0;
-
-	for (LockTable *lock : locks) {
-		if (lock->isLocked()) {
-			fail++;
-			continue;
-		}
-		lock->lockWithPasswordHash(hash);
-		success++;
-	}
-
-	if (out_success) *out_success = success;
-	if (out_fail) *out_fail = fail;
-}
-
 bool LockTable::hasPassword() const
 {
 	return m_locked && m_has_password;
@@ -241,31 +201,72 @@ const HashLock & LockTable::hash() const
 	return m_hash;
 }
 
-//bool LockTable::massUnlock(const std::vector<LockTable*> &table, QString password)
+bool LockTable::massUnlock(const std::vector<LockTable*> &table, QString password)
+{
+	if (table.size() == 0) return true;
+
+	// make sure they're all pw locked, same hash
+	HashLock hash = table[0]->m_hash;
+
+	for (LockTable *lock : table) {
+		bool ok = lock->isLocked()
+			&& lock->hasPassword()
+			&& (lock->m_hash == hash);
+		if (!ok) {
+			qInfo() << "mass unlock fail - differing";
+			return false;
+		}
+	}
+
+	bool pw_ok = hash.checkPassword(password.toStdString());
+	if (!pw_ok) return false;
+
+	for (LockTable *lock : table) {
+		lock->m_locked = false;
+		lock->m_has_password = false;
+		lock->m_hash = {};
+		emit lock->sLockChanged(false);
+	}
+	return true;
+}
+
+//void LockTable::massLock(const std::vector<LockTable*> &locks, QString password,
+//	int *out_success, int *out_fail)
 //{
-//	if (table.size() == 0) return true;
-//	
-//	// make sure they're all pw locked, same hash
-//	HashLock hash = table[0]->m_hash;
+//	int success = 0;
+//	int fail = 0;
 //
-//	for (LockTable *lock : table) {
-//		bool ok = lock->isLocked()
-//			&& lock->hasPassword()
-//			&& (lock->m_hash == hash);
-//		if (!ok) {
-//			qInfo() << "mass unlock fail - differing";
-//			return false;
+//	HashLock hash = HashLock::generateHash(password.toStdString());
+//
+//	for (LockTable *lock : locks) {
+//		if (lock->isLocked()) {
+//			fail++;
+//			continue;
 //		}
+//		lock->lockWithPasswordHash(hash);
+//		success++;
 //	}
 //
-//	bool pw_ok = hash.checkPassword(password.toStdString());
-//	if (!pw_ok) return false;
-//
-//	for (LockTable *lock : table) {
-//		lock->m_locked = false;
-//		lock->m_has_password = false;
-//		lock->m_hash = {};
-//		emit lock->sLockChanged(false);
-//	}
-//	return true;
+//	if (out_success) *out_success = success;
+//	if (out_fail) *out_fail = fail;
 //}
+//
+//void LockTable::massLockWithHash(const std::vector<LockTable*>& locks,
+//	HashLock hash, int * out_success, int *out_fail)
+//{
+//	int success = 0;
+//	int fail = 0;
+//
+//	for (LockTable *lock : locks) {
+//		if (lock->isLocked()) {
+//			fail++;
+//			continue;
+//		}
+//		lock->lockWithPasswordHash(hash);
+//		success++;
+//	}
+//
+//	if (out_success) *out_success = success;
+//	if (out_fail) *out_fail = fail;
+//}
+

@@ -331,6 +331,11 @@ void FastScrollItem::setNumber(int number)
 	m_number = number;
 }
 
+QSizeF FastScrollItem::size() const
+{
+	return m_size;
+}
+
 void FastScrollItem::paint(QPainter *painter,
 	const QStyleOptionGraphicsItem *option, QWidget *widget)
 {

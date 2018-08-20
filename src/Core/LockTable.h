@@ -47,12 +47,13 @@ public: // static methods
 	// successes outputs the number of successful locks
 	// fails outputs the number of failed locks
 
+	static bool massUnlock(const std::vector<LockTable*> &locks, QString password);
+	//static void clumpLocked();
 
 	//static void massLock(const std::vector<LockTable*> &locks, QString password,
 	//	int *out_success = nullptr,
 	//	int *out_fail = nullptr);
-	//static bool massUnlock(const std::vector<LockTable*> &locks, QString password);
-	////static void clumpLocked();
+
 
 	//static void massLockWithHash(const std::vector<LockTable*> &locks, HashLock hash,
 	//	int *out_success = nullptr,

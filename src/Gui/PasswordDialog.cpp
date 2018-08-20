@@ -1,9 +1,11 @@
 ﻿#include "PasswordDialog.h"
-#include "PasswordDialog.h"
 
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDebug>
+
+#include "Core/LockTable.h"
+#include "Core/HashLock.h"
 
 CreatePasswordDialog::CreatePasswordDialog(QWidget *parent)
 	: QDialog(parent),
@@ -90,7 +92,8 @@ void CreatePasswordDialog::showEvent(QShowEvent * e)
 //}
 
 TestPasswordDialog::TestPasswordDialog(QWidget * parent)
-	: QDialog(parent)
+	: QDialog(parent),
+	m_lock(nullptr)
 {
 	ui.setupUi(this);
 	setWindowFlag(Qt::WindowType::WindowContextHelpButtonHint, false);
@@ -106,11 +109,17 @@ TestPasswordDialog::TestPasswordDialog(QWidget * parent)
 	setTabOrder(ui.password, ui.password_checkbox);
 
 	connect(ui.button_box, &QDialogButtonBox::rejected,
-		this, &QDialog::reject);
+		this, [this]() {
+		m_result = Canceled;
+		reject();
+	});
 	connect(ui.button_box, &QDialogButtonBox::accepted,
 		this, &TestPasswordDialog::tryAccept);
 	connect(m_skip_button, &QAbstractButton::pressed,
-		this, &QDialog::accept);
+		this, [this]() {
+		m_result = Skipped;
+		accept();
+	});
 }
 
 void TestPasswordDialog::setLabel(QString text)
@@ -122,18 +131,49 @@ void TestPasswordDialog::showSkipButton(bool show) {
 	m_skip_button->setVisible(show);
 }
 
-void TestPasswordDialog::setTestCallback(std::function<bool(QString)> f)
+void TestPasswordDialog::setLock(LockTable * lock)
 {
-	m_func = f;
+	m_lock = lock;
+	m_locks.clear();
 }
+
+void TestPasswordDialog::setLocks(std::vector<LockTable*> locks)
+{
+	m_lock = nullptr;
+	m_locks = locks;
+}
+
+//void TestPasswordDialog::setTestCallback(std::function<bool(QString)> f)
+//{
+//	m_func = f;
+//}
 
 void TestPasswordDialog::tryAccept()
 {
-	bool ok = m_func(ui.password->text());
+	QString pw = ui.password->text();
+	bool ok = false;
+	if (m_lock) {
+		ok = m_lock->unlock(pw);
+	}
+	else {
+		ok = LockTable::massUnlock(m_locks, ui.password->text());
+	}
+
 	if (ok) {
+		m_result = Unlocked;
 		accept();
 	}
 	else {
 		QMessageBox::warning(this, this->windowTitle(), "Incorrect password.");
 	}
+}
+
+bool TestPasswordDialog::unlocked() const
+{
+	return m_result == Unlocked;
+}
+
+bool TestPasswordDialog::skipped() const
+{
+	return m_result == Skipped;
 }

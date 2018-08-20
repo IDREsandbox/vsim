@@ -1,6 +1,5 @@
 ﻿#include "resources/ERScrollItem.h"
-#include "resources/EResource.h"
-#include "resources/ECategory.h"
+
 #include <QtGlobal>
 #include <QRect>
 #include <QDebug>
@@ -8,17 +7,24 @@
 #include <QElapsedTimer>
 #include <QCoreApplication>
 
+#include "resources/EResource.h"
+#include "resources/ECategory.h"
+#include "Core/LockTable.h"
+#include "Core/Util.h"
+
 ERScrollItem::ERScrollItem()
 	: FastScrollItem(),
 	m_er(nullptr),
-	m_cat(nullptr)
+	m_cat(nullptr),
+	m_lock(nullptr)
 {
 	auto dir = QCoreApplication::applicationDirPath();
-	m_text_icon = QPixmap(dir + "/assets/icons/Text_16xMD.png");
+	m_text_icon = QPixmap(dir + "/assets/icons/Text_Annotation_Icon_August2018.png");
 	m_file_icon = QPixmap(dir + "/assets/icons/Document_16xMD.png");
 	m_url_icon = QPixmap(dir + "/assets/icons/Link_16xMD.png");
-	m_goto_icon = QPixmap(dir + "/assets/icons/View_16xMD.png");
+	m_goto_icon = QPixmap(dir + "/assets/icons/Arrow2PointIcon_August2018.png");
 	m_launch_icon = QPixmap(dir + "/assets/icons/Effects_16xMD.png");
+	m_lock_icon = QPixmap(dir + "/assets/icons/Lock_16xMD.png");
 
 	setCacheMode(QGraphicsItem::CacheMode::DeviceCoordinateCache);
 }
@@ -30,9 +36,9 @@ EResource * ERScrollItem::resource() const
 
 void ERScrollItem::setER(EResource *er)
 {
-	if (m_er) disconnect(m_er, 0, this, 0);
+	Util::reconnect(this, &m_er, er);
+	Util::reconnect(this, &m_lock, er ? er->lockTable() : nullptr);
 
-	m_er = er;
 	if (er) {
 		connect(er, &EResource::sResourceNameChanged, this, &ERScrollItem::updateAlias);
 
@@ -46,7 +52,10 @@ void ERScrollItem::setER(EResource *er)
 		connect(er, &EResource::sRepositionChanged, this, &ERScrollItem::updateAlias);
 		connect(er, &EResource::sAutoLaunchChanged, this, &ERScrollItem::updateAlias);
 		//connect(er, &EResource::sDistanceToChanged, this, &ERScrollItem::updateAlias);
+
+		connect(m_lock, &LockTable::sLockChanged, this, &ERScrollItem::updateAlias);
 	}
+
 	update();
 }
 
@@ -155,9 +164,10 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 	// [repo] [auto] [type]
 	int icon_margin = 0;
 	int icon_spacing = 0;
-	int icon_size = 16;
+	QSize icon_size(16, 16);
 
-	QRect icon_rect = QRect(0, margin, icon_size, icon_size);
+	std::vector<QPixmap> icon_list;
+
 	QPixmap type_icon;
 	switch (m_er->getERType()) {
 	case EResource::ANNOTATION:
@@ -170,24 +180,31 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 		type_icon = m_url_icon;
 		break;
 	}
-		
-	float left = m_size.width() - icon_margin - icon_size;
-	icon_rect.setX(left);
-	painter->drawPixmap(icon_rect, type_icon);
-
-	left -= icon_size;
-	left -= icon_spacing;
-	icon_rect.setX(left);
+	icon_list.push_back(type_icon);
 
 	if (m_er->getReposition()) {
-		painter->drawPixmap(icon_rect, m_goto_icon);
-
-		left -= icon_size;
-		left -= icon_spacing;
-		icon_rect.setX(left);
+		icon_list.push_back(m_goto_icon);
 	}
 
-	//if (m_er->getAutoLaunch()) {
-	//	painter->drawPixmap(icon_rect, m_launch_icon);
-	//}
+	if (m_er->getAutoLaunch()) {
+		icon_list.push_back(m_launch_icon);
+	}
+
+	if (m_er->lockTableConst()->isLocked()) {
+		icon_list.push_back(m_lock_icon);
+	}
+
+	// paint them in reverse order, right to left
+	int right = size().width() - icon_margin;
+	for (QPixmap &pm : icon_list) {
+		QPoint top_right(right, icon_margin);
+		QRect icon_rect;
+		icon_rect.setSize(icon_size);
+		icon_rect.moveTopRight(top_right);
+		painter->drawPixmap(icon_rect, pm);
+
+		// move top-right over
+		right -= icon_size.width();
+		right -= icon_margin;
+	}
 }

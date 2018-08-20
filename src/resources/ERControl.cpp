@@ -20,6 +20,8 @@
 #include "Core/Util.h"
 #include "TimeManager.h"
 #include "VSimRoot.h"
+#include "Core/LockTable.h"
+#include "Gui/PasswordDialog.h"
 
 #include <QDesktopServices>
 #include <QPushButton>
@@ -91,6 +93,12 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	a_goto_er = new QAction("Goto Resource", this);
 	connect(a_goto_er, &QAction::triggered, this, &ERControl::gotoPosition);
 
+	a_lock_ers = new QAction("Lock Resources", this);
+	connect(a_lock_ers, &QAction::triggered, this, &ERControl::lockResources);
+
+	a_unlock_ers = new QAction("Unlock Resources", this);
+	connect(a_unlock_ers, &QAction::triggered, this, &ERControl::unlockResources);
+
 	a_close_er = new QAction("Close Resource", this);
 	connect(a_close_er, &QAction::triggered, this, &ERControl::closeER);
 
@@ -106,7 +114,9 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		a_edit_er,
 		a_open_er,
 		a_position_er,
-		a_goto_er
+		a_goto_er,
+		a_lock_ers,
+		a_unlock_ers
 	};
 	QMenu *box_menu = new QMenu(window->erBar());
 	box_menu->addActions(actions);
@@ -458,6 +468,174 @@ void ERControl::gotoPosition()
 	setDisplay(resource, true);
 }
 
+void ERControl::lockResources()
+{
+
+	auto selected = getCombinedSelectionP();
+
+	// which can be locked?
+	std::vector<LockTable*> lock_me;
+	for (auto *res : selected) {
+		auto *table = res->lockTable();
+		if (!table->isLocked()) {
+			lock_me.push_back(table);
+		}
+	}
+
+	if (lock_me.size() == 0) return;
+
+	// warning dialog
+	auto btn = QMessageBox::warning(m_window, "Lock Resources",
+		"Are you sure you want to lock these resources? This is not undoable.",
+		QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
+	if (btn == QMessageBox::Cancel) return;
+
+	CreatePasswordDialog dlg;
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) return;
+	bool use_pw = dlg.usePassword();
+	QString pw = dlg.password();
+
+	HashLock hash;
+	if (use_pw) hash = HashLock::generateHash(pw.toStdString());
+
+	int bad_count = 0;
+	int good_count = 0;
+	for (auto *res : selected) {
+		auto *lock = res->lockTable();
+		if (lock->isLocked()) {
+			bad_count++;
+			continue;
+		}
+		good_count++;
+		if (use_pw) {
+			lock->lockWithPasswordHash(hash);
+		}
+		else {
+			lock->lock();
+		}
+	}
+
+	if (bad_count > 0) {
+		QString msg = QString().sprintf(
+			"Failed to lock %d selected resources - were already locked.",
+			bad_count);
+		QMessageBox::warning(m_window, "Lock Resources", msg);
+	}
+
+	if (good_count > 0) {
+		m_undo_stack->clear();
+	}
+	onSelectionChange();
+}
+
+void ERControl::unlockResources()
+{
+	std::vector<std::vector<EResource*>> clumps;
+
+	std::vector<EResource*> selected = getCombinedSelectionP();
+	std::unordered_set<EResource*> checked;
+	int nperm = 0;
+	int nskipped = 0;
+	int nunlocked = 0;
+
+	for (size_t i = 0; i < selected.size(); i++) {
+		EResource *res = selected[i];
+		if (checked.find(res) != checked.end()) continue;
+		checked.insert(res);
+
+		std::vector<EResource*> clump;
+		const LockTable *lt = res->lockTable();
+
+		if (lt->isPermanent()) {
+			nperm++;
+			continue;
+		}
+		if (!lt->isLocked()) {
+			continue;
+		}
+
+		HashLock hash = lt->hash();
+		clump.push_back(res);
+
+		for (size_t j = i + 1; j < selected.size(); j++) {
+			EResource *res2 = selected[j];
+			const LockTable *lt2 = res2->lockTable();
+
+			if (lt2->hasPassword() && hash == lt2->hash()) {
+				checked.insert(res2);
+				clump.push_back(res2);
+			}
+
+			// don't check off if it has a different password
+		}
+		clumps.push_back(clump);
+	}
+
+	// unlock the clumps
+	for (int i = 0; i < clumps.size(); i++) {
+		auto &clump = clumps[i];
+
+		// get the first narrative title
+		if (clump.size() < 0) return;
+		EResource *first = clump[0];
+		int count = (int)clump.size();
+		QString title = QString::fromStdString(first->getResourceName());
+
+		QString msg;
+
+		if (clump.size() == 1) {
+			msg = QString("Enter password for %1.")
+				.arg(title);
+		}
+		else {
+			msg = QString("Enter password for %1 narratives. (%2, ...)")
+				.arg(clump.size())
+				.arg(title);
+		}
+
+		std::vector<LockTable*> locks;
+		for (EResource *res : clump) {
+			locks.push_back(res->lockTable());
+		}
+
+		TestPasswordDialog dlg;
+		dlg.setWindowTitle("Unlock Resources");
+		dlg.setLabel(msg);
+		dlg.showSkipButton(clumps.size() > 1);
+		dlg.setLocks(locks);
+		int result = dlg.exec();
+		if (result == QDialog::Rejected) {
+			break;
+		}
+		if (dlg.skipped()) {
+			nskipped += locks.size();
+		}
+		if (dlg.unlocked()) {
+			nunlocked += locks.size();
+		}
+	}
+
+	QStringList msgs;
+	if (nunlocked > 0) {
+		msgs.push_back(QString("Unlocked %1 resources")
+			.arg(nunlocked));
+	}
+	if (nskipped > 0) {
+		msgs.push_back(QString("Skipped %1 resources")
+			.arg(nskipped));
+	}
+	if (nperm > 0) {
+		msgs.push_back(QString("Failed to unlock %1 permanently locked narratives.")
+			.arg(nperm));
+	}
+	if (!msgs.isEmpty()) {
+		QMessageBox::information(nullptr, "Unlock Resources", msgs.join("\n"));
+	}
+
+	onSelectionChange();
+}
+
 void ERControl::setDisplay(EResource *res, bool go)
 {
 	m_displayed = res;
@@ -543,12 +721,29 @@ void ERControl::onTopChange()
 	if (res != m_displayed) {
 		setDisplay(res, false);
 	}
+
+	// TODO: change "edit" to "info"
 }
 
 void ERControl::onSelectionChange()
 {
 	auto s = getCombinedSelectionP();
 	m_display->setCount(s.size());
+
+	// enable/disabled lock/unlock
+	bool can_lock = false;
+	bool can_unlock = false;
+	for (auto *res : s) {
+		auto *lt = res->lockTableConst();
+		if (lt->hasPassword()) {
+			can_unlock = true;
+		}
+		if (!lt->isLocked()) {
+			can_lock = true;
+		}
+	}
+	a_lock_ers->setEnabled(can_lock);
+	a_unlock_ers->setEnabled(can_unlock);
 }
 
 void ERControl::addToSelection(EResource * res, bool top)

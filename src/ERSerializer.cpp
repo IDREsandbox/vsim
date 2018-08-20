@@ -1,12 +1,14 @@
 #include "ERSerializer.h"
+
+#include <unordered_map>
+
 #include "Core/TypesSerializer.h"
 #include "Core/Util.h"
-
+#include "Core/LockTable.h"
 #include "resources/EResource.h"
 #include "resources/EResourceGroup.h"
 #include "resources/ECategory.h"
 #include "resources/ECategoryGroup.h"
-#include <unordered_map>
 
 namespace fb = VSim::FlatBuffers;
 void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group,
@@ -45,7 +47,7 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group,
 		res->setLocalRange(o_res->range());
 		if (o_res->camera()) res->setCameraMatrix(TypesSerializer::fb2osgCameraMatrix(*o_res->camera()));
 		res->setCategoryIndex(o_res->category_index());
-
+		res->lockTable()->readLockTable(o_res->lock_table());
 		group->append(std::shared_ptr<EResource>(res));
 	}
 
@@ -91,6 +93,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(
 		auto o_auth = builder->CreateString(res->getAuthor());
 		auto o_desc = builder->CreateString(res->getResourceDescription());
 		auto o_path = TypesSerializer::createRelativePath(builder, QString::fromStdString(res->getResourcePath()), p);
+		auto o_lock = res->lockTableConst()->createLockTable(builder);
 
 		fb::EResourceBuilder b_res(*builder);
 		b_res.add_type(static_cast<fb::ERType>(res->getERType()));
@@ -108,6 +111,7 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(
 		fb::CameraPosDirUp s_camera = TypesSerializer::osg2fbCameraMatrix(res->getCameraMatrix());
 		b_res.add_camera(&s_camera);
 		b_res.add_category_index(res->getCategoryIndex());
+		b_res.add_lock_table(o_lock);
 		auto o_res = b_res.Finish();
 		resources.push_back(o_res);
 	}

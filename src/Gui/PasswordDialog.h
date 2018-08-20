@@ -6,6 +6,8 @@
 
 #include "ui_PasswordDialog.h"
 
+class LockTable;
+
 class CreatePasswordDialog : public QDialog {
 	Q_OBJECT;
 public:
@@ -35,25 +37,36 @@ public:
 	bool m_use;
 };
 
-
+// Can be used to unlock a single lock with setLock()
+// or a vector of locks with setLocks()
 class TestPasswordDialog : public QDialog {
 	Q_OBJECT;
 public:
 	TestPasswordDialog(QWidget *parent = nullptr);
-	void setLabel(QString test);
+	void setLabel(QString msg);
 
 	void showSkipButton(bool show);
 
-	// testCallback(QString pw) -> bool
-	//  return true if successful
-	void setTestCallback(std::function<bool(QString)> f);
+	void setLock(LockTable *lock);
+	void setLocks(std::vector<LockTable*> locks);
 
 	void tryAccept();
 
+	bool unlocked() const;
+	bool skipped() const;
+
+	enum Result {
+		Unlocked,
+		Skipped,
+		Canceled
+	};
+
 public:
 	Ui::PasswordDialog ui;
-	std::function<bool(QString)> m_func;
+	LockTable *m_lock;
+	std::vector<LockTable*> m_locks;
 	QPushButton *m_skip_button;
+	Result m_result;
 };
 
 #endif

@@ -206,21 +206,11 @@ void LockDialog::execUnlockThis()
 
 	if (!(m_this_lock.isLocked() && m_this_lock.hasPassword())) return;
 
-	bool pw_ok = false;
-
 	TestPasswordDialog dlg;
 	dlg.setWindowTitle("Edit Lock Settings");
 	dlg.setLabel("Enter password:");
 	dlg.showSkipButton(false);
-	dlg.setTestCallback([&](QString pw) -> bool {
-		// test password
-		bool success = m_this_lock.unlock(pw);
-
-		// remember this password
-		m_this_password = pw;
-
-		return success;
-	});
+	dlg.setLock(&m_this_lock);
 
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) return;

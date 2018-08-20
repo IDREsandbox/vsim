@@ -11,6 +11,7 @@
 class EResourcesNode;
 class ECategoryGroup;
 class ECategory;
+class LockTable;
 class EResource : public QObject {
 	Q_OBJECT
 
@@ -105,6 +106,9 @@ public:
 	int getCategoryIndex() const;
 	void setCategoryIndex(int index);
 
+	LockTable *lockTable();
+	const LockTable *lockTableConst() const;
+
 signals:
 	void sResourceNameChanged(const std::string&);
 	void sResourceAuthorChanged(const std::string&);
@@ -194,7 +198,7 @@ public: // resource commands
 		SetCategoryCommand(EResource *res, std::shared_ptr<ECategory> category, QUndoCommand *parent = nullptr)
 			: ModifyCommand(&EResource::categoryShared, &setCategory, category, res, parent) {}
 	};
-	
+
 private:
 	std::string m_name;
 	//std::string m_filetype;
@@ -220,6 +224,8 @@ private:
 	std::weak_ptr<ECategory> m_category;
 
 	int m_index;
+
+	LockTable *m_lock;
 };
 
 #endif /* ERESOURCE_H */

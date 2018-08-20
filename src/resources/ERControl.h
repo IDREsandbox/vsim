@@ -46,6 +46,9 @@ public:
 
 	void gotoPosition();
 
+	void lockResources();
+	void unlockResources();
+
 	// -1 to hide
 	void setDisplay(EResource *res, bool go = true);
 	//void goToResource(EResource *res, bool instant = false);
@@ -59,6 +62,7 @@ public:
 	void onTouch();
 	void onTopChange();
 	void onSelectionChange();
+	void onRestrictToCurrent(bool restrict);
 
 	// selection
 	void addToSelection(EResource *res, bool top = true);
@@ -91,11 +95,10 @@ public: // actions
 	QAction *a_open_er;
 	QAction *a_position_er;
 	QAction *a_goto_er;
+	QAction *a_lock_ers;
+	QAction *a_unlock_ers;
 	QAction *a_close_er;
 	QAction *a_close_all;
-
-private:
-	void onRestrictToCurrent(bool restrict);
 
 private:
 	VSimApp *m_app;

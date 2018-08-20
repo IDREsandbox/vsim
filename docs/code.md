@@ -103,7 +103,9 @@ I never got around to automated testing. Need to figure out how to build on Linu
 
 The only piece which I feel is somewhat testable is the Canvas code. The scene + control are testable with no gui. The canvas can be tested with the scene (Canvas_experiment). The toolbar has no functionality, so could be tested, or could just be data. The editor combines it all together. It's hard to test the editor individually, but there is the CanvasEditor_experiment. The LabelStyle stuff should be testable. 
 
-TODO:
+### TODO:
+
+#### circular spaghetti
 
 MainWindow, Controls, VSimApp all depend on eachother, which makes them all really hard to test.
 
@@ -136,3 +138,31 @@ App owns controls, controls depend on MainWindow, controls depend on data root, 
 
 Ahh I'm so sorry this just happened and I haven't bothered to clean it up.
 
+#### duplicate code
+
+ER lock code and Narrative lock code are almost identical. There's probably a way to merge them but I'm not sure how.
+
+#### Util::reconnect
+
+old old gui-data connection was like this:
+```
+if (m_er) disconnect(m_er, 0, this, 0);
+m_er = er;
+connect(m_er, &QObject::destroyed, ...)
+```
+
+I wrote a utility thing to make it easier.
+```
+Util::reconnect(this, &m_er, er);
+```
+
+This is also kind of awkward, and how disconnection/destruction works is kind of a mystery.
+But I want a better solution. A connection object that bundles all the stuff needed to clear up together.
+
+```
+Connector m_er_conn; // er connection
+Connector m_lt_conn; // lock table connection
+
+m_er_conn.add(connect(this, &func, that, &func));
+m_er_conn.add(connect());
+```

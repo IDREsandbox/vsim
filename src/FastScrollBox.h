@@ -100,6 +100,7 @@ public:
 	FastScrollItem();
 	void setSize(const QSizeF &size);
 	void setNumber(int number);
+	QSizeF size() const;
 
 signals:
 	void sSelected(bool select);

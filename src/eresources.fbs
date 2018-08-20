@@ -50,6 +50,7 @@ table EResource {
 
   category_index:int32;
   auto_launch:AutoLaunch;
+  lock_table:LockTable;
 }
 
 table ECategory {

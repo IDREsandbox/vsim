@@ -435,7 +435,9 @@ void NarrativeControl::unlockNarratives()
 
 	std::set<size_t> nar_set = getSelectedNarratives();
 	std::vector<size_t> indices(nar_set.begin(), nar_set.end());
-	std::vector<Narrative*> perm_nars;
+	int nperm = 0;
+	int nskipped = 0;
+	int nunlocked = 0;
 
 	std::vector<bool> checked(indices.size(), false);
 
@@ -448,7 +450,7 @@ void NarrativeControl::unlockNarratives()
 		const LockTable *lt = nar->lockTable();
 
 		if (lt->isPermanent()) {
-			perm_nars.push_back(nar);
+			nperm++;
 			continue;
 		}
 
@@ -505,19 +507,34 @@ void NarrativeControl::unlockNarratives()
 		dlg.setWindowTitle("Unlock Narratives");
 		dlg.setLabel(msg);
 		dlg.showSkipButton(clumps.size() > 1);
-		dlg.setTestCallback([&locks](QString pw) {
-			return LockTable::massUnlock(locks, pw);
-		});
+		dlg.setLocks(locks);
 		int result = dlg.exec();
 		if (result == QDialog::Rejected) {
-			return;
+			break;
+		}
+		if (dlg.skipped()) {
+			nskipped += locks.size();
+		}
+		if (dlg.unlocked()) {
+			nunlocked += locks.size();
 		}
 	}
 
-	if (perm_nars.size() > 0) {
-		QString msg = QString("Failed to unlock %1 permanently locked narratives.")
-			.arg(perm_nars.size());
-		QMessageBox::warning(nullptr, "Unlock Narratives", msg);
+	QStringList msgs;
+	if (nunlocked > 0) {
+		msgs.push_back(QString("Unlocked %1 resources")
+			.arg(nunlocked));
+	}
+	if (nskipped > 0) {
+		msgs.push_back(QString("Skipped %1 resources")
+			.arg(nskipped));
+	}
+	if (nperm > 0) {
+		msgs.push_back(QString("Failed to unlock %1 permanently locked narratives.")
+			.arg(nperm));
+	}
+	if (!msgs.isEmpty()) {
+		QMessageBox::information(nullptr, "Unlock Resources", msgs.join("\n"));
 	}
 	onNarrativeSelectionChanged();
 }

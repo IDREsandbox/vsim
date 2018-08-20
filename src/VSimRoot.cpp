@@ -24,6 +24,7 @@
 #include "Core/Util.h"
 #include "Canvas/CanvasScene.h"
 #include "Core/HashLock.h"
+#include "Core/LockTable.h"
 
 // debug
 #include "Canvas/LabelStyleGroup.h"
@@ -41,6 +42,8 @@ VSimRoot::VSimRoot(QObject *parent)
 
 	m_settings = std::make_unique<VSim::FlatBuffers::SettingsT>();
 	m_branding_canvas = std::make_unique<CanvasScene>();
+
+	m_lock = new LockTable(this);
 }
 
 VSimRoot::~VSimRoot()
@@ -101,7 +104,7 @@ void VSimRoot::prepareSave()
 	fb_lsettings->lock_add_remove = m_lock_add_remove;
 	fb_lsettings->lock_navigation = m_lock_navigation;
 
-	m_lock.createLockTableT(fb_lock.get());
+	m_lock->createLockTableT(fb_lock.get());
 }
 
 void VSimRoot::postLoad()
@@ -113,7 +116,7 @@ void VSimRoot::postLoad()
 	setRestrictToCurrent(fb_lsettings->lock_add_remove);
 	setNavigationLocked(fb_lsettings->lock_navigation);
 
-	m_lock.readLockTableT(fb_lock.get());
+	m_lock->readLockTableT(fb_lock.get());
 }
 
 bool VSimRoot::settingsLocked() const
@@ -143,12 +146,12 @@ bool VSimRoot::navigationLocked() const
 
 void VSimRoot::setLockTable(const LockTable &lock)
 {
-	m_lock = lock;
+	*m_lock = lock;
 }
 
 const LockTable * VSimRoot::lockTableConst() const
 {
-	return &m_lock;
+	return m_lock;
 }
 
 void VSimRoot::setSettingsLocked(bool locked)

@@ -5,6 +5,7 @@
 
 class EResource;
 class ECategory;
+class LockTable;
 
 class ERScrollItem : public FastScrollItem {
 	Q_OBJECT
@@ -28,12 +29,14 @@ protected:
 private:
 	EResource *m_er;
 	ECategory *m_cat;
+	LockTable *m_lock;
 
 	QPixmap m_text_icon;
 	QPixmap m_file_icon;
 	QPixmap m_url_icon;
 	QPixmap m_launch_icon;
 	QPixmap m_goto_icon;
+	QPixmap m_lock_icon;
 };
 
 #endif
