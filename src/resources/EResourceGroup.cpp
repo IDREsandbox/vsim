@@ -122,10 +122,6 @@ void EResourceGroup::saveCategoryIndices() const
 	}
 }
 
-void EResourceGroup::lockAll(QString password)
-{
-}
-
 void EResourceGroup::fixRelativePaths(const QString & old_base, const QString & new_base)
 {
 	for (auto res : *this) {

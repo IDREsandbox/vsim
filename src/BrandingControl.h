@@ -29,6 +29,7 @@ public:
 
 	void onActivate();
 	void onDeactivate();
+	void onLockChanged();
 
 public: // Actions
 	QAction *a_edit;
@@ -66,6 +67,8 @@ private:
 
 	QUndoStack *m_undo_stack;
 	CanvasStackWrapper m_canvas_stack_wrapper;
+
+	bool m_read_only;
 };
 
 #endif

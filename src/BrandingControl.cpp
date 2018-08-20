@@ -3,8 +3,13 @@
 #include <QAction>
 
 #include "BrandingOverlay.h"
+
+#include <QDebug>
+
 #include "Canvas/CanvasEditor.h"
 #include "VSimApp.h"
+#include "VSimRoot.h"
+#include "Core/LockTable.h"
 
 BrandingControl::BrandingControl(VSimApp *app,
 	CanvasScene *scene,
@@ -13,7 +18,8 @@ BrandingControl::BrandingControl(VSimApp *app,
 	: QObject(parent),
 	m_app(app),
 	m_overlay(overlay),
-	m_canvas_stack_wrapper(this)
+	m_canvas_stack_wrapper(this),
+	m_read_only(false)
 {
 	CanvasEditor *editor = m_overlay->m_editor;
 	editor->setStack(&m_canvas_stack_wrapper);
@@ -25,6 +31,8 @@ BrandingControl::BrandingControl(VSimApp *app,
 
 	m_overlay->enableEditing(false);
 
+	onLockChanged();
+
 	connect(app, &VSimApp::sStateChanged, this, [this](VSimApp::State state) {
 		if (state == VSimApp::State::EDIT_BRANDING) {
 			onActivate();
@@ -34,8 +42,12 @@ BrandingControl::BrandingControl(VSimApp *app,
 		}
 	});
 
+	connect(app->getRoot()->lockTable(), &LockTable::sLockChanged,
+		this, &BrandingControl::onLockChanged);
+
 	connect(editor, &CanvasEditor::sDone, this, &BrandingControl::deactivate);
 	connect(a_edit, &QAction::triggered, this, [this]() {
+		if (m_read_only) return;
 		if (m_app->state() == VSimApp::State::EDIT_BRANDING) {
 			deactivate();
 		}
@@ -47,8 +59,9 @@ BrandingControl::BrandingControl(VSimApp *app,
 
 void BrandingControl::activate()
 {
+	if (m_read_only) return;
 	m_app->setState(VSimApp::State::EDIT_BRANDING);
-	m_overlay->enableEditing(true);
+	//onActivate(); // do we need this?
 }
 
 void BrandingControl::deactivate()
@@ -59,12 +72,21 @@ void BrandingControl::deactivate()
 
 void BrandingControl::onActivate()
 {
+	if (m_read_only) return;
 	m_overlay->enableEditing(true);
 }
 
 void BrandingControl::onDeactivate()
 {
 	m_overlay->enableEditing(false);
+}
+
+void BrandingControl::onLockChanged()
+{
+	bool locked = m_app->getRoot()->lockTableConst()->isLocked();
+	m_read_only = locked;
+	if (locked) deactivate();
+	a_edit->setEnabled(!locked);
 }
 
 BrandingControl::CanvasStackWrapper::CanvasStackWrapper(BrandingControl *control)

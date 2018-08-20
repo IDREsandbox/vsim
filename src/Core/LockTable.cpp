@@ -16,6 +16,7 @@ LockTable &LockTable::operator=(const LockTable &other)
 	m_locked = other.m_locked;
 	m_has_password = other.m_has_password;
 	m_hash = other.m_hash;
+	emit sLockChanged(m_locked);
 	return *this;
 }
 

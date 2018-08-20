@@ -51,6 +51,7 @@ public:
 	// - lock(LockParams)
 	// - lock().pw().settings().current()... named param idiom
 	void setLockTable(const LockTable &lock);
+	LockTable *lockTable();
 	const LockTable *lockTableConst() const;
 
 	//// unlock removes all lock stuff
@@ -75,10 +76,10 @@ public:
 	void moveAllToThread(QThread *thread);
 
 signals:
-	void sLockedChanged(bool locked);
-	//void sSettingsLockedChanged(bool locked);
-	//void sRestrictToCurrentChanged(bool restrict);
-	//void sDisableNavigationChanged(bool disable);
+	//void sLockedChanged(bool locked);
+	void sSettingsLockedChanged(bool locked);
+	void sRestrictToCurrentChanged(bool restrict);
+	void sDisableNavigationChanged(bool disable);
 
 private:
 	std::unique_ptr<NarrativeGroup> m_narratives;

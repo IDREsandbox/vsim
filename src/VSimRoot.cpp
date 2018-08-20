@@ -2,6 +2,7 @@
 #include "VSimRoot.h"
 #include "VSimRoot.h"
 #include "VSimRoot.h"
+#include "VSimRoot.h"
 
 #include <iostream>
 #include <QDate>
@@ -149,6 +150,11 @@ void VSimRoot::setLockTable(const LockTable &lock)
 	*m_lock = lock;
 }
 
+LockTable * VSimRoot::lockTable()
+{
+	return m_lock;
+}
+
 const LockTable * VSimRoot::lockTableConst() const
 {
 	return m_lock;
@@ -157,13 +163,13 @@ const LockTable * VSimRoot::lockTableConst() const
 void VSimRoot::setSettingsLocked(bool locked)
 {
 	m_lock_settings = locked;
-	//emit sSettingsLockedChanged(locked);
+	emit sSettingsLockedChanged(locked);
 }
 
 void VSimRoot::setRestrictToCurrent(bool restrict)
 {
 	m_lock_add_remove = restrict;
-	//emit sRestrictToCurrentChanged(restrict);
+	emit sRestrictToCurrentChanged(restrict);
 
 	m_narratives->setRestrictToCurrent(restrict);
 	m_resources->setRestrictToCurrent(restrict);
@@ -173,7 +179,7 @@ void VSimRoot::setRestrictToCurrent(bool restrict)
 void VSimRoot::setNavigationLocked(bool disable)
 {
 	m_lock_navigation = disable;
-	//emit sDisableNavigationChanged(disable);
+	emit sDisableNavigationChanged(disable);
 }
 
 void VSimRoot::debug()

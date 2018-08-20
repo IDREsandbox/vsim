@@ -990,7 +990,7 @@ void MainWindow::execModelInformation()
 	auto *settings = m_app->getRoot()->settings();
 	auto *info = settings->model_information.get(); // possibly missing
 
-	bool read_only = m_app->getRoot()->restrictedToCurrent();
+	bool read_only = m_app->getRoot()->lockTableConst()->isLocked();
 
 	ModelInformationDialog dlg(info);
 	dlg.setReadOnly(read_only);
