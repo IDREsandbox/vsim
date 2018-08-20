@@ -74,9 +74,9 @@ set(VSim_src
   resources/ERDisplay.cpp
   resources/ERDisplay.h
   resources/ERDisplay.ui
-  resources/ERFilterArea.ui
   resources/ERFilterArea.cpp
   resources/ERFilterArea.h
+  resources/ERFilterArea.ui
   resources/ERScrollBox.cpp
   resources/ERScrollBox.h
   resources/ERScrollItem.cpp
@@ -126,6 +126,9 @@ set(VSim_src
   ERBar.cpp
   ERBar.h
   ERBar.ui
+  ExportDialog.cpp
+  ExportDialog.h
+  ExportDialog.ui
   FastScrollBox.cpp
   FastScrollBox.h
   FirstPersonManipulator.cpp

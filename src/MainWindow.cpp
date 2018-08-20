@@ -31,6 +31,7 @@
 #include "narrative/NarrativeGroup.h"
 #include "narrative/NarrativePlayer.h"
 #include "narrative/NarrativeControl.h"
+#include "narrative/Narrative.h"
 
 #include "resources/EResourceGroup.h"
 #include "resources/ERControl.h"
@@ -57,6 +58,7 @@
 #include "BrandingControl.h"
 #include "LockDialog.h"
 #include "Core/Util.h"
+#include "ExportDialog.h"
 
 #include <fstream>
 
@@ -818,6 +820,8 @@ void MainWindow::actionImportModel()
 
 void MainWindow::actionImportNarratives()
 {
+	if (m_app->getRoot()->restrictedToCurrent()) return;
+
 	// Open dialog
 	qInfo("Importing narratives");
 	QStringList list = QFileDialog::getOpenFileNames(this, "Import Narratives",
@@ -857,18 +861,46 @@ void MainWindow::actionImportNarratives()
 
 void MainWindow::actionExportNarratives()
 {
-	// Open dialog
 	qInfo("Exporting narratives");
-	QString filename = QFileDialog::getSaveFileName(this, "Export Narratives",
-		m_app->getLastDirectory().c_str(), "Narrative files (*.nar);;All types (*.*)");
-	if (filename == "") {
-		qInfo() << "export cancel";
-		return;
+	ExportDialog dlg;
+	dlg.setTitle("Export Narratives");
+	dlg.setTypes("Narratives (*.nar);;All types (*.*)");
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) return;
+
+	NarrativeGroup group;
+	group = *m_app->getRoot()->narratives();
+
+	// make a copy of resources
+	// apply locks
+	if (dlg.lock()) {
+		if (dlg.usePassword()) {
+			HashLock hash = HashLock::generateHash(dlg.password().toStdString());
+			for (auto nar : group) {
+				nar->lockTable()->lockWithPasswordHash(hash);
+			}
+		}
+		else {
+			for (auto nar : group) {
+				nar->lockTable()->lock();
+			}
+		}
 	}
+
+	auto selection = m_app->narrativeControl()->getSelectedNarratives();
+	if (dlg.exportAll()) {
+		selection.clear();
+		for (size_t i = 0; i < group.size(); i++) {
+			selection.insert(i);
+		}
+	}
+	QString filename = dlg.path();
+
 	std::ofstream out(filename.toStdString(), std::ios::binary);
 	if (out.good()) {
-		bool ok = VSimSerializer::exportNarrativesStream(out, m_app->getRoot()->narratives(),
-			m_app->narrativeControl()->getSelectedNarratives());
+		bool ok = VSimSerializer::exportNarrativesStream(out,
+			&group,
+			selection);
 		if (ok) return;
 	}
 	QMessageBox::warning(this, "Export Error", "Error exporting narratives to " + filename);
@@ -876,6 +908,8 @@ void MainWindow::actionExportNarratives()
 
 void MainWindow::actionImportERs()
 {
+	if (m_app->getRoot()->restrictedToCurrent()) return;
+
 	qInfo("Importing resources");
 	QString path = QFileDialog::getOpenFileName(this, "Import Resources",
 		QString(), "Narrative files (*.ere);;All types (*.*)");
@@ -905,19 +939,45 @@ void MainWindow::actionImportERs()
 
 void MainWindow::actionExportERs()
 {
-	// Open dialog
-	qInfo("Exporting resources");
-	QString filename = QFileDialog::getSaveFileName(this, "Export Resources",
-		m_app->getLastDirectory().c_str(), "Resources (*.ere);;All types (*.*)");
-	if (filename == "") {
-		qInfo() << "export cancel";
-		return;
+	qInfo() << "Exporting ers";
+	ExportDialog dlg;
+	dlg.setTitle("Export Resources");
+	dlg.setTypes("Resources (*.ere);;All types (*.*)");
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) return;
+
+	EResourceGroup group;
+	group = *m_app->getRoot()->resources();
+
+	// make a copy of resources
+	// apply locks
+	if (dlg.lock()) {
+		if (dlg.usePassword()) {
+			HashLock hash = HashLock::generateHash(dlg.password().toStdString());
+			for (auto res : group) {
+				res->lockTable()->lockWithPasswordHash(hash);
+			}
+		}
+		else {
+			for (auto res : group) {
+				res->lockTable()->lock();
+			}
+		}
 	}
+
+	auto selection = m_app->erControl()->getCombinedSelection();
+	if (dlg.exportAll()) {
+		selection.clear();
+		for (size_t i = 0; i < group.size(); i++) {
+			selection.insert(i);
+		}
+	}
+	QString filename = dlg.path();
 	std::ofstream out(filename.toStdString(), std::ios::binary);
 	if (out.good()) {
 		bool ok = VSimSerializer::exportEResources(out,
-			m_app->getRoot()->resources(),
-			m_app->erControl()->getCombinedSelection(),
+			&group,
+			selection,
 			saveParams(filename));
 		if (ok) return;
 	}
