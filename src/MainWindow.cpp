@@ -990,16 +990,20 @@ void MainWindow::execModelInformation()
 	auto *settings = m_app->getRoot()->settings();
 	auto *info = settings->model_information.get(); // possibly missing
 
-	ModelInformationDialog dlg(info);
-	int result = dlg.exec();
-	if (result == QDialog::Accepted) {
-		auto new_data = dlg.getData();
+	bool read_only = m_app->getRoot()->restrictedToCurrent();
 
-		settings->model_information.reset(
-			new VSim::FlatBuffers::ModelInformationT(
-				new_data
-			));
-	}
+	ModelInformationDialog dlg(info);
+	dlg.setReadOnly(read_only);
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) return;
+
+	if (read_only) return;
+
+	auto new_data = dlg.getData();
+	settings->model_information.reset(
+		new VSim::FlatBuffers::ModelInformationT(
+			new_data
+		));
 }
 
 void MainWindow::execLockDialog()
