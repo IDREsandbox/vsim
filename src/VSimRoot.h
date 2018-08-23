@@ -5,16 +5,14 @@
 #include <memory>
 #include <QObject>
 
+#include "settings_generated.h"
+
 class NarrativeGroup;
 class ModelGroup;
 class EResourceGroup;
 class ECategoryGroup;
 class CanvasScene;
 class LockTable;
-namespace VSim { namespace FlatBuffers {
-	struct SettingsT;
-	struct LockSettingsT;
-}}
 
 class VSimRoot : public QObject {
 	Q_OBJECT;
@@ -28,7 +26,9 @@ public:
 
 	// copies another VSimRoot
 	// steals some unique_ptrs where QObject is no involved
-	void take(VSimRoot *other);
+	//void take(VSimRoot *other);
+	// doesn't copy osg tree, just uses ref_ptrs
+	void copy(VSimRoot *other);
 
 	NarrativeGroup *narratives() const;
 	EResourceGroup *resources() const;
@@ -39,7 +39,12 @@ public:
 	void copySettings(const VSimRoot *other);
 
 	// never null
-	VSim::FlatBuffers::SettingsT *settings() const;
+	//VSim::FlatBuffers::SettingsT &settings() const;
+	//VSim::FlatBuffers::OtherSettingsT &OtherSettingsT() const;
+	VSim::FlatBuffers::ModelInformationT &modelInformation() const;
+	VSim::FlatBuffers::NavigationSettingsT &navigationSettings() const;
+	VSim::FlatBuffers::GraphicsSettingsT &graphicsSettings() const;
+	VSim::FlatBuffers::WindowSettingsT &windowSettings() const;
 
 	void prepareSave();
 	void postLoad();
@@ -75,6 +80,15 @@ public:
 	// only kind of works
 	void moveAllToThread(QThread *thread);
 
+	static void copyModelInformation(VSim::FlatBuffers::ModelInformationT &dest,
+		const VSim::FlatBuffers::ModelInformationT &src);
+	static void copyNavigationSettings(VSim::FlatBuffers::NavigationSettingsT &dest,
+		const VSim::FlatBuffers::NavigationSettingsT &src);
+	static void copyGraphicsSettings(VSim::FlatBuffers::GraphicsSettingsT &dest,
+		const VSim::FlatBuffers::GraphicsSettingsT &src);
+	static void copyWindowSettings(VSim::FlatBuffers::WindowSettingsT &dest,
+		const VSim::FlatBuffers::WindowSettingsT &src);
+
 signals:
 	//void sLockedChanged(bool locked);
 	void sSettingsLockedChanged(bool locked);
@@ -85,7 +99,11 @@ private:
 	std::unique_ptr<NarrativeGroup> m_narratives;
 	std::unique_ptr<ModelGroup> m_models;
 	std::unique_ptr<EResourceGroup> m_resources;
-	std::unique_ptr<VSim::FlatBuffers::SettingsT> m_settings;
+	//std::unique_ptr<VSim::FlatBuffers::SettingsT> m_settings;
+	std::unique_ptr<VSim::FlatBuffers::ModelInformationT> m_model_information;
+	std::unique_ptr<VSim::FlatBuffers::NavigationSettingsT> m_navigation_settings;
+	std::unique_ptr<VSim::FlatBuffers::GraphicsSettingsT> m_graphics_settings;
+	std::unique_ptr<VSim::FlatBuffers::WindowSettingsT> m_window_settings;
 	std::unique_ptr<CanvasScene> m_branding_canvas;
 
 	LockTable *m_lock;

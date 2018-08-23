@@ -16,6 +16,7 @@
 namespace Ui { class MainWindow; }
 
 class VSimApp;
+class VSimRoot;
 class OSGViewerWidget;
 class ModelOutliner;
 class TimeSlider;
@@ -78,7 +79,10 @@ public slots:
 	void execOpen(const QString &filename);
 	void actionSave();
 	void actionSaveAs();
-	void execSave(const QString &filename); // runs thread and dialog
+	// doesn't collect settings and stuff from app
+	// does fix paths
+	bool execSave(const QString &filename);
+	bool execSave(const QString &filename, VSimRoot *root); // runs thread and dialog
 	void actionImportModel();
 
 	void actionImportNarratives();
@@ -86,6 +90,8 @@ public slots:
 
 	void actionImportERs();
 	void actionExportERs();
+
+	void actionPackage();
 
 	void execModelInformation();
 	void execLockDialog();

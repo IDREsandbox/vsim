@@ -71,5 +71,5 @@ void HashLock::debug()
 {
 	QByteArray h1h(reinterpret_cast<char*>(m_hash.data()), (int)m_hash.size());
 	QByteArray h1s(reinterpret_cast<char*>(m_salt.data()), (int)m_salt.size());
-	qDebug() << "hash - " << h1h << "\nsalt - " << h1s << "\n" << m_iterations;
+	qInfo() << "hash - " << h1h << "\nsalt - " << h1s << "\n" << m_iterations;
 }

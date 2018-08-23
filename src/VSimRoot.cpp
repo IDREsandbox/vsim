@@ -3,6 +3,11 @@
 #include "VSimRoot.h"
 #include "VSimRoot.h"
 #include "VSimRoot.h"
+#include "VSimRoot.h"
+#include "VSimRoot.h"
+#include "VSimRoot.h"
+#include "VSimRoot.h"
+#include "VSimRoot.h"
 
 #include <iostream>
 #include <QDate>
@@ -41,19 +46,40 @@ VSimRoot::VSimRoot(QObject *parent)
 	m_models = std::make_unique<ModelGroup>();
 	m_resources = std::make_unique<EResourceGroup>();
 
-	m_settings = std::make_unique<VSim::FlatBuffers::SettingsT>();
+	//m_settings = std::make_unique<VSim::FlatBuffers::SettingsT>();
+	m_model_information = std::make_unique<VSim::FlatBuffers::ModelInformationT>();
+	m_navigation_settings = std::make_unique<VSim::FlatBuffers::NavigationSettingsT>();
+	m_graphics_settings = std::make_unique<VSim::FlatBuffers::GraphicsSettingsT>();
+	Util::getOrCreate(m_graphics_settings->camera_settings);
+	m_window_settings = std::make_unique<VSim::FlatBuffers::WindowSettingsT>();
 	m_branding_canvas = std::make_unique<CanvasScene>();
 
 	m_lock = new LockTable(this);
+	m_lock_add_remove = false;
+	m_lock_settings = false;
+	m_lock_navigation = false;
 }
 
 VSimRoot::~VSimRoot()
 {
 }
 
-void VSimRoot::take(VSimRoot * other)
+//void VSimRoot::take(VSimRoot * other)
+//{
+//	m_narratives->clear();
+//	m_resources->clear();
+//	m_models->clear();
+//	*m_narratives = *other->m_narratives;
+//	*m_resources = *other->m_resources;
+//	m_models->copyReference(*other->m_models);
+//
+//	m_settings.swap(other->m_settings);
+//	m_branding_canvas->copy(*other->m_branding_canvas);
+//	*m_lock = *other->m_lock;
+//}
+
+void VSimRoot::copy(VSimRoot * other)
 {
-	qDebug() << "vsim root take";
 	m_narratives->clear();
 	m_resources->clear();
 	m_models->clear();
@@ -61,10 +87,16 @@ void VSimRoot::take(VSimRoot * other)
 	*m_resources = *other->m_resources;
 	m_models->copyReference(*other->m_models);
 
-	m_settings.swap(other->m_settings);
+	copyModelInformation(*m_model_information, *other->m_model_information);
+	copyNavigationSettings(*m_navigation_settings, *other->m_navigation_settings);
+	copyGraphicsSettings(*m_graphics_settings, *other->m_graphics_settings);
+	copyWindowSettings(*m_window_settings, *other->m_window_settings);
+
 	m_branding_canvas->copy(*other->m_branding_canvas);
-	qDebug() << "assigning lock" << other->m_lock->isLocked();
 	*m_lock = *other->m_lock;
+	m_lock_add_remove = other->m_lock_add_remove;
+	m_lock_navigation = other->m_lock_navigation;
+	m_lock_settings = other->m_lock_settings;
 }
 
 NarrativeGroup * VSimRoot::narratives() const
@@ -87,55 +119,69 @@ EResourceGroup * VSimRoot::resources() const
 	return m_resources.get();
 }
 
-void VSimRoot::copySettings(const VSimRoot * other)
-{
-	m_settings->graphics_settings;
+//VSim::FlatBuffers::SettingsT &VSimRoot::settings() const
+//{
+//	return *m_settings.get();
+//}
 
+VSim::FlatBuffers::ModelInformationT & VSimRoot::modelInformation() const
+{
+	return *m_model_information.get();
 }
 
-VSim::FlatBuffers::SettingsT * VSimRoot::settings() const
+VSim::FlatBuffers::NavigationSettingsT & VSimRoot::navigationSettings() const
 {
-	return m_settings.get();
+	return *m_navigation_settings.get();
+}
+
+VSim::FlatBuffers::GraphicsSettingsT & VSimRoot::graphicsSettings() const
+{
+	return *m_graphics_settings.get();
+}
+
+VSim::FlatBuffers::WindowSettingsT & VSimRoot::windowSettings() const
+{
+	return *m_window_settings.get();
 }
 
 void VSimRoot::prepareSave()
 {
 	// make all the unique ptr business
-	auto &fb_lsettings = Util::getOrCreate(m_settings->lock_settings);
-	auto &fb_lock = Util::getOrCreate(fb_lsettings->lock);
+	//auto &fb_lsettings = Util::getOrCreate(m_settings->lock_settings);
+	//auto &fb_lock = Util::getOrCreate(fb_lsettings->lock);
 
-	fb_lsettings->lock_settings = m_lock_settings;
-	fb_lsettings->lock_add_remove = m_lock_add_remove;
-	fb_lsettings->lock_navigation = m_lock_navigation;
+	//fb_lsettings->lock_settings = m_lock_settings;
+	//fb_lsettings->lock_add_remove = m_lock_add_remove;
+	//fb_lsettings->lock_navigation = m_lock_navigation;
 
-	m_lock->createLockTableT(fb_lock.get());
+	//m_lock->createLockTableT(fb_lock.get());
 }
 
 void VSimRoot::postLoad()
 {
-	auto &fb_lsettings = Util::getOrCreate(m_settings->lock_settings);
-	auto &fb_lock = Util::getOrCreate(fb_lsettings->lock);
+	//auto &fb_lsettings = Util::getOrCreate(m_settings->lock_settings);
+	//auto &fb_lock = Util::getOrCreate(fb_lsettings->lock);
 
-	setSettingsLocked(fb_lsettings->lock_settings);
-	setRestrictToCurrent(fb_lsettings->lock_add_remove);
-	setNavigationLocked(fb_lsettings->lock_navigation);
+	//setSettingsLocked(fb_lsettings->lock_settings);
+	//setRestrictToCurrent(fb_lsettings->lock_add_remove);
+	//setNavigationLocked(fb_lsettings->lock_navigation);
 
-	m_lock->readLockTableT(fb_lock.get());
+	//m_lock->readLockTableT(fb_lock.get());
 }
 
 bool VSimRoot::settingsLocked() const
 {
-	return m_lock_settings;
+	return m_lock->isLocked() && m_lock_settings;
 }
 
 bool VSimRoot::restrictedToCurrent() const
 {
-	return m_lock_add_remove;
+	return m_lock->isLocked() && m_lock_add_remove;
 }
 
 bool VSimRoot::navigationLocked() const
 {
-	return m_lock_navigation;
+	return m_lock->isLocked() && m_lock_navigation;
 }
 
 //bool VSimRoot::unlock(QString pw)
@@ -241,7 +287,7 @@ void VSimRoot::debug()
 
 void VSimRoot::loadOld(osg::Group * old_group)
 {
-	qDebug() << "loading old vsim" << old_group->getNumChildren();
+	qInfo() << "loading old vsim" << old_group->getNumChildren();
 	// find ModelInformation
 
 	// scan for model information
@@ -250,9 +296,7 @@ void VSimRoot::loadOld(osg::Group * old_group)
 		ModelInformationOld *info = dynamic_cast<ModelInformationOld*>(node);
 		if (info) {
 			qInfo() << "Found old model information";
-			m_settings->model_information =
-				std::make_unique<VSim::FlatBuffers::ModelInformationT>();
-			auto *new_info = m_settings->model_information.get();
+			auto &new_info = m_model_information;
 
 			new_info->authors = info->getPrimaryAuthors();
 			new_info->contributors = info->getContributors();
@@ -325,14 +369,68 @@ void VSimRoot::moveAllToThread(QThread *t)
 	}
 }
 
+
+void VSimRoot::copyModelInformation(VSim::FlatBuffers::ModelInformationT & dest,
+	const VSim::FlatBuffers::ModelInformationT & src)
+{
+	dest.model_name = src.model_name;
+	dest.project_date_julian_day = src.project_date_julian_day;
+	dest.authors = src.authors;
+	dest.contributors = src.contributors;
+	dest.place_of_publication = src.place_of_publication;
+	dest.url = src.url;
+	dest.project_date_end_julian = src.project_date_end_julian;
+	dest.funders = src.funders;
+	dest.research_objective = src.research_objective;
+	dest.technology = src.technology;
+	dest.release_date_julian = src.release_date_julian;
+	dest.release_notes = src.release_notes;
+}
+
+void VSimRoot::copyNavigationSettings(VSim::FlatBuffers::NavigationSettingsT &dest,
+	const VSim::FlatBuffers::NavigationSettingsT &src)
+{
+	dest.base_speed = src.base_speed;
+	dest.collisions_on = src.collisions_on;
+	dest.collision_radius = src.collision_radius;
+	dest.default_start_camera = src.default_start_camera;
+	dest.eye_height = src.eye_height;
+	dest.flight_speed_tick = src.flight_speed_tick;
+	dest.gravity_acceleration = src.gravity_acceleration;
+	dest.gravity_fall_speed = src.gravity_fall_speed;
+	dest.ground_mode_on = src.ground_mode_on;
+	Util::getOrCreate(dest.start_camera);
+	if (src.start_camera) *dest.start_camera = *src.start_camera;
+}
+
+void VSimRoot::copyGraphicsSettings(VSim::FlatBuffers::GraphicsSettingsT &dest,
+	const VSim::FlatBuffers::GraphicsSettingsT &src)
+{
+	auto &cs = Util::getOrCreate(dest.camera_settings);
+	auto &cs2 = src.camera_settings;
+	if (cs2) {
+		cs->fovy = cs2->fovy;
+		cs->near_clip = cs2->near_clip;
+		cs->far_clip = cs2->far_clip;
+		cs->auto_clip = cs2->auto_clip;
+	}
+}
+
+void VSimRoot::copyWindowSettings(VSim::FlatBuffers::WindowSettingsT &dest,
+	const VSim::FlatBuffers::WindowSettingsT & src)
+{
+	dest.window_width = src.window_width;
+	dest.window_height = src.window_height;
+	dest.nbar_size = src.nbar_size;
+	dest.ebar_size = src.ebar_size;
+}
+
+
 //void VSimRoot::merge(VSimRoot *other)
 //{
 //	// basically just copy over the Narratives and Models contents
-//	qDebug() << "merging";
 //
 //	NarrativeGroup *other_narratives = other->narratives();
-//	qDebug() << "current narratives:" << m_narratives->getNumChildren();
-//	qDebug() << "other narratives:" << other_narratives->getNumChildren();
 //	for (uint i = 0; i < other_narratives->getNumChildren(); i++) {
 //		m_narratives->addChild(other_narratives->getChild(i));
 //	}

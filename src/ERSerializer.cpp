@@ -37,7 +37,17 @@ void ERSerializer::readERTable(const fb::ERTable *buffer, EResourceGroup *group,
 		if (o_res->name()) res->setResourceName(o_res->name()->str());
 		if (o_res->author()) res->setAuthor(o_res->author()->str());
 		if (o_res->description()) res->setResourceDescription(o_res->description()->str());
-		res->setResourcePath(TypesSerializer::readRelativePath(o_res->path(), p).toStdString());
+		if (o_res->path()) {
+			if (res->getERType() == EResource::FILE) {
+				// only do relative conversion if file
+				// websites like www.yahoo.com get messed up otherwise
+				res->setResourcePath(TypesSerializer::readRelativePath(o_res->path(), p).toStdString());
+			}
+			else {
+				res->setResourcePath(o_res->path()->str());
+			}
+		}
+
 		res->setGlobal(o_res->global());
 		res->setCopyright(static_cast<EResource::Copyright>(o_res->copyright()));
 		res->setMinYear(o_res->year_min());
@@ -92,7 +102,14 @@ flatbuffers::Offset<fb::ERTable> ERSerializer::createERTable(
 		auto o_name = builder->CreateString(res->getResourceName());
 		auto o_auth = builder->CreateString(res->getAuthor());
 		auto o_desc = builder->CreateString(res->getResourceDescription());
-		auto o_path = TypesSerializer::createRelativePath(builder, QString::fromStdString(res->getResourcePath()), p);
+		flatbuffers::Offset<flatbuffers::String> o_path;
+		if (res->getERType() == EResource::FILE) {
+			o_path = TypesSerializer::createRelativePath(builder,
+				QString::fromStdString(res->getResourcePath()), p);
+		}
+		else {
+			o_path = builder->CreateString(res->getResourcePath());
+		}
 		auto o_lock = res->lockTableConst()->createLockTable(builder);
 
 		fb::EResourceBuilder b_res(*builder);

@@ -13,7 +13,6 @@ Model::Model(QObject *parent)
 void Model::copyReference(const Model &other)
 {
 	m_node = other.m_node; // reference copy
-
 	m_path = other.m_path;
 	m_name = other.m_name;
 	m_embedded = other.m_embedded;
@@ -87,21 +86,23 @@ void Model::embedModel(osg::ref_ptr<osg::Node> node)
 {
 	m_embedded = true;
 	m_path = "";
-
-	if (m_node == node) {
-		m_failed_to_load = (m_node == nullptr);
-		return;
-	}
+	bool is_null = (m_node == nullptr);
 
 	if (node == nullptr) {
+		qDebug() << "embedding null";
 		m_failed_to_load = true;
 		m_node = new osg::Node;
+		emit sNodeChanged();
+	}
+	else if (m_node == node) {
+		m_failed_to_load = is_null;
+		return;
 	}
 	else {
 		m_failed_to_load = false;
 		m_node = node;
+		emit sNodeChanged();
 	}
-	emit sNodeChanged();
 }
 
 void Model::setFile(const std::string & path, osg::ref_ptr<osg::Node> node)
@@ -109,17 +110,18 @@ void Model::setFile(const std::string & path, osg::ref_ptr<osg::Node> node)
 	m_embedded = false;
 	m_path = path;
 
+	if (node == nullptr) {
+		m_failed_to_load = true;
+		m_node = new osg::Node;
+		emit sNodeChanged();
+		return;
+	}
+
 	if (m_node == node) {
 		return;
 	}
 
-	if (node == nullptr) {
-		m_failed_to_load = true;
-		m_node = new osg::Node;
-	}
-	else {
-		m_node = node;
-		m_failed_to_load = false;
-	}
+	m_node = node;
+	m_failed_to_load = false;
 	emit sNodeChanged();
 }

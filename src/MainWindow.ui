@@ -87,6 +87,8 @@
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
+    <addaction name="action_package"/>
+    <addaction name="separator"/>
     <addaction name="actionImport_Model"/>
     <addaction name="separator"/>
     <addaction name="actionImport_Narratives"/>
@@ -539,6 +541,11 @@
   <action name="actionLock_Settings">
    <property name="text">
     <string>Lock Settings</string>
+   </property>
+  </action>
+  <action name="action_package">
+   <property name="text">
+    <string>Export VSim File...</string>
    </property>
   </action>
  </widget>

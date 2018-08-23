@@ -166,7 +166,7 @@ bool VSimApp::initWithVSim(VSimRoot *root)
 	m_undo_stack->clear();
 
 	// keep the old root, just do a copy
-	m_root->take(root);
+	m_root->copy(root);
 
 	osg::Node *osg_root = m_root->models()->sceneRoot();
 	m_viewer->setSceneData(osg_root);

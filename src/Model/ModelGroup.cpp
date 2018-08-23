@@ -146,6 +146,18 @@ osg::Group * ModelGroup::sceneRoot() const
 	return m_root;
 }
 
+int ModelGroup::embedAll()
+{
+	int count = 0;
+	for (auto model : *m_group) {
+		if (!model->embedded()) {
+			model->embedModel(model->nodeRef());
+			count++;
+		}
+	}
+	return count;
+}
+
 void ModelGroup::debugScene() const
 {
 	DebugVisitor v;

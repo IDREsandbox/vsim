@@ -62,7 +62,7 @@ table NavigationSettings {
   collision_radius:float = 1.0;
 
   ground_mode_on:bool = false;
-  gravity_acceleration:float = 10.0;
+  gravity_acceleration:float = 10.0; // positive
   gravity_fall_speed:float = 40.0;
   eye_height:float = 1.7;
 

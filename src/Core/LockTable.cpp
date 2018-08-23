@@ -112,6 +112,11 @@ flatbuffers::Offset<VSim::FlatBuffers::LockTable>
 
 void LockTable::readLockTableT(const VSim::FlatBuffers::LockTableT *fb_lock)
 {
+	if (fb_lock == nullptr) {
+		m_locked = false;
+		emit sLockChanged(false);
+		return;
+	}
 	m_locked = fb_lock->locked;
 	m_has_password = fb_lock->has_password;
 

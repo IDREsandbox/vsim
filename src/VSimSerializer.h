@@ -72,6 +72,14 @@ namespace VSimSerializer {
 		createRoot(flatbuffers::FlatBufferBuilder *builder,
 			const VSimRoot *root, std::ostream &model_data, const TypesSerializer::Params &p);
 
+	void readSettings(const VSim::FlatBuffers::Settings *buffer,
+		VSimRoot *root);
+	flatbuffers::Offset<VSim::FlatBuffers::Settings>
+		createSettings(flatbuffers::FlatBufferBuilder *builder,
+			const VSimRoot *settings,
+			const TypesSerializer::Params &p);
+
+
 	bool readVSimFile(const std::string &path, VSimRoot *root, const TypesSerializer::Params &p);
 	bool writeVSimFile(const std::string &path, const VSimRoot *root, const TypesSerializer::Params &p);
 

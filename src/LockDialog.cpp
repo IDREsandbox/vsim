@@ -3,6 +3,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDebug>
+#include <QFileDialog>
 
 #include "VSimRoot.h"
 #include "narrative/NarrativeGroup.h"
@@ -10,25 +11,223 @@
 #include "resources/EResourceGroup.h"
 #include "resources/EResource.h"
 #include "Gui/PasswordDialog.h"
-
+#include "Model/ModelGroup.h"
 
 LockDialog::LockDialog(QWidget * parent)
-	: QDialog(parent)
+	: QDialog(parent),
+	m_lock_applied(false)
 {
 	ui.setupUi(this);
-
 	setWindowFlag(Qt::WindowType::WindowContextHelpButtonHint, false);
 
-	connect(ui.edit_button, &QAbstractButton::pressed, this, &LockDialog::execUnlockThis);
-
+	ui.file_widget->hide();
 	checkEnablePassword();
+
+	connect(ui.edit_button, &QAbstractButton::pressed, this, &LockDialog::execUnlockThis);
 	connect(ui.change_password, &QCheckBox::stateChanged, this, &LockDialog::checkEnablePassword);
 
 	connect(ui.button_box, &QDialogButtonBox::accepted, this, &LockDialog::tryAccept);
 	connect(ui.button_box, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+	connect(ui.file_button, &QAbstractButton::pressed, this, &LockDialog::onChooseFile);
 }
 
 void LockDialog::execEdit(VSimRoot *root)
+{
+	// TODO: clear undo history?
+	m_title = "Lock Settings";
+	m_package = false;
+
+	auto result = execInternal(root);
+	if (result == QDialog::Rejected) return;
+	apply();
+	execResultsMessage();
+}
+
+QDialog::DialogCode LockDialog::execPackage(VSimRoot *root)
+{
+	m_title = "Export VSim";
+	m_package = true;
+
+	bool file_ok = onChooseFile();
+	if (!file_ok) return QDialog::Rejected;
+	auto result = execInternal(root);
+	if (result == QDialog::Accepted) apply();
+
+	return result;
+}
+
+QString LockDialog::filePath() const
+{
+	return ui.file_text->text();
+}
+
+bool LockDialog::lockApplied() const
+{
+	return m_lock_applied;
+}
+
+void LockDialog::execUnlockThis()
+{
+	// only valid when we have a password to lock
+	//if (!(m_root->locked() && m_root->hasPassword())) return;
+
+	if (!(m_this_lock.isLocked() && m_this_lock.hasPassword())) return;
+
+	TestPasswordDialog dlg;
+	dlg.setWindowTitle("Edit Lock Settings");
+	dlg.setLabel("Enter password:");
+	dlg.showSkipButton(false);
+	dlg.setLock(&m_this_lock);
+
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) return;
+
+	// unlock stuff
+	ui.lock_group_box->setEnabled(true);
+	ui.embed_models->setEnabled(true);
+	ui.edit_button->hide();
+	adjustSize();
+}
+
+void LockDialog::apply()
+{
+	std::string new_password;
+	bool pw_lock_ok = false;
+	m_nar_lock_ok = 0;
+	m_nar_lock_fail = 0;
+	m_er_lock_ok = 0;
+	m_er_lock_fail = 0;
+	m_models_embedded = 0;
+	m_lock_applied = false;
+
+	// embed models
+	if (ui.embed_models->isChecked()) {
+		m_models_embedded = m_root->models()->embedAll();
+	}
+
+	// can't do anything else
+	if (m_this_lock.isLocked()) {
+		return;
+	}
+
+	if (m_new_lock_pw || m_change_pw) {
+		// generate a hash
+		// apply that hash to this, nars, etc
+		HashLock hash = HashLock::generateHash(m_pw.toStdString());
+		m_this_lock.lockWithPasswordHash(hash);
+		m_root->setLockTable(m_this_lock);
+		m_lock_applied = true;
+
+		// TODO: lock nars
+		//root->narratives()->lock
+		//root->narratives()->locks();
+		// mass lock with hash
+		if (ui.lock_all->isChecked()) {
+			// mass lock w/ password
+			for (auto nar : *m_root->narratives()) {
+				if (nar->lockTable()->lockWithPasswordHash(hash)) {
+					m_nar_lock_ok++;
+				}
+				else {
+					m_nar_lock_fail++;
+				}
+			}
+			for (auto er : *m_root->resources()) {
+				if (er->lockTable()->lockWithPasswordHash(hash)) {
+					m_er_lock_ok++;
+				}
+				else {
+					m_er_lock_fail++;
+				}
+			}
+		}
+	}
+
+	if (m_new_lock_perm || m_change_pw_perm) {
+		m_this_lock.lock();
+		m_root->setLockTable(m_this_lock);
+		m_lock_applied = true;
+
+		// mass lock permanent
+		if (ui.lock_all->isChecked()) {
+			for (auto nar : *m_root->narratives()) {
+				if (nar->lockTable()->lock()) {
+					m_nar_lock_ok++;
+				}
+				else {
+					m_nar_lock_fail++;
+				}
+			}
+			for (auto er : *m_root->resources()) {
+				if (er->lockTable()->lock()) {
+					m_er_lock_ok++;
+				}
+				else {
+					m_er_lock_fail++;
+				}
+			}
+		}
+	}
+
+	if (m_lock) {
+		m_root->setSettingsLocked(ui.lock_settings->isChecked());
+		m_root->setRestrictToCurrent(ui.lock_restrict->isChecked());
+		m_root->setNavigationLocked(ui.lock_navigation->isChecked());
+		// don't reassign lock if nothing changed
+	}
+
+	if (m_unlock) {
+		m_root->setSettingsLocked(false);
+		m_root->setRestrictToCurrent(false);
+		m_root->setNavigationLocked(false);
+
+		m_root->setLockTable(m_this_lock);
+	}
+}
+
+QStringList LockDialog::resultsString()
+{
+
+	QStringList msg;
+
+	if (m_new_lock_pw) {
+		msg.push_back("File was locked with a password.");
+	}
+	else if (m_new_lock_perm || m_change_pw_perm) {
+		msg.push_back("File was permanently locked.");
+	}
+	else if (m_change_pw) {
+		msg.push_back("Password was changed.");
+	}
+	else if (m_unlock) {
+		msg.push_back("File was unlocked.");
+	}
+
+	if (m_nar_lock_ok > 0)
+		msg.push_back(QString("Locked %1 narratives.").arg(m_nar_lock_ok));
+	if (m_nar_lock_fail > 0)
+		msg.push_back(QString("Failed to lock %1 narratives.").arg(m_nar_lock_fail));
+	if (m_er_lock_ok > 0)
+		msg.push_back(QString("Locked %1 resources.").arg(m_er_lock_ok));
+	if (m_er_lock_fail > 0)
+		msg.push_back(QString("Failed to lock %1 resources.").arg(m_er_lock_fail));
+	if (m_models_embedded > 0)
+		msg.push_back(QString("Embedded %1 models.").arg(m_models_embedded));
+
+	return msg;
+}
+
+void LockDialog::execResultsMessage()
+{
+	QStringList results = resultsString();
+
+	if (!results.isEmpty()) {
+		QMessageBox::information(nullptr, m_title, results.join('\n'));
+	}
+}
+
+QDialog::DialogCode LockDialog::execInternal(VSimRoot *root)
 {
 	m_root = root;
 
@@ -37,6 +236,7 @@ void LockDialog::execEdit(VSimRoot *root)
 	bool was_locked = m_this_lock.isLocked();
 	m_was_locked = was_locked;
 	bool has_pw = m_this_lock.hasPassword();
+	m_lock_applied = false;
 
 	bool hard_locked = was_locked && !has_pw;
 	bool pw_locked = was_locked && has_pw;
@@ -66,11 +266,13 @@ void LockDialog::execEdit(VSimRoot *root)
 		ui.expiration_checkbox->setChecked(false);
 	}
 
+	ui.file_widget->setVisible(m_package);
+
 	ui.change_password->setVisible(pw_locked);
 	ui.change_password->setChecked(false);
 	ui.use_password->setVisible(!hard_locked);
 	ui.use_password->setChecked(true);
-	ui.embed_models->setChecked(false);
+	ui.embed_models->setChecked(m_package);
 	ui.embed_models->setEnabled(!root->settingsLocked());
 	ui.lock_all->setVisible(!hard_locked);
 	ui.meta_label->setVisible(was_locked);
@@ -85,159 +287,19 @@ void LockDialog::execEdit(VSimRoot *root)
 	int result = exec();
 
 	if (result == QDialog::Rejected) {
-		return;
+		return QDialog::Rejected;
 	}
 
-
-	std::string new_password;
-
-	// can't do anything,
-	// maybe embed all models?
-	if (m_this_lock.isLocked()) {
-		//return;
-		return;
-	}
-
-	bool lock = ui.lock_group_box->isChecked();
-	bool new_lock_pw = lock && !was_locked && ui.use_password->isChecked();
-	bool new_lock_perm = lock && !was_locked && !ui.use_password->isChecked();
-	bool change_pw = lock && was_locked && ui.use_password->isChecked()
+	m_lock = ui.lock_group_box->isChecked();
+	m_new_lock_pw = m_lock && !m_was_locked && ui.use_password->isChecked();
+	m_new_lock_perm = m_lock && !m_was_locked && !ui.use_password->isChecked();
+	m_change_pw = m_lock && m_was_locked && ui.use_password->isChecked()
 		&& ui.change_password->isChecked();
-	bool change_pw_perm = lock && was_locked && !ui.use_password->isChecked();
-	bool unlock = !lock && was_locked;
-	QString pw = ui.password->text();
+	m_change_pw_perm = m_lock && m_was_locked && !ui.use_password->isChecked();
+	m_unlock = !m_lock && m_was_locked;
+	m_pw = ui.password->text();
 
-	bool pw_lock_ok = false;
-	int nar_lock_ok = 0;
-	int nar_lock_fail = 0;
-	int er_lock_ok = 0;
-	int er_lock_fail = 0;
-	int models_embedded = 0;
-
-	if (new_lock_pw || change_pw) {
-		// generate a hash
-		// apply that hash to this, nars, etc
-		HashLock hash = HashLock::generateHash(pw.toStdString());
-		m_this_lock.lockWithPasswordHash(hash);
-		root->setLockTable(m_this_lock);
-
-		// TODO: lock nars
-		//root->narratives()->lock
-		//root->narratives()->locks();
-		// mass lock with hash
-		if (ui.lock_all->isChecked()) {
-
-			// mass lock w/ password
-			for (auto nar : *root->narratives()) {
-				if (nar->lockTable()->lockWithPasswordHash(hash)) {
-					nar_lock_ok++;
-				}
-				else {
-					nar_lock_fail++;
-				}
-			}
-			for (auto er : *root->resources()) {
-				if (er->lockTable()->lockWithPasswordHash(hash)) {
-					er_lock_ok++;
-				}
-				else {
-					er_lock_fail++;
-				}
-			}
-		}
-	}
-
-	if (new_lock_perm || change_pw_perm) {
-		m_this_lock.lock();
-		root->setLockTable(m_this_lock);
-
-		// mass lock permanent
-		if (ui.lock_all->isChecked()) {
-			for (auto nar : *root->narratives()) {
-				if (nar->lockTable()->lock()) {
-					nar_lock_ok++;
-				}
-				else {
-					nar_lock_fail++;
-				}
-			}
-		}
-		for (auto er : *root->resources()) {
-			if (er->lockTable()->lock()) {
-				er_lock_ok++;
-			}
-			else {
-				er_lock_fail++;
-			}
-		}
-	}
-
-	if (lock) {
-		root->setSettingsLocked(ui.lock_settings->isChecked());
-		root->setRestrictToCurrent(ui.lock_restrict->isChecked());
-		root->setNavigationLocked(ui.lock_navigation->isChecked());
-		// don't reassign lock if nothing changed
-	}
-
-	if (unlock) {
-		root->setSettingsLocked(false);
-		root->setRestrictToCurrent(false);
-		root->setNavigationLocked(false);
-
-		root->setLockTable(m_this_lock);
-	}
-
-	// output message
-
-	QString msg;
-
-	if (new_lock_pw) {
-		msg += "File was locked with a password.";
-	}
-	if (new_lock_perm || change_pw_perm) {
-		msg += "File was permanently locked.";
-	}
-	if (change_pw) {
-		msg += "Password was changed.";
-	}
-	if (unlock) {
-		msg += "File was unlocked.";
-	}
-
-	if (nar_lock_ok > 0) msg += QString("\nLocked %1 narratives.").arg(nar_lock_ok);
-	if (nar_lock_fail > 0) msg += QString("\nFailed to lock %1 narratives.").arg(nar_lock_fail);
-	if (er_lock_ok > 0) msg += QString("\nLocked %1 resources.").arg(er_lock_ok);
-	if (er_lock_fail > 0) msg += QString("\nFailed to lock %1 resources.").arg(er_lock_fail);
-	if (models_embedded > 0) msg += QString("\nEmbedded %1 models.").arg(models_embedded);
-
-	if (!msg.isEmpty()) {
-		QMessageBox::information(nullptr, "Lock Settings", msg);
-	}
-
-	// TODO: clear undo history?
-}
-
-void LockDialog::execUnlockThis()
-{
-	// only valid when we have a password to lock
-	//if (!(m_root->locked() && m_root->hasPassword())) return;
-
-	if (!(m_this_lock.isLocked() && m_this_lock.hasPassword())) return;
-
-	TestPasswordDialog dlg;
-	dlg.setWindowTitle("Edit Lock Settings");
-	dlg.setLabel("Enter password:");
-	dlg.showSkipButton(false);
-	dlg.setLock(&m_this_lock);
-
-	int result = dlg.exec();
-	if (result == QDialog::Rejected) return;
-
-	// unlock stuff
-	ui.lock_group_box->setEnabled(true);
-	ui.embed_models->setEnabled(true);
-	ui.edit_button->hide();
-	adjustSize();
+	return QDialog::Accepted;
 }
 
 void LockDialog::tryAccept()
@@ -286,6 +348,23 @@ void LockDialog::tryAccept()
 		accept();
 		return;
 	}
+}
+
+bool LockDialog::onChooseFile()
+{
+	QString start;
+	start = ui.file_text->text();
+	QString filename = QFileDialog::getSaveFileName(this,
+		m_title,
+		start,
+		"VSim files (*.vsim);;"
+		"All types (*.*)");
+
+	if (filename == "") {
+		return false;
+	}
+	ui.file_text->setText(filename);
+	return true;
 }
 
 void LockDialog::checkEnablePassword()

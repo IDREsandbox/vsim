@@ -15,6 +15,7 @@
 #include "Model/Model.h"
 #include "Model/ModelSerializer.h"
 #include "Core/Util.h"
+#include "Core/LockTable.h"
 
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative.h"
@@ -50,15 +51,21 @@ bool VSimSerializer::readStreamRobust(std::istream & in, VSimRoot *root, const T
 	return true;
 }
 
-bool VSimSerializer::readStream(std::istream & in, VSimRoot *root, const TypesSerializer::Params &p)
+bool VSimSerializer::readStream(std::istream &in, VSimRoot *root, const TypesSerializer::Params &p)
 {
 	// read header
 	// V S I M x x x x
 	char header[8];
 	in.read(header, 8);
-	if (!in) return false;
+	if (!in.good()) {
+		qWarning() << "failed to read vsim header";
+		return false;
+	}
 	bool neq = strncmp(header, "VSIM", 4);
-	if (neq) return false;
+	if (neq) {
+		qWarning() << "vsim header mismatch";
+		return false;
+	}
 
 	// flatbuffer buffer
 	std::string buffer;
@@ -79,7 +86,10 @@ bool VSimSerializer::readStream(std::istream & in, VSimRoot *root, const TypesSe
 
 	auto verifier = flatbuffers::Verifier(buf, buffer.size());
 	bool fb_ok = verifier.VerifySizePrefixedBuffer<fb::Root>(fb::RootIdentifier());
-	if (!fb_ok) return false;
+	if (!fb_ok) {
+		qWarning() << "failed to verify vsim flatbuffer";
+		return false;
+	}
 
 	// now do business
 	readRoot(fb_root, root, p);
@@ -116,8 +126,11 @@ bool VSimSerializer::writeStream(std::ostream & out, const VSimRoot * root, cons
 	size_t size = builder.GetSize(); // TODO: check this? does it include the prefix?
 	out.write(buf, size);
 
-	// write models
 	out << model_buffer.rdbuf();
+	// an empty model_buffer triggers failbit, but we don't really care
+	// so just clear it
+	if (out.bad()) return false;
+	out.clear();
 
 	return true;
 }
@@ -139,9 +152,7 @@ void VSimSerializer::readRoot(const VSim::FlatBuffers::Root *buffer,
 	if (buffer->eresources()) {
 		ERSerializer::readERTable(buffer->eresources(), ers, p);
 	}
-	if (buffer->settings()) {
-		buffer->settings()->UnPackTo(root->settings());
-	}
+	readSettings(buffer->settings(), root);
 	if (buffer->branding()) {
 		CanvasSerializer::readCanvas(buffer->branding(), root->branding());
 	}
@@ -156,7 +167,7 @@ flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
 	auto o_nars = NarrativeSerializer::createNarrativeTable(builder, root->narratives());
 	auto o_ers = ERSerializer::createERTable(builder, root->resources(), p);
 	auto o_models = ModelSerializer::createModels(builder, root->models(), model_data, p);
-	auto o_settings = fb::CreateSettings(*builder, root->settings());
+	auto o_settings = createSettings(builder, root, p);
 	auto o_branding = CanvasSerializer::createCanvas(builder, root->branding());
 
 	fb::RootBuilder b_root(*builder);
@@ -171,6 +182,75 @@ flatbuffers::Offset<VSim::FlatBuffers::Root> VSimSerializer::createRoot(
 	return o_root;
 }
 
+void VSimSerializer::readSettings(const VSim::FlatBuffers::Settings *buffer,
+	VSimRoot *root)
+{
+	namespace fb = VSim::FlatBuffers;
+
+	auto settings = std::make_unique<fb::SettingsT>();
+	buffer->UnPackTo(settings.get());
+
+	// we can't do a simple std move, because the address would change
+	// and mess up all of our listeners (controls and gui and stuff)
+	// settings pointer is expected to stay still in memory
+	// what do we do when it's blank?
+
+	VSimRoot::copyModelInformation(root->modelInformation(),
+		*Util::getOrCreate(settings->model_information).get());
+	VSimRoot::copyNavigationSettings(root->navigationSettings(),
+		*Util::getOrCreate(settings->navigation_settings).get());
+	VSimRoot::copyGraphicsSettings(root->graphicsSettings(),
+		*Util::getOrCreate(settings->graphics_settings).get());
+	VSimRoot::copyWindowSettings(root->windowSettings(),
+		*Util::getOrCreate(settings->window_settings).get());
+
+	// lock stuff
+	// read lock table?
+	auto &ls = Util::getOrCreate(settings->lock_settings);
+	root->lockTable()->readLockTableT(ls->lock.get());
+	root->setSettingsLocked(ls->lock_settings);
+	root->setRestrictToCurrent(ls->lock_add_remove);
+	root->setNavigationLocked(ls->lock_navigation);
+	
+	// how do we get defaults?
+	// say we do a
+	// new vsimroot
+	// default constructor makes settingsT's, initialized based on flatbuffers
+	// the assignment copies over thsoe defaults
+}
+
+flatbuffers::Offset<VSim::FlatBuffers::Settings> VSimSerializer::createSettings(
+	flatbuffers::FlatBufferBuilder *builder,
+	const VSimRoot *root,
+	const TypesSerializer::Params & p)
+{
+
+	auto o_mi = VSim::FlatBuffers::CreateModelInformation(*builder,
+		&root->modelInformation());
+	auto o_ns = VSim::FlatBuffers::CreateNavigationSettings(*builder,
+		&root->navigationSettings());
+	auto o_gs = VSim::FlatBuffers::CreateGraphicsSettings(*builder,
+		&root->graphicsSettings());
+	auto o_ws = VSim::FlatBuffers::CreateWindowSettings(*builder,
+		&root->windowSettings());
+
+	auto lst = std::make_unique<fb::LockSettingsT>();
+	root->lockTableConst()->createLockTableT(Util::getOrCreate(lst->lock).get());
+	lst->lock_settings = root->settingsLocked();
+	lst->lock_add_remove = root->restrictedToCurrent();
+	lst->lock_navigation = root->navigationLocked();
+	auto o_ls = VSim::FlatBuffers::CreateLockSettings(*builder, lst.get());
+
+	VSim::FlatBuffers::SettingsBuilder b_set(*builder);
+	b_set.add_model_information(o_mi);
+	b_set.add_navigation_settings(o_ns);
+	b_set.add_graphics_settings(o_gs);
+	b_set.add_window_settings(o_ws);
+	b_set.add_lock_settings(o_ls);
+	auto o_set = b_set.Finish();
+
+	return o_set;
+}
 
 bool VSimSerializer::readVSimFile(const std::string & path, VSimRoot * root, const TypesSerializer::Params &p)
 {

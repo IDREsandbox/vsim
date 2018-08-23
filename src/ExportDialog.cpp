@@ -63,9 +63,10 @@ void ExportDialog::setTypes(QString types)
 
 bool ExportDialog::onChooseFile()
 {
-
+	QString start;
+	start = ui.file_edit->text();
 	QString filename = QFileDialog::getSaveFileName(this, m_title,
-		QString(), m_types);
+		start, m_types);
 
 	if (filename == "") {
 		return false;

@@ -41,3 +41,35 @@ There is no encryption of the actual file. So someone could easily convert a loc
 Narrative (offset api)
 Resource (offset api)
 Settings (object api, postload)
+
+## All features involved
+
+Lock file
+- model information
+- lock settings
+
+Lock settings
+- camera settings
+- window settings
+- navigation settings
+
+Restrict to current
+- add/remove nars
+- add/remove ers
+- add/remove/edit er categories
+- import nars
+- import ers
+
+Disable Navigation
+- stuck frozen
+
+Narrative Lock
+- add/remove slides
+- edit slides
+- slide duration, transition, drag and drop, etc
+
+ER Lock
+- er dialog
+- set position
+- disable right click?
+

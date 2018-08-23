@@ -9,6 +9,7 @@
 #include "Core/TypesSerializer.h"
 #include "types_generated.h"
 #include "settings_generated.h"
+#include "Core/Util.h"
 
 NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObject *parent)
 	: QObject(parent),
@@ -264,11 +265,10 @@ void NavigationControl::activate()
 
 void NavigationControl::gatherSettings()
 {
-	auto *settings = m_app->getRoot()->settings();
 	namespace fbs = VSim::FlatBuffers;
 
 	// navigation settings
-	auto ns = std::make_unique<fbs::NavigationSettingsT>();
+	auto *ns = &m_app->getRoot()->navigationSettings();
 
 	auto home = TypesSerializer::osg2fbCameraMatrix(m_viewer->homePosition());
 	ns->start_camera = std::make_unique<fbs::CameraPosDirUp>(home);
@@ -285,40 +285,30 @@ void NavigationControl::gatherSettings()
 	ns->gravity_fall_speed = m_viewer->gravitySpeed();
 	ns->eye_height = m_viewer->eyeHeight();
 
-	settings->navigation_settings = std::move(ns);
-
-
 	// graphics settings
-	auto gs = std::make_unique<fbs::GraphicsSettingsT>();
-	{
-		// camera setings
-		auto cs = std::make_unique<fbs::CameraSettingsT>();
-		cs->auto_clip = m_viewer->autoClip();
-		cs->near_clip = m_viewer->nearClip();
-		cs->far_clip = m_viewer->farClip();
-		cs->fovy = m_viewer->fovy();
+	auto *gs = &m_app->getRoot()->graphicsSettings();
+	auto *cs = Util::getOrCreate(gs->camera_settings).get();
 
-		gs->camera_settings = std::move(cs);
-	}
-
-	settings->graphics_settings = std::move(gs);
+	// camera setings
+	cs->auto_clip = m_viewer->autoClip();
+	cs->near_clip = m_viewer->nearClip();
+	cs->far_clip = m_viewer->farClip();
+	cs->fovy = m_viewer->fovy();
 }
 
 void NavigationControl::extractSettings()
 {
-	auto *settings = m_app->getRoot()->settings();
 	namespace fbs = VSim::FlatBuffers;
 
 	// navigation settings
-	auto &ns = settings->navigation_settings;
-	if (!ns) ns = std::make_unique<fbs::NavigationSettingsT>();
+	auto *ns = &m_app->getRoot()->navigationSettings();
 
 	// start camera
 	if (ns->default_start_camera) {
 		m_viewer->resetHomePosition();
 	}
 	else {
-		auto *start_camera = ns->start_camera.get();
+		auto &start_camera = ns->start_camera;
 		if (start_camera) {
 			m_viewer->setHomePosition(
 				TypesSerializer::fb2osgCameraMatrix(*start_camera));
@@ -344,12 +334,10 @@ void NavigationControl::extractSettings()
 
 
 	// graphics settings
-	auto &gs = settings->graphics_settings;
-	if (!gs) gs = std::make_unique<fbs::GraphicsSettingsT>();
+	auto *gs = &m_app->getRoot()->graphicsSettings();
 
 	// camera settings
-	auto &cs = gs->camera_settings;
-	if (!cs) cs = std::make_unique<fbs::CameraSettingsT>();
+	auto &cs = Util::getOrCreate(gs->camera_settings);
 
 	m_viewer->setFovy(cs->fovy);
 	m_viewer->setNearClip(cs->near_clip);

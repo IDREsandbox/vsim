@@ -76,7 +76,9 @@ void ModelSerializer::readModels(const VSim::FlatBuffers::ModelTable *buffer,
 		size_t size = fb_model->size();
 		bool external = fb_model->external();
 
-		if (fb_model->name()) model->setName(fb_model->name()->str());
+		std::string name;
+		if (fb_model->name()) name = fb_model->name()->str();
+		model->setName(name);
 
 		QString path;
 		if (fb_model->path()) {
@@ -87,6 +89,9 @@ void ModelSerializer::readModels(const VSim::FlatBuffers::ModelTable *buffer,
 		if (external) {
 			// load external model
 			osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(full_path.toStdString());
+			if (!node) {
+				qInfo() << "external model" << name.c_str() << "failed to load, path:" << path;
+			}
 			model->setFile(path.toStdString(), node);
 		}
 		else {
@@ -138,7 +143,8 @@ ModelSerializer::createModels(flatbuffers::FlatBufferBuilder *builder,
 			o_format = builder->CreateString("osgb");
 		}
 		else {
-			TypesSerializer::createRelativePath(builder, QString::fromStdString(model->path()), p);
+			o_path = TypesSerializer::createRelativePath(builder,
+				QString::fromStdString(model->path()), p);
 		}
 
 		bool ascii = false;

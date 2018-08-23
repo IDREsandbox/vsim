@@ -47,6 +47,9 @@ public:
 
 	OSGNodeWrapper *rootWrapper() const;
 	osg::Group *sceneRoot() const;
+
+	int embedAll();
+
 	void debugScene() const;
 
 signals:

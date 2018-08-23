@@ -159,6 +159,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::actionOpen);
 	connect(ui->actionSave, &QAction::triggered, this, &MainWindow::actionSave);
 	connect(ui->actionSave_As, &QAction::triggered, this, &MainWindow::actionSaveAs);
+	connect(ui->action_package, &QAction::triggered, this, &MainWindow::actionPackage);
 	connect(ui->actionImport_Model, &QAction::triggered, this, &MainWindow::actionImportModel);
 	connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
 	connect(ui->actionImport_Narratives, &QAction::triggered, this, &MainWindow::actionImportNarratives);
@@ -401,9 +402,7 @@ void MainWindow::setApp(VSimApp * vsim)
 
 	connect(m_app, &VSimApp::sAboutToSave, this, [this]() {
 		// gather settings
-		auto *settings = m_app->getRoot()->settings();
-		auto &ws = settings->window_settings;
-		if (!ws) ws = std::make_unique<VSim::FlatBuffers::WindowSettingsT>();
+		auto *ws = &m_app->getRoot()->windowSettings();
 
 		int x = ui->bottomBar->height();
 		ws->window_width = width();
@@ -423,8 +422,7 @@ void MainWindow::onReset()
 	updatePositions();
 
 	// extract settings
-	auto *settings = m_app->getRoot()->settings();
-	auto &ws = settings->window_settings;
+	auto *ws = &m_app->getRoot()->windowSettings();
 	if (ws) {
 		// best fit the rectangle
 		resize(ws->window_width, ws->window_height);
@@ -707,6 +705,7 @@ void MainWindow::execOpen(const QString & filename)
 		w.start();
 		dlg.exec(); // spins gui
 		bool ok = w.result(); // spins
+		qDebug() << "read file?" << ok;
 
 		if (dlg.canceled()) {
 			return;
@@ -772,10 +771,24 @@ void MainWindow::actionSaveAs()
 		return;
 	}
 
-	execSave(filename);
+	bool ok = execSave(filename);
+	if (ok) {
+		m_app->setCurrentFile(filename, true);
+	}
 }
 
-void MainWindow::execSave(const QString & filename)
+bool MainWindow::execSave(const QString & filename)
+{
+	m_app->prepareSave();
+	bool ok = execSave(filename, m_app->getRoot());
+	if (!ok) {
+		QMessageBox::warning(this, "Save Error",
+			"Error saving to file " + filename);
+	}
+	return ok;
+}
+
+bool MainWindow::execSave(const QString &filename, VSimRoot *root)
 {
 	std::string path = filename.toStdString();
 
@@ -784,9 +797,6 @@ void MainWindow::execSave(const QString & filename)
 	dlg.setText("Saving " + filename);
 	dlg.setWindowTitle("Save");
 	dlg.setCancellable(false);
-
-	m_app->prepareSave();
-	VSimRoot *root = m_app->getRoot();
 
 	auto p = saveParams(filename);
 
@@ -808,12 +818,7 @@ void MainWindow::execSave(const QString & filename)
 
 	bool ok = w.result();
 
-	if (!ok) {
-		QMessageBox::warning(this, "Save Error", "Error saving to file " + filename);
-	}
-	else {
-		m_app->setCurrentFile(filename, true);
-	}
+	return ok;
 }
 
 void MainWindow::actionImportModel()
@@ -988,32 +993,66 @@ void MainWindow::actionExportERs()
 	QMessageBox::warning(this, "Export Error", "Error exporting resources to " + filename);
 }
 
+void MainWindow::actionPackage()
+{
+	// same thing as save as, but with a lock dialog attached
+	m_app->prepareSave();
+
+	// make a copy of root
+	VSimRoot root;
+	root.copy(m_app->getRoot());
+
+	LockDialog dlg;
+
+	// fix relative paths and all that
+	//root.fixRelativePaths();
+
+	// lock stuff
+	// exec lock settings
+	//   exec file dialog
+	//root.lockTable();
+	int result = dlg.execPackage(&root);
+	if (result == QDialog::Rejected) {
+		return;
+	}
+
+	QString path = dlg.filePath();
+
+	// then do the whole save thing
+	bool save_ok = execSave(dlg.filePath(), &root);
+
+	if (save_ok) {
+		QStringList lock_msgs = dlg.resultsString();
+		lock_msgs.push_front(QString("Successfully exported to %1").arg(path));
+		QMessageBox::information(this, "Export VSim", lock_msgs.join('\n'));
+	}
+}
+
 void MainWindow::execModelInformation()
 {
 	// get model information
-	auto *settings = m_app->getRoot()->settings();
-	auto *info = settings->model_information.get(); // possibly missing
+	auto &info = m_app->getRoot()->modelInformation();
 
 	bool read_only = m_app->getRoot()->lockTableConst()->isLocked();
 
-	ModelInformationDialog dlg(info);
+	ModelInformationDialog dlg(&info);
 	dlg.setReadOnly(read_only);
 	int result = dlg.exec();
 	if (result == QDialog::Rejected) return;
-
 	if (read_only) return;
 
-	auto new_data = dlg.getData();
-	settings->model_information.reset(
-		new VSim::FlatBuffers::ModelInformationT(
-			new_data
-		));
+	auto new_info = dlg.getData();
+	VSimRoot::copyModelInformation(info, new_info);
 }
 
 void MainWindow::execLockDialog()
 {
 	LockDialog dlg;
 	dlg.execEdit(m_app->getRoot());
+
+	if (dlg.lockApplied()) {
+		m_app->getUndoStack()->clear();
+	}
 }
 
 void MainWindow::onReadOnlyChanged()

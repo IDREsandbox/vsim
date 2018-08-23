@@ -239,3 +239,9 @@ vsim_add_test(
   "ERModel_obj;Core_obj;Deprecated_obj;Qt5::Test"
 )
 
+vsim_add_test(
+  VSimSerializer_test
+  VSimSerializer_test.cpp
+  "VSimRoot_obj;Core_obj;Deprecated_obj;Qt5::Test"
+)
+
