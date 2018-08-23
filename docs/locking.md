@@ -62,6 +62,7 @@ Restrict to current
 
 Disable Navigation
 - stuck frozen
+- disable right click on ers?
 
 Narrative Lock
 - add/remove slides
@@ -71,5 +72,4 @@ Narrative Lock
 ER Lock
 - er dialog
 - set position
-- disable right click?
 

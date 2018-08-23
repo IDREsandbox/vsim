@@ -1,5 +1,16 @@
 # Changelog
 
+## 2018-8-22
+
+### Locking
+
+- Locking
+
+### Fixes
+
+- Fixed loading models w/ relative paths + crash
+- Fixed ER urls changing on save/load
+
 ## 2018-8-7
 
 - Can remove models
