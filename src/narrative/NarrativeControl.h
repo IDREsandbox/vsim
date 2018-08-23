@@ -144,13 +144,18 @@ public: // Actions
 	void debug();
 
 private:
-	void onNarrativeSelectionChanged();
+	// data -> this
+	void onReset();
 	void onCurrentLockChange();
+	void onRestrictToCurrent();
+
+	void onNarrativeSelectionChanged();
 
 	void enableEditing(bool enable);
 
-	// data -> this
-	void onRestrictToCurrent(bool restrict);
+
+
+
 
 private: // classes
 	class SelectNarrativesCommand : public QUndoCommand {

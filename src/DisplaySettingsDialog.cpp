@@ -12,7 +12,8 @@
 // should have full control.
 DisplaySettingsDialog::DisplaySettingsDialog(VSimApp *app, QWidget *parent)
 	: QDialog(parent),
-	m_app(app)
+	m_app(app),
+	m_read_only(false)
 {
 	ui.setupUi(this);
 
@@ -60,10 +61,21 @@ void DisplaySettingsDialog::reload()
 	bool auto_clip = m_viewer->autoClip();
 	ui.clip_auto_checkbox->setChecked(auto_clip);
 
-	ui.clip_near_spinbox->setEnabled(!auto_clip);
-	ui.clip_far_spinbox->setEnabled(!auto_clip);
+	ui.clip_near_spinbox->setEnabled(!auto_clip && !m_read_only);
+	ui.clip_far_spinbox->setEnabled(!auto_clip && !m_read_only);
 	ui.clip_near_spinbox->setValue(m_viewer->nearClip());
 	ui.clip_far_spinbox->setValue(m_viewer->farClip());
+
+	// read only
+	bool enabled = !m_read_only;
+	ui.fov_slider->setEnabled(enabled);
+	ui.fov_spinbox->setEnabled(enabled);
+	ui.clip_auto_checkbox->setEnabled(enabled);
+	ui.clip_near_spinbox->setEnabled(enabled);
+	ui.clip_far_spinbox->setEnabled(enabled);
+	ui.clip_near_spinbox->setValue(enabled);
+	ui.clip_far_spinbox->setValue(enabled);
+	m_defaults_button->setVisible(enabled);
 
 	loadFov(m_viewer->fovy());
 }
@@ -97,13 +109,5 @@ void DisplaySettingsDialog::setFov(float fov)
 void DisplaySettingsDialog::setReadOnly(bool read_only)
 {
 	m_read_only = read_only;
-	bool enabled = !read_only;
-	ui.fov_slider->setEnabled(enabled);
-	ui.fov_spinbox->setEnabled(enabled);
-	ui.clip_auto_checkbox->setEnabled(enabled);
-	ui.clip_near_spinbox->setEnabled(enabled);
-	ui.clip_far_spinbox->setEnabled(enabled);
-	ui.clip_near_spinbox->setValue(enabled);
-	ui.clip_far_spinbox->setValue(enabled);
-	m_defaults_button->setVisible(enabled);
+	reload();
 }

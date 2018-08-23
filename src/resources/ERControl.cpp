@@ -191,6 +191,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	connect(m_app, &VSimApp::sInterrupted, this, [this]() {
 		m_going_to = false;
 	});
+	connect(m_app, &VSimApp::sReset, this, &ERControl::onReset);
 	connect(m_app->timeManager(), &TimeManager::sYearChanged,
 		m_filter_proxy.get(), &ERFilterSortProxy::setYear);
 	connect(m_app->timeManager(), &TimeManager::sTimeEnableChanged,
@@ -882,8 +883,14 @@ void ERControl::debug()
 	}
 }
 
-void ERControl::onRestrictToCurrent(bool restrict)
+void ERControl::onReset()
 {
+	onRestrictToCurrent();
+}
+
+void ERControl::onRestrictToCurrent()
+{
+	bool restrict = m_ers->restrictedToCurrent();
 	bool enable = !restrict;
 	a_new_er->setEnabled(enable);
 	a_delete_er->setEnabled(enable);

@@ -4,6 +4,7 @@
 template<class T>
 inline TGroup<T>& TGroup<T>::operator=(const TGroup & other)
 {
+	GroupSignals::operator=(other);
 	clear();
 	for (auto sp : other) {
 		auto nsp = std::make_shared<T>();

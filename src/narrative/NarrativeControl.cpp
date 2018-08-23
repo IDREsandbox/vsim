@@ -101,10 +101,7 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	});
 
 	// app state
-	connect(m_app, &VSimApp::sReset, this, [this]() {
-		showNarrativeBox();
-		openNarrative(-1);
-	});
+	connect(m_app, &VSimApp::sReset, this, &NarrativeControl::onReset);
 	connect(m_app, &VSimApp::sTick, this, &NarrativeControl::update);
 	connect(m_app, &VSimApp::sStateChanged, this, [this](auto old, auto current) {
 		VSimApp::State state = m_app->state();
@@ -608,6 +605,28 @@ void NarrativeControl::onNarrativeSelectionChanged()
 
 }
 
+void NarrativeControl::onReset()
+{
+	showNarrativeBox();
+	openNarrative(-1);
+	onRestrictToCurrent();
+	onCurrentLockChange();
+}
+
+void NarrativeControl::onRestrictToCurrent()
+{
+	bool restrict = m_narrative_group->restrictedToCurrent();
+	bool enable = !restrict;
+
+	a_new_narrative->setEnabled(enable);
+	a_delete_narratives->setEnabled(enable);
+
+	m_bar->ui.add->setVisible(enable);
+	m_bar->ui.remove->setVisible(enable);
+
+	m_narrative_box->enableDragging(enable);
+}
+
 void NarrativeControl::onCurrentLockChange()
 {
 	// get current nar, get current lock
@@ -648,18 +667,7 @@ void NarrativeControl::enableEditing(bool enable)
 	m_editing_slide = enable;
 }
 
-void NarrativeControl::onRestrictToCurrent(bool restrict)
-{
-	bool enable = !restrict;
 
-	a_new_narrative->setEnabled(enable);
-	a_delete_narratives->setEnabled(enable);
-
-	m_bar->ui.add->setVisible(enable);
-	m_bar->ui.remove->setVisible(enable);
-
-	m_narrative_box->enableDragging(enable);
-}
 
 void NarrativeControl::load(NarrativeGroup *narratives)
 {

@@ -62,7 +62,8 @@ public:
 	void onTouch();
 	void onTopChange();
 	void onSelectionChange();
-	void onRestrictToCurrent(bool restrict);
+	void onRestrictToCurrent();
+	void onReset();
 
 	// selection
 	void addToSelection(EResource *res, bool top = true);

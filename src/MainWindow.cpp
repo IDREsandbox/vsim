@@ -419,6 +419,8 @@ void MainWindow::setApp(VSimApp * vsim)
 
 void MainWindow::onReset()
 {
+	onReadOnlyChanged();
+
 	updatePositions();
 
 	// extract settings

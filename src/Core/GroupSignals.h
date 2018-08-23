@@ -10,6 +10,7 @@ class GroupSignals : public QObject {
 	Q_OBJECT;
 public:
 	GroupSignals(QObject *parent = nullptr);
+	GroupSignals &operator= (const GroupSignals &other);
 
 	bool restrictedToCurrent() const;
 	virtual void setRestrictToCurrent(bool restrict);
