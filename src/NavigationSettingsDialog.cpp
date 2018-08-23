@@ -3,11 +3,13 @@
 #include <QDebug>
 
 #include "VSimApp.h"
+#include "VSimRoot.h"
 #include "NavigationControl.h"
 #include "OSGViewerWidget.h"
 
 NavigationSettingsDialog::NavigationSettingsDialog(VSimApp *app, QWidget *parent)
-	: QDialog(parent)
+	: QDialog(parent),
+	m_read_only(false)
 {
 	ui.setupUi(this);
 
@@ -22,6 +24,8 @@ NavigationSettingsDialog::NavigationSettingsDialog(VSimApp *app, QWidget *parent
 	ui.tick_spinbox->setMaximum(tick_limit);
 	ui.tick_startup_spinbox->setMinimum(-tick_limit);
 	ui.tick_startup_spinbox->setMaximum(tick_limit);
+
+	setReadOnly(app->getRoot()->settingsLocked());
 
 	// presets
 	ui.presets_combobox->addActions({});
@@ -71,6 +75,7 @@ NavigationSettingsDialog::NavigationSettingsDialog(VSimApp *app, QWidget *parent
 	});
 
 	OSGViewerWidget *viewer = app->viewer();
+	m_viewer = viewer;
 
 	// home position
 	connect(ui.home_set_button, &QAbstractButton::pressed, this, [this, viewer]() {
@@ -90,13 +95,12 @@ NavigationSettingsDialog::NavigationSettingsDialog(VSimApp *app, QWidget *parent
 		apply(app);
 	});
 
-	load(app);
+	load();
 }
 
-void NavigationSettingsDialog::load(VSimApp * app)
+void NavigationSettingsDialog::load()
 {
-	OSGViewerWidget *viewer = app->viewer();
-	m_viewer = viewer;
+	auto *viewer = m_viewer;
 
 	// first person
 	ui.speed_spinbox->setValue(viewer->baseSpeed());
@@ -120,6 +124,7 @@ void NavigationSettingsDialog::load(VSimApp * app)
 
 void NavigationSettingsDialog::apply(VSimApp * app)
 {
+	if (m_read_only) return;
 	OSGViewerWidget *viewer = app->viewer();
 
 	// first person
@@ -177,4 +182,28 @@ void NavigationSettingsDialog::updateTickMultipliers()
 	text2.sprintf("x%f", OSGViewerWidget::speedMultiplier(
 		ui.tick_startup_spinbox->value()));
 	ui.tick_startup_multiplier_label->setText(text);
+}
+
+void NavigationSettingsDialog::setReadOnly(bool read_only)
+{
+	m_read_only = read_only;
+	bool enable = !read_only;
+
+	ui.home_set_button->setEnabled(enable);
+	ui.home_reset_button->setEnabled(enable);
+	ui.presets_combobox->setEnabled(enable);
+	ui.speed_spinbox->setEnabled(enable);
+	ui.tick_spinbox->setEnabled(enable);
+	ui.tick_startup_spinbox->setEnabled(enable);
+	ui.collision_checkbox->setEnabled(enable);
+	ui.collision_startup_checkbox->setEnabled(enable);
+	ui.collision_radius_spinbox->setEnabled(enable);
+	ui.ground_checkbox->setEnabled(enable);
+	ui.ground_startup_checkbox->setEnabled(enable);
+	ui.height_spinbox->setEnabled(enable);
+	ui.gravity_acceleration_spinbox->setEnabled(enable);
+	ui.gravity_speed_spinbox->setEnabled(enable);
+
+	ui.button_box->button(QDialogButtonBox::RestoreDefaults)->setVisible(enable);
+	ui.button_box->button(QDialogButtonBox::Cancel)->setVisible(enable);
 }

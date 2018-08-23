@@ -12,11 +12,12 @@ public:
 	NavigationSettingsDialog(VSimApp *app, QWidget *parent = nullptr);
 
 private:
-	void load(VSimApp *app);
+	void load();
 	void apply(VSimApp *app);
 	void defaults();
 	void updateTickMultipliers();
 
+	void setReadOnly(bool read_only);
 private:
 	struct Preset {
 		const char *name;
@@ -35,6 +36,7 @@ private:
 	std::vector<Preset> m_presets;
 	Preset m_default;
 	OSGViewerWidget *m_viewer;
+	bool m_read_only;
 };
 
 #endif
