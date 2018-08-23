@@ -174,6 +174,12 @@ void LockDialog::apply()
 		m_root->setSettingsLocked(ui.lock_settings->isChecked());
 		m_root->setRestrictToCurrent(ui.lock_restrict->isChecked());
 		m_root->setNavigationLocked(ui.lock_navigation->isChecked());
+		if (ui.expiration_checkbox->isChecked()) {
+			m_root->setExpirationDate(ui.expiration_date->date());
+		}
+		else {
+			m_root->setNoExpiration();
+		}
 		// don't reassign lock if nothing changed
 	}
 
@@ -277,9 +283,19 @@ QDialog::DialogCode LockDialog::execInternal(VSimRoot *root)
 	ui.lock_all->setVisible(!hard_locked);
 	ui.meta_label->setVisible(was_locked);
 	ui.lock_group_box->setEnabled(!was_locked);
-	checkEnablePassword();
 
-	// TODO: init expiration date
+	// init expiration date
+	ui.expiration_checkbox->setChecked(root->expires());
+	if (root->expires()) {
+		ui.expiration_date->setDate(root->expirationDate());
+	}
+	else {
+		QDate new_date = QDate::currentDate();
+		new_date.addYears(10);
+		ui.expiration_date->setDate(new_date);
+	}
+
+	checkEnablePassword();
 
 	this->adjustSize();
 

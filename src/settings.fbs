@@ -20,6 +20,8 @@ table LockSettings {
   lock_add_remove:bool;
   // add/remove narratives, ers
   lock_navigation:bool;
+  expires:bool;
+  expiration_date_julian:uint64;
 }
 
 table ModelInformation {
@@ -79,7 +81,7 @@ table WindowSettings {
 }
 
 table OtherSettings {
-  //year:int = 2000;
+  year:int32 = 2000;
   //years_enabled:bool = false;
   //nbar:bool = true;
   //ebar:bool = true;

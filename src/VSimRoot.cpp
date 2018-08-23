@@ -209,6 +209,26 @@ const LockTable * VSimRoot::lockTableConst() const
 	return m_lock;
 }
 
+void VSimRoot::setNoExpiration()
+{
+	m_expiration_date = QDate();
+}
+
+bool VSimRoot::expires() const
+{
+	return m_expiration_date.isValid();
+}
+
+void VSimRoot::setExpirationDate(QDate date)
+{
+	m_expiration_date = date;
+}
+
+QDate VSimRoot::expirationDate() const
+{
+	return m_expiration_date;
+}
+
 void VSimRoot::setSettingsLocked(bool locked)
 {
 	m_lock_settings = locked;

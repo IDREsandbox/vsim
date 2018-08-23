@@ -430,6 +430,7 @@ void writeReadSettings() {
 	root.navigationSettings().base_speed = 10;
 	root.graphicsSettings().camera_settings->fovy = 33;
 	root.windowSettings().ebar_size = 111;
+	root.setExpirationDate(QDate::currentDate());
 
 	// write to stream
 	std::stringstream stream;
@@ -452,6 +453,7 @@ void writeReadSettings() {
 	QCOMPARE(nroot.navigationSettings().base_speed, 10.f);
 	QCOMPARE(nroot.graphicsSettings().camera_settings->fovy, 33.f);
 	QCOMPARE(nroot.windowSettings().ebar_size, 111);
+	QCOMPARE(nroot.expirationDate(), QDate::currentDate());
 }
 
 };

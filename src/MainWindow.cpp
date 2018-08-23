@@ -22,6 +22,7 @@
 #include "HistoryWindow.h"
 #include "Gui/FutureDialog.h"
 #include "Gui/SimpleWorker.h"
+#include "Gui/PasswordDialog.h"
 #include "BrandingOverlay.h"
 #include "NavigationSettingsDialog.h"
 #include "DisplaySettingsDialog.h"
@@ -686,7 +687,7 @@ void MainWindow::execOpen(const QString & filename)
 
 	// run in thread
 	if (read_vsim) {
-
+		// owned by wimple worker
 		VSimRoot *root_buf;
 
 		SimpleWorker w;
@@ -713,13 +714,32 @@ void MainWindow::execOpen(const QString & filename)
 		if (dlg.canceled()) {
 			return;
 		}
-		else if (ok) {
-			m_app->setCurrentFile(filename);
-			m_app->initWithVSim(root_buf);
-		}
-		else {
+		if (!ok) {
 			QMessageBox::warning(this, "Load Error", "Failed to load model " + filename);
+			return;
 		}
+
+		// check expiration date
+		// require a password to proceed
+		if (root_buf->lockTable()->isLocked()
+			&& root_buf->expires()) {
+			QDate expires = root_buf->expirationDate();
+			QDate current = QDate::currentDate();
+			if (current > expires) {
+				TestPasswordDialog dlg;
+				dlg.setWindowTitle("File Expired");
+				dlg.setLabel("This model expired on " + expires.toString() + ". Enter password to open.");
+				dlg.setLock(root_buf->lockTable());
+				dlg.exec();
+				if (!dlg.unlocked()) {
+					QMessageBox::warning(this, "Load Error", "Failed to unlock expired model " + filename);
+					return;
+				}
+			}
+		}
+
+		m_app->setCurrentFile(filename);
+		m_app->initWithVSim(root_buf);
 	}
 	else {
 		std::unique_ptr<VSimRoot> root_buf;

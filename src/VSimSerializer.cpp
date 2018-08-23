@@ -211,7 +211,13 @@ void VSimSerializer::readSettings(const VSim::FlatBuffers::Settings *buffer,
 	root->setSettingsLocked(ls->lock_settings);
 	root->setRestrictToCurrent(ls->lock_add_remove);
 	root->setNavigationLocked(ls->lock_navigation);
-	
+	if (ls->expires) {
+		root->setExpirationDate(QDate::fromJulianDay(ls->expiration_date_julian));
+	}
+	else {
+		root->setNoExpiration();
+	}
+
 	// how do we get defaults?
 	// say we do a
 	// new vsimroot
@@ -239,6 +245,8 @@ flatbuffers::Offset<VSim::FlatBuffers::Settings> VSimSerializer::createSettings(
 	lst->lock_settings = root->settingsLocked();
 	lst->lock_add_remove = root->restrictedToCurrent();
 	lst->lock_navigation = root->navigationLocked();
+	lst->expires = root->expires();
+	lst->expiration_date_julian = root->expirationDate().toJulianDay();
 	auto o_ls = VSim::FlatBuffers::CreateLockSettings(*builder, lst.get());
 
 	VSim::FlatBuffers::SettingsBuilder b_set(*builder);

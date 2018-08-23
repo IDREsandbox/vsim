@@ -4,6 +4,7 @@
 #include <osg/Group>
 #include <memory>
 #include <QObject>
+#include <QDate>
 
 #include "settings_generated.h"
 
@@ -59,6 +60,11 @@ public:
 	LockTable *lockTable();
 	const LockTable *lockTableConst() const;
 
+	void setNoExpiration();
+	void setExpirationDate(QDate date);
+	bool expires() const;
+	QDate expirationDate() const;  // is null date if invalid
+
 	//// unlock removes all lock stuff
 	//bool unlock(QString pw);
 
@@ -110,6 +116,7 @@ private:
 	bool m_lock_settings;
 	bool m_lock_add_remove;
 	bool m_lock_navigation;
+	QDate m_expiration_date;
 };
 
 #endif
