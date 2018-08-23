@@ -1,15 +1,46 @@
 # Changelog
 
-## 2018-8-22
+## 2018-8-23
 
 ### Locking
 
-- Locking
+- Lock file
+    - lock settings
+    - model information
+    - models, import/edit/remove
+- Lock settings
+    - camera settings
+    - window settings
+    - navigation settings
+- Restrict to current
+    - add/remove nars
+    - add/remove ers
+    - add/remove/edit er categories
+    - import nars
+    - import ers
+- Disable Navigation
+- Narrative Lock
+    - add/remove slides
+    - edit slides
+    - slide duration, transition, drag and drop, etc
+    - right click menu, password
+- ER Lock
+    - edit er dialog
+    - set position
+    - right click menu, password
+- File > Export vsim file
+- Settings > Lock Settings
+- Lock all nars/ers
+- Embed all models
 
 ### Fixes
 
 - Fixed loading models w/ relative paths + crash
 - Fixed ER urls changing on save/load
+
+### Misc
+
+- Added new icons for reposition and text ERs
 
 ## 2018-8-7
 

@@ -3,8 +3,10 @@
 ## All features involved
 
 Lock file
-- model information
 - lock settings
+- model information
+- models, import/edit/remove
+- branding
 
 Lock settings
 - camera settings
@@ -20,7 +22,6 @@ Restrict to current
 
 Disable Navigation
 - stuck frozen
-- disable right click on ers?
 
 Narrative Lock
 - add/remove slides
