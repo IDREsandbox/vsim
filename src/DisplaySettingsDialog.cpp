@@ -1,9 +1,15 @@
 ﻿#include "DisplaySettingsDialog.h"
 
-#include "VSimApp.h"
-#include "NavigationControl.h"
-#include "OSGViewerWidget.h"
+#include <QPushButton>
 
+#include "VSimApp.h"
+#include "OSGViewerWidget.h"
+#include "VSimRoot.h"
+
+// one way binding + modal
+// There is no listening to the data, so if someone else changes these values
+// then the dialog goes invalid. However, this should be a modal dialog so we
+// should have full control.
 DisplaySettingsDialog::DisplaySettingsDialog(VSimApp *app, QWidget *parent)
 	: QDialog(parent),
 	m_app(app)
@@ -37,11 +43,14 @@ DisplaySettingsDialog::DisplaySettingsDialog(VSimApp *app, QWidget *parent)
 		reload();
 	});
 
+	m_defaults_button = ui.button_box->button(QDialogButtonBox::RestoreDefaults);
 	connect(ui.button_box, &QDialogButtonBox::clicked, this, [this](QAbstractButton *button) {
-		if (ui.button_box->buttonRole(button) == QDialogButtonBox::ResetRole) {
+		if (button == m_defaults_button) {
 			loadDefaults();
 		}
 	});
+
+	setReadOnly(m_app->getRoot()->settingsLocked());
 
 	reload();
 }
@@ -55,7 +64,6 @@ void DisplaySettingsDialog::reload()
 	ui.clip_far_spinbox->setEnabled(!auto_clip);
 	ui.clip_near_spinbox->setValue(m_viewer->nearClip());
 	ui.clip_far_spinbox->setValue(m_viewer->farClip());
-
 
 	loadFov(m_viewer->fovy());
 }
@@ -84,4 +92,18 @@ void DisplaySettingsDialog::setFov(float fov)
 {
 	m_app->viewer()->setFovy(fov);
 	reload();
+}
+
+void DisplaySettingsDialog::setReadOnly(bool read_only)
+{
+	m_read_only = read_only;
+	bool enabled = !read_only;
+	ui.fov_slider->setEnabled(enabled);
+	ui.fov_spinbox->setEnabled(enabled);
+	ui.clip_auto_checkbox->setEnabled(enabled);
+	ui.clip_near_spinbox->setEnabled(enabled);
+	ui.clip_far_spinbox->setEnabled(enabled);
+	ui.clip_near_spinbox->setValue(enabled);
+	ui.clip_far_spinbox->setValue(enabled);
+	m_defaults_button->setVisible(enabled);
 }

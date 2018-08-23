@@ -18,11 +18,15 @@ private:
 
 	void setFov(float fov);
 
+	void setReadOnly(bool read_only);
+
 public:
 	Ui::DisplaySettingsDialog ui;
 
 	VSimApp *m_app;
 	OSGViewerWidget *m_viewer;
+	QPushButton *m_defaults_button;
+	bool m_read_only;
 };
 
 #endif
