@@ -404,6 +404,8 @@ void MainWindow::setApp(VSimApp * vsim)
 		// gather settings
 		auto *ws = &m_app->getRoot()->windowSettings();
 
+		if (m_app->getRoot()->settingsLocked()) return;
+
 		int x = ui->bottomBar->height();
 		ws->window_width = width();
 		ws->window_height = height();
@@ -707,7 +709,6 @@ void MainWindow::execOpen(const QString & filename)
 		w.start();
 		dlg.exec(); // spins gui
 		bool ok = w.result(); // spins
-		qDebug() << "read file?" << ok;
 
 		if (dlg.canceled()) {
 			return;

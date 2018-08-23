@@ -27,6 +27,7 @@ public:
 	void extractSettings();
 
 	void onModeChange(Navigation::Mode mode);
+	void onLockChange();
 
 public: // actions
 	QActionGroup *m_navigation_action_group;

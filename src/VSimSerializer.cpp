@@ -188,7 +188,7 @@ void VSimSerializer::readSettings(const VSim::FlatBuffers::Settings *buffer,
 	namespace fb = VSim::FlatBuffers;
 
 	auto settings = std::make_unique<fb::SettingsT>();
-	buffer->UnPackTo(settings.get());
+	if (buffer) buffer->UnPackTo(settings.get());
 
 	// we can't do a simple std move, because the address would change
 	// and mess up all of our listeners (controls and gui and stuff)

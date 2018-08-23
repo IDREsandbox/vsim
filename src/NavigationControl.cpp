@@ -59,6 +59,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	// gui -> osg
 	connect(m_navigation_action_group, &QActionGroup::triggered, this,
 		[this](QAction *which) {
+		if (!m_enabled) return;
 		if (which == a_first_person) {
 			m_viewer->setNavigationMode(Navigation::FIRST_PERSON);
 		}
@@ -74,7 +75,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	});
 	connect(a_freeze, &QAction::triggered, this,
 		[this]() {
-
+		if (!m_enabled) return;
 		// unfreeze if frozen
 		// freeze if not
 		bool frozen = m_viewer->getCameraFrozen();
@@ -94,6 +95,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	});
 	connect(a_ground_mode, &QAction::triggered, this,
 		[this]() {
+		if (!m_enabled) return;
 		bool enable = !m_viewer->groundModeEnabled();
 		qInfo() << "Ground mode" << enable;
 		m_viewer->enableGroundMode(enable);
@@ -103,6 +105,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	});
 	connect(a_collisions, &QAction::triggered, this,
 		[this]() {
+		if (!m_enabled) return;
 		bool enable = !m_viewer->collisionsEnabled();
 		qInfo() << "Collisions" << enable;
 		m_viewer->enableCollisions(enable);
@@ -250,7 +253,10 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 		else {
 			a_point->setChecked(true);
 		}
+
+		onLockChange();
 	});
+	connect(m_app->getRoot(), &VSimRoot::sDisableNavigationChanged, this, &NavigationControl::onLockChange);
 }
 
 void NavigationControl::activate()
@@ -358,5 +364,23 @@ void NavigationControl::onModeChange(Navigation::Mode mode)
 	}
 	m_app->setStatusMessage(
 		QString(Navigation::ModeStrings[mode]) + " Mode");
+}
+
+void NavigationControl::onLockChange()
+{
+	bool locked = m_app->getRoot()->navigationLocked();
+	
+	m_enabled = !locked;
+	bool enable = !locked;
+
+	a_first_person->setEnabled(enable);
+	a_flight->setEnabled(enable);
+	a_object->setEnabled(enable);
+	a_freeze->setEnabled(enable);
+	a_home->setEnabled(enable);
+	a_ground_mode->setEnabled(enable);
+	a_collisions->setEnabled(enable);
+
+	m_viewer->setCameraFrozen(true);
 }
 
