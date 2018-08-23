@@ -148,14 +148,10 @@ private:
 	void onReset();
 	void onCurrentLockChange();
 	void onRestrictToCurrent();
-
+	void onLeaveEditSlide(NarrativeSlide *slide);
 	void onNarrativeSelectionChanged();
 
 	void enableEditing(bool enable);
-
-
-
-
 
 private: // classes
 	class SelectNarrativesCommand : public QUndoCommand {

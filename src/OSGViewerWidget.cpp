@@ -173,19 +173,16 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	//ssm->setKeyEventToggleLighting('L');
 	//ssm->setKeyEventToggleTexturing('X');
 	//ssm->setKeyEventCyclePolygonMode('M');
-	m_ssm->setLightingEnabled(true);
-	m_ssm->setBackfaceEnabled(true);
-	m_ssm->setTextureEnabled(true);
-	m_ssm->setPolygonMode(osg::PolygonMode::FILL);
 	//m_main_view->addEventHandler(ssm);
 	//auto ss = m_main_view->getCamera()->getStateSet();
 
 	// thumbnail stateset
-	auto *thumb_ssm = new osgGA::StateSetManipulator(camera2->getOrCreateStateSet());
-	thumb_ssm->setLightingEnabled(true);
-	thumb_ssm->setBackfaceEnabled(true);
-	thumb_ssm->setTextureEnabled(true);
-	thumb_ssm->setPolygonMode(osg::PolygonMode::FILL);
+	m_thumb_ssm = new osgGA::StateSetManipulator(camera2->getOrCreateStateSet());
+
+	setLightingEnabled(true);
+	setBackfaceEnabled(false);
+	setTextureEnabled(true);
+	setPolygonMode(osg::PolygonMode::FILL);
 
 	// Lighting
 	m_main_view->setLightingMode(osg::View::LightingMode::SKY_LIGHT);
@@ -544,6 +541,7 @@ void OSGViewerWidget::setFovy(float fovy2)
 	double fovy, aspect, near_clip, far_clip;
 	m_main_view->getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, near_clip, far_clip);
 	m_main_view->getCamera()->setProjectionMatrixAsPerspective(fovy2, aspect, near_clip, far_clip);
+	m_thumb_view->getCamera()->setProjectionMatrixAsPerspective(fovy2, aspect, near_clip, far_clip);
 }
 
 bool OSGViewerWidget::autoClip() const
@@ -737,6 +735,50 @@ void OSGViewerWidget::resetHomePosition()
 bool OSGViewerWidget::usingDefaultHomePosition()
 {
 	return m_default_home_position;
+}
+
+bool OSGViewerWidget::getLightingEnabled() const
+{
+	return m_ssm->getLightingEnabled();
+}
+
+bool OSGViewerWidget::getBackfaceEnabled() const
+{
+	return m_ssm->getBackfaceEnabled();
+}
+
+bool OSGViewerWidget::getTextureEnabled() const
+{
+	return m_ssm->getTextureEnabled();
+}
+
+osg::PolygonMode::Mode OSGViewerWidget::getPolygonMode() const
+{
+	return m_ssm->getPolygonMode();
+}
+
+void OSGViewerWidget::setLightingEnabled(bool enable)
+{
+	m_ssm->setLightingEnabled(enable);
+	m_thumb_ssm->setLightingEnabled(enable);
+}
+
+void OSGViewerWidget::setBackfaceEnabled(bool enable)
+{
+	m_ssm->setBackfaceEnabled(enable);
+	m_thumb_ssm->setBackfaceEnabled(enable);
+}
+
+void OSGViewerWidget::setTextureEnabled(bool enable)
+{
+	m_ssm->setTextureEnabled(enable);
+	m_thumb_ssm->setTextureEnabled(enable);
+}
+
+void OSGViewerWidget::setPolygonMode(osg::PolygonMode::Mode mode)
+{
+	m_ssm->setPolygonMode(mode);
+	m_thumb_ssm->setPolygonMode(mode);
 }
 
 bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)

@@ -27,6 +27,7 @@ table Slide {
   wait_for_click:bool;
   transition_duration:float;
   canvas:Canvas;
+  thumbnail_background:ImageData;
 }
 
 root_type NarrativeTable;

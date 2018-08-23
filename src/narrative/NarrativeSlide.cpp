@@ -13,8 +13,7 @@ NarrativeSlide::NarrativeSlide(QObject *parent)
 	m_camera_matrix(),
 	m_duration(4.0f),
 	m_stay_on_node(false),
-	m_transition_duration(4.0f),
-	m_thumbnail_dirty(true)
+	m_transition_duration(4.0f)
 {
 	m_scene = new CanvasScene(this);
 }
@@ -25,6 +24,7 @@ NarrativeSlide &NarrativeSlide::operator=(const NarrativeSlide & other)
 	m_duration = other.m_duration;
 	m_stay_on_node = other.m_stay_on_node;
 	m_transition_duration = other.m_transition_duration;
+	m_thumbnail_background = other.m_thumbnail_background;
 
 	m_scene->copy(*other.m_scene);
 	// TODO: insert return statement here
@@ -171,6 +171,11 @@ void NarrativeSlide::setTransitionDuration(float tduration)
 QPixmap NarrativeSlide::thumbnail() const
 {
 	return m_thumbnail;
+}
+
+QPixmap NarrativeSlide::thumbnailBackground() const
+{
+	return m_thumbnail_background;
 }
 
 bool NarrativeSlide::thumbnailForegroundDirty() const

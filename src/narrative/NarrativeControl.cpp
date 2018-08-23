@@ -627,6 +627,12 @@ void NarrativeControl::onRestrictToCurrent()
 	m_narrative_box->enableDragging(enable);
 }
 
+void NarrativeControl::onLeaveEditSlide(NarrativeSlide *slide)
+{
+	if (slide == nullptr) return;
+	slide->setBackgroundDirty();
+}
+
 void NarrativeControl::onCurrentLockChange()
 {
 	// get current nar, get current lock
@@ -665,6 +671,12 @@ void NarrativeControl::enableEditing(bool enable)
 	showCanvasEditor(enable);
 	m_canvas->setEditable(enable);
 	m_editing_slide = enable;
+
+	// onLeaveEditSlide event (for demanding repaints)
+	NarrativeSlide *old_slide = getCurrentSlide();
+	if (!enable && old_slide) {
+		onLeaveEditSlide(old_slide);
+	}
 }
 
 
@@ -774,6 +786,12 @@ void NarrativeControl::openNarrative(int index)
 bool NarrativeControl::openSlide(int index, bool go)
 {
 	NarrativeSlide *slide = getSlide(m_current_narrative, index);
+
+	// onLeaveEditSlide event (for demanding repaints)
+	NarrativeSlide *old_slide = getCurrentSlide();
+	if (old_slide != slide && m_editing_slide) {
+		onLeaveEditSlide(old_slide);
+	}
 
 	// failed to set slide
 	if (!slide) {

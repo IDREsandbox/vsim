@@ -20,7 +20,7 @@ table LockSettings {
   lock_add_remove:bool;
   // add/remove narratives, ers
   lock_navigation:bool;
-  expires:bool;
+  expires:bool = false;
   expiration_date_julian:uint64;
 }
 

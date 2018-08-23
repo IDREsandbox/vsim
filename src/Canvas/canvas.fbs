@@ -102,20 +102,11 @@ table CanvasLabel {
   //text_style:TextStyle; // the other text stuff is kept in the html
 }
 
-
-table CanvasImageData {
-  data:[ubyte];
-  format:string; // .png or whatever
-  // linked:bool
-  // compressed
-  // metadata? size? etc etc
-}
-
 table CanvasImage {
   rect:Rect;
   fill_style:FillStyle;
   line_style:LineStyle;
-  data:CanvasImageData;
+  data:ImageData;
 }
 
 root_type Canvas;

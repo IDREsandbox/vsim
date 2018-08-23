@@ -56,7 +56,6 @@ public: // actions
 private:
 	VSimApp *m_app;
 	OSGViewerWidget *m_viewer;
-	osgGA::StateSetManipulator *m_ssm;
 
 	Navigation::Mode m_mode;
 	bool m_frozen;

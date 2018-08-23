@@ -1,5 +1,11 @@
 # Changelog
 
+## 2018-8-24
+
+- Thumbnails save w/ file, repaint when done editing
+- Thumbnails draw with current display settings
+- Expiration date on files
+
 ## 2018-8-23
 
 ### Locking
@@ -24,10 +30,12 @@
     - edit slides
     - slide duration, transition, drag and drop, etc
     - right click menu, password
+    - lock icon
 - ER Lock
     - edit er dialog
     - set position
     - right click menu, password
+    - lock icon
 - File > Export vsim file
 - Settings > Lock Settings
 - Lock all nars/ers
@@ -41,6 +49,7 @@
 ### Misc
 
 - Added new icons for reposition and text ERs
+- Renamed er "Open" to "Launch"
 
 ## 2018-8-7
 

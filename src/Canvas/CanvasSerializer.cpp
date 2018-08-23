@@ -81,42 +81,6 @@ static void readFillStyle(const fb::FillStyle *fs, FrameStyle *style)
 	if (fs->color()) style->m_bg_color = TypesSerializer::fb2qtColor(*fs->color());
 }
 
-static QPixmap readPixmap(const VSim::FlatBuffers::CanvasImageData *d)
-{
-	if (!d) return QPixmap();
-	QPixmap p;
-
-	auto fb_ibuf = d->data();
-	auto fb_ifmt = d->format();
-	if (fb_ibuf && fb_ifmt) {
-		bool ok = p.loadFromData(fb_ibuf->data(),
-			fb_ibuf->size(), fb_ifmt->c_str());
-	}
-
-	return p;
-}
-
-static flatbuffers::Offset<fb::CanvasImageData> createImageData(
-	flatbuffers::FlatBufferBuilder *builder, QPixmap p)
-{
-	const char *fmt = "PNG";
-	QByteArray bytes;
-	QBuffer buffer(&bytes);
-	buffer.open(QIODevice::WriteOnly);
-	p.save(&buffer, fmt); // writes pixmap into bytes in PNG format
-	const uint8_t *ubuf = reinterpret_cast<const uint8_t *>(bytes.data());
-	auto o_data = builder->CreateVector<unsigned char>(ubuf, bytes.length());
-
-	auto o_fmt = builder->CreateString(fmt);
-
-	fb::CanvasImageDataBuilder b_idata(*builder);
-	b_idata.add_data(o_data);
-	b_idata.add_format(o_fmt);
-	auto o_idata = b_idata.Finish();
-
-	return o_idata;
-}
-
 std::shared_ptr<CanvasItem> CanvasSerializer::readCanvasItem(
 	const void *fb_item,
 	const VSim::FlatBuffers::CanvasItem fb_type)
@@ -149,7 +113,7 @@ std::shared_ptr<CanvasItem> CanvasSerializer::readCanvasItem(
 		auto image = std::make_shared<CanvasImage>();
 
 		// read image
-		image->setPixmap(readPixmap(fb_image->data()));
+		image->setPixmap(TypesSerializer::readPixmap(fb_image->data()));
 
 		// read common
 		item = image;
@@ -205,7 +169,7 @@ bool CanvasSerializer::createCanvasItem(
 	const CanvasImage *image = dynamic_cast<const CanvasImage*>(item);
 	if (image) {
 		// build image data
-		auto o_idata = createImageData(builder, image->pixmap());
+		auto o_idata = TypesSerializer::createImageData(builder, image->pixmap());
 
 		fb::CanvasImageBuilder b_image(*builder);
 		b_image.add_data(o_idata);

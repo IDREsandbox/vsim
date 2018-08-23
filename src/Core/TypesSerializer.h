@@ -5,6 +5,7 @@
 #include "types_generated.h"
 #include <QColor>
 #include <osg/Matrix>
+#include <QPixmap>
 
 class EResourceGroup;
 class LockTable;
@@ -28,6 +29,10 @@ namespace TypesSerializer {
 	osg::Matrix fb2osgCameraMatrix(const VSim::FlatBuffers::CameraPosDirUp &buffer);
 	VSim::FlatBuffers::CameraPosDirUp
 		osg2fbCameraMatrix(const osg::Matrix &mat);
+
+	QPixmap readPixmap(const VSim::FlatBuffers::ImageData *d);
+	flatbuffers::Offset<VSim::FlatBuffers::ImageData> createImageData(
+		flatbuffers::FlatBufferBuilder *builder, QPixmap p);
 
 	struct Params {
 		// for changing relative paths

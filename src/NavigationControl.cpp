@@ -16,7 +16,6 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	m_app(app),
 	m_viewer(viewer)
 {
-	m_ssm = m_viewer->getStateSetManipulator();
 
 	// navigation actions	
 	m_navigation_action_group = new QActionGroup(this);
@@ -127,7 +126,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	a_lighting->setShortcut(Qt::Key_L);
 	connect(a_lighting, &QAction::triggered, this,
 		[this](bool checked) {
-		m_ssm->setLightingEnabled(checked);
+		m_viewer->setLightingEnabled(checked);
 	});
 
 	a_backface_culling = new QAction(this);
@@ -136,7 +135,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	a_backface_culling->setShortcut(Qt::Key_B);
 	connect(a_backface_culling, &QAction::triggered, this,
 		[this](bool checked) {
-		m_ssm->setBackfaceEnabled(checked);
+		m_viewer->setBackfaceEnabled(checked);
 	});
 
 	a_texturing = new QAction(this);
@@ -145,7 +144,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	a_texturing->setShortcut(Qt::Key_X);
 	connect(a_texturing, &QAction::triggered, this,
 		[this](bool checked) {
-		m_ssm->setTextureEnabled(checked);
+		m_viewer->setTextureEnabled(checked);
 	});
 
 	a_stats = new QAction(this);
@@ -161,13 +160,13 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	connect(m_mode_group, &QActionGroup::triggered, this,
 		[this](QAction *which) {
 		if (which == a_fill) {
-			m_ssm->setPolygonMode(osg::PolygonMode::Mode::FILL);
+			m_viewer->setPolygonMode(osg::PolygonMode::Mode::FILL);
 		}
 		else if (which == a_wireframe) {
-			m_ssm->setPolygonMode(osg::PolygonMode::Mode::LINE);
+			m_viewer->setPolygonMode(osg::PolygonMode::Mode::LINE);
 		}
 		else {
-			m_ssm->setPolygonMode(osg::PolygonMode::Mode::POINT);
+			m_viewer->setPolygonMode(osg::PolygonMode::Mode::POINT);
 		}
 	});
 
@@ -238,12 +237,12 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 		m_viewer->startup();
 
 		// init render stuff
-		a_lighting->setChecked(m_ssm->getLightingEnabled());
-		a_backface_culling->setChecked(m_ssm->getBackfaceEnabled());
-		a_texturing->setChecked(m_ssm->getTextureEnabled());
+		a_lighting->setChecked(m_viewer->getLightingEnabled());
+		a_backface_culling->setChecked(m_viewer->getBackfaceEnabled());
+		a_texturing->setChecked(m_viewer->getTextureEnabled());
 
 		// initialize mode
-		auto pmode = m_ssm->getPolygonMode();
+		auto pmode = m_viewer->getPolygonMode();
 		if (pmode == osg::PolygonMode::FILL) {
 			a_fill->setChecked(true);
 		}

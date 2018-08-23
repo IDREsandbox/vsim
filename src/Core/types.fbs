@@ -38,6 +38,14 @@ table LockTable {
   // expiration date?
 }
 
+table ImageData {
+  data:[ubyte];
+  format:string;
+  // linked:bool
+  // compressed
+  // metadata? size? etc etc
+}
+
 // table SimpleImage {
 //   width:int32;
 //   height:int32;

@@ -117,6 +117,10 @@ void NarrativeSerializer::readNarrativeSlide(const fb::Slide * buffer,
 
 	// canvas
 	CanvasSerializer::readCanvas(buffer->canvas(), slide->scene());
+
+	// background thumbnail
+	slide->setThumbnailBackground(
+		TypesSerializer::readPixmap(buffer->thumbnail_background()));
 }
 
 flatbuffers::Offset<fb::Slide>
@@ -126,6 +130,8 @@ flatbuffers::Offset<fb::Slide>
 	auto o_canvas = CanvasSerializer::createCanvas(builder, slide->scene());
 	auto o_item_types = builder->CreateVector<uint8_t>({}); // deprecated
 	auto o_items = builder->CreateVector<flatbuffers::Offset<void>>({});
+	auto o_thumbnail_background = TypesSerializer::createImageData(builder,
+		slide->thumbnailBackground());
 
 	fb::SlideBuilder b_slide(*builder);
 	fb::CameraPosDirUp camera = TypesSerializer::osg2fbCameraMatrix(slide->getCameraMatrix());
@@ -136,6 +142,7 @@ flatbuffers::Offset<fb::Slide>
 	b_slide.add_items_type(o_item_types); // deprecated
 	b_slide.add_items(o_items);
 	b_slide.add_canvas(o_canvas);
+	b_slide.add_thumbnail_background(o_thumbnail_background);
 	auto o_slide = b_slide.Finish();
 
 	return o_slide;

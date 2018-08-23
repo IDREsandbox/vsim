@@ -152,6 +152,17 @@ public:
 	void resetHomePosition();
 	bool usingDefaultHomePosition();
 
+	// state set manipulator wrapper
+	bool getLightingEnabled() const;
+	bool getBackfaceEnabled() const;
+	bool getTextureEnabled() const;
+	osg::PolygonMode::Mode getPolygonMode() const;
+	void setLightingEnabled(bool enable);
+	void setBackfaceEnabled(bool enable);
+	void setTextureEnabled(bool enable);
+	void setPolygonMode(osg::PolygonMode::Mode mode);
+
+
 public:
 
 	// filter out ctrl-s when in wasd
@@ -235,6 +246,7 @@ private:
 	osg::ref_ptr<ObjectManipulator> m_object_manipulator;
 
 	osg::ref_ptr<osgGA::StateSetManipulator> m_ssm;
+	osg::ref_ptr<osgGA::StateSetManipulator> m_thumb_ssm;
 	osg::ref_ptr<osgViewer::StatsHandler> m_stats;
 
 	bool m_camera_frozen;

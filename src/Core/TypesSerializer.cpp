@@ -1,5 +1,7 @@
 #include "TypesSerializer.h"
 
+#include <QBuffer>
+
 #include "Core/Util.h"
 #include "LockTable.h"
 
@@ -51,6 +53,43 @@ fb::CameraPosDirUp TypesSerializer::osg2fbCameraMatrix(const osg::Matrix &mat)
 	fb::Vec3 s_up = osg2fbVec(up);
 
 	return fb::CameraPosDirUp(s_pos, s_dir, s_up);
+}
+
+QPixmap TypesSerializer::readPixmap(const VSim::FlatBuffers::ImageData *d)
+{
+	if (!d) return QPixmap();
+	QPixmap p;
+
+	auto fb_ibuf = d->data();
+	auto fb_ifmt = d->format();
+	if (fb_ibuf && fb_ifmt) {
+		bool ok = p.loadFromData(fb_ibuf->data(),
+			fb_ibuf->size(), fb_ifmt->c_str());
+	}
+
+	return p;
+}
+
+flatbuffers::Offset<fb::ImageData> 
+	TypesSerializer::createImageData(
+	flatbuffers::FlatBufferBuilder *builder, QPixmap p)
+{
+	const char *fmt = "PNG";
+	QByteArray bytes;
+	QBuffer buffer(&bytes);
+	buffer.open(QIODevice::WriteOnly);
+	p.save(&buffer, fmt); // writes pixmap into bytes in PNG format
+	const uint8_t *ubuf = reinterpret_cast<const uint8_t *>(bytes.data());
+	auto o_data = builder->CreateVector<unsigned char>(ubuf, bytes.length());
+
+	auto o_fmt = builder->CreateString(fmt);
+
+	fb::ImageDataBuilder b_idata(*builder);
+	b_idata.add_data(o_data);
+	b_idata.add_format(o_fmt);
+	auto o_idata = b_idata.Finish();
+
+	return o_idata;
 }
 
 QString TypesSerializer::readRelativePath(const flatbuffers::String * string, const Params & p)

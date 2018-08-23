@@ -33,6 +33,7 @@ public:
 
 	// thumbnail cache
 	QPixmap thumbnail() const;
+	QPixmap thumbnailBackground() const;
 
 	bool thumbnailForegroundDirty() const;
 	bool thumbnailBackgroundDirty() const;
@@ -88,9 +89,6 @@ private:
 	float m_duration;
 	bool m_stay_on_node;
 	float m_transition_duration;
-
-	//QImage m_thumbnail;
-	bool m_thumbnail_dirty;
 
 	QPixmap m_thumbnail_foreground;
 	QPixmap m_thumbnail_background;
