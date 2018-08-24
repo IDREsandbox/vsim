@@ -13,6 +13,7 @@ Lock settings
 - window settings
 - navigation settings
 - starting year
+- er settings
 
 Restrict to current
 - add/remove nars

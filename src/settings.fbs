@@ -9,6 +9,7 @@ table Settings {
   graphics_settings:GraphicsSettings;
   window_settings:WindowSettings;
   lock_settings:LockSettings;
+  er_settings:ERSettings;
 }
 
 table LockSettings {
@@ -81,9 +82,17 @@ table WindowSettings {
   ebar_size:int = 100;
 }
 
+enum ERSortBy : byte {
+  Title,
+  Distance,
+  StartYear,
+  None
+}
+
 table OtherSettings {
   year:int32 = 2000;
   years_enabled:bool = false;
+
   //nbar:bool = true;
   //ebar:bool = true;
   //branding:bool = false;
@@ -96,4 +105,11 @@ table OtherSettings {
   //lock ccreator
   //lock no import/new
   //lock no export
+}
+
+table ERSettings {
+  show_all:bool;
+  sort_all:ERSortBy = Title;
+  sort_global:ERSortBy = Title;
+  sort_local:ERSortBy = Distance;
 }

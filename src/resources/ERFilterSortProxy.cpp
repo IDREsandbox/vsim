@@ -116,6 +116,11 @@ void ERFilterSortProxy::setBase(TGroup<EResource> *base)
 	});
 }
 
+ER::SortBy ERFilterSortProxy::getSortBy() const
+{
+	return m_sort_by;
+}
+
 void ERFilterSortProxy::sortBy(ER::SortBy method)
 {
 	//if (m_sort_by == method) return;

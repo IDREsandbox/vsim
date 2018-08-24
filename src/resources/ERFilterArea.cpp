@@ -17,8 +17,9 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 	int nsorts = sizeof(ER::SortByStrings) / sizeof(*ER::SortByStrings);
 	for (int i = 0; i < nsorts; i++) {
 		QString s = ER::SortByStrings[i];
-		ui->sortGlobalBox->addItem(s);
-		ui->sortLocalBox->addItem(s);
+		ui->sort_global_box->addItem(s);
+		ui->sort_local_box->addItem(s);
+		ui->sort_all_box->addItem(s);
 	}
 
 	// sort by
@@ -50,14 +51,17 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 
 	connect(ui->closeButton, &QPushButton::pressed, this, &QWidget::hide);
 	connect(ui->searchClearButton, &QPushButton::pressed, ui->searchLineEdit, &QLineEdit::clear);
-	//connect(ui.clearButton, &QAbstractButton::pressed, this, &ERFilterArea::reset);
 
 	// signals out
-	connect(ui->sortLocalBox, QOverload<int>::of(&QComboBox::activated), this,
+	connect(ui->sort_all_box, QOverload<int>::of(&QComboBox::activated), this,
+		[this](int value) {
+		emit sSortAll((ER::SortBy)value);
+	});
+	connect(ui->sort_local_box, QOverload<int>::of(&QComboBox::activated), this,
 		[this](int value) {
 		emit sSortLocal((ER::SortBy)value);
 	});
-	connect(ui->sortGlobalBox, QOverload<int>::of(&QComboBox::activated), this,
+	connect(ui->sort_global_box, QOverload<int>::of(&QComboBox::activated), this,
 		[this](int value) {
 		emit sSortGlobal((ER::SortBy)value);
 	});
@@ -74,27 +78,12 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 	});
 	connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &ERFilterArea::sSearch);
 
-	reset();
 }
 
 void ERFilterArea::setCategoryModel(CheckableListProxy * categories)
 {
-	ui->categoriesBox->setModel(categories);
+	ui->categories_box->setModel(categories);
 	m_category_checkbox_model = categories;
-}
-
-void ERFilterArea::reset()
-{
-	//ui->globalCheckBox->setChecked(true);
-	//ui->localCheckBox->setChecked(true);
-	//ui->yearsCheckBox->setChecked(true);
-	//ui->showLocalCheckBox->setChecked(false);
-	//ui->searchLineEdit->clear();
-	//ui->sortGlobalBox->setCurrentIndex(0);
-	//ui->sortLocalBox->setCurrentIndex(0);
-	//if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
-	//if (m_type_checkbox_model) m_type_checkbox_model->setCheckAll(true);
-	//ui->filetypesBox->setCurrentText("");
 }
 
 void ERFilterArea::setSearch(const QString & s)
@@ -102,14 +91,19 @@ void ERFilterArea::setSearch(const QString & s)
 	ui->searchLineEdit->setText(s);
 }
 
+void ERFilterArea::setSortAll(ER::SortBy sort)
+{
+	ui->sort_all_box->setCurrentIndex((int)sort);
+}
+
 void ERFilterArea::setSortGlobal(ER::SortBy sort)
 {
-	ui->sortGlobalBox->setCurrentIndex((int)sort);
+	ui->sort_global_box->setCurrentIndex((int)sort);
 }
 
 void ERFilterArea::setSortLocal(ER::SortBy sort)
 {
-	ui->sortLocalBox->setCurrentIndex((int)sort);
+	ui->sort_local_box->setCurrentIndex((int)sort);
 }
 
 void ERFilterArea::enableRange(bool enable)
@@ -130,4 +124,20 @@ void ERFilterArea::enableYears(bool enable)
 void ERFilterArea::enableAutoLaunch(bool enable)
 {
 	ui->enableAutoLaunchCheckBox->setChecked(enable);
+}
+
+void ERFilterArea::setToAll(bool all)
+{
+	m_all = all;
+	bool gl = !all;
+
+	ui->sort_local_label->setVisible(gl);
+	ui->sort_global_label->setVisible(gl);
+	ui->sort_local_box->setVisible(gl);
+	ui->sort_global_box->setVisible(gl);
+	ui->sort_all_label->setVisible(all);
+	ui->sort_all_box->setVisible(all);
+
+	//adjustSize();
+	// TODO: somehow get a layout request
 }

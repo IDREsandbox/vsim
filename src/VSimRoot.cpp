@@ -1,13 +1,4 @@
 #include "VSimRoot.h"
-#include "VSimRoot.h"
-#include "VSimRoot.h"
-#include "VSimRoot.h"
-#include "VSimRoot.h"
-#include "VSimRoot.h"
-#include "VSimRoot.h"
-#include "VSimRoot.h"
-#include "VSimRoot.h"
-#include "VSimRoot.h"
 
 #include <iostream>
 #include <QDate>
@@ -53,6 +44,7 @@ VSimRoot::VSimRoot(QObject *parent)
 	Util::getOrCreate(m_graphics_settings->camera_settings);
 	m_window_settings = std::make_unique<VSim::FlatBuffers::WindowSettingsT>();
 	m_other_settings = std::make_unique<VSim::FlatBuffers::OtherSettingsT>();
+	m_er_settings = std::make_unique<VSim::FlatBuffers::ERSettingsT>();
 	m_branding_canvas = std::make_unique<CanvasScene>();
 
 	m_lock = new LockTable(this);
@@ -93,6 +85,7 @@ void VSimRoot::copy(VSimRoot * other)
 	copyGraphicsSettings(*m_graphics_settings, *other->m_graphics_settings);
 	copyWindowSettings(*m_window_settings, *other->m_window_settings);
 	copyOtherSettings(*m_other_settings, *other->m_other_settings);
+	copyERSettings(*m_er_settings, *other->m_er_settings);
 
 	m_branding_canvas->copy(*other->m_branding_canvas);
 	*m_lock = *other->m_lock;
@@ -149,6 +142,11 @@ VSim::FlatBuffers::WindowSettingsT & VSimRoot::windowSettings() const
 VSim::FlatBuffers::OtherSettingsT & VSimRoot::otherSettings() const
 {
 	return *m_other_settings;
+}
+
+VSim::FlatBuffers::ERSettingsT & VSimRoot::erSettings() const
+{
+	return *m_er_settings;
 }
 
 void VSimRoot::prepareSave()
@@ -458,6 +456,15 @@ void VSimRoot::copyOtherSettings(VSim::FlatBuffers::OtherSettingsT & dest,
 {
 	dest.year = src.year;
 	dest.years_enabled = src.years_enabled;
+}
+
+void VSimRoot::copyERSettings(VSim::FlatBuffers::ERSettingsT & dest,
+	const VSim::FlatBuffers::ERSettingsT & src)
+{
+	dest.show_all = src.show_all;
+	dest.sort_all = src.sort_all;
+	dest.sort_global = src.sort_global;
+	dest.sort_local = src.sort_local;
 }
 
 

@@ -62,6 +62,7 @@ public:
 	// configuration
 	//void setCategories(ECategoryGroup *categories);
 
+	ER::SortBy getSortBy() const;
 	void sortBy(ER::SortBy method);
 	//SortBy getSortMethod() const;
 

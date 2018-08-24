@@ -18,8 +18,7 @@ public:
 	ERFilterArea(QWidget *parent);
 	void setCategoryModel(CheckableListProxy *categories);
 
-	void reset();
-
+	void setSortAll(ER::SortBy sort);
 	void setSortGlobal(ER::SortBy sort);
 	void setSortLocal(ER::SortBy sort);
 	void enableRange(bool enable);
@@ -28,7 +27,13 @@ public:
 	void enableAutoLaunch(bool enable);
 	void setSearch(const QString &s);
 
+	// two configurations
+	// 1. show global/local
+	// 2. show all
+	void setToAll(bool all);
+
 signals:
+	void sSortAll(ER::SortBy sort);
 	void sSortGlobal(ER::SortBy sort);
 	void sSortLocal(ER::SortBy sort);
 	void sEnableRange(bool enable);
@@ -48,6 +53,8 @@ private:
 	//QListView *m_type_view;
 	QAbstractItemModel *m_type_model;
 	CheckableListProxy *m_type_checkbox_model;
+
+	bool m_all;
 };
 
 #endif

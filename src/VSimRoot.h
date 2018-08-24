@@ -44,6 +44,7 @@ public:
 	VSim::FlatBuffers::GraphicsSettingsT &graphicsSettings() const;
 	VSim::FlatBuffers::WindowSettingsT &windowSettings() const;
 	VSim::FlatBuffers::OtherSettingsT &otherSettings() const;
+	VSim::FlatBuffers::ERSettingsT &erSettings() const;
 
 	void prepareSave();
 	void postLoad();
@@ -94,6 +95,8 @@ public:
 		const VSim::FlatBuffers::WindowSettingsT &src);
 	static void copyOtherSettings(VSim::FlatBuffers::OtherSettingsT &dest,
 		const VSim::FlatBuffers::OtherSettingsT &src);
+	static void copyERSettings(VSim::FlatBuffers::ERSettingsT &dest,
+		const VSim::FlatBuffers::ERSettingsT &src);
 
 signals:
 	//void sLockedChanged(bool locked);
@@ -111,6 +114,7 @@ private:
 	std::unique_ptr<VSim::FlatBuffers::GraphicsSettingsT> m_graphics_settings;
 	std::unique_ptr<VSim::FlatBuffers::WindowSettingsT> m_window_settings;
 	std::unique_ptr<VSim::FlatBuffers::OtherSettingsT> m_other_settings;
+	std::unique_ptr<VSim::FlatBuffers::ERSettingsT> m_er_settings;
 	std::unique_ptr<CanvasScene> m_branding_canvas;
 
 	LockTable *m_lock;

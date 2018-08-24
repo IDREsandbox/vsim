@@ -40,7 +40,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_last_touched(nullptr),
 	m_radius(1.0f),
 	m_enabled(true),
-	m_auto_launch(true)
+	m_auto_launch(true),
+	m_showing_all(false)
 {
 	m_undo_stack = m_app->getUndoStack();
 	m_bar = m_window->erBar();
@@ -52,8 +53,12 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_filter_area = m_window->erFilterArea();
 
 	m_filter_proxy = std::unique_ptr<ERFilterSortProxy>(new ERFilterSortProxy(nullptr));
-	m_filter_proxy->sortBy(ER::SortBy::TITLE);
+	m_filter_proxy->sortBy(ER::SortBy::NONE);
 	m_filter_proxy->enableRange(false);
+	m_all_proxy = std::unique_ptr<ERFilterSortProxy>(new ERFilterSortProxy(m_filter_proxy.get()));
+	m_all_proxy->showGlobal(true);
+	m_all_proxy->showLocal(true);
+	m_all_proxy->enableRange(false);
 	m_global_proxy = std::unique_ptr<ERFilterSortProxy>(new ERFilterSortProxy(m_filter_proxy.get()));
 	m_global_proxy->showGlobal(true);
 	m_global_proxy->showLocal(false);
@@ -137,7 +142,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	bar->ui.editERButton->setDefaultAction(a_edit_er);
 	// show all
 	connect(bar->ui.showAll, &QAbstractButton::pressed, this, [this]() {
-		showAll(!showingAll());
+		showAll(!m_showing_all);
 	});
 
 	// goto and open
@@ -191,6 +196,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	connect(m_app, &VSimApp::sInterrupted, this, [this]() {
 		m_going_to = false;
 	});
+	connect(m_app, &VSimApp::sAboutToSave, this, &ERControl::gatherSettings);
 	connect(m_app, &VSimApp::sReset, this, &ERControl::onReset);
 	connect(m_app->timeManager(), &TimeManager::sYearChanged,
 		m_filter_proxy.get(), &ERFilterSortProxy::setYear);
@@ -211,6 +217,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		m_local_proxy.get(), &ERFilterSortProxy::enableRange);
 	connect(m_filter_area, &ERFilterArea::sEnableYears,
 		m_filter_proxy.get(), &ERFilterSortProxy::enableYears);
+	connect(m_filter_area, &ERFilterArea::sSortAll,
+		m_all_proxy.get(), &ERFilterSortProxy::sortBy);
 	connect(m_filter_area, &ERFilterArea::sSortLocal,
 		m_local_proxy.get(), &ERFilterSortProxy::sortBy);
 	connect(m_filter_area, &ERFilterArea::sSortGlobal,
@@ -226,6 +234,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	});
 
 	// this -> filter area
+	connect(m_all_proxy.get(), &ERFilterSortProxy::sSortByChanged,
+		m_filter_area, &ERFilterArea::setSortAll);
 	connect(m_local_proxy.get(), &ERFilterSortProxy::sSortByChanged,
 		m_filter_area, &ERFilterArea::setSortLocal);
 	connect(m_global_proxy.get(), &ERFilterSortProxy::sSortByChanged,
@@ -257,13 +267,11 @@ void ERControl::load(EResourceGroup *ers)
 
 	m_filter_proxy->setBase(ers);
 
-	m_global_box->setGroup(m_global_proxy.get());
+	m_all_box->setGroup(m_all_proxy.get());
 	m_local_box->setGroup(m_local_proxy.get());
-	m_all_box->setGroup(m_filter_proxy.get());
+	m_global_box->setGroup(m_global_proxy.get());
 
 	m_category_control->load(m_categories);
-
-	m_filter_area->reset();
 
 	connect(ers, &EResourceGroup::sRestrictToCurrentChanged, this, &ERControl::onRestrictToCurrent);
 }
@@ -703,8 +711,10 @@ void ERControl::closeAll()
 
 void ERControl::showAll(bool all)
 {
+	m_showing_all = all;
 	m_bar->ui.showAll->setText(all ? "Show Local/Global" : "Show All");
 	m_bar->ui.stackedWidget->setCurrentIndex(all ? 0 : 1);
+	m_filter_area->setToAll(all);
 }
 
 bool ERControl::showingAll() const
@@ -796,6 +806,7 @@ void ERControl::resetFilters()
 {
 	m_local_proxy->enableRange(true);
 	m_filter_proxy->sortBy(ER::SortBy::NONE);
+	m_all_proxy->sortBy(ER::SortBy::TITLE);
 	m_local_proxy->sortBy(ER::SortBy::DISTANCE);
 	m_global_proxy->sortBy(ER::SortBy::TITLE);
 	m_filter_proxy->setSearch("");
@@ -896,9 +907,31 @@ void ERControl::debug()
 	}
 }
 
+void ERControl::gatherSettings()
+{
+	if (m_app->getRoot()->settingsLocked()) return;
+	auto &es = m_app->getRoot()->erSettings();
+
+	es.sort_all = static_cast<VSim::FlatBuffers::ERSortBy>(m_all_proxy->getSortBy());
+	es.sort_global = static_cast<VSim::FlatBuffers::ERSortBy>(m_global_proxy->getSortBy());
+	es.sort_local = static_cast<VSim::FlatBuffers::ERSortBy>(m_local_proxy->getSortBy());
+	es.show_all = m_showing_all;
+}
+
+void ERControl::extractSettings()
+{
+	auto &es = m_app->getRoot()->erSettings();
+
+	m_all_proxy->sortBy(static_cast<ER::SortBy>(es.sort_all));
+	m_local_proxy->sortBy(static_cast<ER::SortBy>(es.sort_local));
+	m_global_proxy->sortBy(static_cast<ER::SortBy>(es.sort_global));
+	showAll(es.show_all);
+}
+
 void ERControl::onReset()
 {
 	onRestrictToCurrent();
+	extractSettings();
 }
 
 void ERControl::onRestrictToCurrent()

@@ -102,6 +102,10 @@ public: // actions
 	QAction *a_close_all;
 
 private:
+	void gatherSettings();
+	void extractSettings();
+
+private:
 	VSimApp *m_app;
 	QUndoStack *m_undo_stack;
 	EResourceGroup *m_ers;
@@ -119,6 +123,7 @@ private:
 
 	// filter stuff
 	std::unique_ptr<ERFilterSortProxy> m_filter_proxy;
+	std::unique_ptr<ERFilterSortProxy> m_all_proxy;
 	std::unique_ptr<ERFilterSortProxy> m_global_proxy;
 	std::unique_ptr<ERFilterSortProxy> m_local_proxy;
 
@@ -126,6 +131,7 @@ private:
 
 	ECategoryControl *m_category_control;
 
+	bool m_showing_all;
 	bool m_going_to;
 	float m_radius;
 	bool m_enabled;

@@ -78,8 +78,15 @@
    </item>
    <item row="1" column="0" rowspan="4">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="2" column="1">
-      <widget class="QComboBox" name="categoriesBox">
+     <item row="1" column="0">
+      <widget class="QLabel" name="sort_local_label">
+       <property name="text">
+        <string>Sort Local</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QComboBox" name="categories_box">
        <property name="minimumSize">
         <size>
          <width>150</width>
@@ -88,32 +95,35 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="sortLocalBox"/>
-     </item>
-     <item row="2" column="0">
+     <item row="3" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Categories</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="sortGlobalBox"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>Sort Local</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="sort_global_label">
        <property name="text">
         <string>Sort Global</string>
        </property>
       </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="sort_local_box"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="sort_global_box"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="sort_all_label">
+       <property name="text">
+        <string>Sort All</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="sort_all_box"/>
      </item>
     </layout>
    </item>
