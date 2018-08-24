@@ -671,11 +671,11 @@ void ERControl::setDisplay(EResource *res, bool go, bool fade)
 	}
 	else if (fade) {
 		if (is_null) {
-			m_display->fadeOut();
+			// extra check for random fade outs
+			if (!was_hidden) m_display->fadeOut();
 		}
 		else {
-			// an extra check to prevent
-			// double fadeins
+			// an extra check to prevent double fadeins
 			if (m_display->canFadeIn()) m_display->fadeIn();
 		}
 	}

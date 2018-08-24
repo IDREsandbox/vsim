@@ -6,10 +6,10 @@
 #mainSplitter QGroupBox,
 #topBar,
 #bottomBar,
-#erFilterArea,
+/* #erFilterArea,
 #erFilterArea QLabel,
 #erFilterArea QCheckBox,
-#erFilterArea QGroupBox,
+#erFilterArea QGroupBox, */
 HorizontalScrollBox
 {
     background: rgba(0, 0, 0, 90);

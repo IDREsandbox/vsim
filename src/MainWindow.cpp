@@ -144,8 +144,11 @@ MainWindow::MainWindow(QWidget *parent)
 	// er filter widget
 	//QWidget *filter_area_padding_layout = new QGridLayout();
 	//middle_layout->addLayout(filter_area_padding_layout, 0, 0);
-	m_er_filter_area = new ERFilterArea(ui->root);
+	m_er_filter_area = new ERFilterArea(this);
+	m_er_filter_area->setWindowFlags(Qt::WindowType::Window);
+	m_er_filter_area->setWindowFlag(Qt::WindowType::WindowContextHelpButtonHint, false);
 	m_er_filter_area->setObjectName("erFilterArea");
+	m_er_filter_area->setWindowTitle("Resource Filters");
 	m_er_filter_area->hide();
 
 	// layering
@@ -610,7 +613,8 @@ void MainWindow::updatePositions()
 	int space = 10;
 	int bottom_top = ui->middleSpacer->height() + top;
 	int filter_top = bottom_top - m_er_filter_area->height() - space;
-	m_er_filter_area->move(space, filter_top);
+
+	//m_er_filter_area->move(space, filter_top);
 
 	// Place the ER popup area
 	// vertical center
