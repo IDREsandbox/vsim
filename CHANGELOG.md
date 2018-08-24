@@ -5,6 +5,24 @@
 - Thumbnails save w/ file, repaint when done editing
 - Thumbnails draw with current display settings
 - Expiration date on files
+- Lighting off by default
+- Lighting serialize
+- Current year saves with file
+- ER filter window
+- ER sort serialize
+- ER all sort
+- ER slow down (.6 sec)
+- ER fade in/out
+- ER display titles adjustment
+- ER reposition icon on left
+
+### Fixes
+
+- Style settings border width fix
+- Canvas right click dotted fix
+
+### Code stuff
+- Deleted mrichtextedit
 
 ## 2018-8-23
 
@@ -51,7 +69,7 @@
 ### Misc
 
 - Added new icons for reposition and text ERs
-- Renamed er "Open" to "Launch"
+- Renamed ER "Open" to "Launch"
 
 ## 2018-8-7
 
