@@ -17,6 +17,21 @@ ERDisplay::ERDisplay(QWidget *parent)
 	connect(ui.close, &QAbstractButton::pressed, this, &ERDisplay::sClose);
 	connect(ui.close_all, &QAbstractButton::pressed, this, &ERDisplay::sCloseAll);
 
+	m_display_opacity = new QGraphicsOpacityEffect(this);
+	m_display_opacity->setOpacity(1.0);
+	this->setGraphicsEffect(m_display_opacity);
+	m_fade_in_anim = new QPropertyAnimation(m_display_opacity, "opacity");
+	m_fade_in_anim->setDuration(250);
+	m_fade_in_anim->setStartValue(0.0);
+	m_fade_in_anim->setEndValue(1.0);
+	m_fade_out_anim = new QPropertyAnimation(m_display_opacity, "opacity");
+	m_fade_out_anim->setDuration(250);
+	m_fade_out_anim->setStartValue(1.0);
+	m_fade_out_anim->setEndValue(0.0);
+
+	connect(m_fade_out_anim, &QPropertyAnimation::finished, this, [this]() {
+		hide();
+	});
 }
 
 void ERDisplay::setInfo(EResource* er)
@@ -81,6 +96,37 @@ void ERDisplay::setCount(int n)
 {
 	QString s = QString("Close All (%1)").arg(QString::number(n));
 	ui.close_all->setText(s);
+}
+
+void ERDisplay::setHardVisible(bool visible)
+{
+	setVisible(visible);
+	m_fade_in_anim->stop();
+	m_fade_out_anim->stop();
+	m_display_opacity->setOpacity(1.0);
+}
+
+bool ERDisplay::canFadeIn()
+{
+	if (!isVisible()) return true;
+	if (m_fade_out_anim->state() == QPropertyAnimation::State::Running) {
+		return true;
+	}
+	return false;
+}
+
+void ERDisplay::fadeIn()
+{
+	show();
+	m_fade_out_anim->stop();
+	m_fade_in_anim->start();
+}
+
+void ERDisplay::fadeOut()
+{
+	show();
+	m_fade_in_anim->stop();
+	m_fade_out_anim->start();
 }
 
 void ERDisplay::mousePressEvent(QMouseEvent * event)

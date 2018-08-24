@@ -50,6 +50,7 @@ FastScrollBox::FastScrollBox(QWidget * parent)
 	});
 	connect(m_selection, &StackSignals::sAdded, this, [this](size_t index) {
 		auto *item = m_selection->at(index);
+		if (!item) return;
 		item->setSelected(true);
 		ensureVisible();
 	});
@@ -58,7 +59,7 @@ FastScrollBox::FastScrollBox(QWidget * parent)
 	});
 	connect(m_selection, &StackSignals::sReset, this, [this]() {
 		for (auto *i : m_items) {
-			i->setSelected(false);
+			i->setSelected(m_selection->has(i));
 		}
 	});
 
@@ -274,14 +275,16 @@ void FastScrollBox::itemMousePressEvent(FastScrollItem * item, QGraphicsSceneMou
 			}
 		}
 		else {
-			singleSelect(item);
+			m_selection->singleSelect(item);
+			emit sSelectionCleared();
 		}
 		event->accept();
 		emit sTouch();
 	}
 	else if (event->button() == Qt::RightButton) {
 		if (!m_selection->has(item)) {
-			singleSelect(item);
+			m_selection->singleSelect(item);
+			emit sSelectionCleared();
 		}
 		else {
 			m_selection->add(item);
@@ -296,14 +299,6 @@ void FastScrollBox::itemMousePressEvent(FastScrollItem * item, QGraphicsSceneMou
 void FastScrollBox::itemMouseDoubleClickEvent(FastScrollItem * item, QGraphicsSceneMouseEvent * event)
 {
 //	emit sTouch();
-}
-
-void FastScrollBox::singleSelect(FastScrollItem * item)
-{
-	m_selection->clear();
-	m_selection->add(item);
-
-	emit sSelectionCleared();
 }
 
 void FastScrollBox::ensureVisible()

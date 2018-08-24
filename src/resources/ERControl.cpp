@@ -648,24 +648,37 @@ void ERControl::unlockResources()
 	onSelectionChange();
 }
 
-void ERControl::setDisplay(EResource *res, bool go)
+void ERControl::setDisplay(EResource *res, bool go, bool fade)
 {
+	bool was_hidden = !m_display->isVisible();
 	m_displayed = res;
-	if (res == nullptr) {
-		m_display->setInfo(nullptr);
-		m_display->hide();
-		return;
-	}
 
+	// info
 	m_display->setInfo(res);
 
-	if (m_enabled) {
-		m_display->show();
+	// display
+	bool is_null = (res == nullptr);
+	if (!m_enabled) {
+		m_display->setHardVisible(false);
+	}
+	else if (fade) {
+		if (is_null) {
+			m_display->fadeOut();
+		}
+		else {
+			// an extra check to prevent
+			// double fadeins
+			if (m_display->canFadeIn()) m_display->fadeIn();
+		}
+	}
+	else {
+		m_display->setHardVisible(!is_null);
 	}
 
-	if (go) {
+	// goto
+	if (go && !is_null) {
 		m_going_to = true;
-		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .3);
+		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .6);
 	}
 }
 
@@ -715,7 +728,7 @@ void ERControl::onTouch()
 	EResource *resource = getCombinedLastSelectedP();
 	if (resource) {
 		m_app->setState(VSimApp::EDIT_ERS);
-		setDisplay(resource, resource->getReposition());
+		setDisplay(resource, resource->getReposition(), true);
 	}
 	else {
 		setDisplay(nullptr);
@@ -731,7 +744,7 @@ void ERControl::onTopChange()
 	// we want to change the display but not goto
 	EResource *res = getCombinedLastSelectedP();
 	if (res != m_displayed) {
-		setDisplay(res, false);
+		setDisplay(res, false, true);
 	}
 
 	// TODO: change "edit" to "info"
@@ -776,7 +789,7 @@ void ERControl::selectERs(const std::vector<EResource*> &res)
 	m_all_box->setSelection(res);
 
 	m_app->setState(VSimApp::EDIT_ERS);
-	setDisplay(getCombinedLastSelectedP());
+	setDisplay(getCombinedLastSelectedP(), true, false);
 }
 
 void ERControl::resetFilters()

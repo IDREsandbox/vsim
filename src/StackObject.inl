@@ -5,17 +5,8 @@
 template<class T>
 inline void StackObject<T>::add(T x)
 {
-	auto it = m_set.find(x);
-	if (it != m_set.end()) {
-		if (x == top()) return; // already at the top
-		m_stack.erase(std::remove(
-			m_stack.begin(), m_stack.end(), x), m_stack.end());
-		m_stack.push_back(x);
-	}
-	else {
-		m_set.insert(x);
-		m_stack.push_back(x);
-	}
+	pushInternal(x);
+
 	emit sAdded(m_stack.size() - 1);
 	emit sChanged();
 }
@@ -67,6 +58,21 @@ inline void StackObject<T>::clear()
 }
 
 template<class T>
+inline void StackObject<T>::singleSelect(T x)
+{
+	// check if already selected
+	if (m_stack.size() == 1 && m_stack[0] == x) {
+		return;
+	}
+
+	m_stack.clear();
+	m_set.clear();
+	pushInternal(x);
+	emit sReset();
+	emit sChanged();
+}
+
+template<class T>
 inline bool StackObject<T>::has(T item) const
 {
 	return m_set.find(item) != m_set.end();
@@ -108,6 +114,34 @@ template<class T>
 inline std::set<T> StackObject<T>::toSet() const
 {
 	return m_set;
+}
+
+template<class T>
+inline void StackObject<T>::setSelection(std::vector<T>& vector) const
+{
+	m_stack.clear();
+	m_set.clear();
+	for (const auto &item : vector) {
+		pushInternal(item);
+	}
+	emit sReset();
+	emit sChanged();
+}
+
+template<class T>
+inline void StackObject<T>::pushInternal(T x)
+{
+	auto it = m_set.find(x);
+	if (it != m_set.end()) {
+		if (x == top()) return; // already at the top
+		m_stack.erase(std::remove(
+			m_stack.begin(), m_stack.end(), x), m_stack.end());
+		m_stack.push_back(x);
+	}
+	else {
+		m_set.insert(x);
+		m_stack.push_back(x);
+	}
 }
 
 #endif

@@ -51,7 +51,6 @@ protected:
 	virtual void itemMouseDoubleClickEvent(FastScrollItem *item, QGraphicsSceneMouseEvent *event);
 
 protected:
-	void singleSelect(FastScrollItem *item);
 	void ensureVisible();
 	//void shiftSelect();
 

@@ -14,7 +14,7 @@ public:
 signals:
 	void sAdded(size_t where); // something added to the top
 	void sRemoved(); // call removed() to get what
-	void sReset();
+	void sReset(); // requires rescan, not necessarily empty
 	void sChanged(); // anything changes
 };
 
@@ -25,7 +25,7 @@ public:
 	void addAt(T, int index);
 	void remove(T);
 	void clear();
-	//void singleSelect(FastScrollItem *);
+	void singleSelect(T);
 	//bool selectIfNot(FastScrollItem *);
 
 	bool has(T item) const;
@@ -36,6 +36,12 @@ public:
 
 	std::vector<T> toVector() const;
 	std::set<T> toSet() const;
+
+	void setSelection(std::vector<T> &vector) const;
+
+private:
+	// returns where
+	void pushInternal(T);
 
 private:
 	T m_removed;

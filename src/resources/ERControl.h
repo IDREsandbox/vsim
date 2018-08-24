@@ -50,7 +50,7 @@ public:
 	void unlockResources();
 
 	// -1 to hide
-	void setDisplay(EResource *res, bool go = true);
+	void setDisplay(EResource *res, bool go = true, bool fade = true);
 	//void goToResource(EResource *res, bool instant = false);
 	void closeER();
 	void closeAll();
@@ -103,23 +103,19 @@ public: // actions
 
 private:
 	VSimApp *m_app;
-	MainWindow *m_window;
-	ERBar *m_bar;
-
+	QUndoStack *m_undo_stack;
 	EResourceGroup *m_ers;
 	ECategoryGroup *m_categories;
 
-	bool m_going_to;
+	MainWindow *m_window;
+	ERBar *m_bar;
 	EResource *m_displayed;
 	ERDisplay *m_display;
 	ERFilterArea *m_filter_area;
-
 	ERScrollBox *m_global_box;
 	ERScrollBox *m_local_box;
 	ERScrollBox *m_all_box;
 	ERScrollBox *m_last_touched;
-
-	QUndoStack *m_undo_stack;
 
 	// filter stuff
 	std::unique_ptr<ERFilterSortProxy> m_filter_proxy;
@@ -130,6 +126,7 @@ private:
 
 	ECategoryControl *m_category_control;
 
+	bool m_going_to;
 	float m_radius;
 	bool m_enabled;
 	bool m_auto_launch;

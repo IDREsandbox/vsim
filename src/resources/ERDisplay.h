@@ -1,6 +1,9 @@
 #ifndef ERDISPLAY_H
 #define ERDISPLAY_H
 #include <QWidget>
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
+
 #include "ui_ERDisplay.h"
 #include "resources/EResource.h"
 
@@ -12,6 +15,11 @@ public:
 	void setInfo(EResource* er);
 	void setCategory(ECategory *cat);
 	void setCount(int n);
+
+	void setHardVisible(bool visible); // no fading
+	bool canFadeIn();
+	void fadeIn();
+	void fadeOut();
 
 	//public slots:
 	//void showER();
@@ -32,6 +40,9 @@ private:
 	Ui::ERDisplay ui;
 	EResource* m_er;
 	ECategory *m_cat;
+	QGraphicsOpacityEffect *m_display_opacity;
+	QPropertyAnimation *m_fade_out_anim;
+	QPropertyAnimation *m_fade_in_anim;
 };
 
 #endif // ERDISPLAY_H
