@@ -203,6 +203,8 @@ void VSimSerializer::readSettings(const VSim::FlatBuffers::Settings *buffer,
 		*Util::getOrCreate(settings->graphics_settings).get());
 	VSimRoot::copyWindowSettings(root->windowSettings(),
 		*Util::getOrCreate(settings->window_settings).get());
+	VSimRoot::copyOtherSettings(root->otherSettings(),
+		*Util::getOrCreate(settings->other_settings).get());
 
 	// lock stuff
 	// read lock table?
@@ -239,6 +241,8 @@ flatbuffers::Offset<VSim::FlatBuffers::Settings> VSimSerializer::createSettings(
 		&root->graphicsSettings());
 	auto o_ws = VSim::FlatBuffers::CreateWindowSettings(*builder,
 		&root->windowSettings());
+	auto o_os = VSim::FlatBuffers::CreateOtherSettings(*builder,
+		&root->otherSettings());
 
 	auto lst = std::make_unique<fb::LockSettingsT>();
 	root->lockTableConst()->createLockTableT(Util::getOrCreate(lst->lock).get());
@@ -255,6 +259,7 @@ flatbuffers::Offset<VSim::FlatBuffers::Settings> VSimSerializer::createSettings(
 	b_set.add_graphics_settings(o_gs);
 	b_set.add_window_settings(o_ws);
 	b_set.add_lock_settings(o_ls);
+	b_set.add_other_settings(o_os);
 	auto o_set = b_set.Finish();
 
 	return o_set;

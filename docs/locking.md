@@ -12,6 +12,7 @@ Lock settings
 - camera settings
 - window settings
 - navigation settings
+- starting year
 
 Restrict to current
 - add/remove nars

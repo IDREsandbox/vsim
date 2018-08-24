@@ -31,11 +31,13 @@
     - slide duration, transition, drag and drop, etc
     - right click menu, password
     - lock icon
+    - export all, with password
 - ER Lock
     - edit er dialog
     - set position
     - right click menu, password
     - lock icon
+    - export all, with password
 - File > Export vsim file
 - Settings > Lock Settings
 - Lock all nars/ers

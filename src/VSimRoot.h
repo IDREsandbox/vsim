@@ -36,9 +36,6 @@ public:
 	ModelGroup *models() const;
 	CanvasScene *branding() const;
 
-	// settings stuff, there is no settings class yet
-	void copySettings(const VSimRoot *other);
-
 	// never null
 	//VSim::FlatBuffers::SettingsT &settings() const;
 	//VSim::FlatBuffers::OtherSettingsT &OtherSettingsT() const;
@@ -46,6 +43,7 @@ public:
 	VSim::FlatBuffers::NavigationSettingsT &navigationSettings() const;
 	VSim::FlatBuffers::GraphicsSettingsT &graphicsSettings() const;
 	VSim::FlatBuffers::WindowSettingsT &windowSettings() const;
+	VSim::FlatBuffers::OtherSettingsT &otherSettings() const;
 
 	void prepareSave();
 	void postLoad();
@@ -94,6 +92,8 @@ public:
 		const VSim::FlatBuffers::GraphicsSettingsT &src);
 	static void copyWindowSettings(VSim::FlatBuffers::WindowSettingsT &dest,
 		const VSim::FlatBuffers::WindowSettingsT &src);
+	static void copyOtherSettings(VSim::FlatBuffers::OtherSettingsT &dest,
+		const VSim::FlatBuffers::OtherSettingsT &src);
 
 signals:
 	//void sLockedChanged(bool locked);
@@ -110,6 +110,7 @@ private:
 	std::unique_ptr<VSim::FlatBuffers::NavigationSettingsT> m_navigation_settings;
 	std::unique_ptr<VSim::FlatBuffers::GraphicsSettingsT> m_graphics_settings;
 	std::unique_ptr<VSim::FlatBuffers::WindowSettingsT> m_window_settings;
+	std::unique_ptr<VSim::FlatBuffers::OtherSettingsT> m_other_settings;
 	std::unique_ptr<CanvasScene> m_branding_canvas;
 
 	LockTable *m_lock;

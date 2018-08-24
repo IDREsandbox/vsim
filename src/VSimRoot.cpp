@@ -52,6 +52,7 @@ VSimRoot::VSimRoot(QObject *parent)
 	m_graphics_settings = std::make_unique<VSim::FlatBuffers::GraphicsSettingsT>();
 	Util::getOrCreate(m_graphics_settings->camera_settings);
 	m_window_settings = std::make_unique<VSim::FlatBuffers::WindowSettingsT>();
+	m_other_settings = std::make_unique<VSim::FlatBuffers::OtherSettingsT>();
 	m_branding_canvas = std::make_unique<CanvasScene>();
 
 	m_lock = new LockTable(this);
@@ -91,6 +92,7 @@ void VSimRoot::copy(VSimRoot * other)
 	copyNavigationSettings(*m_navigation_settings, *other->m_navigation_settings);
 	copyGraphicsSettings(*m_graphics_settings, *other->m_graphics_settings);
 	copyWindowSettings(*m_window_settings, *other->m_window_settings);
+	copyOtherSettings(*m_other_settings, *other->m_other_settings);
 
 	m_branding_canvas->copy(*other->m_branding_canvas);
 	*m_lock = *other->m_lock;
@@ -126,25 +128,27 @@ EResourceGroup * VSimRoot::resources() const
 
 VSim::FlatBuffers::ModelInformationT & VSimRoot::modelInformation() const
 {
-	if (!m_model_information) qWarning() << "graphics settings null?";
 	return *m_model_information.get();
 }
 
 VSim::FlatBuffers::NavigationSettingsT & VSimRoot::navigationSettings() const
 {
-	if (!m_navigation_settings) qWarning() << "graphics settings null?";
 	return *m_navigation_settings.get();
 }
 
 VSim::FlatBuffers::GraphicsSettingsT & VSimRoot::graphicsSettings() const
 {
-	if (!m_graphics_settings) qWarning() << "graphics settings null?";
 	return *m_graphics_settings.get();
 }
 
 VSim::FlatBuffers::WindowSettingsT & VSimRoot::windowSettings() const
 {
 	return *m_window_settings.get();
+}
+
+VSim::FlatBuffers::OtherSettingsT & VSimRoot::otherSettings() const
+{
+	return *m_other_settings;
 }
 
 void VSimRoot::prepareSave()
@@ -447,6 +451,13 @@ void VSimRoot::copyWindowSettings(VSim::FlatBuffers::WindowSettingsT &dest,
 	dest.window_height = src.window_height;
 	dest.nbar_size = src.nbar_size;
 	dest.ebar_size = src.ebar_size;
+}
+
+void VSimRoot::copyOtherSettings(VSim::FlatBuffers::OtherSettingsT & dest,
+	const VSim::FlatBuffers::OtherSettingsT & src)
+{
+	dest.year = src.year;
+	dest.years_enabled = src.years_enabled;
 }
 
 

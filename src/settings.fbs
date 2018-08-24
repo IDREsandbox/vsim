@@ -83,7 +83,7 @@ table WindowSettings {
 
 table OtherSettings {
   year:int32 = 2000;
-  //years_enabled:bool = false;
+  years_enabled:bool = false;
   //nbar:bool = true;
   //ebar:bool = true;
   //branding:bool = false;

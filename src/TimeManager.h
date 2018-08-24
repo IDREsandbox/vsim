@@ -27,6 +27,10 @@ signals:
 	void sKeysChanged();
 
 private:
+	void gatherSettings();
+	void extractSettings();
+
+private:
     VSimApp *m_app;
     ModelGroup *m_models;
     int m_year;

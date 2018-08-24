@@ -431,6 +431,9 @@ void writeReadSettings() {
 	root.graphicsSettings().camera_settings->fovy = 33;
 	root.windowSettings().ebar_size = 111;
 	root.setExpirationDate(QDate::currentDate());
+	root.graphicsSettings().lighting = true;
+	root.otherSettings().year = 1111;
+	root.otherSettings().years_enabled = true;
 
 	// write to stream
 	std::stringstream stream;
@@ -454,6 +457,9 @@ void writeReadSettings() {
 	QCOMPARE(nroot.graphicsSettings().camera_settings->fovy, 33.f);
 	QCOMPARE(nroot.windowSettings().ebar_size, 111);
 	QCOMPARE(nroot.expirationDate(), QDate::currentDate());
+	QCOMPARE(nroot.graphicsSettings().lighting, true);
+	QCOMPARE(nroot.otherSettings().year, 1111);
+	QCOMPARE(nroot.otherSettings().years_enabled, true);
 }
 
 };

@@ -13,8 +13,7 @@ TimeManager::TimeManager(VSimApp *app, QObject *parent)
 {
 	m_models = m_app->getRoot()->models();
 
-	connect(m_app, &VSimApp::sAboutToReset, this, [this]() {
-	});
+	connect(m_app, &VSimApp::sAboutToSave, this, &TimeManager::gatherSettings);
 	connect(m_app, &VSimApp::sReset, this, [this]() {
 		m_models = m_app->getRoot()->models();
 
@@ -27,6 +26,8 @@ TimeManager::TimeManager(VSimApp *app, QObject *parent)
 		}
 		enableTime(true);
 		setKeyYears(m_models->getKeyYears());
+
+		extractSettings();
 	});
 
 	auto reloadKeys = [this]() {
@@ -71,4 +72,20 @@ void TimeManager::setKeyYears(const std::set<int> &keys)
 {
 	m_keys = keys;
 	emit sKeysChanged();
+}
+
+void TimeManager::gatherSettings()
+{
+	// only gather if settings not locked
+	if (m_app->getRoot()->settingsLocked()) return;
+	auto &os = m_app->getRoot()->otherSettings();
+	os.year = m_year;
+	os.years_enabled = m_enabled;
+}
+
+void TimeManager::extractSettings()
+{
+	auto &os = m_app->getRoot()->otherSettings();
+	setYear(os.year);
+	enableTime(os.years_enabled);
 }
