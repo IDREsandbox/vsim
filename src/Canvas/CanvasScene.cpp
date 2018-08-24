@@ -347,7 +347,10 @@ CanvasItem::CanvasItem(QGraphicsItem * parent)
 	setPen(p);
 	updateBorderWidth();
 
-	setCacheMode(QGraphicsItem::CacheMode::DeviceCoordinateCache);
+	// causes some issue w/ right click menu > right click out
+	// but only in vsim and not canvas experiment
+	// i don't really get it
+	//setCacheMode(QGraphicsItem::CacheMode::DeviceCoordinateCache);
 }
 
 CanvasItem::~CanvasItem()
@@ -601,7 +604,6 @@ void CanvasItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * opti
 	painter->setPen(pen());
 	painter->setBrush(brush());
 	painter->drawRect(border_rect);
-
 	// paint a dashed selection line
 	if (isSelected()) {
 		painter->setPen(QPen(Qt::lightGray, 0, Qt::PenStyle::DashLine));
