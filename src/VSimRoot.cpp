@@ -126,16 +126,19 @@ EResourceGroup * VSimRoot::resources() const
 
 VSim::FlatBuffers::ModelInformationT & VSimRoot::modelInformation() const
 {
+	if (!m_model_information) qWarning() << "graphics settings null?";
 	return *m_model_information.get();
 }
 
 VSim::FlatBuffers::NavigationSettingsT & VSimRoot::navigationSettings() const
 {
+	if (!m_navigation_settings) qWarning() << "graphics settings null?";
 	return *m_navigation_settings.get();
 }
 
 VSim::FlatBuffers::GraphicsSettingsT & VSimRoot::graphicsSettings() const
 {
+	if (!m_graphics_settings) qWarning() << "graphics settings null?";
 	return *m_graphics_settings.get();
 }
 
@@ -426,6 +429,7 @@ void VSimRoot::copyNavigationSettings(VSim::FlatBuffers::NavigationSettingsT &de
 void VSimRoot::copyGraphicsSettings(VSim::FlatBuffers::GraphicsSettingsT &dest,
 	const VSim::FlatBuffers::GraphicsSettingsT &src)
 {
+	dest.lighting = src.lighting;
 	auto &cs = Util::getOrCreate(dest.camera_settings);
 	auto &cs2 = src.camera_settings;
 	if (cs2) {

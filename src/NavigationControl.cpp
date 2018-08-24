@@ -292,6 +292,8 @@ void NavigationControl::gatherSettings()
 
 	// graphics settings
 	auto *gs = &m_app->getRoot()->graphicsSettings();
+	gs->lighting = m_viewer->getLightingEnabled();
+
 	auto *cs = Util::getOrCreate(gs->camera_settings).get();
 
 	// camera setings
@@ -340,6 +342,7 @@ void NavigationControl::extractSettings()
 
 	// graphics settings
 	auto *gs = &m_app->getRoot()->graphicsSettings();
+	m_viewer->setLightingEnabled(gs->lighting);
 
 	// camera settings
 	auto &cs = Util::getOrCreate(gs->camera_settings);

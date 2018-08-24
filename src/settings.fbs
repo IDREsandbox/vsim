@@ -44,6 +44,7 @@ table GraphicsSettings {
   camera_settings:CameraSettings;
   // anti aliasing
   // lighting?
+  lighting:bool = false;
 }
 
 table CameraSettings {
