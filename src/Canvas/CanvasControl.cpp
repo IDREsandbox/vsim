@@ -349,13 +349,11 @@ void CanvasControl::applyFrameStyle(CanvasItem * item, const FrameStyle * fs)
 {
 	if (fs == nullptr) return;
 	QColor m_bg_color;
-	item->setBrush(fs->m_bg_color);
 
-	QPen p = item->pen();
-	p.setBrush(fs->m_frame_color);
-	p.setStyle(fs->m_has_frame ? Qt::SolidLine : Qt::NoPen);
-	p.setWidthF(fs->m_frame_width / item->baseHeight());
-	item->setPen(p);
+	item->setBackground(fs->m_bg_color);
+	item->setBorderColor(fs->m_frame_color);
+	item->setBorderWidthPixels(fs->m_frame_width);
+	item->setHasBorder(fs->m_has_frame);
 }
 
 void CanvasControl::applyLabelStyle(CanvasLabel * label, LabelStyle *style)

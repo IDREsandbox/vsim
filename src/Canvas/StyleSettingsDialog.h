@@ -20,7 +20,7 @@ public:
 	void takeStyles(LabelStyleGroup *group = nullptr);
 
 	// use sApplied for ok and accept signal,
-	// the dialog already calls takeStyles
+	// self-applying, the dialog already calls takeStyles
 	// int exec();
 
 signals:
