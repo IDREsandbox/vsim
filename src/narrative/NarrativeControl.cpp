@@ -38,8 +38,6 @@
 #include "MainWindowTopBar.h"
 #include "VSimApp.h"
 
-#include "mrichtextedit.h"
-
 NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *parent)
 	: m_app(app),
 	m_window(window), 

@@ -156,10 +156,6 @@ set(VSim_src
   ModelInformationDialog.cpp
   ModelInformationDialog.h
   ModelInformationDialog.ui
-  mrichtextedit.cpp
-  mrichtextedit.h
-  mtextedit.cpp
-  mtextedit.h
   Navigation.h
   NavigationControl.cpp
   NavigationControl.h
