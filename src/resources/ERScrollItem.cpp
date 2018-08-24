@@ -162,7 +162,7 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 
 	// paint icons, right to left
 	// [repo] [auto] [type]
-	int icon_margin = 0;
+	int icon_margin = 1;
 	int icon_spacing = 0;
 	QSize icon_size(16, 16);
 
@@ -182,13 +182,9 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 	}
 	icon_list.push_back(type_icon);
 
-	if (m_er->getReposition()) {
-		icon_list.push_back(m_goto_icon);
-	}
-
-	if (m_er->getAutoLaunch()) {
-		icon_list.push_back(m_launch_icon);
-	}
+	//if (m_er->getAutoLaunch()) {
+	//	icon_list.push_back(m_launch_icon);
+	//}
 
 	if (m_er->lockTableConst()->isLocked()) {
 		icon_list.push_back(m_lock_icon);
@@ -206,5 +202,13 @@ void ERScrollItem::paint(QPainter * painter, const QStyleOptionGraphicsItem * op
 		// move top-right over
 		right -= icon_size.width();
 		right -= icon_margin;
+	}
+
+	// paint reposition in top left
+
+	if (m_er->getReposition()) {
+		QPoint top_left(icon_margin, icon_margin);
+		QRect goto_rect(top_left, icon_size);
+		painter->drawPixmap(goto_rect, m_goto_icon);
 	}
 }

@@ -295,7 +295,13 @@ bool ERFilterSortProxy::lessThan(size_t left, size_t right)
 
 	switch (m_sort_by) {
 	case ER::SortBy::TITLE:
-		return lres->getResourceName() < rres->getResourceName();
+	{
+		int x = QString::compare(
+			QString::fromStdString(lres->getResourceName()),
+			QString::fromStdString(rres->getResourceName()),
+			Qt::CaseSensitivity::CaseInsensitive);
+		return x < 0;
+	}
 	case ER::SortBy::DISTANCE:
 	{
 		double ld = lres->getDistanceTo();
