@@ -6,6 +6,8 @@
 #include <vector>
 #include <osg/Node>
 #include <QString>
+#include <osg/NodeVisitor>
+#include <stack>
 
 #include "model_generated.h"
 #include "Core/TypesSerializer.h"
@@ -34,10 +36,29 @@ namespace ModelSerializer {
 			std::ostream &model_data,
 			const TypesSerializer::Params &p);
 
-	//void readEmbeddedModels(std::istream &stream, ModelGroup *group);
-	//void loadLinkedModels(ModelGroup *group);
-	//// returns byte sizes of each model written, in order
-	//std::vector<size_t> writeEmbeddedModels(std::ostream &stream, ModelGroup *group);
+	// does osg readNodeFile
+	// also removes ProxyNodes
+	osg::ref_ptr<osg::Node> readNodeFile(const std::string &filename);
+
+	class ExternalReferenceVisitor : public osg::NodeVisitor {
+	public:
+		ExternalReferenceVisitor();
+		void apply(osg::ProxyNode& node) override;
+		static void visit(osg::ref_ptr<osg::Node> node);
+
+	private:
+		std::map<std::string, osg::ref_ptr<osg::Node>> m_node_map;
+		std::stack<std::string> m_path_stack;
+	};
+
+	class ExternalReferenceDebugger : public osg::NodeVisitor {
+	public:
+		ExternalReferenceDebugger();
+		void doNothing(bool do_nothing);
+		void apply(osg::ProxyNode& node) override;
+	private:
+		bool m_do_nothing;
+	};
 };
 
 #endif

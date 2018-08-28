@@ -3,6 +3,7 @@
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 #include <QDebug>
+#include <osg/ProxyNode>
 
 #include "Model/ModelGroup.h"
 #include "Model/Model.h"
@@ -34,6 +35,8 @@ osg::ref_ptr<osg::Node> ModelSerializer::readOSGB(std::istream & in, bool ascii,
 		qWarning() << "Error reading node";
 		return nullptr;
 	}
+	ExternalReferenceVisitor::visit(node);
+
 	return node;
 }
 
@@ -179,3 +182,168 @@ ModelSerializer::createModels(flatbuffers::FlatBufferBuilder *builder,
 	b_table.add_models(o_models);
 	return b_table.Finish();
 }
+
+osg::ref_ptr<osg::Node> ModelSerializer::readNodeFile(const std::string & filename)
+{
+	osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(filename);
+	if (node) {
+		ExternalReferenceVisitor::visit(node);
+	}
+	return node;
+}
+
+
+ModelSerializer::ExternalReferenceVisitor::ExternalReferenceVisitor()
+	: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN)
+{
+}
+
+void ModelSerializer::ExternalReferenceVisitor::apply(osg::ProxyNode& node)
+{
+	// the old way, re-read the files and replace ProxyNodes with Groups
+
+	// the new way, we should have already read in all of these files,
+	//   so just copy the group contents to plain old groups
+	// if u read the source, nodes are created proactively or lazily and
+	//   traversal triggers node loading (I think?)
+	// are duplicate models merged? I know for the old method they are.
+	//   I tested it, yes they are usually merged
+
+
+	// we can preorder or postorder traverse, does it matter?
+
+	osg::ref_ptr<osg::Group> new_group(new osg::Group);
+
+	// transfer children
+	for (size_t i = 0; i < node.getNumChildren(); i++) {
+		new_group->addChild(node.getChild(i));
+	}
+	node.removeChildren(0, node.getNumChildren());
+
+	// replace this node in the parents
+	auto pars = node.getParents();
+	for (auto *par : pars) {
+		par->replaceChild(&node, new_group);
+	}
+
+	// now continue on w/ the traversal
+	traverse(*new_group);
+
+
+	// fix us first? or fix our children first? does it matter? probably not?
+	// traverse all children
+
+	//OSG_WARN << "ProxyNode " << node.getName() << std::endl;
+	//osg::Node::ParentList parents = node.getParents();
+	//if (parents.size() > 1)
+	//	assert(0);
+	//osg::ref_ptr<osg::Group> parent = parents[0];
+	//osg::ref_ptr<osg::Group> newgroup = new osg::Group();
+	//int n = node.getNumFileNames();
+	//for (int i = 0; i < n; i++)
+	//{
+	//	std::string filename = node.getFileName(i);
+	//	OSG_WARN << i << ": " << filename << std::endl;
+	//	std::string pathfilename = osgDB::findDataFile(filename);
+	//	if (pathfilename == "")
+	//	{
+	//		OSG_WARN << "Not found." << std::endl;
+	//	}
+	//	else
+	//	{
+	//		NodeMap::iterator result = m_nodemap.find(pathfilename);
+	//		if (result != m_nodemap.end())
+	//		{
+	//			OSG_WARN << "Duplicate hit" << std::endl;
+	//			newgroup->addChild(result->second);
+	//		}
+	//		else
+	//		{
+	//			osg::ref_ptr<osg::Node> newnode = osgDB::readNodeFile(pathfilename);
+	//			assert(newnode.get() != NULL);
+	//			newgroup->addChild(newnode);
+	//			InsertResult ir = m_nodemap.insert(MapPair(pathfilename, newnode));
+	//			assert(ir.second == true);
+
+	//			std::string path = osgDB::getFilePath(pathfilename);
+	//			osgDB::FilePathList pl = osgDB::getDataFilePathList();
+	//			osgDB::FilePathList pl2;
+	//			pl2.push_back(path);
+	//			osgDB::setDataFilePathList(pl2);
+	//			OSG_WARN << "Entering child with path " << path << std::endl;
+	//			traverse(*newnode);
+	//			OSG_WARN << "Exiting child." << std::endl;
+	//			osgDB::setDataFilePathList(pl);
+	//		}
+	//	}
+	//}
+	//parent->replaceChild(&node, newgroup);
+	//traverse(*newgroup);
+}
+
+void ModelSerializer::ExternalReferenceVisitor::visit(osg::ref_ptr<osg::Node> node)
+{
+	// do a dummy traversal, hopefully this triggers the lazy loading
+	ExternalReferenceDebugger erd;
+	erd.doNothing(true);
+	node->accept(erd);
+
+	ExternalReferenceVisitor visitor;
+	visitor.setTraversalMask(0xffffffff);
+	visitor.setNodeMaskOverride(0xffffffff);
+	//visitor.setBaseDir();
+	node->accept(visitor);
+
+	//ProgressDialog pd;
+	//pd.show("Reading external references. Please wait.");
+	//std::string path = osgDB::getFilePath(m_modelFilename);
+	//osgDB::FilePathList pl = osgDB::getDataFilePathList();
+	//osgDB::FilePathList pl2;
+	//pl2.push_back(path);
+	//osgDB::setDataFilePathList(pl2); e
+	//	ExternalReferenceVisitor erv;
+	//erv.setTraversalMask(0xffffffff);
+	//erv.setNodeMaskOverride(0xffffffff);
+	//m_model->accept(erv);
+	//osgDB::setDataFilePathList(pl);
+	//pd.hide();
+}
+
+ModelSerializer::ExternalReferenceDebugger::ExternalReferenceDebugger()
+	: osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN),
+	m_do_nothing(false)
+{
+	setTraversalMask(0xffffffff);
+}
+
+void ModelSerializer::ExternalReferenceDebugger::doNothing(bool do_nothing)
+{
+	m_do_nothing = do_nothing;
+}
+
+void ModelSerializer::ExternalReferenceDebugger::apply(osg::ProxyNode& node)
+{
+	if (m_do_nothing) return;
+
+	qDebug() << "proxy node" << node.getName().c_str() << "type:" << node.getLoadingExternalReferenceMode()
+		<< node.getNumFileNames() << node.getNumChildren() << "name" << node.getName().c_str();
+
+	int n = node.getNumFileNames();
+	for (int i = 0; i < n; i++)
+	{
+		std::string filename = node.getFileName(i);
+		osg::Node *child;
+		if ((size_t)i >= node.getNumChildren()) {
+			child = nullptr;
+		}
+		else {
+			child = node.getChild(i);
+		}
+		std::string name;
+		if (child) name = child->getName();
+		qDebug() << i << node.getFileName(i).c_str() << child << name.c_str();
+	}
+
+	traverse(node);
+}
+

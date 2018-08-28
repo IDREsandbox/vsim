@@ -12,6 +12,7 @@
 #include "Model/ModelGroup.h"
 #include "Model/ModelEditDialog.h"
 #include "Core/Util.h"
+#include "Model/ModelSerializer.h"
 
 QString ModelUtil::execModelFileDialog(QWidget *parent, QString last_dir)
 {
@@ -153,6 +154,8 @@ osg::ref_ptr<osg::Node> ModelUtil::execLoadModel(const QString & filename)
 	future = QtConcurrent::run(&osgDB::readNodeFile, filename.toStdString());
 	dlg.spin(future); // spin until done loading
 	loaded_model = future.result();
+
+	ModelSerializer::ExternalReferenceVisitor::visit(loaded_model);
 
 	return loaded_model;
 }

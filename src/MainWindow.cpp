@@ -51,6 +51,7 @@
 #include "Model/Model.h"
 #include "Model/ModelGroup.h"
 #include "Model/ModelUtil.h"
+#include "Model/ModelSerializer.h"
 #include "ModelInformationDialog.h"
 //#include "GroupCommands.h"
 #include "NavigationControl.h"
@@ -750,7 +751,7 @@ void MainWindow::execOpen(const QString & filename)
 		// read some osg node, import it
 		osg::ref_ptr<osg::Node> loaded_model;
 		auto import_future = QtConcurrent::run([&]() -> bool {
-			loaded_model = osgDB::readNodeFile(filename.toStdString());
+			loaded_model = ModelSerializer::readNodeFile(filename.toStdString());
 			return (loaded_model != nullptr);
 		});
 

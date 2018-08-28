@@ -62,7 +62,10 @@ void saveModels(QString path, const ModelGroup *models, QString old_path) {
 
 	// build flatbuffer
 	flatbuffers::FlatBufferBuilder builder;
-	auto o_root = ModelSerializer::createModels(&builder, models, model_buffer, old_path, Util::absoluteDirOf(path));
+	TypesSerializer::Params p;
+	p.old_base = old_path;
+	p.new_base = Util::absoluteDirOf(path);
+	auto o_root = ModelSerializer::createModels(&builder, models, model_buffer, p);
 	builder.FinishSizePrefixed(o_root, fb::ModelTableIdentifier());
 	// TODO: when flatbuffer updates - fb::FinishRootSizePrefixed();
 
