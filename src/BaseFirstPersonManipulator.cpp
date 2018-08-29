@@ -1,6 +1,8 @@
 #include "BaseFirstPersonManipulator.h"
-#include "Core/Util.h"
 
+#include <limits>
+
+#include "Core/Util.h"
 
 BaseFirstPersonManipulator::BaseFirstPersonManipulator()
 	: m_sensitivity(.25),
@@ -48,7 +50,11 @@ void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::No
 
 			osg::ref_ptr<osgUtil::LineSegmentIntersector> gline =
 				new osgUtil::LineSegmentIntersector(new_pos, new_pos_down);
-			gline->setIntersectionLimit(osgUtil::Intersector::IntersectionLimit::LIMIT_NEAREST);
+
+			// this is broken or something
+			// it sometimes returns multiple intersections, out of order
+			//gline->setIntersectionLimit(osgUtil::Intersector::IntersectionLimit::LIMIT_NEAREST);
+			// TODO: write osg test code, see if its really broken, submit PR
 
 			osgUtil::IntersectionVisitor giv(gline.get());
 			world->accept(giv);
@@ -57,10 +63,20 @@ void BaseFirstPersonManipulator::update(double dt_sec, KeyTracker *keys, osg::No
 			if (gline->containsIntersections()) {
 				auto intersections = gline->getIntersections();
 
-				osg::Vec3d point = gline->getIntersections().begin()->getWorldIntersectPoint();
+				// scan for the closest intersection
+				float best_dist2 = std::numeric_limits<float>::infinity();
+				osg::Vec3 closest;
+				for (const auto &ins : gline->getIntersections()) {
+					osg::Vec3 pt = ins.getWorldIntersectPoint();
+					float d2 = (new_pos - pt).length2();
+					if (d2 < best_dist2) {
+						best_dist2 = d2;
+						closest = pt;
+					}
+				}
 				// perform a step upward from the ground
 
-				new_pos = point + up;
+				new_pos = closest + up;
 
 				m_gravity_velocity = 0;
 			}

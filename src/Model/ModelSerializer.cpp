@@ -91,7 +91,7 @@ void ModelSerializer::readModels(const VSim::FlatBuffers::ModelTable *buffer,
 
 		if (external) {
 			// load external model
-			osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(full_path.toStdString());
+			osg::ref_ptr<osg::Node> node = readNodeFile(full_path.toStdString());
 			if (!node) {
 				qInfo() << "external model" << name.c_str() << "failed to load, path:" << path;
 			}
