@@ -56,6 +56,7 @@ DisplaySettingsDialog::DisplaySettingsDialog(VSimApp *app, QWidget *parent)
 	setReadOnly(m_app->getRoot()->settingsLocked());
 
 	reload();
+	adjustSize();
 }
 
 void DisplaySettingsDialog::reload()

@@ -33,6 +33,7 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	m_canvas = new CanvasContainer(ui.preview_frame);
 	QVBoxLayout *layout = new QVBoxLayout;
 	ui.preview_frame->setLayout(layout);
+	ui.preview_frame->setMinimumHeight(200);
 	layout->addWidget(m_canvas);
 	layout->setMargin(0);
 	m_canvas->setEditable(true);

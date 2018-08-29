@@ -22,6 +22,8 @@ StyleSettingsDialog::StyleSettingsDialog(QWidget *parent)
 		[this]() {
 		takeStyles();
 	});
+
+	adjustSize();
 }
 
 void StyleSettingsDialog::setStyles(LabelStyleGroup *styles)

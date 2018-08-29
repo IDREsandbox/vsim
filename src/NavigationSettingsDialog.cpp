@@ -59,6 +59,7 @@ NavigationSettingsDialog::NavigationSettingsDialog(VSimApp *app, QWidget *parent
 	});
 
 	load();
+	adjustSize();
 }
 
 void NavigationSettingsDialog::load()
