@@ -149,8 +149,11 @@
         <property name="decimals">
          <number>4</number>
         </property>
+        <property name="minimum">
+         <double>-10000.000000000000000</double>
+        </property>
         <property name="maximum">
-         <double>359.990000000000009</double>
+         <double>10000.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -178,8 +181,11 @@
         <property name="decimals">
          <number>4</number>
         </property>
+        <property name="minimum">
+         <double>-10000.000000000000000</double>
+        </property>
         <property name="maximum">
-         <double>359.990000000000009</double>
+         <double>10000.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -207,8 +213,11 @@
         <property name="decimals">
          <number>4</number>
         </property>
+        <property name="minimum">
+         <double>-10000.000000000000000</double>
+        </property>
         <property name="maximum">
-         <double>359.990000000000009</double>
+         <double>10000.000000000000000</double>
         </property>
        </widget>
       </item>

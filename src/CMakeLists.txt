@@ -196,7 +196,7 @@ file(GLOB_RECURSE oldSerializers
   */Serializer*.cpp
   )
 
-add_executable(VSim main.cpp ${oldSerializers})
+add_executable(VSim main.cpp ${oldSerializers} icon.rc)
 # set_target_properties(VSim PROPERTIES
 #   VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 target_link_libraries(VSim VSim_obj
