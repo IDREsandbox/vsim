@@ -357,7 +357,7 @@
   </action>
   <action name="actionFont_Color_Styles">
    <property name="text">
-    <string>Font and Color Styles</string>
+    <string>fonts colors placeholder</string>
    </property>
   </action>
   <action name="actionHistory">

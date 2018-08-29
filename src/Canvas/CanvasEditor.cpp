@@ -59,6 +59,9 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	a_delete->setShortcut(QKeySequence(Qt::Key_Delete));
 	m_tb->m_delete->setDefaultAction(a_delete);;
 
+	a_edit_styles = new QAction(this);
+	a_edit_styles->setText("Font and Color Styles");
+
 	// styling
 	QFile file(QCoreApplication::applicationDirPath() + "/assets/darkstyle.qss");
 	file.open(QFile::ReadOnly);
@@ -212,7 +215,7 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 
 	// styles button
 	connect(m_tb->m_edit_styles, &QAbstractButton::clicked, this, &CanvasEditor::editStyles);
-	//connect(m_tb->m_edit_styles, &QAbstractButton::clicked, this, &CanvasEditor::sEditStyles);
+	connect(a_edit_styles, &QAction::triggered, this, &CanvasEditor::editStyles);
 
 	setStyles(m_default_styles.get()); // stuff needs to exist
 }
@@ -245,12 +248,15 @@ void CanvasEditor::setStack(ICommandStack * stack)
 void CanvasEditor::setStyles(LabelStyleGroup *styles)
 {
 	m_styles = styles;
-	if (styles != m_default_styles.get()) m_default_styles.reset(nullptr);
+	//if (styles != m_default_styles.get()) m_default_styles.reset(nullptr);
 	// apply to tool buttons
 	applyStylesToButtons();
+
+	a_edit_styles->setEnabled(styles != nullptr);
 }
 
 void CanvasEditor::applyStylesToButtons() {
+	if (m_styles == nullptr) return;
 	for (auto pair : m_button_type_map) {
 		QAbstractButton *button = pair.first;
 		LabelStyle *style = m_styles->getStyle(pair.second);

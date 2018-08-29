@@ -27,7 +27,6 @@
 #include "Core/LockTable.h"
 
 #include "Canvas/LabelType.h"
-#include "Canvas/LabelStyle.h"
 #include "Canvas/LabelStyleGroup.h"
 #include "Canvas/CanvasContainer.h"
 #include "Canvas/CanvasEditor.h"
@@ -41,7 +40,7 @@
 NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *parent)
 	: m_app(app),
 	m_window(window), 
-	m_current_narrative(-1),
+	m_current_narrative(-2),
 	m_narrative_group(nullptr),
 	m_canvas_enabled(true),
 	m_canvas_stack_wrapper(this),
@@ -89,14 +88,6 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	//m_label_buttons->move(10, 200);
 	//m_label_buttons->hide();
 	load(app->getRoot()->narratives());
-
-	connect(m_window, &MainWindow::sEditStyleSettings, this, [this]() {
-		if (getCurrentNarrativeIndex() < 0) {
-			qWarning() << "Can't edit styles: no active narrative";
-			return;
-		}
-		m_canvas->editStyles();
-	});
 
 	// app state
 	connect(m_app, &VSimApp::sReset, this, &NarrativeControl::onReset);
@@ -584,6 +575,9 @@ void NarrativeControl::onNarrativeSelectionChanged()
 	// whats the selection
 	// disable/enable actions accordingly
 
+	// enable/disable styles button
+	//m_canvas->a_
+
 	// locked/unlocked checking
 	// any unlocked? -> enable lock
 	bool any_unlocked = false;
@@ -754,10 +748,11 @@ void NarrativeControl::openNarrative(int index)
 {
 	if (index == m_current_narrative) return;
 	Narrative *nar = getNarrative(index);
-	if (!nar || index < 0) {
+	if (nar == nullptr) {
 		m_current_narrative = -1;
 		m_slide_box->setGroup(nullptr);
 		openSlide(-1);
+		m_canvas->setStyles(nullptr);
 		return;
 	}
 

@@ -170,7 +170,6 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionImport_Resources, &QAction::triggered, this, &MainWindow::actionImportERs);
 	connect(ui->actionExport_Resources, &QAction::triggered, this, &MainWindow::actionExportERs);
 
-	connect(ui->actionFont_Color_Styles, &QAction::triggered, this, &MainWindow::sEditStyleSettings);
 	connect(ui->actionLock_Settings, &QAction::triggered, this, &MainWindow::execLockDialog);
 
 	// model outliner
@@ -375,7 +374,7 @@ void MainWindow::setApp(VSimApp * vsim)
 	smenu->addActions({
 		nav->a_navigation_settings,
 		nav->a_display_settings,
-		ui->actionFont_Color_Styles,
+		m_canvas->a_edit_styles,
 		ui->actionLock_Settings
 		});
 

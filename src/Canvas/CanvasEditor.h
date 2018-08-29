@@ -44,10 +44,10 @@ public:
 
 public: //actions
 	QAction *a_delete;
+	QAction *a_edit_styles;
 
 signals:
 	void sDone();
-	void sEditStyles();
 
 protected:
 	void hideEvent(QHideEvent *e) override;

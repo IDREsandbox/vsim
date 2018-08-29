@@ -107,8 +107,6 @@ signals:
 	void sDebugCamera();
 	void sDebugControl();
 
-	void sEditStyleSettings();
-
 private:
 	TypesSerializer::Params saveParams(const QString &path);
 	//TypesSerializer::Params loadParams(const QString &path);
