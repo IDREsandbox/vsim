@@ -419,6 +419,7 @@ void MainWindow::setApp(VSimApp * vsim)
 		int x = ui->bottomBar->height();
 		ws->window_width = width();
 		ws->window_height = height();
+		ws->has_window_size = true;
 		auto sizes = ui->mainSplitter->sizes();
 		ws->nbar_size = sizes.at(0);
 		ws->ebar_size = sizes.at(2);
@@ -437,8 +438,8 @@ void MainWindow::onReset()
 
 	// extract settings
 	auto *ws = &m_app->getRoot()->windowSettings();
-	if (ws) {
-		// best fit the rectangle
+	// best fit the rectangle
+	if (ws->has_window_size) {
 		resize(ws->window_width, ws->window_height);
 
 		QScreen *screen = QGuiApplication::primaryScreen();
@@ -458,7 +459,6 @@ void MainWindow::onReset()
 
 		int top_diff = geometry().top() - frameGeometry().top();
 
-
 		// try to center based on frame size
 		resize(wrect.size());
 		QSize frame_size = frameGeometry().size();
@@ -470,12 +470,12 @@ void MainWindow::onReset()
 		// Frame top left corner when perfectly aligned: (-8,0)
 		// Geometry when perfectly aligned: (0,31)
 		// it's hard to make this perfect
-
-		int top = ws->nbar_size;
-		int bottom = ws->nbar_size;
-		int middle = ui->mainSplitter->height() - top - bottom;
-		ui->mainSplitter->setSizes({ top, middle, bottom });
 	}
+
+	int top = ws->nbar_size;
+	int bottom = ws->nbar_size;
+	int middle = ui->mainSplitter->height() - top - bottom;
+	ui->mainSplitter->setSizes({ top, middle, bottom });
 
 	// the splitter moved signal is funky
 	// and the correct sizes don't get to updatePositions()

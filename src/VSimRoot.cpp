@@ -449,6 +449,7 @@ void VSimRoot::copyWindowSettings(VSim::FlatBuffers::WindowSettingsT &dest,
 	dest.window_height = src.window_height;
 	dest.nbar_size = src.nbar_size;
 	dest.ebar_size = src.ebar_size;
+	dest.has_window_size = src.has_window_size;
 }
 
 void VSimRoot::copyOtherSettings(VSim::FlatBuffers::OtherSettingsT & dest,

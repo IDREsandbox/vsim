@@ -84,10 +84,11 @@ table NavigationSettings {
 }
 
 table WindowSettings {
-  window_width:int = 800;
-  window_height:int = 600;
+  window_width:int = 1280;
+  window_height:int = 900;
   nbar_size:int = 100;
   ebar_size:int = 100;
+  has_window_size:bool = false;
 }
 
 enum ERSortBy : byte {
