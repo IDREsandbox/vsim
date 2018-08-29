@@ -570,13 +570,8 @@ void MainWindow::dropEvent(QDropEvent * event)
 	if (event->mimeData()->hasText()) {
 		QString text = event->mimeData()->text();
 		qInfo() << "drop file: " << text;
-
-		if (text.startsWith("file:///")) {
-			text.remove(0, 8); // remove the prefix
-		}
-
-		//m_vsimapp->openVSim(text.toStdString());
-		//emit sOpenFile(text.toStdString());
+		QString path = QUrl(text).toLocalFile();
+		execOpen(path);
 	}
 }
 

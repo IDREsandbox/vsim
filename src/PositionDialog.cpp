@@ -3,6 +3,8 @@
 PositionDialog::PositionDialog(QWidget *parent)
 {
 	ui.setupUi(this);
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+	setWindowTitle("Set Position");
 }
 
 void PositionDialog::setPosition(QVector3D position)

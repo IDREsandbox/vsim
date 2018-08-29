@@ -13,6 +13,8 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 {
 	ui = std::make_unique<Ui::ERFilterArea>();
 	ui->setupUi(this);
+	setWindowTitle("Resource Filters");
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
 	int nsorts = sizeof(ER::SortByStrings) / sizeof(*ER::SortByStrings);
 	for (int i = 0; i < nsorts; i++) {

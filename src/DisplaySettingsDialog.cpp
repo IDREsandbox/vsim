@@ -17,6 +17,7 @@ DisplaySettingsDialog::DisplaySettingsDialog(VSimApp *app, QWidget *parent)
 	m_read_only(false)
 {
 	ui.setupUi(this);
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
 	m_viewer = app->viewer();
 

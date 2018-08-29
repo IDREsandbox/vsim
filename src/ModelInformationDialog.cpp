@@ -13,7 +13,8 @@ ModelInformationDialog::ModelInformationDialog(
 {
 	ui = std::make_unique<Ui::modelInformationDialog>();
 	ui->setupUi(this);
-	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+	setWindowTitle("Model Information");
 
 	// set ui stuff
 	if (!data) return;

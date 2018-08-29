@@ -23,7 +23,8 @@ ERDialog::ERDialog(ECategoryControl * category_control, QString current_dir, QWi
 	m_read_only(false)
 {
 	ui.setupUi(this);
-	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+	setWindowTitle("Embedded Resource");
 
 	for (uint i = 0; i < sizeof(EResource::CopyrightStrings) / sizeof(char*); i++) {
 		ui.licensing->addItem(EResource::CopyrightStrings[i]);

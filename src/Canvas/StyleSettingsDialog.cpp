@@ -11,7 +11,8 @@ StyleSettingsDialog::StyleSettingsDialog(QWidget *parent)
 	m_styles(nullptr)
 {
 	ui.setupUi(this);
-	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+	setWindowTitle("Style Settings");
 
 	connect(ui.confirm->button(QDialogButtonBox::Apply), &QAbstractButton::clicked, this,
 		[this]() {

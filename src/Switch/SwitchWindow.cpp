@@ -13,6 +13,7 @@ SwitchWindow::SwitchWindow(QWidget * parent)
 {
 	resize(350, 250);
 	setWindowFlags(Qt::WindowType::Window);
+	setWindowTitle("Model Switches");
 	QGridLayout *layout = new QGridLayout(this);
 
 

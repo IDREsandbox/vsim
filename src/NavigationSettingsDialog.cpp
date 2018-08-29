@@ -12,6 +12,7 @@ NavigationSettingsDialog::NavigationSettingsDialog(VSimApp *app, QWidget *parent
 	m_read_only(false)
 {
 	ui.setupUi(this);
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
 	OSGViewerWidget *viewer = app->viewer();
 	m_viewer = viewer;

@@ -10,6 +10,9 @@ TimeSlider::TimeSlider(QWidget *parent)
 	m_time(nullptr)
 {
 	ui->setupUi(this);
+	setWindowFlags(Qt::WindowType::Window);
+	setWindowTitle("Time Slider");
+
 	ui->slider->setMinimum(-50);
 	ui->slider->setMaximum(50);
 	setEnabled(true);
@@ -17,16 +20,12 @@ TimeSlider::TimeSlider(QWidget *parent)
 	ui->slider->setValue(0); // something outrageous to cause re-scan
 	ui->slider->setPageStep(10);
 
-	this->setWindowFlags(Qt::Dialog);
-	this->setWindowFlag(Qt::WindowType::WindowContextHelpButtonHint, false);
-
 	connect(ui->checkBox, &QCheckBox::stateChanged, this, &TimeSlider::onCheckbox);
 	connect(ui->slider, &QSlider::valueChanged, this, &TimeSlider::onValueChange);
 
 }
 
 TimeSlider::~TimeSlider() {
-	
 }
 
 void TimeSlider::setTimeManager(TimeManager *time)

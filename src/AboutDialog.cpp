@@ -4,5 +4,6 @@ AboutDialog::AboutDialog(QWidget * parent)
 	: QDialog(parent)
 {
 	ui.setupUi(this);
-	this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+	setWindowTitle("About VSim");
 }
