@@ -298,6 +298,10 @@ void MainWindow::setApp(VSimApp * vsim)
 	ui->menuEdit->addAction(undo_action);
 	ui->menuEdit->addAction(redo_action);
 	m_history_window->setStack(stack);
+	// put the history button at the end
+	ui->menuEdit->removeAction(ui->actionHistory);
+	ui->menuEdit->addSeparator();
+	ui->menuEdit->addAction(ui->actionHistory);
 	connect(undo_action, &QAction::triggered, this, [this, stack]() {
 		int index = stack->index();
 		if (index < 0 || index >= stack->count()) return;

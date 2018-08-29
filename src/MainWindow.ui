@@ -116,15 +116,6 @@
     <property name="title">
      <string>Edit</string>
     </property>
-   </widget>
-   <widget class="QMenu" name="menuWindows">
-    <property name="title">
-     <string>Window</string>
-    </property>
-    <addaction name="actionModel_Outliner"/>
-    <addaction name="actionTime_Slider"/>
-    <addaction name="switches"/>
-    <addaction name="separator"/>
     <addaction name="actionHistory"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
@@ -157,13 +148,15 @@
     <property name="title">
      <string>Model</string>
     </property>
+    <addaction name="actionModel_Outliner"/>
+    <addaction name="actionTime_Slider"/>
+    <addaction name="switches"/>
     <addaction name="actionModel_Information"/>
    </widget>
    <addaction name="menuhello_to_the_world"/>
    <addaction name="menuEdit"/>
    <addaction name="menuNavigation"/>
    <addaction name="menuModel"/>
-   <addaction name="menuWindows"/>
    <addaction name="menuRender"/>
    <addaction name="menuSettings"/>
    <addaction name="menuAbout"/>

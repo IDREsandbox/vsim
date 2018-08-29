@@ -1,5 +1,9 @@
 # Changelog
 
+## 2018-8-27
+
+- When importing/opening a model with referenced models, NodeProxys are converted into plain Groups (forcefully embedding)
+
 ## 2018-8-24
 
 - Thumbnails save w/ file, repaint when done editing
