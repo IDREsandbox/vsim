@@ -225,6 +225,38 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	m_first_person_manipulator->setSpeedTick(m_speed_tick);
 	m_flight_manipulator->setSpeedTick(m_speed_tick);
 
+	// presets and units
+	ViewerPreset meters, cm, feet;
+	meters.unit = Meters;
+	meters.name = "meters";
+	meters.base_speed = 10.0;
+	meters.speed_tick = 0;
+	meters.collision_radius = .7;
+	meters.eye_height = 1.7;
+	meters.gravity_acceleration = -10.0;
+	meters.gravity_fall_speed = 40.0;
+
+	auto scalePreset = [](const ViewerPreset &base, float scale, ViewerPreset *out) {
+		out->base_speed = base.base_speed * scale;
+		out->speed_tick = base.speed_tick;
+		out->collision_radius = base.collision_radius * scale;
+		out->eye_height = base.eye_height * scale;
+		out->gravity_acceleration = base.gravity_acceleration * scale;
+		out->gravity_fall_speed = base.gravity_fall_speed * scale;
+	};
+
+	cm.name = "cm";
+	cm.unit = Centimeters;
+	scalePreset(meters, 100.0, &cm);
+
+	feet.name = "feet";
+	feet.unit = Feet;
+	scalePreset(meters, 3.0, &feet);
+
+	m_presets.push_back(meters);
+	m_presets.push_back(cm);
+	m_presets.push_back(feet);
+
 	// This ensures that the widget will receive keyboard events. This focus
 	// policy is not set by default. The default, Qt::NoFocus, will result in
 	// keyboard events that are ignored.
@@ -667,6 +699,32 @@ void OSGViewerWidget::setCollisionRadius(float radius)
 {
 	m_first_person_manipulator->setCollisionRadius(radius);
 	m_flight_manipulator->setCollisionRadius(radius);
+}
+
+LengthUnit OSGViewerWidget::lengthUnit() const
+{
+	return m_length_unit;
+}
+
+void OSGViewerWidget::setLengthUnit(LengthUnit unit)
+{
+	m_length_unit = unit;
+}
+
+//void OSGViewerWidget::setUnitPreset(const ViewerPreset & preset)
+//{
+//	setBaseSpeed(preset.base_speed);
+//	setSpeedTick(preset.speed_tick);
+//	setStartupSpeedTick(preset.speed_tick);
+//	setCollisionRadius(preset.collision_radius);
+//	setEyeHeight(preset.eye_height);
+//	setGravityAcceleration(preset.gravity_acceleration);
+//	setCollisionRadius(preset.collision_radius)
+//}
+
+const std::vector<ViewerPreset>& OSGViewerWidget::presets() const
+{
+	return m_presets;
 }
 
 bool OSGViewerWidget::groundOnStartup() const

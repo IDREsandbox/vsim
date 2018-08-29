@@ -55,6 +55,12 @@ table CameraSettings {
   auto_clip:bool = true;
 }
 
+enum LengthUnit : byte {
+  Meters,
+  Centimeters,
+  Feet
+}
+
 table NavigationSettings {
   start_camera:CameraPosDirUp;
   default_start_camera:bool = true;
@@ -69,6 +75,8 @@ table NavigationSettings {
   gravity_acceleration:float = 10.0; // positive
   gravity_fall_speed:float = 40.0;
   eye_height:float = 1.7;
+
+  length_unit:LengthUnit = Meters;
 
   //first_person_smoothing:float = 1.0f;
   //gravity on

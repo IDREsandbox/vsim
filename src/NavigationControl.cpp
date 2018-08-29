@@ -278,6 +278,7 @@ void NavigationControl::gatherSettings()
 	auto home = TypesSerializer::osg2fbCameraMatrix(m_viewer->homePosition());
 	ns->start_camera = std::make_unique<fbs::CameraPosDirUp>(home);
 	ns->default_start_camera = m_viewer->usingDefaultHomePosition();
+	ns->length_unit = (VSim::FlatBuffers::LengthUnit)m_viewer->lengthUnit();
 
 	ns->base_speed = m_viewer->baseSpeed();
 	ns->flight_speed_tick = m_viewer->startupSpeedTick();
@@ -324,6 +325,7 @@ void NavigationControl::extractSettings()
 			m_viewer->resetHomePosition();
 		}
 	}
+	m_viewer->setLengthUnit((LengthUnit)ns->length_unit);
 
 	m_viewer->setBaseSpeed(ns->base_speed);
 	m_viewer->setStartupSpeedTick(ns->flight_speed_tick);

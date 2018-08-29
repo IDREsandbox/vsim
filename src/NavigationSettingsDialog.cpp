@@ -13,6 +13,9 @@ NavigationSettingsDialog::NavigationSettingsDialog(VSimApp *app, QWidget *parent
 {
 	ui.setupUi(this);
 
+	OSGViewerWidget *viewer = app->viewer();
+	m_viewer = viewer;
+
 	connect(ui.tick_spinbox, QOverload<int>::of(&QSpinBox::valueChanged), this,
 		&NavigationSettingsDialog::updateTickMultipliers);
 	connect(ui.tick_startup_spinbox, QOverload<int>::of(&QSpinBox::valueChanged), this,
@@ -27,55 +30,14 @@ NavigationSettingsDialog::NavigationSettingsDialog(VSimApp *app, QWidget *parent
 
 	setReadOnly(app->getRoot()->settingsLocked());
 
-	// presets
-	ui.presets_combobox->addActions({});
-
-	Preset meters, cm, feet;
-	meters.name = "meters";
-	meters.base_speed = 10.0;
-	meters.speed_tick = 0;
-	meters.collision_radius = .7;
-	meters.eye_height = 1.7;
-	meters.gravity_acceleration = 10.0;
-	meters.gravity_fall_speed = 40.0;
-
-	m_default = meters;
-
-	auto scalePreset = [](const Preset &base, float scale, Preset *out) {
-		out->base_speed = base.base_speed * scale;
-		out->speed_tick = base.speed_tick;
-		out->collision_radius = base.collision_radius * scale;
-		out->eye_height = base.eye_height * scale;
-		out->gravity_acceleration = base.gravity_acceleration * scale;
-		out->gravity_fall_speed = base.gravity_fall_speed * scale;
-	};
-
-	cm.name = "cm";
-	scalePreset(meters, 100.0, &cm);
-
-	feet.name = "feet";
-	scalePreset(meters, 3.0, &feet);
-
-	m_presets.push_back(meters);
-	m_presets.push_back(cm);
-	m_presets.push_back(feet);
-
 	// add items to combobox
-	ui.presets_combobox->addItem("");
-	for (auto &p : m_presets) {
+	for (const auto &p : m_viewer->presets()) {
 		ui.presets_combobox->addItem(p.name);
 	}
 
-	connect(ui.presets_combobox,
-		QOverload<int>::of(&QComboBox::activated), this, [this](int i) {
-		ui.presets_combobox->setCurrentIndex(0);
-		int pi = i - 1;
-		if (pi < 0 || pi >= m_presets.size()) return;
-		applyPreset(m_presets[pi]);
-	});
+	connect(ui.presets_combobox, QOverload<int>::of(&QComboBox::activated),
+		this, &NavigationSettingsDialog::applyPreset);
 
-	OSGViewerWidget *viewer = app->viewer();
-	m_viewer = viewer;
 
 	// home position
 	connect(ui.home_set_button, &QAbstractButton::pressed, this, [this, viewer]() {
@@ -102,6 +64,15 @@ void NavigationSettingsDialog::load()
 {
 	auto *viewer = m_viewer;
 
+	// index of (meters), do a linear search through presets
+	const auto &presets = viewer->presets();
+	for (size_t i = 0; i < presets.size(); i++) {
+		if (presets[i].unit == viewer->lengthUnit()) {
+			ui.presets_combobox->setCurrentIndex(i);
+			break;
+		}
+	}
+
 	// first person
 	ui.speed_spinbox->setValue(viewer->baseSpeed());
 	ui.tick_spinbox->setValue(viewer->speedTick());
@@ -127,6 +98,11 @@ void NavigationSettingsDialog::apply(VSimApp * app)
 	if (m_read_only) return;
 	OSGViewerWidget *viewer = app->viewer();
 
+	int pi = ui.presets_combobox->currentIndex();
+	if (pi >= 0 && pi < viewer->presets().size()) {
+		viewer->setLengthUnit(viewer->presets()[pi].unit);
+	}
+
 	// first person
 	viewer->setBaseSpeed(ui.speed_spinbox->value());
 	viewer->setSpeedTick(ui.tick_spinbox->value());
@@ -145,18 +121,13 @@ void NavigationSettingsDialog::apply(VSimApp * app)
 	viewer->setGravitySpeed(ui.gravity_speed_spinbox->value());
 }
 
-void NavigationSettingsDialog::defaults()
+void NavigationSettingsDialog::applyPreset(int i)
 {
-	applyPreset(m_default);
+	if ((size_t)i >= m_viewer->presets().size()) return;
+	const ViewerPreset &preset = m_viewer->presets()[i];
 
-	ui.collision_checkbox->setChecked(true);
-	ui.collision_startup_checkbox->setChecked(true);
-	ui.ground_checkbox->setChecked(false);
-	ui.ground_startup_checkbox->setChecked(false);
-}
+	ui.presets_combobox->setCurrentIndex(i);
 
-void NavigationSettingsDialog::applyPreset(const Preset & preset)
-{
 	// first person
 	ui.speed_spinbox->setValue(preset.base_speed);
 	ui.tick_spinbox->setValue(preset.speed_tick);
@@ -167,8 +138,19 @@ void NavigationSettingsDialog::applyPreset(const Preset & preset)
 
 	// ground mode
 	ui.height_spinbox->setValue(preset.eye_height);
-	ui.gravity_acceleration_spinbox->setValue(preset.gravity_acceleration);
+	ui.gravity_acceleration_spinbox->setValue(-preset.gravity_acceleration);
 	ui.gravity_speed_spinbox->setValue(preset.gravity_fall_speed);
+}
+
+void NavigationSettingsDialog::defaults()
+{
+	// default preset
+	applyPreset(0);
+
+	ui.collision_checkbox->setChecked(true);
+	ui.collision_startup_checkbox->setChecked(true);
+	ui.ground_checkbox->setChecked(false);
+	ui.ground_startup_checkbox->setChecked(false);
 }
 
 void NavigationSettingsDialog::updateTickMultipliers()

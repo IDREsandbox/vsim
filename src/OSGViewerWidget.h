@@ -37,6 +37,23 @@ enum Manipulator {
 	MANIPULATOR_OBJECT
 };
 
+enum LengthUnit {
+	Meters,
+	Centimeters,
+	Feet
+};
+
+struct ViewerPreset {
+	const char *name;
+	LengthUnit unit;
+	float base_speed;
+	int speed_tick;
+	float collision_radius;
+	float eye_height;
+	float gravity_acceleration; // positive
+	float gravity_fall_speed;
+};
+
 class OSGViewerWidget : public QOpenGLWidget
 {
 	Q_OBJECT
@@ -133,6 +150,7 @@ public:
 	float eyeHeight() const;
 	void setEyeHeight(float height) const;
 
+	// usually set to negative
 	float gravityAcceleration() const;
 	void setGravityAcceleration(float accel);
 
@@ -144,6 +162,13 @@ public:
 
 	float collisionRadius() const;
 	void setCollisionRadius(float radius);
+
+	LengthUnit lengthUnit() const;
+	void setLengthUnit(LengthUnit unit);
+
+	// sets the unit and loads the defaults for that unit (ex. 1.7m tall)
+	//void setUnitPreset(const ViewerPreset &preset);
+	const std::vector<ViewerPreset> &presets() const;
 
 	void goHome();
 	osg::Matrix defaultHomePosition() const;
@@ -255,9 +280,10 @@ private:
 	bool m_rendering_enabled;
 	osg::Matrix m_home_position;
 	bool m_default_home_position;
-
 	bool m_collision_on_startup;
 	bool m_ground_on_startup;
+	LengthUnit m_length_unit;
+	std::vector<ViewerPreset> m_presets;
 
 	// key press tracker
 	KeyTracker *m_key_tracker;
