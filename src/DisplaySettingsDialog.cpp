@@ -1,6 +1,7 @@
 ﻿#include "DisplaySettingsDialog.h"
 
 #include <QPushButton>
+#include <QDebug>
 
 #include "VSimApp.h"
 #include "OSGViewerWidget.h"
@@ -61,8 +62,6 @@ void DisplaySettingsDialog::reload()
 	bool auto_clip = m_viewer->autoClip();
 	ui.clip_auto_checkbox->setChecked(auto_clip);
 
-	ui.clip_near_spinbox->setEnabled(!auto_clip && !m_read_only);
-	ui.clip_far_spinbox->setEnabled(!auto_clip && !m_read_only);
 	ui.clip_near_spinbox->setValue(m_viewer->nearClip());
 	ui.clip_far_spinbox->setValue(m_viewer->farClip());
 
@@ -70,11 +69,9 @@ void DisplaySettingsDialog::reload()
 	bool enabled = !m_read_only;
 	ui.fov_slider->setEnabled(enabled);
 	ui.fov_spinbox->setEnabled(enabled);
+	ui.clip_near_spinbox->setEnabled(!auto_clip && !m_read_only);
+	ui.clip_far_spinbox->setEnabled(!auto_clip && !m_read_only);
 	ui.clip_auto_checkbox->setEnabled(enabled);
-	ui.clip_near_spinbox->setEnabled(enabled);
-	ui.clip_far_spinbox->setEnabled(enabled);
-	ui.clip_near_spinbox->setValue(enabled);
-	ui.clip_far_spinbox->setValue(enabled);
 	m_defaults_button->setVisible(enabled);
 
 	loadFov(m_viewer->fovy());
@@ -83,12 +80,11 @@ void DisplaySettingsDialog::reload()
 void DisplaySettingsDialog::loadFov(float fov)
 {
 	ui.fov_slider->blockSignals(true);
-	ui.fov_slider->setValue(std::round(fov));
-	ui.fov_slider->blockSignals(false);
-
 	ui.fov_spinbox->blockSignals(true);
+	ui.fov_slider->setValue(std::round(fov));
 	ui.fov_spinbox->setValue(fov);
 	ui.fov_spinbox->blockSignals(false);
+	ui.fov_slider->blockSignals(false);
 }
 
 void DisplaySettingsDialog::loadDefaults()
