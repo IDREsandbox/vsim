@@ -24,8 +24,6 @@
 #include "Gui/SimpleWorker.h"
 #include "Gui/PasswordDialog.h"
 #include "BrandingOverlay.h"
-#include "NavigationSettingsDialog.h"
-#include "DisplaySettingsDialog.h"
 #include "Switch/SwitchWindow.h"
 #include "Switch/SwitchManager.h"
 
@@ -357,6 +355,8 @@ void MainWindow::setApp(VSimApp * vsim)
 	nmenu->addSeparator();
 	nmenu->addAction(nav->a_speed_up);
 	nmenu->addAction(nav->a_slow_down);
+	nmenu->addSeparator();
+	nmenu->addAction(nav->a_reposition);
 
 	// init render menu
 	QMenu *rmenu = ui->menuRender;
@@ -369,6 +369,15 @@ void MainWindow::setApp(VSimApp * vsim)
 	rmenu->addAction(nav->a_cycle_mode);
 	rmenu->addActions(nav->m_mode_group->actions());
 	rmenu->addSeparator();
+
+	QMenu *smenu = ui->menuSettings;
+	smenu->clear();
+	smenu->addActions({
+		nav->a_navigation_settings,
+		nav->a_display_settings,
+		ui->actionFont_Color_Styles,
+		ui->actionLock_Settings
+		});
 
 	QMenu *aa_menu = rmenu->addMenu("Anti Aliasing");
 	QActionGroup *aa_group = new QActionGroup(this);
@@ -400,14 +409,6 @@ void MainWindow::setApp(VSimApp * vsim)
 	model_menu->addAction(m_app->brandingControl()->a_edit);
 
 	connect(ui->actionModel_Information, &QAction::triggered, this, &MainWindow::execModelInformation);
-	connect(ui->navigation_settings, &QAction::triggered, this, [this]() {
-		NavigationSettingsDialog dlg(m_app, this);
-		dlg.exec();
-	});
-	connect(ui->display_settings, &QAction::triggered, this, [this]() {
-		DisplaySettingsDialog dlg(m_app, this);
-		dlg.exec();
-	});
 
 	connect(m_app, &VSimApp::sAboutToSave, this, [this]() {
 		// gather settings

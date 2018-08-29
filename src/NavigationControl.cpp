@@ -1,6 +1,7 @@
 #include "NavigationControl.h"
 
 #include <QMenu>
+#include <QVector3D>
 #include <QDebug>
 
 #include "VSimApp.h"
@@ -10,6 +11,9 @@
 #include "types_generated.h"
 #include "settings_generated.h"
 #include "Core/Util.h"
+#include "NavigationSettingsDialog.h"
+#include "DisplaySettingsDialog.h"
+#include "PositionDialog.h"
 
 NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObject *parent)
 	: QObject(parent),
@@ -215,6 +219,19 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 			+ " (x" + QString::number(multiplier, 'g', 4) + ")");
 	});
 
+	a_navigation_settings = new QAction(this);
+	a_navigation_settings->setText("Navigation Settings");
+
+	a_display_settings = new QAction(this);
+	a_display_settings->setText("Display Settings");
+
+	a_reposition = new QAction(this);
+	a_reposition->setText("Set Current Position");
+
+	connect(a_navigation_settings, &QAction::triggered, this, &NavigationControl::execNavigationSettings);
+	connect(a_display_settings, &QAction::triggered, this, &NavigationControl::execDisplaySettings);
+	connect(a_reposition, &QAction::triggered, this, &NavigationControl::execSetPosition);
+
 	// app -> this
 	connect(m_app, &VSimApp::sStateChanged, this,
 		[this](VSimApp::State old, VSimApp::State current) {
@@ -385,6 +402,46 @@ void NavigationControl::onLockChange()
 	a_ground_mode->setEnabled(enable);
 	a_collisions->setEnabled(enable);
 
+	a_reposition->setEnabled(enable);
+
 	m_viewer->setCameraFrozen(true);
+}
+
+void NavigationControl::execNavigationSettings()
+{
+	NavigationSettingsDialog dlg(m_app);
+	dlg.exec();
+}
+
+void NavigationControl::execDisplaySettings()
+{
+	DisplaySettingsDialog dlg(m_app);
+	dlg.exec();
+}
+
+void NavigationControl::execSetPosition()
+{
+	qDebug() << "exec set position";
+	if (m_app->getRoot()->settingsLocked()) return;
+	PositionDialog dlg;
+
+	auto mat = m_app->getCameraMatrix();
+	auto p0 = mat.getTrans();
+	double y, p, r;
+	Util::matToYPR(mat, &y, &p, &r);
+
+	dlg.setPosition(QVector3D(p0.x(), p0.y(), p0.z()));
+	dlg.setOrientationDeg(QVector3D(Util::deg(y), Util::deg(p), Util::deg(r)));
+
+	int result = dlg.exec();
+	if (result == QDialog::Rejected) return;
+
+	QVector3D p1 = dlg.position();
+	QVector3D o1 = dlg.orientationDeg();
+
+	auto translate = osg::Matrixd::translate(p1.x(), p1.y(), p1.z());
+	auto rotate = Util::yprToMat(Util::rad(o1.x()), Util::rad(o1.y()), Util::rad(o1.z()));
+
+	m_viewer->setCameraMatrix(rotate * translate);
 }
 

@@ -127,9 +127,6 @@
     <property name="title">
      <string>Settings</string>
     </property>
-    <addaction name="display_settings"/>
-    <addaction name="navigation_settings"/>
-    <addaction name="other_settings"/>
     <addaction name="actionFont_Color_Styles"/>
     <addaction name="actionLock_Settings"/>
    </widget>

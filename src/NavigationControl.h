@@ -29,6 +29,10 @@ public:
 	void onModeChange(Navigation::Mode mode);
 	void onLockChange();
 
+	void execNavigationSettings();
+	void execDisplaySettings();
+	void execSetPosition();
+
 public: // actions
 	QActionGroup *m_navigation_action_group;
 	QAction *a_first_person;
@@ -52,6 +56,10 @@ public: // actions
 
 	QAction *a_speed_up; // forwarded from osg widget
 	QAction *a_slow_down;
+
+	QAction *a_navigation_settings;
+	QAction *a_display_settings;
+	QAction *a_reposition;
 
 private:
 	VSimApp *m_app;

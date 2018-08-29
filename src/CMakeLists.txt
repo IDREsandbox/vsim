@@ -166,6 +166,9 @@ set(VSim_src
   ObjectManipulator.h
   OSGViewerWidget.cpp
   OSGViewerWidget.h
+  PositionDialog.cpp
+  PositionDialog.h
+  PositionDialog.ui
   ScrollBoxItem.cpp
   ScrollBoxItem.h
   Selection.cpp
