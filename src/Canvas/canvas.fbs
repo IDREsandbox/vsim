@@ -79,10 +79,13 @@ table LabelStyle {
   fill_style:FillStyle;
   text_style:TextStyle;
   line_style:LineStyle;
+  width:int32;
+  height:int32;
 }
 // kept in StyleTable
 table ImageStyle {
   line_style:LineStyle;
+  fill_style:FillStyle;
 }
 
 struct Rect {

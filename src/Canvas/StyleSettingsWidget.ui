@@ -346,6 +346,64 @@
        <string>clear</string>
       </property>
      </widget>
+     <widget class="QLabel" name="width_label">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>91</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Width:</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="width_spinbox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>60</y>
+        <width>51</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>1</number>
+      </property>
+      <property name="maximum">
+       <number>10000</number>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="height_spinbox">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>60</y>
+        <width>51</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>1</number>
+      </property>
+      <property name="maximum">
+       <number>10000</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="height_label">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>60</y>
+        <width>41</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Height:</string>
+      </property>
+     </widget>
     </widget>
    </item>
    <item>

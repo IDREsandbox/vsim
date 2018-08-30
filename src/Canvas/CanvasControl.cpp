@@ -363,6 +363,15 @@ void CanvasControl::applyLabelStyle(CanvasLabel * label, LabelStyle *style)
 	label->setStyleType(style->getType());
 	label->setVAlign(style->m_align);
 
+	// resize around the center
+	QRectF rect = label->rect();
+	QPointF center = rect.center();
+	rect.setSize(QSizeF(
+		style->getSize().width() / label->baseHeight(),
+		style->getSize().height() / label->baseHeight()));
+	rect.moveCenter(center);
+	label->setRect(rect);
+
 	style->applyToDocument(label->document());
 }
 
@@ -386,6 +395,10 @@ QUndoCommand *CanvasControl::createApplyLabelStyleCommand(CanvasLabel *label,
 	new CanvasItem::SetBorderWidthCommand(label, frame->m_frame_width, cmd);
 	new CanvasItem::SetBorderColorCommand(label, frame->m_frame_color, cmd);
 	new CanvasItem::SetHasBorderCommand(label, frame->m_has_frame, cmd);
+
+	// resize around center
+	QRectF();
+	new CanvasItem::SetRectCommand(label, applySy, cmd);
 
 	// label
 	new CanvasLabel::SetVAlignCommand(label, s->valign(), cmd);
@@ -421,6 +434,11 @@ void CanvasControl::insertList(QTextCursor cursor, QTextListFormat::Style style)
 	cursor.createList(listFmt);
 
 	cursor.endEditBlock();
+}
+
+QRectF CanvasControl::newStyleStyle(CanvasLabel * label, QSize size)
+{
+	return QRectF();
 }
 
 // can perform text operations

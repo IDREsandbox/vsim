@@ -46,7 +46,6 @@ public:
 	// implementation in CanvasControl
 	//void applyToCanvasLabel(CanvasLabel *label);
 
-	// serializer
 	LabelType getType() const;
 	void setType(LabelType s);
 	int getTypeInt() const;
@@ -54,6 +53,10 @@ public:
 
 	FrameStyle *frameStyle(); // FIXME: better style than raw pointer?
 	const FrameStyle &cFrameStyle() const;
+
+	QSize getSize() const;
+	void setSize(QSize size);
+	void setSize(int w, int h);
 
 	//QColor backgroundColor() const;
 	//const osg::Vec4 &getBackgroundColor() const;
@@ -87,9 +90,8 @@ public:
 	LabelType m_type;
 
 	// box properties
-	//int m_width;
-	//int m_height;
 	FrameStyle m_frame;
+	QSize m_size;
 
 	// text box properties
 	Qt::Alignment m_align; // v align doesn't work on text documents, need to manually impl

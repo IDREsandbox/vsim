@@ -508,6 +508,11 @@ void CanvasItem::setRect(double x, double y, double w, double h)
 	move(x, y);
 }
 
+void CanvasItem::setRect2(const QRectF & r)
+{
+	setRect(r);
+}
+
 void CanvasItem::resize(double w, double h)
 {
 	prepareGeometryChange();

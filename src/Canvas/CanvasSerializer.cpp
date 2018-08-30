@@ -256,6 +256,8 @@ void CanvasSerializer::readLabelStyle(
 		style->setHAlign(static_cast<Qt::Alignment>(ts->halign()));
 		style->setVAlign(static_cast<Qt::Alignment>(ts->valign()));
 	}
+
+	style->m_size = QSize(buffer->width(), buffer->height());
 }
 
 flatbuffers::Offset<fb::LabelStyle>
@@ -290,6 +292,8 @@ flatbuffers::Offset<fb::LabelStyle>
 	b_style.add_line_style(o_line);
 	b_style.add_text_style(o_text);
 	b_style.add_type(static_cast<fb::LabelType>(style->getType()));
+	b_style.add_width(style->m_size.width());
+	b_style.add_height(style->m_size.height());
 	auto o_style = b_style.Finish();
 
 	return o_style;
@@ -308,8 +312,8 @@ void CanvasSerializer::readStyleTable(const fb::StyleTable *buffer,
 	if (body) readLabelStyle(body, group->getStyle(LabelType::BODY));
 	auto image = buffer->image();
 	if (image) {
-		auto *fs = group->getImageStyle();
-		readLineStyle(image->line_style(), fs);
+		readLineStyle(image->line_style(), group->getImageStyle());
+		readFillStyle(image->fill_style(), group->getImageStyle());
 	}
 }
 
@@ -324,8 +328,11 @@ flatbuffers::Offset<fb::StyleTable> CanvasSerializer::createStyleTable(
 	auto o_body = createLabelStyle(builder, group->getStyle(LabelType::BODY));
 	
 	auto o_line = createLineStyle(builder, group->getImageStyle());
+	auto o_fill = createFillStyle(builder, group->getImageStyle()->m_bg_color);
+
 	fb::ImageStyleBuilder b_image(*builder);
 	b_image.add_line_style(o_line);
+	b_image.add_fill_style(o_fill);
 	auto o_image = b_image.Finish();
 
 	fb::StyleTableBuilder b_styles(*builder);

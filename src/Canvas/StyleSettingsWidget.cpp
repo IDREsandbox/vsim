@@ -23,7 +23,7 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	m_style = std::make_unique<LabelStyle>();
 
 	m_scene = new CanvasScene(this);
-	m_scene->setBaseHeight(300);
+	m_scene->setBaseHeight(200);
 	m_scene->setEditable(true);
 
 	m_control = new CanvasControl(this);
@@ -187,6 +187,17 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 		m_style->m_underline = ul;
 		refresh();
 	});
+	connect(ui.width_spinbox, QOverload<int>::of(&QSpinBox::valueChanged), this,
+		[this](int w) {
+		m_style->m_size.setWidth(w);
+		refresh();
+	});
+	connect(ui.height_spinbox, QOverload<int>::of(&QSpinBox::valueChanged), this,
+		[this](int h) {
+		qDebug() << "setting height" << h;
+		m_style->m_size.setHeight(h);
+		refresh();
+	});
 
 	setStyle(m_style.get());
 	refresh();
@@ -200,6 +211,7 @@ void StyleSettingsWidget::setMode(Mode mode)
 	m_image.reset();
 
 	m_mode = mode;
+	bool label = (mode == Mode::LABEL);
 
 	if (mode == Mode::LABEL) {
 		ui.text_editor->show();
@@ -221,6 +233,11 @@ void StyleSettingsWidget::setMode(Mode mode)
 		m_scene->addItem(m_image);
 		m_image->initSize();
 	}
+
+	ui.width_label->setVisible(label);
+	ui.height_label->setVisible(label);
+	ui.width_spinbox->setVisible(label);
+	ui.height_spinbox->setVisible(label);
 
 	refresh();
 }
@@ -280,6 +297,13 @@ void StyleSettingsWidget::setStyle(const LabelStyle * style)
 	ui.bold->setChecked(m_style->m_weight > 50);
 	ui.italicize->setChecked(m_style->m_ital);
 	ui.underline->setChecked(m_style->m_underline);
+
+	ui.width_spinbox->blockSignals(true);
+	ui.height_spinbox->blockSignals(true);
+	ui.width_spinbox->setValue(m_style->getSize().width());
+	ui.height_spinbox->setValue(m_style->getSize().height());
+	ui.width_spinbox->blockSignals(false);
+	ui.height_spinbox->blockSignals(false);
 
 	setFrameStyleInternal(&style->cFrameStyle());
 

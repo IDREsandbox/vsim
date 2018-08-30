@@ -198,6 +198,8 @@ public: // misc, internal stuff
 		m_stack->end();
 	}
 
+	static QRectF newStyleStyle(CanvasLabel *label, QSize size);
+
 private:
 	CanvasScene *m_scene;
 	SimpleCommandStack *m_default_stack;

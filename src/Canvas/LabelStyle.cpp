@@ -171,6 +171,21 @@ const FrameStyle & LabelStyle::cFrameStyle() const
 	return m_frame;
 }
 
+QSize LabelStyle::getSize() const
+{
+	return m_size;
+}
+
+void LabelStyle::setSize(QSize size)
+{
+	m_size = size;
+}
+
+void LabelStyle::setSize(int w, int h)
+{
+	setSize(QSize(w, h));
+}
+
 int LabelStyle::getAlign() const
 {
 	return m_align;

@@ -188,6 +188,7 @@ public:
 	QRectF rect() const;
 	void setRect(QRectF r);
 	void setRect(double x, double y, double w, double h);
+	void setRect2(const QRectF &r);
 	void resize(double w, double h);
 	void move(double x, double y);
 	//void setRotation(double deg_ccw);
@@ -250,6 +251,8 @@ public: // commands
 		ModifyCommand2<CanvasItem, bool, &hasBorder, &setHasBorder>;
 	using SetBackgroundCommand =
 		ModifyCommand2<CanvasItem, const QColor&, &background, &setBackground>;
+	using SetRectCommand =
+		ModifyCommand2<CanvasItem, const QRectF&, &rect, &setRect2>;
 
 protected:
 	virtual void onResize(QSizeF size);
