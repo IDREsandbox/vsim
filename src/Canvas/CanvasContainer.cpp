@@ -41,6 +41,7 @@ void CanvasContainer::setEditable(bool editable)
 
 	m_manipulator->setEnabled(editable);
 	m_view->setDragMode(editable ? QGraphicsView::RubberBandDrag : QGraphicsView::NoDrag);
+	m_manipulator->reposition();
 }
 
 void CanvasContainer::resizeEvent(QResizeEvent * event)
