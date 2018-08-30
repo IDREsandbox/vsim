@@ -1,6 +1,6 @@
 # Changelog
 
-## 2018-8-27
+## 2018-8-30
 
 - Menu tabs moved around. Removed Window menu, moved History button to Edit menu, moved others into Model.
 - Near clip issues fixed
@@ -19,6 +19,10 @@
 - Right click always clears ERs (experimental)
 - ER filter rearrangement
 - ER filter options are saved with the file
+- Added x/y/w/h to canvas editor
+- Fixed importing linked files with ProxyNodes (I think?)
+
+## 2018-8-27
 - When importing/opening a model with referenced models, NodeProxys are converted to plain Groups (forcefully embedding)
 
 ## 2018-8-24
