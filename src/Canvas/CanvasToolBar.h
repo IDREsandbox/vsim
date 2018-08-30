@@ -8,6 +8,7 @@
 #include <QSpinBox>
 #include <QPushButton>
 #include <QToolButton>
+#include <QDoubleSpinBox>
 
 #include "LabelType.h"
 
@@ -27,6 +28,9 @@ class CanvasToolBar : public QToolBar
 
 public:
 	CanvasToolBar(QWidget *parent = Q_NULLPTR);
+
+	QRectF getRect() const;
+	void setRect(QRectF); // no signals
 
 signals:
 	// for combobox consistency
@@ -85,6 +89,13 @@ public:
 	QToolButton *m_valign_top;
 	QToolButton *m_valign_center;
 	QToolButton *m_valign_bottom;
+
+	ToolBox *m_coord_box;
+
+	QDoubleSpinBox *m_x_spinbox;
+	QDoubleSpinBox *m_y_spinbox;
+	QDoubleSpinBox *m_w_spinbox;
+	QDoubleSpinBox *m_h_spinbox;
 
 	QPushButton *m_done;
 

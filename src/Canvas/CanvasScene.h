@@ -81,26 +81,47 @@ public:
 
 	bool transforming() const;
 
-	void beginMove(QPointF start);
+	// transforms the whole selection to fit in rect
+	void beginRectTransform();
+	void previewRectTransform(QRectF rect);
+	void endRectTransform(QRectF rect);
+
+	// moved the selection based on given points
+	// if you use the null points then it's all automatically based on the top/left
+	// you don't need to call begin(), a plain call to end() will move top/left to new top/left
+	void beginMove(QPointF start = QPointF());
 	void previewMove(QPointF preview);
-	void endMove(QPointF end);
+	void endMove(QPointF end = QPointF());
 	bool moving() const;
 
 	// get the original rects before a transformation
 	const std::map<CanvasItem*, QRectF> &getTransformRects() const;
 
+	// get a merged area of all the selected rects
+	QRectF getSavedRect() const;
+	QRectF getSelectedRect() const;
+
 	// makes all items editable
 	bool isEditable() const;
 	void setEditable(bool editable);
 
-	// pixel height of the scene
+	// pixel height of the scene (~600)
 	void setBaseHeight(double height);
+	// base width is used for deciding on a top-left
+	void setBaseWidth(double height);
 	double baseHeight() const;
 
-	// maps pixel height count to scene size
+	// maps pixel height to scene size (600 -> 1)
 	double toScene(int px) const;
+	QPointF toScene(QPointF pt) const;
+	QRectF toScene(QRectF rect) const;
+	// maps scene sizes to big sizes (1 -> 600)
+	double fromScene(double px) const;
+	QPointF fromScene(QPointF pt) const;
+	QRectF fromScene(QRectF rect) const;
 
 	WeakObject *weakContainer() const;
+
 
 signals:
 	void sAdded(CanvasItem *item);
@@ -127,8 +148,10 @@ private:
 
 	bool m_editable;
 	double m_base_height;
+	double m_base_width;
 	bool m_selection_in_progress;
 	bool m_moving;
+	bool m_rect_transforming;
 	QPointF m_start_move;
 	WeakObject *m_weak_container; // for storing QObjects so that moveToThread() works correctly
 

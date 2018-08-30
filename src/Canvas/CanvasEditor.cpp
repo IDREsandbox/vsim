@@ -195,6 +195,37 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 		});
 	}
 
+
+	// spinboxes are funky, we aren't guaranteed a change signal
+	// before finish even if it does change. Maybe use the string
+	// version of valueChanged?
+	auto xySpinChanged = [this]() {
+		if (!m_scene->transforming()) m_scene->beginMove();
+		m_scene->previewMove(m_scene->toScene(m_tb->getRect().topLeft()));
+	};
+	auto xySpinFinished = [this, xySpinChanged]() {
+		if (!m_scene->moving()) return;
+		m_scene->endMove(m_scene->toScene(m_tb->getRect().topLeft()));
+	};
+	auto whSpinChanged = [this]() {
+		if (!m_scene->transforming()) m_scene->beginRectTransform();
+		m_scene->previewRectTransform(m_scene->toScene(m_tb->getRect()));
+	};
+	auto whSpinFinished = [this]() {
+		if (!m_scene->transforming()) return;
+		m_scene->endRectTransform(m_scene->toScene(m_tb->getRect()));
+	};
+
+	connect(m_tb->m_x_spinbox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), xySpinChanged);
+	connect(m_tb->m_y_spinbox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), xySpinChanged);
+	connect(m_tb->m_x_spinbox, &QAbstractSpinBox::editingFinished, xySpinFinished);
+	connect(m_tb->m_y_spinbox, &QAbstractSpinBox::editingFinished, xySpinFinished);
+
+	connect(m_tb->m_w_spinbox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), whSpinChanged);
+	connect(m_tb->m_h_spinbox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), whSpinChanged);
+	connect(m_tb->m_w_spinbox, &QAbstractSpinBox::editingFinished, whSpinFinished);
+	connect(m_tb->m_h_spinbox, &QAbstractSpinBox::editingFinished, whSpinFinished);
+
 	// font begin end
 	connect(m_tb, &CanvasToolBar::sFont, this, [this](const QFont &f) {
 		m_cc->setFont(f.family());
@@ -355,6 +386,10 @@ void CanvasEditor::updateToolBar()
 	m_tb->m_italicize->setChecked(m_cc->allItalic());
 	m_tb->m_underline->setChecked(m_cc->allUnderline());
 	m_tb->m_strikeout->setChecked(m_cc->allStrikeOut());
+
+	// spinboxes
+	QRectF rect = m_scene->getSelectedRect();
+	m_tb->setRect(m_scene->fromScene(rect));
 }
 
 void CanvasEditor::onStylesChanged()

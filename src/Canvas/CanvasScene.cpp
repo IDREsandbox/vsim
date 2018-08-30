@@ -14,6 +14,7 @@ CanvasScene::CanvasScene(QObject *parent)
 	: QGraphicsScene(parent),
 	m_editable(false),
 	m_base_height(600.0),
+	m_base_width(800.0),
 	m_selection_in_progress(false),
 	m_moving(false)
 {
@@ -163,6 +164,11 @@ void CanvasScene::setBaseHeight(double height)
 	}
 }
 
+void CanvasScene::setBaseWidth(double height)
+{
+	m_base_width = height;
+}
+
 double CanvasScene::baseHeight() const
 {
 	return m_base_height;
@@ -170,7 +176,41 @@ double CanvasScene::baseHeight() const
 
 double CanvasScene::toScene(int px) const
 {
-	return px / (double)m_base_height;
+	return px / m_base_height;
+}
+
+QPointF CanvasScene::toScene(QPointF pt) const
+{
+	QPointF mid = QPointF(m_base_width / 2, m_base_height / 2);
+	return (pt - mid) / m_base_height;
+}
+
+QRectF CanvasScene::toScene(QRectF rect) const
+{
+	QPointF pt = toScene(rect.topLeft());
+	QSizeF size = QSizeF(
+		toScene(rect.width()),
+		toScene(rect.height()));
+	return QRectF(pt, size);
+}
+
+double CanvasScene::fromScene(double x) const
+{
+	return m_base_height * x;
+}
+
+QPointF CanvasScene::fromScene(QPointF pt) const
+{
+	QPointF mid = QPointF(m_base_width / 2, m_base_height / 2);
+	return (pt * m_base_height) + mid;
+}
+
+QRectF CanvasScene::fromScene(QRectF rect) const
+{
+	QPointF pt = fromScene(rect.topLeft());
+	QSizeF s = QSizeF(fromScene(rect.width()),
+		fromScene(rect.height()));
+	return QRectF(pt, s);
 }
 
 WeakObject * CanvasScene::weakContainer() const
@@ -221,7 +261,7 @@ void CanvasScene::endTransform()
 	if (out_map.size() > 0) {
 		emit sRectsTransformed(saved_rects, out_map);
 	}
-	saved_rects = {};
+	m_saved_rects.clear();
 }
 
 bool CanvasScene::transforming() const
@@ -229,10 +269,59 @@ bool CanvasScene::transforming() const
 	return m_saved_rects.size() > 0;
 }
 
+void CanvasScene::beginRectTransform()
+{
+	if (!isEditable()) return;
+	if (transforming()) return;
+	m_rect_transforming = true;
+	beginTransform();
+}
+
+void CanvasScene::previewRectTransform(QRectF rect)
+{
+	if (!isEditable()) return;
+	if (!m_rect_transforming) return;
+
+	QRectF old = getSavedRect();
+
+	for (auto &pair : getTransformRects()) {
+		// convert everything to ratios
+		CanvasItem *item = pair.first;
+		QRectF or = pair.second;
+		double xr = (or.x() - old.x()) / old.width();
+		double yr = (or.y() - old.y()) / old.height();
+		double wr = or.width() / old.width();
+		double hr = or.height() / old.height();
+		QRectF rrect(xr, yr, wr, hr); // ratio rect
+
+		// use those ratios to figure out new rect
+		double x2 = (xr * rect.width()) + rect.x();
+		double y2 = (yr * rect.height()) + rect.y();
+		double w2 = wr * rect.width();
+		double h2 = hr * rect.height();
+
+		item->setRect(x2, y2, w2, h2);
+	}
+}
+
+void CanvasScene::endRectTransform(QRectF rect)
+{
+	if (!isEditable()) return;
+	previewRectTransform(rect);
+	m_rect_transforming = false;
+	endTransform();
+}
+
 void CanvasScene::beginMove(QPointF start)
 {
 	if (!isEditable()) return;
-	m_start_move = start;
+	if (m_moving) return;
+	if (start.isNull()) {
+		m_start_move = getSelectedRect().topLeft();
+	}
+	else {
+		m_start_move = start;
+	}
 	m_moving = true;
 	beginTransform();
 }
@@ -252,6 +341,10 @@ void CanvasScene::previewMove(QPointF preview)
 void CanvasScene::endMove(QPointF end)
 {
 	if (!isEditable()) return;
+	if (!transforming()) {
+		beginMove();
+	}
+	if (end.isNull()) end = getSelectedRect().topLeft();
 	previewMove(end);
 	m_moving = false;
 	endTransform();
@@ -265,6 +358,26 @@ bool CanvasScene::moving() const
 const std::map<CanvasItem*, QRectF> &CanvasScene::getTransformRects() const
 {
 	return m_saved_rects;
+}
+
+QRectF CanvasScene::getSavedRect() const
+{
+	QRectF rect;
+	for (auto &pair : m_saved_rects) {
+		rect = rect.united(pair.second);
+	}
+	return rect;
+}
+
+QRectF CanvasScene::getSelectedRect() const
+{
+	QRectF rect;
+	for (auto item : m_items) {
+		if (item->isSelected()) {
+			rect = rect.united(item->rect());
+		}
+	}
+	return rect;
 }
 
 bool CanvasScene::isEditable() const
@@ -425,7 +538,7 @@ void CanvasItem::mousePressEvent(QGraphicsSceneMouseEvent *e)
 	}
 	if (f & QGraphicsItem::ItemIsMovable) {
 		if (e->button() == Qt::LeftButton) {
-			canvasScene()->beginTransform();
+			//canvasScene()->beginMove(e->scenePos());
 		}
 		e->accept();
 	}

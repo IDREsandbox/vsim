@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <QCoreApplication>
+#include <QLabel>
 
 #include "Gui/TitledComboBox.h"
 
@@ -265,6 +266,54 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	valign_row->addWidget(m_valign_bottom);
 	valign_row->addStretch(1);
 
+	m_coord_box = new ToolBox(this);
+	QGridLayout *coord_layout = new QGridLayout(m_coord_box);
+	// x [] y []
+	// w [] h []
+	QLabel *x_label = new QLabel("x", m_coord_box);
+	QLabel *y_label = new QLabel("y", m_coord_box);
+	QLabel *w_label = new QLabel("w", m_coord_box);
+	QLabel *h_label = new QLabel("h", m_coord_box);
+	m_x_spinbox = new QDoubleSpinBox(m_coord_box);
+	m_y_spinbox = new QDoubleSpinBox(m_coord_box);
+	m_w_spinbox = new QDoubleSpinBox(m_coord_box);
+	m_h_spinbox = new QDoubleSpinBox(m_coord_box);
+	x_label->setStyleSheet("background:none;");
+	y_label->setStyleSheet("background:none;");
+	w_label->setStyleSheet("background:none;");
+	h_label->setStyleSheet("background:none;");
+	m_x_spinbox->setMinimum(-10000);
+	m_x_spinbox->setMaximum(10000);
+	m_x_spinbox->setDecimals(1);
+	m_y_spinbox->setMinimum(-10000);
+	m_y_spinbox->setMaximum(10000);
+	m_y_spinbox->setDecimals(1);
+	m_w_spinbox->setMinimum(.1);
+	m_w_spinbox->setMaximum(10000);
+	m_w_spinbox->setDecimals(1);
+	m_h_spinbox->setMinimum(.1);
+	m_h_spinbox->setMaximum(10000);
+	m_h_spinbox->setDecimals(1);
+	//m_x_spinbox->setMinimumWidth(50);
+	//m_y_spinbox->setMinimumWidth(50);
+	//m_w_spinbox->setMinimumWidth(50);
+	//m_h_spinbox->setMinimumWidth(50);
+	//m_x_spinbox->setFixedWidth(50);
+	//m_y_spinbox->setFixedWidth(50);
+	//m_w_spinbox->setFixedWidth(50);
+	//m_h_spinbox->setFixedWidth(50);
+
+	coord_layout->addWidget(x_label, 0, 0);
+	coord_layout->addWidget(m_x_spinbox, 0, 1);
+	coord_layout->addWidget(y_label, 0, 2);
+	coord_layout->addWidget(m_y_spinbox, 0, 3);
+	coord_layout->addWidget(w_label, 1, 0);
+	coord_layout->addWidget(m_w_spinbox, 1, 1);
+	coord_layout->addWidget(h_label, 1, 2);
+	coord_layout->addWidget(m_h_spinbox, 1, 3);
+	coord_layout->setColumnStretch(1, 1);
+	coord_layout->setColumnStretch(3, 1);
+
 	ToolBox *spacer_box = new ToolBox(this);
 	spacer_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	QHBoxLayout *spacer_layout = new QHBoxLayout(spacer_box);
@@ -284,8 +333,13 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	addSeparator();
 	addWidget(m_align_box);
 	addSeparator();
+	addWidget(m_coord_box);
+	addSeparator();
 	addWidget(spacer_box);
 	setOrientation(Qt::Orientation::Vertical);
+
+	//m_font->hide();
+	//m_style->hide();
 
 	//QAction *test = new QAction(this);
 	//test->setText("Test Action");
@@ -313,4 +367,38 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 		}
 		emit sLabelType(type);
 	});
+}
+
+QRectF CanvasToolBar::getRect() const
+{
+	return QRectF(m_x_spinbox->value(),
+		m_y_spinbox->value(),
+		m_w_spinbox->value(),
+		m_h_spinbox->value());
+}
+
+void CanvasToolBar::setRect(QRectF rect)
+{
+	if (m_x_spinbox->hasFocus()) return;
+	if (m_y_spinbox->hasFocus()) return;
+	if (m_w_spinbox->hasFocus()) return;
+	if (m_h_spinbox->hasFocus()) return;
+
+	bool enable = !rect.isNull();
+	m_x_spinbox->setEnabled(enable);
+	m_y_spinbox->setEnabled(enable);
+	m_w_spinbox->setEnabled(enable);
+	m_h_spinbox->setEnabled(enable);
+	m_x_spinbox->blockSignals(true);
+	m_y_spinbox->blockSignals(true);
+	m_w_spinbox->blockSignals(true);
+	m_h_spinbox->blockSignals(true);
+	m_x_spinbox->setValue(rect.x());
+	m_y_spinbox->setValue(rect.y());
+	m_w_spinbox->setValue(rect.width());
+	m_h_spinbox->setValue(rect.height());
+	m_x_spinbox->blockSignals(false);
+	m_y_spinbox->blockSignals(false);
+	m_w_spinbox->blockSignals(false);
+	m_h_spinbox->blockSignals(false);
 }

@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
 	auto image = std::make_shared<CanvasImage>();
 	image->move(.2, -.2);
-	image->setPixmap(QPixmap("assets/karnak.jpg"));
+	image->setPixmap(QPixmap(QCoreApplication::applicationDirPath() + "/assets/karnak.jpg"));
 	image->setPen(QPen(QBrush(QColor(0, 0, 0)), scene->toScene(10)));
 	image->setEditable(true);
 	scene->addItem(image);
