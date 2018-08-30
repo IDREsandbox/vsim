@@ -1048,10 +1048,14 @@ void OSGViewerWidget::mousePressEvent(QMouseEvent* event)
 
 	// how do we know whether to ignore or not?
 	// ex: flight mode slow down causes cancel?
-	if (m_manipulator == MANIPULATOR_OBJECT
-		|| m_manipulator == MANIPULATOR_SIMPLE) {
-		event->ignore();
-	}
+	// ideally we'd send this mouse event over to the manipulator, check for ignore
+	event->ignore();
+
+
+	//if (m_manipulator == MANIPULATOR_OBJECT
+	//	|| m_manipulator == MANIPULATOR_SIMPLE) {
+	//	event->ignore();
+	//}
 }
 
 void OSGViewerWidget::mouseReleaseEvent(QMouseEvent* event)
