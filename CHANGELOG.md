@@ -2,7 +2,24 @@
 
 ## 2018-8-27
 
-- When importing/opening a model with referenced models, NodeProxys are converted into plain Groups (forcefully embedding)
+- Menu tabs moved around. Removed Window menu, moved History button to Edit menu, moved others into Model.
+- Near clip issues fixed
+- Navigations settings saves last selected preset
+- Added Navigation > Set Position. Opens a dialog to manually type in position.
+- Updated about VSim text
+- Window size initialization is less crazy
+- Fixed dialog titles and question marks (Model Information, Switches, Fonts & Colors, About, ER Edit, Position, ER Filters, Time Slider, Export, Navi Settings, Disp Settings)
+- Removed other settings
+- Replaced icons, added .exe icon
+- Fonts & colors greys out when a narrative is not active
+- Fixed branding editor transform desyncing after resize
+- ER search by file name, ER search by author
+- ER scroll bar style
+- ER double click -> don't go to
+- Right click always clears ERs (experimental)
+- ER filter rearrangement
+- ER filter options are saved with the file
+- When importing/opening a model with referenced models, NodeProxys are converted to plain Groups (forcefully embedding)
 
 ## 2018-8-24
 
