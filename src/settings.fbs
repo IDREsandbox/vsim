@@ -121,4 +121,9 @@ table ERSettings {
   sort_all:ERSortBy = Title;
   sort_global:ERSortBy = Title;
   sort_local:ERSortBy = Distance;
+  range_enabled:bool = true;
+  years_enabled:bool = true;
+  auto_launch:bool = true;
+  local_radius:float = 5.0;
+  categories:[bool];
 }

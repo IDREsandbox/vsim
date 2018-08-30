@@ -72,9 +72,9 @@ public:
 	void showLocal(bool local);
 	void showGlobal(bool global);
 	void enableRange(bool enable);
-	void enableYears(bool enable); // both have to be true for time test
-	void appTimeEnable(bool enable); // this is for the global
-	//void setSearchRadius(float radius);
+	bool rangeEnabled() const;
+	void setYearsEnabled(bool enable);
+	bool yearsEnabled() const;
 
 	void setSearch(const QString &search);
 	void setYear(int year);
@@ -90,7 +90,6 @@ public:
 
 signals:
 	void sSortByChanged(ER::SortBy);
-	void sRadiusChanged(float radius);
 	void sUseRangeChanged(bool use);
 	void sUseYearsChanged(bool use);
 	void sShowLocalChanged(bool show);
@@ -155,8 +154,7 @@ private:
 	bool m_show_global;
 	bool m_show_local;
 	bool m_enable_range;
-	bool m_enable_years;
-	bool m_time_enabled;
+	bool m_years_enabled;
 
 	std::unordered_map<EResource*, ERMetadata> m_metadata;
 	bool m_search_changed; // cache search

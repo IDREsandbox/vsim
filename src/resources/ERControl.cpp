@@ -22,6 +22,7 @@
 #include "VSimRoot.h"
 #include "Core/LockTable.h"
 #include "Gui/PasswordDialog.h"
+#include "settings_generated.h"
 
 #include <QDesktopServices>
 #include <QPushButton>
@@ -145,9 +146,12 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		showAll(!m_showing_all);
 	});
 
-	// goto and open
+	// goto and open? or just open?
 	auto goto_open = [this]() {
-		gotoPosition();
+		//gotoPosition();
+		EResource *res = getCombinedLastSelectedP();
+		if (!res) return;
+		if (res->getReposition()) gotoPosition();
 		openTopResource();
 	};
 	connect(m_local_box, &ERScrollBox::sDoubleClick, this, goto_open);
@@ -201,7 +205,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	connect(m_app->timeManager(), &TimeManager::sYearChanged,
 		m_filter_proxy.get(), &ERFilterSortProxy::setYear);
 	connect(m_app->timeManager(), &TimeManager::sTimeEnableChanged,
-		m_filter_proxy.get(), &ERFilterSortProxy::appTimeEnable);
+		this, &ERControl::onYearsEnabledChanged);
 
 	connect(m_display, &ERDisplay::sClose, this, &ERControl::closeER);
 	connect(m_display, &ERDisplay::sCloseAll, this, &ERControl::closeAll);
@@ -215,8 +219,6 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		this, &ERControl::setRadius);
 	connect(m_filter_area, &ERFilterArea::sEnableRange,
 		m_local_proxy.get(), &ERFilterSortProxy::enableRange);
-	connect(m_filter_area, &ERFilterArea::sEnableYears,
-		m_filter_proxy.get(), &ERFilterSortProxy::enableYears);
 	connect(m_filter_area, &ERFilterArea::sSortAll,
 		m_all_proxy.get(), &ERFilterSortProxy::sortBy);
 	connect(m_filter_area, &ERFilterArea::sSortLocal,
@@ -227,6 +229,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		this, &ERControl::enableAutoLaunch);
 	connect(m_filter_area, &ERFilterArea::sSearch,
 		m_filter_proxy.get(), &ERFilterSortProxy::setSearch);
+	connect(m_filter_area, &ERFilterArea::sEnableYears,
+		this, &ERControl::enableYears);
 
 	connect(m_window->erBar()->ui.filter, &QPushButton::pressed, this,
 		[this]() {
@@ -240,10 +244,6 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		m_filter_area, &ERFilterArea::setSortLocal);
 	connect(m_global_proxy.get(), &ERFilterSortProxy::sSortByChanged,
 		m_filter_area, &ERFilterArea::setSortGlobal);
-	connect(this, &ERControl::sRadiusChanged,
-		m_filter_area, &ERFilterArea::setRadius);
-	connect(m_filter_proxy.get(), &ERFilterSortProxy::sUseYearsChanged,
-		m_filter_area, &ERFilterArea::enableYears);
 	connect(m_local_proxy.get(), &ERFilterSortProxy::sUseRangeChanged,
 		m_filter_area, &ERFilterArea::enableRange);
 	connect(m_filter_proxy.get(), &ERFilterSortProxy::sSearchChanged,
@@ -804,24 +804,17 @@ void ERControl::selectERs(const std::vector<EResource*> &res)
 
 void ERControl::resetFilters()
 {
-	m_local_proxy->enableRange(true);
-	m_filter_proxy->sortBy(ER::SortBy::NONE);
-	m_all_proxy->sortBy(ER::SortBy::TITLE);
-	m_local_proxy->sortBy(ER::SortBy::DISTANCE);
-	m_global_proxy->sortBy(ER::SortBy::TITLE);
-	m_filter_proxy->setSearch("");
-	m_filter_proxy->showGlobal(true);
-	m_filter_proxy->showLocal(true);
-	m_filter_proxy->appTimeEnable(m_app->timeManager()->timeEnabled());
-	setRadius(5.0f);
-	enableAutoLaunch(true);
-	if (m_category_checkbox_model) m_category_checkbox_model->setCheckAll(true);
+	// load based on the default settings
+	VSim::FlatBuffers::ERSettingsT default;
+	loadFilterSettings(default);
+
+	m_category_checkbox_model->setCheckAll(true);
 }
 
 void ERControl::setRadius(float radius)
 {
 	m_radius = radius;
-	emit sRadiusChanged(radius);
+	m_filter_area->setRadius(radius);
 }
 
 void ERControl::enableAutoLaunch(bool enable)
@@ -829,6 +822,13 @@ void ERControl::enableAutoLaunch(bool enable)
 	if (m_auto_launch == enable) return;
 	m_auto_launch = enable;
 	m_filter_area->enableAutoLaunch(enable);
+}
+
+void ERControl::enableYears(bool enable)
+{
+	m_filter_area->enableYears(enable);
+	m_years_enabled = enable;
+	onYearsEnabledChanged();
 }
 
 void ERControl::onUpdate()
@@ -916,22 +916,48 @@ void ERControl::gatherSettings()
 	es.sort_global = static_cast<VSim::FlatBuffers::ERSortBy>(m_global_proxy->getSortBy());
 	es.sort_local = static_cast<VSim::FlatBuffers::ERSortBy>(m_local_proxy->getSortBy());
 	es.show_all = m_showing_all;
+
+	es.range_enabled = m_local_proxy->rangeEnabled();
+	es.years_enabled = m_years_enabled;
+	es.auto_launch = m_auto_launch;
+	es.local_radius = m_radius;
+
+	es.categories = m_category_checkbox_model->getChecked();
 }
 
 void ERControl::extractSettings()
 {
 	auto &es = m_app->getRoot()->erSettings();
+	loadFilterSettings(es);
+	showAll(es.show_all);
+}
 
+void ERControl::loadFilterSettings(VSim::FlatBuffers::ERSettingsT &es)
+{
 	m_all_proxy->sortBy(static_cast<ER::SortBy>(es.sort_all));
 	m_local_proxy->sortBy(static_cast<ER::SortBy>(es.sort_local));
 	m_global_proxy->sortBy(static_cast<ER::SortBy>(es.sort_global));
-	showAll(es.show_all);
+	m_local_proxy->enableRange(es.range_enabled);
+
+	enableYears(es.years_enabled);
+	enableAutoLaunch(es.auto_launch);
+	setRadius(es.local_radius);
+
+	for (size_t i = 0; i < es.categories.size(); i++) {
+		m_category_checkbox_model->setChecked(i, es.categories[i]);
+	}
 }
 
 void ERControl::onReset()
 {
 	onRestrictToCurrent();
 	extractSettings();
+}
+
+void ERControl::onYearsEnabledChanged()
+{
+	m_filter_proxy->setYearsEnabled(m_years_enabled
+		&& m_app->timeManager()->timeEnabled());
 }
 
 void ERControl::onRestrictToCurrent()

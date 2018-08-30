@@ -70,8 +70,7 @@ width: 0px;
 }
 
 #erDisplay QScrollBar {
-    background: none;
-    background: rgb(26, 26, 26);
+    background: rgb(50, 50, 50);
     border: none;
 }
 #erDisplay QScrollBar::handle {

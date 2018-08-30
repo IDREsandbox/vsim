@@ -24,6 +24,7 @@ class ERFilterArea;
 class CheckableListProxy;
 class SelectionStack;
 class ERBar;
+namespace VSim { namespace FlatBuffers { struct ERSettingsT; } };
 
 // manages which ER is active
 // slots for creating a new ER, editing, etc
@@ -64,6 +65,11 @@ public:
 	void onSelectionChange();
 	void onRestrictToCurrent();
 	void onReset();
+	void onYearsEnabledChanged();
+
+	void gatherSettings();
+	void extractSettings();
+	void loadFilterSettings(VSim::FlatBuffers::ERSettingsT &settings);
 
 	// selection
 	void addToSelection(EResource *res, bool top = true);
@@ -80,14 +86,12 @@ public:
 	void resetFilters();
 	void setRadius(float radius);
 	void enableAutoLaunch(bool enable);
+	void enableYears(bool enable);
 
 	void onUpdate();
 
 	QString debugString();
 	void debug();
-
-signals:
-	void sRadiusChanged(float radius);
 
 public: // actions
 	QAction *a_new_er;
@@ -100,10 +104,6 @@ public: // actions
 	QAction *a_unlock_ers;
 	QAction *a_close_er;
 	QAction *a_close_all;
-
-private:
-	void gatherSettings();
-	void extractSettings();
 
 private:
 	VSimApp *m_app;
@@ -131,6 +131,7 @@ private:
 
 	ECategoryControl *m_category_control;
 
+	bool m_years_enabled;
 	bool m_showing_all;
 	bool m_going_to;
 	float m_radius;

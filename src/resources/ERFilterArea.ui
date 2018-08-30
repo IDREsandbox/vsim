@@ -6,36 +6,121 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>366</width>
-    <height>206</height>
+    <width>364</width>
+    <height>170</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="4" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Local Radius</string>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="1" column="0" rowspan="2" colspan="2">
+    <widget class="QStackedWidget" name="sort_stack">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="global_local_page">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="radiusSpinBox">
-       <property name="maximum">
-        <double>1000.000000000000000</double>
+       <property name="topMargin">
+        <number>0</number>
        </property>
-       <property name="value">
-        <double>10.000000000000000</double>
+       <property name="rightMargin">
+        <number>0</number>
        </property>
-      </widget>
-     </item>
-    </layout>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="sort_global_box">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="sort_local_box">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="sort_local_label">
+         <property name="text">
+          <string>Sort Local</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="sort_global_label">
+         <property name="text">
+          <string>Sort Global</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="all_page">
+      <layout class="QGridLayout" name="gridLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="QLabel" name="sort_all_label">
+         <property name="text">
+          <string>Sort All</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="sort_all_box">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Ignored</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
-   <item row="1" column="1">
+   <item row="1" column="2">
     <widget class="QCheckBox" name="showLocalCheckBox">
      <property name="text">
       <string>Show All Local</string>
@@ -45,7 +130,44 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="2">
+   <item row="2" column="2">
+    <widget class="QCheckBox" name="yearsCheckBox">
+     <property name="text">
+      <string>Use Active Years</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Categories</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QComboBox" name="categories_box">
+     <property name="minimumSize">
+      <size>
+       <width>150</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QCheckBox" name="enableAutoLaunchCheckBox">
+     <property name="text">
+      <string>Enable Auto Launch</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1,0">
      <item>
       <widget class="QPushButton" name="clearButton">
@@ -76,58 +198,28 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0" rowspan="4">
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0">
-      <widget class="QLabel" name="sort_local_label">
+   <item row="4" column="2">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Sort Local</string>
+        <string>Local Radius</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QComboBox" name="categories_box">
-       <property name="minimumSize">
-        <size>
-         <width>150</width>
-         <height>0</height>
-        </size>
+     <item>
+      <widget class="QDoubleSpinBox" name="radiusSpinBox">
+       <property name="maximum">
+        <double>1000.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>10.000000000000000</double>
        </property>
       </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Categories</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="sort_global_label">
-       <property name="text">
-        <string>Sort Global</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="sort_local_box"/>
-     </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="sort_global_box"/>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="sort_all_label">
-       <property name="text">
-        <string>Sort All</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="sort_all_box"/>
      </item>
     </layout>
    </item>
-   <item row="5" column="0" colspan="2">
+   <item row="0" column="0" colspan="3">
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QLabel" name="label_4">
@@ -163,26 +255,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="2" column="1">
-    <widget class="QCheckBox" name="yearsCheckBox">
-     <property name="text">
-      <string>Use Active Years</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QCheckBox" name="enableAutoLaunchCheckBox">
-     <property name="text">
-      <string>Enable Auto Launch</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

@@ -29,6 +29,7 @@ public:
 
 	bool isChecked(int row) const;
 	std::vector<bool> getChecked() const;
+	bool setChecked(int row, bool checked); // true if changed
 	void setCheckAll(bool value);
 	Qt::CheckState getCheckAll() const;
 

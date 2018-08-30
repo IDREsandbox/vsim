@@ -5,6 +5,7 @@
 #include "Model/OSGNodeWrapper.h"
 #include "VSimApp.h"
 #include "VSimRoot.h"
+#include "settings_generated.h"
 
 TimeManager::TimeManager(VSimApp *app, QObject *parent)
 	: QObject(parent),

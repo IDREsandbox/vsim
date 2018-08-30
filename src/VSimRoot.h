@@ -6,14 +6,23 @@
 #include <QObject>
 #include <QDate>
 
-#include "settings_generated.h"
-
 class NarrativeGroup;
 class ModelGroup;
 class EResourceGroup;
 class ECategoryGroup;
 class CanvasScene;
 class LockTable;
+
+namespace VSim {
+	namespace FlatBuffers {
+		struct ModelInformationT;
+		struct NavigationSettingsT;
+		struct GraphicsSettingsT;
+		struct WindowSettingsT;
+		struct OtherSettingsT;
+		struct ERSettingsT;
+	}
+}
 
 class VSimRoot : public QObject {
 	Q_OBJECT;

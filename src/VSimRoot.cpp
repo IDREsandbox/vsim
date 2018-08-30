@@ -466,6 +466,11 @@ void VSimRoot::copyERSettings(VSim::FlatBuffers::ERSettingsT & dest,
 	dest.sort_all = src.sort_all;
 	dest.sort_global = src.sort_global;
 	dest.sort_local = src.sort_local;
+	dest.range_enabled = src.range_enabled;
+	dest.years_enabled = src.years_enabled;
+	dest.auto_launch = src.auto_launch;
+	dest.local_radius = src.local_radius;
+	dest.categories = src.categories;
 }
 
 

@@ -216,24 +216,9 @@ bool CheckableListProxy::setData(const QModelIndex & index, const QVariant & val
 	// [ ] [x]
 	if (role == Qt::ItemDataRole::CheckStateRole) {
 		Qt::CheckState val = value.value<Qt::CheckState>();
-		bool setChecked = (val == Qt::Checked) ? true : false;
+		bool checked = (val == Qt::Checked) ? true : false;
 
-		if (isChecked(index.row() - 1) == setChecked) {
-			// nothing changed
-			return false;
-		}
-		m_checked[index.row() - 1] = setChecked;
-		if (setChecked) {
-			m_checked_count++;
-			m_unchecked_count--;
-		}
-		else {
-			m_checked_count--;
-			m_unchecked_count++;
-		}
-		updateTristate();
-		emit dataChanged(index, index, {Qt::ItemDataRole::CheckStateRole});
-		return true;
+		return setChecked(index.row() - 1, checked);
 	}
 
 	// TODO: try to set data on original
@@ -258,6 +243,28 @@ bool CheckableListProxy::isChecked(int row) const
 std::vector<bool> CheckableListProxy::getChecked() const
 {
 	return m_checked;
+}
+
+bool CheckableListProxy::setChecked(int row, bool checked)
+{
+	if (row < 0 || row >= m_checked.size()) return false;
+	if (isChecked(row) == checked) {
+		return false;
+	}
+
+	m_checked[row] = checked;
+
+	if (checked) {
+		m_checked_count++;
+		m_unchecked_count--;
+	}
+	else {
+		m_checked_count--;
+		m_unchecked_count++;
+	}
+	updateTristate();
+	emit dataChanged(index(row + 1, 0), index(row + 1, 0), { Qt::ItemDataRole::CheckStateRole });
+	return true;
 }
 
 void CheckableListProxy::setCheckAll(bool value)

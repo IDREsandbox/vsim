@@ -19,10 +19,9 @@ ERFilterSortProxy::ERFilterSortProxy(TGroup<EResource> *base)
 	m_show_global(true),
 	m_show_local(true),
 	m_enable_range(false),
-	m_enable_years(true),
+	m_years_enabled(true),
 	m_show_all(false),
 	m_year(0),
-	m_time_enabled(true),
 	m_search_changed(false)
 {
 	setBase(base);
@@ -269,7 +268,7 @@ bool ERFilterSortProxy::accept(EResource *res)
 	}
 
 	// check years
-	if (m_time_enabled && m_enable_years && m_year != 0) {
+	if (m_years_enabled && m_year != 0) {
 		int min = res->getMinYear();
 		if (min != 0 && min > m_year) {
 			return false;
@@ -525,18 +524,23 @@ void ERFilterSortProxy::enableRange(bool enable)
 	emit sUseRangeChanged(enable);
 }
 
-void ERFilterSortProxy::enableYears(bool enable)
+bool ERFilterSortProxy::rangeEnabled() const
 {
-	m_enable_years = enable;
+	return m_enable_range;
+}
+
+void ERFilterSortProxy::setYearsEnabled(bool enable)
+{
+	m_years_enabled = enable;
 	reload2();
 	emit sUseYearsChanged(enable);
 }
 
-void ERFilterSortProxy::appTimeEnable(bool enable)
+bool ERFilterSortProxy::yearsEnabled() const
 {
-	m_time_enabled = enable;
-	reload2();
+	return m_years_enabled;
 }
+
 
 //void ERFilterSortProxy::setSearchRadius(float radius)
 //{
@@ -761,6 +765,12 @@ void ERFilterSortProxy::reload2()
 	std::vector<size_t> insertions;
 	std::vector<std::pair<size_t, size_t>> moves;
 
+	auto toQList = [](std::vector<size_t> vec) {
+		QList<size_t> out;
+		for (size_t x : vec) out.push_back(x);
+		return out;
+	};
+
 	// decomposes all changes into remove insert move
 	VecUtil::removalsInsertionsMoves(before,
 		after, &removals, &insertions, &moves);
@@ -815,22 +825,16 @@ bool ERFilterSortProxy::checkSearch(const EResource * res, const QString & searc
 	// tolower everything
 	// then a basic search
 
-	bool hit;
+	auto check = [search](const std::string &text) {
+		QString qtext = QString(text.c_str());
+		bool hit = qtext.contains(search, Qt::CaseSensitivity::CaseInsensitive);
+		return hit;
+	};
 
-	// search title
-	QString title = QString(res->getResourceName().c_str());
-	hit = title.contains(search, Qt::CaseSensitivity::CaseInsensitive);
-	if (hit) return true;
-
-	// search description
-	QString desc = QString(res->getResourceDescription().c_str());
-	hit = desc.contains(search, Qt::CaseSensitivity::CaseInsensitive);
-	if (hit) return true;
-
-	// search authors/source
-	QString source = QString(res->getAuthor().c_str());
-	hit = desc.contains(search, Qt::CaseSensitivity::CaseInsensitive);
-	if (hit) return true;
+	if (check(res->getResourceName())) return true;
+	if (check(res->getResourceDescription())) return true;
+	if (check(res->getAuthor())) return true;
+	if (check(res->getResourcePath())) return true;
 
 	return false;
 }

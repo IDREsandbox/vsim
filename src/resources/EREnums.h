@@ -12,7 +12,7 @@ namespace ER {
 		"Title",
 		"Distance",
 		"Start Year",
-		"None"
+		"Creation Order"
 	};
 }
 
