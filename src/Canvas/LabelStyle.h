@@ -38,7 +38,7 @@ public:
 		QFont::Weight we, bool ital, Qt::Alignment al, int m);
 	~LabelStyle();
 
-	// LabelStyle::operator=(); // default
+	// operator=(); // default
 	void copy(const LabelStyle *other);
 
 	void applyToWidget(QWidget *widget, bool font_size = true);
@@ -53,10 +53,6 @@ public:
 
 	FrameStyle *frameStyle(); // FIXME: better style than raw pointer?
 	const FrameStyle &cFrameStyle() const;
-
-	QSize getSize() const;
-	void setSize(QSize size);
-	void setSize(int w, int h);
 
 	//QColor backgroundColor() const;
 	//const osg::Vec4 &getBackgroundColor() const;

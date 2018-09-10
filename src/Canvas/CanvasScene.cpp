@@ -910,6 +910,19 @@ std::string CanvasLabel::html() const
 	return document()->toHtml().toStdString();
 }
 
+QRectF CanvasLabel::rectCenteredPixels(int w, int h)
+{
+	w = std::max(w, 1);
+	h = std::max(h, 1);
+	QRectF r = rect();
+	QPointF center = r.center();
+	r.setSize(QSizeF(
+		w / baseHeight(),
+		h / baseHeight()));
+	r.moveCenter(center);
+	return r;
+}
+
 void CanvasLabel::setHtml(const std::string & s)
 {
 	document()->setHtml(QString::fromStdString(s));

@@ -57,7 +57,7 @@ table FillStyle {
 
 table BorderStyle {
   color:Color;
-  width:int;
+  width:int; // big units
   visible:bool;
 }
 
@@ -68,7 +68,7 @@ table TextStyle {
   margin:int;
   font_family:string;
   point_size:int;
-  weight:int; // bold
+  weight:int; // boldness 0-100
   italicized:bool;
   underlined:bool;
 }
@@ -79,8 +79,8 @@ table LabelStyle {
   fill_style:FillStyle;
   text_style:TextStyle;
   line_style:LineStyle;
-  width:int32;
-  height:int32;
+  width:int32 = 200; // big units
+  height:int32 = 100; // big units
 }
 // kept in StyleTable
 table ImageStyle {

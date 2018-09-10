@@ -362,15 +362,9 @@ void CanvasControl::applyLabelStyle(CanvasLabel * label, LabelStyle *style)
 	applyFrameStyle(label, style->frameStyle());
 	label->setStyleType(style->getType());
 	label->setVAlign(style->m_align);
-
-	// resize around the center
-	QRectF rect = label->rect();
-	QPointF center = rect.center();
-	rect.setSize(QSizeF(
-		style->getSize().width() / label->baseHeight(),
-		style->getSize().height() / label->baseHeight()));
-	rect.moveCenter(center);
-	label->setRect(rect);
+	label->setRect(
+		label->rectCenteredPixels(
+			style->m_size.width(), style->m_size.height()));
 
 	style->applyToDocument(label->document());
 }
@@ -397,8 +391,8 @@ QUndoCommand *CanvasControl::createApplyLabelStyleCommand(CanvasLabel *label,
 	new CanvasItem::SetHasBorderCommand(label, frame->m_has_frame, cmd);
 
 	// resize around center
-	QRectF();
-	new CanvasItem::SetRectCommand(label, applySy, cmd);
+	new CanvasItem::SetRectCommand(label,
+		label->rectCenteredPixels(s->m_size.width(), s->m_size.height()), cmd);
 
 	// label
 	new CanvasLabel::SetVAlignCommand(label, s->valign(), cmd);

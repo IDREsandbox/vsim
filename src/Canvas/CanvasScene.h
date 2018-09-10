@@ -309,6 +309,8 @@ public:
 	std::string html() const;
 	void setHtml(const std::string &s);
 
+	QRectF rectCenteredPixels(int w, int h);
+
 	TextItem *textItem() const;
 
 public: // commands

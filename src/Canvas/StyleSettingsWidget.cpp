@@ -194,7 +194,6 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	});
 	connect(ui.height_spinbox, QOverload<int>::of(&QSpinBox::valueChanged), this,
 		[this](int h) {
-		qDebug() << "setting height" << h;
 		m_style->m_size.setHeight(h);
 		refresh();
 	});
@@ -218,7 +217,7 @@ void StyleSettingsWidget::setMode(Mode mode)
 
 		// create a slide
 		m_label = m_control->createLabel(m_style.get());
-		m_label->setHtml("Sample Label");
+		m_label->setHtml("New Label");
 		m_label->setRect(-.5, -.3, 1, .6);
 		m_scene->addItem(m_label);
 
@@ -300,8 +299,8 @@ void StyleSettingsWidget::setStyle(const LabelStyle * style)
 
 	ui.width_spinbox->blockSignals(true);
 	ui.height_spinbox->blockSignals(true);
-	ui.width_spinbox->setValue(m_style->getSize().width());
-	ui.height_spinbox->setValue(m_style->getSize().height());
+	ui.width_spinbox->setValue(m_style->m_size.width());
+	ui.height_spinbox->setValue(m_style->m_size.height());
 	ui.width_spinbox->blockSignals(false);
 	ui.height_spinbox->blockSignals(false);
 
