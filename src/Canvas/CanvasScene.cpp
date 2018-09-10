@@ -7,6 +7,12 @@
 #include <QTextDocument>
 #include <QPainter>
 #include <QKeyEvent>
+#include <QTextEdit>
+#include <QClipboard>
+#include <QMimeData>
+#include <QMenu>
+#include <QApplication>
+#include <QGraphicsSceneContextMenuEvent>
 #include "FocusFilter.h"
 #include "Core/WeakObject.h"
 
@@ -1034,10 +1040,40 @@ void TextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event)
 	QGraphicsTextItem::mouseDoubleClickEvent(event);
 }
 
-void TextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent * event)
+void TextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 {
-	// TODO: how to add paste plain text?
-	QGraphicsTextItem::contextMenuEvent(event);
+	float old_width = document()->textWidth();
+
+	QTextEdit temp;
+	temp.setDocument(document());
+	temp.setTextCursor(textCursor());
+	temp.setTextInteractionFlags(textInteractionFlags());
+	QMenu *m2 = temp.createStandardContextMenu();
+	// remove undo/redo actions because they break things
+	auto actions = m2->actions();
+	m2->removeAction(actions[1]);
+	m2->removeAction(actions[0]);
+
+	// restore some document things because temp messes them up
+	document()->setTextWidth(old_width);
+
+	QMenu m3(e->widget());
+	m3.addActions(m2->actions());
+
+	QAction *paste = m3.addAction("Paste as plain text");
+	connect(paste, &QAction::triggered, this, [this]() {
+		auto cursor = textCursor();
+		const QClipboard *clipboard = QApplication::clipboard();
+		const QMimeData *mimeData = clipboard->mimeData();
+		if (mimeData->hasText()) {
+			cursor.insertText(mimeData->text());
+		}
+	});
+	m3.exec(e->screenPos());
+	setTextCursor(temp.textCursor());
+	document()->setTextWidth(old_width);
+
+	m2->deleteLater();
 }
 
 CanvasImage::CanvasImage()
