@@ -979,6 +979,11 @@ TextItem::TextItem(CanvasLabel * parent)
 	m_rect(parent)
 {
 	setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+
+	// default font
+	auto f = document()->defaultFont();
+	f.setHintingPreference(QFont::PreferNoHinting);
+	document()->setDefaultFont(f);
 }
 
 QRectF TextItem::boundingRect() const
