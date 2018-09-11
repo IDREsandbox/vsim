@@ -5,6 +5,9 @@
 #include <memory>
 #include <QDebug>
 #include <QDir>
+#include <osgDB/Registry>
+
+USE_OSGPLUGIN(assimp)
 
 int main(int argc, char *argv[])
 {

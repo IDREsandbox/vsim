@@ -283,6 +283,7 @@ void ModelSerializer::ExternalReferenceVisitor::apply(osg::ProxyNode& node)
 
 void ModelSerializer::ExternalReferenceVisitor::visit(osg::ref_ptr<osg::Node> node)
 {
+	if (!node) return;
 	// do a dummy traversal, hopefully this triggers the lazy loading
 	ExternalReferenceDebugger erd;
 	erd.doNothing(true);

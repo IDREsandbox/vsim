@@ -1,5 +1,10 @@
 # Changelog
 
+## 2018-9-10
+
+- Added x/y/w/h to style editor
+- Added "Paste as plain text" to canvas text editing
+
 ## 2018-8-30
 
 - Menu tabs moved around. Removed Window menu, moved History button to Edit menu, moved others into Model.

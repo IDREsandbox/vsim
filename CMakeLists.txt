@@ -43,6 +43,8 @@ set(osgComponents
 find_package(OpenSceneGraph 3.4.0 REQUIRED ${osgComponents})
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
+find_package(Assimp REQUIRED)
+include_directories(${ASSIMP_INCLUDE_DIRS})
 
 find_package(Qt5 REQUIRED Core Gui Widgets Test Concurrent)
 find_package(Qt5Concurrent REQUIRED)

@@ -63,8 +63,8 @@ table BorderStyle {
 
 table TextStyle {
   foreground:Color;
-  halign:HAlign;
-  valign:VAlign;
+  halign:HAlign = HCenter;
+  valign:VAlign = VCenter;
   margin:int;
   font_family:string;
   point_size:int;
@@ -101,7 +101,7 @@ table CanvasLabel {
   html:string;
   fill_style:FillStyle;
   line_style:LineStyle;
-  valign:VAlign;
+  valign:VAlign = VCenter;
   //text_style:TextStyle; // the other text stuff is kept in the html
 }
 

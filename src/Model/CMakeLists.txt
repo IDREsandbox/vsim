@@ -26,10 +26,12 @@ set(Model_src
   OSGGroupModel.cpp
   OSGNodeWrapper.cpp
   OSGYearModel.cpp
-)
+  ReaderWriterAssImp.cpp
+) 
 
 add_library(Model_obj ${Model_src} ${Model_h})
-target_link_libraries(Model_obj Core_obj Gui_obj Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES})
+target_link_libraries(Model_obj Core_obj Gui_obj Qt5::Widgets
+  ${OPENSCENEGRAPH_LIBRARIES} ${ASSIMP_LIBRARIES})
 
 vsim_add_experiment(
   Model_experiment
