@@ -36,13 +36,13 @@ public:
 	citerator end() const;
 
 	// simple
-	virtual void append(std::shared_ptr<T> node);
+	void append(std::shared_ptr<T> node);
 	// continuous *
 	virtual bool insert(size_t index, const std::vector<std::shared_ptr<T>> &nodes);
 	virtual bool remove(size_t index, size_t count);
 	// index based, multiple
-	virtual void insertMulti(const std::vector<std::pair<size_t, std::shared_ptr<T>>> &children);
-	virtual void removeMulti(const std::vector<size_t> &children);
+	void insertMulti(const std::vector<std::pair<size_t, std::shared_ptr<T>>> &children);
+	void removeMulti(const std::vector<size_t> &children);
 	// pointer based, multiple
 	//virtual void insertMultiP(const std::set<std::shared_ptr<T>> &children);
 	//virtual void removeMultiP(const std::set<std::shared_ptr<T>> &children);

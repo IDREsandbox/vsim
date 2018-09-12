@@ -55,6 +55,7 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 		emit sSetRadius(value);
 	});
 	connect(ui->searchLineEdit, &QLineEdit::textChanged, this, &ERFilterArea::sSearch);
+	connect(ui->legend_checkbox, &QAbstractButton::clicked, this, &ERFilterArea::sShowLegend);
 }
 
 void ERFilterArea::setCategoryModel(CheckableListProxy * categories)
@@ -66,6 +67,10 @@ void ERFilterArea::setCategoryModel(CheckableListProxy * categories)
 void ERFilterArea::setSearch(const QString & s)
 {
 	ui->searchLineEdit->setText(s);
+}
+
+void ERFilterArea::setShowLegend(bool show)
+{
 }
 
 void ERFilterArea::setSortAll(ER::SortBy sort)

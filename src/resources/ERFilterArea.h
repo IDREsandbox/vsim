@@ -26,6 +26,7 @@ public:
 	void enableYears(bool enable);
 	void enableAutoLaunch(bool enable);
 	void setSearch(const QString &s);
+	void setShowLegend(bool show);
 
 	// two configurations
 	// 1. show global/local
@@ -41,6 +42,7 @@ signals:
 	void sEnableYears(bool enable);
 	void sEnableAutoLaunch(bool enable);
 	void sSearch(const QString &search);
+	void sShowLegend(bool show);
 	void sClear();
 
 private:

@@ -32,6 +32,7 @@ class CanvasEditor;
 class CanvasContainer;
 class BrandingOverlay;
 class SwitchWindow;
+class ECategoryLegend;
 
 class MainWindow : public QMainWindow
 {
@@ -55,6 +56,7 @@ public:
 	ModelOutliner *outliner() const;
 	TimeSlider *timeSlider() const;
 	BrandingOverlay *brandingOverlay() const;
+	ECategoryLegend *categoryLegend() const;
 
 	QMenu *navigationMenu() const;
 
@@ -131,6 +133,7 @@ private:
 	CoordinateWidget *m_coordinate_widget;
 	BrandingOverlay *m_branding_overlay;
 	SwitchWindow *m_switch_window;
+	ECategoryLegend *m_category_legend;
 
 	QActionGroup *m_navigation_action_group;
 	QAction *m_action_first_person;

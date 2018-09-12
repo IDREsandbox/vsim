@@ -59,6 +59,7 @@
 #include "LockDialog.h"
 #include "Core/Util.h"
 #include "ExportDialog.h"
+#include "ECategoryLegend.h"
 
 #include <fstream>
 
@@ -149,6 +150,8 @@ MainWindow::MainWindow(QWidget *parent)
 	m_er_filter_area->setObjectName("erFilterArea");
 	m_er_filter_area->setWindowTitle("Resource Filters");
 	m_er_filter_area->hide();
+
+	m_category_legend = new ECategoryLegend(ui->root);
 
 	// layering
 	m_branding_overlay->lower();
@@ -531,6 +534,11 @@ BrandingOverlay * MainWindow::brandingOverlay() const
 	return m_branding_overlay;
 }
 
+ECategoryLegend * MainWindow::categoryLegend() const
+{
+	return m_category_legend;
+}
+
 QMenu * MainWindow::navigationMenu() const
 {
 	return ui->menuNavigation;
@@ -634,8 +642,9 @@ void MainWindow::updatePositions()
 
 	// place the toolbar where the middle spacer is
 	QWidget *middle = ui->middleSpacer;
+	QRect midrect = middle->geometry();
 	auto *canvas_window = m_canvas->internalWindow();
-	canvas_window->setGeometry(middle->geometry());
+	canvas_window->setGeometry(midrect);
 
 	m_branding_overlay->setGeometry(middle->geometry());
 
@@ -644,6 +653,9 @@ void MainWindow::updatePositions()
 	QRegion full = QRegion(0, 0, splitter->width(), splitter->height());
 	QRegion center = QRegion(middle->geometry());
 	QRegion toolbar;
+
+	QPoint legend_margin(10, 10);
+	m_category_legend->setAnchor(midrect.bottomRight() - legend_margin);
 
 	//auto *canvas_window = m_canvas->internalWindow();
 	//canvas_window->isVisible();

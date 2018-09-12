@@ -123,6 +123,8 @@ set(VSim_src
   DisplaySettingsDialog.cpp
   DisplaySettingsDialog.h
   DisplaySettingsDialog.ui
+  ECategoryLegend.cpp
+  ECategoryLegend.h
   ERBar.cpp
   ERBar.h
   ERBar.ui
@@ -229,6 +231,12 @@ vsim_add_experiment(
   HorizontalScrollBox_experiment
   "${HorizontalScrollBox_src}"
   "Core_obj;Qt5::Widgets"
+)
+
+vsim_add_experiment(
+  ECategoryLegend_experiment
+  "ECategoryLegend.cpp;ECategoryLegend_experiment.cpp"
+  "ERModel_obj;Qt5::Widgets"
 )
 
 # ER serializer test

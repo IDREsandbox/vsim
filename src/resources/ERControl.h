@@ -7,6 +7,8 @@
 #include <QSortFilterProxyModel>
 #include <vector>
 #include <memory>
+#include <QGraphicsOpacityEffect>
+#include <QPropertyAnimation>
 
 #include "Core/Command.h"
 
@@ -24,6 +26,7 @@ class ERFilterArea;
 class CheckableListProxy;
 class SelectionStack;
 class ERBar;
+class ECategoryLegend;
 namespace VSim { namespace FlatBuffers { struct ERSettingsT; } };
 
 // manages which ER is active
@@ -59,6 +62,8 @@ public:
 	void showAll(bool all);
 	bool showingAll() const;
 
+	bool isERState() const;
+
 	// callbacks, show and goto resource
 	void onTouch();
 	void onTopChange();
@@ -66,6 +71,8 @@ public:
 	void onRestrictToCurrent();
 	void onReset();
 	void onYearsEnabledChanged();
+
+	void showLegend(bool show);
 
 	void gatherSettings();
 	void extractSettings();
@@ -106,6 +113,9 @@ public: // actions
 	QAction *a_close_all;
 
 private:
+	void checkShowLegend();
+
+private:
 	VSimApp *m_app;
 	QUndoStack *m_undo_stack;
 	EResourceGroup *m_ers;
@@ -120,6 +130,10 @@ private:
 	ERScrollBox *m_local_box;
 	ERScrollBox *m_all_box;
 	ERScrollBox *m_last_touched;
+	ECategoryLegend *m_legend;
+	QGraphicsOpacityEffect *m_legend_opacity;
+	QPropertyAnimation *m_legend_out_anim;
+	QPropertyAnimation *m_legend_in_anim;
 
 	// filter stuff
 	std::unique_ptr<ERFilterSortProxy> m_filter_proxy;
@@ -137,6 +151,7 @@ private:
 	float m_radius;
 	bool m_enabled;
 	bool m_auto_launch;
+	bool m_show_legend;
 
 	double m_update_time_sec;
 };

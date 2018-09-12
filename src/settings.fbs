@@ -126,4 +126,5 @@ table ERSettings {
   auto_launch:bool = true;
   local_radius:float = 5.0;
   categories:[bool];
+  show_legend:bool = true;
 }

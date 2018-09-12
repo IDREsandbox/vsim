@@ -72,14 +72,17 @@ void ECategoryControl::execDeleteCategory(QAbstractItemModel * model, const QMod
 	ECategory *cat = TGroupModel<ECategory>::get(model, index.row());
 	if (!cat) return;
 
-	m_undo_stack->beginMacro("Delete Category");
+	auto *cmd = new QUndoCommand();
+	cmd->setText("Delete Category");
+
 	std::set<EResource*> resources = cat->resources();
 	for (auto res : resources) {
 		// null out resource categories so that they get restored on undo
-		m_undo_stack->push(new EResource::SetCategoryCommand(res, nullptr));
+		new EResource::SetCategoryCommand(res, nullptr, cmd);
 	}
-	m_undo_stack->push(new RemoveMultiCommand<ECategory>(m_categories, { (size_t)m_categories->indexOf(cat) }));
-	m_undo_stack->endMacro();
+	new RemoveMultiCommand<ECategory>(m_categories, { (size_t)m_categories->indexOf(cat) }, cmd);
+
+	m_undo_stack->push(cmd);
 }
 
 ECategory *ECategoryControl::execEditCategory(QAbstractItemModel * model, const QModelIndex & index)
@@ -92,10 +95,11 @@ ECategory *ECategoryControl::execEditCategory(QAbstractItemModel * model, const 
 	dlg.setTitle(QString::fromStdString(cat->getCategoryName()));
 	dlg.exec();
 
-	m_undo_stack->beginMacro("Edit Category");
-	m_undo_stack->push(new ECategory::SetCategoryNameCommand(cat, dlg.getCatTitle().toStdString()));
-	m_undo_stack->push(new ECategory::SetColorCommand(cat, dlg.getColor()));
-	m_undo_stack->endMacro();
+	auto *cmd = new QUndoCommand();
+	cmd->setText("Edit Category");
+	new ECategory::SetCategoryNameCommand(cat, dlg.getCatTitle().toStdString(), cmd);
+	new ECategory::SetColorCommand(cat, dlg.getColor(), cmd);
+	m_undo_stack->push(cmd);
 	return cat;
 }
 
@@ -113,6 +117,7 @@ std::shared_ptr<ECategory> ECategoryControl::execNewCategory()
 	category->setCategoryName(dlg.getCatTitle().toStdString());
 	category->setColor(dlg.getColor());
 	m_categories->append(category);
+	m_categories->sAnyChange();
 	return category;
 }
 

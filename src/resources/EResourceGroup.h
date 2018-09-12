@@ -40,7 +40,7 @@ public:
 
 public: // commands
 
-	// adds merge operations as children to cmd
+	// adds merge operations as children to cmd, for importing
 	static void mergeCommand(EResourceGroup *group,
 		const EResourceGroup *other, QUndoCommand *cmd);
 

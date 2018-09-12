@@ -13,6 +13,13 @@ public:
 	// operator=() // default
 
 	ECategory *category(int index) const;
+
+	bool insert(size_t index, const std::vector<std::shared_ptr<ECategory>> &nodes) override;
+	bool remove(size_t index, size_t count) override;
+	void clear() override;
+
+signals:
+	void sAnyChange();
 };
 
 #endif

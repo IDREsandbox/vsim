@@ -471,6 +471,7 @@ void VSimRoot::copyERSettings(VSim::FlatBuffers::ERSettingsT & dest,
 	dest.auto_launch = src.auto_launch;
 	dest.local_radius = src.local_radius;
 	dest.categories = src.categories;
+	dest.show_legend = src.show_legend;
 }
 
 

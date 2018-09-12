@@ -1,5 +1,14 @@
 # Changelog
 
+## 2018-9-12
+
+- ER category legend
+
+## 2018-9-11
+
+- Fixed canvas text scaling with funky kerning
+- Added basic dae support with assimp
+
 ## 2018-9-10
 
 - Added x/y/w/h to style editor

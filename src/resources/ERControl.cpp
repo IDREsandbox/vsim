@@ -23,6 +23,7 @@
 #include "Core/LockTable.h"
 #include "Gui/PasswordDialog.h"
 #include "settings_generated.h"
+#include "ECategoryLegend.h"
 
 #include <QDesktopServices>
 #include <QPushButton>
@@ -52,6 +53,20 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	m_last_touched = m_local_box;
 	m_display = m_window->erDisplay();
 	m_filter_area = m_window->erFilterArea();
+	m_legend = m_window->categoryLegend();
+
+	m_legend_opacity = new QGraphicsOpacityEffect(this);
+	m_legend_opacity->setOpacity(1.0);
+	m_legend->setGraphicsEffect(m_legend_opacity);
+	m_legend_in_anim = new QPropertyAnimation(m_legend_opacity, "opacity");
+	m_legend_in_anim->setDuration(250);
+	m_legend_in_anim->setStartValue(0.0);
+	m_legend_in_anim->setEndValue(1.0);
+	m_legend_out_anim = new QPropertyAnimation(m_legend_opacity, "opacity");
+	m_legend_out_anim->setDuration(250);
+	m_legend_out_anim->setStartValue(1.0);
+	m_legend_out_anim->setEndValue(0.0);
+	connect(m_legend_out_anim, &QPropertyAnimation::finished, m_legend, &QWidget::hide);
 
 	m_filter_proxy = std::unique_ptr<ERFilterSortProxy>(new ERFilterSortProxy(nullptr));
 	m_filter_proxy->sortBy(ER::SortBy::NONE);
@@ -182,9 +197,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 
 	connect(m_app, &VSimApp::sStateChanged, this, [this]() {
 		VSimApp::State state = m_app->state();
-		bool ok = m_app->isFlying()
-			|| state == VSimApp::EDIT_ERS;
-		if (ok) {
+		if (isERState()) {
 			m_enabled = true;
 			setDisplay(m_displayed, false); // try to redisplay
 		}
@@ -192,6 +205,7 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 			m_enabled = false;
 			m_display->hide();
 		}
+		checkShowLegend();
 	});
 	connect(m_app, &VSimApp::sTick, this, &ERControl::onUpdate);
 	connect(m_app, &VSimApp::sArrived, this, [this]() {
@@ -231,6 +245,8 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 		m_filter_proxy.get(), &ERFilterSortProxy::setSearch);
 	connect(m_filter_area, &ERFilterArea::sEnableYears,
 		this, &ERControl::enableYears);
+	connect(m_filter_area, &ERFilterArea::sShowLegend,
+		this, &ERControl::showLegend);
 
 	connect(m_window->erBar()->ui.filter, &QPushButton::pressed, this,
 		[this]() {
@@ -272,8 +288,10 @@ void ERControl::load(EResourceGroup *ers)
 	m_global_box->setGroup(m_global_proxy.get());
 
 	m_category_control->load(m_categories);
+	m_legend->setCategoryGroup(m_categories);
 
 	connect(ers, &EResourceGroup::sRestrictToCurrentChanged, this, &ERControl::onRestrictToCurrent);
+	connect(m_categories, &ECategoryGroup::sAnyChange, this, &ERControl::checkShowLegend);
 }
 
 void ERControl::newER()
@@ -722,6 +740,12 @@ bool ERControl::showingAll() const
 	return m_bar->ui.stackedWidget->currentIndex() == 0;
 }
 
+bool ERControl::isERState() const
+{
+	return m_app->isFlying()
+		|| m_app->state() == VSimApp::EDIT_ERS;
+}
+
 void ERControl::onTouch()
 {
 	QObject *sender = QObject::sender();
@@ -923,6 +947,7 @@ void ERControl::gatherSettings()
 	es.local_radius = m_radius;
 
 	es.categories = m_category_checkbox_model->getChecked();
+	es.show_legend = m_show_legend;
 }
 
 void ERControl::extractSettings()
@@ -930,6 +955,7 @@ void ERControl::extractSettings()
 	auto &es = m_app->getRoot()->erSettings();
 	loadFilterSettings(es);
 	showAll(es.show_all);
+	showLegend(es.show_legend);
 }
 
 void ERControl::loadFilterSettings(VSim::FlatBuffers::ERSettingsT &es)
@@ -952,12 +978,49 @@ void ERControl::onReset()
 {
 	onRestrictToCurrent();
 	extractSettings();
+	checkShowLegend();
 }
 
 void ERControl::onYearsEnabledChanged()
 {
 	m_filter_proxy->setYearsEnabled(m_years_enabled
 		&& m_app->timeManager()->timeEnabled());
+}
+
+void ERControl::showLegend(bool show)
+{
+	m_show_legend = show;
+	m_filter_area->setShowLegend(show);
+	checkShowLegend();
+}
+
+void ERControl::checkShowLegend()
+{
+	// er/flying state + show_legend + has categories
+	bool show = isERState()
+		&& m_show_legend
+		&& m_categories->size() > 0;
+
+	// show
+	if (show) {
+		m_legend_out_anim->stop();
+		m_legend->show();
+
+		if (m_legend_in_anim->state() == QPropertyAnimation::State::Stopped
+			&& m_legend_opacity->opacity() < 1.0) {
+			m_legend_in_anim->start();
+		}
+	}
+	// hide
+	else {
+		m_legend_in_anim->stop();
+		// only play if visible, not playing
+		if (m_legend->isVisible() &&
+			m_legend_out_anim->state() == QPropertyAnimation::State::Stopped) {
+			m_legend->show();
+			m_legend_out_anim->start();
+		}
+	}
 }
 
 void ERControl::onRestrictToCurrent()
