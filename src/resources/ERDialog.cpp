@@ -87,16 +87,15 @@ void ERDialog::init(const EResource * er)
 {
 	if (er == nullptr) { // Defaults
 		ui.title->setText("Untitled");
-		ui.description->setPlainText("");
-		ui.authors->setText("");
-		ui.authors->setText("");
+		ui.description->setHtml("");
+		ui.authors->setHtml("");
 		// make all of the other fields just copy the previous?
 		return;
 	}
 
 	ui.title->setText(QString::fromStdString(er->getResourceName()));
-	ui.description->setPlainText(QString::fromStdString(er->getResourceDescription()));
-	ui.authors->setText(QString::fromStdString(er->getAuthor()));
+	ui.description->setHtml(QString::fromStdString(er->getResourceDescription()));
+	ui.authors->setHtml(QString::fromStdString(er->getAuthor()));
 	ui.year_lower->setValue(er->getMinYear());
 	ui.year_upper->setValue(er->getMaxYear());
 	ui.radius->setValue(er->getLocalRange());
@@ -151,12 +150,12 @@ std::string ERDialog::getTitle() const
 
 std::string ERDialog::getDescription() const
 {
-	return ui.description->toPlainText().toStdString();
+	return ui.description->html().toStdString();
 }
 
 std::string ERDialog::getAuthor() const
 {
-	return ui.authors->toPlainText().toStdString();
+	return ui.authors->html().toStdString();
 }
 
 std::string ERDialog::getPath() const

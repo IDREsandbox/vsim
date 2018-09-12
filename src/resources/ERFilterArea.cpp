@@ -71,6 +71,7 @@ void ERFilterArea::setSearch(const QString & s)
 
 void ERFilterArea::setShowLegend(bool show)
 {
+	ui->legend_checkbox->setChecked(show);
 }
 
 void ERFilterArea::setSortAll(ER::SortBy sort)

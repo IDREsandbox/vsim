@@ -114,6 +114,11 @@ set(VSim_src
   AboutDialog.ui
   BaseFirstPersonManipulator.cpp
   BaseFirstPersonManipulator.h
+  BasicRichTextEdit.cpp
+  BasicRichTextEdit.h
+  BasicRichTextEdit.ui
+  BasicRichTextEditWidget.cpp
+  BasicRichTextEditWidget.h
   BrandingOverlay.cpp
   BrandingOverlay.h
   BrandingControl.cpp
@@ -237,6 +242,12 @@ vsim_add_experiment(
   ECategoryLegend_experiment
   "ECategoryLegend.cpp;ECategoryLegend_experiment.cpp"
   "ERModel_obj;Qt5::Widgets"
+)
+
+vsim_add_experiment(
+  BasicRichTextEdit_experiment
+  "BasicRichTextEdit.cpp;BasicRichTextEdit.ui;BasicRichTextEditWidget.cpp;BasicRichTextEdit_experiment.cpp"
+  "Qt5::Widgets"
 )
 
 # ER serializer test

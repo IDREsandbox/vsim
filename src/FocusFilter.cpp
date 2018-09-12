@@ -2,6 +2,7 @@
 
 #include <QEvent>
 #include <QFocusEvent>
+#include "BasicRichTextEdit.h"
 
 FocusFilter::FocusFilter(QObject *parent)
 {

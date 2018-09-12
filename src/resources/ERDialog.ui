@@ -110,7 +110,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPlainTextEdit" name="description"/>
+    <widget class="BasicRichTextEdit" name="description"/>
    </item>
    <item>
     <widget class="QLabel" name="label_authors">
@@ -120,7 +120,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTextEdit" name="authors">
+    <widget class="BasicRichTextEdit" name="authors">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -393,6 +393,11 @@ p, li { white-space: pre-wrap; }
    <extends>QWidget</extends>
    <header>Gui/NumberSlider.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BasicRichTextEdit</class>
+   <extends>QTextEdit</extends>
+   <header>BasicRichTextEdit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
