@@ -114,3 +114,10 @@ void TimeSlider::onTimeEnableChange(bool enable)
 {
 	enableSlider(enable);
 }
+
+void TimeSlider::focusInEvent(QFocusEvent * e)
+{
+	if (m_time->timeEnabled()) {
+		ui->slider->setFocus();
+	}
+}

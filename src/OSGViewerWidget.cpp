@@ -202,7 +202,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	// speed
 	a_speed_up = new QAction(this);
-	a_speed_up->setText("Speed up");
+	a_speed_up->setText("Speed Up");
 	a_speed_up->setShortcut(QKeySequence(Qt::Key_Equal));
 	addAction(a_speed_up);
 	connect(a_speed_up, &QAction::triggered, this, [this]() {
@@ -212,7 +212,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	});
 
 	a_slow_down = new QAction(this);
-	a_slow_down->setText("Slow down");
+	a_slow_down->setText("Slow Down");
 	a_slow_down->setShortcut(QKeySequence(Qt::Key_Minus));
 	addAction(a_slow_down);
 	connect(a_slow_down, &QAction::triggered, this, [this]() {

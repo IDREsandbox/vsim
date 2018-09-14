@@ -1047,6 +1047,10 @@ void TextItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event)
 
 void TextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 {
+	if (!m_rect->editable()) {
+		return;
+	}
+
 	float old_width = document()->textWidth();
 
 	QTextEdit temp;
@@ -1054,31 +1058,37 @@ void TextItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *e)
 	temp.setTextCursor(textCursor());
 	temp.setTextInteractionFlags(textInteractionFlags());
 	QMenu *m2 = temp.createStandardContextMenu();
-	// remove undo/redo actions because they break things
-	auto actions = m2->actions();
-	m2->removeAction(actions[1]);
-	m2->removeAction(actions[0]);
 
-	// restore some document things because temp messes them up
+	if (m2) {
+		// remove undo/redo actions because they break things
+		auto actions = m2->actions();
+		m2->removeAction(actions[1]);
+		m2->removeAction(actions[0]);
+
+		// restore some document things because temp messes them up
+		document()->setTextWidth(old_width);
+
+		QMenu m3(e->widget());
+		m3.addActions(m2->actions());
+
+		QAction *paste = m3.addAction("Paste as plain text");
+		connect(paste, &QAction::triggered, this, [this]() {
+			auto cursor = textCursor();
+			const QClipboard *clipboard = QApplication::clipboard();
+			const QMimeData *mimeData = clipboard->mimeData();
+			if (mimeData->hasText()) {
+				cursor.insertText(mimeData->text());
+			}
+		});
+		m3.exec(e->screenPos());
+		setTextCursor(temp.textCursor());
+		m2->deleteLater();
+	}
+
+	// have to restore text width because the QTextEdit
+	// changes the text width
 	document()->setTextWidth(old_width);
 
-	QMenu m3(e->widget());
-	m3.addActions(m2->actions());
-
-	QAction *paste = m3.addAction("Paste as plain text");
-	connect(paste, &QAction::triggered, this, [this]() {
-		auto cursor = textCursor();
-		const QClipboard *clipboard = QApplication::clipboard();
-		const QMimeData *mimeData = clipboard->mimeData();
-		if (mimeData->hasText()) {
-			cursor.insertText(mimeData->text());
-		}
-	});
-	m3.exec(e->screenPos());
-	setTextCursor(temp.textCursor());
-	document()->setTextWidth(old_width);
-
-	m2->deleteLater();
 }
 
 CanvasImage::CanvasImage()

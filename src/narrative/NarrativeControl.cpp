@@ -364,7 +364,7 @@ void NarrativeControl::lockNarratives()
 	
 	// warning dialog
 	auto btn = QMessageBox::warning(m_window, "Lock Narratives",
-		"Are you sure you want to lock these narratives? This is not undoable.",
+		"Are you sure you want to lock these narratives? A narrative locked without a password cannot be unlocked.",
 		QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
 	if (btn == QMessageBox::Cancel) return;
 

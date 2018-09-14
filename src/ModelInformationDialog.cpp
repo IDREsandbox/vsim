@@ -16,6 +16,8 @@ ModelInformationDialog::ModelInformationDialog(
 	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 	setWindowTitle("Model Information");
 
+
+
 	// set ui stuff
 	if (!data) return;
 	// TODO: try to grab defaults?

@@ -12,6 +12,7 @@
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 #include <osgUtil/Optimizer>
+#include <windows.h>
 
 #include "ui_MainWindow.h"
 
@@ -75,6 +76,11 @@ MainWindow::MainWindow(QWidget *parent)
 	resize(1280, 900);
 	setWindowTitle("VSim");
 	setAcceptDrops(true);
+
+// not debug
+#if NDEBUG
+	hideConsole();
+#endif
 
 	// osg viewer widget
 	m_osg_widget = new OSGViewerWidget(ui->root);
@@ -216,6 +222,7 @@ MainWindow::MainWindow(QWidget *parent)
 	addAction(a_test);
 	connect(a_test, &QAction::triggered, this, [this]() {
 		ui->menubar->addAction(ui->menuTest->menuAction());
+		showConsole();
 	});
 	ui->menubar->removeAction(ui->menuTest->menuAction());
 
@@ -233,6 +240,15 @@ MainWindow::MainWindow(QWidget *parent)
 	debug_frame->setShortcut(Qt::CTRL + Qt::Key_F1);
 	connect(debug_frame, &QAction::triggered, this, [this]() {
 		qInfo() << "debug frame" << "geom:" << geometry() << "frame" << frameGeometry();
+	});
+
+	QAction *toggle_console = new QAction("Toggle console", this);
+	ui->menuTest->addAction(toggle_console);
+	toggle_console->setShortcut(Qt::CTRL + Qt::Key_F2);
+	connect(toggle_console, &QAction::triggered, this, [this]() {
+		if (isConsoleVisible()) hideConsole();
+		else showConsole();
+		m_app->setStatusMessage(QString("console visible ") + (isConsoleVisible() ? "true" : "false"));
 	});
 
 	m_stats_window = new StatsWindow(this);
@@ -413,18 +429,7 @@ void MainWindow::setApp(VSimApp * vsim)
 	connect(ui->actionModel_Information, &QAction::triggered, this, &MainWindow::execModelInformation);
 
 	connect(m_app, &VSimApp::sAboutToSave, this, [this]() {
-		// gather settings
-		auto *ws = &m_app->getRoot()->windowSettings();
-
-		if (m_app->getRoot()->settingsLocked()) return;
-
-		int x = ui->bottomBar->height();
-		ws->window_width = width();
-		ws->window_height = height();
-		ws->has_window_size = true;
-		auto sizes = ui->mainSplitter->sizes();
-		ws->nbar_size = sizes.at(0);
-		ws->ebar_size = sizes.at(2);
+		gatherSettings();
 	});
 
 	onReadOnlyChanged();
@@ -436,48 +441,7 @@ void MainWindow::onReset()
 {
 	onReadOnlyChanged();
 
-	updatePositions();
-
-	// extract settings
-	auto *ws = &m_app->getRoot()->windowSettings();
-	// best fit the rectangle
-	if (ws->has_window_size) {
-		resize(ws->window_width, ws->window_height);
-
-		QScreen *screen = QGuiApplication::primaryScreen();
-		QRect srect = screen->availableGeometry();
-		QRect wrect(0, 0, ws->window_width, ws->window_height);
-
-		double max_width_ratio = 1.0;
-		double max_height_ratio = 1.0;
-
-		QRect mrect(0, 0, srect.width() * max_width_ratio, srect.height() * max_height_ratio);
-		mrect.moveCenter(srect.center());
-
-		// center the rect
-		wrect.moveCenter(mrect.center());
-		// clip the rect
-		wrect = wrect.intersected(mrect);
-
-		int top_diff = geometry().top() - frameGeometry().top();
-
-		// try to center based on frame size
-		resize(wrect.size());
-		QSize frame_size = frameGeometry().size();
-		move(srect.center() - QPoint(frame_size.width() / 2, frame_size.height() / 2));
-
-		// we could also use QWidget::saveState() and QWidget::saveGeometry()
-
-		// Windows 10:
-		// Frame top left corner when perfectly aligned: (-8,0)
-		// Geometry when perfectly aligned: (0,31)
-		// it's hard to make this perfect
-	}
-
-	int top = ws->nbar_size;
-	int bottom = ws->nbar_size;
-	int middle = ui->mainSplitter->height() - top - bottom;
-	ui->mainSplitter->setSizes({ top, middle, bottom });
+	extractSettings();
 
 	// the splitter moved signal is funky
 	// and the correct sizes don't get to updatePositions()
@@ -557,6 +521,81 @@ ERDisplay * MainWindow::erDisplay() const
 ERFilterArea * MainWindow::erFilterArea() const
 {
 	return m_er_filter_area;
+}
+
+void MainWindow::showConsole()
+{
+	ShowWindow(GetConsoleWindow(), SW_SHOW);
+}
+
+void MainWindow::hideConsole()
+{
+	ShowWindow(GetConsoleWindow(), SW_HIDE);
+}
+
+bool MainWindow::isConsoleVisible()
+{
+	return (IsWindowVisible(GetConsoleWindow()) != FALSE);
+}
+
+void MainWindow::gatherSettings()
+{
+	// gather settings
+	auto *ws = &m_app->getRoot()->windowSettings();
+
+	if (m_app->getRoot()->settingsLocked()) return;
+
+	int x = ui->bottomBar->height();
+	ws->window_width = width();
+	ws->window_height = height();
+	ws->has_window_size = true;
+	auto sizes = ui->mainSplitter->sizes();
+	ws->nbar_size = sizes.at(0);
+	ws->ebar_size = sizes.at(2);
+}
+
+void MainWindow::extractSettings()
+{
+	// extract settings
+	auto *ws = &m_app->getRoot()->windowSettings();
+	// best fit the rectangle
+	if (ws->has_window_size) {
+		resize(ws->window_width, ws->window_height);
+
+		QScreen *screen = QGuiApplication::primaryScreen();
+		QRect srect = screen->availableGeometry();
+		QRect wrect(0, 0, ws->window_width, ws->window_height);
+
+		double max_width_ratio = 1.0;
+		double max_height_ratio = 1.0;
+
+		QRect mrect(0, 0, srect.width() * max_width_ratio, srect.height() * max_height_ratio);
+		mrect.moveCenter(srect.center());
+
+		// center the rect
+		wrect.moveCenter(mrect.center());
+		// clip the rect
+		wrect = wrect.intersected(mrect);
+
+		int top_diff = geometry().top() - frameGeometry().top();
+
+		// try to center based on frame size
+		resize(wrect.size());
+		QSize frame_size = frameGeometry().size();
+		move(srect.center() - QPoint(frame_size.width() / 2, frame_size.height() / 2));
+
+		// we could also use QWidget::saveState() and QWidget::saveGeometry()
+
+		// Windows 10:
+		// Frame top left corner when perfectly aligned: (-8,0)
+		// Geometry when perfectly aligned: (0,31)
+		// it's hard to make this perfect
+	}
+
+	int top = ws->nbar_size;
+	int bottom = ws->nbar_size;
+	int middle = ui->mainSplitter->height() - top - bottom;
+	ui->mainSplitter->setSizes({ top, middle, bottom });
 }
 
 MainWindowTopBar *MainWindow::topBar() const

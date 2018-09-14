@@ -66,7 +66,7 @@
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Clear</string>
+        <string>Clear Search</string>
        </property>
       </widget>
      </item>
@@ -77,7 +77,7 @@
      <item>
       <widget class="QPushButton" name="clearButton">
        <property name="text">
-        <string>Clear All</string>
+        <string>Reset All Filters</string>
        </property>
       </widget>
      </item>

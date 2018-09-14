@@ -524,7 +524,7 @@ void ERControl::lockResources()
 
 	// warning dialog
 	auto btn = QMessageBox::warning(m_window, "Lock Resources",
-		"Are you sure you want to lock these resources? This is not undoable.",
+		"Are you sure you want to lock these resources? A resource locked without a password cannot be unlocked.",
 		QMessageBox::StandardButton::Ok, QMessageBox::StandardButton::Cancel);
 	if (btn == QMessageBox::Cancel) return;
 

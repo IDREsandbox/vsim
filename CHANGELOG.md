@@ -1,8 +1,22 @@
 # Changelog
 
+## 2018-9-14
+
+- adjusted About VSim, fixed typos
+- lock narrative/ER title, locking text
+- fix menu capitalization typos
+- model information touchup, focus order, tab focus
+- home hotkey changed to 'r'
+- console window hidden in release, F11 to show
+- touchup style defaults
+- er filter text changes
+- canvas toolbar color buttons have colored highlighting
+- fixed crash  when right clicking on slides
+
 ## 2018-9-12
 
 - ER category legend
+- ER description/author basic rich text editing
 
 ## 2018-9-11
 

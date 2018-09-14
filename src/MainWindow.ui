@@ -145,10 +145,10 @@
     <property name="title">
      <string>Model</string>
     </property>
+    <addaction name="actionModel_Information"/>
     <addaction name="actionModel_Outliner"/>
     <addaction name="actionTime_Slider"/>
     <addaction name="switches"/>
-    <addaction name="actionModel_Information"/>
    </widget>
    <addaction name="menuhello_to_the_world"/>
    <addaction name="menuEdit"/>

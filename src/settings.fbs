@@ -28,16 +28,16 @@ table LockSettings {
 table ModelInformation {
   model_name:string;
   version:string (deprecated);
-  project_date_julian_day:uint64;
+  project_date_julian_day:uint64 = 2456859; // 7/21/2014
   authors:string;
   contributors:string;
   place_of_publication:string; // institutional affiliation
   url:string;
-  project_date_end_julian:uint64;
+  project_date_end_julian:uint64 = 2456859;
   funders:string;
   research_objective:string;
   technology:string;
-  release_date_julian:uint64;
+  release_date_julian:uint64 = 2456859;
   release_notes:string;
 }
 

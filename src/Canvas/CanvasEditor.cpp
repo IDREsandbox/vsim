@@ -390,6 +390,19 @@ void CanvasEditor::updateToolBar()
 	// spinboxes
 	QRectF rect = m_scene->getSelectedRect();
 	m_tb->setRect(m_scene->fromScene(rect));
+
+	auto colorBorder = [](QWidget *widget, QColor c) {
+		widget->setStyleSheet(
+			QString("border: 1px solid rgb(%1, %2, %3);")
+				.arg(QString::number(c.red()))
+				.arg(QString::number(c.green()))
+				.arg(QString::number(c.blue())));
+	};
+
+	// colors
+	colorBorder(m_tb->m_background, m_cc->allBackgroundColor());
+	colorBorder(m_tb->m_foreground, m_cc->allTextColor());
+	colorBorder(m_tb->m_border, m_cc->allBorderColor());
 }
 
 void CanvasEditor::onStylesChanged()

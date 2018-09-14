@@ -149,7 +149,7 @@ CanvasToolBar::CanvasToolBar(QWidget *parent)
 	border_row->addStretch(1);
 
 	m_style = new TitledComboBox(m_color_box);
-	m_style->setTitle("Revert to Label Style");
+	m_style->setTitle("Revert to ...");
 	//ComboBoxLimiter::install(m_style);
 	m_style->setFocusPolicy(Qt::NoFocus);
 	m_style->addItem("Header 1");

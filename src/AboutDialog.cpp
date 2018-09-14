@@ -6,4 +6,5 @@ AboutDialog::AboutDialog(QWidget * parent)
 	ui.setupUi(this);
 	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 	setWindowTitle("About VSim");
+	adjustSize();
 }

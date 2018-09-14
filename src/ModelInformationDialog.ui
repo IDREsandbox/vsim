@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>271</width>
+    <width>273</width>
     <height>694</height>
    </rect>
   </property>
@@ -17,6 +17,18 @@
    <item>
     <widget class="QWidget" name="widget" native="true">
      <layout class="QGridLayout" name="gridLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="name_label">
         <property name="text">
@@ -45,6 +57,12 @@
           <width>0</width>
           <height>40</height>
          </size>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="tabStopWidth">
+         <number>40</number>
         </property>
        </widget>
       </item>
@@ -99,7 +117,7 @@
       <item row="8" column="0">
        <widget class="QLabel" name="authors_label">
         <property name="text">
-         <string>Authors</string>
+         <string>Author(s)</string>
         </property>
        </widget>
       </item>
@@ -111,12 +129,18 @@
           <height>40</height>
          </size>
         </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="tabStopWidth">
+         <number>40</number>
+        </property>
        </widget>
       </item>
       <item row="10" column="0" colspan="2">
        <widget class="QLabel" name="contributors_label">
         <property name="text">
-         <string>Contributors</string>
+         <string>Contributor(s)</string>
         </property>
        </widget>
       </item>
@@ -127,6 +151,12 @@
           <width>0</width>
           <height>40</height>
          </size>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="tabStopWidth">
+         <number>40</number>
         </property>
        </widget>
       </item>
@@ -145,12 +175,18 @@
           <height>40</height>
          </size>
         </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="tabStopWidth">
+         <number>40</number>
+        </property>
        </widget>
       </item>
       <item row="14" column="0">
        <widget class="QLabel" name="funders_label">
         <property name="text">
-         <string>Funders</string>
+         <string>Funder(s)</string>
         </property>
        </widget>
       </item>
@@ -161,6 +197,12 @@
           <width>0</width>
           <height>40</height>
          </size>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="tabStopWidth">
+         <number>40</number>
         </property>
        </widget>
       </item>
@@ -179,6 +221,12 @@
           <height>40</height>
          </size>
         </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="tabStopWidth">
+         <number>40</number>
+        </property>
        </widget>
       </item>
       <item row="18" column="0" colspan="2">
@@ -195,6 +243,12 @@
           <width>0</width>
           <height>40</height>
          </size>
+        </property>
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="tabStopWidth">
+         <number>40</number>
         </property>
        </widget>
       </item>
@@ -233,6 +287,20 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>model_name</tabstop>
+  <tabstop>release_date</tabstop>
+  <tabstop>release_notes</tabstop>
+  <tabstop>project_date</tabstop>
+  <tabstop>project_date_end</tabstop>
+  <tabstop>authors</tabstop>
+  <tabstop>contributors</tabstop>
+  <tabstop>place</tabstop>
+  <tabstop>funders</tabstop>
+  <tabstop>objective</tabstop>
+  <tabstop>technology</tabstop>
+  <tabstop>website</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

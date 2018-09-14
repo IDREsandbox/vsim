@@ -29,10 +29,11 @@ public:
 	void onRangeChange();
 	void onTimeEnableChange(bool enable);
 
+protected:
+	void focusInEvent(QFocusEvent *e) override;
+
 private:
 	std::unique_ptr<Ui::TimeSlider> ui;
-
-	bool m_enabled;
 
 	TimeManager *m_time;
 };

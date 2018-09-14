@@ -15,6 +15,11 @@
 #include "DisplaySettingsDialog.h"
 #include "PositionDialog.h"
 
+static QString onoff(bool on) {
+	if (on) return "On";
+	else return "Off";
+}
+
 NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObject *parent)
 	: QObject(parent),
 	m_app(app),
@@ -44,7 +49,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 
 	a_home = new QAction(this);
 	a_home->setText("Reset");
-	a_home->setShortcut(Qt::Key_H);
+	a_home->setShortcut(Qt::Key_R);
 
 	a_ground_mode = new QAction(this);
 	a_ground_mode->setCheckable(true);
@@ -91,10 +96,10 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	});
 	connect(a_home, &QAction::triggered, this,
 		[this]() {
-		qInfo() << "Home";
+		qInfo() << "Reset Position";
 		m_viewer->goHome();
 		activate();
-		m_app->setStatusMessage("Home");
+		m_app->setStatusMessage("Reset");
 	});
 	connect(a_ground_mode, &QAction::triggered, this,
 		[this]() {
@@ -131,6 +136,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	connect(a_lighting, &QAction::triggered, this,
 		[this](bool checked) {
 		m_viewer->setLightingEnabled(checked);
+		m_app->setStatusMessage("Lighting " + onoff(checked));
 	});
 
 	a_backface_culling = new QAction(this);
@@ -140,6 +146,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	connect(a_backface_culling, &QAction::triggered, this,
 		[this](bool checked) {
 		m_viewer->setBackfaceEnabled(checked);
+		m_app->setStatusMessage("Backface Culling " + onoff(checked));
 	});
 
 	a_texturing = new QAction(this);
@@ -149,6 +156,7 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	connect(a_texturing, &QAction::triggered, this,
 		[this](bool checked) {
 		m_viewer->setTextureEnabled(checked);
+		m_app->setStatusMessage("Texturing " + onoff(checked));
 	});
 
 	a_stats = new QAction(this);
@@ -163,15 +171,20 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	m_mode_group->setExclusive(true);
 	connect(m_mode_group, &QActionGroup::triggered, this,
 		[this](QAction *which) {
+		QString text;
 		if (which == a_fill) {
 			m_viewer->setPolygonMode(osg::PolygonMode::Mode::FILL);
+			text = "Fill";
 		}
 		else if (which == a_wireframe) {
 			m_viewer->setPolygonMode(osg::PolygonMode::Mode::LINE);
+			text = "Line";
 		}
 		else {
 			m_viewer->setPolygonMode(osg::PolygonMode::Mode::POINT);
+			text = "Point";
 		}
+		m_app->setStatusMessage("Polygon Mode: " + text);
 	});
 
 	a_cycle_mode = new QAction(this);

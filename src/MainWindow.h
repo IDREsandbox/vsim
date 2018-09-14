@@ -67,6 +67,13 @@ public:
 	ERDisplay *erDisplay() const;
 	ERFilterArea *erFilterArea() const;
 
+	void showConsole();
+	void hideConsole();
+	bool isConsoleVisible();
+
+	void gatherSettings();
+	void extractSettings();
+
 protected: // event stuff
 	virtual void dragEnterEvent(QDragEnterEvent *event) override;
 	virtual void dropEvent(QDropEvent *event) override;

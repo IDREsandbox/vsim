@@ -12,10 +12,9 @@ CreatePasswordDialog::CreatePasswordDialog(QWidget *parent)
 	m_use(true)
 {
 	ui.setupUi(this);
-
 	setWindowFlag(Qt::WindowType::WindowContextHelpButtonHint, false);
-
 	onUseChange();
+	adjustSize();
 
 	connect(ui.password_checkbox, &QAbstractButton::clicked, this,
 		[this]() {
