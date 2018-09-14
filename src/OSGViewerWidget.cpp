@@ -185,8 +185,13 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	setPolygonMode(osg::PolygonMode::FILL);
 
 	// Lighting
-	m_main_view->setLightingMode(osg::View::LightingMode::SKY_LIGHT);
-	m_thumb_view->setLightingMode(osg::View::LightingMode::SKY_LIGHT);
+	// share the same light
+	m_main_view->setLightingMode(osg::View::LightingMode::HEADLIGHT);
+	auto *light = m_main_view->getLight();
+	m_thumb_view->setLightingMode(osg::View::LightingMode::HEADLIGHT);
+	m_thumb_view->setLight(light);
+
+	light->setAmbient(osg::Vec4(.5, .5, .5, 1.0));
 
 	// Camera Manipulator and Navigation
 	//osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;

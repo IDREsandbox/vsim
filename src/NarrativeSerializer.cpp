@@ -102,7 +102,7 @@ flatbuffers::Offset<fb::NarrativeTable>
 
 void NarrativeSerializer::readNarrativeSlide(const fb::Slide * buffer,
 	NarrativeSlide *slide)
-{	
+{
 
 	if (buffer->camera()) slide->setCameraMatrix(
 		TypesSerializer::fb2osgCameraMatrix(*buffer->camera()));

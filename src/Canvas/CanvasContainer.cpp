@@ -34,6 +34,11 @@ CanvasContainer::CanvasContainer(QWidget *parent)
 	m_manipulator->hide();
 }
 
+void CanvasContainer::setInteractive(bool interactive)
+{
+	m_view->setInteractive(interactive);
+}
+
 void CanvasContainer::setEditable(bool editable)
 {
 	m_editable = editable;

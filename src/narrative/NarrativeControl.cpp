@@ -31,6 +31,7 @@
 #include "Canvas/CanvasContainer.h"
 #include "Canvas/CanvasEditor.h"
 #include "Canvas/CanvasControl.h"
+#include "Canvas/CanvasScene.h"
 
 #include "SelectionStack.h"
 #include "Selection.h"
@@ -189,14 +190,14 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 		this, &NarrativeControl::onNarrativeSelectionChanged);
 
 	// SLIDE CONTROL
-	a_new_slide = new QAction("New Slide", this);
+	a_new_slide = new QAction("New Node", this);
 	a_new_slide->setIconText("+");
-	a_delete_slides = new QAction("Delete Slide", this);
+	a_delete_slides = new QAction("Delete Node", this);
 	a_delete_slides->setIconText("-");
 	a_slide_duration = new QAction("Set Duration", this);
 	a_slide_transition = new QAction("Set Transition", this);
 	a_slide_camera = new QAction("Set Camera", this);
-	a_edit_slide = new QAction("Edit Slide", this);
+	a_edit_slide = new QAction("Edit Node", this);
 	a_edit_slide->setIconText("Edit");
 
 	// menus
@@ -623,6 +624,8 @@ void NarrativeControl::onLeaveEditSlide(NarrativeSlide *slide)
 {
 	if (slide == nullptr) return;
 	slide->setBackgroundDirty();
+	slide->setForegroundDirty();
+	slide->scene()->setEditable(false);
 }
 
 void NarrativeControl::onCurrentLockChange()
@@ -660,13 +663,14 @@ void NarrativeControl::onCurrentLockChange()
 
 void NarrativeControl::enableEditing(bool enable)
 {
+	bool was_editable = m_canvas->isEditable();
 	showCanvasEditor(enable);
 	m_canvas->setEditable(enable);
 	m_editing_slide = enable;
 
 	// onLeaveEditSlide event (for demanding repaints)
 	NarrativeSlide *old_slide = getCurrentSlide();
-	if (!enable && old_slide) {
+	if (!enable && old_slide && was_editable) {
 		onLeaveEditSlide(old_slide);
 	}
 }
@@ -1102,7 +1106,7 @@ void NarrativeControl::newSlide()
 	slide->setCameraMatrix(matrix);
 
 	// perform command
-	m_undo_stack->beginMacro("New Slide");
+	m_undo_stack->beginMacro("New Node");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, {}, Command::ON_UNDO));
 	m_undo_stack->push(new AddNodeCommand<NarrativeSlide>(nar, slide, index));
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, { index }, Command::ON_REDO));
@@ -1121,7 +1125,7 @@ void NarrativeControl::deleteSlides()
 	}
 	Narrative *nar = getNarrative(m_current_narrative);
 
-	m_undo_stack->beginMacro("Delete Slides");
+	m_undo_stack->beginMacro("Delete Nodes");
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, m_slide_selection->data(), Command::ON_UNDO));
 	m_undo_stack->push(new RemoveMultiCommand<NarrativeSlide>(nar, m_slide_selection->toUSet()));
 	m_undo_stack->push(new SelectSlidesCommand(this, m_current_narrative, {}, Command::ON_REDO));

@@ -27,6 +27,7 @@ public:
 	CanvasScene *scene() const;
 	void setScene(CanvasScene *scene);
 
+	void setInteractive(bool interactive);
 	void setEditable(bool editable);
 
 	void debug();

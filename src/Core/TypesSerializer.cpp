@@ -74,6 +74,9 @@ flatbuffers::Offset<fb::ImageData>
 	TypesSerializer::createImageData(
 	flatbuffers::FlatBufferBuilder *builder, QPixmap p)
 {
+	if (p.isNull()) {
+		return flatbuffers::Offset<fb::ImageData>(); // 0 offset
+	}
 	const char *fmt = "PNG";
 	QByteArray bytes;
 	QBuffer buffer(&bytes);

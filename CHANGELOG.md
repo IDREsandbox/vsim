@@ -12,6 +12,12 @@
 - er filter text changes
 - canvas toolbar color buttons have colored highlighting
 - fixed crash  when right clicking on slides
+- replaced "slide" with "node"
+- headlight experiment
+- thumbnails don't redraw on play
+- attempted fix for: the first slide of an imported narrative repaints
+- fixed thumbnails saving text selection
+- status messages for render settings changes
 
 ## 2018-9-12
 
