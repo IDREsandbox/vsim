@@ -101,6 +101,7 @@ bool CanvasContainer::eventFilter(QObject * obj, QEvent * e)
 			return true;
 		}
 		break;
+	default: break;
 	}
 	return false;
 }

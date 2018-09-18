@@ -342,7 +342,7 @@ void Util::quatToYPR(const osg::Quat &quat, double *yaw, double *pitch, double *
 	flat_right.normalize();
 
 	double dot = right * flat_right;
-	double roll2 = acos(std::clamp(dot, -1.0, 1.0));
+	double roll2 = acos(clamp(dot, -1.0, 1.0));
 	//roll2 = std::clamp(roll2, 0.0, .99999);
 
 	// if right is above the horizontal, then negate

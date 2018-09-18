@@ -26,6 +26,28 @@ installing, you might have to run install twice for all dll copying to work
 cmake --build . --target INSTALL --config RELEASE
 ```
 
+## Mac OSX
+
+- install git
+- install homebrew
+- `brew install cmake`
+
+```
+brew install flatbuffers open-scene-graph qt cryptopp assimp
+
+dprefix=""
+for dep in "qt"; do dprefix+=$(brew --prefix $dep)";"; done
+
+mkdir build
+cd build
+cmake -DCMAKE_PREFIX_PATH=$dprefix \
+  -DCMAKE_INSTALL_PREFIX=install ..
+```
+
+cmake -Dcryptopp_DIR="$(pwd)/../cmake" ..
+
+
+
 # old setup instructions that probably don't work
 
 

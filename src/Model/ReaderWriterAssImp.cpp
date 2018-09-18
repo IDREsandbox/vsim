@@ -367,8 +367,9 @@ protected:
         case aiTextureOp_Subtract: return osg::TexEnv::DECAL;
         case aiTextureOp_SmoothAdd: case aiTextureOp_SignedAdd:
             return osg::TexEnv::ADD;
+        default:
+            return osg::TexEnv::REPLACE;
         }
-        return osg::TexEnv::REPLACE;
     }
     
     osg::Texture::WrapMode getWrapMode( aiTextureMapMode mode ) const
@@ -379,8 +380,8 @@ protected:
         case aiTextureMapMode_Clamp: return osg::Texture::CLAMP;
         case aiTextureMapMode_Decal: return osg::Texture::CLAMP_TO_BORDER;
         case aiTextureMapMode_Mirror: return osg::Texture::MIRROR;
+        default: return osg::Texture::CLAMP;
         }
-        return osg::Texture::CLAMP;
     }
 };
 

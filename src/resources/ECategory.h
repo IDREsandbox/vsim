@@ -31,16 +31,10 @@ signals:
 
 // COMMANDS
 public:
-	class SetCategoryNameCommand : public ModifyCommand<ECategory, const std::string&> {
-	public:
-		SetCategoryNameCommand(ECategory *cat, const std::string &name, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getCategoryName, &setCategoryName, name, cat, parent) {}
-	};
-	class SetColorCommand : public ModifyCommand<ECategory, QColor> {
-	public:
-		SetColorCommand(ECategory *cat, QColor color, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getColor, &setColor, color, cat, parent) {}
-	};
+	using SetCategoryNameCommand = ModifyCommand2<ECategory, const std::string&,
+		&ECategory::getCategoryName, &ECategory::setCategoryName>;
+	using SetColorCommand = ModifyCommand2<ECategory, QColor,
+		&ECategory::getColor, &ECategory::setColor>;
 
 private:
 	std::string m_cat_name;

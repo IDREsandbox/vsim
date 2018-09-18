@@ -1,4 +1,4 @@
-#include "Canvas/CanvasToolBar.h  "
+#include "Canvas/CanvasToolBar.h"
 
 #include <QPaintEvent>
 #include <QPainter>
@@ -29,6 +29,7 @@ public:
 		switch (type) {
 		case QEvent::Wheel:
 			return true;
+		default: break;
 		// case QEvent::QKeyEvent:
 		}
 		return false;

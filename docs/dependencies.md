@@ -1,3 +1,11 @@
+# dependencies
+
+flatbuffers
+OpenSceneGraph
+Qt5
+crypto++
+assimp
+
 # vcpkg
 
 Make sure you have at least 30GB before doing this. These build trees are kind of enormous, and can take several hours to build. You can delete the big buildtrees folder afterwards.

@@ -29,7 +29,7 @@ public:
 class SwitchWindow : public QFrame {
 	Q_OBJECT;
 public:
-	SwitchWindow::SwitchWindow(QWidget *parent = nullptr);
+	SwitchWindow(QWidget *parent = nullptr);
 
 	void setModel(SwitchListModel *model);
 

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QtConcurrent>
+
 #include "ui_FutureDialog.h"
 
 class SimpleWorker;

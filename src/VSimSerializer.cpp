@@ -301,7 +301,8 @@ bool VSimSerializer::importNarrativesStream(std::istream &in, NarrativeGroup *gr
 	std::string s = ss.str();
 	const uint8_t *buf = reinterpret_cast<const uint8_t*>(s.c_str());
 
-	bool fb_match = fb::VerifyNarrativeTableBuffer(flatbuffers::Verifier(buf, s.length()));
+	auto tv = flatbuffers::Verifier(buf, s.length());
+	bool fb_match = fb::VerifyNarrativeTableBuffer(tv);
 	if (fb_match) {
 		// reading flatbuffers
 		const fb::NarrativeTable *fb_root = fb::GetNarrativeTable(s.c_str());
@@ -359,7 +360,8 @@ bool VSimSerializer::importEResources(std::istream &in, EResourceGroup *group, c
 	std::string s = ss.str();
 	const uint8_t *buf = reinterpret_cast<const uint8_t*>(s.c_str());
 
-	bool fb_match = fb::VerifyERTableBuffer(flatbuffers::Verifier(buf, s.length()));
+	auto tv = flatbuffers::Verifier(buf, s.length());
+	bool fb_match = fb::VerifyERTableBuffer(tv);
 	if (fb_match) {
 		// reading flatbuffers
 		const fb::ERTable *fb_root = fb::GetERTable(s.c_str());

@@ -20,6 +20,7 @@ class StyleSettingsWidget : public QDialog {
 	Q_OBJECT
 public:
 	StyleSettingsWidget(QWidget *parent = nullptr);
+	~StyleSettingsWidget();
 
 	enum class Mode {
 		LABEL,

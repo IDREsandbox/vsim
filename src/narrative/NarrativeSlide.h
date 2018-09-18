@@ -59,27 +59,14 @@ signals:
 	//void sThumbnailBackgroundChanged(QPixmap image);
 
 public: // COMMANDS
-
-	class SetStayOnNodeCommand : public ModifyCommand<NarrativeSlide, bool> {
-	public:
-		SetStayOnNodeCommand(NarrativeSlide *slide, bool stay, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getStayOnNode, &setStayOnNode, stay, slide, parent) {}
-	};
-	class SetDurationCommand : public ModifyCommand<NarrativeSlide, float> {
-	public:
-		SetDurationCommand(NarrativeSlide *slide, float duration, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getDuration, &setDuration, duration, slide, parent) {}
-	};
-	class SetTransitionDurationCommand : public ModifyCommand<NarrativeSlide, float> {
-	public:
-		SetTransitionDurationCommand(NarrativeSlide *slide, float duration, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getTransitionDuration, &setTransitionDuration, duration, slide, parent) {}
-	};
-	class SetCameraMatrixCommand : public ModifyCommand<NarrativeSlide, const osg::Matrixd&> {
-	public:
-		SetCameraMatrixCommand(NarrativeSlide *slide, osg::Matrixd camera, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getCameraMatrix, &setCameraMatrix, camera, slide, parent) {}
-	};
+	using SetStayOnNodeCommand = ModifyCommand2<NarrativeSlide, bool,
+		&NarrativeSlide::getStayOnNode, &NarrativeSlide::setStayOnNode>;
+	using SetDurationCommand = ModifyCommand2<NarrativeSlide, float,
+		&NarrativeSlide::getDuration, &NarrativeSlide::setDuration>;
+	using SetTransitionDurationCommand = ModifyCommand2<NarrativeSlide, float,
+		&NarrativeSlide::getTransitionDuration, &NarrativeSlide::setTransitionDuration>;
+	using SetCameraMatrixCommand = ModifyCommand2<NarrativeSlide, const osg::Matrixd&,
+		&NarrativeSlide::getCameraMatrix, &NarrativeSlide::setCameraMatrix>;
 
 private:
 	void compositeThumbnail();

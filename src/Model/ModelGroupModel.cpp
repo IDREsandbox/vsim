@@ -75,7 +75,7 @@ int ModelGroupModel::rowCount(const QModelIndex &parent) const
 
 int ModelGroupModel::columnCount(const QModelIndex &parent) const
 {
-	return std::size(ColumnStrings);
+	return Util::size(ColumnStrings);
 }
 
 QVariant ModelGroupModel::data(const QModelIndex &index, int role) const

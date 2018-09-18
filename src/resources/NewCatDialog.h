@@ -1,5 +1,5 @@
-#ifndef NEWCATDOALOG_HPP
-#define NEWCATDIALOG_HPP
+#ifndef NEWCATDOALOG_H
+#define NEWCATDIALOG_H
 #include <QDialog>
 #include <QDialogButtonBox>
 
@@ -25,4 +25,4 @@ private:
 	QColor m_color;
 };
 
-#endif // NEWCATDIALOG_HPP
+#endif

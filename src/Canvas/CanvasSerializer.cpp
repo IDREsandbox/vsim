@@ -16,7 +16,7 @@ static fb::VAlign qt2fbVAlign(Qt::Alignment al) {
 }
 
 static Qt::Alignment fb2qtVAlign(fb::HAlign al) {
-	return static_cast<int>(al);
+	return static_cast<Qt::Alignment>(al);
 }
 
 static flatbuffers::Offset<fb::FillStyle>

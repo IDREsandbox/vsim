@@ -108,7 +108,7 @@ void OSGYearModel::setBase(OSGNodeWrapper *base)
 
 int OSGYearModel::columnCount(const QModelIndex &parent) const
 {
-	return std::size(ColumnStrings);
+	return Util::size(ColumnStrings);
 }
 
 QVariant OSGYearModel::data(const QModelIndex &index, int role) const

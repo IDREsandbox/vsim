@@ -80,7 +80,7 @@ inline std::shared_ptr<T> TGroupModel<T>::getShared(TGroup<T> *base,
 template<class T>
 inline int TGroupModel<T>::baseIndex(const QAbstractItemModel *model, int row)
 {
-	return = model->data(model->index(row, 0), BaseIndexRole).toInt();
+	return model->data(model->index(row, 0), BaseIndexRole).toInt();
 }
 
 template<class T>
@@ -111,7 +111,7 @@ inline QModelIndex TGroupModel<T>::indexOf(T * node) const
 	if (!m_group) return QModelIndex();
 	int row = m_group->indexOf(node);
 	if (row < 0) return QModelIndex();
-	return QModelIndex(row, 0);
+	return createIndex(row, 0, node);
 }
 
 template<class T>

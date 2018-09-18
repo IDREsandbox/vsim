@@ -131,73 +131,34 @@ signals:
 	void sCategoryChanged(ECategory *old_category, ECategory *new_category);
 
 public: // resource commands
-	class SetResourceNameCommand : public ModifyCommand<EResource, const std::string&> {
-	public:
-		SetResourceNameCommand(EResource *res, const std::string &title, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getResourceName, &setResourceName, title, res, parent) {}
-	};
-	class SetResourceAuthorCommand : public ModifyCommand<EResource, const std::string&> {
-	public:
-		SetResourceAuthorCommand(EResource *re, const std::string &author, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getAuthor, &setAuthor, author, re, parent) {}
-	};
-	class SetResourceDescriptionCommand : public ModifyCommand<EResource, const std::string&> {
-	public:
-		SetResourceDescriptionCommand(EResource *res, const std::string &desc, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getResourceDescription, &setResourceDescription, desc, res, parent) {}
-	};
-	class SetResourcePathCommand : public ModifyCommand<EResource, const std::string&> {
-	public:
-		SetResourcePathCommand(EResource *res, const std::string &path, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getResourcePath, &setResourcePath, path, res, parent) {}
-	};
-	class SetGlobalCommand : public ModifyCommand<EResource, bool> {
-	public:
-		SetGlobalCommand(EResource *res, bool global, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getGlobal, &setGlobal, global, res, parent) {}
-	};
-	class SetCopyrightCommand : public ModifyCommand<EResource, Copyright> {
-	public:
-		SetCopyrightCommand(EResource *res, Copyright cr, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getCopyright, &setCopyright, cr, res, parent) {}
-	};
-	class SetMinYearCommand : public ModifyCommand<EResource, int> {
-	public:
-		SetMinYearCommand(EResource *res, int my, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getMinYear, &setMinYear, my, res, parent) {}
-	};
-	class SetMaxYearCommand : public ModifyCommand<EResource, int> {
-	public:
-		SetMaxYearCommand(EResource *res, int my, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getMaxYear, &setMaxYear, my, res, parent) {}
-	};
-	class SetRepositionCommand : public ModifyCommand<EResource, bool> {
-	public:
-		SetRepositionCommand(EResource *res, bool re, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getReposition, &setReposition, re, res, parent) {}
-	};
-	using SetAutoLaunchCommand =
-		ModifyCommand2<EResource, AutoLaunch, &getAutoLaunch, &setAutoLaunch>;
-	class SetLocalRangeCommand : public ModifyCommand<EResource, float> {
-	public:
-		SetLocalRangeCommand(EResource *res, float lr, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getLocalRange, &setLocalRange, lr, res, parent) {}
-	};
-	class SetErTypeCommand : public ModifyCommand<EResource, ERType> {
-	public:
-		SetErTypeCommand(EResource *res, ERType er, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getERType, &setERType, er, res, parent) {}
-	};
-
-	using SetCameraMatrixCommand =
-		ModifyCommand2<EResource, const osg::Matrixd&, &getCameraMatrix, &setCameraMatrix>;
-
-	// category commands
-	class SetCategoryCommand : public ModifyCommand<EResource, std::shared_ptr<ECategory>> {
-	public:
-		SetCategoryCommand(EResource *res, std::shared_ptr<ECategory> category, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&EResource::categoryShared, &setCategory, category, res, parent) {}
-	};
+	using SetResourceNameCommand = ModifyCommand2<EResource, const std::string&,
+		&EResource::getResourceName, &EResource::setResourceName>;
+	using SetResourceAuthorCommand = ModifyCommand2<EResource, const std::string&,
+		&EResource::getAuthor, &EResource::setAuthor>;
+	using SetResourceDescriptionCommand = ModifyCommand2<EResource, const std::string&,
+		&EResource::getResourceDescription, &EResource::setResourceDescription>;
+	using SetResourcePathCommand = ModifyCommand2<EResource, const std::string&,
+		&EResource::getResourcePath, &EResource::setResourcePath>;
+	using SetGlobalCommand = ModifyCommand2<EResource, bool,
+		&EResource::getGlobal, &EResource::setGlobal>;
+	using SetMinYearCommand = ModifyCommand2<EResource, int,
+		&EResource::getMinYear, &EResource::setMinYear>;
+	using SetMaxYearCommand = ModifyCommand2<EResource, int,
+		&EResource::getMaxYear, &EResource::setMaxYear>;
+	using SetRepositionCommand = ModifyCommand2<EResource, bool,
+		&EResource::getReposition, &EResource::setReposition>;
+	using SetAutoLaunchCommand = ModifyCommand2<EResource, AutoLaunch,
+		&EResource::getAutoLaunch, &EResource::setAutoLaunch>;
+	using SetLocalRangeCommand = ModifyCommand2<EResource, float,
+		&EResource::getLocalRange, &EResource::setLocalRange>;
+	using SetCopyrightCommand = ModifyCommand2<EResource, Copyright,
+		&EResource::getCopyright, &EResource::setCopyright>;
+	using SetErTypeCommand = ModifyCommand2<EResource, ERType,
+		&EResource::getERType, &EResource::setERType>;
+	using SetCameraMatrixCommand = ModifyCommand2<EResource, const osg::Matrixd&,
+		&EResource::getCameraMatrix, &EResource::setCameraMatrix>;
+	using SetCategoryCommand = ModifyCommand2<EResource, std::shared_ptr<ECategory>,
+		&EResource::categoryShared, &EResource::setCategory>;
 
 private:
 	std::string m_name;

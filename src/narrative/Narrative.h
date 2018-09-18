@@ -19,6 +19,7 @@ class Narrative : public TGroup<NarrativeSlide> {
 public:
 	Narrative(QObject *parent = nullptr);
 	Narrative &operator= (const Narrative &other);
+	~Narrative();
 
 	void loadOld(const NarrativeOld *old);
 
@@ -42,22 +43,12 @@ signals:
 	void sDeleteSlide(int);
 
 public: // COMMANDS
-
-	class SetTitleCommand : public ModifyCommand<Narrative, const std::string&> {
-	public:
-		SetTitleCommand(Narrative *nar, const std::string &title, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getTitle, &setTitle, title, nar, parent) {}
-	};
-	class SetAuthorCommand : public ModifyCommand<Narrative, const std::string&> {
-	public:
-		SetAuthorCommand(Narrative *nar, const std::string &author, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getAuthor, &setAuthor, author, nar, parent) {}
-	};
-	class SetDescriptionCommand : public ModifyCommand<Narrative, const std::string&> {
-	public:
-		SetDescriptionCommand(Narrative *nar, const std::string &desc, QUndoCommand *parent = nullptr)
-			: ModifyCommand(&getDescription, &setDescription, desc, nar, parent) {}
-	};
+	using SetTitleCommand = ModifyCommand2<Narrative, const std::string&,
+		&Narrative::getTitle, &Narrative::setTitle>;
+	using SetAuthorCommand = ModifyCommand2<Narrative, const std::string&,
+		&Narrative::getAuthor, &Narrative::setAuthor>;
+	using SetDescriptionCommand = ModifyCommand2<Narrative, const std::string&,
+		&Narrative::getDescription, &Narrative::setDescription>;
 
 private:
 	std::string m_title;

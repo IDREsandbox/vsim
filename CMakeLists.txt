@@ -53,14 +53,15 @@ include_directories(${Qt5Test_INCLUDE_DIRS})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Concurrent_INCLUDE_DIRS})
 
-find_package(cryptopp CONFIG REQUIRED)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+find_package(cryptopp MODULE REQUIRED)
 
 # qt flags
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 # set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-# set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "autouic")
-set_property(GLOBAL PROPERTY AUTOGEN_BUILD_DIR "autogen")
+set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "autouic")
+set_property(GLOBAL PROPERTY AUTOGEN_BUILD_DIR "aaaaaaaaaa")
 #message("GAUTOGEN:\n" ${gautogen})
 # set(CMAKE_AUTORCC ON)
 
@@ -103,8 +104,7 @@ function(vsim_add_flatbuffer var fbs_src)
             --gen-object-api
             -o ${CMAKE_BINARY_DIR}/generated
             -I ${CMAKE_SOURCE_DIR}/src
-            ${fbs_full}
-    DEPENDS flatc ${fbs_full})
+            ${fbs_full})
   set(${var} ${fbs_header_full} PARENT_SCOPE)
 endfunction()
 
@@ -132,7 +132,10 @@ endfunction()
 # if you have .ui files in a library
 # then use this to propagate the include dirs
 function(vsim_include_uic target)
-  target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/${target}_autogen/include_$<CONFIG>")
+  set(extraIncludeDir "${CMAKE_CURRENT_BINARY_DIR}/${target}_autogen/include")
+  message("${extraIncludeDir}")
+  #include_directories("${extraIncludeDir}")
+  target_include_directories(${target} PUBLIC "${extraIncludeDir}")
 endfunction()
 
 # puts all the tests and things in build/Debug

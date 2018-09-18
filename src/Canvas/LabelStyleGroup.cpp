@@ -69,6 +69,7 @@ LabelStyle * LabelStyleGroup::getStyle(LabelType style) const
 	case LabelType::LABEL:
 		return m_lab.get();
 		break;
+	default: break;
 	}
 
 	return nullptr;

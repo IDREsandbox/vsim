@@ -74,7 +74,7 @@ public:
 	//using S = decltype(Setter);
 
 	ModifyCommand2(C *obj, T value, QUndoCommand *parent = nullptr)
-		: ModifyCommand(Getter, Setter, value, obj, parent) {}
+		: ModifyCommand<C,T>(Getter, Setter, value, obj, parent) {}
 };
 
 #endif

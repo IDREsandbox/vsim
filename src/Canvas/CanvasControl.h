@@ -12,7 +12,9 @@
 #include <memory>
 
 #include "Canvas/LabelType.h"
+#include "Canvas/CanvasScene.h"
 #include "Core/Command.h"
+#include "Core/ICommandStack.h"
 
 class ICommandStack;
 class SimpleCommandStack;
@@ -30,6 +32,22 @@ class FrameStyle;
 //	void setFont(const std::vector<TextRect*> &items,
 //		const QString &family, ICommandStack *stack);
 //}
+
+
+class CanvasSelectCommand : public QUndoCommand
+{
+public:
+	CanvasSelectCommand(CanvasScene *scene,
+		const std::set<CanvasItem*> selection,
+		Command::When when = Command::ON_BOTH,
+		QUndoCommand *parent = nullptr);
+	void undo();
+	void redo();
+private:
+	CanvasScene * m_scene;
+	std::set<CanvasItem*> m_selection;
+	Command::When m_when;
+};
 
 class CanvasControl : public QObject {
 	Q_OBJECT;
@@ -231,21 +249,6 @@ public:
 	void redo();
 private:
 	QTextDocument * m_doc;
-};
-
-class CanvasSelectCommand : public QUndoCommand
-{
-public:
-	CanvasSelectCommand(CanvasScene *scene,
-		const std::set<CanvasItem*> selection,
-		Command::When when = Command::ON_BOTH,
-		QUndoCommand *parent = nullptr);
-	void undo();
-	void redo();
-private:
-	CanvasScene * m_scene;
-	std::set<CanvasItem*> m_selection;
-	Command::When m_when;
 };
 
 // Command thats adds or removes items from a scene

@@ -202,6 +202,9 @@ StyleSettingsWidget::StyleSettingsWidget(QWidget *parent)
 	refresh();
 }
 
+StyleSettingsWidget::~StyleSettingsWidget() {
+}
+
 void StyleSettingsWidget::setMode(Mode mode)
 {
 	// remove everything from scene

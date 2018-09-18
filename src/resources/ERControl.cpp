@@ -829,8 +829,8 @@ void ERControl::selectERs(const std::vector<EResource*> &res)
 void ERControl::resetFilters()
 {
 	// load based on the default settings
-	VSim::FlatBuffers::ERSettingsT default;
-	loadFilterSettings(default);
+	VSim::FlatBuffers::ERSettingsT settings;
+	loadFilterSettings(settings);
 
 	m_category_checkbox_model->setCheckAll(true);
 }

@@ -293,11 +293,11 @@ void CanvasScene::previewRectTransform(QRectF rect)
 	for (auto &pair : getTransformRects()) {
 		// convert everything to ratios
 		CanvasItem *item = pair.first;
-		QRectF or = pair.second;
-		double xr = (or.x() - old.x()) / old.width();
-		double yr = (or.y() - old.y()) / old.height();
-		double wr = or.width() / old.width();
-		double hr = or.height() / old.height();
+		QRectF ro = pair.second;
+		double xr = (ro.x() - old.x()) / old.width();
+		double yr = (ro.y() - old.y()) / old.height();
+		double wr = ro.width() / old.width();
+		double hr = ro.height() / old.height();
 		QRectF rrect(xr, yr, wr, hr); // ratio rect
 
 		// use those ratios to figure out new rect
@@ -637,7 +637,7 @@ void CanvasItem::debugPaint(bool debug)
 
 int CanvasItem::borderWidthPixels() const
 {
-	return std::lround(pen().widthF() * m_base_height);
+	return qRound(pen().widthF() * m_base_height);
 }
 
 void CanvasItem::setBorderWidthPixels(int px)
@@ -752,7 +752,7 @@ void CanvasItem::mouseEventSelection(QGraphicsSceneMouseEvent * event)
 	// single selection if
 	// - left
 	// - right and not already select
-	else if (left || right && !selected) {
+	else if ((left || right) && !selected) {
 		// scene select one item
 		canvasScene()->setSelected({ this });
 		// refocus

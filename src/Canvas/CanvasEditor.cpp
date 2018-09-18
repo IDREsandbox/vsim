@@ -251,6 +251,9 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	setStyles(m_default_styles.get()); // stuff needs to exist
 }
 
+CanvasEditor::~CanvasEditor() {
+}
+
 CanvasScene *CanvasEditor::scene() const
 {
 	return m_container->scene();
@@ -450,6 +453,7 @@ bool CanvasWindow::event(QEvent *e) {
 	case QEvent::Show:
 	case QEvent::Hide:
 		calcMask();
+	default: break;
 	}
 	return QMainWindow::event(e);
 }

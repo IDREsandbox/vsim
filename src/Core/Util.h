@@ -88,6 +88,13 @@ namespace Util
 		return std::min(std::max(value, min), max);
 	}
 
+	// a constexpr array sizeof
+	template <class T, std::size_t N>
+	constexpr std::size_t size(const T (&array)[N]) noexcept
+	{
+		return N;
+	}
+
 	// forces an angle between [0, 2PI)
 	double angleWrap(double x);
 

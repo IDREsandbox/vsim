@@ -28,6 +28,9 @@ Narrative & Narrative::operator=(const Narrative & other)
 	return *this;
 }
 
+Narrative::~Narrative() {
+}
+
 void Narrative::loadOld(const NarrativeOld * old)
 {
 	m_title = old->getName();

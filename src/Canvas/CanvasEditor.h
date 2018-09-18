@@ -25,6 +25,7 @@ class CanvasEditor : public QWidget {
 	Q_OBJECT;
 public:
 	CanvasEditor(QWidget *parent = nullptr);
+	~CanvasEditor();
 
 	CanvasScene *scene() const;
 	void setScene(CanvasScene *scene);

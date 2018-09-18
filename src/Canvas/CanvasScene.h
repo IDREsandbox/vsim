@@ -244,15 +244,15 @@ public:
 
 public: // commands
 	using SetBorderWidthCommand =
-		ModifyCommand2<CanvasItem, int, &borderWidthPixels, &setBorderWidthPixels>;
+		ModifyCommand2<CanvasItem, int, &CanvasItem::borderWidthPixels, &CanvasItem::setBorderWidthPixels>;
 	using SetBorderColorCommand =
-		ModifyCommand2<CanvasItem, const QColor&, &borderColor, &setBorderColor>;
+		ModifyCommand2<CanvasItem, const QColor&, &CanvasItem::borderColor, &CanvasItem::setBorderColor>;
 	using SetHasBorderCommand =
-		ModifyCommand2<CanvasItem, bool, &hasBorder, &setHasBorder>;
+		ModifyCommand2<CanvasItem, bool, &CanvasItem::hasBorder, &CanvasItem::setHasBorder>;
 	using SetBackgroundCommand =
-		ModifyCommand2<CanvasItem, const QColor&, &background, &setBackground>;
+		ModifyCommand2<CanvasItem, const QColor&, &CanvasItem::background, &CanvasItem::setBackground>;
 	using SetRectCommand =
-		ModifyCommand2<CanvasItem, const QRectF&, &rect, &setRect2>;
+		ModifyCommand2<CanvasItem, const QRectF&, &CanvasItem::rect, &CanvasItem::setRect2>;
 
 protected:
 	virtual void onResize(QSizeF size);
@@ -315,9 +315,9 @@ public:
 
 public: // commands
 	using SetVAlignCommand =
-		ModifyCommand2<CanvasLabel, Qt::Alignment, &valign, &setVAlign>;
+		ModifyCommand2<CanvasLabel, Qt::Alignment, &CanvasLabel::valign, &CanvasLabel::setVAlign>;
 	using SetStyleTypeCommand =
-		ModifyCommand2<CanvasLabel, LabelType, &styleType, &setStyleType>;
+		ModifyCommand2<CanvasLabel, LabelType, &CanvasLabel::styleType, &CanvasLabel::setStyleType>;
 
 protected:
 	void onResize(QSizeF size) override;

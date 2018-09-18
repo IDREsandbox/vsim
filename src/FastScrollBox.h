@@ -116,7 +116,7 @@ protected:
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 		QWidget *widget = 0) override;
 	QRectF boundingRect() const override;
-	QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+	QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
