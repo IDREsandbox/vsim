@@ -306,7 +306,7 @@ void HorizontalScrollBox::removeItems(const std::vector<size_t> indices, bool de
 	for (size_t i : indices) {
 		ScrollBoxItem *item = m_items[i];
 		if (delete_items) {
-			delete item;
+			item->deleteLater();
 		}
 	}
 	VecUtil::multiRemove(&m_items, indices);

@@ -204,7 +204,7 @@ file(GLOB_RECURSE oldSerializers
   )
 
 if (APPLE)
-  set(specialLinker MACOSX_BUNDLE)
+  #set(specialLinker MACOSX_BUNDLE)
 endif()
 add_executable(VSim ${specialLinker} main.cpp ${oldSerializers} icon.rc)
 target_link_libraries(VSim VSim_obj
