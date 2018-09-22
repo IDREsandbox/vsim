@@ -274,6 +274,9 @@ NarrativeControl::NarrativeControl(VSimApp *app, MainWindow *window, QObject *pa
 	connect(window, &MainWindow::sDebugControl, this, &NarrativeControl::debug);
 }
 
+NarrativeControl::~NarrativeControl() {
+}
+
 void NarrativeControl::newNarrative()
 {
 	if (m_narrative_group->restrictedToCurrent()) return;

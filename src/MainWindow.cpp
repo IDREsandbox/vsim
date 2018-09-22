@@ -12,7 +12,10 @@
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 #include <osgUtil/Optimizer>
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 #include "ui_MainWindow.h"
 
@@ -525,17 +528,24 @@ ERFilterArea * MainWindow::erFilterArea() const
 
 void MainWindow::showConsole()
 {
+	#ifdef _WIN32
 	ShowWindow(GetConsoleWindow(), SW_SHOW);
+	#endif
 }
 
 void MainWindow::hideConsole()
 {
+	#ifdef _WIN32
 	ShowWindow(GetConsoleWindow(), SW_HIDE);
+	#endif
 }
 
 bool MainWindow::isConsoleVisible()
 {
+	#ifdef _WIN32
 	return (IsWindowVisible(GetConsoleWindow()) != FALSE);
+	#endif
+	return false;
 }
 
 void MainWindow::gatherSettings()
@@ -630,8 +640,8 @@ void MainWindow::resizeEvent(QResizeEvent * event)
 void MainWindow::mousePressEvent(QMouseEvent * event)
 {
 	if (event->button() == Qt::MouseButton::RightButton
-		&& m_app->isFlying()
-		|| m_app->state() == VSimApp::State::EDIT_ERS) {
+		&& (m_app->isFlying()
+			|| (m_app->state() == VSimApp::State::EDIT_ERS))) {
 		m_app->erControl()->closeAll();
 	}
 	else if (event->button() == Qt::MouseButton::LeftButton
@@ -940,8 +950,6 @@ void MainWindow::actionImportNarratives()
 	m_app->narrativeControl()->mergeNarratives(&group);
 
 	if (!error_list.empty()) {
-		QString s;
-		for (const auto &s : error_list);
 		QMessageBox::warning(this, "Import Narratives", "Error importing narratives from " + error_list.join(", "));;
 	}
 }

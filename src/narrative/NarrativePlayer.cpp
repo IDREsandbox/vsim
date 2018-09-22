@@ -300,8 +300,8 @@ void NarrativePlayer::recheckPlayPause()
 		!m_app->isPlaying()
 		|| m_app->state() == VSimApp::PLAY_WAIT_CLICK
 		|| m_app->state() == VSimApp::PLAY_FLYING
-		|| m_app->state() == VSimApp::PLAY_TRANSITION && m_paused
-		|| m_app->state() == VSimApp::PLAY_WAIT_TIME && m_paused
+		|| (m_app->state() == VSimApp::PLAY_TRANSITION && m_paused)
+		|| (m_app->state() == VSimApp::PLAY_WAIT_TIME && m_paused)
 		;
 
 	a_play->setEnabled(enable_play);
@@ -327,13 +327,13 @@ void NarrativePlayer::recheckPlayPause()
 		!m_app->isPlaying()
 		|| m_app->state() == VSimApp::PLAY_WAIT_CLICK
 		|| m_app->state() == VSimApp::PLAY_FLYING
-		|| m_app->state() == VSimApp::PLAY_TRANSITION && m_paused
-		|| m_app->state() == VSimApp::PLAY_WAIT_TIME && m_paused
+		|| (m_app->state() == VSimApp::PLAY_TRANSITION && m_paused)
+		|| (m_app->state() == VSimApp::PLAY_WAIT_TIME && m_paused)
 		|| m_app->state() == VSimApp::PLAY_END;
 
 	bool can_pause =
-		m_app->state() == VSimApp::PLAY_TRANSITION && !m_paused
-		|| m_app->state() == VSimApp::PLAY_WAIT_TIME && !m_paused;
+		(m_app->state() == VSimApp::PLAY_TRANSITION && !m_paused)
+		|| (m_app->state() == VSimApp::PLAY_WAIT_TIME && !m_paused);
 
 	a_play->setEnabled(can_play);
 	a_pause->setEnabled(can_pause);

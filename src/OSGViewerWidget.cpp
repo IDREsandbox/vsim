@@ -368,6 +368,8 @@ Navigation::Mode OSGViewerWidget::manipulatorToNavigation(Manipulator man)
 		return Navigation::FLIGHT;
 	case MANIPULATOR_OBJECT:
 		return Navigation::OBJECT;
+	default:
+		break;
 	}
 	return Navigation::FIRST_PERSON;
 }
@@ -380,6 +382,8 @@ Manipulator OSGViewerWidget::navigationToManipulator(Navigation::Mode mode)
 		return MANIPULATOR_FLIGHT;
 	case Navigation::OBJECT:
 		return MANIPULATOR_OBJECT;
+	default:
+		break;
 	}
 	return MANIPULATOR_SIMPLE;
 }

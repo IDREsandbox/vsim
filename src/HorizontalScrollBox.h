@@ -84,7 +84,7 @@ public:
 	virtual void setReadOnly(bool read_only);
 
 	// viewport resize event filter
-	bool eventFilter(QObject *o, QEvent *e);
+	bool eventFilter(QObject *o, QEvent *e) override;
 
 	QScrollArea *scrollArea();
 

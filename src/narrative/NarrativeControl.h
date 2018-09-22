@@ -39,6 +39,7 @@ class NarrativeControl : public QObject
 	Q_OBJECT;
 public:
 	NarrativeControl(VSimApp *app, MainWindow *window, QObject *parent = nullptr);
+	~NarrativeControl();
 
 	// initializes gui from osg data
 	void load(NarrativeGroup *narratives);

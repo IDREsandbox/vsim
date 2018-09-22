@@ -191,7 +191,7 @@ public:
 public:
 
 	// filter out ctrl-s when in wasd
-	bool eventFilter(QObject *obj, QEvent *e);
+	bool eventFilter(QObject *obj, QEvent *e) override;
 
 	float getFrameTime() const;
 	float getTimeBetween() const;

@@ -197,15 +197,16 @@ set(VSim_src
   VSimApp.h
 )
 add_library(VSim_obj ${VSim_src})
-target_link_libraries(VSim_obj VSimRoot_obj Switch_obj Gui_obj Model_obj cryptopp-static)
+target_link_libraries(VSim_obj VSimRoot_obj Switch_obj Gui_obj Model_obj)
 
 file(GLOB_RECURSE oldSerializers
   */Serializer*.cpp
   )
 
-add_executable(VSim main.cpp ${oldSerializers} icon.rc)
-# set_target_properties(VSim PROPERTIES
-#   VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+if (APPLE)
+  set(specialLinker MACOSX_BUNDLE)
+endif()
+add_executable(VSim ${specialLinker} main.cpp ${oldSerializers} icon.rc)
 target_link_libraries(VSim VSim_obj
   Qt5::Widgets Qt5::Core Qt5::Gui
   ${OPENSCENEGRAPH_LIBRARIES})

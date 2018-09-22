@@ -54,7 +54,6 @@ void ECategoryControl::load(ECategoryGroup * cats)
 	m_categories = cats;
 
 	if (!m_categories) return;
-	m_category_sort_proxy;
 }
 
 void ECategoryControl::execDeleteCategory(QAbstractItemModel * model, const QModelIndex & index)

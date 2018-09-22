@@ -28,7 +28,7 @@ signals:
 	//void sThumbnailsDirty();
 
 protected:
-	void paintEvent(QPaintEvent *event);
+	void paintEvent(QPaintEvent *event) override;
 
 	void itemMousePressEvent(QMouseEvent *event, int index) override;
 

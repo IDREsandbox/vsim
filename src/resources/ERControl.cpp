@@ -269,6 +269,9 @@ ERControl::ERControl(VSimApp *app, MainWindow *window, QObject *parent)
 	showAll(false);
 }
 
+ERControl::~ERControl() {
+}
+
 void ERControl::load(EResourceGroup *ers)
 {
 	setDisplay(nullptr);

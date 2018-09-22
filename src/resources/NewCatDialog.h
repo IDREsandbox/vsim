@@ -1,4 +1,4 @@
-#ifndef NEWCATDOALOG_H
+#ifndef NEWCATDIALOG_H
 #define NEWCATDIALOG_H
 #include <QDialog>
 #include <QDialogButtonBox>

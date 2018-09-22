@@ -19,11 +19,11 @@ public:
 	void setDuration(bool stay, float duration); // 0 for stay, >0 for timed
 
 	// overrides 
-	virtual void setIndex(int index) override;
-	virtual int widthFromHeight(int height) const override;
+	void setIndex(int index) override;
+	int widthFromHeight(int height) const override;
 
 	// for filtering double clicks
-	bool eventFilter(QObject * obj, QEvent * ev);
+	bool eventFilter(QObject * obj, QEvent * ev) override;
 
 signals:
 	void sTransitionDoubleClick();

@@ -58,6 +58,9 @@ ERFilterArea::ERFilterArea(QWidget *parent)
 	connect(ui->legend_checkbox, &QAbstractButton::clicked, this, &ERFilterArea::sShowLegend);
 }
 
+ERFilterArea::~ERFilterArea() {
+}
+
 void ERFilterArea::setCategoryModel(CheckableListProxy * categories)
 {
 	ui->categories_box->setModel(categories);

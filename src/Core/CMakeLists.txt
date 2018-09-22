@@ -35,7 +35,7 @@ set(Core_src
 )
 
 add_library(Core_obj ${Core_src} ${Core_h})
-target_link_libraries(Core_obj Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES} cryptopp-static)
+target_link_libraries(Core_obj Qt5::Widgets ${OPENSCENEGRAPH_LIBRARIES} cryptopp)
 
 vsim_add_test(
   Group_test

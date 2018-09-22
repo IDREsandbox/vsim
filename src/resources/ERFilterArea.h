@@ -16,6 +16,7 @@ class ERFilterArea : public QFrame {
 	Q_OBJECT
 public:
 	ERFilterArea(QWidget *parent);
+	~ERFilterArea();
 	void setCategoryModel(CheckableListProxy *categories);
 
 	void setSortAll(ER::SortBy sort);

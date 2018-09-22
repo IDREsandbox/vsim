@@ -14,7 +14,7 @@ public:
 	NarrativeScrollItem(QWidget *parent);
 	void setNarrative(Narrative *narrative);
 
-	virtual int widthFromHeight(int height) const;
+	int widthFromHeight(int height) const override;
 
 	// scales the title to fit
 	void fitTitle();

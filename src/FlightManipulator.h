@@ -8,7 +8,7 @@ public:
 	FlightManipulator();
 
 	// stop all motion
-	void stop();
+	void stop() override;
 
 	virtual void update(double dt_sec, KeyTracker *keys, osg::Node *world) override;
 
