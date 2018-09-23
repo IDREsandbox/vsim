@@ -76,3 +76,10 @@ void ElidedLabel::paintEvent(QPaintEvent *event)
 	//	emit elisionChanged(didElide);
 	//}
 }
+
+QSize ElidedLabel::sizeHint() const
+{
+	QFontMetrics met = fontMetrics();
+	return QSize(0, met.height());
+	// at least one line?
+}

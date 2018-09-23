@@ -38,8 +38,9 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 	layout->addWidget(m_scroll, 0, 0);
 	layout->setMargin(0);
 
+	m_scroll->setFrameShape(QFrame::NoFrame);
 	m_scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+	m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	m_scroll->setWidgetResizable(true);
 	m_scroll->viewport()->installEventFilter(this);
 	m_scroll->setObjectName("scrollArea");
@@ -230,6 +231,13 @@ std::pair<int, float> HorizontalScrollBox::posToIndex(int px)
 void HorizontalScrollBox::refresh()
 {
 	m_height = m_scroll->viewport()->height();
+
+	// int ih = (m_items.size() > 0) ? m_items[0]->height() : 0;
+	// qInfo() << "h:" << height() << "h2:" << m_scroll->height()
+	// 	<< "vh:" << m_scroll->viewport()->height()
+	// 	<< "ih:" << ih
+	// 	<< "sv" << m_scroll->horizontalScrollBar()->isVisible()
+	// 	<< "sbh" << m_scroll->horizontalScrollBar()->height() << objectName();
 
 	for (int i = 0; i < m_items.size(); i++) {
 		m_items[i]->setIndex(i);

@@ -69,10 +69,11 @@ protected:
 	class View : public QGraphicsView {
 	public:
 		View(FastScrollBox *box);
-
-		void paintEvent(QPaintEvent *event) override;
+		bool eventFilter(QObject *obj, QEvent *e) override;
 	protected:
-
+		void paintEvent(QPaintEvent *event) override;
+		void scrollContentsBy(int dx, int dy) override;
+		void wheelEvent(QWheelEvent *event) override;
 	private:
 		FastScrollBox *m_box;
 	};

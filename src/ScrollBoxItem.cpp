@@ -9,6 +9,7 @@ ScrollBoxItem::ScrollBoxItem(QWidget *parent)
 {
 	m_select_color = QColor(0, 100, 255);
 	m_color = QColor(60, 60, 60);
+	setFrameShape(QFrame::NoFrame);
 }
 
 void ScrollBoxItem::setIndex(int index)

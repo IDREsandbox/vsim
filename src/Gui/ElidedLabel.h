@@ -22,6 +22,8 @@ public:
 
 	void setHAlign(Qt::Alignment align);
 
+	QSize sizeHint() const override;
+
 protected:
 	void paintEvent(QPaintEvent *event) override;
 

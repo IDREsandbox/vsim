@@ -5,14 +5,9 @@
 #include <QResizeEvent>
 #include <QGraphicsSceneMouseEvent>
 #include <QElapsedTimer>
+#include <QWheelEvent>
+#include <QScrollBar>
 #include "Core/VecUtil.h"
-
-static void execMenu(const QPoint &pos) {
-	QMenu menu;
-	menu.addAction(new QAction("heyyy"));
-	menu.addAction(new QAction("weowww"));
-	menu.exec(pos);
-}
 
 FastScrollBox::FastScrollBox(QWidget * parent)
 	: QFrame(parent),
@@ -466,9 +461,31 @@ FastScrollBox::View::View(FastScrollBox * box)
 	: QGraphicsView(box),
 	m_box(box)
 {
+	setAlignment(Qt::AlignLeft | Qt::AlignTop);
+}
+
+bool FastScrollBox::View::eventFilter(QObject *obj, QEvent *e)
+{
+	if (obj == verticalScrollBar()) {
+		verticalScrollBar()->setValue(0);
+		return true;
+	}
+	return false;
 }
 
 void FastScrollBox::View::paintEvent(QPaintEvent * event)
 {
 	QGraphicsView::paintEvent(event);
+}
+
+void FastScrollBox::View::scrollContentsBy(int dx, int dy)
+{
+	// this doesn't really work
+	QGraphicsView::scrollContentsBy(dx, 0);
+	verticalScrollBar()->setValue(0);
+}
+
+void FastScrollBox::View::wheelEvent(QWheelEvent *e)
+{
+	QGraphicsView::wheelEvent(e);
 }

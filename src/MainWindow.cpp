@@ -221,7 +221,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// debug stuff
 	QAction *a_test = new QAction("Debug Menu", this);
-	a_test->setShortcut(QKeySequence(Qt::Key_F11));
+	a_test->setShortcut(QKeySequence(Qt::Key_F10));
 	addAction(a_test);
 	connect(a_test, &QAction::triggered, this, [this]() {
 		ui->menubar->addAction(ui->menuTest->menuAction());
@@ -464,6 +464,22 @@ void MainWindow::reloadStyle()
 	file2.open(QFile::ReadOnly);
 	QString dark_style = QLatin1String(file2.readAll());
 	m_canvas->internalWindow()->setStyleSheet(dark_style);
+
+	// scrollbar style
+	// On ios, scrollbars dont take up any space, and like to disappear
+	// But if you apply a style to it appears permanently but isVisible()
+	// stays false and it overlaps everything. So we have to avoid setting
+	// the stylesheet on mac.
+#ifdef _WIN32 
+	QFile sb_file(QCoreApplication::applicationDirPath() + "/assets/scrollbar.qss");
+	sb_file.open(QFile::ReadOnly);
+	QString sb_style = QLatin1String(sb_file.readAll());
+
+	// which scrollbars?
+	// narrative box, er box, er display, er boxes (global, local, all)
+	erBar()->setStyleSheet(sb_style);
+	topBar()->setStyleSheet(sb_style);
+#endif
 }
 
 OSGViewerWidget * MainWindow::getViewerWidget() const

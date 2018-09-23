@@ -35,30 +35,6 @@ QToolButton:disabled {
 	background: rgba(0,0,0,100);
 }
 
-#mainSplitter QScrollBar::horizontal {
-    background: rgb(50, 50, 50);
-    height: 15px;
-	margin: 0px;
-}
-#mainSplitter QScrollBar::handle:horizontal {
-    background: #777777;
-    min-width: 20px;
-	margin: 3px;
-}
-#erDisplay QScrollBar::add-page:horizontal,
-#erDisplay QScrollBar::sub-page:horizontal,
-#mainSplitter QScrollBar::add-line:horizontal,
-#mainSplitter QScrollBar::sub-line:horizontal {
-width: 0px;
-}
-#erDisplay QScrollBar::add-page:horizontal,
-#erDisplay QScrollBar::sub-page:horizontal,
-#mainSplitter QScrollBar::add-page:horizontal,
-#mainSplitter QScrollBar::sub-page:horizontal {
-	background: none;
-}
-
-
 #erDisplay {
     background: rgba(0, 0, 0, 120);
 }
@@ -67,26 +43,4 @@ width: 0px;
     background: rgba(0, 0, 0, 90);
     color: rgb(255, 255, 255);
     /* border-color: rgb(238, 238, 238); */
-}
-
-#erDisplay QScrollBar {
-    background: rgb(50, 50, 50);
-    border: none;
-}
-#erDisplay QScrollBar::handle {
-    background: #777777;
-    /* min-width: 20px; */
-	margin: 3px;
-}
-
-#erDisplay QScrollBar::add-line:vertical,
-#erDisplay QScrollBar::sub-line:vertical {
-    width: 0px;
-}
-/* page is the background */
-#erDisplay QScrollBar::add-page:vertical,
-#erDisplay QScrollBar::sub-page:vertical {
-    width: 0px;
-    height: 0px;
-    background: none;
 }

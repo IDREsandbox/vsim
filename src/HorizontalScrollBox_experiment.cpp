@@ -5,7 +5,20 @@
 #include "ScrollBoxItem.h"
 #include <QApplication>
 #include <QVBoxLayout>
+#include <QLabel>
 #include <iostream>
+#include <QTimer>
+
+class Item : public ScrollBoxItem {
+public:
+	Item(int i = 0, QWidget *parent = nullptr)
+		: ScrollBoxItem(parent) {
+		QHBoxLayout *layout = new QHBoxLayout(this);
+		QLabel *label = new QLabel(this);
+		layout->addWidget(label);
+		label->setText(QString("Testing Widget %1").arg(i));
+	}
+};
 
 int main(int argc, char *argv[])
 {
@@ -26,7 +39,7 @@ int main(int argc, char *argv[])
 
 	std::vector<std::pair<size_t, ScrollBoxItem*>> items;
 	for (int i = 0; i < 30; i++) {
-		auto item = new ScrollBoxItem();
+		auto item = new Item(i);
 		items.push_back({i, item});
 	}
 	normal_box->insertItems(items);
@@ -80,7 +93,7 @@ int main(int argc, char *argv[])
 	QTimer timer;
 	timer.setInterval(0);
 	QObject::connect(&timer, &QTimer::timeout, [&]() {
-		//normal_box->update();
+		normal_box->update();
 		//qDebug() << "cat" << x; x++;
 	});
 	timer.start();
