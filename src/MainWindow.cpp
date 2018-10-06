@@ -470,7 +470,9 @@ void MainWindow::reloadStyle()
 	// But if you apply a style to it appears permanently but isVisible()
 	// stays false and it overlaps everything. So we have to avoid setting
 	// the stylesheet on mac.
-#ifdef _WIN32 
+	// The behavior changes depending on if you have a mouse plugged in
+	// or not. How in the world are we supposed to handle that.
+#if _WIN32
 	QFile sb_file(QCoreApplication::applicationDirPath() + "/assets/scrollbar.qss");
 	sb_file.open(QFile::ReadOnly);
 	QString sb_style = QLatin1String(sb_file.readAll());

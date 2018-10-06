@@ -121,9 +121,8 @@ signals:
 protected:
 	// The auto-sliding effect when you're dragging a widget needs a loop
 	void moveTimer();
-	//void setWidgetWidth();
-	//void positionChildren();
-	//void refreshGeometry();
+	// get hypothetical list of positions given height
+	QList<QRect> positionsForHeight(int height);
 
 	QGridLayout *m_layout;
 	QScrollArea *m_scroll;

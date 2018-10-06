@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	verticalLayout->addWidget(normal_box);
 
 	std::vector<std::pair<size_t, ScrollBoxItem*>> items;
-	for (int i = 0; i < 30; i++) {
+	for (int i = 0; i < 8; i++) {
 		auto item = new Item(i);
 		items.push_back({i, item});
 	}

@@ -40,7 +40,7 @@ HorizontalScrollBox::HorizontalScrollBox(QWidget* parent)
 
 	m_scroll->setFrameShape(QFrame::NoFrame);
 	m_scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	m_scroll->setWidgetResizable(true);
 	m_scroll->viewport()->installEventFilter(this);
 	m_scroll->setObjectName("scrollArea");
@@ -231,21 +231,62 @@ std::pair<int, float> HorizontalScrollBox::posToIndex(int px)
 void HorizontalScrollBox::refresh()
 {
 	m_height = m_scroll->viewport()->height();
-
-	// int ih = (m_items.size() > 0) ? m_items[0]->height() : 0;
-	// qInfo() << "h:" << height() << "h2:" << m_scroll->height()
-	// 	<< "vh:" << m_scroll->viewport()->height()
-	// 	<< "ih:" << ih
-	// 	<< "sv" << m_scroll->horizontalScrollBar()->isVisible()
-	// 	<< "sbh" << m_scroll->horizontalScrollBar()->height() << objectName();
+	auto *bar = m_scroll->horizontalScrollBar();
+	int view_height = m_scroll->viewport()->height();
+	int full_height = m_scroll->height();
+	int max_width = m_scroll->width();
+	bool disappearing = (bar->isVisible() && view_height == full_height);
 
 	for (int i = 0; i < m_items.size(); i++) {
 		m_items[i]->setIndex(i);
 	}
 
+	// turn off the scrollbar if the full resize fits
+	bool show_scrollbar = false;
+	QList<QRect> geoms = positionsForHeight(full_height);
+	int right = 0;
+	if (geoms.size() > 0) {
+		right = geoms.rbegin()->right() + m_spacing;
+		if (right > max_width) {
+			show_scrollbar = true;
+		}
+	}
+
+	if (show_scrollbar) {
+		m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+	}
+	else {
+		m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	}
+// #ifndef _WIN32
+// 	// on mac, if you have a disappearing scrollbar, and it's hidden, then the
+// 	// stuff beneath it doesn't render for some reason unless you forcefully
+// 	// say ScrollBarAlwaysOff
+// 	if (!bar->isVisible()) {
+// 		m_scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+// 	}
+// #endif
+
+	// re-grab the view height, it could have changed
+	// TODO: prevent recursive refresh()? I think it calls this twice when a scrollbar appears/diappears
+	view_height = m_scroll->viewport()->height();
+
 	if (m_items.size() == 0) {
 		m_scroll_area_widget->setMinimumWidth(0);
 		return;
+	}
+
+	if (show_scrollbar && view_height != full_height) {
+		geoms = positionsForHeight(view_height);
+		right = geoms.rbegin()->right() + m_spacing;
+	}
+
+	// set to geoms
+	for (size_t i = 0; i < m_items.size(); i++) {
+		QRect geom = geoms[i];
+		auto *o = m_items[i];
+		o->setGeometry(geoms[i]);
+		o->setFixedSize(geom.width(), geom.height());
 	}
 
 	// do we draw a drag-n-drop box?
@@ -266,32 +307,36 @@ void HorizontalScrollBox::refresh()
 		m_drop_highlight->hide();
 	}
 
+	if (m_drag) {
+		int xpos = 0;
+		if (spacer_index < geoms.size()) {
+			xpos = geoms[spacer_index].x() - m_spacing;
+		}
+		else if (geoms.size() > 0) {
+			xpos = geoms.rbegin()->right();
+		}
+		m_drop_highlight->setGeometry(xpos, 0, m_spacing, m_height);
+	}
 
+	m_scroll_area_widget->setMinimumWidth(right);
+	m_scroll_area_widget->adjustSize();
+}
+
+QList<QRect> HorizontalScrollBox::positionsForHeight(int h)
+{
+	QList<QRect> out;
 	int xpos = m_spacing;
-
-	int bheight = std::max(m_height, 10);
-
 	for (int i = 0; i < m_items.size(); i++) {
 		ScrollBoxItem *o = m_items.at(i);
-		int bwidth = o->widthFromHeight(bheight);
+		int bwidth = o->widthFromHeight(h);
 		bwidth = std::max(bwidth, 10);
 
-		//QRect geom(xpos, margins.top(), bwidth, bheight);
-		QRect geom(xpos, 0, bwidth, bheight);
-		o->setGeometry(geom);
-		o->setFixedSize(bwidth, bheight);
-		if (m_drag && spacer_index == i) {
-			m_drop_highlight->setGeometry(xpos - m_spacing, 0, m_spacing, m_height);
-		}
+		QRect geom(xpos, 0, bwidth, h);
+		out.push_back(geom);
 		xpos += bwidth;
 		xpos += m_spacing;
 	}
-	if (m_drag && spacer_index >= m_items.size()) {
-		m_drop_highlight->setGeometry(xpos - m_spacing, 0, m_spacing, m_height);
-	}
-
-	m_scroll_area_widget->setMinimumWidth(xpos);
-	m_scroll_area_widget->adjustSize();
+	return out;
 }
 
 void HorizontalScrollBox::insertItems(const std::vector<std::pair<size_t, ScrollBoxItem*>>& insertions)
