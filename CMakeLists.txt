@@ -45,6 +45,7 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 find_package(Assimp REQUIRED)
 include_directories(${ASSIMP_INCLUDE_DIRS})
+message("assimp libraries ${ASSIMP_LIBRARIES}")
 
 find_package(Qt5 REQUIRED Core Gui Widgets Test Concurrent)
 find_package(Qt5Concurrent REQUIRED)
@@ -55,6 +56,8 @@ include_directories(${Qt5Concurrent_INCLUDE_DIRS})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 find_package(cryptopp MODULE REQUIRED)
+
+message("cryptopp libraries " ${CRYPTOPP_LIBRARIES})
 
 # qt flags
 set(CMAKE_AUTOMOC ON)
@@ -140,6 +143,13 @@ endfunction()
 
 # puts all the tests and things in build/Debug
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if (APPLE)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D GL_SILENCE_DEPRECATION")
+  SET(CMAKE_EXE_LINKER_FLAGS "-v -L/usr/local/lib")
+  add_compile_definitions(GL_SILENCE_DEPRECATION)
+  message("setting special flags" ${CMAKE_CXX_FLAGS})
+endif()
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 

@@ -33,19 +33,17 @@ cmake --build . --target INSTALL --config RELEASE
 - `brew install cmake`
 
 ```
-brew install flatbuffers open-scene-graph qt cryptopp assimp
+brew install flatbuffers open-scene-graph qt cryptopp assimp python3
+
+mkdir build
+cd build
 
 dprefix=""
 for dep in "qt"; do dprefix+=$(brew --prefix $dep)";"; done
 
-mkdir build
-cd build
 cmake -DCMAKE_PREFIX_PATH=$dprefix \
   -DCMAKE_INSTALL_PREFIX=install ..
 ```
-
-cmake -Dcryptopp_DIR="$(pwd)/../cmake" ..
-
 
 
 # old setup instructions that probably don't work

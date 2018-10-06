@@ -18,6 +18,8 @@ bool ChildMaskFilter::eventFilter(QObject *object, QEvent *e)
 		// there is some double-painting because of this. solution?
 		calcMask(w);
 		break;
+	default:
+		break;
 	}
 	return false;
 }

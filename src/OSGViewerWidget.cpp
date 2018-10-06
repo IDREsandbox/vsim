@@ -121,8 +121,8 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits(osg::DisplaySettings::instance());
 	traits->x = x();
 	traits->y = y();
-	traits->width = width();
-	traits->height = height();
+	traits->width = width() * devicePixelRatio();
+	traits->height = height() * devicePixelRatio();
 	traits->sharedContext = m_shared_graphics_window.get();
 	m_graphics_window = new FBOGraphicsWindow(traits);
 	m_graphics_window->setName("main_context");
@@ -146,7 +146,7 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 	osg::Camera* camera = m_main_view->getCamera();
 	float cfar = 7500.0f;
 	float cnear = 1.0f;
-	camera->setViewport(0, 0, this->width(), this->height());
+	camera->setViewport(0, 0, this->width() * devicePixelRatio(), this->height() * devicePixelRatio());
 	camera->setClearColor(osg::Vec4(51/255.f, 51/255.f, 102/255.f, 1.f));
 	camera->setProjectionMatrixAsPerspective(55.f, aspect_ratio, cnear, cfar);
 	camera->setGraphicsContext(m_graphics_window); // set the context, connects the viewer and graphics context
@@ -939,24 +939,25 @@ void OSGViewerWidget::paintGL()
 		m_frame_time = ft.nsecsElapsed() / 1000000.0;
 	}
 
-	m_full_frame_time = t.nsecsElapsed() / 1000000.0;
-	m_between_timer.start();
-
 	if (m_fbo) {
 		QOpenGLFramebufferObject::blitFramebuffer(nullptr, m_fbo.get(),
 			GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
+
+	m_full_frame_time = t.nsecsElapsed() / 1000000.0;
+	m_between_timer.start();
 }
 
 void OSGViewerWidget::resizeGL(int width, int height)
 {
-	this->getEventQueue()->windowResize(this->x(), this->y(), width, height);
-	m_graphics_window->resized(this->x(), this->y(), width, height);
+	int w2 = width * devicePixelRatio();
+	int h2 = height * devicePixelRatio();
+	this->getEventQueue()->windowResize(this->x(), this->y(), w2, h2);
+	m_graphics_window->resized(this->x(), this->y(), w2, h2);
 	// ^ this also fixes camera aspect ratio and viewport
 	// no need to do it manually
 
 	recreateFramebuffer();
-
 }
 
 void OSGViewerWidget::setThumbnailSize(QSize size)
@@ -1179,7 +1180,7 @@ void OSGViewerWidget::recreateFramebuffer()
 	fmt.setSamples(m_samples);
 	fmt.setAttachment(QOpenGLFramebufferObject::Depth);
 
-	m_fbo = std::make_shared<QOpenGLFramebufferObject>(size(), fmt);
+	m_fbo = std::make_shared<QOpenGLFramebufferObject>(size() * devicePixelRatio(), fmt);
 	m_graphics_window->setFramebuffer(m_fbo);
 
 	QOpenGLFramebufferObjectFormat thumb_fmt;
