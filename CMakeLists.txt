@@ -45,7 +45,10 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 find_package(Assimp REQUIRED)
 include_directories(${ASSIMP_INCLUDE_DIRS})
-message("assimp libraries ${ASSIMP_LIBRARIES}")
+
+if(APPLE)
+  set(CMAKE_PREFIX_PATH "/usr/local/opt/qt;${CMAKE_PREFIX_PATH}")
+endif()
 
 find_package(Qt5 REQUIRED Core Gui Widgets Test Concurrent)
 find_package(Qt5Concurrent REQUIRED)
@@ -135,9 +138,20 @@ endfunction()
 # if you have .ui files in a library
 # then use this to propagate the include dirs
 function(vsim_include_uic target)
-  set(extraIncludeDir "${CMAKE_CURRENT_BINARY_DIR}/${target}_autogen/include")
-  message("${extraIncludeDir}")
-  #include_directories("${extraIncludeDir}")
+  # this doesn't work on XCode, the paths is include_Debug, not include
+  # (use generator expressions to figure this out?)
+  # The qt docs: the include dir is _autogen/include or include_<config>
+  # I think GENERATOR_IS_MULTI_CONFIG is broken for Xcode
+  if(0 OR ("hey" OR 0))
+  endif()
+  if("${GENERATOR_IS_MULTI_CONFIG}" OR (${CMAKE_GENERATOR} STREQUAL "Xcode"))
+    set(includeSuffix "include_$<CONFIG>")
+  else()
+    set(includeSuffix "include")
+  endif()
+
+  set(extraIncludeDir "${CMAKE_CURRENT_BINARY_DIR}/${target}_autogen/${includeSuffix}")
+  message("including uic dir ${extraIncludeDir}")
   target_include_directories(${target} PUBLIC "${extraIncludeDir}")
 endfunction()
 

@@ -38,12 +38,18 @@ brew install flatbuffers open-scene-graph qt cryptopp assimp python3
 mkdir build
 cd build
 
+cmake -DCMAKE_INSTALL_PREFIX=install ..
+```
+
+You can do `-G Xcode` for an Xcode project. The default is just a makefile.
+You might need this? I hardcoded the qt install symlink (/usr/local/opt/qt)
+
+```
 dprefix=""
 for dep in "qt"; do dprefix+=$(brew --prefix $dep)";"; done
-
-cmake -DCMAKE_PREFIX_PATH=$dprefix \
-  -DCMAKE_INSTALL_PREFIX=install ..
+-DCMAKE_PREFIX_PATH=$dprefix
 ```
+
 
 
 # old setup instructions that probably don't work
