@@ -17,26 +17,25 @@ public:
 	virtual ~EResourcesNode();
 	bool operator== (const EResourcesNode &other);
 
-    EResourcesNode(const EResourcesNode& e, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
-        : osg::Group(e, copyop),
-        m_name(e.m_name),
-        m_filetype(e.m_filetype),
-        m_filepath(e.m_filepath),
-        m_description(e.m_description),
+	EResourcesNode(const EResourcesNode& e, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
+		: osg::Group(e, copyop),
+		m_name(e.m_name),
+		m_filetype(e.m_filetype),
+		m_filepath(e.m_filepath),
+		m_description(e.m_description),
 		m_authors(e.m_authors),
-        m_global(e.m_global),
+		m_global(e.m_global),
+		m_reposition(e.m_reposition),
+		m_launch(e.m_launch),
+		m_copyright(e.m_copyright),
 		m_min_year(e.m_min_year),
 		m_max_year(e.m_max_year),
-        m_reposition(e.m_reposition),
-        m_launch(e.m_launch),
-		m_copyright(e.m_copyright),
-        m_local_range(e.m_local_range),
-        m_ertype(e.m_ertype),
+		m_local_range(e.m_local_range),
+		m_ertype(e.m_ertype),
 		m_filter(false),
-        m_camera_position(e.m_camera_position),
-        m_category(e.m_category),
-    	m_view_matrix(e.m_view_matrix)
-        {}
+		m_camera_position(e.m_camera_position),
+		m_category(e.m_category),
+		m_view_matrix(e.m_view_matrix){}
 
     META_Node(, EResourcesNode)
 

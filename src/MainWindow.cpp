@@ -1043,8 +1043,10 @@ void MainWindow::actionImportERs()
 		p.new_base = m_app->getCurrentDirectory();
 
 		bool ok = VSimSerializer::importEResources(in, &g, p);
-		m_app->erControl()->mergeERs(&g);
-		return;
+        if (ok) {
+            m_app->erControl()->mergeERs(&g);
+            return;
+        }
 	}
 	QMessageBox::warning(this, "Import Narratives",
 		"Error importing narratives from " + path);

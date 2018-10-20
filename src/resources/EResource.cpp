@@ -21,10 +21,10 @@ EResource::EResource(QObject *parent)
 	m_ertype(ANNOTATION),
 	m_camera_position(osg::Vec3f(0, 0, 0)),
 	m_camera_matrix(osg::Matrixd()),
-	m_category(),
-	m_index(-1),
 	m_distance_to(0.0f),
-	m_in_range(false)
+	m_in_range(false),
+	m_category(),
+	m_index(-1)
 {
 	m_lock = new LockTable(this);
 }

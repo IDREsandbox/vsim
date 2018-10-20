@@ -137,13 +137,12 @@ endfunction()
 
 # if you have .ui files in a library
 # then use this to propagate the include dirs
+# qt auto_uic doesn't do this automatically (I think?)
 function(vsim_include_uic target)
-  # this doesn't work on XCode, the paths is include_Debug, not include
+  # the qt autogen path changes 
   # (use generator expressions to figure this out?)
   # The qt docs: the include dir is _autogen/include or include_<config>
   # I think GENERATOR_IS_MULTI_CONFIG is broken for Xcode
-  if(0 OR ("hey" OR 0))
-  endif()
   if("${GENERATOR_IS_MULTI_CONFIG}" OR (${CMAKE_GENERATOR} STREQUAL "Xcode"))
     set(includeSuffix "include_$<CONFIG>")
   else()

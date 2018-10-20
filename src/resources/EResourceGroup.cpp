@@ -66,7 +66,6 @@ void EResourceGroup::loadOld(const EResourcesList * old_ers)
 		er->loadOld(node);
 		// assign category
 
-		ECategory *cat = nullptr;
 		auto it = name_map.find(node->getCategoryName());
 		if (it != name_map.end()) {
 			er->setCategory(it->second);
@@ -168,7 +167,7 @@ void EResourceGroup::mergeCommand(EResourceGroup *group,
 
 		auto it = cat_map.find(new_cat->getCategoryName());
 		if (it == cat_map.end()) { // category doesn't already exist
-			auto *add_cat = new AddNodeCommand<ECategory>(group->categories(),
+			new AddNodeCommand<ECategory>(group->categories(),
 				new_cat, -1, cmd);
 
 			cat_map[new_cat->getCategoryName()] = new_cat;
@@ -187,6 +186,6 @@ void EResourceGroup::mergeCommand(EResourceGroup *group,
 	for (size_t i = 0; i < other->size(); i++) {
 		auto res = other->childShared(i);
 		if (!res) continue;
-		auto *add_res = new AddNodeCommand<EResource>(group, res, -1, cmd);
+		new AddNodeCommand<EResource>(group, res, -1, cmd);
 	}
 }

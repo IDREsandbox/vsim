@@ -20,9 +20,9 @@ ERFilterSortProxy::ERFilterSortProxy(TGroup<EResource> *base)
 	m_show_local(true),
 	m_enable_range(false),
 	m_years_enabled(true),
-	m_show_all(false),
+    m_search_changed(false),
 	m_year(0),
-	m_search_changed(false)
+    m_show_all(false)
 {
 	setBase(base);
 	sortBy(ER::SortBy::NONE);
@@ -166,7 +166,7 @@ void ERFilterSortProxy::setCategories(CheckableListProxy * cats)
 
 	// change -> add/remove accordingly
 	connect(cats, &QAbstractItemModel::dataChanged, this,
-		[this, cats](const QModelIndex &topLeft,
+		[this](const QModelIndex &topLeft,
 			const QModelIndex &bottomRight,
 			const QVector<int> &roles = QVector<int>()) {
 
@@ -472,7 +472,6 @@ void ERFilterSortProxy::checkAndInsertSet(const std::set<size_t> &base_indices)
 	size_t old_i = 0;
 	for (size_t i = 0; i < result.size(); i++) {
 		if (old_i >= m_map_to_base.size() || m_map_to_base[old_i] != result[i]) {
-			EResource *new_node = m_base->child(result[i]);
 			//insertions.push_back({ i, new_node });
 			indices.push_back(i);
 			//resources.push_back(new_node);
@@ -764,12 +763,6 @@ void ERFilterSortProxy::reload2()
 	std::vector<size_t> removals;
 	std::vector<size_t> insertions;
 	std::vector<std::pair<size_t, size_t>> moves;
-
-	auto toQList = [](std::vector<size_t> vec) {
-		QList<size_t> out;
-		for (size_t x : vec) out.push_back(x);
-		return out;
-	};
 
 	// decomposes all changes into remove insert move
 	VecUtil::removalsInsertionsMoves(before,
