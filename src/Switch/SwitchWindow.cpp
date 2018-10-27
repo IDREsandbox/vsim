@@ -124,8 +124,6 @@ bool SwitchColorDelegate::editorEvent(QEvent *event, QAbstractItemModel * model,
 	QEvent::Type type = event->type();
 
 	if (type == QEvent::MouseButtonPress) {
-		QMouseEvent *me = (QMouseEvent*)event;
-
 		Qt::CheckState state = Qt::CheckState::Checked;
 
 		model->setData(index, state, Qt::ItemDataRole::CheckStateRole);

@@ -191,7 +191,7 @@ bool ERDialog::getReposition() const
 
 EResource::AutoLaunch ERDialog::getAutoLaunch() const
 {
-	EResource::AutoLaunch value;
+	EResource::AutoLaunch value = EResource::OFF;
 	if (ui.autolaunch_off->isChecked()) {
 		value = EResource::OFF;
 	}
@@ -203,8 +203,6 @@ EResource::AutoLaunch ERDialog::getAutoLaunch() const
 	}
 
 	return value;
-	//return ui.autolaunch->isChecked();
-	//return ui.autolaunch->isChecked() && getERType() != EResource::ANNOTATION;
 }
 
 float ERDialog::getLocalRange() const

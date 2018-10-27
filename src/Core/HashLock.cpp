@@ -1,4 +1,4 @@
-﻿#include "HashLock.h"
+#include "HashLock.h"
 
 #include <cryptopp/osrng.h>
 #include <cryptopp/pwdbased.h>
@@ -58,7 +58,7 @@ bool HashLock::checkPassword(const std::string & password) const
 
 	std::vector<uint8_t> hash_bytes(m_hash.size(), 0);
 
-	unsigned int nits = pbkdf2.DeriveKey(hash_bytes.data(), hash_bytes.size(), 0,
+	pbkdf2.DeriveKey(hash_bytes.data(), hash_bytes.size(), 0,
 		pw_bytes, password.size(),
 		m_salt.data(), m_salt.size(),
 		m_iterations);

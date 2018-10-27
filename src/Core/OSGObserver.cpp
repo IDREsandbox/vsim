@@ -8,8 +8,6 @@ OSGObserver::OSGObserver()
 
 OSGObserver::~OSGObserver()
 {
-	int i = 0;
-
 	// make a copy for safe iteration
 	std::set<osg::Referenced*> observed = m_observed;
 

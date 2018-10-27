@@ -252,9 +252,6 @@ double Util::closestAngle(double x, double y)
 
 double Util::angleDiff(double x, double y)
 {
-	double wx = angleWrap(x);
-	double wy = angleWrap(y);
-
 	double diff = x - y;
 
 	// small, in range

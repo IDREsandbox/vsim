@@ -203,10 +203,11 @@ file(GLOB_RECURSE oldSerializers
   */Serializer*.cpp
   )
 
-if (APPLE)
-  #set(specialLinker MACOSX_BUNDLE)
+if (WIN32)
+  set(icon icon.rc)
 endif()
-add_executable(VSim ${specialLinker} main.cpp ${oldSerializers} icon.rc)
+
+add_executable(VSim main.cpp ${oldSerializers} ${icon})
 target_link_libraries(VSim VSim_obj
   Qt5::Widgets Qt5::Core Qt5::Gui
   ${OPENSCENEGRAPH_LIBRARIES})
@@ -215,6 +216,31 @@ if (WIN32)
   add_dependencies(VSim CopyAssets)
   add_dependencies(VSim CopyOSGPlugins)
   add_dependencies(VSim CopyBuildDLLs)
+endif()
+
+# osx gets another target VSim_app, basically the same thing but a mac bundle
+# I'm to lazy to figure out how to make the bundle myself
+if (APPLE)
+  set(icon ${CMAKE_SOURCE_DIR}/assets/vsim.icns)
+  set(MACOSX_BUNDLE_ICON_FILE vsim.icns)
+  set_source_files_properties(${icon} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+  add_executable(VSim_bundle MACOSX_BUNDLE ${CMAKE_SOURCE_DIR}/osx/dummy_main.cpp ${icon})
+
+  add_executable(VSim_bundle2 MACOSX_BUNDLE main.cpp ${oldSerializer} ${icon})
+  target_link_libraries(VSim_bundle2 VSim_obj
+    Qt5::Widgets Qt5::Core Qt5::Gui
+    ${OPENSCENEGRAPH_LIBRARIES})
+
+
+  add_custom_target(VSim.app
+    ALL
+    python3 "${CMAKE_SOURCE_DIR}/osx/build_osx.py" -c ${CMAKE_BINARY_DIR}
+      -x $<TARGET_FILE:VSim>
+      -b $<TARGET_FILE_DIR:VSim>/VSim_bundle.app
+    DEPENDS VSim_bundle VSim
+    BYPRODUCTS ${CMAKE_BINARY_DIR}/VSim.app
+    COMMENT "running build_osx.py"
+    )
 endif()
 
 install(TARGETS VSim DESTINATION .)

@@ -76,7 +76,7 @@ void SwitchListModel::removeNode(osg::Node *node)
 	// but oberserver erases too quickly
 
 	auto it = std::find_if(m_nodes.begin(), m_nodes.end(),
-		[this, node](const std::unique_ptr<SwitchNode> &item) -> bool {
+		[node](const std::unique_ptr<SwitchNode> &item) -> bool {
 		return item->group() == node;
 	});
 	if (it == m_nodes.end()) return;

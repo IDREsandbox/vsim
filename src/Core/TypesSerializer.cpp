@@ -63,7 +63,7 @@ QPixmap TypesSerializer::readPixmap(const VSim::FlatBuffers::ImageData *d)
 	auto fb_ibuf = d->data();
 	auto fb_ifmt = d->format();
 	if (fb_ibuf && fb_ifmt) {
-		bool ok = p.loadFromData(fb_ibuf->data(),
+		p.loadFromData(fb_ibuf->data(),
 			fb_ibuf->size(), fb_ifmt->c_str());
 	}
 
