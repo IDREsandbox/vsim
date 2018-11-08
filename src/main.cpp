@@ -1,6 +1,7 @@
 #include <QtWidgets/QApplication>
 #include "MainWindow.h"
 #include "VSimApp.h"
+#include "Core/VSimInfo.h"
 
 #include <memory>
 #include <QDebug>
@@ -12,12 +13,6 @@ USE_OSGPLUGIN(assimp)
 
 int main(int argc, char *argv[])
 {
-	qDebug() << "library location" << QLibraryInfo::location(QLibraryInfo::BinariesPath);
-	qDebug() << "plugins location" << QLibraryInfo::location(QLibraryInfo::PluginsPath);
-	qDebug() << "library paths?" << QCoreApplication::libraryPaths();
-
-
-
 #if __APPLE__
 	qDebug() << "__apple__";
 
@@ -27,31 +22,43 @@ int main(int argc, char *argv[])
 	//   /Frameworks
 	//   /Plugins
 
+	// search for Info.plist
 	// search for ./Frameworks, ../Frameworks, etc
 	// set the BinariesPath
 
-	QString appdir = argv[0];
+	qDebug() << "library paths:" << QCoreApplication::libraryPaths();
 
-	for (const char *path : {"./Frameworks", "../Frameworks"}) {
-		auto joined = QDir(QDir(appdir).relativeFilePath(path));
-		qDebug() << "testing fw dir" << joined.absolutePath();
-		if (joined.exists()) {
-			QCoreApplication::setLibraryPaths({joined.absolutePath()});
-			qDebug() << "setting library paths:" << joined.absolutePath();
-			break;
-		}
-	}
+	VSimInfo::initPath(argv[0]);
+
+	qDebug() << "assets path:" << VSimInfo::assets();
+	qDebug() << "is bundle:" << VSimInfo::isMacBundle();
+
+	// for (const char *path : {"./Frameworks", "../Frameworks"}) {
+	// 	auto joined = QDir(QDir(appdir).relativeFilePath(path));
+	// 	qDebug() << "testing fw dir" << joined.absolutePath();
+	// 	if (joined.exists()) {
+	// 		QCoreApplication::setLibraryPaths({joined.absolutePath()});
+	// 		qDebug() << "setting library paths:" << joined.absolutePath();
+	// 		break;
+	// 	}
+	// }
+	// qDebug() << "library info plugins?" << QLibraryInfo::location(QLibraryInfo::PluginsPath);
+	// for (const char *path : {"./Plugins", "../Plugins"}) {
+	// 	auto joined = QDir(QDir(appdir).relativeFilePath(path));
+	// 	qDebug() << "testing plugin dir" << joined.absolutePath();
+	// 	if (joined.exists()) {
+	// 		QCoreApplication::setLibraryPaths({joined.absolutePath()});
+	// 	}
+	// }
+	qDebug() << "library location" << QLibraryInfo::location(QLibraryInfo::BinariesPath);
+	qDebug() << "plugins location" << QLibraryInfo::location(QLibraryInfo::PluginsPath);
+	qDebug() << "library paths?" << QCoreApplication::libraryPaths();
 #endif
 
-	qDebug() << "creating application";
 	QApplication a(argc, argv);
-	qDebug() << "after creating application";
-	a.addLibraryPath("plugins");
-	QString dir = QCoreApplication::applicationDirPath();
 
-
-
-	QString startup = dir + "/assets/default.vsim";
+	QString assets = VSimInfo::assets();
+	QString startup = assets + "/default.vsim";
 	if (argc >= 2) {
 		startup = argv[1];
 		qInfo() << "startup set to" << startup;
@@ -59,12 +66,12 @@ int main(int argc, char *argv[])
 	//qputenv("QT_FATAL_WARNINGS", "1"); // for debugging bad connections
 	//qputenv("OSG_GL_ERROR_CHECKING", "ON");
 
-	a.setWindowIcon(QIcon(dir + "/assets/vsim.png"));
+	a.setWindowIcon(QIcon(assets + "/vsim.png"));
 
 	MainWindow window;
 	VSimApp vsim(&window);
 
-	QFile File(dir + "/assets/style.qss");
+	QFile File(assets + "/style.qss");
 	File.open(QFile::ReadOnly);
 	QString style = QLatin1String(File.readAll());
 	window.setStyleSheet(style);

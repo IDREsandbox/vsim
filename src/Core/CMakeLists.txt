@@ -18,6 +18,7 @@ set(Core_h
   TypesSerializer.h
   WeakObject.h
   VecUtil.h
+  VSimInfo.h
   Util.h
   ${types_h}
 )
@@ -31,6 +32,7 @@ set(Core_src
   TypesSerializer.cpp
   Util.cpp
   VecUtil.cpp
+  VSimInfo.cpp
   WeakObject.cpp
 )
 

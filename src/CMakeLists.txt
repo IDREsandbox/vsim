@@ -221,26 +221,33 @@ endif()
 # osx gets another target VSim_app, basically the same thing but a mac bundle
 # I'm to lazy to figure out how to make the bundle myself
 if (APPLE)
-  set(icon ${CMAKE_SOURCE_DIR}/assets/vsim.icns)
-  set(MACOSX_BUNDLE_ICON_FILE vsim.icns)
-  set_source_files_properties(${icon} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-  add_executable(VSim_bundle MACOSX_BUNDLE ${CMAKE_SOURCE_DIR}/osx/dummy_main.cpp ${icon})
+  # set(icon ${CMAKE_SOURCE_DIR}/assets/vsim.icns)
+  # set(MACOSX_BUNDLE_ICON_FILE vsim.icns)
+  # set_source_files_properties(${icon} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+  # add_executable(VSim_bundle MACOSX_BUNDLE ${CMAKE_SOURCE_DIR}/osx/dummy_main.cpp ${icon})
 
-  add_executable(VSim_bundle2 MACOSX_BUNDLE main.cpp ${oldSerializer} ${icon})
-  target_link_libraries(VSim_bundle2 VSim_obj
+  add_executable(bundletest MACOSX_BUNDLE main.cpp ${oldSerializer} ${icon})
+  target_link_libraries(bundletest VSim_obj
     Qt5::Widgets Qt5::Core Qt5::Gui
     ${OPENSCENEGRAPH_LIBRARIES})
 
-
+  set(build_osx "${CMAKE_SOURCE_DIR}/osx/build_osx.py")
   add_custom_target(VSim.app
     ALL
-    python3 "${CMAKE_SOURCE_DIR}/osx/build_osx.py" -c ${CMAKE_BINARY_DIR}
+    python3 ${build_osx} build -o ${CMAKE_BINARY_DIR}/VSim.app
       -x $<TARGET_FILE:VSim>
-      -b $<TARGET_FILE_DIR:VSim>/VSim_bundle.app
-    DEPENDS VSim_bundle VSim
+    DEPENDS VSim #VSim_bundle
     BYPRODUCTS ${CMAKE_BINARY_DIR}/VSim.app
     COMMENT "running build_osx.py"
     )
+
+  add_custom_target(BundleCopyExe
+    python3 ${build_osx} update
+      -o ${CMAKE_BINARY_DIR}/VSim.app
+      -x $<TARGET_FILE:VSim>
+    DEPENDS VSim
+    COMMENT "updating VSim bundle executable"
+  )
 endif()
 
 install(TARGETS VSim DESTINATION .)
