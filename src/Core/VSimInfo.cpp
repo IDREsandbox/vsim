@@ -41,13 +41,13 @@ namespace VSimInfo {
             do_normal_assets = false;
             g_is_bundle = true;
 		    QString bundle_root = macos_dir.absoluteFilePath("../../");
-		    g_assets_path = QDir(bundle_root).absoluteFilePath("Contents/Resources/assets");
-            g_osg_plugins_path = QDir(bundle_root).absoluteFilePath("Contents/Plugins");
+		    g_assets_path = QDir(bundle_root).absoluteFilePath("Contents/Resources/asset/s");
+            g_osg_plugins_path = QDir(bundle_root).absoluteFilePath("Contents/Plugins/");
         }
 #endif
         if (do_normal_assets) {
             g_is_bundle = false;
-            g_assets_path = QFileInfo(app_path).dir().absoluteFilePath("assets");
+            g_assets_path = QFileInfo(app_path).dir().absoluteFilePath("assets/");
         }
     }
 

@@ -9,6 +9,7 @@
 #include "Canvas/CanvasContainer.h"
 #include "Canvas/CanvasControl.h"
 #include "Core/Util.h"
+#include "Core/VSimInfo.h"
 
 #include <QDebug>
 
@@ -228,7 +229,7 @@ void StyleSettingsWidget::setMode(Mode mode)
 	if (mode == Mode::IMAGE) {
 		ui.text_editor->hide();
 
-		QPixmap pm(QGuiApplication::applicationDirPath() + "/assets/vsim_big.png");
+		QPixmap pm(VSimInfo::assets() + "/vsim_big.png");
 
 		// create a slide
 		m_image = m_control->createImage(pm, m_style->frameStyle());

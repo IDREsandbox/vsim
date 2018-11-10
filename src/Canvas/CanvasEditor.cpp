@@ -20,6 +20,7 @@
 #include "Canvas/LabelStyle.h"
 #include "Canvas/ChildMaskFilter.h"
 #include "Canvas/StyleSettingsDialog.h"
+#include "Core/VSimInfo.h"
 
 CanvasEditor::CanvasEditor(QWidget * parent)
 	: QWidget(parent),
@@ -63,7 +64,7 @@ CanvasEditor::CanvasEditor(QWidget * parent)
 	a_edit_styles->setText("Font and Color Styles");
 
 	// styling
-	QFile file(QCoreApplication::applicationDirPath() + "/assets/darkstyle.qss");
+	QFile file(VSimInfo::assets() + "/darkstyle.qss");
 	file.open(QFile::ReadOnly);
 	QString dark_style = QLatin1String(file.readAll());
 	internalWindow()->setStyleSheet(dark_style);

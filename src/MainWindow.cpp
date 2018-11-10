@@ -62,6 +62,7 @@
 #include "BrandingControl.h"
 #include "LockDialog.h"
 #include "Core/Util.h"
+#include "Core/VSimInfo.h"
 #include "ExportDialog.h"
 #include "ECategoryLegend.h"
 
@@ -455,12 +456,12 @@ void MainWindow::onReset()
 void MainWindow::reloadStyle()
 {
 	qInfo() << "reloading style";
-	QFile file(QCoreApplication::applicationDirPath() + "/assets/style.qss");
+	QFile file(VSimInfo::assets() + "/style.qss");
 	file.open(QFile::ReadOnly);
 	QString style = QLatin1String(file.readAll());
 	setStyleSheet(style);
 
-	QFile file2(QCoreApplication::applicationDirPath() + "/assets/darkstyle.qss");
+	QFile file2(VSimInfo::assets() + "/darkstyle.qss");
 	file2.open(QFile::ReadOnly);
 	QString dark_style = QLatin1String(file2.readAll());
 	m_canvas->internalWindow()->setStyleSheet(dark_style);
@@ -473,7 +474,7 @@ void MainWindow::reloadStyle()
 	// The behavior changes depending on if you have a mouse plugged in
 	// or not. How in the world are we supposed to handle that.
 #if _WIN32
-	QFile sb_file(QCoreApplication::applicationDirPath() + "/assets/scrollbar.qss");
+	QFile sb_file(VSimInfo::assets() + "/scrollbar.qss");
 	sb_file.open(QFile::ReadOnly);
 	QString sb_style = QLatin1String(sb_file.readAll());
 

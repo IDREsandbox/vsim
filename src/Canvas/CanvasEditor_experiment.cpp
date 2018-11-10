@@ -13,14 +13,17 @@
 #include <sstream>
 #include <fstream>
 #include <QToolButton>
+
 #include "Core/SimpleCommandStack.h"
 #include "Canvas/CanvasSerializer.h"
 #include "Canvas/CanvasControl.h"
+#include "Core/VSimInfo.h"
 
 
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
+	VSimInfo::initPath(argv[0]);
 
 	QMainWindow window;
 	window.resize(800, 600);
@@ -36,8 +39,8 @@ int main(int argc, char *argv[])
 	reload->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
 	auto reloadStyle = [&]() {
 		qDebug() << "reload style";
-		QFile File(QCoreApplication::applicationDirPath()
-			+ "/assets/darkstyle.qss");
+		QFile File(VSimInfo::assets()
+			+ "/darkstyle.qss");
 		File.open(QFile::ReadOnly);
 		QString data = QLatin1String(File.readAll());
 		window.setStyleSheet(data);
@@ -103,7 +106,7 @@ int main(int argc, char *argv[])
 
 	auto image = std::make_shared<CanvasImage>();
 	image->move(.2, -.2);
-	image->setPixmap(QPixmap(QCoreApplication::applicationDirPath() + "/assets/karnak.jpg"));
+	image->setPixmap(QPixmap(VSimInfo::assets() + "/karnak.jpg"));
 	image->setPen(QPen(QBrush(QColor(0, 0, 0)), scene->toScene(10)));
 	image->setEditable(true);
 	scene->addItem(image);

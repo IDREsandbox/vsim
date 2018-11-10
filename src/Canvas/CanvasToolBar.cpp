@@ -7,6 +7,7 @@
 #include <QLabel>
 
 #include "Gui/TitledComboBox.h"
+#include "Core/VSimInfo.h"
 
 // ComboBoxLimiter filters out scroll wheel events
 // this is because scrolling dumps undo commands on every change
@@ -56,27 +57,27 @@ void setMargins(QLayout *layout) {
 CanvasToolBar::CanvasToolBar(QWidget *parent)
 	: QToolBar(parent)
 {
-	QString dir = QCoreApplication::applicationDirPath();
+	QString dir = VSimInfo::assets();
 	// all icons
-	QIcon i_fill(dir + "/assets/icons/canvas/format_color_fill.png");
-	QIcon i_pen(dir + "/assets/icons/canvas/border_color.png");
-	QIcon i_clear(dir + "/assets/icons/canvas/format_color_reset.png");
-	QIcon i_color_text(dir + "/assets/icons/canvas/format_color_text.png");
-	QIcon i_bold(dir + "/assets/icons/canvas/format_bold.png");
-	QIcon i_ital(dir + "/assets/icons/canvas/format_italic.png");
-	QIcon i_uline(dir + "/assets/icons/canvas/format_underlined.png");
-	QIcon i_strike(dir + "/assets/icons/canvas/format_strikethrough.png");
-	QIcon i_number(dir + "/assets/icons/canvas/format_list_numbered.png");
-	QIcon i_bullet(dir + "/assets/icons/canvas/format_list_bulleted.png");
-	QIcon i_link(dir + "/assets/icons/canvas/link.png");
-	QIcon i_link_off(dir + "/assets/icons/canvas/link_off.png");
-	QIcon i_left(dir + "/assets/icons/canvas/format_align_left.png");
-	QIcon i_center(dir + "/assets/icons/canvas/format_align_center.png");
-	QIcon i_right(dir + "/assets/icons/canvas/format_align_right.png");
-	QIcon i_justify(dir + "/assets/icons/canvas/format_align_justify.png");
-	QIcon i_top(dir + "/assets/icons/canvas/vertical_align_top.png");
-	QIcon i_vcenter(dir + "/assets/icons/canvas/vertical_align_center.png");
-	QIcon i_bottom(dir + "/assets/icons/canvas/vertical_align_bottom.png");
+	QIcon i_fill(dir + "/icons/canvas/format_color_fill.png");
+	QIcon i_pen(dir + "/icons/canvas/border_color.png");
+	QIcon i_clear(dir + "/icons/canvas/format_color_reset.png");
+	QIcon i_color_text(dir + "/icons/canvas/format_color_text.png");
+	QIcon i_bold(dir + "/icons/canvas/format_bold.png");
+	QIcon i_ital(dir + "/icons/canvas/format_italic.png");
+	QIcon i_uline(dir + "/icons/canvas/format_underlined.png");
+	QIcon i_strike(dir + "/icons/canvas/format_strikethrough.png");
+	QIcon i_number(dir + "/icons/canvas/format_list_numbered.png");
+	QIcon i_bullet(dir + "/icons/canvas/format_list_bulleted.png");
+	QIcon i_link(dir + "/icons/canvas/link.png");
+	QIcon i_link_off(dir + "/icons/canvas/link_off.png");
+	QIcon i_left(dir + "/icons/canvas/format_align_left.png");
+	QIcon i_center(dir + "/icons/canvas/format_align_center.png");
+	QIcon i_right(dir + "/icons/canvas/format_align_right.png");
+	QIcon i_justify(dir + "/icons/canvas/format_align_justify.png");
+	QIcon i_top(dir + "/icons/canvas/vertical_align_top.png");
+	QIcon i_vcenter(dir + "/icons/canvas/vertical_align_center.png");
+	QIcon i_bottom(dir + "/icons/canvas/vertical_align_bottom.png");
 
 	m_text_sizes = QFontDatabase::standardSizes();
 
