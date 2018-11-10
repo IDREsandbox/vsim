@@ -21,6 +21,8 @@ public:
 	void fadeIn();
 	void fadeOut();
 
+	void setScrollBarStyle(QString s);
+
 	//public slots:
 	//void showER();
 	//void hideER();

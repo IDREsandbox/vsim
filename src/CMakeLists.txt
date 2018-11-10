@@ -284,7 +284,6 @@ vsim_add_experiment(
   "Qt5::Widgets"
 )
 
-# ER serializer test
 vsim_add_test(
   ERSerializer_test
   ERSerializer_test.cpp
@@ -297,3 +296,8 @@ vsim_add_test(
   "VSimRoot_obj;Core_obj;Deprecated_obj;Qt5::Test"
 )
 
+vsim_add_experiment(
+  Style_experiment
+  "Style_experiment.cpp;"
+  "Qt5::Widgets"
+)

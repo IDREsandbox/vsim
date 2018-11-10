@@ -454,7 +454,7 @@ void MainWindow::onReset()
 
 void MainWindow::reloadStyle()
 {
-	qInfo() << "reload style";
+	qInfo() << "reloading style";
 	QFile file(QCoreApplication::applicationDirPath() + "/assets/style.qss");
 	file.open(QFile::ReadOnly);
 	QString style = QLatin1String(file.readAll());
@@ -481,6 +481,7 @@ void MainWindow::reloadStyle()
 	// narrative box, er box, er display, er boxes (global, local, all)
 	erBar()->setStyleSheet(sb_style);
 	topBar()->setStyleSheet(sb_style);
+	erDisplay()->setScrollBarStyle(sb_style);
 #endif
 }
 

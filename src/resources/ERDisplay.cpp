@@ -129,6 +129,12 @@ void ERDisplay::fadeOut()
 	m_fade_out_anim->start();
 }
 
+void ERDisplay::setScrollBarStyle(QString s)
+{
+	ui.description->setStyleSheet(s);
+	//ui.description->setStyleSheet("background:rgb(255,0,0)");
+}
+
 void ERDisplay::mousePressEvent(QMouseEvent * event)
 {
 	if (event->button() == Qt::RightButton) {

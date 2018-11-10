@@ -44,11 +44,9 @@ int main(int argc, char *argv[])
 	MainWindow window;
 	VSimApp vsim(&window);
 
-	QFile File(assets + "/style.qss");
-	File.open(QFile::ReadOnly);
-	QString style = QLatin1String(File.readAll());
-	window.setStyleSheet(style);
+#if _WIN32
 	QDir::setCurrent(QCoreApplication::applicationDirPath());
+#endif
 
 	// FIXME: remove circular dependency
 	// TODO:
@@ -56,7 +54,7 @@ int main(int argc, char *argv[])
 	window.setApp(&vsim);
 
 	window.show();
-
+	window.reloadStyle();
 	window.execOpen(startup);
 	return a.exec();
 }
