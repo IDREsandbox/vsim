@@ -10,6 +10,7 @@ namespace VSimInfo {
 
     QString app();
     QString assets();
+    QString osgPluginsPath();
     bool isMacBundle();
 }
 

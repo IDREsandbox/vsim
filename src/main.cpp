@@ -7,52 +7,25 @@
 #include <QDebug>
 #include <QDir>
 #include <osgDB/Registry>
+#include <osgDB/PluginQuery>
 #include <QLibraryInfo>
 
 USE_OSGPLUGIN(assimp)
 
 int main(int argc, char *argv[])
 {
-#if __APPLE__
-	qDebug() << "__apple__";
-
-	// mac release
-	// /Contents
-	//   /MacOS
-	//   /Frameworks
-	//   /Plugins
-
-	// search for Info.plist
-	// search for ./Frameworks, ../Frameworks, etc
-	// set the BinariesPath
-
-	qDebug() << "library paths:" << QCoreApplication::libraryPaths();
-
 	VSimInfo::initPath(argv[0]);
 
-	qDebug() << "assets path:" << VSimInfo::assets();
-	qDebug() << "is bundle:" << VSimInfo::isMacBundle();
+#if __APPLE__
+	qInfo() << "library paths:" << QCoreApplication::libraryPaths();
+	qInfo() << "assets path:" << VSimInfo::assets();
+	qInfo() << "is mac bundle:" << VSimInfo::isMacBundle();
+	qInfo() << "qt library location:" << QLibraryInfo::location(QLibraryInfo::BinariesPath);
+	qInfo() << "qt plugins location:" << QLibraryInfo::location(QLibraryInfo::PluginsPath);
+	qInfo() << "qtlibrary paths:" << QCoreApplication::libraryPaths();
 
-	// for (const char *path : {"./Frameworks", "../Frameworks"}) {
-	// 	auto joined = QDir(QDir(appdir).relativeFilePath(path));
-	// 	qDebug() << "testing fw dir" << joined.absolutePath();
-	// 	if (joined.exists()) {
-	// 		QCoreApplication::setLibraryPaths({joined.absolutePath()});
-	// 		qDebug() << "setting library paths:" << joined.absolutePath();
-	// 		break;
-	// 	}
-	// }
-	// qDebug() << "library info plugins?" << QLibraryInfo::location(QLibraryInfo::PluginsPath);
-	// for (const char *path : {"./Plugins", "../Plugins"}) {
-	// 	auto joined = QDir(QDir(appdir).relativeFilePath(path));
-	// 	qDebug() << "testing plugin dir" << joined.absolutePath();
-	// 	if (joined.exists()) {
-	// 		QCoreApplication::setLibraryPaths({joined.absolutePath()});
-	// 	}
-	// }
-	qDebug() << "library location" << QLibraryInfo::location(QLibraryInfo::BinariesPath);
-	qDebug() << "plugins location" << QLibraryInfo::location(QLibraryInfo::PluginsPath);
-	qDebug() << "library paths?" << QCoreApplication::libraryPaths();
+	auto &osg_path_list = osgDB::Registry::instance()->getDataFilePathList();
+	osg_path_list.push_back(VSimInfo::osgPluginsPath().toStdString());
 #endif
 
 	QApplication a(argc, argv);

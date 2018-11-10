@@ -1,18 +1,60 @@
-just dump of osx stuff
 
+This is mostly about building on mac.
+For development I just used VSCode and cmake. I couldn't get XCode working nicely.
 
-ok here is our todo list
+## VSim.app
 
-"i like work where there is list of tasks
-i go through the list and get things done"
+This is called a Bundle, an easy way to distribute apps on osx.
+Bundles follow a specific format
 
-VSim_bundle
-    cmake generates this dummy OSX_BUNDLE, for metadata and stuff
-    uses dummy_main.cpp
+VSim.app/
+    Contents/
+        Info.plist
+        MacOS/
+            VSim
+        Resources/
+            vsim.icns
+            assets/
+                default.vsim
+        Frameworks/
+            QtCore.dylib
+        Plugins/
+            imageformats/
+                jpg.dylib
+            osgPlugins-3.6.2/
+                osgdb_obj.so
 
-VSim.app
+Info.plist specifies application metadata.
+Frameworks are supposed to have more stuff like include, versions, etc, but eh.
+
+## cmake stuff
+
+VSim.app (target)
     cmake custom target, created through a python script
-    build_osx.py
+    runs build_osx.py to create VSim.app
+
+BundleCopyExe (target)
+    assumes VSim.app is already set up, simply copies over the exe
+    this exists so that you can test without re-run the slow build script every time you test
+
+## osx
+
+Info.plist
+    template plist
+
+deps.py
+    code which builds VSim.app
+    copies VSim
+    find and copies qt plugins, osg plugins
+    recursively finds and copies qt, osg, and other 3rd party libs
+    fixes VSim, plugins, and libs to point only to the copied versions
+    copies assets
+
+build_osx.py
+    command line interface wrapper around deps.py
+    'build' for building
+    'update' for updating the exe
+    everything else is just used for debugging
 
 bundle todo list
     copy frameworks into place, recursively fix up dependencies
@@ -20,13 +62,15 @@ bundle todo list
     copy assets, etc, like everything in cmake install() how to do
     replace VSim_bundle with VSim, fix the Info.plist
 
-app fixes
-    fix assets path location
-        maybe just make a more dynamic global gAssets(), way easier than QGuiApplication::applicationDirectory() or whatever
-    set osg plugin path if OSX
+qt.conf
+    points qt plugins to Plugins rather that qt/plugins
+    points qt binaries/libraries to Frameworks rather that qt/bin
+    I don't know if this is necessary
+
 
 
 ## useful shell commands
+
 install_name_tool -change /the/old/path/to/the_library_name.dylib  "@executable_path/../Frameworks/the_library_name.dylib" ./MyProgram.app/Contents/MacOS/MyProgram
 otool -L exeordll.dylib
 brew --prefix open-scene-graph
@@ -34,72 +78,6 @@ brew --prefix qt
 brew info --json=v1 open-scene-graph
 export DYLD_PRINT_LIBRARIES=1
 
+## other
 
-
-PPNAME=MyApp
-APPBUNDLE=$(APPNAME).app
-APPBUNDLECONTENTS=$(APPBUNDLE)/Contents
-APPBUNDLEEXE=$(APPBUNDLECONTENTS)/MacOS
-APPBUNDLERESOURCES=$(APPBUNDLECONTENTS)/Resources
-APPBUNDLEICON=$(APPBUNDLECONTENTS)/Resources
-appbundle: macosx/$(APPNAME).icns
-    rm -rf $(APPBUNDLE)
-    mkdir $(APPBUNDLE)
-    mkdir $(APPBUNDLE)/Contents
-    mkdir $(APPBUNDLE)/Contents/MacOS
-    mkdir $(APPBUNDLE)/Contents/Resources
-    cp macosx/Info.plist $(APPBUNDLECONTENTS)/
-    cp macosx/PkgInfo $(APPBUNDLECONTENTS)/
-    cp macosx/$(APPNAME).icns $(APPBUNDLEICON)/
-    cp $(OUTFILE) $(APPBUNDLEEXE)/$(APPNAME)
-
-macosx/$(APPNAME).icns: macosx/$(APPNAME)Icon.png
-    rm -rf macosx/$(APPNAME).iconset
-    mkdir macosx/$(APPNAME).iconset
-    sips -z 16 16     macosx/$(APPNAME)Icon.png --out macosx/$(APPNAME).iconset/icon_16x16.png
-    sips -z 32 32     macosx/$(APPNAME)Icon.png --out macosx/$(APPNAME).iconset/icon_16x16@2x.png
-    sips -z 32 32     macosx/$(APPNAME)Icon.png --out macosx/$(APPNAME).iconset/icon_32x32.png
-    sips -z 64 64     macosx/$(APPNAME)Icon.png --out macosx/$(APPNAME).iconset/icon_32x32@2x.png
-    sips -z 128 128   macosx/$(APPNAME)Icon.png --out macosx/$(APPNAME).iconset/icon_128x128.png
-    sips -z 256 256   macosx/$(APPNAME)Icon.png --out macosx/$(APPNAME).iconset/icon_128x128@2x.png
-    sips -z 256 256   macosx/$(APPNAME)Icon.png --out macosx/$(APPNAME).iconset/icon_256x256.png
-    sips -z 512 512   macosx/$(APPNAME)Icon.png --out macosx/$(APPNAME).iconset/icon_256x256@2x.png
-    sips -z 512 512   macosx/$(APPNAME)Icon.png --out macosx/$(APPNAME).iconset/icon_512x512.png
-    cp macosx/$(APPNAME)Icon.png macosx/$(APPNAME).iconset/icon_512x512@2x.png
-    iconutil -c icns -o macosx/$(APPNAME).icns macosx/$(APPNAME).iconset
-    rm -r macosx/$(APPNAME).iconset
-Info.plist
-
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleDevelopmentRegion</key>
-    <string>English</string>
-    <key>CFBundleExecutable</key>
-    <string>MyApp</string>
-    <key>CFBundleGetInfoString</key>
-    <string>0.48.2, Copyright 2013 my company</string>
-    <key>CFBundleIconFile</key>
-    <string>MyApp.icns</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.mycompany.MyApp</string>
-    <key>CFBundleDocumentTypes</key>
-    <array>
-    </array>
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleShortVersionString</key>
-    <string>0.48.2</string>
-    <key>CFBundleSignature</key>
-    <string>MyAp</string>
-    <key>CFBundleVersion</key>
-    <string>0.48.2</string>
-    <key>NSHumanReadableCopyright</key>
-    <string>Copyright 2013 my company.</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>10.3</string>
-</dict>
-</plist>
+If the first person camera if flying all over the place, it's because the app doesn't have permission to center the mouse. Give VSim and maybe Terminal accessibility permission.
