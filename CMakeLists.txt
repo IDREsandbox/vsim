@@ -57,17 +57,22 @@ include_directories(${Qt5Test_INCLUDE_DIRS})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Concurrent_INCLUDE_DIRS})
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-find_package(cryptopp MODULE REQUIRED)
-
-message("cryptopp libraries " ${CRYPTOPP_LIBRARIES})
+if (APPLE)
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+  find_package(cryptopp MODULE REQUIRED)
+  set(CRYPTOPP_DEP ${CRYPTOPP_LIBRARIES})
+else()
+  find_package(cryptopp CONFIG REQUIRED)
+  set(CRYPTOPP_DEP cryptopp-static)
+endif()
 
 # qt flags
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
+# these don't work
 # set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "autouic")
-set_property(GLOBAL PROPERTY AUTOGEN_BUILD_DIR "aaaaaaaaaa")
+#set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "autouic")
+#set_property(GLOBAL PROPERTY AUTOGEN_BUILD_DIR "aaaaaaaaaa")
 #message("GAUTOGEN:\n" ${gautogen})
 # set(CMAKE_AUTORCC ON)
 
@@ -77,7 +82,6 @@ set_property(GLOBAL PROPERTY AUTOGEN_BUILD_DIR "aaaaaaaaaa")
 # foreach (_variableName ${_variableNames})
 #     message(STATUS "${_variableName}=${${_variableName}}")
 # endforeach()
-
 
 # flatbuffers stuff
 # sources in src/*
@@ -139,11 +143,15 @@ endfunction()
 # then use this to propagate the include dirs
 # qt auto_uic doesn't do this automatically (I think?)
 function(vsim_include_uic target)
+  # message("generator: ${CMAKE_GENERATOR}")
+  # message("compiler id: ${CMAKE_CXX_COMPILER_ID}")
+
   # the qt autogen path changes 
   # (use generator expressions to figure this out?)
   # The qt docs: the include dir is _autogen/include or include_<config>
-  # I think GENERATOR_IS_MULTI_CONFIG is broken for Xcode
-  if("${GENERATOR_IS_MULTI_CONFIG}" OR (${CMAKE_GENERATOR} STREQUAL "Xcode"))
+  if("${GENERATOR_IS_MULTI_CONFIG}" # I think GENERATOR_IS_MULTI_CONFIG is broken
+      OR (${CMAKE_GENERATOR} STREQUAL "Xcode")
+      OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")) # for some reason this doesn't work w/o quotes
     set(includeSuffix "include_$<CONFIG>")
   else()
     set(includeSuffix "include")

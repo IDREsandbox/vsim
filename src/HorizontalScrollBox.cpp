@@ -282,7 +282,7 @@ void HorizontalScrollBox::refresh()
 	}
 
 	// set to geoms
-	for (size_t i = 0; i < m_items.size(); i++) {
+	for (int i = 0; i < (size_t)m_items.size(); i++) {
 		QRect geom = geoms[i];
 		auto *o = m_items[i];
 		o->setGeometry(geoms[i]);
