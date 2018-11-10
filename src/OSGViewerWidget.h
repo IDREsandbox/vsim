@@ -284,6 +284,7 @@ private:
 	bool m_ground_on_startup;
 	LengthUnit m_length_unit;
 	std::vector<ViewerPreset> m_presets;
+	QPoint m_wheel_acc;
 
 	// key press tracker
 	KeyTracker *m_key_tracker;

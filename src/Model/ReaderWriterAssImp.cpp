@@ -113,7 +113,6 @@ public:
     
     virtual ReadResult readNode( const std::string& file, const osgDB::ReaderWriter::Options* options ) const
     {
-		std::cout << "assimp read node?\n";
         std::string ext = osgDB::getLowerCaseFileExtension(file);
         if ( ext=="assimp" ) return readNode(osgDB::getNameLessExtension(file), options);
         if ( !acceptsExtension(ext) ) return ReadResult::FILE_NOT_HANDLED;
@@ -121,6 +120,7 @@ public:
         std::string fileName = osgDB::findDataFile( file, options );
         if ( fileName.empty() ) return ReadResult::FILE_NOT_FOUND;
         
+        std::cout << "Using assimp importer";
         Assimp::Importer importer;
         const aiScene* aiScene = importer.ReadFile( fileName.c_str(), aiProcessPreset_TargetRealtime_Quality );
         if ( !aiScene )

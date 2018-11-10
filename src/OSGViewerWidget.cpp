@@ -1105,24 +1105,55 @@ void OSGViewerWidget::mouseReleaseEvent(QMouseEvent* event)
 }
 
 void OSGViewerWidget::wheelEvent(QWheelEvent* event) {
-
 	event->accept();
-	int delta = event->delta();
+
+	QPoint angle_delta = event->angleDelta();
+	if (angle_delta.isNull()) angle_delta = QPoint(0,0);
+
+	m_wheel_acc += angle_delta;
+
+	int threshold = 40;
+	int bumpx = 0;
+	int bumpy = 0;
+	int bump = 0;
+
+	osgGA::GUIEventAdapter::ScrollingMotion motion = osgGA::GUIEventAdapter::SCROLL_NONE;
+
+	// test for > threshold, < threshold
+	if (abs(m_wheel_acc.x()) > threshold) {
+		if (m_wheel_acc.x() > 0) {
+			motion = osgGA::GUIEventAdapter::SCROLL_RIGHT;
+			bump = 1;
+		}
+		else {
+			motion = osgGA::GUIEventAdapter::SCROLL_LEFT;
+			bump = -1;
+		}
+		m_wheel_acc = QPoint(0,0);
+	}
+	if (abs(m_wheel_acc.y()) > threshold) {
+		if (m_wheel_acc.y() > 0) {
+			motion = osgGA::GUIEventAdapter::SCROLL_UP;
+			bump = 1;
+		}
+		else {
+			motion = osgGA::GUIEventAdapter::SCROLL_DOWN;
+			bump = -1;
+		}
+		m_wheel_acc = QPoint(0,0);
+	}
 
 	if (m_manipulator == MANIPULATOR_FIRST_PERSON
 		|| m_manipulator == MANIPULATOR_FLIGHT)
 	{
-		if (delta > 0) {
+		if (bump > 0) {
 			a_speed_up->trigger();
 		}
-		else {
+		else if (bump < 0) {
 			a_slow_down->trigger();
 		}
 	}
 
-	// osg adapter
-	osgGA::GUIEventAdapter::ScrollingMotion motion = delta > 0 ? osgGA::GUIEventAdapter::SCROLL_UP
-		: osgGA::GUIEventAdapter::SCROLL_DOWN;
 	this->getEventQueue()->mouseScroll(motion);
 }
 
@@ -1167,8 +1198,9 @@ bool OSGViewerWidget::event(QEvent* event)
 void OSGViewerWidget::centerCursor()
 {
 	QCursor new_cursor = cursor();
-	new_cursor.setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
-	setCursor(new_cursor);
+	auto old_pos = new_cursor.pos();
+	auto new_pos = mapToGlobal(QPoint(width() / 2, height() / 2));
+	QCursor::setPos(new_pos);
 }
 
 void OSGViewerWidget::recreateFramebuffer()
