@@ -1144,14 +1144,21 @@ void NarrativeControl::setSlideDuration()
 	if (selection.empty()) return;
 
 	NarrativeSlide *first_slide = getSlide(m_current_narrative, m_slide_selection->last());
-	float duration = NarrativeSlideDurationDialog::create(first_slide->getStayOnNode(), first_slide->getDuration());
-	if (duration < 0) return;
+	bool stay;
+	float duration;
+	bool ok = NarrativeSlideDurationDialog::create(
+		first_slide->getStayOnNode(),
+		first_slide->getDuration(),
+		&stay,
+		&duration);
+	if (!ok) return;
+	if (!stay && duration < 0) return;
 
 	// perform the command
 	m_undo_stack->beginMacro("Set Duration");
 	for (auto index : selection) {
 		NarrativeSlide *slide = getSlide(m_current_narrative, index);
-		if (duration == 0) {
+		if (stay) {
 			m_undo_stack->push(new NarrativeSlide::SetStayOnNodeCommand(slide, true));
 		}
 		else {

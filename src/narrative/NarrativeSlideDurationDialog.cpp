@@ -2,20 +2,17 @@
 #include <QCheckBox>
 #include <QDebug>
 
-float NarrativeSlideDurationDialog::create(bool init_stay, float init_duration) {
-	NarrativeSlideDurationDialog *dialog = new NarrativeSlideDurationDialog(nullptr);
-	dialog->setWindowFlags(Qt::WindowSystemMenuHint);
-	dialog->setDuration(init_stay, init_duration);
-	int result = dialog->exec();
-	float duration;
+bool NarrativeSlideDurationDialog::create(bool init_stay, float init_duration, bool *out_stay, float *out_duration) {
+	NarrativeSlideDurationDialog dialog;
+	dialog.setWindowFlags(Qt::WindowSystemMenuHint);
+	dialog.setDuration(init_stay, init_duration);
+	int result = dialog.exec();
 	if (result == QDialog::Rejected) {
-		duration = -1.0f;
+		return false;
 	}
-	else {
-		duration = dialog->getDuration();
-	}
-	delete dialog;
-	return duration;
+	*out_stay = dialog.getStayOnNode();
+	*out_duration = dialog.getDuration();
+	return true;
 }
 
 NarrativeSlideDurationDialog::NarrativeSlideDurationDialog(QWidget * parent) 
@@ -39,14 +36,14 @@ void NarrativeSlideDurationDialog::setDuration(bool stay, float duration)
 	}
 }
 
-float NarrativeSlideDurationDialog::getDuration()
+float NarrativeSlideDurationDialog::getDuration() const
 {
-	if (ui.onclick_checkbox->isChecked()) {
-		return 0.0f;
-	}
-	else {
-		return ui.duration_spinbox->value();
-	}
+	return ui.duration_spinbox->value();
+}
+
+bool NarrativeSlideDurationDialog::getStayOnNode() const
+{
+	return ui.onclick_checkbox->isChecked();
 }
 
 void NarrativeSlideDurationDialog::enableDuration(bool enable)

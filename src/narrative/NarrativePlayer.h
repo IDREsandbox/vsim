@@ -53,6 +53,7 @@ private:
 
 	//QTimer m_timer;
 	bool m_paused;
+	bool m_rewind_on_resume;
 	double m_time_remaining_sec;
 	double m_total_time;
 

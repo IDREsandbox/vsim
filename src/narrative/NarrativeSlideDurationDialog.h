@@ -8,9 +8,11 @@ class NarrativeSlideDurationDialog : public QDialog {
 
 public:
 	// Creates and execs a dialog
-	// returns 0 if wait for click
-	// returns >0 for duration
-	static float create(bool stay, float duration);
+	// returns <0 on cancel
+	// returns true on accept, false on cancel
+	// stores stay in *out_stay
+	// stores duration in *out_duratio
+	static bool create(bool init_stay, float init_duration, bool *out_stay, float *out_duration);
 
 	NarrativeSlideDurationDialog(QWidget * parent = nullptr);
 
@@ -18,7 +20,8 @@ public:
 
 	// returns >0 for the timer
 	// returns 0 if transition-on-click is checked
-	float getDuration();
+	float getDuration() const;
+	bool getStayOnNode() const;
 
 private:
 	void enableDuration(bool enable);

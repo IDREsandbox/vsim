@@ -45,7 +45,8 @@
 #include <QMenuBar>
 
 VSimApp::VSimApp(MainWindow* window)
-	: m_window(window)
+	: m_window(window),
+	m_state(State::PLAY_FLYING)
 {
 	m_root = std::make_unique<VSimRoot>();
 
@@ -87,6 +88,11 @@ VSimApp::VSimApp(MainWindow* window)
 		setCameraMatrix(m_camera_target);
 		emit sArrived();
 	});
+
+	m_center_message_timer = new QTimer(this);
+	connect(m_center_message_timer, &QTimer::timeout, this, [this]() {
+		m_window->centerLabel()->hide();
+	});
 }
 
 VSimApp::~VSimApp() {
@@ -106,7 +112,7 @@ VSimApp::State VSimApp::state() const
 void VSimApp::setState(State s)
 {
 	if (s == m_state) return;
-	State old = s;
+	State old = m_state;
 	m_state = s;
 	stopGoingSomewhere();
 	emit sStateChanged(old, s);
@@ -246,6 +252,25 @@ void VSimApp::setStatusMessage(const QString & message, int timeout)
 {
 	if (m_window)
 		m_window->statusBar()->showMessage(message, timeout);
+}
+
+void VSimApp::setCenterMessage(const QString & message, int ms)
+{
+	QLabel *label = m_window->centerLabel();
+
+	m_center_message_timer->stop();
+	if (message.isEmpty()) {
+		label->hide();
+	}
+	else {
+		label->setText(message);
+		label->show();
+		if (ms > 0) {
+			m_center_message_timer->setSingleShot(true);
+			m_center_message_timer->setInterval(ms);
+			m_center_message_timer->start();
+		}
+	}
 }
 
 osg::Vec3d VSimApp::getPosition() const

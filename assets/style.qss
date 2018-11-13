@@ -31,6 +31,10 @@ QToolButton:disabled {
     color: rgb(100, 100, 100);
 }
 
+#pausedLabel {
+    color: white;
+}
+
 #bottomBar QSplitter::handle {
 	background: rgba(0,0,0,100);
 }

@@ -163,7 +163,17 @@ MainWindow::MainWindow(QWidget *parent)
 
 	m_category_legend = new ECategoryLegend(ui->root);
 
+	m_paused_label = new QLabel(ui->root);
+	m_paused_label->setText("test test");
+	m_paused_label->adjustSize();
+	m_paused_label->resize(800, m_paused_label->height());
+	m_paused_label->setAlignment(Qt::AlignCenter);
+	m_paused_label->setAttribute(Qt::WA_TransparentForMouseEvents);
+	m_paused_label->setObjectName("pausedLabel");
+	m_paused_label->hide();
+
 	// layering
+	m_paused_label->lower();
 	m_branding_overlay->lower();
 	canvas_window->lower();
 	m_canvas->lower();
@@ -526,6 +536,11 @@ ECategoryLegend * MainWindow::categoryLegend() const
 	return m_category_legend;
 }
 
+QLabel * MainWindow::centerLabel() const
+{
+	return m_paused_label;
+}
+
 QMenu * MainWindow::navigationMenu() const
 {
 	return ui->menuNavigation;
@@ -731,6 +746,14 @@ void MainWindow::updatePositions()
 	//auto r = canvas_window->mask();
 	//r.map
 	//if (m_canvas->internalWindow());
+
+	int paused_label_margin = 15;
+	int paused_bottom = ui->middleSpacer->geometry().bottom() - paused_label_margin;
+
+	QRect paused_rect = m_paused_label->rect();
+	paused_rect.moveCenter(QPoint(ui->middleSpacer->width() / 2, 0));
+	paused_rect.moveBottom(paused_bottom);
+	m_paused_label->setGeometry(paused_rect);
 
 	splitter->setMask(full - center);
 }

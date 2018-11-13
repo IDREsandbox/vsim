@@ -33,6 +33,7 @@ class CanvasContainer;
 class BrandingOverlay;
 class SwitchWindow;
 class ECategoryLegend;
+class QLabel;
 
 class MainWindow : public QMainWindow
 {
@@ -57,6 +58,7 @@ public:
 	TimeSlider *timeSlider() const;
 	BrandingOverlay *brandingOverlay() const;
 	ECategoryLegend *categoryLegend() const;
+	QLabel *centerLabel() const;
 
 	QMenu *navigationMenu() const;
 
@@ -141,6 +143,7 @@ private:
 	BrandingOverlay *m_branding_overlay;
 	SwitchWindow *m_switch_window;
 	ECategoryLegend *m_category_legend;
+	QLabel *m_paused_label;
 
 	QActionGroup *m_navigation_action_group;
 	QAction *m_action_first_person;

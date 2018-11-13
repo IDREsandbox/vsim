@@ -65,16 +65,35 @@ NarrativePlayer::NarrativePlayer(VSimApp *app,
 		}
 
 		if (state == VSimApp::PLAY_WAIT_CLICK) {
-			// set status?
-			m_app->setStatusMessage("Click to continue");
+			m_app->setCenterMessage("(Click or press P to continue)");
 		}
-		if (state == VSimApp::PLAY_END) {
-			m_app->setStatusMessage("Narrative finished");
+		else if (state == VSimApp::State::PLAY_FLYING) {
+			m_app->setCenterMessage("(Press P to continue)");
+		}
+		else if (state == VSimApp::PLAY_END) {
+			m_app->setCenterMessage("(Narrative finished)", 2000);
+		}
+		else {
+			m_app->setCenterMessage("");
 		}
 
-		// stop events
+		// fly around interruption
+		if (state == VSimApp::State::PLAY_FLYING
+			&& VSimApp::isPlaying(old)
+			&& old != VSimApp::State::PLAY_FLYING) {
+			m_rewind_on_resume = (old == VSimApp::State::PLAY_TRANSITION);
+		}
+
+		//qDebug() << "playing old?"
+		//	<< VSimApp::StateStrings[old]
+		//	<< VSimApp::isPlaying(old)
+		//	<< "playing new?"
+		//	<< VSimApp::StateStrings[state]
+		//	<< VSimApp::isPlaying(state);
+		// stop playing interruption
 		if (VSimApp::isPlaying(old) && !VSimApp::isPlaying(state)) {
 			stop();
+			m_app->setCenterMessage("(Narrative stopped)", 2000);
 		}
 
 		a_stop->setEnabled(m_app->isPlaying());
@@ -96,8 +115,14 @@ void NarrativePlayer::play()
 	}
 
 	if (m_app->state() == VSimApp::PLAY_FLYING) {
+		// if we were transitioning, then replay the transition
+		if (m_rewind_on_resume) {
+			toTransitioning(m_narratives->getTopSlide());
+		}
 		// go to the currently selected node
-		toAtNode();
+		else {
+			toAtNode();
+		}
 		return;
 	}
 

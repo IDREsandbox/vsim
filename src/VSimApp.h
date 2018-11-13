@@ -87,6 +87,7 @@ public:
 
 	// status
 	void setStatusMessage(const QString &message, int ms = 2000);
+	void setCenterMessage(const QString &message, int ms = 0);
 
 	// camera
 	osg::Vec3d getPosition() const;
@@ -174,6 +175,7 @@ private:
 	osg::Vec3d m_position;
 
 	QTimer *m_slide_timer;
+	QTimer *m_center_message_timer;
 
 	State m_state;
 };
