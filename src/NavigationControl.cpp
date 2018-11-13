@@ -61,9 +61,6 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 	a_collisions->setText("Collisions");
 	a_collisions->setShortcut(Qt::Key_C);
 
-	// initialize
-	onModeChange(m_viewer->getNavigationMode());
-
 	// gui -> osg
 	connect(m_navigation_action_group, &QActionGroup::triggered, this,
 		[this](QAction *which) {
@@ -282,7 +279,8 @@ NavigationControl::NavigationControl(VSimApp *app, OSGViewerWidget *viewer, QObj
 		else {
 			a_point->setChecked(true);
 		}
-
+		// initialize
+		onModeChange(m_viewer->getNavigationMode());
 		onLockChange();
 	});
 	connect(m_app->getRoot(), &VSimRoot::sDisableNavigationChanged, this, &NavigationControl::onLockChange);

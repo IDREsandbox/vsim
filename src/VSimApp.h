@@ -85,8 +85,15 @@ public:
 
 	void update(float dt_sec);
 
-	// status
+	// status bar
 	void setStatusMessage(const QString &message, int ms = 2000);
+
+	// this allows the status bar to stack multiple messages
+	// id is never actually dereferenced, so deletion is safe
+	void addPermanentStatusMessage(QString *id, const QString &message, bool override = false);
+	void updatePermanentStatusMessage(QString *id, const QString &message);
+	void removePermanentStatusMessage(QString *id);
+
 	void setCenterMessage(const QString &message, int ms = 0);
 
 	// camera
@@ -143,6 +150,7 @@ signals:
 
 private:
 	void connectSwitchManager();
+	void pokeStatusBar();
 
 private:
 	MainWindow *m_window;
@@ -176,6 +184,9 @@ private:
 
 	QTimer *m_slide_timer;
 	QTimer *m_center_message_timer;
+	std::vector<std::pair<QString*, QString>> m_status_stack;
+	QString m_temp_status;
+	QTimer *m_status_timer;
 
 	State m_state;
 };

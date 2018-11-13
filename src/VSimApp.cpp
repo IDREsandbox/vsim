@@ -46,7 +46,7 @@
 
 VSimApp::VSimApp(MainWindow* window)
 	: m_window(window),
-	m_state(State::PLAY_FLYING)
+	m_state(State::EDIT_FLYING)
 {
 	m_root = std::make_unique<VSimRoot>();
 
@@ -87,6 +87,13 @@ VSimApp::VSimApp(MainWindow* window)
 	connect(m_camera_timer, &QTimer::timeout, this, [this]() {
 		setCameraMatrix(m_camera_target);
 		emit sArrived();
+	});
+
+	m_status_timer = new QTimer(this);
+	connect(m_status_timer, &QTimer::timeout, this, [this]() {
+		m_temp_status.clear();
+		pokeStatusBar();
+		//m_unique_status = nullptr;
 	});
 
 	m_center_message_timer = new QTimer(this);
@@ -250,8 +257,56 @@ void VSimApp::setCurrentFile(const QString &path, bool fix)
 
 void VSimApp::setStatusMessage(const QString & message, int timeout)
 {
-	if (m_window)
+	m_status_timer->stop();
+	m_temp_status = message;
+	if (m_window) {
 		m_window->statusBar()->showMessage(message, timeout);
+	}
+	if (timeout > 0) {
+		m_status_timer->setSingleShot(true);
+		m_status_timer->setInterval(timeout);
+		m_status_timer->start();
+	}
+}
+
+void VSimApp::addPermanentStatusMessage(QString * id, const QString & message, bool override)
+{
+	if (override) {
+		m_temp_status.clear();
+		m_status_timer->stop();
+	}
+	// no duplicates
+	bool exists = false;
+	for (auto &p : m_status_stack) {
+		if (p.first == id) {
+			exists = true;
+			p.second = message; // do update
+		}
+	}
+	if (!exists) {
+		m_status_stack.push_back({ id, message });
+	}
+	pokeStatusBar();
+}
+
+void VSimApp::updatePermanentStatusMessage(QString * id, const QString & message)
+{
+	for (auto &p : m_status_stack) {
+		if (p.first == id) {
+			p.second = message;
+		}
+	}
+	pokeStatusBar();
+}
+
+void VSimApp::removePermanentStatusMessage(QString * id)
+{
+	auto rit = std::remove_if(m_status_stack.begin(), m_status_stack.end(),
+		[id](auto &pair) -> bool {
+		return pair.first == id;
+	});
+	m_status_stack.erase(rit, m_status_stack.end());
+	pokeStatusBar();
 }
 
 void VSimApp::setCenterMessage(const QString & message, int ms)
@@ -395,4 +450,21 @@ void VSimApp::connectSwitchManager()
 	connect(models->rootWrapper(), &OSGNodeWrapper::sAboutToReset, [this]() {
 		m_switch_manager->clear();
 	});
+}
+
+void VSimApp::pokeStatusBar()
+{
+	if (!m_temp_status.isNull()) {
+		//
+	}
+	else {
+		// try top of stack
+		if (m_status_stack.size() > 0) {
+			auto &p = *m_status_stack.rbegin();
+			m_window->statusBar()->showMessage(p.second, 0);
+		}
+		else {
+			m_window->statusBar()->clearMessage();
+		}
+	}
 }

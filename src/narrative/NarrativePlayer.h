@@ -43,8 +43,23 @@ public:
 
 	void update(double dt_sec);
 
+	bool isPaused() const;
+
 private:
 	void recheckPlayPause(); // enables/disables accordingly
+	QString getNarrativeName() const;
+	void updateStatusMessage();
+
+	enum CenterMessage {
+		NONE,
+		CLICK,
+		PRESSP,
+		PLAYING,
+		FINISHED,
+		PAUSED,
+		STOPPED
+	};
+	void setCenterMessage(CenterMessage msg);
 
 private:
 	VSimApp *m_app;
@@ -56,6 +71,9 @@ private:
 	bool m_rewind_on_resume;
 	double m_time_remaining_sec;
 	double m_total_time;
+	QString m_status_message;
+	QTimer *m_center_msg_timer;
+	CenterMessage m_center_msg;
 
 	osg::Matrix m_camera_from;
 	osg::Matrix m_camera_to;

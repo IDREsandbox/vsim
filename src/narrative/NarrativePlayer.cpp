@@ -6,6 +6,7 @@
 #include "narrative/NarrativeControl.h"
 #include "narrative/NarrativeSlide.h"
 #include "narrative/NarrativeGroup.h"
+#include "narrative/Narrative.h"
 #include "VSimApp.h"
 #include "MainWindowTopBar.h"
 #include "Core/Util.h"
@@ -47,6 +48,9 @@ NarrativePlayer::NarrativePlayer(VSimApp *app,
 	a_prev->setShortcut(Qt::Key_Left);
 	connect(a_prev, &QAction::triggered, this, &NarrativePlayer::prev);
 
+	m_center_msg_timer = new QTimer(this);
+	m_center_msg_timer->setSingleShot(true);
+
 	// ui connections
 	top_bar->ui.play->setDefaultAction(a_play);
 	top_bar->ui.play_2->setDefaultAction(a_play);
@@ -61,20 +65,27 @@ NarrativePlayer::NarrativePlayer(VSimApp *app,
 		// clean up timer
 		if (state != VSimApp::PLAY_TRANSITION
 			&& state != VSimApp::PLAY_WAIT_TIME) {
-			m_paused = false;
 		}
-
 		if (state == VSimApp::PLAY_WAIT_CLICK) {
-			m_app->setCenterMessage("(Click or press P to continue)");
+			setCenterMessage(CenterMessage::CLICK);
 		}
 		else if (state == VSimApp::State::PLAY_FLYING) {
-			m_app->setCenterMessage("(Press P to continue)");
+			setCenterMessage(CenterMessage::PRESSP);
 		}
 		else if (state == VSimApp::PLAY_END) {
-			m_app->setCenterMessage("(Narrative finished)", 2000);
+			setCenterMessage(CenterMessage::FINISHED);
 		}
 		else {
-			m_app->setCenterMessage("");
+			if (state == VSimApp::PLAY_TRANSITION
+				|| state == VSimApp::PLAY_WAIT_TIME) {
+				// clear the message if it isn't playing
+				if (m_center_msg != CenterMessage::PLAYING) {
+					setCenterMessage(CenterMessage::NONE);
+				}
+			}
+			else {
+				setCenterMessage(CenterMessage::NONE);
+			}
 		}
 
 		// fly around interruption
@@ -90,14 +101,16 @@ NarrativePlayer::NarrativePlayer(VSimApp *app,
 		//	<< "playing new?"
 		//	<< VSimApp::StateStrings[state]
 		//	<< VSimApp::isPlaying(state);
+
 		// stop playing interruption
 		if (VSimApp::isPlaying(old) && !VSimApp::isPlaying(state)) {
 			stop();
-			m_app->setCenterMessage("(Narrative stopped)", 2000);
+			setCenterMessage(CenterMessage::STOPPED);
 		}
 
 		a_stop->setEnabled(m_app->isPlaying());
 		recheckPlayPause();
+		updateStatusMessage();
 	});
 	connect(m_app, &VSimApp::sTick, this, &NarrativePlayer::update);
 }
@@ -111,6 +124,7 @@ void NarrativePlayer::play()
 		) {
 		m_paused = false;
 		recheckPlayPause();
+		setCenterMessage(CenterMessage::NONE);
 		return;
 	}
 
@@ -141,7 +155,7 @@ void NarrativePlayer::play()
 
 	Narrative *nar = m_narratives->getCurrentNarrative();
 	if (!nar) {
-		qDebug() << "there is no curernt narative";
+		qInfo() << "there is no current narative";
 		m_narratives->selectNarratives({ 0 });
 		// don't necessarily have to ->openNarrative()
 	}
@@ -159,6 +173,7 @@ void NarrativePlayer::play()
 
 	m_narratives->singleSelectOpenSlide();
 	toAtNode();
+	setCenterMessage(CenterMessage::PLAYING);
 }
 
 void NarrativePlayer::pause()
@@ -166,6 +181,9 @@ void NarrativePlayer::pause()
 	if (m_app->state() == VSimApp::PLAY_WAIT_TIME
 		|| m_app->state() == VSimApp::PLAY_TRANSITION) {
 		m_paused = true;
+
+		setCenterMessage(CenterMessage::PAUSED);
+		updateStatusMessage();
 	}
 
 	recheckPlayPause();
@@ -318,6 +336,16 @@ void NarrativePlayer::update(double dt_sec)
 	}
 }
 
+bool NarrativePlayer::isPaused() const
+{
+	// can only be paused during
+	// transitioning, waiting
+	auto state = m_app->state();
+	return (state == VSimApp::PLAY_TRANSITION
+		|| state == VSimApp::PLAY_WAIT_TIME)
+		&& m_paused;
+}
+
 void NarrativePlayer::recheckPlayPause()
 {
 	// play and pause are mutually exclusive
@@ -373,4 +401,77 @@ void NarrativePlayer::recheckPlayPause()
 		button->setDefaultAction(use_me);
 	}
 
+}
+
+QString NarrativePlayer::getNarrativeName() const
+{
+	Narrative *nar = m_narratives->getCurrentNarrative();
+	if (!nar) return QString();
+	QString title = QString::fromStdString(nar->getTitle());
+	return title;
+}
+
+void NarrativePlayer::updateStatusMessage()
+{
+	auto state = m_app->state();
+
+	QString status;
+	QString base = "Playing narrative: " + getNarrativeName();
+	if (state == VSimApp::PLAY_WAIT_CLICK) {
+		status = base + " (wait click)";
+	}
+	else if (state == VSimApp::State::PLAY_FLYING) {
+		status = base + " (flying)";
+	}
+	else if (state == VSimApp::PLAY_END) {
+		status = "End of narrative: " + getNarrativeName();
+	}
+	else if (isPaused()) {
+		status = base + " (paused)";
+	}
+	else if (m_app->isPlaying()) {
+		status = base;
+	}
+	else {
+	}
+
+	m_status_message = status;
+	if (!status.isEmpty()) {
+		m_app->addPermanentStatusMessage(&m_status_message, m_status_message, false);
+	}
+	else {
+		m_app->removePermanentStatusMessage(&m_status_message);
+	}
+}
+
+void NarrativePlayer::setCenterMessage(CenterMessage msg)
+{
+	QString str;
+	int duration = 0;
+	m_center_msg_timer->stop();
+	if (msg == CenterMessage::NONE) {
+	}
+	else if (msg == CenterMessage::CLICK) {
+		str = "(Click or press P to continue)";
+	}
+	else if (msg == CenterMessage::PRESSP) {
+		str = "(Press P to continue)";
+	}
+	else if (msg == CenterMessage::FINISHED) {
+		str = "(Narrative finished)";
+		duration = 2000;
+	}
+	else if (msg == CenterMessage::PLAYING) {
+		str = "(Playing narrative: " + getNarrativeName() + ")";
+		duration = 2000;
+	}
+	else if (msg == CenterMessage::PAUSED) {
+		str = "(Paused, press P to continue)";
+	}
+	else if (msg == CenterMessage::STOPPED) {
+		str = "(Narrative stopped)";
+		duration = 2000;
+	}
+	m_center_msg = msg;
+	m_app->setCenterMessage(str, duration);
 }
