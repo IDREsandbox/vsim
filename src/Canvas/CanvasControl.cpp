@@ -149,7 +149,11 @@ void CanvasControl::setBorderWidth(int width)
 void CanvasControl::setBorderColor(const QColor & color)
 {
 	multiEdit([color](CanvasItem *item, QUndoCommand *parent) {
-		new CanvasItem::SetHasBorderCommand(item, true, parent);
+		// if there was no border, then enable it and set width to 1
+		if (!item->hasBorder()) {
+			new CanvasItem::SetHasBorderCommand(item, true, parent);
+			new CanvasItem::SetBorderWidthCommand(item, 1, parent);
+		}
 		new CanvasItem::SetBorderColorCommand(item, color, parent);
 	}, "Set Border Color");
 }
