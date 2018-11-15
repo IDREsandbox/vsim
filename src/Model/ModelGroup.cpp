@@ -1,5 +1,4 @@
 #include "ModelGroup.h"
-#include "ModelGroup.h"
 #include <QDebug>
 #include <regex>
 #include <iostream>

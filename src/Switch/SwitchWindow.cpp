@@ -62,9 +62,7 @@ void SwitchWindow::setModel(SwitchListModel *model)
 
 void SwitchWindow::onSwitchChanged(const QModelIndex & current)
 {
-	if (!m_model) return;
-
-	if (!current.isValid()) {
+	if (!m_model || !current.isValid()) {
 		// how to clear a view?
 		m_nodes_view->setRootIndex(QModelIndex());
 		m_nodes_view->setModelColumn(0);

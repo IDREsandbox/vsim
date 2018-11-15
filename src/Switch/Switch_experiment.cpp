@@ -19,6 +19,84 @@ class NoisyObs : public osg::Observer {
 	}
 };
 
+void readWriteTest() {
+	osg::ref_ptr<osgSim::MultiSwitch> ms = new osgSim::MultiSwitch;
+
+
+	osg::ref_ptr<osg::Node> node1 = new osg::Node;
+	osg::ref_ptr<osg::Node> node2 = new osg::Node;
+	osg::ref_ptr<osg::Node> node3 = new osg::Node;
+
+	node1->setName("n1");
+	node2->setName("n2");
+	node3->setName("n3");
+
+	// set0 - 0 0 0
+	// set1 - 1 1 1
+	// set2 = 1 0 1
+
+	ms->addChild(node1);
+	ms->addChild(node2);
+	ms->addChild(node3);
+
+	//osgSim::MultiSwitch::SwitchSetList; // vector<vector<bool>>
+	//osgSim::MultiSwitch::ValueList; // vector<bool>
+	//osgSim::MultiSwitch::SwitchSetNameList; // vector<string>
+	std::vector<std::vector<bool>> sets = {
+		{ false, false, false },
+		{ true, true, true },
+		{ true, false, true }
+	};
+	std::vector<std::string> names = {
+		"set0",
+		"set1",
+		"set2"
+	};
+
+	ms->setSwitchSetList(sets);
+	for (int i = 0; i < names.size(); i++) {
+		ms->setValueName(i, names[i]);
+	}
+
+	// possible hack solutions
+	// 1. Use Descriptions, it isn't documented so I have no idea what it's for
+	//	but we can store a list of strings in it. It's probably for describing
+	//  each user object? ex. time_data, other_data, etc_data
+	// 2. Use a user data map/stack of strings?
+	// 3. Use a tree of user data containers
+	// 4. Encode names as a single string "name1;name2;name3"
+
+	// (2) ValueStack is so confusing, its a
+	//		Stack of Maps of ValueObjects pointing to ValueObjects
+	// (3) obj->container()["switch_names"]->dummycontainer()->descriptions()
+	//		we're going to use the Descriptions section of a dummy container
+	//		to store a string list
+
+	SwitchListModel::saveCustomSwitchNames(ms);
+
+	// write out to buffer
+	std::stringstream ss;
+	auto *osgrw = osgDB::Registry::instance()->getReaderWriterForExtension("osgb");
+	osgrw->writeNode(*ms, ss);
+	auto read_result = osgrw->readNode(ss);
+	if (!read_result.success()) {
+		std::cout << "read error?\n";
+	}
+	auto *ms2 = dynamic_cast<osgSim::MultiSwitch*>(read_result.takeNode());
+
+	if (!ms2) {
+		qDebug() << "not a multiswitch fail";
+		return;
+	}
+	SwitchListModel::loadCustomSwitchNames(ms2);
+
+	std::vector<std::string> after = SwitchListModel::getSwitchNames(ms2);
+	qDebug() << "after:";
+	for (std::string s : after) {
+		qDebug() << QString::fromStdString(s);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
@@ -60,6 +138,11 @@ int main(int argc, char *argv[])
 	auto *a_clear3 = menu->addAction("remove rec");
 	QObject::connect(a_clear3, &QAction::triggered, [&]() {
 		manager->removeNodeRecursive(loaded);
+	});
+
+	auto *a_rwtest = menu->addAction("rw test");
+	QObject::connect(a_rwtest, &QAction::triggered, [&]() {
+		readWriteTest();
 	});
 
 

@@ -412,6 +412,74 @@ bool SwitchListModel::setData(const QModelIndex &index, const QVariant &value, i
 	return false;
 }
 
+void SwitchListModel::preSave()
+{
+	for (auto &x : m_nodes) {
+		if (x->m_multi_switch == nullptr) continue;
+		saveCustomSwitchNames(x->m_multi_switch);
+	}
+}
+
+void SwitchListModel::postLoad()
+{
+	for (auto &x : m_nodes) {
+		if (x->m_multi_switch == nullptr) continue;
+		loadCustomSwitchNames(x->m_multi_switch);
+	}
+}
+
+void SwitchListModel::saveCustomSwitchNames(osgSim::MultiSwitch * ms)
+{
+	std::vector<std::string> names = getSwitchNames(ms);
+
+	// get container
+	auto *cont = ms->getOrCreateUserDataContainer();
+
+	// remove any existing switch_names
+	osg::Object *search = cont->getUserObject("switch_names");
+	unsigned int existing = cont->getUserObjectIndex("switch_names");
+	if (existing < cont->getNumUserObjects()) {
+		cont->removeUserObject(existing);
+	}
+
+	// create our target
+	osg::DefaultUserDataContainer *name_cont = new osg::DefaultUserDataContainer;
+	name_cont->setName("switch_names");
+	name_cont->setDescriptions(names);
+	cont->addUserObject(name_cont);
+}
+
+void SwitchListModel::loadCustomSwitchNames(osgSim::MultiSwitch * ms)
+{
+	auto *cont = ms->getOrCreateUserDataContainer();
+	osg::Object *search = cont->getUserObject("switch_names");
+
+	auto *name_cont2 = dynamic_cast<osg::UserDataContainer*>(search);
+
+	if (name_cont2) {
+		std::vector<std::string> names = name_cont2->getDescriptions();
+		setSwitchNames(ms, names);
+	}
+}
+
+std::vector<std::string> SwitchListModel::getSwitchNames(osgSim::MultiSwitch * ms)
+{
+	std::vector<std::string> out;
+	for (unsigned int i = 0; i < ms->getSwitchSetList().size(); i++) {
+		out.push_back(ms->getValueName(i));
+	}
+	return out;
+}
+
+void SwitchListModel::setSwitchNames(osgSim::MultiSwitch * ms, const std::vector<std::string>& names)
+{
+	for (unsigned int i = 0;
+		i < names.size() && i < ms->getSwitchSetList().size();
+		i++) {
+		ms->setValueName(i, names[i]);
+	}
+}
+
 osg::Group * SwitchListModel::SwitchNode::group() const
 {
 	if (m_type == BASIC) {

@@ -450,6 +450,13 @@ void VSimApp::connectSwitchManager()
 	connect(models->rootWrapper(), &OSGNodeWrapper::sAboutToReset, [this]() {
 		m_switch_manager->clear();
 	});
+
+	connect(this, &VSimApp::sReset, [this]() {
+		m_switch_manager->postLoad();
+	});
+	connect(this, &VSimApp::sAboutToSave, [this]() {
+		m_switch_manager->preSave();
+	});
 }
 
 void VSimApp::pokeStatusBar()

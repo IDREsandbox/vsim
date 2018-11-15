@@ -62,6 +62,18 @@ SwitchListModel *SwitchManager::listModel()
 	return m_list_model;
 }
 
+void SwitchManager::preSave()
+{
+	// save all the switch names
+	m_list_model->preSave();
+}
+
+void SwitchManager::postLoad()
+{
+	// load all the switch names
+	m_list_model->postLoad();
+}
+
 void SwitchManager::track(osg::Node * node)
 {
 	m_observer.observe(node);

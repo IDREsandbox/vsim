@@ -59,6 +59,15 @@ public:
 	QVariant data(const QModelIndex &index, int role) const override;
 	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
+	void preSave();
+	void postLoad();
+
+public:
+	static void saveCustomSwitchNames(osgSim::MultiSwitch *ms);
+	static void loadCustomSwitchNames(osgSim::MultiSwitch *ms);
+	static std::vector<std::string> getSwitchNames(osgSim::MultiSwitch *ms);
+	static void setSwitchNames(osgSim::MultiSwitch *ms, const std::vector<std::string> &names);
+
 private:
 	struct SwitchNode;
 

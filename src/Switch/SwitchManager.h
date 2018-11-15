@@ -32,6 +32,9 @@ public:
 
 	SwitchListModel *listModel();
 
+	void preSave();
+	void postLoad();
+
 private:
 	void track(osg::Node *node);
 
