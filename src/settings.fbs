@@ -46,6 +46,7 @@ table GraphicsSettings {
   // anti aliasing
   // lighting?
   lighting:bool = false;
+  ambient:Color;
 }
 
 table CameraSettings {

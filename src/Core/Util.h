@@ -57,7 +57,9 @@ namespace Util
 	QImage imageOsgToQt(const osg::Image *oimg);
 
 	QColor vecToColor(const osg::Vec4 &vec);
+	QColor vec3ToColor(const osg::Vec3 &vec);
 	osg::Vec4 colorToVec(const QColor &color);
+	osg::Vec3 colorToVec3(const QColor &color);
 
 	// convert QColor to "background:rgba(r, g, b, a);"
 	QString colorToStylesheet(QColor);

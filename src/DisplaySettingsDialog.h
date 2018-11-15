@@ -15,6 +15,7 @@ private:
 	void reload();
 	void loadFov(float fov);
 	void loadDefaults();
+	void loadAmbient(QColor c);
 
 	void setFov(float fov);
 

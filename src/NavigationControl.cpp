@@ -323,6 +323,10 @@ void NavigationControl::gatherSettings()
 	auto *gs = &m_app->getRoot()->graphicsSettings();
 	gs->lighting = m_viewer->getLightingEnabled();
 
+	VSim::FlatBuffers::Color *ambs = Util::getOrCreate(gs->ambient).get();
+	QColor qamb = Util::vec3ToColor(m_viewer->getAmbient());
+	*ambs = VSim::FlatBuffers::Color(TypesSerializer::qt2fbColor(qamb));
+
 	auto *cs = Util::getOrCreate(gs->camera_settings).get();
 
 	// camera setings
@@ -373,6 +377,16 @@ void NavigationControl::extractSettings()
 	// graphics settings
 	auto *gs = &m_app->getRoot()->graphicsSettings();
 	m_viewer->setLightingEnabled(gs->lighting);
+
+	auto *ambient = gs->ambient.get();
+	osg::Vec3 amb;
+	if (ambient) {
+		amb = Util::colorToVec3(TypesSerializer::fb2qtColor(*ambient));
+	}
+	else {
+		amb = OSGViewerWidget::defaultAmbient();
+	}
+	m_viewer->setAmbient(amb);
 
 	// camera settings
 	auto &cs = Util::getOrCreate(gs->camera_settings);

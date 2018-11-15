@@ -186,12 +186,12 @@ OSGViewerWidget::OSGViewerWidget(QWidget* parent, Qt::WindowFlags f)
 
 	// Lighting
 	// share the same light
-	m_main_view->setLightingMode(osg::View::LightingMode::HEADLIGHT);
-	auto *light = m_main_view->getLight();
-	m_thumb_view->setLightingMode(osg::View::LightingMode::HEADLIGHT);
-	m_thumb_view->setLight(light);
+	m_main_view->setLightingMode(osg::View::LightingMode::SKY_LIGHT);
+	m_light = m_main_view->getLight();
+	m_thumb_view->setLightingMode(osg::View::LightingMode::SKY_LIGHT);
+	m_thumb_view->setLight(m_light);
 
-	light->setAmbient(osg::Vec4(.5, .5, .5, 1.0));
+	m_light->setAmbient(osg::Vec4(defaultAmbient(), 1.0));
 
 	// Camera Manipulator and Navigation
 	//osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
@@ -846,6 +846,22 @@ void OSGViewerWidget::setPolygonMode(osg::PolygonMode::Mode mode)
 {
 	m_ssm->setPolygonMode(mode);
 	m_thumb_ssm->setPolygonMode(mode);
+}
+
+osg::Vec3 OSGViewerWidget::getAmbient() const
+{
+	osg::Vec4 amb = m_light->getAmbient();
+	return { amb.x(), amb.y(), amb.z() };
+}
+
+void OSGViewerWidget::setAmbient(osg::Vec3 color)
+{
+	m_light->setAmbient({ color.x(), color.y(), color.z(), 1.0 });
+}
+
+osg::Vec3 OSGViewerWidget::defaultAmbient()
+{
+	return { .5, .5, .5 };
 }
 
 bool OSGViewerWidget::eventFilter(QObject * obj, QEvent * e)

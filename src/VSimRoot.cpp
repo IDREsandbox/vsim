@@ -440,6 +440,13 @@ void VSimRoot::copyGraphicsSettings(VSim::FlatBuffers::GraphicsSettingsT &dest,
 		cs->far_clip = cs2->far_clip;
 		cs->auto_clip = cs2->auto_clip;
 	}
+
+	if (src.ambient) {
+		dest.ambient = std::make_unique<VSim::FlatBuffers::Color>(*src.ambient);
+	}
+	else {
+		dest.ambient = nullptr;
+	}
 }
 
 void VSimRoot::copyWindowSettings(VSim::FlatBuffers::WindowSettingsT &dest,

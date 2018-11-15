@@ -199,6 +199,18 @@ osg::Vec4 Util::colorToVec(const QColor & color)
 	return osg::Vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF());
 }
 
+QColor Util::vec3ToColor(const osg::Vec3 & vec)
+{
+	QColor color;
+	color.setRgbF(vec.x(), vec.y(), vec.z());
+	return color;
+}
+
+osg::Vec3 Util::colorToVec3(const QColor & color)
+{
+	return osg::Vec3(color.redF(), color.greenF(), color.blueF());
+}
+
 QString Util::colorToStylesheet(QColor color)
 {
 	QString style = "background:rgba("

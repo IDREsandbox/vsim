@@ -17,6 +17,53 @@
    <item row="0" column="0">
     <widget class="QWidget" name="widget" native="true">
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="2" column="5">
+       <widget class="QLabel" name="clip_far_label">
+        <property name="text">
+         <string>Far</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" colspan="3">
+       <widget class="QSlider" name="fov_slider">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="6">
+       <widget class="QDoubleSpinBox" name="fov_spinbox"/>
+      </item>
+      <item row="2" column="3">
+       <widget class="QLabel" name="clip_near_label">
+        <property name="text">
+         <string>Near</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QCheckBox" name="clip_auto_checkbox">
+        <property name="text">
+         <string>Auto</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="6">
+       <widget class="QDoubleSpinBox" name="clip_far_spinbox"/>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="camera_label">
         <property name="text">
@@ -31,16 +78,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2" colspan="3">
-       <widget class="QSlider" name="fov_slider">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="6">
-       <widget class="QDoubleSpinBox" name="fov_spinbox"/>
-      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="clip_label">
         <property name="text">
@@ -48,45 +85,21 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="2">
-       <widget class="QCheckBox" name="clip_auto_checkbox">
-        <property name="text">
-         <string>Auto</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QLabel" name="clip_near_label">
-        <property name="text">
-         <string>Near</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="4">
        <widget class="QDoubleSpinBox" name="clip_near_spinbox"/>
       </item>
-      <item row="2" column="5">
-       <widget class="QLabel" name="clip_far_label">
+      <item row="3" column="0">
+       <widget class="QPushButton" name="ambient_button">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="text">
-         <string>Far</string>
+         <string>Ambient</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
-      </item>
-      <item row="2" column="6">
-       <widget class="QDoubleSpinBox" name="clip_far_spinbox"/>
-      </item>
-      <item row="3" column="3">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>

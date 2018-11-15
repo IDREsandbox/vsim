@@ -187,6 +187,10 @@ public:
 	void setTextureEnabled(bool enable);
 	void setPolygonMode(osg::PolygonMode::Mode mode);
 
+	osg::Vec3 getAmbient() const;
+	void setAmbient(osg::Vec3 color);
+	static osg::Vec3 defaultAmbient();
+
 
 public:
 
@@ -253,6 +257,7 @@ private:
 
 	osg::ref_ptr<osgViewer::View> m_main_view;
 	osg::ref_ptr<osgViewer::View> m_thumb_view;
+	osg::ref_ptr<osg::Light> m_light;
 
 	std::shared_ptr<QOpenGLFramebufferObject> m_fbo;
 	std::shared_ptr<QOpenGLFramebufferObject> m_thumb_fbo;

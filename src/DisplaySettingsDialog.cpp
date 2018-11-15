@@ -2,10 +2,13 @@
 
 #include <QPushButton>
 #include <QDebug>
+#include <QColorDialog>
 
 #include "VSimApp.h"
 #include "OSGViewerWidget.h"
 #include "VSimRoot.h"
+#include "Core/Util.h"
+#include "settings_generated.h"
 
 // one way binding + modal
 // There is no listening to the data, so if someone else changes these values
@@ -46,6 +49,14 @@ DisplaySettingsDialog::DisplaySettingsDialog(VSimApp *app, QWidget *parent)
 		reload();
 	});
 
+	connect(ui.ambient_button, &QPushButton::pressed, this, [this]() {
+		QColor init = Util::vec3ToColor(m_viewer->getAmbient());
+		QColor result = QColorDialog::getColor(init, this, "Ambient Color");
+		if (!result.isValid()) return;
+		m_viewer->setAmbient(Util::colorToVec3(result));
+		reload();
+	});
+
 	m_defaults_button = ui.button_box->button(QDialogButtonBox::RestoreDefaults);
 	connect(ui.button_box, &QDialogButtonBox::clicked, this, [this](QAbstractButton *button) {
 		if (button == m_defaults_button) {
@@ -77,6 +88,7 @@ void DisplaySettingsDialog::reload()
 	m_defaults_button->setVisible(enabled);
 
 	loadFov(m_viewer->fovy());
+	loadAmbient(Util::vec3ToColor(m_viewer->getAmbient()));
 }
 
 void DisplaySettingsDialog::loadFov(float fov)
@@ -91,11 +103,23 @@ void DisplaySettingsDialog::loadFov(float fov)
 
 void DisplaySettingsDialog::loadDefaults()
 {
-	m_viewer->setFovy(55);
-	m_viewer->setAutoClip(true);
-	m_viewer->setNearClip(.5);
-	m_viewer->setFarClip(5000);
+	VSim::FlatBuffers::CameraSettingsT cs;
+	VSim::FlatBuffers::GraphicsSettingsT gs;
+
+	m_viewer->setFovy(cs.fovy);
+	m_viewer->setAutoClip(cs.auto_clip);
+	m_viewer->setNearClip(cs.near_clip);
+	m_viewer->setFarClip(cs.far_clip);
+	m_viewer->setAmbient(OSGViewerWidget::defaultAmbient());
 	reload();
+}
+
+void DisplaySettingsDialog::loadAmbient(QColor c)
+{
+	QPushButton *b = ui.ambient_button;
+	QPixmap pm(50,50);
+	pm.fill(c);
+	b->setIcon(pm);
 }
 
 void DisplaySettingsDialog::setFov(float fov)
