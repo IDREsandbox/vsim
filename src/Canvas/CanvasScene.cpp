@@ -462,7 +462,7 @@ CanvasItem::CanvasItem(QGraphicsItem * parent)
 	QPen p = pen();
 	p.setBrush(QColor(0, 0, 0));
 	p.setStyle(Qt::NoPen);
-	p.setJoinStyle(Qt::RoundJoin);
+	p.setJoinStyle(Qt::PenJoinStyle::MiterJoin);
 	setPen(p);
 	updateBorderWidth();
 
