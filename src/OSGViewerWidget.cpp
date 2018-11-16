@@ -1201,6 +1201,9 @@ void OSGViewerWidget::centerCursor()
 	auto old_pos = new_cursor.pos();
 	auto new_pos = mapToGlobal(QPoint(width() / 2, height() / 2));
 	QCursor::setPos(new_pos);
+
+	// get the new position, test it
+	// if it's the same then we have a problem
 }
 
 void OSGViewerWidget::recreateFramebuffer()

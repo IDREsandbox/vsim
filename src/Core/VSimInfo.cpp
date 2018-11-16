@@ -41,7 +41,7 @@ namespace VSimInfo {
             do_normal_assets = false;
             g_is_bundle = true;
 		    QString bundle_root = macos_dir.absoluteFilePath("../../");
-		    g_assets_path = QDir(bundle_root).absoluteFilePath("Contents/Resources/asset/s");
+		    g_assets_path = QDir(bundle_root).absoluteFilePath("Contents/Resources/assets/");
             g_osg_plugins_path = QDir(bundle_root).absoluteFilePath("Contents/Plugins/");
         }
 #endif
