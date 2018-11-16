@@ -18,6 +18,7 @@ BasicRichTextEdit::BasicRichTextEdit(QWidget *parent)
 
 	auto *ff = new FocusFilter(this);
 	ui.text->installEventFilter(ff);
+	ui.text->setTabStopDistance(40.0);
 
 	connect(ui.text, &QTextEdit::currentCharFormatChanged,
 		this, &BasicRichTextEdit::onAnyChange);

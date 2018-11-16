@@ -984,6 +984,10 @@ TextItem::TextItem(CanvasLabel * parent)
 	auto f = document()->defaultFont();
 	f.setHintingPreference(QFont::PreferNoHinting);
 	document()->setDefaultFont(f);
+
+	auto opt = document()->defaultTextOption();
+	opt.setTabStopDistance(40.0);
+	document()->setDefaultTextOption(opt);
 }
 
 QRectF TextItem::boundingRect() const

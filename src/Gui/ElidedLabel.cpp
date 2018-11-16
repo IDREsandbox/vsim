@@ -43,6 +43,7 @@ void ElidedLabel::paintEvent(QPaintEvent *event)
 
 	QTextOption opt;
 	opt.setAlignment(Qt::AlignHCenter);
+	opt.setTabStopDistance(40.0);
 
 	while (true) {
 		QTextLine line = textLayout.createLine();
