@@ -1,5 +1,24 @@
 # Changelog
 
+## 2018-11-16
+
+- mac build
+- changed scrollbar style a bit
+- fixed high res display & thumbnails on mac (does 4K windows work?)
+- scrolling to change navigation speed works better with touchpads
+- narrative player - added persistent status bar messages
+- narrative player - added middle-of-the-screen messages
+- narrative player - replays transition if you started flying around in the middle of a transition
+- canvas - borders are square instead of rounded
+- canvas - border size 1 instead of 0 when you first add a border
+- switch names save
+- allow 0.0s duration slides
+- reverted lighting from flashlight to skylight (points down)
+- added ambient light setting
+- various tab widths 80px -> 40px
+- ers don't select while playing narratives
+- er transition time .6s -> 1.0s
+
 ## 2018-9-14
 
 - adjusted About VSim, fixed typos
