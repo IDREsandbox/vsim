@@ -707,7 +707,7 @@ void ERControl::setDisplay(EResource *res, bool go, bool fade)
 	// goto
 	if (go && !is_null) {
 		m_going_to = true;
-		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), .6);
+		m_app->setCameraMatrixSmooth(res->getCameraMatrix(), 1.0);
 	}
 }
 
@@ -896,17 +896,20 @@ void ERControl::onUpdate()
 	// send updates to proxies
 	m_ers->sEdited(change_list);
 
-	// add to selection if possible
-	for (auto *res : trigger_list) {
-		if (!isSelectable(res)) continue;
+	// only select/launch if we're flying
+	if (m_app->isFlying()) {
+		// add to selection if possible
+		for (auto *res : trigger_list) {
+			if (!isSelectable(res)) continue;
 
-		// if we're going somewhere then queue (want to keep target on top)
-		// if just moving around then stack (want to change target)
-		addToSelection(res, !m_going_to);
+			// if we're going somewhere then queue (want to keep target on top)
+			// if just moving around then stack (want to change target)
+			addToSelection(res, !m_going_to);
 
-		if (res->getAutoLaunch() == EResource::ON && m_auto_launch) {
-			// try to open this thing
-			launchResource(res);
+			if (res->getAutoLaunch() == EResource::ON && m_auto_launch) {
+				// try to open this thing
+				launchResource(res);
+			}
 		}
 	}
 
