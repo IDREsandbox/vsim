@@ -11,6 +11,7 @@
 #include "resources/ECategory.h"
 #include "Core/LockTable.h"
 #include "Core/Util.h"
+#include "Core/VSimInfo.h"
 
 ERScrollItem::ERScrollItem()
 	: FastScrollItem(),
@@ -18,13 +19,13 @@ ERScrollItem::ERScrollItem()
 	m_cat(nullptr),
 	m_lock(nullptr)
 {
-	auto dir = QCoreApplication::applicationDirPath();
-	m_text_icon = QPixmap(dir + "/assets/icons/Text_Annotation_Icon_August2018.png");
-	m_file_icon = QPixmap(dir + "/assets/icons/Document_16xMD.png");
-	m_url_icon = QPixmap(dir + "/assets/icons/Link_16xMD.png");
-	m_goto_icon = QPixmap(dir + "/assets/icons/Arrow2PointIcon_August2018.png");
-	m_launch_icon = QPixmap(dir + "/assets/icons/Effects_16xMD.png");
-	m_lock_icon = QPixmap(dir + "/assets/icons/Lock_16xMD.png");
+	auto dir = VSimInfo::assets();
+	m_text_icon = QPixmap(dir + "/icons/Text_Annotation_Icon_August2018.png");
+	m_file_icon = QPixmap(dir + "/icons/Document_16xMD.png");
+	m_url_icon = QPixmap(dir + "/icons/Link_16xMD.png");
+	m_goto_icon = QPixmap(dir + "/icons/Arrow2PointIcon_August2018.png");
+	m_launch_icon = QPixmap(dir + "/icons/Effects_16xMD.png");
+	m_lock_icon = QPixmap(dir + "/icons/Lock_16xMD.png");
 
 	setCacheMode(QGraphicsItem::CacheMode::DeviceCoordinateCache);
 }
