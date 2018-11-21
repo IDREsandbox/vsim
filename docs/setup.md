@@ -31,17 +31,28 @@ cmake --build . --target INSTALL --config RELEASE
 - install git
 - install homebrew
 - `brew install cmake`
+- `brew install flatbuffers open-scene-graph qt cryptopp assimp python3`
 
 ```
-brew install flatbuffers open-scene-graph qt cryptopp assimp python3
-
 mkdir build
 cd build
-
 cmake -DCMAKE_INSTALL_PREFIX=install ..
 ```
 
+Building uses a custom python script instead of the install target.
+
+```
+cmake --build . --target VSim.app --config Release
+```
+
+Make a tarball.
+
+```
+tar czf VSim.tar.gz VSim.app
+```
+
 You can do `-G Xcode` for an Xcode project. The default is just a makefile.
+I didn't have much success working with Xcode.
 You might need this? I hardcoded the qt install symlink (/usr/local/opt/qt)
 
 ```
@@ -49,8 +60,6 @@ dprefix=""
 for dep in "qt"; do dprefix+=$(brew --prefix $dep)";"; done
 -DCMAKE_PREFIX_PATH=$dprefix
 ```
-
-
 
 # old setup instructions that probably don't work
 

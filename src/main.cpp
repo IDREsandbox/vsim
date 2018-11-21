@@ -16,19 +16,23 @@ int main(int argc, char *argv[])
 {
 	VSimInfo::initPath(argv[0]);
 
-#if __APPLE__
-	qInfo() << "library paths:" << QCoreApplication::libraryPaths();
 	qInfo() << "assets path:" << VSimInfo::assets();
-	qInfo() << "is mac bundle:" << VSimInfo::isMacBundle();
+	qInfo() << "qt library paths:" << QCoreApplication::libraryPaths();
 	qInfo() << "qt library location:" << QLibraryInfo::location(QLibraryInfo::BinariesPath);
 	qInfo() << "qt plugins location:" << QLibraryInfo::location(QLibraryInfo::PluginsPath);
-	qInfo() << "qtlibrary paths:" << QCoreApplication::libraryPaths();
+	qInfo() << "is mac bundle:" << VSimInfo::isMacBundle();
 
+#if __APPLE__
 	auto &osg_path_list = osgDB::Registry::instance()->getDataFilePathList();
 	osg_path_list.push_back(VSimInfo::osgPluginsPath().toStdString());
 #endif
+#if _WIN32
+	QCoreApplication::addLibraryPath("plugins");
+#endif
 
 	QApplication a(argc, argv);
+
+	qInfo() << "qt library paths:" << QCoreApplication::libraryPaths();
 
 	QString assets = VSimInfo::assets();
 	QString startup = assets + "/default.vsim";
