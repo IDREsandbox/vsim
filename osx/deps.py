@@ -338,7 +338,7 @@ def prepAppDir(dst, exe):
         shutil.copytree(os.path.join(root, "assets"), assets_dst)
 
     # copy icon
-    shutil.copy(os.path.join(root, "assets", "vsim.icns"), assets_dst)
+    shutil.copy(os.path.join(root, "assets", "vsim.icns"), resources)
 
     # copy conf
     shutil.copy(os.path.join(root, "osx", "qt.conf"), resources)
