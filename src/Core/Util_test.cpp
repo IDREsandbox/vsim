@@ -168,6 +168,34 @@ private slots:
 		QVERIFY(Util::doubleEq(r, r2));
 	}
 
+	void cubicTest() {
+
+		auto doTest = [](double m0, double m1, int n = 20) {
+			printf("[");
+			for (int i = 0; i < n; i++) {
+				if (i > 0) printf(",");
+				printf("%f", i / (double)n);
+			}
+			printf("]\n");
+			printf("[");
+			for (int i = 0; i < n; i++) {
+				if (i > 0) printf(",");
+				printf("%f", Util::cubicInterp(m0, m1, i / (double)n));
+			}
+			printf("]\n");
+		};
+
+		doTest(0, 0);
+		doTest(0, 1);
+		doTest(1, 0);
+		doTest(1, 1);
+
+		QVERIFY(Util::doubleEq(Util::cubicInterp(0, 0, .5), 0.5));
+		QVERIFY(Util::doubleEq(Util::cubicInterp(1, 1, .5), 0.5));
+
+
+	}
+
 };
 
 QTEST_MAIN(Util_test)

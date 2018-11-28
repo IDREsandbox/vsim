@@ -258,6 +258,9 @@ void NarrativePlayer::toTransitioning(int index)
 	m_camera_from = prev->getCameraMatrix();
 	m_camera_to = slide->getCameraMatrix();
 
+	m_slope_from = prev->doesSlowdown() ? 0.0 : 1.0;
+	m_slope_to = slide->doesSlowdown() ? 0.0 : 1.0;
+
 	m_total_time = slide->getTransitionDuration();
 	m_time_remaining_sec = slide->getTransitionDuration();
 	m_paused = false;
@@ -315,7 +318,10 @@ void NarrativePlayer::update(double dt_sec)
 		// t: [0, 1]
 		// max to avoid dividing by 0
 		double t_linear = 1 - m_time_remaining_sec / std::max(m_total_time, .001);
-		double t_smooth = Util::simpleCubic(0, 1, t_linear);
+
+		// if an endpoint is 0.0s then generate a curve w/ slope 1
+		double t_smooth = Util::cubicInterp(m_slope_from, m_slope_to, t_linear);
+
 		m_app->setCameraMatrix(Util::cameraMatrixInterp(m_camera_from, m_camera_to, t_smooth));
 
 		// check timer finished

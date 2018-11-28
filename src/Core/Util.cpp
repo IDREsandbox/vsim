@@ -477,6 +477,40 @@ double Util::simpleCubic(double x0, double x1, double t)
 	return lerp(x0, x1, ht);
 }
 
+double Util::cubicInterp(double m0, double m1, double t)
+{
+	// we could make this more powerful, higher dimensions, any x/y
+	// Ax = b
+	// where b = [f(0); f(1); f'(0); f'(1)]
+	// for A you just plugin ax^3 + bx^2 + cx + d for x=0, x=1
+	//  then slopes 3ax^2 + 2bx + c + 0 for x=0, x=1
+
+	osg::Matrixd matA(
+		0, 0, 0, 1,
+		1, 1, 1, 1,
+		0, 0, 1, 0,
+		3, 2, 1, 0);
+
+	osg::Vec4d vecb(
+		0,
+		1,
+		m0,
+		m1
+	);
+
+	matA.invert(matA);
+	osg::Vec4d vecx = matA.postMult(vecb);
+
+	// a, b, c, d is vecx
+	// just do a normal polynomial calculation
+	return cubicPoly(vecx[0], vecx[1], vecx[2], vecx[3], t);
+}
+
+double Util::cubicPoly(double a, double b, double c, double d, double x)
+{
+	return a * pow(x, 3) + b * pow(x, 2) + c * x + d;
+}
+
 //Util::endPt Util::hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl) {
 //	osg::Matrixd curveMat(b[0], b[1], b[2], b[3], a[0], a[1], a[2], a[3], db[0], db[1], db[2], db[3], da[0], da[1], da[2], da[3]);
 //	osg::Matrixd hermiteMat(-2, 3, 0, 0, 2, -3, 0, 1, 1, -1, 0, 0, 1, -2, 1, 0);

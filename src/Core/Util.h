@@ -165,10 +165,16 @@ namespace Util
 		osg::Vec3d tan;
 	};
 	
-	osg::Matrixd camMatHerm(double t, osg::Matrixd m0, osg::Matrixd m1);
+	//osg::Matrixd camMatHerm(double t, osg::Matrixd m0, osg::Matrixd m1);
 
 	// a dumb version of hermite curve
 	double simpleCubic(double x0, double x1, double t);
+
+	// fits a cubic curve between (0, 0) slope m0 and (1, 1) slope m1
+	double cubicInterp(double m0, double m1, double t);
+
+	// returns ax^3 + bx^2 + cx + d
+	double cubicPoly(double a, double b, double c, double d, double x);
 
 	//Util::endPt hermiteCurve(osg::Vec4d a, osg::Vec4d b, osg::Vec4d da, osg::Vec4d db, double t, double epsl = .0001);
 

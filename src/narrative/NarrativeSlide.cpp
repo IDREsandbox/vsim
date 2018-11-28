@@ -168,6 +168,11 @@ void NarrativeSlide::setTransitionDuration(float tduration)
 	emit sTransitionDurationChanged(tduration);
 }
 
+bool NarrativeSlide::doesSlowdown() const
+{
+	return m_stay_on_node || m_duration != 0.0;
+}
+
 QPixmap NarrativeSlide::thumbnail() const
 {
 	return m_thumbnail;

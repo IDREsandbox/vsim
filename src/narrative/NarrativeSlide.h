@@ -31,6 +31,9 @@ public:
 	float getTransitionDuration() const;
 	void setTransitionDuration(float tduration);
 
+	// 0.0s slides don't slowdown
+	bool doesSlowdown() const;
+
 	// thumbnail cache
 	QPixmap thumbnail() const;
 	QPixmap thumbnailBackground() const;

@@ -77,6 +77,8 @@ private:
 
 	osg::Matrix m_camera_from;
 	osg::Matrix m_camera_to;
+	double m_slope_from;
+	double m_slope_to;
 };
 
 #endif /* NARRATIVEPLAYER_H */
