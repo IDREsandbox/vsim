@@ -31,7 +31,9 @@ static flatbuffers::Offset<fb::FillStyle>
 static void readLineStyle(const fb::LineStyle *ls, CanvasItem *item)
 {
 	if (!ls) return;
-	if (ls->color()) item->setBorderColor(TypesSerializer::fb2qtColor(*ls->color()));
+	if (ls->color()) {
+		item->setBorderColor(TypesSerializer::fb2qtColor(*ls->color()));
+	}
 	item->setBorderWidthPixels(ls->width());
 	item->setHasBorder(ls->visible());
 }
@@ -39,7 +41,9 @@ static void readLineStyle(const fb::LineStyle *ls, CanvasItem *item)
 static void readLineStyle(const fb::LineStyle *ls, FrameStyle *style)
 {
 	if (!ls) return;
-	if (ls->color()) style->m_frame_color = TypesSerializer::fb2qtColor(*ls->color());
+	if (ls->color()) {
+		style->m_frame_color = TypesSerializer::fb2qtColor(*ls->color());
+	}
 	style->m_frame_width = ls->width();
 	style->m_has_frame = ls->visible();
 }
@@ -137,7 +141,7 @@ std::shared_ptr<CanvasItem> CanvasSerializer::readCanvasItem(
 }
 
 bool CanvasSerializer::createCanvasItem(
-	flatbuffers::FlatBufferBuilder * builder,
+	flatbuffers::FlatBufferBuilder *builder,
 	const CanvasItem *item,
 	flatbuffers::Offset<void> *out_offset,
 	fb::CanvasItem *out_type)

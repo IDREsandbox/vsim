@@ -181,7 +181,7 @@ public:
 	int type() const override { return Type; };
 
 	void copy(const CanvasItem &other);
-	virtual CanvasItem *clone() const; // covariant return magic
+	virtual CanvasItem *clone() const; // covariant return magic, make sure to override this
 	//SharedItem cloneShared() const; // too complicated, need template shenanigans
 
 	QSizeF size() const;

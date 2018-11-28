@@ -482,6 +482,7 @@ void CanvasItem::copy(const CanvasItem & other)
 	m_border_around = other.m_border_around;
 	m_border_width = other.m_border_width;
 	setHasBorder(other.hasBorder());
+	setBorderColor(other.borderColor());
 	setRect(other.rect());
 }
 
