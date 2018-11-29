@@ -98,12 +98,10 @@ NarrativePlayer::NarrativePlayer(VSimApp *app,
 			m_rewind_on_resume = (old == VSimApp::State::PLAY_TRANSITION);
 		}
 
-		//qDebug() << "playing old?"
+		//qDebug() << "state change : "
 		//	<< VSimApp::StateStrings[old]
-		//	<< VSimApp::isPlaying(old)
-		//	<< "playing new?"
-		//	<< VSimApp::StateStrings[state]
-		//	<< VSimApp::isPlaying(state);
+		//	<< "->"
+		//	<< VSimApp::StateStrings[state];
 
 		// stop playing interruption
 		if (VSimApp::isPlaying(old) && !VSimApp::isPlaying(state)) {
@@ -225,7 +223,7 @@ void NarrativePlayer::next()
 					ni = ni2;
 					// try to break infinite loops
 					if (nar == starting_nar && nar->size() == 0) {
-						qDebug() << "infinite loop narrative detected";
+						qInfo() << "Can't cycle narratives, there are no slides.";
 						break;
 					}
 					continue;
@@ -233,9 +231,17 @@ void NarrativePlayer::next()
 				else {
 					m_narratives->openNarrative(ni2);
 					next = m_narratives->getSlide(ni2, 0);
+					if (next) {
+						setCenterMessage(NarrativePlayer::CenterMessage::PLAYING);
+						//m_narratives->selectSlides(ni2, { 0 }, false);
+						m_narratives->openSlide(0, true);
+						toAtNode();
+						return;
+					}
 				}
 			}
 		}
+
 		if (!next) {
 			m_app->setState(VSimApp::State::PLAY_END);
 			return;
