@@ -115,7 +115,7 @@ function(vsim_add_flatbuffer var fbs_src)
             -o ${CMAKE_BINARY_DIR}/generated
             -I ${CMAKE_SOURCE_DIR}/src
             ${fbs_full}
-    DEPENDS ${fbs_full})
+    MAIN_DEPENDENCY ${fbs_full})
   set(${var} ${fbs_header_full} PARENT_SCOPE)
 endfunction()
 

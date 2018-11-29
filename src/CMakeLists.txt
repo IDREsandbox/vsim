@@ -173,6 +173,9 @@ set(VSim_src
   ObjectManipulator.h
   OSGViewerWidget.cpp
   OSGViewerWidget.h
+  OtherSettingsDialog.cpp
+  OtherSettingsDialog.h
+  OtherSettingsDialog.ui
   PositionDialog.cpp
   PositionDialog.h
   PositionDialog.ui

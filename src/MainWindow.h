@@ -121,6 +121,7 @@ signals:
 private:
 	TypesSerializer::Params saveParams(const QString &path);
 	//TypesSerializer::Params loadParams(const QString &path);
+	void execOtherSettings();
 
 	// ui, signal emitters
 public:
@@ -149,6 +150,8 @@ private:
 	QAction *m_action_first_person;
 	QAction *m_action_flight;
 	QAction *m_action_object;
+
+	QAction *a_other_settings;
 };
 
 #endif // MAINWINDOW_H

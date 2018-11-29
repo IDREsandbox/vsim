@@ -65,6 +65,7 @@
 #include "Core/VSimInfo.h"
 #include "ExportDialog.h"
 #include "ECategoryLegend.h"
+#include "OtherSettingsDialog.h"
 
 #include <fstream>
 
@@ -229,6 +230,11 @@ MainWindow::MainWindow(QWidget *parent)
 	// coordinate
 	m_coordinate_widget = new CoordinateWidget(this);
 	ui->statusbar->addPermanentWidget(m_coordinate_widget);
+
+	a_other_settings = new QAction("Other Settings", this);
+	connect(a_other_settings, &QAction::triggered, this, [this]() {
+		OtherSettingsDialog::exec2(m_app);
+	});
 
 	// debug stuff
 	QAction *a_test = new QAction("Debug Menu", this);
@@ -408,7 +414,8 @@ void MainWindow::setApp(VSimApp * vsim)
 		nav->a_navigation_settings,
 		nav->a_display_settings,
 		m_canvas->a_edit_styles,
-		ui->actionLock_Settings
+		ui->actionLock_Settings,
+		a_other_settings
 		});
 
 	QMenu *aa_menu = rmenu->addMenu("Anti Aliasing");
@@ -1197,6 +1204,10 @@ TypesSerializer::Params MainWindow::saveParams(const QString &path)
 	QString from = m_app->getCurrentDirectory();
 	QString to = Util::absoluteDirOf(path);
 	return {from, to};
+}
+
+void MainWindow::execOtherSettings()
+{
 }
 
 //TypesSerializer::Params MainWindow::loadParams(const QString &path)

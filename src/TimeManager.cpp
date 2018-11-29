@@ -75,6 +75,29 @@ void TimeManager::setKeyYears(const std::set<int> &keys)
 	emit sKeysChanged();
 }
 
+//void TimeManager::setUseStartingYear(bool use)
+//{
+//	m_use_starting_year = use;
+//}
+//
+//bool TimeManager::useStartingYear() const
+//{
+//	return m_use_starting_year;
+//}
+//
+//void TimeManager::setStartingYear(int year)
+//{
+//	m_starting_year = year;
+//}
+//
+//int TimeManager::startingYear() const
+//{
+//	if (m_use_starting_year) {
+//		return m_starting_year;
+//	}
+//	return m_year;
+//}
+
 void TimeManager::gatherSettings()
 {
 	// only gather if settings not locked

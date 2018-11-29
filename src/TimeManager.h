@@ -21,6 +21,11 @@ public:
     std::set<int> keyYears() const;
     void setKeyYears(const std::set<int> &keys);
 
+	//void setUseStartingYear(bool use);
+	//bool useStartingYear() const;
+	//void setStartingYear(int year);
+	//int startingYear() const;
+
 signals:
 	void sTimeEnableChanged(bool enabled);
 	void sYearChanged(int year);
@@ -36,6 +41,8 @@ private:
     int m_year;
     bool m_enabled;
     std::set<int> m_keys;
+	bool m_use_starting_year;
+	int m_starting_year;
 };
 
 #endif

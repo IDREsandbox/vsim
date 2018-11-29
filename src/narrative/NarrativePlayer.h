@@ -45,10 +45,16 @@ public:
 
 	bool isPaused() const;
 
+	bool narrativeCycling() const;
+	void setNarrativeCycling(bool cycling);
+
 private:
 	void recheckPlayPause(); // enables/disables accordingly
 	QString getNarrativeName() const;
 	void updateStatusMessage();
+
+	void gatherSettings();
+	void extractSettings();
 
 	enum CenterMessage {
 		NONE,
@@ -66,7 +72,7 @@ private:
 	NarrativeControl *m_narratives;
 	MainWindowTopBar *m_bar;
 
-	//QTimer m_timer;
+	bool m_narrative_cycling;
 	bool m_paused;
 	bool m_rewind_on_resume;
 	double m_time_remaining_sec;

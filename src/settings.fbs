@@ -102,7 +102,8 @@ enum ERSortBy : byte {
 table OtherSettings {
   year:int32 = 2000;
   years_enabled:bool = false;
-
+  year_use_slider:bool = true; // unused, todo
+  narrative_cycling:bool = false;
   //nbar:bool = true;
   //ebar:bool = true;
   //branding:bool = false;

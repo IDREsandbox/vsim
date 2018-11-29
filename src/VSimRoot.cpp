@@ -464,6 +464,7 @@ void VSimRoot::copyOtherSettings(VSim::FlatBuffers::OtherSettingsT & dest,
 {
 	dest.year = src.year;
 	dest.years_enabled = src.years_enabled;
+	dest.narrative_cycling = src.narrative_cycling;
 }
 
 void VSimRoot::copyERSettings(VSim::FlatBuffers::ERSettingsT & dest,

@@ -128,7 +128,6 @@
      <string>Settings</string>
     </property>
     <addaction name="actionFont_Color_Styles"/>
-    <addaction name="actionLock_Settings"/>
    </widget>
    <widget class="QMenu" name="menuRender">
     <property name="title">
@@ -357,7 +356,7 @@
   </action>
   <action name="actionFont_Color_Styles">
    <property name="text">
-    <string>fonts colors placeholder</string>
+    <string>impl is in mainwindow</string>
    </property>
   </action>
   <action name="actionHistory">
@@ -536,6 +535,11 @@
   <action name="action_package">
    <property name="text">
     <string>Export VSim File...</string>
+   </property>
+  </action>
+  <action name="actionOther_Settings">
+   <property name="text">
+    <string>Other Settings</string>
    </property>
   </action>
  </widget>

@@ -8,6 +8,8 @@
 #include "narrative/NarrativeGroup.h"
 #include "narrative/Narrative.h"
 #include "VSimApp.h"
+#include "VSimRoot.h"
+#include "settings_generated.h"
 #include "MainWindowTopBar.h"
 #include "Core/Util.h"
 
@@ -18,6 +20,7 @@ NarrativePlayer::NarrativePlayer(VSimApp *app,
 	: QObject(parent),
 	m_app(app),
 	m_narratives(narratives),
+	m_narrative_cycling(false),
 	m_paused(false)
 {
 	// actions
@@ -113,6 +116,8 @@ NarrativePlayer::NarrativePlayer(VSimApp *app,
 		updateStatusMessage();
 	});
 	connect(m_app, &VSimApp::sTick, this, &NarrativePlayer::update);
+	connect(m_app, &VSimApp::sAboutToSave, this, &NarrativePlayer::gatherSettings);
+	connect(m_app, &VSimApp::sReset, this, &NarrativePlayer::extractSettings);
 }
 
 void NarrativePlayer::play()
@@ -206,8 +211,33 @@ void NarrativePlayer::next()
 		NarrativeSlide *next = m_narratives->getSlide(m_narratives->getCurrentNarrativeIndex(),
 			next_index);
 
+		if (m_narrative_cycling) {
+			Narrative *starting_nar = m_narratives->getCurrentNarrative();
+			int ni = m_narratives->getCurrentNarrativeIndex();
+			Narrative *cnar = m_narratives->getCurrentNarrative();
+
+			while (!next) {
+				int ni2 = (ni + 1) % m_narratives->narratives()->size();
+
+				Narrative *nar = m_narratives->narratives()->child(ni2);
+				if (nar->size() == 0) {
+					// try the next narrative?
+					ni = ni2;
+					// try to break infinite loops
+					if (nar == starting_nar && nar->size() == 0) {
+						qDebug() << "infinite loop narrative detected";
+						break;
+					}
+					continue;
+				}
+				else {
+					m_narratives->openNarrative(ni2);
+					next = m_narratives->getSlide(ni2, 0);
+				}
+			}
+		}
 		if (!next) {
-			m_app->setState(VSimApp::PLAY_END);
+			m_app->setState(VSimApp::State::PLAY_END);
 			return;
 		}
 
@@ -352,6 +382,16 @@ bool NarrativePlayer::isPaused() const
 		&& m_paused;
 }
 
+bool NarrativePlayer::narrativeCycling() const
+{
+	return m_narrative_cycling;
+}
+
+void NarrativePlayer::setNarrativeCycling(bool cycling)
+{
+	m_narrative_cycling = cycling;
+}
+
 void NarrativePlayer::recheckPlayPause()
 {
 	// play and pause are mutually exclusive
@@ -448,6 +488,20 @@ void NarrativePlayer::updateStatusMessage()
 	else {
 		m_app->removePermanentStatusMessage(&m_status_message);
 	}
+}
+
+void NarrativePlayer::gatherSettings()
+{
+	if (m_app->getRoot()->settingsLocked()) return;
+	auto &os = m_app->getRoot()->otherSettings();
+	os.narrative_cycling = m_narrative_cycling;
+}
+
+void NarrativePlayer::extractSettings()
+{
+	if (m_app->getRoot()->settingsLocked()) return;
+	auto &os = m_app->getRoot()->otherSettings();
+	setNarrativeCycling(os.narrative_cycling);
 }
 
 void NarrativePlayer::setCenterMessage(CenterMessage msg)
