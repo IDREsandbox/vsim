@@ -560,8 +560,9 @@ QComboBox {
     border-style: solid;
     border: 1px solid #76797C;
     border-radius: 2px;
-    /* padding: 5px; */
-    /* min-width: 30px; */
+    /* top right bottom left */
+    padding: 1px 1px 1px 3px;
+    min-width: 30px;
 }
 
 QPushButton:checked {
@@ -597,7 +598,7 @@ QComboBox QAbstractItemView {
 QComboBox::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: top right;
-    width: 15px;
+    min-width: 30px;
     border-left-width: 0px;
     border-left-color: darkgray;
     border-left-style: solid;

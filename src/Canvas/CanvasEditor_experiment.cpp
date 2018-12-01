@@ -183,7 +183,8 @@ int main(int argc, char *argv[])
 		std::string s = ss.str();
 		const uint8_t *buf = reinterpret_cast<const uint8_t*>(s.c_str());
 
-		bool fb_ok = fb::VerifyCanvasBuffer(flatbuffers::Verifier(buf, s.length()));
+		auto verifier = flatbuffers::Verifier(buf, s.length());
+		bool fb_ok = fb::VerifyCanvasBuffer(verifier);
 		if (!fb_ok) {
 			qDebug() << "fb verify" << fb_ok;
 			//return;
