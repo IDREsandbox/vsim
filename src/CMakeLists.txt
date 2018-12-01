@@ -146,6 +146,9 @@ set(VSim_src
   FocusFilter.h
   GroupScrollBox.inl
   GroupScrollBox.h
+  HelpDialog.cpp
+  HelpDialog.h
+  HelpDialog.ui
   HistoryWindow.cpp
   HistoryWindow.h
   HorizontalScrollBox.cpp
