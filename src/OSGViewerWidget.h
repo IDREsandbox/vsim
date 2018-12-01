@@ -290,6 +290,7 @@ private:
 	LengthUnit m_length_unit;
 	std::vector<ViewerPreset> m_presets;
 	QPoint m_wheel_acc;
+	QPoint m_old_mouse;
 
 	// key press tracker
 	KeyTracker *m_key_tracker;

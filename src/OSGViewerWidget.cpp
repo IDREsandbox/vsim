@@ -1012,8 +1012,14 @@ void OSGViewerWidget::keyReleaseEvent(QKeyEvent* event)
 
 void OSGViewerWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	int dx = event->x() - width() / 2;
-	int dy = event->y() - height() / 2;
+	// this doesn't really work if mouse centering doesn't work (on mac sometimes)
+	//int dx = event->x() - width() / 2;
+	//int dy = event->y() - height() / 2;
+	// solution is? we have to keep a delta?
+	int dx = event->x() - m_old_mouse.x();
+	int dy = event->y() - m_old_mouse.y();
+	m_old_mouse = event->pos();
+
 	if (m_manipulator == MANIPULATOR_FIRST_PERSON) {
 		// if the mouse is centered then don't do anything
 		if (dx != 0 || dy != 0) {
@@ -1220,6 +1226,7 @@ void OSGViewerWidget::centerCursor()
 
 	// get the new position, test it
 	// if it's the same then we have a problem
+	m_old_mouse = mapFromGlobal(QCursor::pos());
 }
 
 void OSGViewerWidget::recreateFramebuffer()
