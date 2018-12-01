@@ -1,5 +1,17 @@
 # Changelog
 
+## 2018-12-1
+
+- touchup style on mac for canvas editor
+- first person manipulator on mac slightly better, still needs permission
+- help dialog (F1)
+- narrative cycling (looping)
+- fixed canvas border colors saving
+- canvas borders are rectangular
+- 0.0s slides don't have smoothing
+- fixed some mac icons
+- ER display resizes based on content
+
 ## 2018-11-16
 
 - mac build
