@@ -58,7 +58,7 @@ ERDisplay::ERDisplay(QWidget *parent)
 	m_fade_out_anim->setEndValue(0.0);
 
 	// replace the description with a resizing browser
-	delete ui.description;
+	ui.description->deleteLater();
 	ui.description = new ResizingBrowser(this);
 	ui.title_desc_layout->insertWidget(1, ui.description, 1);
 	ui.description->setTabStopWidth(40);

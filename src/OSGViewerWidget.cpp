@@ -898,7 +898,7 @@ float OSGViewerWidget::getFullFrameTime() const
 QString OSGViewerWidget::debugString()
 {
 	QString str;
-
+	if (!m_main_view) return "";
 	auto *cam = m_main_view->getCamera();
 	double fovy, aspect, n, f;
 	cam->getProjectionMatrixAsPerspective(fovy, aspect, n, f);
