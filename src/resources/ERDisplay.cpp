@@ -5,6 +5,34 @@
 #include "ECategory.h"
 #include "Core/Util.h"
 
+class ResizingBrowser : public QTextBrowser {
+public:
+	ResizingBrowser(QWidget *parent)
+		: QTextBrowser(parent) {
+		m_height_padding = 10;
+		connect(this, &QTextEdit::textChanged, this, [this]() {
+			QSize size = document()->size().toSize();
+			m_text_height = size.height();
+			updateGeometry();
+		});
+	}
+	QSize minimumSizeHint() const override {
+		return QAbstractScrollArea::minimumSizeHint();
+		//return viewportSizeHint();
+	}
+	QSize sizeHint() const override {
+		QSize sh = viewportSizeHint();
+		return sh;
+	}
+	QSize viewportSizeHint() const override {
+		return QSize(-1, m_text_height + m_height_padding);
+	}
+private:
+	QSize m_hint;
+	int m_text_height;
+	int m_height_padding;
+};
+
 ERDisplay::ERDisplay(QWidget *parent)
 	: QFrame(parent),
 	m_er(nullptr),
@@ -29,9 +57,18 @@ ERDisplay::ERDisplay(QWidget *parent)
 	m_fade_out_anim->setStartValue(1.0);
 	m_fade_out_anim->setEndValue(0.0);
 
+	// replace the description with a resizing browser
+	delete ui.description;
+	ui.description = new ResizingBrowser(this);
+	ui.title_desc_layout->insertWidget(1, ui.description, 1);
+	ui.description->setTabStopWidth(40);
+	ui.description->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
 	connect(m_fade_out_anim, &QPropertyAnimation::finished, this, [this]() {
 		hide();
 	});
+
+	setMaxRect(rect());
 }
 
 void ERDisplay::setInfo(EResource* er)
@@ -92,6 +129,15 @@ void ERDisplay::reload()
 	}
 }
 
+bool ERDisplay::event(QEvent * event)
+{
+	if (event->type() == QEvent::LayoutRequest) {
+		recalcSize();
+	}
+
+	return QWidget::event(event);
+}
+
 void ERDisplay::setCount(int n)
 {
 	QString s = QString("Close All (%1)").arg(QString::number(n));
@@ -133,6 +179,29 @@ void ERDisplay::setScrollBarStyle(QString s)
 {
 	ui.description->setStyleSheet(s);
 	//ui.description->setStyleSheet("background:rgb(255,0,0)");
+}
+
+void ERDisplay::setMaxRect(QRect r)
+{
+	m_max_rect = r;
+	recalcSize();
+}
+
+void ERDisplay::recalcSize()
+{
+	// maximize size within limits
+	setMinimumWidth(m_max_rect.width());
+	setMaximumWidth(m_max_rect.width());
+	setMinimumHeight(275);
+	setMaximumHeight(m_max_rect.height());
+	adjustSize();
+
+	QPoint center = m_max_rect.center();
+	// recenter
+	QRect r = rect();
+	r.moveCenter(center);
+
+	setGeometry(r);
 }
 
 void ERDisplay::mousePressEvent(QMouseEvent * event)

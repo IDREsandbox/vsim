@@ -23,11 +23,18 @@ public:
 
 	void setScrollBarStyle(QString s);
 
+	// sent in from main window based on the top/bottom bars
+	// here we resize to whatever we want as long as it fits
+	void setMaxRect(QRect r);
+	void recalcSize();
+
 	//public slots:
 	//void showER();
 	//void hideER();
 
 	void reload();
+
+	bool event(QEvent *event) override;
 
 signals:
 	void sClose();
@@ -45,6 +52,7 @@ private:
 	QGraphicsOpacityEffect *m_display_opacity;
 	QPropertyAnimation *m_fade_out_anim;
 	QPropertyAnimation *m_fade_in_anim;
+	QRect m_max_rect;
 };
 
 #endif // ERDISPLAY_H

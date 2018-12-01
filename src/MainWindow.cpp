@@ -736,7 +736,8 @@ void MainWindow::updatePositions()
 	er_rect.setWidth(er_width);
 	er_rect.setTop(top + er_margin);
 	er_rect.setBottom(bottom_top - er_margin);
-	m_er_display->setGeometry(er_rect);
+	//m_er_display->setGeometry(er_rect);
+	m_er_display->setMaxRect(er_rect);
 
 	// place the toolbar where the middle spacer is
 	QWidget *middle = ui->middleSpacer;
