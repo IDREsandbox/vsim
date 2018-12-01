@@ -6,7 +6,7 @@
 
 static QString g_app_path;
 static bool g_is_bundle;
-static QString g_assets_path;
+static QString g_assets_path = "assets/";
 static bool g_is_mac;
 static QString g_osg_plugins_path;
 

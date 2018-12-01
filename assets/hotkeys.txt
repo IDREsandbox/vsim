@@ -1,0 +1,26 @@
+# a simple tab separated table
+
+1	First Person (WASD) navigation mode (w=forward, s=backwards, a=left, d=right, Alt+mouse movement=elevator and strafe 3,)
+2	Flight navigation mode (left mouse=forward thrust, right mouse=reverse thrust, Alt+mouse movement=elevator and strafe)
+3	Object navigation mode (left mouse+drag to rotate, scroll wheel to zoom in/out, hold down scroll wheel=pan)
+space	Freeze/Unfreeze toggle in all three navigation modes 
+g	Ground mode on/off (i.e., pedestrian mode)
+c	Collision on/off
+=	Increases speed
+- 	Decreases speed 
+r	Resets the viewing position to home
+h	Help and hot key menu
+t	Time Slider controls
+e	Switch menu 
+l 	Lighting on/off
+x	Texturing on/off
+y	Simulation Statistics
+;	Draw mode fill/wireframe/pointcloud
+p	Play/pause narrative
+esc	Stop playing narrative
+left	Previous node
+right	Next node
+m	open models window
+t	open time slider
+e	open switch window
+j	open history window

@@ -138,6 +138,7 @@
     <property name="title">
      <string>About</string>
     </property>
+    <addaction name="actionHelp"/>
     <addaction name="actionAbout_VSim"/>
    </widget>
    <widget class="QMenu" name="menuModel">
@@ -489,6 +490,9 @@
    <property name="text">
     <string>About VSim</string>
    </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
   </action>
   <action name="navigation_settings">
    <property name="text">
@@ -540,6 +544,14 @@
   <action name="actionOther_Settings">
    <property name="text">
     <string>Other Settings</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help/Hotkeys</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
   </action>
  </widget>

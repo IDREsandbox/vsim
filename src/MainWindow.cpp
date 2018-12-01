@@ -55,16 +55,17 @@
 #include "Model/ModelUtil.h"
 #include "Model/ModelSerializer.h"
 #include "ModelInformationDialog.h"
-//#include "GroupCommands.h"
-#include "NavigationControl.h"
-#include "AboutDialog.h"
-#include "CoordinateWidget.h"
-#include "BrandingControl.h"
-#include "LockDialog.h"
 #include "Core/Util.h"
 #include "Core/VSimInfo.h"
+//#include "GroupCommands.h"
+#include "AboutDialog.h"
+#include "BrandingControl.h"
+#include "CoordinateWidget.h"
 #include "ExportDialog.h"
 #include "ECategoryLegend.h"
+#include "HelpDialog.h"
+#include "LockDialog.h"
+#include "NavigationControl.h"
 #include "OtherSettingsDialog.h"
 
 #include <fstream>
@@ -212,6 +213,12 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->actionAbout_VSim, &QAction::triggered, this, [this]() {
 		AboutDialog *dlg = new AboutDialog(this);
 		dlg->exec();
+	});
+
+	// help
+	m_help_dialog = new HelpDialog(this);
+	connect(ui->actionHelp, &QAction::triggered, this, [this]() {
+		m_help_dialog->show();
 	});
 
 	// history

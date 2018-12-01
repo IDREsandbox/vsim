@@ -23,7 +23,6 @@ class TimeSlider;
 class MainWindowTopBar;
 class ERDisplay;
 class ERFilterArea;
-class editButtons;
 class ERBar;
 class StatsWindow;
 class HistoryWindow;
@@ -34,6 +33,7 @@ class BrandingOverlay;
 class SwitchWindow;
 class ECategoryLegend;
 class QLabel;
+class HelpDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -137,7 +137,6 @@ private:
 	ERFilterArea *m_er_filter_area;
 	ModelOutliner *m_outliner;
 	TimeSlider *m_time_slider;
-	editButtons *m_label_buttons;
 	StatsWindow *m_stats_window;
 	HistoryWindow *m_history_window;
 	CoordinateWidget *m_coordinate_widget;
@@ -145,6 +144,7 @@ private:
 	SwitchWindow *m_switch_window;
 	ECategoryLegend *m_category_legend;
 	QLabel *m_paused_label;
+	HelpDialog *m_help_dialog;
 
 	QActionGroup *m_navigation_action_group;
 	QAction *m_action_first_person;

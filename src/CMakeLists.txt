@@ -296,6 +296,12 @@ vsim_add_test(
   "ERModel_obj;Core_obj;Deprecated_obj;Qt5::Test"
 )
 
+vsim_add_experiment(
+  HelpDialog_experiment
+  "HelpDialog.cpp;HelpDialog.ui;HelpDialog.cpp;HelpDialog_experiment.cpp"
+  "Core_obj;Qt5::Widgets"
+)
+
 vsim_add_test(
   VSimSerializer_test
   VSimSerializer_test.cpp
