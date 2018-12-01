@@ -25,7 +25,7 @@ public:
 		return sh;
 	}
 	QSize viewportSizeHint() const override {
-		return QSize(-1, m_text_height + m_height_padding);
+		return QSize(0, m_text_height + m_height_padding);
 	}
 private:
 	QSize m_hint;
@@ -63,6 +63,8 @@ ERDisplay::ERDisplay(QWidget *parent)
 	ui.title_desc_layout->insertWidget(1, ui.description, 1);
 	ui.description->setTabStopWidth(40);
 	ui.description->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	ui.description->setStyleSheet("border:none;background:none;");
+	ui.description->setFrameShape(QFrame::NoFrame);
 
 	connect(m_fade_out_anim, &QPropertyAnimation::finished, this, [this]() {
 		hide();
