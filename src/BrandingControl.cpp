@@ -33,7 +33,7 @@ BrandingControl::BrandingControl(VSimApp *app,
 
 	onLockChanged();
 
-	connect(app, &VSimApp::sStateChanged, this, [this](VSimApp::State state) {
+	connect(app, &VSimApp::sStateChanged, this, [this](VSimApp::State old, VSimApp::State state) {
 		if (state == VSimApp::State::EDIT_BRANDING) {
 			onActivate();
 		}
