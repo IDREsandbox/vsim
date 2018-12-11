@@ -17,9 +17,11 @@ int main(int argc, char *argv[])
 	VSimInfo::initPath(argv[0]);
 
 	qInfo() << "assets path:" << VSimInfo::assets();
-	qInfo() << "qt library paths:" << QCoreApplication::libraryPaths();
-	qInfo() << "qt library location:" << QLibraryInfo::location(QLibraryInfo::BinariesPath);
-	qInfo() << "qt plugins location:" << QLibraryInfo::location(QLibraryInfo::PluginsPath);
+	// TODO: figure how to set these, currently its the build machine's qt paths
+	//   use qt conf? does this even matter?
+	//qInfo() << "qt library paths:" << QCoreApplication::libraryPaths();
+	//qInfo() << "qt library location:" << QLibraryInfo::location(QLibraryInfo::BinariesPath);
+	//qInfo() << "qt plugins location:" << QLibraryInfo::location(QLibraryInfo::PluginsPath);
 	qInfo() << "is mac bundle:" << VSimInfo::isMacBundle();
 
 #if __APPLE__
@@ -31,8 +33,6 @@ int main(int argc, char *argv[])
 #endif
 
 	QApplication a(argc, argv);
-
-	qInfo() << "qt library paths:" << QCoreApplication::libraryPaths();
 
 	QString assets = VSimInfo::assets();
 	QString startup = assets + "/default.vsim";
