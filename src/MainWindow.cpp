@@ -217,6 +217,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	// help
 	m_help_dialog = new HelpDialog(this);
+	ui->actionHelp->setShortcuts({Qt::Key_F1, Qt::Key_H});
 	connect(ui->actionHelp, &QAction::triggered, this, [this]() {
 		m_help_dialog->show();
 	});
