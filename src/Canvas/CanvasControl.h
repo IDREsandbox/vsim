@@ -179,7 +179,7 @@ public: // misc, internal stuff
 	// Wraps changes with wrapTextCommand
 	// signature: void(*)(QTextCursor &cursor)
 	template <typename T>
-	void mergeCursorOp(T func) {
+	void massCursorOp(T func) {
 		CanvasLabel *label = subText();
 		if (label) {
 			QTextCursor c = label->textCursor();

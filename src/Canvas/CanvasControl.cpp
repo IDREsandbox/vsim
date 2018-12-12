@@ -303,8 +303,30 @@ void CanvasControl::setHAlign(Qt::Alignment al)
 void CanvasControl::setSize(qreal size)
 {
 	QTextCharFormat fmt;
-	fmt.setFontPointSize(size);
-	mergeCharFormat(fmt);
+	//fmt.setFontPointSize(size);
+	// try to clear the old point size setting, it's set in old vsim files and it saves over
+	// our point size settings
+	//fmt.clearProperty(QTextFormat::FontPointSize);
+	//fmt.clearProperty(QTextFormat::FontPixelSize);
+
+	//auto font = fmt.font();
+	//font.setPixelSize(size);
+	//font.setHintingPreference(QFont::PreferNoHinting);
+	//fmt.setFont(font, QTextCharFormat::FontPropertiesInheritanceBehavior::FontPropertiesSpecifiedOnly);
+
+	fmt.setProperty(QTextFormat::FontPixelSize, size);
+	//mergeCharFormat(fmt);
+
+	massCursorOp([fmt](QTextCursor c) {
+		// clear point size
+		auto cfmt = c.charFormat();
+		cfmt.clearProperty(QTextFormat::FontPointSize);
+		c.setCharFormat(cfmt);
+		// assign pixel size
+		c.mergeCharFormat(fmt);
+		auto f = c.charFormat().font();
+		qDebug() << "sizes" << f.pixelSize() << f.pointSize();
+	});
 }
 
 void CanvasControl::toggleBold()
@@ -410,7 +432,7 @@ QUndoCommand *CanvasControl::createApplyLabelStyleCommand(CanvasLabel *label,
 }
 
 void CanvasControl::mergeCharFormat(const QTextCharFormat &fmt) {
-	mergeCursorOp([&](QTextCursor &cursor) {
+	massCursorOp([&](QTextCursor &cursor) {
 		cursor.mergeCharFormat(fmt);
 		//cursor.mergeBlockCharFormat(fmt); //
 	});
@@ -418,7 +440,7 @@ void CanvasControl::mergeCharFormat(const QTextCharFormat &fmt) {
 
 void CanvasControl::mergeBlockFormat(const QTextBlockFormat & fmt)
 {
-	mergeCursorOp([&](QTextCursor cursor) {
+	massCursorOp([&](QTextCursor cursor) {
 		cursor.mergeBlockFormat(fmt);
 	});
 }
@@ -565,11 +587,12 @@ int CanvasControl::allFontSize() const
 	return std::accumulate(labels.begin(), labels.end(), 0,
 		[](int size, CanvasLabel *label) -> int {
 		QTextCharFormat fmt = label->textCursor().charFormat();
-		int x = std::lround(fmt.fontPointSize());
+		qDebug() << "poke fmtpt/fpx/fpt" << fmt.fontPointSize() << fmt.font().pixelSize() << fmt.font().pointSize();
+		int x = std::lround(fmt.font().pixelSize());
 		// fmt.fontPointSize() might be 0 != font.pointSize()
-		if (x == 0) {
-			x = std::lround(fmt.font().pointSizeF());
-		}
+		//if (x == 0) {
+		//	x = std::lround(fmt.font().pixel());
+		//}
 
 		if (size == 0) {
 			return x;

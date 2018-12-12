@@ -16,11 +16,15 @@
 #include "FocusFilter.h"
 #include "Core/WeakObject.h"
 
+#include <QPaintEngine>
+#include <QPaintDevice>
+#include <QGraphicsView>
+
 CanvasScene::CanvasScene(QObject *parent)
 	: QGraphicsScene(parent),
 	m_editable(false),
-	m_base_height(600.0),
-	m_base_width(800.0),
+	m_base_height(540),
+	m_base_width(1200),
 	m_selection_in_progress(false),
 	m_moving(false)
 {
@@ -451,7 +455,7 @@ CanvasItem::CanvasItem(QGraphicsItem * parent)
 	m_prefers_fixed(false),
 	m_border_around(false),
 	m_debug_paint(false),
-	m_base_height(600.0),
+	m_base_height(540),
 	m_border_width(0)
 {
 	setEditable(false);
@@ -795,7 +799,7 @@ CanvasLabel::CanvasLabel(QGraphicsItem * parent)
 	m_text->setTextInteractionFlags(Qt::TextEditorInteraction);
 	m_text->setOpenExternalLinks(true);
 
-	setBaseHeight(600);
+	setBaseHeight(540);
 	setFocusProxy(m_text);
 
 	setDocument(m_text->document());

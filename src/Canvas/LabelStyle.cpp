@@ -129,9 +129,13 @@ void LabelStyle::applyToDocument(QTextDocument * doc)
 	if (!ff.isEmpty()) tcf.setFontFamily(ff);
 	tcf.setFontWeight(getWeight());
 	tcf.setForeground(foregroundColor());
-	tcf.setFontPointSize(getPointSize());
 	tcf.setFontItalic(getItalicized());
 	tcf.setFontUnderline(getUnderline());
+
+	QFont f;
+	f.setPixelSize(getPointSize());
+	f.setHintingPreference(QFont::PreferNoHinting);
+	tcf.setFont(f, QTextCharFormat::FontPropertiesInheritanceBehavior::FontPropertiesSpecifiedOnly);
 
 	// assign formats to document
 	QTextCursor cursor = QTextCursor(doc);

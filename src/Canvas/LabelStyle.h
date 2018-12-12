@@ -71,7 +71,7 @@ public:
 
 	const std::string &getFontFamily() const;
 	void setFontFamily(const std::string &f);
-	int getPointSize() const;
+	int getPointSize() const; // is actually pixel size
 	void setPointSize(int p);
 	int getWeight() const;
 	void setWeight(int);
