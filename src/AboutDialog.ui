@@ -52,7 +52,7 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Principle Investigators: Lisa M. Snyder and Scott Friedman
+      <string>Principal Investigators: Lisa M. Snyder and Scott Friedman
 Prototype Programmers: Eduardo Poyart, Jingyi (Franklin) Fang, and XinLi Cai
 Usability Consultants: Elaine A. Sullivan and Joy Guey
 Production Version Programmers: (Lead) David Stephan and Sam Amin

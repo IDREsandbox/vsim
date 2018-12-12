@@ -1,5 +1,11 @@
 # Changelog
 
+## 2018-12-11
+
+- new default model
+- fixed up the help dialog
+- fixed branding editor showing up strangely
+
 ## 2018-12-1
 
 - touchup style on mac for canvas editor
