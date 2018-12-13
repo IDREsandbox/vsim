@@ -1,10 +1,12 @@
 # Changelog
 
-## 2018-12-11
+## 2018-12-12
 
 - new default model
 - fixed up the help dialog
 - fixed branding editor showing up strangely
+- fixed canvas font size discrepancies between devices
+- canvas base size changed to 720x540, or 10in x 7.5in at 72dpi. Font sizes roughly match google slides
 
 ## 2018-12-1
 

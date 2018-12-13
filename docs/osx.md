@@ -1,6 +1,6 @@
 
 This is mostly about building on mac.
-For development I just used VSCode and cmake. I couldn't get XCode working nicely.
+For development I just used VSCode and cmake. I couldn't get Xcode working nicely. If you want to use XCode you can use -G "Xcode" w/ cmake, or just make an Xcode project and add all the src files.
 
 ## VSim.app
 
@@ -54,13 +54,7 @@ build_osx.py
     command line interface wrapper around deps.py
     'build' for building
     'update' for updating the exe
-    everything else is just used for debugging
-
-bundle todo list
-    copy frameworks into place, recursively fix up dependencies
-    copy osg plugins, qt plugins?, fix up dependencies
-    copy assets, etc, like everything in cmake install() how to do
-    replace VSim_bundle with VSim, fix the Info.plist
+    everything else was just used for debugging
 
 qt.conf
     points qt plugins to Plugins rather that qt/plugins
@@ -80,4 +74,4 @@ export DYLD_PRINT_LIBRARIES=1
 
 ## other
 
-If the first person camera if flying all over the place, it's because the app doesn't have permission to center the mouse. Give VSim and maybe Terminal accessibility permission.
+If the first person camera is flying all over the place, it's because the app doesn't have permission to center the mouse. Give VSim and maybe Terminal accessibility permission.

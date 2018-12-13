@@ -42,7 +42,7 @@ CanvasEditor
 
 tldr
 canvas & item units y:[-0.5,0.5], x:[~-0.7, ~0.7], relative to canvas height
-text & frame units h:600
+text & frame units h:~600 (subject to change)
 
 There were a lot of questions about what the base size should be, and how resizing affect the text displayed.
 
@@ -86,28 +86,9 @@ CanvasControl::multiText() checks for labels selected
 
 ### Live ToolBar
 
-The toolbar should change based on what is selected.
+The toolbar changes based on what is selected.
 
-Current:
-  border width
-  font
-  font size
-
-Optional, TODO:
-  bold, italic, underline, strikeout, alignment, colors, etc
-
-Signaling
-
-Fine grained?
-- sAllBorderWidthChanged()
-- sAllFontChanged()
-- sAllFontSizeChanged()
-- sAllStyleChanged()
-
-Loose grained?
-- sSelectionChanged()
-
-It doesn't really matter. I'm doing fine grained
+We do loosely grained signalling with CanvasControl::sAnyChange and lots of query functions CanvasControl::allBold() etc.
 
 ### Font previewing, Font size previewing, Border previewing
 

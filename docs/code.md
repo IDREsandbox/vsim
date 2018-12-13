@@ -5,11 +5,17 @@
 Most of this is just rambling. The best documentation is probably the diagrams.
 
 [Diagrams](./diagrams.md)
+
 [Model view](./modelview.md)
+
 [CMake](./cmake.md)
+
 [Multithreading](./multithreading.md)
+
 [Testing](./testing.md)
+
 [Qt Event Order](./qteventorder.md)
+
 [Canvas](./canvas.md)
 
 ## Forward declarations

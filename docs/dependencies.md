@@ -1,17 +1,20 @@
 # dependencies
 
-flatbuffers
-OpenSceneGraph
-Qt5
-crypto++
-assimp
+flatbuffers - serialization
 
-# vcpkg
+OpenSceneGraph - 3D viewer and scene graph
+
+Qt5 - gui
+
+crypto++ - cryptography
+
+assimp - model format loader
+
+# windows, vcpkg
 
 Make sure you have at least 30GB before doing this. These build trees are kind of enormous, and can take several hours to build. You can delete the big buildtrees folder afterwards.
 
-intalling vcpkg
-you probably have to switch to powershell to run the bat
+intalling vcpkg, you have to use to powershell to run the bat
 ```
 git clone https://github.com/Microsoft/vcpkg
 cd vcpkg
@@ -21,13 +24,23 @@ cd vcpkg
 ```
 
 building
+
 ```
 ./vcpkg install flatbuffers:x64-windows osg:x64-windows qt5-base:x64-windows cryptopp:x64-windows assimp:x64-windows
 ```
 
 packaging
+
 ```
 ./vcpkg export flatbuffers:x64-windows osg:x64-windows qt5-base:x64-windows cryptopp:x64-windows assimp:x64-windows --7zip
+```
+
+# osx
+
+OSX has a homebrew, so it's really easy
+
+```
+brew install flatbuffers open-scene-graph qt cryptopp assimp python3
 ```
 
 

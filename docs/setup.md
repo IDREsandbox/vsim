@@ -1,11 +1,11 @@
 # Setup
 
-## Windows Simple - Visual Studio 2017, CMake, vcpkg pre-built
+## Windows - Visual Studio 2017, CMake, vcpkg
 
 - install Visual Studio 2017, make sure to check C++
 - install git bash
 - install cmake
-- download pre-built vcpkg dependencies (ask me for a google drive link)
+- download pre-built vcpkg dependencies (ask me for a onedrive link) or build dependencies [building dependencies](docs/dependencies.md)
 - extract dependencies
 
 building
@@ -20,11 +20,15 @@ cmake -G "Visual Studio 15 2017 Win64" \
   -DCMAKE_INSTALL_PREFIX=install ..
 ```
 
-installing, you might have to run install twice for all dll copying to work
+installing (into build/install)
 
 ```
 cmake --build . --target INSTALL --config RELEASE
 ```
+
+(optional)
+
+- install qt, qt visual studio addon : this is useful for experimentation
 
 ## Mac OSX
 
@@ -39,7 +43,13 @@ cd build
 cmake -DCMAKE_INSTALL_PREFIX=install ..
 ```
 
-Building uses a custom python script instead of the install target.
+Build the executable
+
+```
+cmake --build . --target VSim --config Release
+```
+
+Package everything into an osx bundle
 
 ```
 cmake --build . --target VSim.app --config Release
@@ -53,7 +63,8 @@ tar czf VSim.tar.gz VSim.app
 
 You can do `-G Xcode` for an Xcode project. The default is just a makefile.
 I didn't have much success working with Xcode.
-You might need this? I hardcoded the qt install symlink (/usr/local/opt/qt)
+You might need to add this? I put in a qt install symlink (/usr/local/opt/qt) so I didn't need it.
+I haven't tried the osx build on other machines... so this might not actually work.
 
 ```
 dprefix=""
@@ -63,65 +74,11 @@ for dep in "qt"; do dprefix+=$(brew --prefix $dep)";"; done
 
 # old setup instructions that probably don't work
 
+(removed)
 
-## Windows - Visual Studio 2017, Qt5, CMake, vcpkg build dependencies
+other things done/tried
 
-You can either (1) use CMake to generate Visual Studio project files or (2) use Visual Studio alone with a Qt extension. CMake is used for the release builds.
-
-Essentials
-- install Visual Studio 2017, the free one
-- install git bash
-- `git clone https://github.com/IDREsandbox/vsim.git`
-
-### Install Visual Studio 2017
-
-- just install it
-1. `git clone https://github.com/IDREsandbox/vsim.git`
-
-### CMake without vcpkg
-
-You have to install qt, osg, and osg third party binaries.
-
-```
-mkdir build
-cd build
-
-cmake -G "Visual Studio 15 2017 Win64" \
-  -DCMAKE_TOOLCHAIN_FILE=C:/Users/David/Desktop/vcpkg/scripts/buildsystems/vcpkg.cmake \
-  -DQT_DIR="${QT_DIR}" \
-  -DOSG_DIR="${OSG_DIR}" \
-  -DTP_BIN="${TP_BIN}" \
-  -DCMAKE_INSTALL_PREFIX=install ..
-```
-
-```
-cmake --build . --target INSTALL --config Release
-```
-
-### Setup Visual Studio 2017, no CMake
-
-1. `git clone https://github.com/IDREsandbox/vsim.git`, the solution is in src/windows
-2. PATH - right click vsim project in the Solution Explorer (or click Project in the top tool bar) > Properties > Debugging > Environment
-	`PATH=$(QTDIR)\bin;$(DEPS)\3rdParty-build\bin;$(DEPS)\osg-build\install\bin;%PATH%`
-3. Working Directory, this is for the little icon and fonts - `$(ROOT)`
-4. Dependencies - setup a symlink to the dependencies. The project assumes that dependencies are located in the root git directory, so you have to give it a link to the actual dependencies. If you're at the sandbox, dependencies are in vsim/vsim-dependencies.
-	`mklink /D dependencies T:\Projects\_UCLA\vsim\vsim-dependencies`
-	In powershell:
-	`cmd /c mklink /D dependencies T:\Projects\_UCLA\vsim\vsim-dependencies`
-5. Qt Version - right click vsim project in the Solution Explorer > Qt Project Settings > Version > link to the corresponding version (have to do this for 32 and 64 if you have both).
-
-
-## OSX
-
- 1. `brew install qt5 openscenegraph`
- 2. `git clone https://github.com/IDREsandbox/vsim.git`
- 3. in the vsim repo
-	```
-	mkdir build
-	cd build
-	cmake \
-	  -DCMAKE_PREFIX_PATH="/usr/local/Cellar/qt/5.9.1" \
-	  -DCMAKE_INSTALL_PREFIX=install ..
-	```
- 4. Building and installing `cmake --build . --config RELEASE --target install`
- 5. Packaging `cpack .`
+- Visual Studio solution. We used to use this, pain to manage dependencies, hard to source control, I still use this for my experimental code
+- Building osg, building osg third party libs. We used to do this, it's a pain and takes all day, vcpkg is a blessing
+- Visual Studio 2017 cmake support CMakeSettings.json, didn't work
+- CMake + Xcode, couldn't get archiving/bundling to work
