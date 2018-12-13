@@ -65,6 +65,7 @@ ERDisplay::ERDisplay(QWidget *parent)
 	ui.description->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 	ui.description->setStyleSheet("border:none;background:none;");
 	ui.description->setFrameShape(QFrame::NoFrame);
+	ui.description->viewport()->setAutoFillBackground(false);
 
 	connect(m_fade_out_anim, &QPropertyAnimation::finished, this, [this]() {
 		hide();
