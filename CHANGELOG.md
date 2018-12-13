@@ -7,6 +7,7 @@
 - fixed branding editor showing up strangely
 - fixed canvas font size discrepancies between devices
 - canvas base size changed to 720x540, or 10in x 7.5in at 72dpi. Font sizes roughly match google slides
+- fixed white background resources (again?)
 
 ## 2018-12-1
 
