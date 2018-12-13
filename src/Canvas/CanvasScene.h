@@ -313,6 +313,11 @@ public:
 
 	TextItem *textItem() const;
 
+	static void convertPointToPixel(QTextCursor cursor);
+	static void convertPointToPixel(QTextDocument *doc);
+	static void convertPointToPixel(QTextDocument *doc, int begin, int count);
+	static void convertPixelToPoint(QTextDocument *doc);
+
 public: // commands
 	using SetVAlignCommand =
 		ModifyCommand2<CanvasLabel, Qt::Alignment, &CanvasLabel::valign, &CanvasLabel::setVAlign>;

@@ -15,10 +15,7 @@
 #include <QGraphicsSceneContextMenuEvent>
 #include "FocusFilter.h"
 #include "Core/WeakObject.h"
-
-#include <QPaintEngine>
-#include <QPaintDevice>
-#include <QGraphicsView>
+#include <QTextBlock>
 
 CanvasScene::CanvasScene(QObject *parent)
 	: QGraphicsScene(parent),
@@ -886,8 +883,13 @@ Qt::Alignment CanvasLabel::valign() const
 void CanvasLabel::setDocument(QTextDocument * doc)
 {
 	m_text->setDocument(doc);
-	QObject::connect(doc, &QTextDocument::contentsChanged, m_text, [this]() {
-		this->realign();
+	QObject::connect(doc, &QTextDocument::contentsChange, m_text,
+		[this](int from, int removed, int added) {
+		convertPointToPixel(document(), from, added);
+	});
+	QObject::connect(doc, &QTextDocument::contentsChanged, m_text,
+		[this]() {
+		realign();
 	});
 }
 
@@ -918,7 +920,11 @@ void CanvasLabel::setStyleType(LabelType type)
 
 std::string CanvasLabel::html() const
 {
-	return document()->toHtml().toStdString();
+	//clone the document, convert to point
+	std::unique_ptr<QTextDocument> copy(document()->clone(nullptr));
+	convertPixelToPoint(copy.get());
+	QString result = copy->toHtml();
+	return result.toStdString();
 }
 
 QRectF CanvasLabel::rectCenteredPixels(int w, int h)
@@ -937,11 +943,136 @@ QRectF CanvasLabel::rectCenteredPixels(int w, int h)
 void CanvasLabel::setHtml(const std::string & s)
 {
 	document()->setHtml(QString::fromStdString(s));
+	convertPointToPixel(document());
+
+	document()->clearUndoRedoStacks();
 }
 
 TextItem * CanvasLabel::textItem() const
 {
 	return m_text;
+}
+
+void CanvasLabel::convertPointToPixel(QTextCursor cursor)
+{
+	// returns true if changes were made
+	auto fixFormat = [](QTextCharFormat *fmt) -> bool {
+		int old_point = fmt->font().pointSize();
+		int old_pixels = fmt->font().pixelSize();
+
+		if (old_point <= 0 || old_pixels > 0) {
+			return false;
+		}
+
+		fmt->clearProperty(QTextFormat::FontPointSize);
+		fmt->clearProperty(QTextFormat::FontSizeAdjustment);
+		fmt->setProperty(QTextFormat::FontPixelSize, old_point);
+		return true;
+	};
+
+	QTextCharFormat fmt = cursor.charFormat();
+	if (fixFormat(&fmt)) {
+		cursor.joinPreviousEditBlock();
+		cursor.setCharFormat(fmt);
+		cursor.endEditBlock();
+	}
+
+	QTextCharFormat bfmt = cursor.blockCharFormat();
+	if (fixFormat(&bfmt)) {
+		cursor.joinPreviousEditBlock();
+		cursor.setBlockCharFormat(bfmt);
+		cursor.endEditBlock();
+	}
+}
+
+void CanvasLabel::convertPointToPixel(QTextDocument *doc)
+{
+	// TODO: how does undo/redo work?
+
+	// iterate over every block
+	for (QTextBlock block = doc->begin();
+		block.isValid();
+		block = block.next()) {
+		// iterate over every format range
+		auto fmts = block.textFormats();
+		for (QTextLayout::FormatRange range : fmts) {
+			QTextCursor cursor(block);
+			int begin = block.position() + range.start;
+			int end = block.position() + range.start + range.length;
+			//cursor.movePosition(QTextCursor::MoveOperation::WordRight);
+			cursor.setPosition(begin, QTextCursor::MoveAnchor);
+			cursor.setPosition(end, QTextCursor::KeepAnchor);
+
+			convertPointToPixel(cursor);
+		}
+	}
+}
+
+void CanvasLabel::convertPointToPixel(QTextDocument * doc, int begin, int count)
+{
+	// i dont really know how to do this
+	// could span multiple blocks
+
+	// find the starting block
+
+	// do the same thing as point to pixel, but w/ an end condition? why not just do the whole block
+	// it's kind of wasteful, every character added causes a full scan...
+
+	// TODO: so much duplicate code, how to unify?
+
+	int convert_end = begin + count;
+
+	// give up if we hit the end
+	for (QTextBlock block = doc->findBlock(begin);
+		block.isValid();
+		block = block.next()) {
+		// iterate over every format range
+		if (block.position() >= convert_end) return;
+		auto fmts = block.textFormats();
+		for (QTextLayout::FormatRange range : fmts) {
+			QTextCursor cursor(block);
+			int begin = block.position() + range.start;
+			int end = block.position() + range.start + range.length;
+
+			// end conditions?
+			if (begin >= convert_end) return;
+			if (end >= convert_end) end = convert_end;
+
+			cursor.setPosition(begin, QTextCursor::MoveAnchor);
+			cursor.setPosition(end, QTextCursor::KeepAnchor);
+
+			convertPointToPixel(cursor);
+		}
+	}
+}
+
+void CanvasLabel::convertPixelToPoint(QTextDocument * doc)
+{
+	// iterate over every block
+	for (QTextBlock block = doc->begin();
+		block.isValid();
+		block = block.next()) {
+		// iterate over every format range
+
+		auto fmts = block.textFormats();
+		for (QTextLayout::FormatRange range : fmts) {
+			QTextCursor cursor(block);
+			int begin = block.position() + range.start;
+			int end = block.position() + range.start + range.length;
+			cursor.setPosition(begin, QTextCursor::MoveAnchor);
+			cursor.setPosition(end, QTextCursor::KeepAnchor);
+
+			// replace point size w/ pixel size
+			int old_point = range.format.fontPointSize();
+			int old_pixels = range.format.font().pixelSize();
+			if (old_pixels <= 0) {
+				continue;
+			}
+			QTextCharFormat fmt;
+			fmt.setFontPointSize(old_pixels);
+			cursor.mergeCharFormat(fmt);
+		}
+	}
 }
 
 void CanvasLabel::onResize(QSizeF size)

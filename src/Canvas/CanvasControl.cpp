@@ -587,7 +587,6 @@ int CanvasControl::allFontSize() const
 	return std::accumulate(labels.begin(), labels.end(), 0,
 		[](int size, CanvasLabel *label) -> int {
 		QTextCharFormat fmt = label->textCursor().charFormat();
-		qDebug() << "poke fmtpt/fpx/fpt" << fmt.fontPointSize() << fmt.font().pixelSize() << fmt.font().pointSize();
 		int x = std::lround(fmt.font().pixelSize());
 		// fmt.fontPointSize() might be 0 != font.pointSize()
 		//if (x == 0) {
